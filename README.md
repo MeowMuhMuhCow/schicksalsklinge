@@ -4,7 +4,9 @@
 Borland C++ 3.1 baut daraus eine `BLADEM.EXE`, die **Byte für Byte dem Original gleicht**
 (MD5 `4ce035f95ead01a8b2553b4487544e5d`), **ohne Nachbearbeitung**.
 
-*English: Source code of the 1992 DOS RPG "Realms of Arkania: Blade of Destiny" (German CD 3.02), based on the
+> **Passt zur GOG-Fassung:** Grundlage ist die deutsche `SCHICKM.EXE` (CD-Version 3.02), wie sie in **„Realms of Arkania 1 - Blade of Destiny Classic“ bei GOG** enthalten ist (MD5 `4ce035f95ead01a8b2553b4487544e5d`). Andere Fassungen (Diskette, englisch, andere Patchstände) ergeben eine andere EXE. Vor dem Bauen die eigene EXE mit dieser Prüfsumme vergleichen.
+
+*English: Source code of the 1992 DOS RPG "Realms of Arkania: Blade of Destiny" (German CD 3.02, as sold by GOG), based on the
 Bright-Eyes project, reworked to plain C like the original. Rebuilds a byte-identical executable with Borland C++ 3.1. Includes an unofficial, untested
 bug-fix build (~240 original bugs fixed, savegame compatible) behind compile-time switches.
 Documentation is in German.*
