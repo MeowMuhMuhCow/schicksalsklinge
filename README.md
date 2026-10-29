@@ -10,8 +10,9 @@ bug-fix build (~240 original bugs fixed, savegame compatible) behind compile-tim
 Documentation is in German.*
 
 > **Neu: Bugfix-Fassung.** Rund 240 Fehler aus dem Original sind per Schalter behoben, darunter 23 von 25
-> kritischen. Und zum ersten Mal seit 1992 begegnet man auf Reisen **Bären, Kvillottern, Krakenmolchen und Piraten**
-> und kann **jagen**: Attic hatte diese Begegnungen eingebaut, aber ein Fehler machte sie praktisch unerreichbar.
+> kritischen. Und zum ersten Mal seit 1992 trifft man auf Landreisen **Höhlenbären und Kvillottern** und kann
+> **Karene, Wildschweine, Auerochsen und Nashörner jagen**: Attic hatte diese Begegnungen eingebaut, aber ein verkehrt
+> herum geschriebener Vergleich machte sie unerreichbar. Auch Krakenmolch und Piraten auf See funktionieren jetzt richtig.
 > Spielstände bleiben kompatibel. Im Spiel noch ungetestet, **Tester willkommen**, siehe
 > [Bugfix-Fassung](#bugfix-fassung-die-schicksalsklinge-ohne-die-fehler-von-1992).
 
@@ -56,7 +57,7 @@ sich per Schalter beheben.
 |---|---|
 | Stufe „wichtig“ | kritische und mittlere Fehler, darunter 23 von 25 kritischen: Spiel hängt bei Priester, fliehendem Drachen und Einbruch, Totenschiff beendet das Spiel für alle Gruppen, Absturz bei der Gruppensuche, Stufenanstieg per ESC bringt 168.000 Dukaten |
 | Stufe „alles“ | zusätzlich viele kleine Fehler ohne große Spielwirkung |
-| Neu erreichbar | Fix 181: Auf Reisen sind erstmals Jagden, Bär, Kvillotter, Krakenmolch und Piraten erreichbar (abschaltbar mit `-DFIX_0181=0`) |
+| Neu erreichbar | Fix 181: Auf Landreisen sind erstmals Höhlenbär, Kvillotter und die Jagden (Karene, Wildschwein, Auerochse, Nashorn) erreichbar, im Original kam praktisch nur ein einziger Wildtierkampf vor (abschaltbar mit `-DFIX_0181=0`). Dazu behoben: Bär und Krakenmolch würfeln AT/PA verkehrt, die Kvillotter beißt nie, Krakenmolch-Endlosschleife (177–180) |
 | Exploits | standardmäßig mit behoben (z. B. KK +5 durch Umlegen am Körper). Wer sie behalten will: `FIX_EXPLOITS 0` |
 | Spielstände | **kompatibel**, das Speicherformat ist unverändert |
 | Bauen | `Bauen\BAUEN.bat wichtig` oder `Bauen\BAUEN.bat alles` → `Build\BLADEM_FIX_WICHTIG.EXE` bzw. `BLADEM_FIX_ALLES.EXE` |

@@ -54,5 +54,5 @@ Stand dieses Pakets: **20.10.2026**. Rechte am Spiel bei den Rechteinhabern, sie
 | Prinzip | Jede Behebung steht im Quelltext hinter `#if FIX_nnnn`. Ohne Schalter (`FIX_BUGS=0`) ergibt der Bau das bytegleiche Original |
 | Stufen | `FIX_BUGS 1` = wichtig (kritisch + mittel), `2` = alles. `FIX_EXPLOITS 0` lässt die Exploits im Spiel. Jeder Fehler einzeln: `FIX_0181` usw. in `Quelle\s_fix.h` |
 | Umfang | wichtig: 120 ganz, 5 teilweise. alles: zusätzlich 118 ganz, 5 teilweise. 23 von 25 kritischen Fehlern behoben. Was nicht geht und warum: `Bauen\FIXES.md` |
-| Achtung | Fix 181 macht auf Reisen erstmals Jagden, Bär, Kvillotter, Krakenmolch und Piraten erreichbar, das verändert das Spiel spürbar. Abschalten: `--fixflags "-DFIX_0181=0"` |
+| Achtung | Fix 181 macht auf Landreisen erstmals Höhlenbär, Kvillotter und die Jagden (Karene, Wildschwein, Auerochse, Nashorn) erreichbar, das verändert das Spiel spürbar. Abschalten: `--fixflags "-DFIX_0181=0"` |
 | Geprüft | Standardbau bytegleich, beide Fix-EXEs statisch geprüft und in DOSBox gestartet. **Im Spiel ungetestet, Tester willkommen** |
