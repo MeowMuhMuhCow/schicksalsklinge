@@ -61,6 +61,6 @@ pause
 exit /b
 
 :keinexe
-echo Build\BLADEM_FIX_WICHTIG.EXE fehlt. Erst Bauen\BAUEN.bat wichtig ausfuehren.
+echo Build\BLADEM_FIX_WICHTIG.EXE fehlt. Erst PATCHEN.bat ausfuehren (ohne Compiler) oder Bauen\BAUEN.bat wichtig.
 pause
 exit /b

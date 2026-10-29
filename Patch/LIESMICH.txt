@@ -1,0 +1,3 @@
+Bugfix-Patch fuer die Schicksalsklinge (GOG, deutsche SCHICKM.EXE 3.02, MD5 4ce035f95ead01a8b2553b4487544e5d).
+Anwenden: PATCHEN.bat im Hauptordner. Erzeugt Build\BLADEM_FIX_WICHTIG.EXE und _ALLES.EXE.
+Die Patches enthalten nur die geaenderten Bytes. Format NDP1, erzeugt mit Werkzeuge/mkpatch.py.

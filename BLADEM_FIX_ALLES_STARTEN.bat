@@ -61,6 +61,6 @@ pause
 exit /b
 
 :keinexe
-echo Build\BLADEM_FIX_ALLES.EXE fehlt. Erst Bauen\BAUEN.bat alles ausfuehren.
+echo Build\BLADEM_FIX_ALLES.EXE fehlt. Erst PATCHEN.bat ausfuehren (ohne Compiler) oder Bauen\BAUEN.bat alles.
 pause
 exit /b
