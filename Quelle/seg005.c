@@ -1,0 +1,1100 @@
+/*
+ * seg005 - Kampfbildschirm: Figuren-Animationen und Kampfmeldungen
+ *
+ * Inhalt:    draw_fight_screen() spielt die Animationsspuren aller Kaempfer ab (Bewegen, Drehen,
+ *            Waffe, Zauber, Toene), haelt dabei das Schachbrett (Kampffeld) aktuell, laesst Helden und
+ *            Gegner am Rand fliehen und zeichnet nur die Figuren neu, die es brauchen.
+ *            fight_printer() zeigt die Kampfmeldungen nacheinander als farbigen Stern mit Schadenszahl
+ *            und Textzeile ("ANGRIFF VON %s MISSLINGT" usw. aus FIGHTTXT.LTX).
+ * Aufrufer:  Kampfsteuerung (seg032 ff.), Zauber und Aktionen im Kampf.
+ * Daten:     g_fig_star_colors, g_fig_msg_dtps (Meldungsart -> Textnummer), TEMP\XX als Zwischenspeicher
+ *            des Hintergrunds, g_delay_factor (Kampfgeschwindigkeit, im Optionsmenue einstellbar).
+ * Besonders: Original-Bug 4 und 5 (zweiteilige Gegner beim Fliehen bzw. Ziehen ueber Leichen) sind von
+ *            Bright-Eyes markiert.
+ *
+ * Uebersetzen: BCC.EXE -mlarge -O- -c -1 -Y seg005.c
+ */
+
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <fcntl.h>
+
+#if defined(__BORLANDC__)
+#include <DOS.H>
+#include <IO.H>
+#else
+#include <unistd.h>
+#endif
+
+#include "v302de.h"
+#include "common.h"
+
+#include "seg001.h"
+#include "seg002.h"
+#include "seg004.h"
+#include "seg005.h"
+#include "seg006.h"
+#include "seg027.h"
+#include "seg032.h"
+#include "seg096.h"
+
+signed int g_delay_factor = 4; // ds:0x4b66
+extern char g_str_temp_xx[8];
+static char *g_str_temp_xx_ptr = (char*)&g_str_temp_xx[0]; // ds:0x4b68, to STR_TEMP_XX; uint8_t*
+static const signed char g_fig_star_colors[12] = { 0x03, 0x03, 0x0c, 0x0c, 0x04, 0x0b, 0x0d, 0x01, 0x07, 0x0e, 0x02, 0x07 }; // ds:0x4b6c
+static signed char g_fig_star_counter = 0; // ds:0x4b78
+signed int g_fig_star_timer = 0; // ds:0x4b79
+static signed char g_fig_star_last_count = -1; // ds:0x4b7b
+static const signed int g_fig_msg_dtps[12] = { 0x36, 0x37, 0x36, 0x37, 0x38, 0x39, 0x3a, 0x3b, 0x00, 0x00, 0x3b, 0x00 }; // ds:0x4b7c
+signed char g_fig_star_printed = 0; // ds:0x4b94
+char g_str_temp_xx[8] = "TEMP\\XX"; // ds:0x4b95
+
+unsigned char* g_fig_gfxbuffers[8];	// ds:0xe278, 0x508 byte segments in FIGHTOBJ_BUF
+signed int g_fig_figlist_readd[8];	// ds:0xe298
+signed int g_fig_ani_state[8];		// ds:0xe2a8
+struct actor_class g_fig_actor_grammar;			// ds:0xe2b8
+struct actor_class g_fig_target_grammar;		// ds:0xe2bc
+signed int g_figobj_unkn_y1;		// ds:0xe2c0
+signed int g_figobj_unkn_y1_bak;		// ds:0xe2c2
+signed int g_figobj_unkn_x1;		// ds:0xe2c4
+signed int g_figobj_unkn_x1_bak;		// ds:0xe2c6
+signed int g_figobj_unkn_y2;		// ds:0xe2c8
+signed int g_figobj_unkn_y2_bak;		// ds:0xe2ca
+signed int g_figobj_unkn_x2;		// ds:0xe2cc
+signed int g_figobj_unkn_x2_bak;		// ds:0xe2ce
+signed int g_delay_timer;			// ds:0xe2d0
+
+/* static prototypes */
+static void set_delay_timer(void);
+static void fight_delay(void);
+
+
+/**
+ * \brief   prueft, ob ein Kaempfer neu gezeichnet werden muss
+ *
+ *          Ja, wenn er animiert ist oder sich mit einem davor gezeichneten Objekt ueberschneidet.
+ *
+ * \param     p_fighter pointer to a fighter object
+ * \param[in] x       x coordinate on the screen
+ * \param[in] y       y coordinate on the screen
+ * \return            1 = neu zeichnen (visible 1 wird dabei zu 2), sonst 0
+ */
+static signed int FIG_obj_needs_refresh(struct struct_fighter *p_fighter, const signed int x, const signed int y)
+{
+	if (p_fighter->visible) {
+
+		struct struct_fighter *p_fighter_iter;
+		signed int ox;
+		signed int oy;
+
+		/* animated objects always need a refresh */
+		if ((p_fighter->ani_track_id_base != FANI_TRACK_ID_NONE) || (p_fighter->visible == 3))
+			goto damn_label;
+
+		/* i = i->next; */
+		/* check if given object overlaps with any of the objects behind it */
+		for (p_fighter_iter = g_fig_list_head; p_fighter_iter != p_fighter; p_fighter_iter = p_fighter_iter->next)
+		{
+			/* Ignore invisible objects or objects, that are not refreshed */
+			if (p_fighter_iter->visible >= 2) {
+
+				ox = 10 - p_fighter_iter->width / 2 + (p_fighter_iter->cbx + p_fighter_iter->cby) * 10;
+
+				oy = 118 - p_fighter_iter->height + (p_fighter_iter->cbx - p_fighter_iter->cby) * 5;
+
+				ox += p_fighter_iter->offsetx;
+				oy += p_fighter_iter->offsety;
+
+				if ((x + p_fighter->width >= ox) && (x - p_fighter_iter->width <= ox) && (y + p_fighter->height >= oy) && (y - p_fighter_iter->height <= oy))
+				{
+damn_label:
+					if (p_fighter->visible == 1)
+						p_fighter->visible = 2;
+
+					return 1;
+				}
+			}
+		}
+	}
+
+	return 0;
+}
+
+/**
+ * \brief   set the color of the star in fights
+ *
+ *          Sets the color of the star which shows fight activities,
+ *          like damage, in fights.
+ *
+ * \param   ptr         pointer to the star template
+ * \param   count       number of bytes the star has
+ * \param   color       1=red/2=green/3=blue/4=yellow/11=darkbrown/12=lightbrown/13=pink
+ *
+ */
+static void FIG_set_star_color(uint8_t *ptr, signed int count, signed char color)
+{
+	uint8_t *p;
+
+	color += 0x80;
+
+	/* REMARK: memset(ptr, color + 0x80, count); */
+	for (p = ptr; count--; p++) {
+		if (*p) *p = color;
+	}
+}
+
+/**
+ * \brief   returns the name of an actor class (monster or hero) in the 3rd german case
+ *
+ * \param   actor_class_type   1 = monster / 2 = hero
+ * \param   actor_class_id     monster_id or hero_pos
+ * \return              "einem Magier" if the enemy is a "Magier".
+ */
+static char* FIG_name_3rd_case(const signed int actor_class_type, volatile const signed int actor_class_id)
+{
+	if (actor_class_type == ACTOR_CLASS_TYPE_HERO) {
+		return get_hero(actor_class_id)->alias;
+	} else {
+		return (char*)GUI_name_inflect_with_article(
+			INFLECT_INDEFINITE_ARTICLE | INFLECT_SINGULAR | INFLECT_3RD_CASE,
+			actor_class_id,
+			INFLECT_NAME_TYPE_MONSTER
+		);
+	}
+}
+
+/**
+ * \brief   returns the name of an actor class (monster or hero) in the 4th german case
+ *
+ * \param   actor_class_type   1 = monster / 2 = hero
+ * \param   actor_class_id     monster_id or hero_pos
+ * \return              "einen Magier" if the enemy is a "Magier".
+ */
+static char* FIG_name_4th_case(const signed int actor_class_type, volatile const signed int actor_class_id)
+{
+	if (actor_class_type == ACTOR_CLASS_TYPE_HERO) {
+		return get_hero(actor_class_id)->alias;
+	} else {
+		return (char*)GUI_name_inflect_with_article(
+			INFLECT_INDEFINITE_ARTICLE | INFLECT_SINGULAR | INFLECT_4TH_CASE,
+			actor_class_id,
+			INFLECT_NAME_TYPE_MONSTER
+		);
+	}
+}
+
+/**
+ * \brief   returns the name of an actor class (monster or hero) in the 1st german case
+ *
+ * \param   actor_class_type   1 = monster / 2 = hero
+ * \param   actor_class_id     monster_id or hero_pos
+ * \return              "ein Magier" if the enemy is a "Magier".
+ */
+static char *FIG_name_1st_case(const signed int actor_class_type, volatile const signed int actor_class_id)
+{
+	if (actor_class_type == ACTOR_CLASS_TYPE_HERO) {
+		return get_hero(actor_class_id)->alias;
+	} else {
+		return (char*)GUI_name_inflect_with_article(
+			INFLECT_INDEFINITE_ARTICLE | INFLECT_SINGULAR | INFLECT_1ST_CASE,
+			actor_class_id,
+			INFLECT_NAME_TYPE_MONSTER
+		);
+	}
+}
+
+#define idx (g_fig_msg_dtps[g_fig_msg_data[g_fig_star_counter].f_action - 1])
+
+/**
+ * \brief   zeigt die naechste Kampfmeldung aus g_fig_msg_data (Stern mit Schaden, Textzeile)
+ *
+ * \return  1, wenn eine neue Meldung gezeichnet wurde, sonst 0
+ */
+static signed int fight_printer(void)
+{
+	if (!g_fig_msg_data[0].f_action) {
+		g_fig_continue_print = 0;
+	}
+
+	if (!g_fig_star_timer && g_fig_star_printed) {
+
+		g_fig_star_counter++;
+
+		g_fig_star_printed = 0;
+
+		g_fig_star_timer = g_autofight ? 10 : g_delay_factor * 6;
+
+		if (!g_fig_msg_data[g_fig_star_counter].f_action) {
+			g_fig_continue_print = 0;
+		}
+	}
+
+	if (g_fig_continue_print) {
+
+		if (g_fig_star_counter != g_fig_star_last_count) {
+
+			signed int fg_bak;
+			signed int bg_bak;
+			uint8_t* gfx_pos_bak;
+			uint16_t x;
+			char str[6];
+			uint8_t* gfx_dst_bak;
+			int16_t f_action;
+
+			g_fig_star_printed = 1;
+
+			f_action = g_fig_msg_data[g_fig_star_counter].f_action;
+
+			if (f_action) {
+
+				gfx_pos_bak = g_vga_backbuffer;
+
+				g_vga_backbuffer = g_renderbuf_ptr;
+
+				get_textcolor(&fg_bak, &bg_bak);
+
+				FIG_set_star_color(g_fig_star_gfx, 3724, g_fig_star_colors[f_action - 1]);
+
+				g_pic_copy.x1 = 0;
+				g_pic_copy.y1 = 150;
+				g_pic_copy.x2 = 75;
+				g_pic_copy.y2 = 198;
+				g_pic_copy.src = g_fig_star_gfx;
+				g_pic_copy.dst = g_renderbuf_ptr;
+				gfx_dst_bak = g_pic_copy.dst;
+				do_pic_copy(2);
+
+				g_pic_copy.dst = gfx_dst_bak;
+
+				/* print number into the star */
+				if (g_fig_msg_data[g_fig_star_counter].damage) {
+
+					set_textcolor(0xff, g_fig_star_colors[f_action - 1] + 0x80);
+
+					my_itoa(g_fig_msg_data[g_fig_star_counter].damage, str, 10);
+
+					x = GUI_get_first_pos_centered(str, 30, 20, 0);
+					GUI_print_string(str, x, 170);
+				}
+
+				/* Generate textmessage */
+				if (g_fig_msg_dtps[f_action - 1]) {
+
+					g_pic_copy.x1 = g_pic_copy.v1 = 0;
+					g_pic_copy.y1 = g_pic_copy.v2 = 194;
+					g_pic_copy.x2 = 318;
+					g_pic_copy.y2 = 199;
+					g_pic_copy.src = g_buffer8_ptr;
+					do_pic_copy(3);
+
+					set_textcolor(0xff, 0);
+
+					if (f_action == 1 || f_action == 3) {
+//						case 1:	/* heroes attack fails */
+//						case 3: /* enemy attack fails */
+
+						sprintf(g_text_output_buf, get_tx(idx),
+							FIG_name_3rd_case(g_fig_actor_grammar.actor_class_type, g_fig_actor_grammar.actor_class_id));
+
+					} else if (f_action == 2 || f_action == 4 || f_action == 7) {
+//						case 2: /* hero parade fails */
+//						case 4: /* enemy parade fails */
+//						case 7:	/* hero get unconscious */
+
+						sprintf(g_text_output_buf, get_tx(idx),
+							FIG_name_3rd_case(g_fig_target_grammar.actor_class_type, g_fig_target_grammar.actor_class_id));
+
+
+
+					} else if (f_action == 8 || f_action == 11) {
+//						case 8:		/* enemy hits hero */
+//						case 11:	/* hero hits enemy */
+
+						sprintf(g_text_output_buf, get_tx(idx),
+							FIG_name_1st_case(g_fig_actor_grammar.actor_class_type, g_fig_actor_grammar.actor_class_id),
+							FIG_name_4th_case(g_fig_target_grammar.actor_class_type, g_fig_target_grammar.actor_class_id));
+					} else {
+						/* case 5: hero successful parade */
+						/* (5 = "ANGRIFF ABGEWEHRT", kommt von Held und Gegner, seg042 und seg043) */
+						/* case 6: weapon broke */
+						strcpy(g_text_output_buf, get_tx(idx));
+					}
+
+					GUI_print_string(g_text_output_buf, 1, 194);
+				}
+
+				g_vga_backbuffer = gfx_pos_bak;
+				set_textcolor(fg_bak, bg_bak);
+			}
+
+			g_fig_star_last_count = g_fig_star_counter;
+
+			return 1;
+		} else {
+			return 0;
+		}
+	} else {
+		g_fig_star_counter = 0;
+
+		g_fig_star_timer = g_autofight ? 10 : g_delay_factor * 6;
+
+		g_fig_star_last_count = -1;
+
+		return 0;
+	}
+
+}
+#undef idx
+
+/**
+ * \brief   spielt alle Animationsspuren des Kampfes ab und zeichnet den Kampfbildschirm
+ *
+ * \param   val         0 = danach warten, bis alle Kampfmeldungen gezeigt sind, sonst Meldungen abbrechen
+ */
+void draw_fight_screen(const signed int val)
+{
+	signed int i;
+	signed int object_id_bak;
+	signed int width;
+	signed int flag;
+	signed int current_x1;
+	signed int current_y1;
+	signed int obj_x;
+	signed int obj_y;
+
+	uint8_t* p_figure_gfx;
+	uint8_t* p_weapon_gfx;
+	struct struct_fighter *p_fighter;
+
+	struct struct_rect rect_bak;
+	struct struct_hero *hero;
+	struct enemy_sheet *p_enemy_sheet;
+
+	signed int viewdir_before;
+	signed int viewdir_after;
+	signed int object_id;
+	signed char double_size_move_tail_first;
+	struct struct_fighter *p_fighter_tmp;
+	signed int viewdir_unconsc;
+	int8_t *p_ani_clip;
+	int8_t *p_ani_clip_weapon;
+	signed int handle;
+	struct nvf_extract_desc nvf;
+	signed int figlist_remove[8];
+
+	call_mouse_bg();
+
+	p_fighter = g_fig_list_head;
+
+	do {
+		/* Check for each list entry if a sprite is needed */
+
+		if (p_fighter->reload == -1) {
+
+			nvf.src = (uint8_t*)load_fight_figs(p_fighter->figure);
+			nvf.dst = p_fighter->gfxbuf;
+			nvf.image_num = p_fighter->nvf_no;
+			nvf.compression_type = 0;
+			nvf.width = &width;
+			nvf.height = &object_id_bak; /* object_id_bak dient hier nur als Ablage fuer die Hoehe */
+
+			process_nvf_extraction(&nvf);
+
+			p_fighter->reload = 0;
+		}
+
+	} while ((p_fighter = p_fighter->next));
+
+	/* set elements array[0] of array[9] */
+	/* (g_fig_gfxbuffers hat 8 Elemente, je 0x508 Byte hinter g_fightobj_buf_seek_ptr) */
+	g_fig_gfxbuffers[0] = g_fightobj_buf_seek_ptr;
+	g_fig_ani_state[0] = -1;
+
+	for (i = 1; i < 8; i++) {
+		/* copy a pointer to the next position */
+		g_fig_gfxbuffers[i] = (HugePt)g_fig_gfxbuffers[i - 1] + 0x508L;
+		g_fig_ani_state[i] = -1;
+	}
+
+	p_fighter = g_fig_list_head;
+	flag = 0;
+
+	do {
+
+#if !defined(__BORLANDC__)
+		D1_LOG(" loop Figure = %3d Sheet_ID : %d 0xf : %d 0x12: %d object: %d\n",
+				p_fighter->figure, p_fighter->ani_track_id_base, p_fighter->ani_track_id_weapon,
+				p_fighter->visible, p_fighter->object_id);
+#endif
+
+		if (p_fighter->ani_track_id_base != FANI_TRACK_ID_NONE) {
+
+			if (p_fighter->visible) {
+				p_fighter->visible = 3;
+			}
+
+			flag = 1;
+
+			g_fig_ani_state[p_fighter->ani_track_id_base] = 0;
+
+			memcpy((uint8_t*)g_fig_gfxbuffers[p_fighter->ani_track_id_base],
+				p_fighter->gfxbuf,
+				p_fighter->width * p_fighter->height);
+		}
+
+		if (p_fighter->ani_track_id_weapon != FANI_TRACK_ID_NONE) {
+			memset((uint8_t*)g_fig_gfxbuffers[p_fighter->ani_track_id_weapon], 0, 0x508);
+		}
+
+
+	} while ((p_fighter = p_fighter->next));
+
+	/* write TEMP/XX */
+	/* (sichert den Hintergrund g_buffer8_ptr, wird am Ende zurueckgelesen) */
+	/* TODO: should be O_BINARY | O_WRONLY */
+	handle = _creat(g_str_temp_xx_ptr, 0);
+	write(handle, g_buffer8_ptr, 64000);
+	close(handle);
+
+	if (flag != 0) {
+
+		g_figobj_unkn_x2_bak = g_figobj_unkn_x1_bak = -1;
+
+		FIG_draw_pic();
+
+		FIG_draw_figures();
+
+		memcpy(g_buffer8_ptr, g_renderbuf_ptr, 64000);
+	}
+
+	while (flag != 0) {
+
+		set_delay_timer();
+
+		g_pic_copy.dst = g_vga_backbuffer = g_renderbuf_ptr;
+
+		for (p_fighter = g_fig_list_head; p_fighter; p_fighter = p_fighter->next) {
+			if (p_fighter->visible == 2)
+				p_fighter->visible = 1;
+		}
+
+		for (i = 0; i < 8; i++) {
+			g_fig_figlist_readd[i] = -1;
+			figlist_remove[i] = -1;
+		}
+
+		rect_bak = g_pic_copy_rect;
+		g_pic_copy.x1 = g_pic_copy.v1 = 0;
+		g_pic_copy.y1 = g_pic_copy.v2 = 0;
+		g_pic_copy.x2 = 318;
+		g_pic_copy.y2 = 149;
+		g_pic_copy.src = g_buffer8_ptr;
+		do_pic_copy(3);
+
+		g_pic_copy.x1 = g_pic_copy.v1 = 80;
+		g_pic_copy.y1 = g_pic_copy.v2 = 150;
+		g_pic_copy.x2 = 318;
+		g_pic_copy.y2 = 193;
+		g_pic_copy.src = g_buffer8_ptr;
+		do_pic_copy(3);
+
+		p_fighter = g_fig_list_head;
+
+		do {
+			p_weapon_gfx = 0;	/* NULL */
+
+			obj_x = 10 - (p_fighter->width / 2) +
+				(10 * (p_fighter->cbx + p_fighter->cby));
+
+			obj_y = 118 - p_fighter->height + (p_fighter->cbx - p_fighter->cby) * 5;
+
+			obj_x += p_fighter->offsetx;
+			obj_y += p_fighter->offsety;
+
+			p_figure_gfx = p_fighter->gfxbuf;
+
+			if ((p_fighter->ani_track_id_base != FANI_TRACK_ID_NONE) && (g_fig_ani_state[p_fighter->ani_track_id_base] != -1)) {
+
+				p_ani_clip = g_fig_ani_tracks[p_fighter->ani_track_id_base];
+
+				if (*(p_ani_clip + 1 + 3 * g_fig_ani_state[p_fighter->ani_track_id_base]) == -1) {
+
+					p_figure_gfx = (uint8_t*)g_fig_gfxbuffers[p_fighter->ani_track_id_base];
+					g_fig_ani_state[p_fighter->ani_track_id_base] = -1;
+					p_fighter->ani_track_id_base = p_fighter->ani_track_id_weapon = FANI_TRACK_ID_NONE;
+
+				} else {
+
+					if (*(p_ani_clip + 1 + 3 * g_fig_ani_state[p_fighter->ani_track_id_base]) == -7)
+					{
+						p_fighter->z = (*(p_ani_clip + 2 + g_fig_ani_state[p_fighter->ani_track_id_base] * 3));
+
+						g_fig_ani_state[p_fighter->ani_track_id_base]++;
+
+						g_fig_figlist_readd[p_fighter->ani_track_id_base] = p_fighter->id;
+					}
+
+					if (*(p_ani_clip + 1 + 3 * g_fig_ani_state[p_fighter->ani_track_id_base]) == -9)
+					{
+						play_voc(0xc8 + *(p_ani_clip + 2 + 3 * g_fig_ani_state[p_fighter->ani_track_id_base]));
+						g_fig_ani_state[p_fighter->ani_track_id_base]++;
+					}
+
+
+					if (*(p_ani_clip + 1 + 3 * g_fig_ani_state[p_fighter->ani_track_id_base]) == -5) {
+
+						if (p_fighter->ani_track_id_weapon != FANI_TRACK_ID_NONE) {
+
+							p_ani_clip_weapon = &g_fig_ani_tracks[p_fighter->ani_track_id_weapon][0];
+
+							if (*(p_ani_clip_weapon + 1 + 3 * g_fig_ani_state[p_fighter->ani_track_id_base]) == -9)
+							{
+								play_voc(0xc8 + *(p_ani_clip_weapon + 2 + 3 * g_fig_ani_state[p_fighter->ani_track_id_base]));
+							}
+						}
+
+						g_fig_ani_state[p_fighter->ani_track_id_base]++;
+
+					} else if (*(p_ani_clip + 1 + 3 * g_fig_ani_state[p_fighter->ani_track_id_base]) == -4) {
+
+						*p_ani_clip = *(p_ani_clip + 2 + 3 * g_fig_ani_state[p_fighter->ani_track_id_base]);
+
+						g_fig_ani_state[p_fighter->ani_track_id_base]++;
+
+					} else if ((*(p_ani_clip + 1 + 3 * g_fig_ani_state[p_fighter->ani_track_id_base]) == -3) ||
+							(*(p_ani_clip + 1 + 3 * g_fig_ani_state[p_fighter->ani_track_id_base]) == -6)) {
+
+						/* get nvf no */
+						viewdir_before = p_fighter->nvf_no;
+
+						if (*(p_ani_clip + 1 + 3 * g_fig_ani_state[p_fighter->ani_track_id_base]) == -3) {
+
+							p_fighter->nvf_no += *(p_ani_clip + 3 + 3 * g_fig_ani_state[p_fighter->ani_track_id_base]);
+						} else {
+
+							p_fighter->figure = g_gfxtab_figures_main[p_fighter->actor_sprite_id][*(p_ani_clip + 2 + 3 * g_fig_ani_state[p_fighter->ani_track_id_base])];
+							p_fighter->nvf_no = *(p_ani_clip + 3 + 3 * g_fig_ani_state[p_fighter->ani_track_id_base]);
+						}
+
+						if (p_fighter->figure >= 88) {
+							/* fighter uses figure from MONSTER file */
+
+							if (p_fighter->nvf_no > 3) {
+
+								/* not standing still */
+								p_fighter->offsetx = g_gfxtab_offsets_main[p_fighter->actor_sprite_id][4].x;
+								p_fighter->offsety = g_gfxtab_offsets_main[p_fighter->actor_sprite_id][4].y;
+
+								if (p_fighter->double_size != -1) {
+									p_fighter->x1 = g_gfxtab_double_size_x1[1];
+									p_fighter->x2 = g_gfxtab_double_size_x2[1];
+								}
+
+							} else {
+								p_fighter->offsetx = g_gfxtab_offsets_main[p_fighter->actor_sprite_id][p_fighter->nvf_no].x;
+								p_fighter->offsety = g_gfxtab_offsets_main[p_fighter->actor_sprite_id][p_fighter->nvf_no].y;
+
+								if (p_fighter->double_size != -1) {
+									p_fighter->x1 = g_gfxtab_double_size_x1[p_fighter->nvf_no];
+									p_fighter->x2 = g_gfxtab_double_size_x2[p_fighter->nvf_no];
+								}
+							}
+
+						} else {
+							if (p_fighter->nvf_no == g_nvftab_figures_dead[p_fighter->actor_sprite_id]) {
+
+								p_fighter->offsetx = g_gfxtab_offsets_main[p_fighter->actor_sprite_id][4].x;
+								p_fighter->offsety = g_gfxtab_offsets_main[p_fighter->actor_sprite_id][4].y;
+
+							} else {
+								viewdir_unconsc = p_fighter->nvf_no - g_nvftab_figures_unconscious[p_fighter->actor_sprite_id];
+
+								if (viewdir_unconsc >= 0) {
+
+									p_fighter->offsetx = g_gfxtab_offsets_unconscious[p_fighter->actor_sprite_id][viewdir_unconsc].x;
+									p_fighter->offsety = g_gfxtab_offsets_unconscious[p_fighter->actor_sprite_id][viewdir_unconsc].y;
+								}
+							}
+						}
+
+						obj_x = 10 - (p_fighter->width / 2) + (10 * (p_fighter->cbx + p_fighter->cby));
+
+						obj_y = 118 - p_fighter->height + ((p_fighter->cbx - p_fighter->cby) * 5);
+
+						obj_x += p_fighter->offsetx;
+						obj_y += p_fighter->offsety;
+
+						if ((p_fighter->ani_track_id_base < FANI_TRACK_ID_SPELL_IMPACT) && (*(p_ani_clip + 242) >= 0)) {
+							nvf.src = (uint8_t*)load_fight_figs(p_fighter->figure);
+						} else {
+							nvf.src = g_spellobj_nvf_buf;
+						}
+
+						nvf.dst = p_fighter->gfxbuf;
+						nvf.image_num = p_fighter->nvf_no;
+						nvf.compression_type = 0;
+						nvf.width = &width;
+						nvf.height = &object_id_bak;
+
+						process_nvf_extraction(&nvf);
+
+						g_fig_ani_state[p_fighter->ani_track_id_base]++;
+
+						p_figure_gfx = p_fighter->gfxbuf;
+
+						if (p_fighter->double_size > 20) {
+							/* p_fighter point to the fighter entry of the tail of a double-size enemy */
+
+							viewdir_after = (p_fighter->nvf_no > 3) ? 1 : p_fighter->nvf_no;
+
+							p_fighter->offsetx += g_gfxtab_double_size_extra_ox[viewdir_after];
+							p_fighter->offsety += g_gfxtab_double_size_extra_oy[viewdir_after];
+							p_fighter->x1 = g_gfxtab_double_size_extra_x1[viewdir_after];
+							p_fighter->x2 = g_gfxtab_double_size_extra_x2[viewdir_after];
+
+							object_id_bak = get_cb_val(p_fighter->cbx, p_fighter->cby); /* enemy_id + 30 of the enemy the tail belongs to */
+
+							FIG_set_cb_object(p_fighter->cby, p_fighter->cbx, p_fighter->object_id);
+
+							/* update CBX depending on the view direction */
+							if (
+								(
+									 (viewdir_after == FIG_VIEWDIR_LEFT)
+									 && ((viewdir_before == FIG_VIEWDIR_DOWN) || (viewdir_before == FIG_VIEWDIR_UP))
+								 ) || (
+									 ((viewdir_after == FIG_VIEWDIR_UP) || (viewdir_after == FIG_VIEWDIR_DOWN))
+									 && (viewdir_before == FIG_VIEWDIR_RIGHT)
+								 )
+							) {
+								p_fighter->cbx++;
+
+							} else if (
+								(
+									(viewdir_after == FIG_VIEWDIR_RIGHT)
+									&& ((viewdir_before == FIG_VIEWDIR_DOWN) || (viewdir_before == FIG_VIEWDIR_UP))
+								) || (
+									((viewdir_after == FIG_VIEWDIR_UP) || (viewdir_after == FIG_VIEWDIR_DOWN))
+									&& (viewdir_before == FIG_VIEWDIR_LEFT)
+								)
+							) {
+								p_fighter->cbx--;
+							}
+
+							/* update CBY depending on the view direction */
+							if (
+								(
+									(viewdir_after == FIG_VIEWDIR_UP)
+									&& ((viewdir_before == FIG_VIEWDIR_RIGHT) || (viewdir_before == FIG_VIEWDIR_LEFT))
+								) || (
+									((viewdir_after == FIG_VIEWDIR_RIGHT) || (viewdir_after == FIG_VIEWDIR_LEFT))
+									&& (viewdir_before == FIG_VIEWDIR_DOWN)
+								)
+							) {
+								p_fighter->cby--;
+
+							} else if (
+								(
+									 (viewdir_after == FIG_VIEWDIR_DOWN)
+									 && ((viewdir_before == FIG_VIEWDIR_RIGHT) || (viewdir_before == FIG_VIEWDIR_LEFT))
+								 ) || (
+									 ((viewdir_after == FIG_VIEWDIR_RIGHT) || (viewdir_after == FIG_VIEWDIR_LEFT))
+									 && (viewdir_before == FIG_VIEWDIR_UP)
+								 )
+							) {
+								p_fighter->cby++;
+							} else if ((viewdir_after == FIG_VIEWDIR_DOWN) && (viewdir_before == FIG_VIEWDIR_UP)) {
+								p_fighter->cby = (p_fighter->cby + 2);
+							}
+
+							object_id = get_cb_val(p_fighter->cbx, p_fighter->cby); /* object id of the square the tail moves to */
+							p_fighter->object_id = object_id; /* move it to fighter.object_id */
+							FIG_set_cb_object(p_fighter->cby, p_fighter->cbx, object_id_bak); /* set object id of the target square to enemy_id + 30 */
+
+							obj_x = 10 - (p_fighter->width / 2) + (10 * (p_fighter->cbx + p_fighter->cby));
+
+							obj_y = 118 - p_fighter->height + ((p_fighter->cbx - p_fighter->cby) * 5);
+
+							obj_x += p_fighter->offsetx;
+
+							obj_y += p_fighter->offsety;
+
+						}
+					} else {
+
+						/* move a hero/enemy */
+						if (*(p_ani_clip + 1 + 3 * g_fig_ani_state[p_fighter->ani_track_id_base]) == -2) {
+
+							if (p_fighter->ani_track_id_base < FANI_TRACK_ID_SPELL_IMPACT) {
+
+								object_id_bak = get_cb_val(p_fighter->cbx, p_fighter->cby);
+
+								/* copy fighter.object_id back to the chessboard */
+								FIG_set_cb_object(p_fighter->cby, p_fighter->cbx, p_fighter->object_id);
+
+								p_fighter->cbx = (p_fighter->cbx + *(p_ani_clip + 2 + 3 * g_fig_ani_state[p_fighter->ani_track_id_base]));
+
+								p_fighter->cby = (p_fighter->cby + *(p_ani_clip + 3 + 3 * g_fig_ani_state[p_fighter->ani_track_id_base]));
+
+								double_size_move_tail_first = 0;
+
+								/* get the value from the cb where the actor wants to move to */
+								object_id = get_cb_val(p_fighter->cbx, p_fighter->cby);
+
+								if ((p_fighter->double_size > 20) && (object_id_bak - 20 == object_id)) {
+									/* for a double-size enemy, either the head part or the tail part is moved first.
+									 * This is the case that the tail part is moved first (the target square is the head part). */
+
+#ifndef M302de_ORIGINAL_BUGFIX
+									/* Original-Bug 5: */
+									/* the removal of the following line is not strictly necessary, but it is not needed as a replacement is added further below. */
+									p_fighter->object_id = 0;
+#endif
+									double_size_move_tail_first = 1;
+
+									/* create pointer to the head part of the enemy */
+									p_fighter_tmp = FIG_get_fighter(g_enemy_sheets[object_id - 10].fighter_id);
+
+#ifdef M302de_ORIGINAL_BUGFIX
+									/* Original-Bug 5: */
+									/* The fighter.object_id entry of the head part will be overwritten by the next line in the original code.
+									 * In this way, sometimes dead bodies are lost from the chessboard after a double-size enemy walks over it.
+									 * The right thing is to copy it to the fighter.object_id of tail part. */
+									p_fighter->object_id = p_fighter_tmp->object_id;
+#endif
+									p_fighter_tmp->object_id = object_id_bak;
+									/* write cb_id of the tail part at fighter.object_id of the head part.
+									 * when the head part moves lated, it will be written to the cb.
+									 * possible bug: the overwritten fighter.object_id is lost! */
+								} else {
+									p_fighter->object_id = object_id;
+								}
+
+								/* check chessboard bounds */
+								if (
+									(p_fighter->cbx >= 24) || (p_fighter->cby >= 24)
+									|| (p_fighter->cbx < 0) || (p_fighter->cby < 0)
+									|| (p_fighter->object_id < 0)
+								) {
+									/* hero/enemy escapes */
+
+										if (p_fighter->is_enemy == 1) {
+											/* enemy escapes */
+											p_enemy_sheet = FIG_get_enemy_sheet(p_fighter->id);
+											if (p_enemy_sheet) {
+												p_enemy_sheet->flags.dead = 1;
+												p_enemy_sheet->bp = 0;
+												figlist_remove[p_fighter->ani_track_id_base] = p_enemy_sheet->fighter_id;
+
+												if (p_fighter->double_size != -1) {
+#ifdef M302de_ORIGINAL_BUGFIX
+													/* Original-Bug 4:
+													 * remove tail of the escaped double-size enemy from the chessboard
+													 * For more on this bug, see Original-Bug 3 at seg032.cpp */
+													p_fighter_tmp = FIG_get_fighter(g_fig_double_size_fighter_id_table[p_fighter->double_size]);
+													FIG_set_cb_object(p_fighter_tmp->cby, p_fighter_tmp->cbx, p_fighter_tmp->object_id);
+#endif
+													figlist_remove[FANI_TRACK_ID_BASE_TO_TAIL(p_fighter->ani_track_id_base)] = g_fig_double_size_fighter_id_table[p_fighter->double_size];
+												}
+											}
+										} else {
+											/* hero escapes */
+											/* REMARK: hero is always != NULL */
+											hero = FIG_get_hero_ptr(p_fighter->id);
+											if (hero) {
+												hero->action_id = FIG_ACTION_FLEE;
+												hero->flags.scared = 1;
+
+												/* set the dungeon position the hero escapes to.
+												 * This depends on the direction the escape square on the battlefield has been entered.
+												 * Note: Apparently, this is done in any fight, including seafights and wilderness fights where it doesn't make sense.
+												 * The distinction is done only later. */
+												hero->escape_position =
+													g_fig_escape_position[hero->viewdir == FIG_VIEWDIR_UP ? NORTH : (hero->viewdir + 1)];
+												figlist_remove[p_fighter->ani_track_id_base] = hero->fighter_id;
+
+											}
+										}
+
+										p_fighter->object_id = 0;
+										*((int8_t*)(p_ani_clip + 1 + 3 * (1 + g_fig_ani_state[p_fighter->ani_track_id_base]))) = -1;
+
+										if (p_fighter->double_size != -1) {
+
+											g_fig_ani_tracks[FANI_TRACK_ID_BASE_TO_TAIL(p_fighter->ani_track_id_base)][4 + 3 * g_fig_ani_state[FANI_TRACK_ID_BASE_TO_TAIL(p_fighter->ani_track_id_base)]] = -1;
+
+											g_fig_ani_state[FANI_TRACK_ID_BASE_TO_TAIL(p_fighter->ani_track_id_base)] = -1;
+										}
+
+								} else {
+									if (!double_size_move_tail_first) {
+										FIG_set_cb_object(p_fighter->cby, p_fighter->cbx, object_id_bak);
+									}
+								}
+							} else {
+								p_fighter->cbx = (p_fighter->cbx +
+									*(p_ani_clip + g_fig_ani_state[p_fighter->ani_track_id_base] * 3 + 2));
+
+								p_fighter->cby = (p_fighter->cby +
+									*(p_ani_clip + g_fig_ani_state[p_fighter->ani_track_id_base] * 3 + 3));
+							}
+
+							g_fig_figlist_readd[p_fighter->ani_track_id_base] = p_fighter->id;
+
+							g_fig_ani_state[p_fighter->ani_track_id_base]++;
+						}
+
+						if (*(p_ani_clip + 1 + (g_fig_ani_state[p_fighter->ani_track_id_base] * 3)) == -1) {
+
+							p_figure_gfx = (uint8_t*)g_fig_gfxbuffers[p_fighter->ani_track_id_base];
+							g_fig_ani_state[p_fighter->ani_track_id_base] = -1;
+							p_fighter->ani_track_id_base = p_fighter->ani_track_id_weapon = FANI_TRACK_ID_NONE;
+
+						} else {
+							obj_x = 10 - (p_fighter->width / 2) + (10 * (p_fighter->cbx + p_fighter->cby));
+
+							obj_y = 118 - p_fighter->height + ((p_fighter->cbx - p_fighter->cby) * 5);
+
+							obj_x += p_fighter->offsetx;
+
+							obj_y += p_fighter->offsety;
+
+							obj_x += *(p_ani_clip + 2 + g_fig_ani_state[p_fighter->ani_track_id_base] * 3);
+
+							obj_y -= *(p_ani_clip + 3 + g_fig_ani_state[p_fighter->ani_track_id_base] * 3);
+
+							i = g_gfxtab_figures_main[p_fighter->actor_sprite_id][*(p_ani_clip)];
+
+							if ((p_fighter->ani_track_id_base < FANI_TRACK_ID_SPELL_IMPACT) && (*(p_ani_clip + 242) >= 0)) {
+								nvf.src = (uint8_t*)load_fight_figs(i);
+							} else {
+								nvf.src = g_spellobj_nvf_buf;
+							}
+
+							nvf.dst = (uint8_t*)g_fig_gfxbuffers[p_fighter->ani_track_id_base];
+							nvf.image_num = *(p_ani_clip + 1 + g_fig_ani_state[p_fighter->ani_track_id_base] * 3);
+							nvf.compression_type = 0;
+							nvf.width = &width;
+							nvf.height = &object_id_bak;
+
+							process_nvf_extraction(&nvf);
+
+							if (p_fighter->ani_track_id_weapon != FANI_TRACK_ID_NONE) {
+
+								p_ani_clip_weapon = &g_fig_ani_tracks[p_fighter->ani_track_id_weapon][0];
+
+								if (*(p_ani_clip_weapon + 1 + g_fig_ani_state[p_fighter->ani_track_id_base] * 3) == -1)
+								{
+									p_fighter->ani_track_id_weapon = FANI_TRACK_ID_NONE;
+								} else {
+									current_x1 = obj_x;
+									current_y1 = obj_y;
+
+									p_weapon_gfx = (uint8_t*)g_fig_gfxbuffers[p_fighter->ani_track_id_weapon];
+
+									if (*(p_ani_clip_weapon + 1 + 3 * (g_fig_ani_state[p_fighter->ani_track_id_base])) != -5) {
+										nvf.dst = (uint8_t*)g_fig_gfxbuffers[p_fighter->ani_track_id_weapon];
+										nvf.src = g_weapons_nvf_buf;
+										nvf.image_num = *(uint8_t*)(p_ani_clip_weapon + 1 + g_fig_ani_state[p_fighter->ani_track_id_base] * 3);
+										nvf.compression_type = 0;
+										nvf.width = &width;
+										nvf.height = &object_id_bak;
+
+										process_nvf_extraction(&nvf);
+
+										current_x1 += p_fighter->width - 14;
+										current_x1 += *(p_ani_clip_weapon + 2 + g_fig_ani_state[p_fighter->ani_track_id_base] * 3);
+										current_y1 -= *(p_ani_clip_weapon + 3 + g_fig_ani_state[p_fighter->ani_track_id_base] * 3);
+									}
+								}
+							}
+
+							g_fig_ani_state[p_fighter->ani_track_id_base]++;
+						}
+
+						if (p_fighter->ani_track_id_base != FANI_TRACK_ID_NONE) {
+							p_figure_gfx = (uint8_t*)g_fig_gfxbuffers[p_fighter->ani_track_id_base];
+						}
+					}
+				}
+			}
+/* 0x17e5 */
+
+			if (FIG_obj_needs_refresh(p_fighter, obj_x, obj_y)) {
+
+				if ((p_fighter->ani_track_id_base == FANI_TRACK_ID_NONE) || (figlist_remove[p_fighter->ani_track_id_base] == -1)) {
+
+					if (p_fighter->ani_track_id_base != FANI_TRACK_ID_NONE) {
+
+						g_figobj_unkn_x1 = g_figobj_unkn_x2;
+						g_figobj_unkn_y1 = g_figobj_unkn_y2;
+
+						g_figobj_unkn_x2 = obj_x - 8;
+						g_figobj_unkn_y2 = obj_y - 8;
+					}
+
+					/* set Y1 */
+					g_pic_copy_rect.y1 = obj_y + p_fighter->y1;
+					if (g_pic_copy_rect.y1 < 0) g_pic_copy_rect.y1 = 0;
+
+					/* set X1 */
+					g_pic_copy_rect.x1 = obj_x + p_fighter->x1;
+					if (g_pic_copy_rect.x1 < 0) g_pic_copy_rect.x1 = 0;
+
+					/* set Y2 */
+					g_pic_copy_rect.y2 = obj_y + p_fighter->y2;
+					if (g_pic_copy_rect.y2 > (200 - 1)) g_pic_copy_rect.y2 = (200 - 1);
+
+					/* set X2 */
+					g_pic_copy_rect.x2 = obj_x + p_fighter->x2;
+					if (g_pic_copy_rect.x2 > (320 - 2)) g_pic_copy_rect.x2 = (320 - 2);
+
+					g_pic_copy.x1 = obj_x;
+					g_pic_copy.y1 = obj_y;
+					g_pic_copy.x2 = obj_x + p_fighter->width - 1;
+					g_pic_copy.y2 = obj_y + p_fighter->height - 1;
+					g_pic_copy.src = p_figure_gfx;
+
+					do_pic_copy(2);	/* Critical */
+				}
+
+
+				/* NULL check on uint8_t* */
+				if (p_weapon_gfx != 0)  {
+
+					g_pic_copy.x1 = current_x1;
+					g_pic_copy.y1 = current_y1;
+					g_pic_copy.x2 = current_x1 + 13;
+					g_pic_copy.y2 = current_y1 + 13;
+
+					g_pic_copy.src = p_weapon_gfx;
+
+					do_pic_copy(2);
+				}
+			}
+
+		} while ((p_fighter = p_fighter->next));
+
+		g_pic_copy_rect = rect_bak;
+		g_figobj_unkn_x2_bak = g_figobj_unkn_x2;
+		g_figobj_unkn_x2 = -1;
+		g_figobj_unkn_x1_bak = g_figobj_unkn_x1;
+		g_figobj_unkn_x1 = -1;
+		g_figobj_unkn_y2_bak = g_figobj_unkn_y2;
+		g_figobj_unkn_y2 = -1;
+		g_figobj_unkn_y1_bak = g_figobj_unkn_y1;
+		g_figobj_unkn_y1 = -1;
+
+		for (i = 0; i < 8; i++) {
+			if (g_fig_figlist_readd[i] != -1) {
+				FIG_remove_from_list(g_fig_figlist_readd[i], 1);
+				FIG_add_to_list(g_fig_figlist_readd[i]);
+			}
+
+			if (figlist_remove[i] != -1) {
+				FIG_remove_from_list((signed char)figlist_remove[i], 0);
+			}
+		}
+
+		flag = 0;
+
+		for (i = 0; i < 8; i++) {
+			if (g_fig_ani_state[i] != -1) {
+				flag = 1;
+				break;
+			}
+		}
+
+		g_fig_star_last_count = -1;
+
+		fight_printer();
+
+		g_pic_copy.x1 = 0;
+		g_pic_copy.y1 = 0;
+		g_pic_copy.x2 = 319;
+		g_pic_copy.y2 = 199;
+
+		g_pic_copy.src = g_renderbuf_ptr;
+		g_pic_copy.dst = g_vga_memstart;
+
+		fight_delay();
+
+		do_pic_copy(0);
+
+		g_pic_copy.dst = g_renderbuf_ptr;
+	}
+
+	for (p_fighter = g_fig_list_head; p_fighter; p_fighter = p_fighter->next) {
+		if (p_fighter->visible != 0)
+			p_fighter->visible = 1;
+	}
+
+	call_mouse();
+
+	if (!val) {
+
+		FIG_draw_pic();
+		FIG_draw_figures();
+
+		g_pic_copy.x1 = 0;
+		g_pic_copy.y1 = 0;
+		g_pic_copy.x2 = 319;
+		g_pic_copy.y2 = 199;
+
+		g_pic_copy.src = g_renderbuf_ptr;
+		g_pic_copy.dst = g_vga_memstart;
+
+		do_pic_copy(0);
+
+		while (g_fig_continue_print == 1) {
+
+/* We get in an endless loop here,
+when the Timer IRQ cannot set g_fig_continue_print to 0.
+So this call to wait_for_vsync() passes control
+to the DOSBox-CPU and may run the timer.
+ */
+			/* REMARK: SPEEDFIX
+			wait_for_vsync();
+			*/
+			if (fight_printer()) {
+				g_pic_copy.x1 = 0;
+				g_pic_copy.y1 = 0;
+				g_pic_copy.x2 = 319;
+				g_pic_copy.y2 = 199;
+
+				g_pic_copy.src = g_renderbuf_ptr;
+				g_pic_copy.dst = g_vga_memstart;
+
+				do_pic_copy(0);
+			}
+		}
+
+	} else {
+		g_fig_continue_print = 0;
+	}
+
+	/* read TEMP/XX */
+	/* TODO: should be O_BINARY | O_RDONLY */
+	handle = _open(g_str_temp_xx_ptr, 0);
+	_read(handle, g_buffer8_ptr, 64000);
+	close(handle);
+
+	g_pic_copy.dst = g_vga_backbuffer = g_vga_memstart;
+}
+
+/* Verzoegerung je Animationsschritt; g_delay_timer wird vom Timer-Interrupt und von fight_delay() heruntergezaehlt */
+static void set_delay_timer(void)
+{
+	/* set delay_timer to delay_factor */
+	g_delay_timer = g_delay_factor;
+}
+
+static void fight_delay(void)
+{
+	CD_audio_repeat_check();
+
+	while (g_delay_timer > 0) {
+		g_delay_timer--;
+		wait_for_vsync();
+	}
+}

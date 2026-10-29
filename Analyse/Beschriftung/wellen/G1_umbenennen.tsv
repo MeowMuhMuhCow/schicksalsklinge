@@ -1,0 +1,27 @@
+alt	neu	art	datei:zeile	begruendung
+CD_enable_repeat	CD_audio_repeat_check	funktion	seg001.c:263	schaltet keine Wiederholung ein, sondern startet den Titel neu, wenn seine Spieldauer abgelaufen ist; wird bei jeder Tastaturabfrage aufgerufen (seg001, seg005, seg036)
+CD_audio_play	CD_audio_resume	funktion	seg001.c:362	sendet RESUME AUDIO (req[7]) und setzt nur eine Pause fort; startet keinen Titel (Aufrufer sound_menu in seg002)
+g_cd_audio_pos	g_cd_audio_duration	variable	seg001.c:76	enthaelt keine Position, sondern die Spieldauer des Titels in Timer-Ticks (Frames * 18.2 / 75)
+g_cd_audio_tod	g_cd_audio_start_tod	variable	seg001.c:75	Startzeitpunkt des Titels (Ticks seit Mitternacht); wird nach einer Pause um die Pausendauer verschoben
+g_cd_audio_pause_pos	g_cd_audio_duration_bak	variable	seg001.c:71	Sicherung von g_cd_audio_pos (= Spieldauer) waehrend der Pause
+cd_dummy0	cd_ioctl_reset_code	variable	seg001.c:39	Wert 2 = IOCTL-Ausgabe-Steuercode "Reset Drive"; Uebertragungsadresse von req[8] in seg013.asm (dort extrn _cd_dummy0 mit umbenennen)
+dummy4	count_lo	feld	seg013.h:10	struct driver_request, Offset 0x12: Uebertragungsanzahl (IOCTL) bzw. Low-Word der Sektorenanzahl (PLAY AUDIO), siehe CD_audio_track_start()
+dummy6	count_hi	feld	seg013.h:11	struct driver_request, Offset 0x14: High-Word der Sektorenanzahl bei PLAY AUDIO (req[5])
+g_load_sound_driver	g_ail_music_inactive	variable	seg002.c:114	1 = kein MIDI-Musiktreiber geladen (init_AIL, Fehlschlag in load_music_driver, CD-Audio in read_sound_cfg), 0 = Treiber geladen; der Name klingt wie eine Anforderung zum Laden
+start_midi_playback_IRQ	restart_midi_playback_IRQ	funktion	seg002.c:765	startet aus dem Timer-Interrupt die Sequenz neu, wenn sie zu Ende ist (Musik in Schleife)
+get_readlength2	get_archive_file_length	funktion	seg002.c:1075	liefert die Laenge der zuletzt mit load_archive_file() geoeffneten Datei; die "2" ist ein Platzhalter
+unused_cruft	get_random_hero_unused	funktion	seg002.c:5193	nie aufgerufen; waehlt zufaellig einen Helden (0..5) der aktiven Gruppe, Vorlaeufer von get_random_hero()
+swap_u32_unused	swap_u32_halves_unused	funktion	seg002.c:4148	vertauscht nur die beiden 16-Bit-Haelften, nicht die Byte-Reihenfolge wie swap_u32()
+mouse_irq_init	mouse_install_handler	funktion	seg002.c:1596	meldet die Ereignisroutine beim Maustreiber an (INT 33h/0Ch); mit einem IRQ hat das nichts zu tun, der Parameter ist die Ereignismaske
+move	update_visual_squares	funktion	seg003.c:59	bewegt nichts, sondern ermittelt die 29 sichtbaren Kartenfelder und die Felder vor/hinter der Gruppe (Aufrufer seg066, seg075)
+unused_ega1	unused_ega_set_mode	funktion	seg004.c:985	schreibt Grafik-Controller 3CEh Index 5 (Modusregister)
+unused_ega2	unused_ega_map_mask	funktion	seg004.c:991	schreibt Sequencer 3C4h Index 2 (Map Mask)
+unused_ega3	unused_ega_set_reset	funktion	seg004.c:997	schreibt 3CEh Index 0 (Set/Reset)
+unused_ega4	unused_ega_enable_set_reset	funktion	seg004.c:1003	schreibt 3CEh Index 1 (Enable Set/Reset)
+unused_ega5	unused_ega_read_map	funktion	seg004.c:1009	schreibt 3CEh Index 4 (Read Map Select)
+unused_ega6	unused_ega_bit_mask	funktion	seg004.c:1015	schreibt 3CEh Index 8 (Bit Mask)
+g_gfx_spinlock	g_timer_tick_counter	variable	seg004.c:50	wird in jedem Timer-Tick hochgezaehlt; nur unused_gfx_spinlock() wartet darauf
+v1	src_x	feld	datseg.h:78	struct struct_pic_copy: wird von pic_copy() nur in Modus 3 benutzt, als X-Versatz in einer 320 Pixel breiten Quelle (seg005, seg042, seg098 setzen v1 = x1)
+v2	src_y	feld	datseg.h:79	struct struct_pic_copy: Y-Versatz der Quelle in Modus 3 (siehe v1); v3/v4 werden von pic_copy() nicht benutzt
+unkn	sex	feld	datseg.h:555	struct struct_informer_tab: 1 genau bei Yasma, Ragna, Eliane, Swafnild, Algrid, also vermutlich Geschlecht (1 = weiblich); wird nirgends gelesen
+get_informer_name2	get_town_informer_name	funktion	seg031.c:336	Name des Informanten der aktuellen Stadt (im Unterschied zu get_informer_name() fuer gs_current_informer)

@@ -1,0 +1,277 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Schicksalsklinge Quelltextkarte</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&family=Fraunces:opsz,wght@9..144,600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#f6f4ee; --panel:#ffffff; --panel2:#f0ede4; --ink:#1d1b16; --muted:#6b665a; --line:#e2ddcf;
+  --accent:#8a5a00; --accent-soft:#f6e7c4; --code:#2d4a7a; --code-bg:#eef2f8;
+  --hoch:#b3261e; --hoch-soft:#fbe3e1; --mittel:#9a5b00; --mittel-soft:#fbecd2; --niedrig:#3d6b3d; --niedrig-soft:#e3f0e1;
+  --c:#2d5fa0; --cpp:#6a3fa0; --asm:#7a6a4a; --shadow:0 1px 2px rgba(0,0,0,.05);
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#0f1220; --panel:#171b2e; --panel2:#1d2238; --ink:#e9e6dc; --muted:#9a9cb0; --line:#2a3050;
+    --accent:#f0c060; --accent-soft:#3a3220; --code:#a9c4ef; --code-bg:#1f2742;
+    --hoch:#ff8a80; --hoch-soft:#3d1f22; --mittel:#f2b45c; --mittel-soft:#3a2d18; --niedrig:#8fcf8f; --niedrig-soft:#1d3322;
+    --c:#8db8f2; --cpp:#c3a3f0; --asm:#cbbd9a; --shadow:none;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#0f1220; --panel:#171b2e; --panel2:#1d2238; --ink:#e9e6dc; --muted:#9a9cb0; --line:#2a3050;
+  --accent:#f0c060; --accent-soft:#3a3220; --code:#a9c4ef; --code-bg:#1f2742;
+  --hoch:#ff8a80; --hoch-soft:#3d1f22; --mittel:#f2b45c; --mittel-soft:#3a2d18; --niedrig:#8fcf8f; --niedrig-soft:#1d3322;
+  --c:#8db8f2; --cpp:#c3a3f0; --asm:#cbbd9a; --shadow:none;
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.5 "IBM Plex Sans",system-ui,sans-serif}
+.wrap{max-width:1120px;margin:0 auto;padding:24px max(16px,env(safe-area-inset-right)) 64px max(16px,env(safe-area-inset-left))}
+h1{font-family:Fraunces,Georgia,serif;font-weight:600;font-size:clamp(26px,5vw,38px);line-height:1.1;margin:8px 0 6px;letter-spacing:-.01em}
+.sub{color:var(--muted);margin:0 0 20px;max-width:70ch}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(128px,1fr));gap:10px;margin-bottom:22px}
+.stat{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:12px 14px;box-shadow:var(--shadow)}
+.stat b{display:block;font-size:22px;font-weight:600;font-variant-numeric:tabular-nums}
+.stat span{color:var(--muted);font-size:13px}
+.bar{height:4px;border-radius:2px;background:var(--panel2);margin-top:8px;overflow:hidden}
+.bar i{display:block;height:100%;background:var(--accent)}
+.tabs{display:flex;gap:4px;border-bottom:1px solid var(--line);margin-bottom:16px}
+.tabs button{appearance:none;border:0;background:none;color:var(--muted);font:inherit;font-weight:500;padding:10px 14px;cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-1px}
+.tabs button[aria-selected="true"]{color:var(--ink);border-bottom-color:var(--accent)}
+.tools{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-bottom:12px}
+input[type=search]{flex:1 1 240px;min-width:0;font:inherit;padding:9px 12px;border-radius:8px;border:1px solid var(--line);background:var(--panel);color:var(--ink)}
+.seg{display:inline-flex;border:1px solid var(--line);border-radius:8px;overflow:hidden;background:var(--panel)}
+.seg button{appearance:none;border:0;background:none;color:var(--muted);font:inherit;font-size:13px;padding:8px 11px;cursor:pointer}
+.seg button[aria-pressed="true"]{background:var(--accent-soft);color:var(--ink);font-weight:500}
+label.chk{display:inline-flex;gap:6px;align-items:center;font-size:13px;color:var(--muted);cursor:pointer}
+.chips{display:flex;gap:6px;overflow-x:auto;padding-bottom:6px;margin-bottom:10px;scrollbar-width:thin}
+.chip{flex:0 0 auto;appearance:none;border:1px solid var(--line);background:var(--panel);color:var(--ink);font:inherit;font-size:13px;padding:5px 10px;border-radius:999px;cursor:pointer;white-space:nowrap}
+.chip[aria-pressed="true"]{background:var(--accent);border-color:var(--accent);color:var(--bg)}
+.chip small{color:inherit;opacity:.7;margin-left:4px}
+.count{color:var(--muted);font-size:13px;margin:4px 0 14px}
+h2.grp{font-size:13px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);font-weight:600;margin:22px 0 8px;display:flex;justify-content:space-between}
+details.mod{background:var(--panel);border:1px solid var(--line);border-radius:10px;margin-bottom:6px;box-shadow:var(--shadow)}
+details.mod[open]{border-color:var(--accent)}
+details.mod summary{list-style:none;cursor:pointer;padding:10px 14px;display:grid;grid-template-columns:72px 1fr auto;gap:10px;align-items:baseline}
+details.mod summary::-webkit-details-marker{display:none}
+.id{font-family:"IBM Plex Mono",monospace;font-size:13px;color:var(--accent);font-weight:500}
+.ttl{font-weight:500;min-width:0}
+.badges{display:flex;gap:5px;flex-wrap:wrap;justify-content:flex-end}
+.b{font-size:11.5px;padding:1px 7px;border-radius:5px;background:var(--panel2);color:var(--muted);white-space:nowrap;font-variant-numeric:tabular-nums}
+.b.C{color:var(--c)} .b.Cpp{color:var(--cpp)} .b.ASM{color:var(--asm)}
+.b.f{background:var(--mittel-soft);color:var(--mittel)}
+.body{padding:2px 14px 14px 96px}
+.body p{margin:0 0 10px;max-width:75ch}
+.meta{font-size:13px;color:var(--muted);margin-bottom:10px}
+.lbl{font-size:12px;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);margin:12px 0 5px;font-weight:600}
+.fns{display:flex;flex-wrap:wrap;gap:4px}
+code,.fn{font-family:"IBM Plex Mono",monospace;font-size:12.5px;background:var(--code-bg);color:var(--code);padding:1px 6px;border-radius:4px;overflow-wrap:anywhere}
+.bug{display:grid;grid-template-columns:auto 1fr;gap:4px 10px;padding:8px 10px;border-radius:8px;background:var(--panel2);margin-bottom:5px;font-size:13.5px}
+.bug a{color:var(--accent);font-family:"IBM Plex Mono",monospace;text-decoration:none;font-weight:500}
+.sv{font-size:11px;padding:1px 6px;border-radius:4px;font-weight:600;text-transform:uppercase;letter-spacing:.03em}
+.sv.hoch{background:var(--hoch-soft);color:var(--hoch)} .sv.mittel{background:var(--mittel-soft);color:var(--mittel)} .sv.niedrig{background:var(--niedrig-soft);color:var(--niedrig)}
+.frow{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:12px 14px;margin-bottom:8px;display:grid;grid-template-columns:52px 1fr;gap:4px 12px;box-shadow:var(--shadow);scroll-margin-top:16px}
+.frow.ziel{border-color:var(--accent);box-shadow:0 0 0 2px var(--accent-soft)}
+.frow .nr{font-family:"IBM Plex Mono",monospace;color:var(--accent);font-weight:500}
+.frow .ort{font-size:13px;color:var(--muted);margin-bottom:4px}
+.frow .ort a{color:var(--accent)}
+.frow .txt{margin-bottom:4px}
+.frow .folge{font-size:13.5px;color:var(--muted)}
+.matrix{display:grid;grid-template-columns:auto repeat(3,1fr);gap:6px;margin:4px 0 14px;max-width:640px}
+.matrix .h{font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;align-self:end;padding:0 4px 2px}
+.matrix .rh{font-size:13px;color:var(--muted);align-self:center;padding-right:6px}
+.cell{appearance:none;border:1px solid var(--line);background:var(--panel);color:var(--ink);font:inherit;border-radius:10px;padding:10px 8px;cursor:pointer;text-align:center;box-shadow:var(--shadow)}
+.cell b{display:block;font-size:22px;font-variant-numeric:tabular-nums}
+.cell span{font-size:11.5px;color:var(--muted)}
+.cell.kritisch b{color:var(--hoch)} .cell.mittel b{color:var(--mittel)} .cell.egal b{color:var(--niedrig)}
+.cell[aria-pressed="true"]{border-color:var(--accent);box-shadow:0 0 0 2px var(--accent-soft)}
+.tag{font-size:11px;padding:1px 6px;border-radius:4px;font-weight:600;background:var(--panel2);color:var(--muted)}
+.tag.unsicher{background:var(--accent-soft);color:var(--accent)}
+.sv.kritisch{background:var(--hoch-soft);color:var(--hoch)} .sv.egal{background:var(--niedrig-soft);color:var(--niedrig)}
+.frow .ein{font-size:13px;margin-top:6px;padding-top:6px;border-top:1px dashed var(--line)}
+.frow .ein b{color:var(--muted);font-weight:600}
+.leer{color:var(--muted);padding:30px 0;text-align:center}
+.fuss{margin-top:40px;color:var(--muted);font-size:13px;border-top:1px solid var(--line);padding-top:14px}
+[hidden]{display:none!important}
+@media (max-width:640px){
+  details.mod summary{grid-template-columns:60px 1fr}
+  .badges{grid-column:2;justify-content:flex-start}
+  .body{padding:2px 14px 14px 14px}
+  .frow{grid-template-columns:1fr}
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Schicksalsklinge – Quelltextkarte</h1>
+  <p class="sub">Rekonstruierter Quelltext von BLADEM.EXE (Das Schwarze Auge 1: Die Schicksalsklinge, Attic 1992). Borland C 3.1 baut daraus eine Datei, die Byte für Byte dem Original gleicht. Alle Module nach Spielbereich, mit Funktionen und den Fehlern, die schon im Original stecken.</p>
+  <div class="stats" id="stats"></div>
+  <div class="tabs" role="tablist">
+    <button role="tab" id="t-mod" aria-selected="true">Module</button>
+    <button role="tab" id="t-feh" aria-selected="false">Originalfehler</button>
+  </div>
+
+  <section id="p-mod">
+    <div class="tools">
+      <input type="search" id="q" placeholder="Suchen: Modul, Funktion, Klasse, Stichwort …" autocomplete="off">
+      <div class="seg" id="spr">
+        <button data-v="" aria-pressed="true">Alle</button><button data-v="C">C</button><button data-v="ASM">ASM</button>
+      </div>
+      <label class="chk"><input type="checkbox" id="nurf"> nur mit Fehlern</label>
+    </div>
+    <div class="chips" id="ber"></div>
+    <div class="count" id="mcount"></div>
+    <div id="mlist"></div>
+  </section>
+
+  <section id="p-feh" hidden>
+    <div class="tools">
+      <input type="search" id="fq" placeholder="Suchen in Fehlern: Modul, Funktion, Stichwort …" autocomplete="off">
+    </div>
+    <div class="matrix" id="matrix"></div>
+    <div class="count" id="fcount"></div>
+    <div id="flist"></div>
+  </section>
+
+  <div class="fuss">Stand 20.10.2026. Fehler sind bewusst so nachgebaut, damit der Build bytegleich bleibt; Kandidaten für einen späteren Build mit Fehlerbehebung. „Bright-Eyes“: Grundlage ist der Quelltext des Projekts BrightEyes (GPL), geprüft und überarbeitet.</div>
+</div>
+
+<script>
+const D = /*__DATEN__*/null;
+const $ = s => document.querySelector(s);
+const esc = s => String(s ?? '').replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const md = s => esc(s).replace(/`([^`]+)`/g,'<code>$1</code>').replace(/\*\*([^*]+)\*\*/g,'<strong>$1</strong>');
+const n = x => x.toLocaleString('de-DE');
+const FB = Object.fromEntries(D.fehler.map(f => [f.nr, f]));
+const S = D.stand;
+
+const stats = [
+  [n(S.c_module), 'Module in C', S.c_module/(S.c_module+S.asm_module)],
+  [n(S.asm_module), 'Module in Assembler', null],
+  [n(S.c_zeilen), 'Zeilen C-Quelltext', null],
+  ['1.375', 'Funktionen, benannt und geprüft', null],
+  ['1.677', 'Datenobjekte mit Originaladresse (geprüft)', null],
+  [n(S.fehler), `Originalfehler, ${S.hoch} kritisch`, null],
+  ['4.858', 'Spieltexte + 2.208 Dialogtexte, 3.406 Textstellen im Code kommentiert', null],
+];
+$('#stats').innerHTML = stats.map(([v,l,p]) => `<div class="stat"><b>${v}</b><span>${l}</span>${p!=null?`<div class="bar"><i style="width:${(p*100).toFixed(1)}%"></i></div>`:''}</div>`).join('');
+
+// Tabs
+function tab(w){
+  $('#t-mod').setAttribute('aria-selected', w==='mod'); $('#t-feh').setAttribute('aria-selected', w==='feh');
+  $('#p-mod').hidden = w!=='mod'; $('#p-feh').hidden = w!=='feh';
+}
+$('#t-mod').onclick = () => tab('mod');
+$('#t-feh').onclick = () => tab('feh');
+
+// Bereiche
+const cnt = {};
+D.module.forEach(m => cnt[m.bereich] = (cnt[m.bereich]||0)+1);
+const bereiche = Object.keys(cnt).sort((a,b) => (a==='In Arbeit')-(b==='In Arbeit') || cnt[b]-cnt[a] || a.localeCompare(b,'de'));
+let selB = '', selS = '', selSch = '';
+$('#ber').innerHTML = `<button class="chip" data-v="" aria-pressed="true">Alle Bereiche<small>${D.module.length}</small></button>` +
+  bereiche.map(b => `<button class="chip" data-v="${esc(b)}" aria-pressed="false">${esc(b)}<small>${cnt[b]}</small></button>`).join('');
+function seg(id, cb){
+  document.querySelectorAll(id+' button').forEach(btn => btn.onclick = () => {
+    document.querySelectorAll(id+' button').forEach(x => x.setAttribute('aria-pressed', x===btn));
+    cb(btn.dataset.v);
+  });
+}
+seg('#ber', v => { selB = v; renderM(); });
+seg('#spr', v => { selS = v; renderM(); });
+
+
+const key = m => (m.modul.startsWith('SEG')?'0':'1') + m.modul.replace(/\D/g,'').padStart(4,'0');
+const hay = m => [m.modul,m.datei,m.titel,m.beschreibung,m.bereich,(m.funktionen||[]).join(' '),(m.klassen||[]).join(' '),(m.spieltexte||[]).join(' '),m.bright_eyes||''].join(' ').toLowerCase();
+D.module.forEach(m => m._h = hay(m));
+
+function modHTML(m){
+  const sp = m.sprache==='C++'?'Cpp':m.sprache;
+  const fb = (m.fehler||[]).map(nr => FB[nr]).filter(Boolean);
+  return `<details class="mod" id="m-${esc(m.modul)}"><summary><span class="id">${esc(m.modul)}</span><span class="ttl">${esc(m.titel)}</span>
+  <span class="badges"><span class="b ${sp}">${esc(m.sprache)}</span><span class="b">${n(m.zeilen)} Z.</span>${fb.length?`<span class="b f">${fb.length} Fehler</span>`:''}</span></summary>
+  <div class="body">
+    <p>${md(m.beschreibung)}</p>
+    <div class="meta">${esc(m.datei)} · ${esc(m.bereich)}${m.bright_eyes?` · Bright-Eyes: ${esc(m.bright_eyes)}`:''}</div>
+    ${m.funktionen?.length?`<div class="lbl">Funktionen</div><div class="fns">${m.funktionen.map(f=>`<span class="fn">${esc(f)}</span>`).join('')}</div>`:''}
+    ${m.klassen?.length?`<div class="lbl">Klassen</div><div class="fns">${m.klassen.map(f=>`<span class="fn">${esc(f)}</span>`).join('')}</div>`:''}
+    ${m.spieltexte?.length?`<div class="lbl">Spieltexte</div><div class="fns">${m.spieltexte.map(f=>`<span class="fn">${esc(f)}</span>`).join('')}</div>`:''}
+    ${fb.length?`<div class="lbl">Fehler im Original</div>${fb.map(f=>`<div class="bug"><a href="#f-${f.nr}" data-f="${f.nr}">#${f.nr}</a><div><span class="sv ${esc(f.ausw||f.schwere)}">${esc(f.ausw||f.schwere)}</span> ${md(f.fehler)}</div></div>`).join('')}`:''}
+  </div></details>`;
+}
+
+function renderM(){
+  const q = $('#q').value.trim().toLowerCase().split(/\s+/).filter(Boolean);
+  const nurf = $('#nurf').checked;
+  const L = D.module.filter(m => (!selB || m.bereich===selB) && (!selS || m.sprache===selS) && (!nurf || m.fehler?.length) && q.every(w => m._h.includes(w)));
+  $('#mcount').textContent = `${L.length} von ${D.module.length} Modulen`;
+  if(!L.length){ $('#mlist').innerHTML = '<div class="leer">Nichts gefunden.</div>'; return; }
+  const g = {};
+  L.forEach(m => (g[m.bereich] ||= []).push(m));
+  $('#mlist').innerHTML = bereiche.filter(b => g[b]).map(b =>
+    `<h2 class="grp"><span>${esc(b)}</span><span>${g[b].length}</span></h2>` + g[b].sort((a,c)=>key(a)<key(c)?-1:1).map(modHTML).join('')).join('');
+  if(q.length && L.length <= 3) document.querySelectorAll('#mlist details').forEach(d => d.open = true);
+}
+
+D.fehler.forEach(f => f._h = [f.nr,f.ort,f.fehler,f.folge,f.sicher,f.ausw,f.begr,f.fix].join(' ').toLowerCase());
+let selSi = '', selAu = '';
+const AUSW = ['kritisch','mittel','egal'], SICH = ['sicher','unsicher'];
+function renderMatrix(){
+  const n = (si, au) => D.fehler.filter(f => (!si || f.sicher===si) && (!au || f.ausw===au)).length;
+  let h = '<div></div>' + AUSW.map(a => `<div class="h">${a}</div>`).join('');
+  for (const si of SICH) {
+    h += `<div class="rh">${si} falsch</div>` + AUSW.map(a => `<button class="cell ${a}" data-si="${si}" data-au="${a}" aria-pressed="${selSi===si && selAu===a}"><b>${n(si,a)}</b><span>${si}, ${a}</span></button>`).join('');
+  }
+  $('#matrix').innerHTML = h;
+  document.querySelectorAll('#matrix .cell').forEach(c => c.onclick = () => {
+    const same = selSi===c.dataset.si && selAu===c.dataset.au;
+    selSi = same ? '' : c.dataset.si; selAu = same ? '' : c.dataset.au;
+    renderMatrix(); renderF();
+  });
+}
+const modFor = ort => { const m = ort.match(/^(SEG\d{3}|O\d{3})/); return m ? m[1] : null; };
+function renderF(){
+  const q = $('#fq').value.trim().toLowerCase().split(/\s+/).filter(Boolean);
+  const L = D.fehler.filter(f => (!selSi || f.sicher===selSi) && (!selAu || f.ausw===selAu) && q.every(w => f._h.includes(w)));
+  $('#fcount').textContent = `${L.length} von ${D.fehler.length} Fehlern` + (selSi ? ` · Feld: ${selSi}, ${selAu} (nochmal klicken = alle)` : ' · Feld anklicken zum Filtern');
+  $('#flist').innerHTML = L.length ? L.map(f => {
+    const mo = modFor(f.ort);
+    const ort = mo && D.module.some(m=>m.modul===mo) ? md(f.ort).replace(mo, `<a href="#m-${mo}" data-m="${mo}">${mo}</a>`) : md(f.ort);
+    return `<div class="frow" id="f-${f.nr}"><div class="nr">#${f.nr}</div><div>
+      <div class="ort">${ort} · <span class="tag ${esc(f.sicher)}">${esc(f.sicher||'?')}</span> <span class="sv ${esc(f.ausw)}">${esc(f.ausw||f.schwere)}</span></div>
+      <div class="txt">${md(f.fehler)}</div><div class="folge">${md(f.folge)}</div>
+      ${f.begr?`<div class="ein"><b>Einordnung:</b> ${md(f.begr)}</div>`:''}
+      ${f.fix?`<div class="ein"><b>Fix:</b> ${md(f.fix)}</div>`:''}</div></div>`;
+  }).join('') : '<div class="leer">Nichts gefunden.</div>';
+}
+
+// Querverweise
+document.addEventListener('click', e => {
+  const a = e.target.closest('a[data-f],a[data-m]');
+  if(!a) return;
+  e.preventDefault();
+  if(a.dataset.f){
+    tab('feh'); selSi=''; selAu=''; renderMatrix();
+    $('#fq').value=''; renderF();
+    const el = document.getElementById('f-'+a.dataset.f);
+    document.querySelectorAll('.frow.ziel').forEach(x=>x.classList.remove('ziel'));
+    if(el){ el.classList.add('ziel'); el.scrollIntoView({block:'center'}); }
+  } else {
+    tab('mod'); $('#q').value = a.dataset.m; selB=''; selS=''; $('#nurf').checked=false;
+    document.querySelectorAll('#ber button,#spr button').forEach(x=>x.setAttribute('aria-pressed', x.dataset.v===''));
+    renderM();
+    const el = document.getElementById('m-'+a.dataset.m);
+    if(el){ el.open = true; el.scrollIntoView({block:'start'}); }
+  }
+});
+
+$('#q').oninput = renderM; $('#nurf').onchange = renderM; $('#fq').oninput = renderF;
+renderM(); renderMatrix(); renderF();
+</script>
+</body>
+</html>

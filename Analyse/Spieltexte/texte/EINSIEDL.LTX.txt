@@ -1,0 +1,5 @@
+# EINSIEDL.LTX (4 Texte, Index ab 0, @ = Zeilenumbruch)
+[0] EINSIEDLER SEE
+[1] <FREMDE? HIER? SO WAS!>
+[2] DIE TÜR IST ZU, ABER UNVERSCHLOSSEN.
+[3] @@

@@ -1,0 +1,189 @@
+datei	zeile	art	bisher	richtig	begruendung
+seg074.c	19	originalfehler_be	gelber Pfeil vor violetten gezeichnet	Fix verschiebt den Block nach hinten	Begruendung und Fix stimmen
+seg074.c	67	platzhalter	g_unkn_055	vermutlich Fuellbyte	keine Nutzer ausser der Definition
+seg074.c	72	kommentar	(kein Kommentar)	\brief show_automap mit Lichtbedingung	gs_dungeon_light 0 = hell, 1 = Orientierung+6, 2 = unmoeglich
+seg074.c	80	name	l_si	scroll_x	lokale Variable ist der horizontale Scroll-Offset der Karte (show_automap, select_teleport_dest)
+seg074.c	81	name	l_di	answer	Rueckgabe von GUI_radio (show_automap)
+seg074.c	195	kommentar	(kein Kommentar)	\brief is_discovered	Bitfeld g_automap_buf 16x32
+seg074.c	238	kommentar	the value of the in_prison flag	jail-Flag des ersten Helden der Gruppe	nur der erste passende Held wird geprueft
+seg074.c	262	kommentar	x offset for vertical scroll	x offset for horizontal scroll	x_off verschiebt die Spalten (x + x_off)
+seg074.c	266	name	l_di	tile_type	Feldtyp des Ziels in select_teleport_dest (nur Nicht-Borland-Zweig)
+seg074.c	337	kommentar	shouldn't this always be true?	nein: nach dem Scrollen kann die Gruppe ausserhalb liegen	Spieler kann die Karte schieben
+seg074.c	337	originalfehler_neu	(gs_x - x_off) <= 16	< 16	sichtbar sind die Spalten 0..15, eine Gruppe in Spalte 16 wird rechts neben die Karte gezeichnet (auch violette Pfeile, Kreuz)
+seg074.c	384	kommentar	draws a building on the automap	draws one square: colored tile, arrow or cross	wird fuer alle Feldarten, Pfeile und das Kreuz benutzt
+seg074.c	537	kommentar	costs for teleport in AE	15 / 0 (gleiche Position) / -2 (verboten)	Rueckgabewerte aus dem Code, spell_transversalis wertet > 0 aus
+seg074.c	629	originalfehler_neu	g_automap_sely < 16	g_automap_sely < 15	is_discovered(x,16) liest hinter g_automap_buf[64], Kreuz kann eine Zeile unter die Karte
+seg075.c	438	kommentar	Load ceiling	Load floor	zweites Bild (Index 1/2) liegt bei renderbuf+0x4030 = untere Bildhaelfte
+seg075.c	458	name	DNG_turn	DNG_hide_occluded_squares	static, nur in seg075: setzt Sichtfelder hinter Waenden/geschlossenen Tueren auf 0, hat nichts mit Drehen zu tun
+seg075.c	652	kommentar	(kein Kommentar)	\brief fuer DNG_stub1..5, DNG_lights, DNG_floor_ceil u. a.	Funktionen beschrieben
+seg075.c	727	parameter	a3	image_id	Bildnummer in der NVF-Datei mit Flags 0x8000/0x4000
+seg075.c	733	name	flag	mirrored	Bit 0x8000 des Bildparameters = gespiegelt zeichnen
+seg075.c	734	name	dst_ptr / ptr2	src_ptr / dst_ptr	dst_ptr war die Quelle (entpacktes Bild), ptr2 das Ziel im Renderpuffer
+seg075.c	762	originalfehler_neu	src_ptr += abs(x) bzw. width2 = 208 - x bei gespiegelten Bildern	Ausschnitt von der anderen Seite	vermutlich: copy_solid_permuted liest ab src+width2-1 rueckwaerts, angeschnittene gespiegelte Bilder zeigen den falschen Teil (nicht im Spiel geprueft)
+seg075.c	772	originalfehler_neu	height2 -= y	height2 += y	beim Anschnitt oben wird die Hoehe groesser statt kleiner, es werden Zeilen hinter dem Bild kopiert (bis Zeile 135)
+seg075.c	814	name	l3	idx	Index des Sichtfelds, danach Grafiknummer
+seg075.c	815	name	l4	tile_type	div16(Feldwert)
+seg075.c	816	name	l5	square_val	Feldwert aus g_visual_square_vals
+seg075.c	1011	originalfehler_be	Todesfalle -> GAME_STATE_DEAD	nur Gruppen im Dungeon sterben	Begruendung stimmt, auch fuer gs_deathtrap == 2 (Spinnenhoehle), kein Fix vorhanden
+seg075.c	1207	name	l_di	nr_heroes	Zahl der Helden der Gruppe (DNG01_pitfall)
+seg075.c	1251	originalfehler_neu	get_hero(l_si++) ohne Gruppenpruefung	nur Helden der aktiven Gruppe	bei geteilter Gruppe oder leerem Platz falsche/leere Namen in der Kletter-Meldung
+seg075.c	1288	kommentar	position of a hero with stafflevel > 2	position + 1 of a mage	Code liefert i + 1 und prueft HERO_TYPE_MAGIER
+seg075.c	1298	originalfehler_be	nur dead geprueft	check_hero()	Hinweis plausibel: versteinerter/bewusstloser Magier verwandelt trotzdem den Stab
+seg075.c	1331	kommentar	single<kaputtes UTF-8>hero	single-hero	Zeichensalat im Kommentar
+seg076.c	94	platzhalter	g_unkn_090	vermutlich Fuellbyte	keine Nutzer
+seg076.c	115	name	l4	door_unlocked	Bit 1 des Tuerfeldes = aufgeschlossen
+seg076.c	152	platzhalter	gs_dng15_unknown_flag	Tuer (1,9,3) zugenagelt	Startwert 1, nie geloescht; Raetsel in seg088 oeffnet die Tuer direkt in der Karte
+seg076.c	183	kommentar	door closed and unlocked	oder Tuer ohne Schloss	Bedingung prueft auch !smash_handicap
+seg076.c	262	originalfehler_be	globaler Dietrich-Zaehler	an Tuer/Dietrich binden	Hinweis vertretbar; wichtiger ist der nie geloeschte g_dng_level_changed (s. o.)
+seg076.c	267	kommentar	when tried three times without moving	beim 4. Versuch	Zaehler wird vor dem Vergleich > 3 erhoeht
+seg076.c	328	kommentar	unlucky => just print a message	not enough AE	test_spell() liefert -99 nur bei zu wenig AE (Patzer wird zu -1), der Text sagt das auch
+seg076.c	350	kommentar	1 AP for successful lock pick	1 AP fuer den gelungenen FORAMEN	Kommentar aus dem Dietrich-Zweig kopiert
+seg076.c	380	kommentar	A random number of heroes falls	im Dunkeln faellt die ganze Gruppe, im Hellen eine zufaellige Zahl	Code-Zweige
+seg076.c	398	kommentar	light is on / light is off	vertauscht	gs_dungeon_light 0 = hell (datseg.c), Zweig != 0 ist dunkel
+seg076.c	460	kommentar	(kein Kommentar)	Rueckgabe immer 0	retval des Handlers wird verworfen
+seg076.c	516	originalfehler_be	TODO: g_dng_level_changed never back to 0	bestaetigt	nur seg075 setzt 1; Folge: Dietrich-Zaehler wirkungslos nach erstem Ebenenwechsel
+seg076.c	578	originalfehler_neu	(dng == HYGGELIK && pos == (1,8,1)) || pos == (1,8,5)	dng == HYGGELIK && (pos == (1,8,1) || pos == (1,8,5))	in jedem Dungeon mit 2. Ebene ersetzt Feld (1,8,5) das Vereinen durch den Spiegeltext und setzt gs_dng15_reached_hands; DNG_see_lever hat die Klammern richtig
+seg076.c	589	originalfehler_be	Vereinen-Icon nicht grau nach Vereinen	g_can_merge_group = -1	Begruendung und Fix stimmen (wie town_step)
+seg076.c	656	originalfehler_neu	Rueckwaertsschritt ohne Pruefung von Feldart 11	Richtungsflag pruefen wie beim Vorwaertsschritt	vermutlich: halbdurchlaessige Wand ist rueckwaerts immer passierbar
+seg076.c	694	kommentar	set bit 1 'unlocked'	fuer Truhen 'geoeffnet'	common.h: DNG_TILE_CHEST flag 1 = opened
+seg076.c	806	kommentar	standing two squares away from a door, facing it	keine Tuer mehr voraus	Zweig laeuft bei jedem Feld ohne Tuer voraus, nicht nur zwei Felder davor
+seg076.c	832	kommentar	standing two squares away from a treasure chest, facing it	keine Truhe mehr voraus	wie bei DNG_see_door
+seg076.c	936	name	l_di	hero_i	Heldenzaehler in DNG_waterbarrel
+seg076.c	1021	originalfehler_neu	Schlauch wird gefuellt, dann erst Fass geprueft	bei leerem Fass abbrechen	leeres Fass fuellt alle Schlaeuche, Meldung kommt mehrfach (BE-TODO streift das nur)
+seg077.c	146	kommentar	TRAP: heroes may loose 2 LE with probability 10%	Rattenbisse alle 10 Minuten, je Held 10 %	Text "%s WURDE VON EINER RATTE GEBISSEN", mod_day_timer(MINUTES(10))
+seg077.c	200	originalfehler_be	nur Seil/Strickleiter	DNG_check_climb_tools()	Designhinweis, plausibel (DNG01_pitfall erlaubt den Stab)
+seg077.c	203	originalfehler_be	test_talent(get_hero(0), ...)	erster verfuegbarer Held	stimmt: Held 0 kann tot oder in anderer Gruppe sein
+seg077.c	206	originalfehler_be	g_dng_map[32 * gs_y + gs_x]	16 * gs_y (MAP_POS)	stimmt: Dungeonkarten sind 16 breit (MAP_POS in v302de.h), Grube/Deckenloch landen auf (14,14) statt (14,7)
+seg077.c	236	originalfehler_be	gs_deathtrap nach leave_dungeon() schon 0	gs_quest_deadship_done	Begruendung stimmt, Fix plausibel
+seg077.c	334	kommentar	DNG01_chest6_x1() / DNG01_chest6_open()	DNG01_chest06_open()	veraltete Funktionsnamen im Bugfix-Kommentar
+seg077.c	342	originalfehler_be	sprintf(..., 10)	Heldenname	stimmt; Fix funktioniert (Text wird danach in print_msg_with_first_hero nochmals als Format benutzt)
+seg077.c	370	kommentar	(kein Kommentar)	\brief fuer Raetseltruhe, Daemonentruhe, Leiche	Funktionen beschrieben
+seg077.c	386	originalfehler_be	g_get_extra_loot nicht gesetzt	= 1	stimmt: ohne Fix gibt es die 10 AP der Truhe nie; Fix braucht den zweiten Teil in DNG01_chest06_loot
+seg078.c	19	kommentar	-c -1- Yo seg078.cpp	-c -1 -Yo	Tippfehler in der Compilerzeile
+seg078.c	139	originalfehler_be	Meldung nur nach Fehlversuch	Meldung immer	Begruendung und Fix stimmen
+seg078.c	194	kommentar	(0,10,12) and (0,10,12)	(0,10,12) and (0,10,10)	Tippfehler, der Zweig prueft (0,10,12) und (0,10,10)
+seg078.c	321	originalfehler_be	Knirschen jedes Mal	nur wenn Wand noch da	stimmt
+seg078.c	329	kommentar	teleporting away from (0,11,8)	(0,11,6)	die Gewichtsplatte liegt auf (0,11,6), (0,11,8) ist die Wand
+seg078.c	334	originalfehler_neu	weight_sum = 0 in der Schleife	vor der Schleife	Sperre "Gruppe steht auf (11,8)" (Dummy 5000) wird im naechsten Durchlauf wieder geloescht, wirkt nur fuer Gruppe 5
+seg078.c	376	originalfehler_be	Inschrift "links"	unklar	nicht geprueft (Kartenlage), als Frage belassen
+seg078.c	393	kommentar	SphÃ¤renriss (Zeichensalat)	Sphaerenriss	UTF-8 in Latin-1-Datei
+seg078.c	466	kommentar	massage	message	Tippfehler
+seg078.c	552	originalfehler_be	get_hero(0)	get_first_hero_available_in_group()	stimmt (2 Stellen), Geheimtuer 3 nutzt schon den richtigen Helden
+seg078.c	625	kommentar	unlike other similar code positions, the lower 4 bits are preserved here	hier werden sie geloescht	Kommentar von Geheimtuer 1 kopiert, bei Tuer 2 und 3 steht "= CORRIDOR << 4" (2 Stellen)
+seg078.c	753	kommentar	(kein Kommentar)	\brief DNG02_chest04_loot	Mitnehmen versteinert, Zerschlagen kostet 1W6 LE je Held und schaltet die Falle (1,8,9) ab
+seg079.c	100	originalfehler_neu	Teleporter-Schaden fuer alle 7 Heldenplaetze	nur Helden der aktiven Gruppe	4 Teleporter: Helden anderer Gruppen verlieren ebenfalls 1W6 AE bzw. LE
+seg079.c	205	originalfehler_neu	target_pos != pos_bak && viewdir != viewdir_bak	||	Betreten und Drehen im selben Durchlauf kommt bei normaler Bewegung nicht vor, Hebel (0,9,11) praktisch nicht bedienbar (vermutlich, nicht im Spiel getestet); der Hebel (1,3,11) hat ||
+seg079.c	227	kommentar	(kein Kommentar)	Ablauf der Saeuregrube	Logik mit j erklaert
+seg079.c	310	kommentar	do_fight(224/225/222/223) ohne Namen	Enum-Namen als Kommentar	Literale den FIGHT_IDs zugeordnet (Code unveraendert)
+seg079.c	489	kommentar	(kein Kommentar)	chest05 ist eine Leiter nach unten	Text "HIER FUEHRT EINE LEITER IN DIE..."
+seg079.c	568	kommentar	leader with 4 crystals	genau 4	Vergleich == 4, Kristalle sind nicht stapelbar
+seg079.c	593	kommentar	(kein Kommentar)	Fallentruhe, Hebel schaltet ab	gs_dng03_lever_chest11 startet mit 1 (datseg.c)
+seg080.c	50	kommentar	(kein Kommentar)	Bedeutung von g_dng05_trash_flag	als g_-Variable vermutlich nicht im Spielstand gespeichert
+seg080.c	152	originalfehler_be	get_hero(0) beim Kothaufen	erster verfuegbarer Held	stimmt
+seg080.c	194	kommentar	a very deep gap	Ablauf erklaert	Frage nur beim ersten Mal oder nach gelungener GE-Probe
+seg080.c	223	originalfehler_neu	hero_disappear(hero, 0, -1)	Position des ersten verfuegbaren Helden	write_chr_temp(0) schreibt den falschen Helden, beim NSC fehlt save_npc
+seg080.c	231	kommentar	(kein Kommentar)	Hinweis auf fehlendes else	zweite if-Kette laeuft auch nach einem Ereignis der ersten (Ratten koennen zusaetzlich beissen); vermutlich so im Original
+seg080.c	267	originalfehler_be	Rattenbiss ohne dead-Pruefung	!dead	stimmt (vgl. 5-%-Ratten direkt darueber)
+seg080.c	379	originalfehler_neu	set_mod_slot(..., &hero->CH, -5, 0)	who = Position von hero	Offset wird relativ zu Held 0 gespeichert, Ruecknahme trifft falschen Helden, wenn Held 0 wechselt
+seg080.c	421	kommentar	(kein Kommentar)	Hinweis F061 in DNG05	Goblinhoehle nutzt FIGHT_ID_F061_4B (Wolfsbau-Liste), Absicht unklar
+seg080.c	493	kommentar	fight_id == 76	FIGHT_ID_F076_07	Literal zugeordnet
+seg081.c	63	name	l4	hero_pos	innerer Heldenzaehler bei den Hebeln
+seg081.c	126	originalfehler_neu	for (i = 0; i < 2; ...) zaehlt Plaetze 0 und 1	Helden der Gruppe zaehlen	bei l3 == 0 wird hero_second uninitialisiert benutzt, sonst trifft es evtl. nur einen Helden
+seg081.c	159	kommentar	(kein Kommentar)	Ablauf Falltuer und Sicherungsstein	Flag sperrt zugleich die Tuer (0,11,1) in DNG_door
+seg081.c	228	kommentar	(kein Kommentar)	Werte des Flags	aus dem Code
+seg081.c	239	kommentar	hero = get_first_hero_available_in_group() ohne Nutzen	bestaetigt	hero wird danach nicht benutzt
+seg081.c	280	kommentar	(kein Kommentar)	beide Antworten fuehren in die Grube	Texte 18/19
+seg081.c	317	originalfehler_neu	gs_groups_x/y == (3,6) bzw. (1,2)	auch Dungeon und Ebene pruefen	Gruppe auf demselben x/y in anderer Ebene/anderem Dungeon/Stadt loest den Hebel aus
+seg081.c	494	kommentar	this is true all the time	(!gs_estorik_known) ist immer wahr	gs_estorik_known wird nirgends gesetzt (grep), es kommt immer Text 32
+seg081.c	514	kommentar	(kein Kommentar)	\brief DNG06_chest01_loot	nur Meldung, kein Gegenstand
+seg081.c	545	kommentar	level 2, square (3,12)	Werte von gs_dng09_pit_flag, Rettungsbedingung	aus dem Code
+seg081.c	565	originalfehler_neu	hero = erster verfuegbarer Held, Schleife 7 Plaetze	hero = get_hero(0)	liest ueber das Heldenfeld hinaus, wenn Held 0 nicht verfuegbar ist
+seg081.c	572	originalfehler_be	nur dead geprueft	check_hero	plausibel
+seg082.c	39	kommentar	These 500 D might result in an integer overflow	kein Ueberlauf	money ist unsigned int, 50000 passt; loot_special_chest addiert als int32_t
+seg082.c	69	kommentar	(kein Kommentar)	Ablauf der Tuer (13,2)	Misserfolg ruft Kampf F100_03, Gruppe tritt zurueck
+seg082.c	200	originalfehler_be	ORIGINAL-BUG: forgot to set hero	get_hero(0)	stimmt (2 Stellen): Schleife laeuft ueber das Heldenfeld hinaus
+seg082.c	253	kommentar	(kein Kommentar)	Endlosgang	(14,13) -> x=7 und (8,13) -> x=13, jeweils umgedreht
+seg082.c	271	kommentar	(kein Kommentar)	Wirkung des Gifttimers	seg002 macht alle 15 Minuten Schaden im Dungeon
+seg082.c	323	kommentar	(kein Kommentar)	\brief und \param fuer DNG09_statues	prob/bonus erklaert
+seg082.c	385	originalfehler_neu	for (i = 0; i < 14; i++)	for (i = 1; i <= 14; i++)	Eintrag 0 wird erhoeht, Ifirn (14) nicht; seg112 macht es richtig (gleicher Fehler in seg084 und seg069)
+seg083.c	180	originalfehler_neu	for (i...; hero++) mit hero = erster verfuegbarer Held	hero = get_hero(0)	3 Stellen (2 Kessel, Speerfalle): falsche Plaetze, Lesen hinter dem Heldenfeld, CH-Malus auf get_hero(i) passt nicht zum gefuetterten Helden
+seg083.c	309	originalfehler_be	Teleport vom Hebel weg schliesst die Tuer nicht	-	plausibel
+seg083.c	310	originalfehler_neu	gs_groups_x/y == (11,11)	auch Dungeon/Ebene	wie bei den Hebeln in seg081
+seg083.c	346	originalfehler_neu	pos != pos_bak && viewdir != viewdir_bak	||	Geheimtuer (4,8) nur bei Betreten und Drehen im selben Schritt; vermutlich praktisch nicht auffindbar (nicht im Spiel getestet)
+seg083.c	421	kommentar	(kein Kommentar)	\brief DNG08_search_bed	Wahrscheinlichkeiten aus dem Code
+seg083.c	537	kommentar	(kein Kommentar)	\brief DNG08_chest02_open	Sprachen-Probe, Antwort TAIRACH
+seg083.c	541	originalfehler_neu	if (!gs_dng08_chest2_looted)	Flag nach dem Pluendern setzen	Flag wird nirgends gesetzt, "DIE TRUHE IST LEER" unerreichbar, Raetsel kommt jedes Mal
+seg083.c	566	kommentar	(kein Kommentar)	\brief DNG08_chest03..05_open	853 S = 8530 Heller
+seg084.c	76	originalfehler_be	hero = get_hero(0) fuer Fallen	ok fuer die Schleifen	Schleifen beginnen bei Held 0, das ist richtig; nur Statuen/Probe nutzen andere Helden
+seg084.c	80	originalfehler_neu	gs_day_timer % 90 * 20	gs_day_timer % MINUTES(20)	(t % 90) * 20: Hilferuf zu jeder vollen Minute (MINUTES(1) = 90) statt alle 20 Minuten
+seg084.c	126	kommentar	failed FF+4 test	GE+4	geprueft wird ATTRIB_GE (5 Stellen)
+seg084.c	191	kommentar	(kein Kommentar)	Hebel schaltet zwischen Falle 1 und 2	Bedingungen !lever1 / lever1
+seg084.c	248	originalfehler_be	Falle 4 ohne Zaehler	gs_dng09_bolttrap4_flag--	stimmt: Fallen 1-3 zaehlen herunter, Falle 4 loest beliebig oft aus
+seg084.c	283	kommentar	removes wall at (4,5)	und setzt Wand auf (3,5)	zweite Zeile macht (3,5) zur Wand
+seg084.c	304	kommentar	clear flags	setzt Feldart 15 (Wand), Flags bleiben	"|= 0xf0" setzt die oberen 4 Bit (2 Stellen)
+seg084.c	364	originalfehler_neu	for (i = 0; i < 14; i++)	1..14	Eintrag 0 statt Ifirn (wie DNG09_statues)
+seg084.c	532	kommentar	(kein Kommentar)	\brief DNG09_chest04_loot	Kosten aus dem Code
+seg085.c	113	kommentar	radom hero gets ...	random hero, Feld haengt vom Hebel ab	Tippfehler; Bedingung mit gs_dng10_lever_state
+seg085.c	139	originalfehler_neu	gs_dng10_hole_state = 1 vor "== 2"	nur setzen, wenn 0	Zustand "Stein entfernt" geht verloren, Frage (Text 6 statt 41) kommt jedes Mal
+seg085.c	182	originalfehler_be	Trittplatte nur beim Entschaerfen	-	Beobachtung stimmt (Text 13 fragt nach dem Entschaerfen, unentdeckt passiert nichts); vermutlich Absicht, kein eindeutiger Fehler
+seg085.c	213	originalfehler_neu	answer = GUI_input(...) * 10 ohne Pruefung	answer > 0 pruefen	ESC ergibt -10, Geldpruefung besteht, set_party_money addiert 10 Heller (beliebig wiederholbar)
+seg085.c	220	kommentar	(kein Kommentar)	Schwelle 1000 Heller = 100 S	aus dem Code
+seg085.c	274	kommentar	enables/disables fight 111, leader get 2 LE	FIGHT_ID_F129_21	Literal zugeordnet
+seg085.c	445	kommentar	(kein Kommentar)	\brief DNG10_chest00_open	Text "LEICHE EINES TOTEN ZWERGES"
+seg086.c	110	kommentar	(kein Kommentar)	Bedeutung der Hebelstellungen	aus den Abfragen in seg086 und seg076
+seg086.c	123	kommentar	(kein Kommentar)	Ablauf Statue und Feuerfallen	Texte 12/13 F131.DTX, seg105 setzt gs_dng11_efferd_sacrifice
+seg086.c	139	platzhalter	gs_dng11_unknown1_flag	zweiter Schalter der Feuerfalle (12,10), immer 0	nur gelesen, nirgends gesetzt
+seg086.c	159	platzhalter	gs_dng11_unknown2_flag	Feuerfalle (11,8) aktiv	Startwert 1, die Statue setzt es auf 0
+seg086.c	219	kommentar	possibly a bug. position (8,12) might indeed be (8,11)	kein Fehler	von (8,12) nach Norden blickt man auf die Geheimtuer (8,11); die anderen zwei Tueren sind gleich aufgebaut
+seg086.c	231	originalfehler_neu	(lever ok) && (test_result = ...) > 0, danach if (test_result > 0)	test_result vorher setzen	uninitialisierte Variable (3 Geheimtueren): Tuer kann trotz falscher Hebelstellung aufgehen oder Wert vom letzten Aufruf wirken
+seg086.c	342	kommentar	a chest with 50 food rations	Proviant kommt aus dem Feld food	DNG11_chest00/01 geben selbst nichts
+seg087.c	64	originalfehler_neu	gs_day_timer % MINUTES(10) in jeder Schleife	-	vermutlich mehr als 1 LE pro 10 Minuten im Giftgasraum (wie seg090)
+seg087.c	211	kommentar	(kein Kommentar)	Ablauf Giftfalle	gs_dng14_poisontrap 0/1/2
+seg087.c	315	kommentar	acticate trap	Geheimtuer entdeckt	nur bei Geheimtuer 2 aktiviert ein Fehlschlag die Giftfalle; bei 3 und 4 kopiert (2 Stellen)
+seg087.c	329	kommentar	test was sucessful => disable trap / disable trap	Geheimtuer oeffnen	Code setzt das Wandfeld auf Gang (3 Stellen)
+seg087.c	396	kommentar	(kein Kommentar)	dritte Option ab 5 Seilen	tmp >= 5
+seg087.c	511	kommentar	(kein Kommentar)	Geheimtuer 5 nur beim Drehen	Feuerfalle steht vorher in der else-if-Kette
+seg087.c	619	kommentar	1W6 damage	3 LE	sub_hero_le(hero, 3)
+seg088.c	48	kommentar	(kein Kommentar)	\brief und \param fuer DNG14_dive	diver_pos -1 = kein Vortaucher, handicap 2/8
+seg088.c	96	kommentar	fight_id == 172 / 174	Enum-Namen	Literale zugeordnet
+seg088.c	164	kommentar	(kein Kommentar)	gs_dng14_fullmap_flag	set_automap_tile fuer alle 16x16 Felder
+seg088.c	211	kommentar	(kein Kommentar)	\brief DNG15_riddle	Ablauf aus dem Code
+seg088.c	221	name	l_di	other_group_in_position	Flag: andere Gruppe steht am anderen Spiegel
+seg088.c	234	originalfehler_neu	gs_groups_x/y == (8,5) bzw. (8,1)	auch Dungeon und Ebene	wie seg081/seg083; abgeschwaecht, weil zusaetzlich gs_dng15_reached_hands noetig ist
+seg088.c	286	kommentar	pull on the this side	pull on this side	Tippfehler
+seg089.c	163	kommentar	(kein Kommentar)	toter Teil der Bedingung	(0,11,1) steht schon im ersten Truemmer-Zweig
+seg089.c	384	kommentar	target_pos == 0x3e02	DNG_POS(3,14,2)	Literal entschluesselt
+seg089.c	426	kommentar	do_fight(134/133), do_fight(137/136)	Enum-Namen	Literale zugeordnet (2 Stellen)
+seg089.c	469	kommentar	group gets GRIMRING	Schleife erzwingt die Annahme	give_new_item_to_group fragt nach Wegwerfen, liefert 0 bei Nein
+seg089.c	546	kommentar	group find debris / ladder to descent	Truhe mit Leiter / descend	Tippfehler und Inhalt (Text 12: "IHR LEGT EINE TRUHE FREI")
+seg089.c	637	kommentar	(kein Kommentar)	Zustaende 1-4	aus den case-Zweigen und den Texten 40-49
+seg089.c	667	kommentar	more that one	more than one	Tippfehler
+seg089.c	699	originalfehler_neu	switch ohne case 3	case 3: blockieren und DNG15_clear_way anbieten	verschuetteter Gang wirkt nicht (Gruppe geht durch), Text 45 unbenutzt, zwei Stellen starten mit 3
+seg089.c	743	originalfehler_neu	timewarp(!i ? MINUTES(30) : HOURS(1))	mit Werkzeug kuerzer	mit allen vier Werkzeugen 1 Stunde, ohne 30 Minuten; der Kommentar sagt das Gegenteil
+seg089.c	747	kommentar	aprobability	a probability	Tippfehler
+seg089.c	792	kommentar	\brief (leer)	Beschreibung	DNG15_wounds_and_ladders hatte keinen Text
+seg090.c	42	kommentar	These 400 D might result in an integer overflow	kein Ueberlauf	unsigned int, 40000 passt
+seg090.c	73	kommentar	TODO: buggy timer for cave in	Erklaerung der Stollenzaehler und des Fehlers	Startwerte datseg.c; Tageszaehler laeuft im Timer-Interrupt (seg004 -> do_timers)
+seg090.c	75	originalfehler_neu	gs_day_timer % MINUTES(5) == 0 in jeder Schleife	Marke merken	vermutlich: Tageszaehler laeuft im Interrupt (18,2 Hz), dieselbe Marke wird in mehreren Durchlaeufen gesehen, Stollen zaehlen schneller herunter (BE-TODO "buggy timer" bestaetigt die Vermutung); gleiches Muster seg084 (Hilferuf), seg087 (Giftgas)
+seg090.c	288	kommentar	(kein Kommentar)	Tueren des Wasserraums schliessen	(1,3,10)/(1,3,7) setzen offene Tuer auf geschlossen
+seg090.c	368	originalfehler_be	g_dng12_obstacle_tries ausserhalb des Spielstands	in den Spielstand	stimmt (g_-Variable in seg090)
+seg090.c	371	kommentar	the hero must at least fall three times into pit	prallt gegen die unsichtbare Wand	Text 25 "IST VOR ETWAS GEPRALLT, WAS IHR NICHT SEHEN KONNTET"
+seg090.c	377	kommentar	the hero falls again into the pit	ab dem dritten Versuch Text 31	Text 31 fehlt in der deutschen OBER.DTX
+seg090.c	379	originalfehler_be	get_tx(31) / get_tx(32) in der deutschen Version	Feature-Mod 7	stimmt: OBER.DTX hat nur die Texte 0..30, ab dem 3. Versuch und beim Durchbrechen wird ein ungueltiger Textzeiger benutzt
+seg090.c	540	kommentar	(kein Kommentar)	\brief und \param fuer DNG_clear_corridor	nur von DNG12 benutzt
+seg090.c	579	kommentar	fight_id == 141	FIGHT_ID_DOBE07	Literal zugeordnet
+seg091.c	168	kommentar	AP bonus for each collapsed ceiling tile	je betretenem Deckenfeld	Zaehler steigt bei jedem Aufruf, auch ohne Einsturz und bei wiederholtem Betreten
+seg091.c	232	kommentar	(kein Kommentar)	\brief DNG13_chest00/01_open	Texte 9 und 14
+seg091.c	283	kommentar	(kein Kommentar)	\brief beider Deckenfunktionen	Proben, Schaden, Dauer aus dem Code
+seg091.c	330	originalfehler_neu	timewarp(has_items == 0 ? HOURS(6) : DAYS(1))	mit Werkzeug kuerzer	Kommentar und Logik der Schwesterfunktionen sagen: mit Werkzeug schneller; hier dauert es mit Werkzeug einen Tag
+seg091.c	388	originalfehler_be	Original-Bug 18 in DNG13_collapsing_ceiling_easy	kein Fehler	ohne Werkzeug 18 h, mit Werkzeug 12 h ist sinnvoll; der BE-Fix dreht es falsch herum. Der echte Fehler steckt in DNG13_collapsing_ceiling
+seg092.c	55	kommentar	(kein Kommentar)	Index und NULL fuer DNG05	aus der Tabelle
+seg092.c	86	kommentar	a protected chest	Truhe bleibt zu, kein Schaden	chest_closed zeigt nur "SCHAFFT ES NICHT"
+seg092.c	212	kommentar	cursed chest on the Totenschiff. 50D, ...	Falle der Truhe, 50 D im Feld money	g_dng01_specialchests: trap = chest_cursed, money 5000
+seg092.c	331	kommentar	anser	answer	Tippfehler
+seg092.c	334	originalfehler_neu	char names[20][20]	[20][30] wie loot_simple_chest	vermutlich: Namen ab 20 Zeichen (MAGISCHER BROTBEUTEL, REZEPT FUER STARKEN HEILTRANK) laufen in den naechsten Eintrag; nur sichtbar, wenn so ein Gegenstand in einer Leiche liegt
+seg092.c	418	kommentar	check_dir {0 = no, 1 = yes}	Ablauf und Bedeutung von check_dir	0 = eigenes Feld, 1 = Feld vor der Gruppe
+seg092.c	510	kommentar	(kein Kommentar)	\brief use_lockpicks_on_chest	AP 1 bzw. 6
+seg092.c	573	kommentar	(kein Kommentar)	\brief use_key_on_chest	mit zerbrochenem Schluessel passiert nichts
+seg092.c	660	originalfehler_neu	do { ... } while (i < 0)	ESC als Abbruch	Mengenabfrage laesst sich nicht abbrechen, nur mit 0
+seg092.c	682	kommentar	subseqent	subsequent	Tippfehler

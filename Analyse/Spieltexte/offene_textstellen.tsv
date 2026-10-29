@@ -1,0 +1,71 @@
+seg005.c	279	get_tx(idx)	berechneter Index	FIGHTTXT.LTX
+seg005.c	287	get_tx(idx)	berechneter Index	FIGHTTXT.LTX
+seg005.c	296	get_tx(idx)	berechneter Index	FIGHTTXT.LTX
+seg005.c	302	get_tx(idx)	berechneter Index	FIGHTTXT.LTX
+seg025.c	121	get_tx(gs_town_locdata)	Datei unklar: keine Regel	show_citizen
+seg025.c	156	get_tx(gs_town_locdata)	Datei unklar: keine Regel	do_house
+seg025.c	666	get_tx(person)	berechneter Index	STORY.LTX
+seg030.c	74	get_ttx(656 + 1 + i)	berechneter Index	TEXT.LTX
+seg030.c	106	get_ttx(656 + 1 + i)	berechneter Index	TEXT.LTX
+seg030.c	201	get_tx2(txt_id + txt_offset)	Datei unklar: nach load_informer_tlk(talk_id + ARCHIVE_FILE_DIALOGS_TLK) Datei unbestimmt	do_talk
+seg030.c	497	get_tx2(state_ptr->txt_id1 + txt_offset)	Datei unklar: nach load_informer_tlk(talk_id + ARCHIVE_FILE_DIALOGS_TLK) Datei unbestimmt	do_talk
+seg030.c	498	get_tx2(state_ptr->txt_id2 + txt_offset)	Datei unklar: nach load_informer_tlk(talk_id + ARCHIVE_FILE_DIALOGS_TLK) Datei unbestimmt	do_talk
+seg030.c	499	get_tx2(state_ptr->txt_id3 + txt_offset)	Datei unklar: nach load_informer_tlk(talk_id + ARCHIVE_FILE_DIALOGS_TLK) Datei unbestimmt	do_talk
+seg031.c	119	get_tx(txt_id + txt_offset)	Datei unklar: nach load_tlk(talk_id + ARCHIVE_FILE_DIALOGS_TLK) Datei unbestimmt	do_random_talk
+seg031.c	186	get_tx(options[0].txt)	Datei unklar: nach load_tlk(talk_id + ARCHIVE_FILE_DIALOGS_TLK) Datei unbestimmt	do_random_talk
+seg031.c	187	get_tx(options[1].txt)	Datei unklar: nach load_tlk(talk_id + ARCHIVE_FILE_DIALOGS_TLK) Datei unbestimmt	do_random_talk
+seg031.c	188	get_tx(options[2].txt)	Datei unklar: nach load_tlk(talk_id + ARCHIVE_FILE_DIALOGS_TLK) Datei unbestimmt	do_random_talk
+seg031.c	240	get_ttx(p_info->name_id)	berechneter Index	TEXT.LTX
+seg031.c	249	get_ttx(p_info->name_id)	berechneter Index	TEXT.LTX
+seg031.c	295	get_ttx(i + 715)	berechneter Index	TEXT.LTX
+seg031.c	299	get_ttx(725)	leerer Text	TEXT.LTX
+seg031.c	309	get_ttx(g_informer_tab[gs_current_informer - 1].name_id)	berechneter Index	TEXT.LTX
+seg031.c	319	get_ttx(g_informer_tab[informer_id_from_current_town()].name_id)	berechneter Index	TEXT.LTX
+seg046.c	453	get_tx2(49)	leerer Text	CHARTEXT.LTX
+seg046.c	455	get_tx2(50)	leerer Text	CHARTEXT.LTX
+seg053.c	123	get_tx(gs_town_locdata)	Datei unklar: keine Regel	do_healer
+seg053.c	142	get_tx(gs_town_locdata)	Datei unklar: keine Regel	do_healer
+seg054.c	413	get_tx(gs_town_locdata)	Datei unklar: keine Regel	do_inn
+seg054.c	420	get_tx(gs_town_locdata)	Datei unklar: keine Regel	do_inn
+seg055.c	298	get_tx(gs_town_locdata)	Datei unklar: keine Regel	do_merchant
+seg055.c	305	get_tx(gs_town_locdata)	Datei unklar: keine Regel	do_merchant
+seg058.c	574	get_tx(gs_town_locdata)	Datei unklar: keine Regel	do_smith
+seg059.c	43	get_tx(gs_town_locdata)	Datei unklar: keine Regel	do_tavern
+seg059.c	73	get_tx(gs_town_locdata)	Datei unklar: keine Regel	do_tavern
+seg060.c	176	get_tx(txt_id)	berechneter Index	TAVERN.TLK
+seg060.c	265	get_tx(txt_id)	berechneter Index	TAVERN.TLK
+seg060.c	275	get_tx(txt_id)	berechneter Index	TAVERN.TLK
+seg060.c	295	get_tx(txt_id)	berechneter Index	TAVERN.TLK
+seg063.c	292	get_tx(g_trv_ship_to_hafen_ltx[psg_ptr->ship_type])	berechneter Index	HAFEN.LTX
+seg063.c	296	get_tx(g_trv_passage_type_to_hafen_ltx[g_ship_table[psg_ptr->ship_type].passage_type])	berechneter Index	HAFEN.LTX
+seg064.c	45	get_tx(name_id)	berechneter Index	HAFEN.LTX
+seg064.c	53	get_tx(name_id)	berechneter Index	HAFEN.LTX
+seg064.c	91	get_tx(ent->ship_type * 10 + ent->price_mod % 10 + 0x2a)	berechneter Index	HAFEN.LTX
+seg064.c	115	get_tx(ent->ship_type * 10 + ent->price_mod % 10 + 0x2a)	berechneter Index	HAFEN.LTX
+seg066.c	510	get_tx(locations_tab_ptr->locdata)	berechneter Index	DASPOTA.LTX
+seg066.c	527	get_tx(locations_tab_ptr->locdata)	berechneter Index	DASPOTA.LTX
+seg099.c	1123	get_tx(g_analues_items[i].text_id)	berechneter Index	SPELLTXT.LTX
+seg100.c	63	get_tx(27)	leerer Text	SPELLTXT.LTX
+seg109.c	618	get_tx2(city_index)	bewusst offen: TRV_hunt_generic: Textbeginn kommt als Parameter vom aufrufenden tevent (FEATURE1..8)	
+seg109.c	633	get_tx2(city_index + 1)	bewusst offen: TRV_hunt_generic: Textbeginn kommt als Parameter vom aufrufenden tevent (FEATURE1..8)	
+seg109.c	633	get_tx2(city_index + 7)	bewusst offen: TRV_hunt_generic: Textbeginn kommt als Parameter vom aufrufenden tevent (FEATURE1..8)	
+seg109.c	633	get_tx2(city_index + 8)	bewusst offen: TRV_hunt_generic: Textbeginn kommt als Parameter vom aufrufenden tevent (FEATURE1..8)	
+seg109.c	639	get_tx2(city_index + 2)	bewusst offen: TRV_hunt_generic: Textbeginn kommt als Parameter vom aufrufenden tevent (FEATURE1..8)	
+seg109.c	646	get_tx2(city_index + 1)	bewusst offen: TRV_hunt_generic: Textbeginn kommt als Parameter vom aufrufenden tevent (FEATURE1..8)	
+seg109.c	646	get_tx2(city_index + 7)	bewusst offen: TRV_hunt_generic: Textbeginn kommt als Parameter vom aufrufenden tevent (FEATURE1..8)	
+seg109.c	646	get_tx2(city_index + 8)	bewusst offen: TRV_hunt_generic: Textbeginn kommt als Parameter vom aufrufenden tevent (FEATURE1..8)	
+seg109.c	652	get_tx2(city_index + 3)	bewusst offen: TRV_hunt_generic: Textbeginn kommt als Parameter vom aufrufenden tevent (FEATURE1..8)	
+seg109.c	665	get_tx2(city_index + 4)	bewusst offen: TRV_hunt_generic: Textbeginn kommt als Parameter vom aufrufenden tevent (FEATURE1..8)	
+seg109.c	678	get_tx2(failed_sneaks_num == 1 ? city_index + 5 : city_index + 6)	bewusst offen: TRV_hunt_generic: Textbeginn kommt als Parameter vom aufrufenden tevent (FEATURE1..8)	
+seg109.c	681	get_tx2(city_index + 7)	bewusst offen: TRV_hunt_generic: Textbeginn kommt als Parameter vom aufrufenden tevent (FEATURE1..8)	
+seg109.c	681	get_tx2(city_index + 8)	bewusst offen: TRV_hunt_generic: Textbeginn kommt als Parameter vom aufrufenden tevent (FEATURE1..8)	
+seg109.c	698	get_tx2(city_index + 9)	bewusst offen: TRV_hunt_generic: Textbeginn kommt als Parameter vom aufrufenden tevent (FEATURE1..8)	
+seg109.c	750	get_tx2(text_start + 0)	bewusst offen: TRV_barrier: Textbeginn kommt als Parameter vom aufrufenden tevent (FEATURE1/2)	
+seg109.c	751	get_tx2(text_start + 1)	bewusst offen: TRV_barrier: Textbeginn kommt als Parameter vom aufrufenden tevent (FEATURE1/2)	
+seg109.c	751	get_tx2(text_start + 2)	bewusst offen: TRV_barrier: Textbeginn kommt als Parameter vom aufrufenden tevent (FEATURE1/2)	
+seg109.c	759	get_tx2(text_start + 3)	bewusst offen: TRV_barrier: Textbeginn kommt als Parameter vom aufrufenden tevent (FEATURE1/2)	
+seg109.c	794	get_tx2(text_start + 4)	bewusst offen: TRV_barrier: Textbeginn kommt als Parameter vom aufrufenden tevent (FEATURE1/2)	
+seg109.c	823	get_tx2(text_start + 6)	bewusst offen: TRV_barrier: Textbeginn kommt als Parameter vom aufrufenden tevent (FEATURE1/2)	
+seg109.c	827	get_tx2(text_start + 5)	bewusst offen: TRV_barrier: Textbeginn kommt als Parameter vom aufrufenden tevent (FEATURE1/2)	
+seg109.c	829	get_tx2(text_start + 7)	bewusst offen: TRV_barrier: Textbeginn kommt als Parameter vom aufrufenden tevent (FEATURE1/2)	
+seg109.c	841	get_tx2(text_start + 4)	bewusst offen: TRV_barrier: Textbeginn kommt als Parameter vom aufrufenden tevent (FEATURE1/2)	

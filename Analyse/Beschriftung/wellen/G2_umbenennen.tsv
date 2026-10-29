@@ -1,0 +1,11 @@
+alt	neu	art	datei:zeile	begruendung
+FIG_check_hero_attack	FIG_check_target_cursor_step	funktion	seg034.c:64	prueft keinen Angriff, sondern ob der Zielcursor ein Feld weiter darf (Reichweite, Sichtlinie); Aufrufer seg034, seg035
+AFIG_search_spell_target	AFIG_search_line_target	funktion	seg036.c:368	sucht das erste Ziel in einer Linie, fuer Fernkampf (AFIG_select_range_target) und Fernzauber
+AFIG_get_spell	AFIG_get_spell_target_mode	funktion	seg036.c:586	liefert keinen Zauber, sondern den Zielmodus (-1/0/1/2) eines Zaubers
+AFIG_change_hero_weapon	AFIG_switch_to_melee_weapon	funktion	seg036.c:225	nimmt die erste Nahkampfwaffe aus dem Gepaeck, wenn die Fernwaffe nicht nutzbar ist
+FIG_get_mspell	FIG_get_mspell_target_mode	funktion	seg037.c:451	liefert den Zielmodus (0..3) eines Monsterzaubers, nicht den Zauber
+FIG_unused	FIG_screen_to_cb_pos	funktion	seg038.c:110	rechnet Bildschirm- in Schachbrettkoordinaten um (nie aufgerufen)
+FIG_ACTION_UNKNOWN3	FIG_ACTION_USE_HERB_POTION	enum	seg043.c:1008	nur in FIG_use_item fuer Kraeuter/Traenke (Animation 41)
+FIG_ACTION_UNKNOWN4	FIG_ACTION_USE_OTHER_ITEM	enum	seg043.c:1008	nur in FIG_use_item fuer sonstige benutzbare Gegenstaende (Animation 53); kein Zauber
+unkn1	is_ranged	feld	seg037.c:524	struct mon_spell_description: 1 = Fernzauber (Blitz, Eisenrost, Fulminictus, Ignifaxius, Plumbumbarum), 0 = Beruehrung
+g_mspell_awake_flag	g_mspell_unmushroom_flag	variable	seg043.c:39	wird gesetzt, wenn "Verwandlung beenden" einen Pilz (Salander) zurueckverwandelt; danach wird die Figur neu angelegt

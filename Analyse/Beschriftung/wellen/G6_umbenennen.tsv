@@ -1,0 +1,13 @@
+alt	neu	art	datei:zeile	begruendung
+gs_tevent094_flag	gs_daspota_treasure_hint	variable	seg110.c:667	Wird von tevent_044 (sterbende Abenteurerin: "ZEHN MEILEN HINTER RYBON ... DER DASPOTA-SCHATZ") gesetzt und schaltet in tevent_094 den Hoehleneingang frei; der Name legt faelschlich ein Flag von Ereignis 94 nahe
+gs_tevent064_silent_flag	gs_tevent064_ambush_flag	variable	seg111.c:514	Gesetzt bei gelungenem Silentium (man hoert nichts) UND bei misslungenem Anschleichen; Folge ist der Hinterhalt der Woelfe (FEATURE3.LTX 62). "silent" beschreibt das Gegenteil
+gs_tevent128_replen_flag	gs_tevent128_herb_flag	variable	seg115.c:510	Wird nach gelungener Pflanzenkunde-Probe gesetzt und waehlt den Kraeuterhinweis (TRV_found_replenish_place(1)), analog gs_tevent050_herb_flag
+gs_tevent074_fight_flag	gs_tevent074_fight_result	variable	seg112.c:467	Haelt den Rueckgabewert von do_fight() (0xff = nie gekaempft, 0 = gewonnen, 1 = geflohen); tevent_075 bemisst danach das Raeuberlager
+gs_tevent077_fight_flag	gs_tevent077_fight_result	variable	seg112.c:700	wie gs_tevent074_fight_flag
+g_trv_detour_pixel_bak	g_trv_crosslink_pixel_bak	variable	seg094.c:209	Nur TM_draw_track() benutzt es fuer die Vorstrecke zur Querverbindung (Crosslink); mit gs_travel_detour (Dungeon-Abstecher) hat es nichts zu tun
+TM_unused1	TM_unused_continue_journey	funktion	seg094.c:779	Nie aufgerufen; bietet am Zielort "DEINE GRUPPE KOENNTE VON HIER AUS NOCH AN FOLGENDE ORTE WEITERREISEN" (TEXT.LTX 546/547) an
+gs_tm_unused1_ptr	gs_tm_unused_signpost_ptr	variable	seg094.c:820	Merkt in TM_unused1() den Wegweiser des Zielorts; passend zur Umbenennung von TM_unused1
+trv_journey_enter_destination_town	trv_find_dest_town_signpost	funktion	seg094.c:871	Betritt den Zielort nicht, sondern sucht dort den Wegweiser des befahrenen Wegs und setzt gs_travel_destination_x/_y/_viewdir
+set_textbox_positions	set_town_marker_and_textbox	funktion	seg094.c:259	Setzt ausser der Textfensterlage auch die Koordinaten der Ortsmarke (g_current_town_anix/aniy)
+tevent_unused01	tevent_unused_herb_swim	funktion	seg112.c:335	Nie aufgerufenes Reiseereignis: Kraeuterplatz (Gulmond) am anderen Ufer des Hjaldorval, Hin- und Rueckweg schwimmend
+gs_teventu01_flag	gs_tevent_unused_herb_flag	variable	seg112.c:348	Flag von tevent_unused01 (passend zur vorgeschlagenen Umbenennung)

@@ -1,0 +1,91 @@
+datei	zeile	art	bisher	richtig	begruendung
+seg096.c	275	kommentar	bits 14/15: 1 = unbestimmt, 2 = ohne Artikel, 3 = bestimmt	0 = unbestimmt, 1 = ohne Artikel, 2 = bestimmt (Bit 15 hat Vorrang)	INFLECT_INDEFINITE/OMIT/DEFINITE_ARTICLE in common.h sind 0x0000/0x4000/0x8000
+seg096.c	549	parameter	char_width, char_height	char_height, char_width	der 2. Parameter zaehlt die Pixelzeilen (dst += 320), der 3. die Spalten; GUI_write_char_to_screen_xy uebergibt (7/8, Breite)
+seg096.c	947	parameter	v2	width	verfuegbare Breite: Ergebnis = x + (width - Textbreite) / 2
+seg096.c	850	kommentar	current text position	8x8-Zeichenpuffer g_gui_text_buffer	p zeigt auf den Glyphenpuffer, nicht auf eine Textposition (Zusatzkommentar)
+seg096.c	492	originalfehler_neu	g_grammar_pronouns_index[7] Eintraege	muesste 8 Eintraege haben (IHNEN fehlt)	GRAMMAR_PRONOUN_ID_IHNEN = 7 indiziert hinter das Feld und liest die Bytes von g_grammar_pronouns_table2 als far-Zeiger. Latent: einziger Aufrufer seg077 nutzt Singular 4. Fall
+seg096.c	174	kommentar	(ohne)	Bytes 0x00,0x80..0xFF = vermutlich eigene Bitmasken-Tabelle	g_grammar_pronouns_table2 braucht nur 24 Eintraege; die 9 Bytes danach werden nirgends benutzt
+seg096.c	261	platzhalter	g_unkn_092	(keine Deutung, ungenutzt)	grep ueber alle Module: weder gelesen noch geschrieben
+seg096.c	664	kommentar	(ohne Doku)	gibt den ganzen (umgebrochenen) Text aus, liefert Zeilenzahl	Name irrefuehrend, Umbenennung vorgeschlagen
+seg096.c	902	platzhalter	GUI_unused	zaehlt CR im String, nie aufgerufen	grep: nur Prototyp in seg096.h; Umbenennung vorgeschlagen
+seg096.c	760	kommentar	(ohne)	'<' wird als Glyphe 52 wie '>' gedruckt	Spieltexte nutzen <...> als Anfuehrungszeichen (z. B. SPELLTXT 52..80)
+seg097.c	116	name	g_gui_char_height	Breitentabelle einer 8 Pixel hohen Schrift	Werte 3..8 verhalten sich wie Breiten (I=6, .=4, M=8); GUI_unused1 addiert sie auf x; Umbenennung vorgeschlagen
+seg097.c	128	platzhalter	GUI_unused1	GUI_print_string fuer die 8-Pixel-Schrift (toter Code)	nie aufgerufen; Glyphen aus g_splash_buffer (Splash-Grafiken), FONT8 wird nirgends geladen
+seg097.c	178	platzhalter	GUI_unused2 (lokal v1, v2)	GUI_print_char fuer die 8-Pixel-Schrift; lokal char_width, font_index	nur von GUI_unused1 aufgerufen
+seg097.c	216	platzhalter	GUI_1c2 (Parameter v2)	zeichnet eine Glyphe der 8-Pixel-Schrift; Parameter char_width	Gegenstueck zu GUI_write_fonti_to_screen (seg096) mit Hoehe 8
+seg097.c	238	parameter	num, zero	max_len, cursor_mode	num = Feldlaenge; zero schaltet zwischen vorgezeichnetem Feld (0) und Einzelcursor (1); einziger Aufrufer uebergibt 0
+seg097.c	257	originalfehler_neu	length >= si	length > si (vermutlich)	beim Bearbeiten eines Spielstandnamens steht die Schreibstelle eine Position hinter dem Namen; angehaengte Zeichen landen hinter der 0 und gehen verloren, solange man nicht erst die Ruecktaste drueckt (Auswirkung bei leerem Namen haengt vom Inhalt von GAMES.NAM ab, nicht im Spiel geprueft)
+seg097.c	445	parameter	l2, l3, l4, l5, l6	height, tlx_bak, tly_bak, ml_bak, wc_bak	Boxhoehe und Sicherungen von g_textline_posx/posy/maxlen, g_wallclock_update
+seg097.c	547	kommentar	\param text	\param header	Parameter heisst header
+seg097.c	572	name	lokal x = y-Koordinate, y = x-Koordinate	x und y getauscht	y = g_textbox_pos_x + 6 wurde als x-Argument an do_v_line(dst, x, y1, y2, color) uebergeben
+seg097.c	605	parameter	l2, l3, l4, l5, l10	opt_x, opt_y, lines_total, height, tab0_bak	Position der Antwortzeilen, Gesamtzeilen, Boxhoehe, Sicherung g_txt_tabpos[0]
+seg097.c	750	parameter	l1, l2, l3, l4, l5	opt_y0, mouse_y_last, mouse_x_bak, mouse_y_bak, sel_drawn	y der ersten Auswahl, letzte Mausposition, Maussicherung, zuletzt gefuellter Radio-Knopf
+seg097.c	865	parameter	l3, l4, l10	opt_x, opt_y, tab0_bak	wie GUI_dialogbox
+seg097.c	423	platzhalter	GUI_copy_smth	stellt den gesicherten Hintergrund wieder her	Gegenstueck zu do_save_rect in GUI_draw_radio_bg; Umbenennung vorgeschlagen
+seg098.c	365	originalfehler_be	BE: "the first attribute is tested twice, the second one is left out"	die ZWEITE Eigenschaft wird doppelt geprueft, die DRITTE fehlt	Code uebergibt attrib1, attrib2, attrib2; BE-Fix (attrib3) stimmt, nur die Begruendung war falsch
+seg098.c	345	originalfehler_be	staff_level == 7	== 4	BE stimmt: ab Stabzauber 5 ist der Zuschlag 99, die Probe misslingt immer; die Meldung "KEINE STABZAUBER MEHR" erscheint nie, jeder Versuch kostet halbe AE und 2 Stunden
+seg098.c	319	originalfehler_neu	ae = hero->le - 8	(Grenzfall, vermutlich gewollt)	Meditation bei LE 6/7 zieht noch LE ab (bis auf 5) und gibt keine AE; bei LE <= 5 nur Thonnys und 1 AE verbraucht
+seg098.c	706	kommentar	abort with error message	Abbruch ohne Meldung, Rueckgabe -2	select_magic_user gibt nichts aus
+seg098.c	791	kommentar	only in fight spell	Zauber nicht im Kampf anwendbar	Zweig fuer where_to_use == -1 (Kommentar war vom Zweig darueber kopiert)
+seg098.c	454	parameter	str_val, col_str, str, col_str_val, ones	fmt_val, fmt_hl, fmt, fmt_hl_val, class_usable	col_* sind die Formate mit Farbcode 0xF2 (hervorgehoben), ones = je Klasse anwendbar; Doku fuer show_vals ergaenzt
+seg098.c	725	parameter	l4	tx_file_bak	Sicherung von g_tx_file_index (222 = SPELLTXT.LTX)
+seg098.c	62	kommentar	show some stars on the picture of a healed hero	erscheint nach jedem gelungenen Zauber auf einen Helden ausserhalb des Kampfes	Aufruf in use_spell haengt nicht vom Zauber ab; Umbenennung vorgeschlagen
+seg098.c	757	kommentar	(ohne)	nach Meldung 234 laeuft der Zauber weiter	harmlos: alle Sprueche mit target_type 1 haben where_to_use 1 und scheitern direkt danach (Doppelmeldung)
+seg099.c	994	originalfehler_neu	if (ae < g_spell_special_aecost)	if (ae < le * 2); erste Bedingung "< le" statt "< le * 2"	Hexenspeichel: AE-Pruefung greift nie (Vergleich mit 0), der Held kann mehr AE ausgeben als er hat; erster Zweig ganz ohne AE-Pruefung und mit LE/AE vermischter Bedingung
+seg099.c	219	kommentar	AEcosts = enemy level - spelluser_level	(enemy level - spelluser_level) * 2	Code multipliziert mit 2
+seg099.c	429	kommentar	cost is 8 AP	cost is 8 AE	g_spell_special_aecost sind AE
+seg099.c	657	platzhalter	unk	attacks_left_bak	sichert attacks_left vor fill_enemy_sheet und stellt es danach wieder her
+seg099.c	666	originalfehler_neu	SPELLTXT 15 "IST DOCH GARNICHT TOT."	"%s IST DOCH GARNICHT TOT."	Spieltext ohne %s: Skelettarius auf lebenden Gegner meldet den Satz ohne Subjekt
+seg099.c	193	originalfehler_be	TODO: this adds the AE to a variable no one reads	bestaetigt	grep: gs_gardanium_used_ae nur hier geschrieben (datseg: WRITEONLY); Gardianum kostet AE ohne Wirkung
+seg099.c	944	originalfehler_neu	Mindestkosten 7 nur bei Anfrage < 7	(vermutlich unbeabsichtigt)	Balsam: wer mehr LE verlangt als fehlen, zahlt nur die fehlenden LE (auch < 7); wer weniger als 7 verlangt, zahlt 7
+seg099.c	173	name	spell_gardanium	spell_gardianum	Zauber heisst Gardianum Paradei (datseg-Tabelle); Umbenennung vorgeschlagen
+seg099.c	285	originalfehler_be	SPELLTXT 5 "AUF %S RUHT ..."	bestaetigt	Text enthaelt %S statt %s; BE-Fix patcht den Text zur Laufzeit
+seg099.c	1115	originalfehler_be	inventory[-1]	bestaetigt	select_item_to_drop liefert -1 bei Abbruch; Index -1 wird ungeprueft benutzt
+seg100.c	106	originalfehler_neu	for (j = 0; j <= count; j++)	j < count	arr ist nicht initialisiert; zufaellige Uebereinstimmung mit arr[count] laesst einen Monstertyp in der Exposami-Liste fehlen
+seg100.c	306	originalfehler_be	TODO: graphic bug if cast more than once	Ursache gefunden	width/height bleiben beim zweiten Wirken uninitialisiert; g_hexenknoten_gfx_buf (static) wird nie auf NULL gesetzt und zeigt in spaeteren Kaempfen auf fremde Daten
+seg100.c	38	kommentar	(ohne)	wird nie zurueckgesetzt	static, nur in spell_hexenknoten gesetzt
+seg100.c	407	kommentar	set AP costs	set AE costs	Ecliptifactus kostet AE
+seg100.c	479	originalfehler_neu	Eisenrost auf Tier: Kosten -1 (voll)	0 wie bei Bannbaladin (vermutlich)	Meldung "TIERE HABEN KEINE WAFFEN" ohne Wirkung, aber volle AE-Kosten
+seg100.c	89	parameter	changed	found	Merker "Monstertyp schon in der Liste"
+seg100.c	52	originalfehler_be	min/max * 8 / 10	nicht geprueft	Begruendung (80 % nur bei Fernkampf umgesetzt) plausibel, im Rahmen dieses Moduls nicht nachpruefbar
+seg101.c	163	kommentar	Duration = Level * 12 min	Level * 5 min	Code: level * MINUTES(5)
+seg101.c	319	kommentar	IN + 2 for 2 hours	KK + 2 for 2 hours	aus spell_inc_in kopiert
+seg101.c	126	kommentar	set AP cost(s) (11x)	set AE cost(s)	g_spell_special_aecost sind AE (spell_inc_*, feuerbann, brenne, silentium)
+seg101.c	431	originalfehler_be	BE: "first check can be removed, it would not give a message"	Folge: Zauber scheitert still	g_spelltarget stammt vom letzten Zauber; war das der Zauberer selbst, wirkt Paralue auf keinen Helden und kostet 0 AE ohne Meldung
+seg101.c	71	originalfehler_be	while (max_bonus * max_bonus < ae)	bestaetigt	z. B. AE 10 -> max_bonus 4 (16 AE); BE-Fix (<= und dann -1) richtig
+seg101.c	584	originalfehler_be	inv_slot_of_item(..FACKEL__UNLIT)	bestaetigt	es wird immer die erste unentzuendete Fackel/Laterne genommen
+seg101.c	164	parameter	target_hero_pos (spell_feuerbann)	hero_pos	ist die Position des Zauberers selbst, kein Ziel
+seg101.c	471	kommentar	read a value from that struct	AE-Kosten = MR * 3	nichtssagender Kommentar
+seg102.c	126	kommentar	return PA-value	return RS-value	Funktion liefert rs
+seg102.c	137	parameter	flag	half_cost	wie get_spell_cost in seg098
+seg102.c	153	kommentar	\param monster	\param enemy	Parameter heisst enemy
+seg102.c	270	name	MON_test_talent	MON_test_spell	prueft einen Zauber (mit MR des Ziels), kein Talent; Umbenennung vorgeschlagen
+seg102.c	791	originalfehler_neu	while ((i * i) < ae)	wie BE-Fix in seg101	gleicher Eins-zu-viel-Fehler wie beim Heldenzauber, hier nicht markiert; MON_sub_ae kappt bei 0
+seg102.c	744	originalfehler_neu	HOURS(1)	FIGHT_ROUNDS(5)? (vermutlich)	Gegner-Plumbumbarum senkt die AT des Helden eine Stunde lang, der Heldenzauber nur 5 Kampfrunden
+seg102.c	503	originalfehler_be	mspell_balsam	bestaetigt	Analyse stimmt: le < 7 heilt 7 (ueber Maximum moeglich), le >= 7 heilt 0 (Kosten bleiben 0 -> Rueckgabe -1)
+seg102.c	86	kommentar	unused	bestaetigt	MON_get_target_PA und MON_get_target_RS: kein Aufrufer (grep)
+seg119.c	52	kommentar	multi use: hero_pos, disease_id	hero_pos, Waffentalent-Index, Zufallswert, disease_id	j dient auch als AT/PA-Index und als W6-Wert (Paralyse)
+seg119.c	86	kommentar	Strength is fading, but only to 1	bis 0, dann Tod	Pruefung current != 0; am Funktionsende stirbt der Held bei KK <= 0
+seg119.c	160	originalfehler_neu	5% chance (random_schick(100) < 5)	4 % bzw. "<= 5"	alle anderen Wahrscheinlichkeiten im Modul nutzen "<="
+seg119.c	181	originalfehler_neu	(ohne)	vermutlich unbeabsichtigt	nach dem Wechsel zu Blauer Keuche gibt es am selben Tag noch D6-1 LE Schaden durch den beendeten Dumpfschaedel
+seg119.c	186	originalfehler_be	Original-Bug? forgot? (3x)	harmlos	der Genesungsblock direkt darunter setzt time_counter = 0 (Dumpfschaedel, Blaue Keuche, Schlachtfeldfieber)
+seg119.c	291	originalfehler_be	permanent attribute loss happened (log_3 != 0)	log_3 = voruebergehender Abzug	Bug 48 selbst stimmt (Heilung durch Heiler/Talent/Kraut zeigt "nie wieder"-Meldung), aber der BE-Fix nutzt log_3, das schon am ersten Krankheitstag gesetzt wird
+seg119.c	487	kommentar	((number of days * 5) + 1)% chance	(number of days * 5)%	random_schick(100) <= time_counter * 5
+seg119.c	71	kommentar	after 13 days	after more than 13 days	time_counter > 13
+seg119.c	360	originalfehler_be	(!log_1) / (!log_2)	bestaetigt	umgekehrte Bedingung: Zaehler laufen auf -1, Status bleibt fuer immer RECOVER, KK/GE kommen nicht zurueck
+seg119.c	453	originalfehler_be	Schlachtfeldfieber RECOVER	bestaetigt	Status wird nie HEALTHY, die Meldung "GELBLICHE FAERBUNG ... GEHT ZURUECK" kommt jeden Tag
+seg119.c	18	kommentar	(ohne)	kein Uebergang DISEASED -> RECOVER	nur Heilung beendet Frostschaeden (Original-Verhalten, evtl. gewollt)
+seg120.c	333	originalfehler_neu	if (test_spell(hero_2, SP_SANFTMUT, 0))	if (test_spell(...) > 0)	misslungene Sanftmut-Probe (negativer Wert) zaehlt als Erfolg, 15 AE werden abgezogen
+seg120.c	282	originalfehler_be	test_attrib(...) != 0	bestaetigt	test_attrib liefert Wert - Wurf + 1, Fehlschlaege meist negativ; auch leere Plaetze und andere Gruppen werden getestet
+seg120.c	521	originalfehler_neu	329000L - freemem	334000L - freemem	Meldung "needs %ld Byte more" zeigt 5000 zu wenig bzw. eine negative Zahl
+seg120.c	926	originalfehler_neu	cleanup_game(); ohne exit	exit nach cleanup_game (vermutlich)	nach gescheitertem spawnl von GEN.EXE laeuft das Spiel mit freigegebenem globalem Puffer weiter
+seg120.c	315	originalfehler_be	typus >= HERO_TYPE_HEXE	bestaetigt	kein Pruefen von spells[SP_SANFTMUT]; BE-Fix plausibel
+seg120.c	189	kommentar	see blow	see below	Tippfehler; Aussage geprueft: GRP_switch_to_next ordnet die Helden nicht um, die Markierung sex = 50 ist wirklich unnoetig
+seg120.c	79	kommentar	g_palette_unknown2	Farben 0xd8..0xdf der Textboxen	set_palette(..., 0xd8, 8); 0xd8/0xd9 Radio-Knopf, 0xdf Texthintergrund (vermutlich)
+seg120.c	85	kommentar	g_palette_unknown3	Textfarben 1..3 (0xc8..0xca)	init_game_state setzt g_textcolor_fg[1..3] = 0xc8..0xca
+seg121.c	99	originalfehler_neu	!poison_ptr->time_counter % 12	!(poison_ptr->time_counter % 12)	Vorrang: (!tc) % 12 ist nur bei tc == 0 wahr; Shurinknollengift (KK, GE) und Bannstaub (AE) geben pro 256 Takte (gut 21 Std.) nur 1 Punkt zurueck statt stuendlich
+seg121.c	34	kommentar	multi use: weapon_type, hero_pos, poison_id	weapon_type, AE-Verlust, poison_id	j wird nie als hero_pos benutzt
+seg121.c	51	kommentar	After half an hour, every 5 minutes KK-1, GE-1, LE - 1D6	LE von Anfang an, KK/GE ab 30 Min., endet nicht von selbst	sub_hero_le steht ausserhalb der Pruefung time_counter >= 6
+seg121.c	156	originalfehler_be	Original-Bug? forgot? (13x)	harmlos, ausser Bannstaub	hero_gets_poisoned setzt time_counter = 0; nur bei Bannstaub verzoegert der alte Zaehlerstand die (fehlerhafte) AE-Rueckgabe
+seg121.c	290	kommentar	(ohne)	Dauer wird jeden Takt neu gewuerfelt	Goldleim und Bannstaub enden dadurch frueher als der Mittelwert (auffaellig, evtl. gewollt)
+seg122.c	4	kommentar	dummy_location	Handler fuer LOCTYPE_UNKN1	Tabelle in seg025.c Index 1

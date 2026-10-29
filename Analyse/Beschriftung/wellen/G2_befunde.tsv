@@ -1,0 +1,124 @@
+datei	zeile	art	bisher	richtig	begruendung
+seg032.c	190	kommentar	something still unknown	has action phases left in this round (hero->actions != 0)	Schleifenbedingung prueft hero->actions == 0
+seg032.c	340	kommentar	something at offset HERO_ACTION_ID set (maybe sleeping)	action_id == FIG_ACTION_FLEE	Code vergleicht action_id mit FIG_ACTION_FLEE
+seg032.c	409	kommentar	0: enemies' turn; 1: heroes' turn	0: heroes' turn; 1: enemies' turn	bei is_enemies_turn == 0 wird FIG_choose_next_hero() aufgerufen
+seg032.c	617	kommentar	save the fighter_id of this hero	object id (hero_pos + 1) fuer das Portrait (FIG_draw_char_pic in seg006)	g_fig_char_pic = actor_id + 1 ist die Objekt-Id, kein fighter_id
+seg032.c	642	kommentar	TODO: (hero->target_object_id) gives better results than (... - 10)	TODO unbegruendet, "- 10" ist richtig	Objekt-Ids 10..29 = g_enemy_sheets[0..19] (2 Stellen)
+seg032.c	1122	kommentar	This fight ends after 9 rounds	endet nach 10 Runden	g_fight_round wird vor der Pruefung >= 10 erhoeht
+seg032.c	946	kommentar	0 = Hygellik's ruin cursed (?); 2 = ?	0 = gewonnen (auch ohne Kampf bei verfluchtem Geld), 1 = keine Gegner/geflohen, 2 = verloren, 3 = Visibili, 4 = Verlassen/Laden	Rueckgabewerte aus dem Code von do_fight abgeleitet
+seg032.c	959	name	new_escape_position_found	escape_position_known	wird 1, wenn die Fluchtposition schon in der Liste steht, also das Gegenteil von "neu gefunden"
+seg032.c	849	kommentar	loads some special textures for the ghost ship	Ergaenzung: zeichnet Objekte 58..61 in den Hintergrund, deren Felder sind Fluchtfelder	Zusammenhang mit FIG_chessboard_init()/FIG_draw_scenario(); Schiff nicht geprueft
+seg032.c	98	kommentar	(kein Kommentar)	Doxygen fuer draw_fight_screen_pal und FIG_fight_continues	Funktionen waren undokumentiert
+seg032.c	1162	kommentar	Does that mean that the fight is lost??	ja, GAME_STATE_DEAD aus FIG_fight_continues()	einzige Stelle, die den Zustand im Kampf setzt
+seg032.c	1213	originalfehler_neu	if ((g_max_enemies != 0) && !g_fig_discard)	Bedingung ist nie wahr	g_max_enemies wird vor dem Kampf (nach dem Kuerzen der Gegnerliste) auf 0 gesetzt und im Kampf nicht wieder gesetzt; Gegner gekuerzter Kaempfe werden hier nie als tot markiert
+seg032.c	534	originalfehler_neu	else if (nr_hero_act_phases_left_in_round == 0)	toter Zweig; vermutlich Endlosschleife in FIG_choose_next_hero()	Bedingung davor (0 <= nr_enemy) ist dann immer wahr. Haben die Helden keine Phasen mehr, die Gegner aber schon, bekommen die Helden trotzdem eine Phase und FIG_choose_next_hero() findet keinen Helden. Moeglicher Fall: einziger handlungsfaehiger Held mit gescheiterter Flucht (action_id bleibt FLEE). Nicht getestet
+seg032.c	533	originalfehler_be	this might be an Original-Bug (Reihenfolge der Abfragen)	Begruendung stimmt	Reihenfolge macht den ==0-Zweig unerreichbar, siehe originalfehler_neu
+seg032.c	772	originalfehler_be	Original-Bug 3: Schwanzteil selbstgetoeteter Doppelgegner bleibt stehen	Begruendung und Fix schluessig	die Entfernung des Schwanzteils steht nur in den Zweigen fuer getoetete Ziele, nicht fuer den Angreifer selbst
+seg032.c	203	originalfehler_be	Orig_BUG: I had this loop running infinitely	Ursache im Code nicht gefunden	Schleife endet, solange die Summe der attacks_left dem Zaehler in FIG_do_round entspricht; Skelettarius erhaelt attacks_left, Boeser Blick aendert nur attacks
+seg032.c	976	originalfehler_be	Visibili wirkt nur fuer Einzelhelden	Beobachtung stimmt	es wird nur get_hero(0) bei Gruppengroesse 1 geprueft; ob Absicht, unklar
+seg032.c	1233	originalfehler_neu	for (i = 0; gs_group_member_counts[...] > i; i++) hero = get_hero(i)	NSC in Slot 6 wird bei der Fluchtverteilung uebergangen (vermutlich)	GRP_sort_heroes() sortiert nur Slots 0..5 nach vorn; ist der NSC in der aktiven Gruppe, faellt er aus der Schleife (Randfall)
+seg033.c	63	name	l1	first_menu	nur im ersten Menue eines Zuges gibt es 13 Optionen (mit "ALTE OPTIONEN")
+seg033.c	309	kommentar	WEAPON_GFX_ID_NONE == 1	WEAPON_GFX_ID_NONE == -1	Wert laut common.h
+seg033.c	371	kommentar	(kein Kommentar)	weapon_id dient als Reichweite fuer FIG_cb_select_target (1/99) bzw. als KK-Zuschlag	Mehrfachnutzung der Variable erklaert
+seg033.c	56	kommentar	position of the hero	Position in der Gruppe, Objekt-Id = hero_pos + 1	Praezisierung
+seg033.c	385	originalfehler_neu	Zauberziel: nur target_object_id < 0 wird abgewiesen	Ids >= 50 muessten abgewiesen werden	FIG_cb_select_target() kann auf begehbaren Objekten (g_cb_obj_nonobstacle) enden; FIG_do_hero_action() behandelt das Ziel dann als Gegner (>= 30 -> -20) und greift ausserhalb von g_enemy_sheets[20] zu
+seg034.c	48	kommentar	\brief TODO, \return TODO	Pruefung eines Cursorschritts der Zielauswahl (Reichweite, Sichtlinie)	aus Code und Aufrufern (FIG_cb_select_target, check_hero_range_attack)
+seg034.c	70	name	hero_object_id	cursor_object_id	ist das Objekt unter der aktuellen Cursorposition, nicht der Held
+seg034.c	190	name	actor_object_id (FIG_cb_select_target)	cursor_object_id	Objekt unter dem Cursor, dessen Bild gezeigt wird
+seg034.c	179	kommentar	px: x-coordinate of actor; return fight-id of the target	Ein-/Ausgabeparameter; Rueckgabe Objekt-Id oder -99 bei Abbruch	aus dem Code
+seg034.c	442	name	l4	tail_fighter_id	fighter_id des Schwanzteils aus g_fig_double_size_fighter_id_table
+seg034.c	547	parameter	\param actor_id	\param hero_pos	Doku nannte einen Parameter, den es nicht gibt
+seg034.c	570	kommentar	1: left; 2: down; 3: up	1: Rand x < 0, 2: Rand y < 0, 3: Rand y > 23	links/unten/oben passt nicht zur isometrischen Darstellung; Zuordnung zu den Pfadrichtungen ergaenzt
+seg034.c	521	kommentar	(kein Kommentar)	Doxygen fuer FIG_move_pathlen	undokumentiert
+seg034.c	794	originalfehler_neu	x<0: fight_bp_left > bp_cost; y<0/y>23: bp_cost < fight_bp_left - 1	gleiche Bedingung fuer alle Raender	Flucht ueber y-Raender verlangt ein BP mehr als ueber den x-Rand
+seg034.c	830	originalfehler_neu	object_id_bak wird im Fluchtfall geprueft	im Fluchtfall object_id_bak_escape pruefen	object_id_bak stammt von einer frueheren Cursorposition (beim ersten Durchlauf uninitialisiert); freies Fluchtfeld kann als "ZIEL: BLOCKIERT" erscheinen
+seg034.c	850	originalfehler_be	Original-Bug: verschachtelte ifs -> "ZIEL: 99 BP"	Begruendung und Fix stimmen	bei totem Gegner/Helden auf dem Zielfeld werden target_reachable und bp_cost nicht geprueft
+seg035.c	86	name	l_si, l4, l5, l6	page_offset, selected, more_entry_pos, radio_count	Seitenversatz (0/15), gewaehlter Eintrag, Position von "MEHR", Zahl der Radio-Eintraege
+seg035.c	37	kommentar	compress enemies	Ergaenzung, welche Gegner entfernt werden	aus der Bedingung im Code
+seg035.c	82	kommentar	(kein Kommentar)	Doxygen fuer FIG_loot_enemies	undokumentiert
+seg035.c	109	originalfehler_neu	loot_names[31], nur 0..29 gesetzt	Zeiger 30 setzen oder Grenze pruefen	bei genau 30 Beutestuecken schreibt Seite 2 "MEHR" nach loot_names[30] (nicht gesetzter Zeiger)
+seg035.c	291	originalfehler_neu	zwei unabhaengige Pruefungen mit GUI_output	Meldung nur einmal	kleiner Schoenheitsfehler: Meldung kann doppelt erscheinen
+seg035.c	114	originalfehler_be	Knochen mit Rune beendet die Beuteliste	Beobachtung stimmt	Gegenstaende hinter dem Knochen werden nicht angezeigt; Behelfsloesung im Original
+seg036.c	59	parameter	\param ani_num	\param clip_num	Parametername der Funktion
+seg036.c	84	originalfehler_neu	if (clip_num > clip_num_max) return 0;	>=	Grenze um eins verschoben (auch in seg037, seg044); folgenlos, da nur gueltige Nummern kommen
+seg036.c	147	kommentar	prepare_enemy_ani in seg036.cpp / FIG_prepare_hero_ani in seg037.cpp, FANI_prepare_fight_enemy_ani doppelt	Dateien getauscht, FANI_prepare_spell_enemy	gleiche Liste in seg036, seg037, seg044 (4x) berichtigt
+seg036.c	222	kommentar	pointer to the hero with a broken weapon	Held, dessen Fernwaffe nicht nutzbar ist (keine Munition, Ziel zu nah)	einziger Aufrufer AFIG_hero_turn() ruft nur in diesen Faellen
+seg036.c	291	kommentar	1 = Attack heroes and enemies	1 = Helden und abtruennige Gegner; Modus 2 wird nicht benutzt	Code prueft flags.renegade
+seg036.c	368	parameter	renegade (AFIG_search_spell_target)	target_mode	wird auch mit dem Zielmodus aus AFIG_get_spell() aufgerufen, nicht nur mit flags.renegade
+seg036.c	355	kommentar	\brief TODO	Suche des ersten Ziels in einer Linie	aus dem Code
+seg036.c	475	kommentar	selects a target to be attacked from hero with a spell	Ziel fuer einen Fernkampfangriff	wird nur bei Fernwaffe aufgerufen; Zauber laufen ueber AFIG_select_autospell()
+seg036.c	506	kommentar	REMARK: spells usually require 5 BP	Fernkampf kostet 3 BP	Funktion betrifft Fernkampf (2 Stellen)
+seg036.c	576	kommentar	\brief TODO, \return TODO	Zielmodus -1/0/1/2	aus dem Code
+seg036.c	612	kommentar	\brief TODO	Zauber- und Zielwahl im Computerkampf	aus dem Code
+seg036.c	809	kommentar	number of heroes in the group - 1	Zahl der anderen handlungsfaehigen Helden	check_hero() filtert
+seg036.c	828	kommentar	\brief TODO	automatischer Zug eines Helden	aus dem Code
+seg036.c	326	originalfehler_neu	Modus 0: Gegner ohne Pruefung von flags.renegade	abtruennige Gegner ausnehmen	im Computerkampf greifen Helden auch Gegner an, die durch Boeser Blick auf ihrer Seite kaempfen (ebenso AFIG_search_spell_target Modus 0)
+seg036.c	938	originalfehler_neu	(hero_x + 1 <= 25) && (hero_y + 1 <= 25)	<= 23	Grenze zu weit; am Rand wird das Feld der naechsten Zeile gelesen (folgenarm)
+seg036.c	243	originalfehler_be	Speere werden nicht als Nahkampfwaffe gewaehlt	Begruendung stimmt nur im Zusammenhang mit Original-Bug 60	das Spiel behandelt Speere sonst als Fernwaffe (FIG_weapon_gfx_id_ranged); die Ausnahme ist dazu folgerichtig
+seg036.c	310	originalfehler_be	Bugfix: negative Objekt-Id als Held	Fix stimmt	negative Ids sind Fluchtfelder, get_hero(-x) liest ausserhalb
+seg037.c	44	kommentar	copies something from ANI.DAT	Kopie einer Animationssequenz	Praezisierung
+seg037.c	215	kommentar	checks if range attack is possible; mode 0 = common	Pruefung des Nachbarfelds; Modi 0/1/2 beschrieben	Funktion prueft nur das Nachbarfeld (Nahkampf/Beruehrungszauber)
+seg037.c	283	kommentar	mode 0 = common, 1 = attack enemies only, 2 = attack heroes only	Modi praezisiert	Code prueft flags.renegade
+seg037.c	296	kommentar	signed char target;	unused	Variable wird nie benutzt (fuer Bytegleichheit noetig)
+seg037.c	451	parameter	mode	attack_foe	gleicher Wert wie attack_foe im Aufrufer; "mode" verwechselbar mit desc->mode
+seg037.c	442	kommentar	(kein Kommentar)	Doxygen fuer FIG_get_mspell, FIG_select_mspell, FIG_enemy_range_attack, FIG_enemy_turn, prepare_enemy_ani	undokumentiert
+seg037.c	524	platzhalter	mon_spell_description.unkn1	Fernzauber-Kennzeichen (is_ranged)	1 bei Blitz, Eisenrost, Fulminictus, Ignifaxius, Plumbumbarum; 0 = Beruehrung, Nachbarfeld wird gesucht
+seg037.c	822	kommentar	chance of 4% that an illusion enemy disappears	4 % Chance, die Bindung (Band und Fessel) zu loesen	Code setzt nur flags.tied zurueck, fuer jeden Gegner
+seg037.c	831	originalfehler_be	Original-Bug? Why unset 'tied' and not 'illusion'??	vermutlich kein Fehler	die Illusionsdeutung stammt aus dem falschen Kommentar; Freikommen aus "Band und Fessel" ist plausibel
+seg037.c	761	name	target_object_id (lokal in FIG_enemy_turn)	rear_object_id	Objekt auf dem Feld hinter dem doppelt grossen Gegner (Platz fuer den Schwanz), nicht das Ziel
+seg037.c	925	kommentar	enemy->action_id = 1 / 2	FIG_ACTION_MOVE / FIG_ACTION_MELEE_ATTACK	Zahlen statt Enum (Code unveraendert)
+seg037.c	512	originalfehler_neu	Schleife in FIG_select_mspell	Schleife bei Modus 0 verlassen	ein abtruenniger Gegner (Boeser Blick), dessen Zauberbuch nur Sprueche der Art 1/2 hat (g_mon_spellbooks[8]: Balsam, Verwandlung beenden, Eisenrost), aendert weder done noch bp -> Endlosschleife, Spiel haengt
+seg037.c	289	originalfehler_be	Fernkampf auch mit direktem Kontakt	Begruendung stimmt	FIG_search_range_target prueft keinen Mindestabstand
+seg037.c	374	originalfehler_be	negative Objekt-Id als Held	Fix stimmt	negative Ids sind Fluchtfelder
+seg038.c	37	parameter	\param obj	\param object_id	Parametername
+seg038.c	59	kommentar	(kein Kommentar)	Doxygen fuer FIG_init_list_elem	undokumentiert
+seg038.c	110	name	a1, a2, p1, p2, loc1, loc2	screen_x, screen_y, p_cb_x, p_cb_y, const_x, const_y	Umkehrung der Bildschirmformel; "never called" per grep bestaetigt
+seg038.c	271	kommentar	and the target is an escape square	is not an escape square	Bedingung lautet target_is_escape_square == 0
+seg038.c	295	originalfehler_be	TODO: g_fig_move_pathdir is only 10 bytes	im Original folgenlos	die folgenden 10 Bytes (g_fig_enemy_parry_action_used[0..9]) werden nie benutzt
+seg038.c	353	parameter	\param object_id	\param actor_id	Parametername
+seg038.c	313	kommentar	(kein Kommentar)	Doxygen fuer FIG_num_viewdir_changes_of_path	undokumentiert
+seg038.c	431	originalfehler_be	tote Schwanzteile nicht begehbar	Begruendung und Fix stimmen	nur Ids 10..29 werden freigegeben
+seg038.c	475	originalfehler_be	new_y > 23 doppelt, new_x > 23 fehlt	Begruendung und Fix stimmen (2 Stellen)	offensichtlicher Tippfehler
+seg038.c	223	originalfehler_be	Endlosschleife beim Rueckweg fliehender Doppelgegner	Begruendung schluessig	Schwanzpruefung fehlt im letzten Schritt der Vorwaertssuche
+seg038.c	153	originalfehler_be	best_viewdir uninitialisiert	moeglich, wenn kein Pfad != -1 entsteht	Fix (Initialisierung) ist harmlos
+seg039.c	35	kommentar	{ 10,-10,-5,-5 }	{ 5,5,-5,-5 }	Kommentar passte nicht zu den Daten
+seg039.c	105	parameter	target_object_id	monster_id	Index in g_monster_dat_buf (MONSTER.DAT), keine Objekt-Id
+seg039.c	209	kommentar	typus for heroes, monster_id for enemies	actor_sprite_id fuer Gegner, Objektnummer fuer Objekte	Aufrufer uebergeben actor_sprite_id bzw. object_id - 50
+seg039.c	371	kommentar	(kein Kommentar)	Doxygen fuer FIG_init_enemies/FIG_init_heroes	undokumentiert
+seg040.c	166	kommentar	set something in the hero charactersheet to -1	fighter_id = -1	Feld ist bekannt
+seg040.c	71	kommentar	(kein Kommentar)	Doxygen fuer FIG_chessboard_init, FIG_preload_gfx, FIG_draw_scenario	undokumentiert
+seg040.c	318	originalfehler_neu	z = (object_id >= 58 && object_id <= 61 ? -1 : 50)	toter Zweig	Brettwerte 108..111 werden vorher ausgefiltert; folgenlos
+seg041.c	66	parameter	arg: 1 = just check, 2 = check with output	mode: 1 = pruefen mit Meldung, 2 = still pruefen	Meldung kommt bei arg != 2; seg033 nutzt 1 (Menue), seg036 nutzt 2 (Computerkampf)
+seg041.c	220	parameter	\param flag: 0 not affected, 1 reset 'renegade'	\param preserve_renegade: 0 = zuruecksetzen, sonst unveraendert	Code: if (!preserve_renegade) renegade = 0; Doku hatte es umgekehrt
+seg041.c	263	kommentar	nur \param attack_hero	vollstaendiges Doxygen	undokumentiert
+seg041.c	455	originalfehler_neu	enemy_p->flags.scared = 1 (Angstgift)	nur bei attack_hero == 0	beim Angriff eines (abtruennigen) Helden auf einen Helden mit Angstgift-Waffe wird ueber einen nicht gesetzten Zeiger geschrieben
+seg041.c	81	originalfehler_be	Speer als Wurfwaffe	Begruendung stimmt	Speer ist nach DSA-Regeln Nahkampfwaffe
+seg041.c	364	originalfehler_be	Probe auf Schusswaffen bei Speeren	Begruendung stimmt	Folge von Original-Bug 60
+seg041.c	95	originalfehler_be	nur Item-Id geworfener Waffen gespeichert	Beobachtung stimmt	Zustand (z.B. magic_revealed) geht verloren
+seg041.c	180	kommentar	(kein Kommentar)	Doxygen fuer FIG_output, FIG_add_msg, FANI_clear_ani_tracks	undokumentiert
+seg042.c	402	originalfehler_neu	target_pa_val = ... + p_target_hero->weapon_at_mod	weapon_pa_mod	PA eines angegriffenen Helden (Held gegen Held) mit dem AT-Modifikator der Waffe; seg043 und seg033 nutzen weapon_pa_mod
+seg042.c	530	kommentar	bf == 99	bf == -99	Code prueft bf != -99
+seg042.c	776	kommentar	(kein Kommentar)	Argument ist immer 1	Bedingung innerhalb von if (flag != 0) redundant (auch seg043)
+seg042.c	279	originalfehler_be	AT des Gegenhelden mit rs_be des Angreifers	Begruendung stimmt	drei Stellen nutzen hero->rs_be statt p_target_hero->rs_be
+seg042.c	676	originalfehler_be	Wurfwaffe vor Schadensberechnung abgelegt	Begruendung und Fix stimmen	range_attack_check_ammo(hero, 0) entfernt die Waffe aus der Hand
+seg042.c	528	originalfehler_be	Waffenschaden bei gleichen Wuerfen	Beschreibung stimmt	Waffe eines parierenden Gegners wird nie beschaedigt
+seg042.c	459	originalfehler_be	Patzer bei der Parade setzt backfire_1 statt backfire_2	Vermutung bestaetigt (nur Animation)	seg044 animiert bei backfire_1 die verteidigende, bei backfire_2 die angreifende Figur; hier erhaelt der Angreifer den Freischlag, animiert wird aber der Verteidiger
+seg043.c	385	kommentar	defender gegs 1W6 damage	gets	Tippfehler
+seg043.c	911	name	l3	impact_ani_shown	wird 1, wenn die Wirkungsanimation (Hylailer Feuer) gezeigt wurde und entfernt werden muss
+seg043.c	39	kommentar	(kein Kommentar)	Herkunft von g_mspell_awake_flag	einziger Setzer seg102 (Pilz zurueckverwandelt)
+seg043.c	586	kommentar	(kein Kommentar)	Konstante erklaert, keine 80%-Kuerzung gegen Gegner	Vergleich mit Zahl statt Enum
+seg043.c	827	originalfehler_neu	double_size bleibt im Zweig fuer doppelt grosse Gegner ungesetzt	double_size setzen	beim Zurueckverwandeln eines Pilzes wird die Figur mit altem double_size-Wert neu eingetragen (vermutlich folgenarm)
+seg044.c	33	parameter	\param ani	\param ani_num	Parametername
+seg044.c	90	kommentar	\brief TODO	liefert das Kopfbyte einer Sequenz	aus dem Code
+seg044.c	146	parameter	object_id_attacker, object_id_target, a7	actor_object_id, opponent_object_id, is_defender	bei der Parade wird die Id des Verteidigers als "attacker" uebergeben; a7: 0 = aktive Seite, 1 = angegriffen (beide FANI_prepare_fight_*_ani)
+seg044.c	195	kommentar	drink potion / cast spell	Kraut/Trank benutzen / anderen Gegenstand benutzen	FIG_ACTION_UNKNOWN3/4 kommen nur aus FIG_use_item (2x je)
+seg044.c	381	kommentar	prepares the animation sequence of a hero in fights	of an enemy	Funktion fuer Gegner
+seg044.c	654	parameter	max_range, caster_object_id, target_object_id, v5, v6	ani_mode, actor_object_id, opponent_object_id, projectile_gfx_id, is_target	4 = zaubern, 99 = getroffen (keine Reichweite); v5 ist die Geschossart (1 = Blitz -> anderer Clip)
+seg044.c	794	parameter	target_object_id, caster_object_id (FANI_prepare_spell_enemy)	actor_object_id, opponent_object_id	Namen vertauscht: Aufrufer uebergeben zuerst die animierte Figur selbst (enemy_id + 10 beim Zaubern), dann die Gegenseite
+seg044.c	835	kommentar	this is true if an enemy attacks a hero	ani_mode 4 = Gegner zaubert	gilt fuer jedes Ziel (2 Stellen)
+seg044.c	787	kommentar	This is used for "Blitz", "Fulminictus", "Ignifaxius"	fuer alle Gegnerzauber und getroffene Gegner	Aufrufer in seg042/seg043
+seg044.c	221	kommentar	Liste paralleler Codebloecke	Dateinamen berichtigt	siehe seg036
+seg045.c	252	platzhalter	struct dummy2 / struct dummy4	struct int8_pair / struct int16_pair	Hilfsstrukturen fuer die Kopie der 2-elementigen Tabellen
+seg045.c	320	parameter	spell_gfx_id	spell_impact_gfx_id	einheitlich mit FANI_prepare_enemy_spell_ani und FANI_add_spell
+seg045.c	263	kommentar	(kein Kommentar)	nur Wirkungen 1 und 2 haben Tabelleneintraege	Hexenknoten (3) hat kein Ziel und erreicht die Funktion nicht; Pilz (4) wird ausgenommen
+seg045.c	210	kommentar	(kein Kommentar)	Doxygen fuer FANI_prepare_projectile_ani u.a.	undokumentiert

@@ -1,0 +1,169 @@
+datei	zeile	funktion	be_nr	zweig	kommentar	code
+seg002.cpp	1314	process_nvf_extraction		fix-zweig		/* retval was originally neither set nor used here. | VC++2008 complains about an uninitialized variable | on a Debug build, so we fix this for debuggings sake */ | /* Orig-Fix */ | retval = p_size;
+seg002.cpp	2172	timers_daily		fix-zweig		/* Original-Bug: Reenable identifying item in the academy */ | gs_academy_daily_ident = 0;
+seg002.cpp	3561	passages_reset		orig-zweig		/* Original-Bug 36: the loop operates only on the first sea route (which is Thorwal-Prem) */ | for (i = 0; i < (SEA_ROUTE_ID__END - 1); i++)
+seg002.cpp	3616	timewarp		orig-zweig		/* Original-Bug 37: | * Healing time-offs, staffspell time-offs and timers for the consumption of burning lanterns and torches | * do not get updated in certain situations, like a step forward in a to
+seg002.cpp	3631	timewarp		orig-zweig		/* fixes Original-Bugs 38 and 39. | * | * Original-Bug 38: | * In some situations, the hourly damage from the magic chain mail is not correctly applied. | * For example, if the hero stays in an inn fo
+seg002.cpp	3705	timewarp_until_time_of_day		fix-zweig		/* The code of the function replicates the one of timewarp(..) | * Better call timewarp(..), such that we don't have to apply the same bugfixes twice. | * The bypassed code below suffers from Original
+seg002.cpp	4528	sub_ae_splash		fix-zweig		/* AE bar was not updated in pseudo 3D mode */ | if (!g_in_fight && g_mouse1_doubleclick) { | /* redraw AE bar */ | draw_bar(1, get_hero_pos(hero), hero->ae, hero->ae_max, 0); | }
+seg002.cpp	5076	get_random_hero		fix-zweig		signed int pos = 0; |  | struct struct_hero *hero = get_hero(0); | for (int i = 0; i <= 6; i++, hero++) { |  | if (hero->typus == HERO_TYPE_NONE) | continue; | /* Check if in current group */ | if (he
+seg002.cpp	5481	count_heroes_available		fix-zweig		/* this function allows a cleaner fix for Original-Bug 15 */ | signed int count_heroes_available_ignore_npc(void) | { | signed int i; | signed int retval = 0; | struct struct_hero *hero = get_hero(0);
+seg002.cpp	5523	count_heroes_available_in_group		fix-zweig		/* this function allows cleaner fixes for Original-Bug 12, 13, 14 and 15 */ | signed int count_heroes_available_in_group_ignore_npc(void) | { | signed int heroes = 0; | signed int i; | struct struct_h
+seg002.cpp	5554	count_heroes_available_in_group_ignore_npc	15	orig-zweig	/* Original-Bug 15:	(!count_heroes_available())
+seg002.cpp	5564	count_heroes_available_in_group_ignore_npc		orig-zweig		(!count_heroes_available_in_group())
+seg005.cpp	722	draw_fight_screen		orig-zweig		/* Original-Bug 5: */ | /* the removal of the following line is not strictly necessary, but it is not needed as a replacement is added further below. */ | p_fighter->object_id = 0;
+seg005.cpp	732	draw_fight_screen		fix-zweig		/* Original-Bug 5: */ | /* The fighter.object_id entry of the head part will be overwritten by the next line in the original code. | * In this way, sometimes dead bodies are lost from the chessboard a
+seg005.cpp	764	draw_fight_screen		fix-zweig		/* Original-Bug 4: | * remove tail of the escaped double-size enemy from the chessboard | * For more on this bug, see Original-Bug 3 at seg032.cpp */ | p_fighter_tmp = FIG_get_fighter(g_fig_double_siz
+seg031.cpp	250	get_informer_forename		fix-zweig		break;
+seg032.cpp	730	FIG_do_round		fix-zweig		/* Original-Bug 3: | * Tails of dead/disappeared two-squared enemies must be removed separately. | * Otherwise, those tails are an obstacle for movement (by another bug) or can be used | * as a target
+seg034.cpp	810	FIG_move_hero		orig-zweig		} else if (object_id_bak >= 10) { |  | /* target square contains an enemy (including the tail of a double-size enemy) */ | if (!g_enemy_sheets[(object_id_bak - 10 - (object_id_bak >= 30 ? 20 : 0))].fl
+seg036.cpp	409	AFIG_search_spell_target		fix-zweig		(target_object_id > 0) &&
+seg037.cpp	342	FIG_search_range_target		fix-zweig		/* Original-Bugfix: the next if assumes | that a negative target_object_id is a hero -> SEGFAULT*/ | if (target_object_id < 0) { | done = 1; | } else
+seg037.cpp	376	FIG_search_range_target		fix-zweig		if (target_object_id < 0) { | done = 1; | } else
+seg038.cpp	123	FIG_unused		orig-zweig		/* potential Original-Bug: | * best_viewdir is not initialized and may stay so in case that FIG_find_path_to_target_backtrack | * is called with equal target and hero/enemy position. | * It's not clea
+seg038.cpp	202	FIG_unused		fix-zweig	/* Original-Bug	(dist == dist_bak-1) ||
+seg038.cpp	400	FIG_num_viewdir_changes_of_path		fix-zweig	/* Original-Bug: The tail parts of dead double-size enemies have been forgotten,	/* make dead tail-parts walkable */ | } else if ((object_id_or_dist_entry >= 30) && (object_id_or_dist_entry < 50) && g_enemy_sheets[object_id_or_dist_entry - 30].flags.dead) { | /* test 'dead' flag *
+seg038.cpp	437	FIG_num_viewdir_changes_of_path		orig-zweig		/* Original-Bug: new_y > 23 gets checked twice, new_x > 23 is missing */ | (new_y > 23)
+seg038.cpp	487	FIG_num_viewdir_changes_of_path		orig-zweig		/* Original-Bug: new_y > 23 gets checked twice, new_x > 23 is missing */ | (new_y > 23)
+seg041.cpp	65	range_attack_check_ammo		orig-zweig		/* Original-Bug 60: | * Speer is a melee weapon. */ | case ITEM_ID_SPEER:
+seg042.cpp	660	FIG_do_hero_action		orig-zweig		/* Original-Bug 32: throwing weapon in a ranged attack is dropped before the damage logic is done. | * As result, all throwing weapons (except throwing stars in a pile of at least 2 units) will be tre
+seg042.cpp	676	FIG_do_hero_action		fix-zweig		/* Original-Bug 32: | * Fix: move the function call after the damage calculation. | */ | if (!range_attack_check_ammo(hero, 0)) { | return; | }
+seg042.cpp	699	FIG_do_hero_action		fix-zweig		/* Original-Bug 32: | * Fix: move the function call after the damage calculation. | */ | if (!range_attack_check_ammo(hero, 0)) { | return; | }
+seg046.cpp	217	status_show_talents		fix-zweig		/** | * \brief   a helper for an Original Bugfix | * | *          This makes changes to the max LE visible by changing the format string. | * | * \param   fmt         format string | */ | static void 
+seg046.cpp	254	status_show		fix-zweig		char le_fix[10];
+seg046.cpp	491	status_show		fix-zweig		if (hero->attrib[ATTRIB_KK].current * 110 <= hero->load) { | /* Original-Bug 6: status screen shows wrong number of BP if the load is at least 110% of the carrying capacity. | (3 BP shown, but in fact
+seg046.cpp	502	status_show		fix-zweig		/* Original-Bugfix: show permanent damage red */ | char le_fix[10]; | set_status_string(get_tx2(13)); |  | if (hero->le_max_malus) { | /* print max LE in red if hero has permanent damage */ | sprintf(
+seg046.cpp	573	status_show		fix-zweig		/* Original-Bugfix: show permanent damage in red */ | set_status_string(get_tx2(52)); |  | if (hero->le_max_malus) { | /* print max LE in red if hero has permanent damage */ | sprintf(le_fix, "%c%d%c"
+seg047.cpp	158	hero_gets_diseased		fix-zweig		/* not a real BUG, but very useless */ | if (hero->typus == HERO_TYPE_NONE) | return;
+seg047.cpp	167	hero_gets_diseased	46	fix-zweig	/* not a real BUG, but very useless */ /* Original-Bug 46: If the hero is already has the disease,	if ((hero->disease[disease_id].status != DISEASE_STATUS_HEALTHY) | /* A hero cannot get the same disease twice. In the recovering phase, the hero is immune. */ | || (disease_id == DISEASE_ID_DUMPFSCHA
+seg047.cpp	180	hero_gets_diseased		fix-zweig		if (disease_id == DISEASE_ID_BLAUE_KEUCHE) { | /* Blaue Keuche is a worsening of DumpfschÃ¤del. | * Hence, the effect of DumpfschÃ¤del is removed. (But blaue Keuche will be worse...) */ | hero->diseas
+seg047.cpp	210	hero_disease_test		fix-zweig		/* not a real BUG, but very useless */ | if (hero->typus == HERO_TYPE_NONE) { | D1_ERR("WARNING: called %s with an invalid hero\n", __func__); | return; | }
+seg049.cpp	164	GRP_split		orig-zweig		/* Original-Bug 13: | * Split group does not work if the active group consists of 2 available heroes and there is an NPC in another group. */ | if (count_heroes_available_in_group() <= (get_hero(6)->t
+seg049.cpp	199	GRP_split		orig-zweig		/* Original-Bug 14: | * Split group does not allow to select all but one available hero of the active group if there is an NPC in another group. */ | while (count_heroes_available_in_group() > (get_he
+seg052.cpp	304	do_area_camp	26	fix-zweig	/* Original-Bug 26: After leaving a camp in town/dungeon-mode, the party is rotated by 180 degrees. This does not make sense. */	/* The rotation is performed in the function leave_location(). | * We fix the bug in a hacky way by simply correcting the rotation afterwards. */ | gs_viewdir = REVERSE_VIEWDIR(gs_viewdir); /* rotate 
+seg054.cpp	126	get_first_brewing_hero		orig-zweig		/* Original-Bug 11: If NPC Curian got separated from the group for brewing a recipe at an inn, | * he is stuck in the inn. When the group enters the inn where they left him, no dialog appears. | * Als
+seg054.cpp	156	do_inn		orig-zweig		/* Original-Bug 7: NPC Curian cannot do magic actions in an inn. | * Problem: no space allocated for the NPC (= seventh hero). */ | signed char magic_act[6];
+seg054.cpp	181	do_inn		orig-zweig		/* Original-Bug 8: | * If a group of >=2 heroes enters an inn where another hero is brewing, | * a textbox is shown with the possibility to interrupt the brewing process. | * However, this textbox is 
+seg054.cpp	390	do_inn		orig-zweig		/* Original-Bug 7: NPC Curian cannot do magic actions in an inn. */ | for (i = 0; i < 6; i++)
+seg062.cpp	75	ask_miracle		orig-zweig		/* Original-Bug 43: | The implementation of Praios miracles suggests that Praios only grants miracles to groups without spellcasters. | This fits the lore that Praios hates magic. | However, the way i
+seg063.cpp	76	-		orig-zweig		/* Original-Bug 25: According to the map, the route Prem <-> Manrin should be the longest ship route by far. Distance 54 is way too short. Maybe the original intention was a value of 310, which after 
+seg063.cpp	704	sea_travel		orig-zweig		/* Original-Bug 34: | * There is an Efferd miracle with the text "Efferd gewaehrt euch seinen Schutz auf Wasser.". | * For sea traveling, it prevents octopus encounters. However, pirate encounters are
+seg064.cpp	79	prepare_passages		orig-zweig		/* Original-Bug 23: | * In the function get_ship_name(..), the ship names are created randomly every time the party checks the available ships at a harbor. | * In this way, the names of the ships can 
+seg064.cpp	110	prepare_passages		orig-zweig		/* Original-Bug 23: | * see above */ | gs_harbor_options[prepared].ship_name_ptr = get_ship_name(ent->ship_type, prepared);
+seg064.cpp	188	get_passage_travel_hours		orig-zweig		/* Original-Bug 35: | * In the predicted traveling times of sea passages, only very specific values show up. | * For example, the predicted number of hours for Prem-Hjalsingor will be one of 14, 15, 1
+seg065.cpp	562	show_outro		fix-zweig		/* Original-Bug: restore permanent LE-damage at the end of game */ | /* Famous heroes get healed for free */ | if (hero->le_max_malus > 0) | { | hero->le_max += hero->le_max_malus; | hero->le_max_malu
+seg065.cpp	578	show_outro		orig-zweig		hero->le_max_malus = 0;
+seg067.cpp	255	city_event_6		fix-zweig		/* Original-Bug 24 */ | signed int type_bak;
+seg067.cpp	276	city_event_6		fix-zweig		/* Original-Bug 24: | * When entering a building in Thorwal, Prem, Phexcaer or Oberorken between 8:00 and 20:00 o'clock, the street merchant (random city event) shows up with a chance 1:900. Selecting
+seg067.cpp	285	city_event_6	24	fix-zweig	/* Original-Bug 24:	/* Original-Bug 24 */ | gs_town_typeindex = type_bak;
+seg067.cpp	290	city_event_6	24	fix-zweig	#ifdef M302de_ORIGINAL_BUGFIX /* Original-Bug 24 */ /* Original-Bug 27: After leaving the street merchant (random city event), the party is rotated by 180 degrees. This doesn't make too much sense, and it is inconsistent to the similar situation of visiting a merchant at a market, where no rotation 	/* fix analogous to to Original-Bug 26. | * The rotation is performed in the function leave_location(), which has been called in do_merchant() above. | * We fix the bug in a hacky way by simply correc
+seg068.cpp	451	THO_ugdalf		fix-zweig	/* Original-Bug: Everytime the heroes enter the dungeon they get 20D.	gs_quest_ugdalf = 2;
+seg070.cpp	88	PHX_stadthaus		fix-zweig		signed int answer2;
+seg070.cpp	96	PHX_stadthaus		fix-zweig	#ifdef M302de_ORIGINAL_BUGFIX	 | do { | answer2 = GUI_radio(get_tx2(19), (signed char)answer, get_tx2(21), get_tx2(20),	get_tx2(22)); |  | } while (answer2 == -1); |  | answer = answer2; | 
+seg070.cpp	165	PHX_spielhaus		fix-zweig		if ((count_heroes_in_group() >> 1) >= counter) {
+seg074.cpp	296	render_automap		orig-zweig		/* draw yellow arrow at the position of the active group */ |  | /* Original-Bug 31: If there is another group on the same map square as the active group, the automap will mark that square by a purple
+seg074.cpp	326	render_automap		fix-zweig		/* draw yellow arrow at the position of the active group */ |  | /* Original-Bug 31: see above. | * Fix: Move the code block drawing the yellow arrow after the one drawing the purple arrows. */ | if (
+seg076.cpp	549	DNG_step		fix-zweig		/* Original-Bug 19: After merging groups in a dungeon, the icon "merge groups" is not grayed. | * Compare to the corresponding code in town_step() in seg066.cpp, where the following line is present. *
+seg077.cpp	223	DNG01_handler		orig-zweig		/* Original-Bug 30: | * After killing the demon on the death ship, it begins to sink. The party has 30 remaining steps to leave the ship. Succeeding in this, the corresponding message of the sinking d
+seg077.cpp	318	DNG01_chest06_loot		fix-zweig		/* Enabling the extra loot in function DNG01_chest6_x1() also causes the special chest handler to call this function instead of DNG01_chest6_open(). | Without this additional check the player will alw
+seg077.cpp	329	DNG01_chest06_loot		fix-zweig	/* Original-Bug: The string 14 from SHIP.DTX needs a pointer to the name of the hero, not an integer.	sprintf(g_text_output_buf, get_tx(14), (get_first_hero_available_in_group())->alias);
+seg077.cpp	338	DNG01_chest06_loot		fix-zweig		/* We also need to close the if-block...*/ | } | else | { | /* ... and tell the player that the chest is now empty.*/ | GUI_output(get_ttx(522)); | }
+seg077.cpp	367	DNG01_chest06_open		fix-zweig	// Original-Bug: enable the extra loot, here 10 AP	g_get_extra_loot = 1;
+seg078.cpp	123	DNG02_handler		orig-zweig		// Original-Bug 65: | // verfallene Herberge: If the group leader becomes stuck in the sticky liquid on the floor, | // the "freed himself" message only appears after a prior failed attempt that reduc
+seg078.cpp	532	DNG02_handler		orig-zweig		/* Original-Bug 66: | * This should be the leader of the active group, who is not necessarily at hero_pos 0. */ | hero = get_hero(0);
+seg078.cpp	576	DNG02_handler		orig-zweig		/* Original-Bug 66: | * This should be the leader of the active group, who is not necessarily at hero_pos 0. */ | hero = get_hero(0);
+seg091.cpp	348	DNG13_collapsing_ceiling_easy		orig-zweig		/* Original-Bug 18 */ | /* if all items are available, it takes 18 hours instead of 12. | * So in the presence of tools, it takes longer to clear the way. This doesn't make sense at all. */ | timewarp
+seg093.cpp	377	-		fix-zweig		/* Original-Bug 40: After doing a ship passage from Overthorn to Hjalsingor and leaving the harbor, | * the party is positioned in a wrong square behind the buildings. */ | /* Reason: In the hard-code
+seg093.cpp	385	-	40	orig-zweig	#ifdef M302de_ORIGINAL_BUGFIX /* Original-Bug 40: After doing a ship passage from Overthorn to Hjalsingor and leaving the harbor,	SEA_ROUTE_ID_VARNHEIM_LJASDAHL,
+seg093.cpp	516	-		orig-zweig		/* Original-Bug 41: After doing a ship passage to Leuchtturm Runin and leaving the harbor, | * the party is positioned in a remote town square. */ | /* Reason: The following line is incorrect; it is a
+seg094.cpp	269	trv_do_journey		orig-zweig		/* After fixing Original-Bug 50, 51, and 52, this is not needed any more. */ | signed int last_tevent_id;
+seg094.cpp	277	trv_do_journey	50	orig-zweig	#ifndef M302de_ORIGINAL_BUGFIX /* After fixing Original-Bug 50, 51, and 52, this is not needed any more. */	/* After fixing Original-Bug 50, 51, and 52, this is not needed any more. */ | last_tevent_id = -1;
+seg094.cpp	514	trv_do_journey		orig-zweig		TRV_event(gs_journey_tevents[(last_tevent_id = gs_trv_i)].tevent_id);
+seg094.cpp	539	trv_do_journey		fix-zweig		} | /* Otherwise, the travel event handler wants to reverse the traveling direction. | * This means that the event was not really settled | * (so we don't remove it even when it is non-repeatable) | *
+seg094.cpp	701	trv_do_journey	50	orig-zweig	* For the fix of Original-Bug 50, 51, and 52,	/* Original-Bug 50, 51, and 52 */ | if ( last_tevent_id != -1) { | g_journey_tevent_relative_position[last_tevent_id] = (gs_journey_direction == JOURNEY_DIRECTION_CHANGE_TO_BACKWARD ? TEVENT_POSITION_
+seg094.cpp	844	trv_journey_enter_destination_town		orig-zweig		// not a bug, but useless | signpost_typeindex = 1; |  | if (signpost_typeindex) | {
+seg094.cpp	852	trv_journey_enter_destination_town		orig-zweig	#ifndef M302de_ORIGINAL_BUGFIX // not a bug, but useless	signpost_typeindex = 0;
+seg094.cpp	908	trv_journey_enter_destination_town		orig-zweig		}
+seg095.cpp	114	npc_farewell	42	fix-zweig	/* Original-Bug 42:	char ta_rise_bak = hero_i->saved_talent_increases;
+seg095.cpp	119	npc_farewell		fix-zweig	#ifdef M302de_ORIGINAL_BUGFIX	/* The unwanted reduction is done within the function inc_talent_novice(). We revert it. */ | hero_i->saved_talent_increases = ta_rise_bak;
+seg096.cpp	279	GUI_name_inflect_with_article		orig-zweig		// Usage of + is not clean, assumes that the bits got initialized with 0. | // This is probably always the case, so more a glitch than a bug. | inflection_features += gender_bitmask.a[g_item_name_gend
+seg096.cpp	294	GUI_name_inflect_with_article		orig-zweig		// the following is pretty wild... | inflection_features += INFLECT_PLURAL; // Usage of "+" instead of "|" is not clean. This in effect toggles the plural bit. | inflection_features &= ~INFLECT_DEFINI
+seg096.cpp	316	GUI_name_inflect_with_article		orig-zweig		// Usage of + is not clean, assumes that the bits got initialized with 0. | // This is probably always the case, so more a glitch than a bug. | inflection_features += gender_bitmask.a[g_monster_name_g
+seg096.cpp	394	GUI_name_inflect		orig-zweig		(inflection_features & INFLECT_CASE_NUMBER_BITMASK) == 1 | // 2nd or 3rd case singular. 3rd case is not correct.
+seg098.cpp	342	use_magic		orig-zweig		/* Original-Bug 17: the first attribute is tested twice, the second one is left out */ | g_staffspell_descriptions[hero->staff_level].attrib2,
+seg098.cpp	694	use_spell		fix-zweig		/* Original-Bug 29: see below */ | signed int x; | signed int y; | signed int pos; | struct dungeon_door *ptr_doors;
+seg098.cpp	763	use_spell		fix-zweig		/* Original-Bug 29: door-specific spell handicap is not considered in a free Foramen spell (from the spellcast menu). */ | if (spell_id == SP_FORAMEN_FORAMINOR && gs_dungeon_id != DUNGEON_ID_NONE && (
+seg099.cpp	272	spell_verwandlung		fix-zweig		/* Broken format string, %S must be %s */ | get_tx(5)[5] = 's';
+seg099.cpp	679	spell_skelettarius		fix-zweig		/* Original-Bug 1: | * If the dead target enemy is lying on top of the body of another dead enemy, | * after the 'Skelettarius' the other body is still displayed, but cannot be selected for 'Skelettar
+seg099.cpp	687	spell_skelettarius	1	fix-zweig	#ifdef M302de_ORIGINAL_BUGFIX /* Original-Bug 1:	/* Original-Bug 2: | * reported at https://www.crystals-dsa-foren.de/showthread.php?tid=5039&pid=148171#pid148171 | * Every 'Skelettarius' spell adds 1288 (=0x508) bytes at the end of g_fightobj_buf f
+seg099.cpp	711	spell_skelettarius		fix-zweig		/* Original-Bug 2: | * set g_fightobj_buf_freespace and g_fightobj_buf_seek_ptr to the correct values as discussed above */ | g_fightobj_buf_freespace += 0x508L; | g_fightobj_buf_seek_ptr = buf_seek_p
+seg099.cpp	723	spell_skelettarius		fix-zweig		/* Original-Bug 1: | * restore the fighter.object_id value. */ | p_fighter = FIG_get_fighter(g_spelltarget_e->fighter_id); | p_fighter->object_id = object_id_bak;
+seg099.cpp	802	spell_foramen		orig-zweig		/* Original-Bug 28: | * Free Foramen spell (from the spellcast menu) can open closed dors only if the 'open door' submenu has been activated before (showing the three symbols smash, pick and spell). *
+seg099.cpp	1094	spell_analues		fix-zweig		/* If the player cancels item selection or has no items select_item_to_drop() returns -1. | The original uses the return value to calculate an index, whithout checking for this. */ | if (inv_slot == -
+seg100.cpp	42	spell_eigenschaften		orig-zweig		/* Original-Bug 63: | * When casting the spell "Eigenschaften seid gelesen", the displayed damage range is only 80% of the true numbers. | * | * Background: Apparently, late in the development process
+seg100.cpp	166	spell_odem_arcanum		fix-zweig		/* If the player cancels item selection or has no items select_item_to_drop() returns -1. | The original uses the return value to calculate an index, whithout checking for this. */ | if (inv_pos == -1
+seg100.cpp	746	spell_saft_kraft		fix-zweig		char *p = get_tx(96); |  | if (p[10] == 'L' && p[11] == 'E') { | /* change "VERWANDLET" into "VERWANDELT" */ | p[10] = 'E'; | p[11] = 'L'; | }
+seg101.cpp	63	spell_armatrutz		orig-zweig		/* Original-Bug: you can get one RS point more that you have AE for */ | while (max_bonus * max_bonus < get_spelluser()->ae) { | max_bonus++; | }
+seg101.cpp	573	spell_brenne		orig-zweig		/* Original-Bug 55: | * Using the second (third, firth...) un-lit torch in the inventory to ignite it, | * actually the first torch will be ignited. (provided the hero also has a tinder box) | * The s
+seg102.cpp	475	mspell_balsam		orig-zweig		/* Original-Bug: | * very strange behavior. | * If LE loss is less then 14, 7 LE will be healed, price AE = LE. | * If not enouh AE available, number of healed LE is lowered accordingly. | * | * Probl
+seg104.cpp	318	plan_alchemy		orig-zweig		/* Original-Bug 12: If the total number of heroes is >= 2, and the current group consists only of a single available hero (+possibly the non-brewing NPC), | * the option to separate that hero from the
+seg106.cpp	154	move_item		fix-zweig	/* Original-Bug: Might result in a stack size bigger than STACK_SIZE_MAX */	/* Decrement the item counter */ | hero->num_filled_inv_slots--;
+seg106.cpp	224	move_item		fix-zweig		/* Decrement the item counter */ | hero->num_filled_inv_slots--;
+seg106.cpp	460	pass_item		orig-zweig		INFLECT_INDEFINITE_ARTICLE | INFLECT_PLURAL | INFLECT_4TH_CASE,
+seg106.cpp	570	pass_item		orig-zweig		INFLECT_INDEFINITE_ARTICLE | INFLECT_PLURAL | INFLECT_4TH_CASE,
+seg106.cpp	714	get_max_light_time		fix-zweig		if (!hero->typus) | continue;
+seg107.cpp	49	void		orig-zweig		static signed int g_used_item_inv_slot;	// ds:0xe5cc, used_item position
+seg107.cpp	476	item_ignite		fix-zweig		if (get_spelluser() != g_itemuser) { | g_spelluser = g_itemuser; | }
+seg107.cpp	531	item_ignite		fix-zweig		/* Original-Bug 54: | * Use a torch to ignite it. After that, it is not possible to ignite a | * lantern with the spell "Brenne toter Stoff". | * (For exampe, if the hero casting that spell has a a to
+seg109.cpp	78	void		orig-zweig		/* Original-Bug 33: | * In certain travel events, an axe is needed as a tool. | * (These are: bridge building Breida <-> Tjoila, bridge building Auplog <-> Varnheim, path blocked by a tree Skjal <-> O
+seg109.cpp	309	TRV_found_replenish_place		fix-zweig	/* Original-Bug: This code assumes that the leader of the group will replenish the stocks,	for (hero_pos = 0; hero_pos <= 7; hero_pos++) { |  | g_wildcamp_replstatus[hero_pos] = | g_wildcamp_herbstatus[hero_pos] = | g_wildcamp_magicstatus[hero_pos] = | g_wildcamp_guardstatus[hero_pos] = 0; 
+seg109.cpp	328	TRV_found_replenish_place		fix-zweig	/* Original-Bug: the second argument is is the counter of replenish tries, not the position of the leader.	replenish_stocks(-3, 0);
+seg109.cpp	431	TRV_cross_a_ford		orig-zweig		/* Original-Bug 53: | * If the party was already traveling backward, the new direction should be forward. */ | done = gs_journey_direction = JOURNEY_DIRECTION_CHANGE_TO_BACKWARD; // this is value 1
+seg109.cpp	464	TRV_ford_test	47	orig-zweig	/* Original-Bug 47: When crossing a ford, the result of the GE test is mis-evaluated, resulting in these success rates:	if (test_attrib(hero, ATTRIB_GE, handicap) == 0)
+seg113.cpp	301	tevent_098		fix-zweig	/* Original-Bug: hero not initialized */	/* Original-Bugfix: take the leader of the group */ | hero = get_first_hero_available_in_group();
+seg113.cpp	435	tevent_099		fix-zweig		}
+seg113.cpp	448	tevent_099		orig-zweig		}
+seg113.cpp	479	tevent_101		fix-zweig	/* Original-Bugfix: see description in tevent_099() */	}
+seg113.cpp	492	tevent_101		orig-zweig		}
+seg113.cpp	515	tevent_103		fix-zweig	/* Original-Bug: save the address instead the return value of a function as a hero */	hero = get_first_hero_available_in_group();
+seg113.cpp	645	tevent_104		fix-zweig		/* Original-Bug: The dialog picture is lost when a campfight occurs. */ | load_in_head(57);
+seg113.cpp	653	tevent_104		orig-zweig	#ifdef M302de_ORIGINAL_BUGFIX /* Original-Bug: The dialog picture is lost when a campfight occurs. */	/* Original-Bug 53: | * If the party was already traveling backward, the new direction should be forward. */ | gs_journey_direction = done = JOURNEY_DIRECTION_CHANGE_TO_BACKWARD; // this is value 1
+seg114.cpp	359	tevent_114		orig-zweig		/* Original-Bug 53: | * If the party was already traveling backward, the new direction should be forward. */ | gs_journey_direction = done = JOURNEY_DIRECTION_CHANGE_TO_BACKWARD; // this is value 1
+seg114.cpp	602	tevent_123		orig-zweig		/* Original-Bug 53: | * If the party was already traveling backward, the new direction should be forward. */ | gs_journey_direction = done = JOURNEY_DIRECTION_CHANGE_TO_BACKWARD; // this is value 1
+seg115.cpp	278	tevent_095		orig-zweig		/* Original-Bug 53: | * If the party was already traveling backward, the new direction should be forward. */ | gs_journey_direction = done = JOURNEY_DIRECTION_CHANGE_TO_BACKWARD; // this is value 1
+seg115.cpp	722	tevent_100		orig-zweig		/* Original-Bug 53: | * If the party was already traveling backward, the new direction should be forward. */ | gs_journey_direction = JOURNEY_DIRECTION_CHANGE_TO_BACKWARD;
+seg116.cpp	150	tevent_133		orig-zweig		/* Original-Bug 53: | * If the party was already traveling backward, the new direction should be forward. */ | gs_journey_direction = JOURNEY_DIRECTION_CHANGE_TO_BACKWARD;
+seg117.cpp	31	-		fix-zweig		/* Original-Bug 22: see below */ | #include "seg113.h"
+seg117.cpp	202	hunt_karen		orig-zweig		/* Original-Bug 60: | * Speer is a melee weapon. */ | || (get_first_hero_with_item(ITEM_ID_SPEER) != -1)
+seg117.cpp	288	hunt_wildboar		orig-zweig		/* Original-Bug 60: | * Speer is a melee weapon. */ | || (get_first_hero_with_item(ITEM_ID_SPEER) != -1)
+seg117.cpp	471	octopus_attack		fix-zweig		/* Original-Bug 22: see below */ | char any_hero_active;
+seg117.cpp	484	octopus_attack		fix-zweig		/* Original-Bug 22: see below */ | any_hero_active = 0;
+seg117.cpp	494	octopus_attack		fix-zweig		/* Original-Bug 22: see below */ | any_hero_active = 1;
+seg117.cpp	498	octopus_attack	22	orig-zweig	#ifdef M302de_ORIGINAL_BUGFIX /* Original-Bug 22: see below */	/* Original-Bug 21: | * Apparently, the outcome of the following GE-attrib-test is misinterpreted. | * For GE <= 17, its always 5% strangling attack, 5% grabbing attack, 90% hero attacks octopus. | * 
+seg117.cpp	520	octopus_attack		orig-zweig		/* Original-Bug 21: see above */ | else if (tmp == -1)
+seg117.cpp	553	octopus_attack		orig-zweig		/* Original-Bug 22: infinite loop if all heroes are overboard/dead */ | while (hits <= 5);
+seg118.cpp	277	tevent_078		fix-zweig		/* if a campfight occurs, the picture needs to be reloaded */ | load_in_head(57);
+seg118.cpp	317	tevent_078		fix-zweig		/* if a campfight occurs, the picture needs to be reloaded */ | load_in_head(57);
+seg118.cpp	334	tevent_078		orig-zweig	/* TODO: Original-Bug: all heroes die, even if they are not in the current group */	/* Original-Bug 16: all heroes die, even if they are not in the current group */ | hero_disappear(hero, tmp, -1);
+seg118.cpp	497	tevent_124		orig-zweig		/* Original-Bug 53: | * If the party was already traveling backward, the new direction should be forward. */ | gs_journey_direction = JOURNEY_DIRECTION_CHANGE_TO_BACKWARD;
+seg118.cpp	519	tevent_124		fix-zweig	/* Original-Bug: a talent test with a fatal result returns -99, not -1 */	if (talent_ret == -99 && have_climb_tools == 0)
+seg119.cpp	261	disease_effect	48	orig-zweig	/* Original-Bug 48:	/* regeneration complete */ | sprintf(g_dtp2, get_ttx(576), hero->alias); | // "hero has overcome the illness, but life will probably never be the same" | GUI_output(g_dtp2);
+seg119.cpp	284	disease_effect		fix-zweig		/* Original-Bug 48, see above */ | sprintf(g_dtp2, get_ttx(576), hero->alias); | // %s HAT DIE KRANKHEIT ÃBERWUNDEN, DOCH DAS LEBEN WIRD WOHL NIE WIEDER SEIN, WIE ES WAR! | } else { | /* permanent at
+seg119.cpp	296	disease_effect		fix-zweig		GUI_output(g_dtp2);
+seg119.cpp	336	disease_effect		orig-zweig		/* Original-Bug 44: | * Recover from Paralyse and Frostschaden does not work, GE and KK are not recovered. | * In the two if statements below, the condition is reversed. */ | (!disease_ptr->log_1)
+seg119.cpp	355	disease_effect		orig-zweig		/* Original-Bug 44, see above. */ | (!disease_ptr->log_2)
+seg119.cpp	432	disease_effect	45	orig-zweig	/* Original-Bug 45: It is impossible to fully recover from Schlachtenfieber.	if (disease_ptr->log_3) { |  | disease_ptr->log_3 = 0; | disease_ptr->time_counter = 0; | hero->attrib[ATTRIB_KK].current += 5; | } |  | sprintf(g_dtp2, get_ttx(582), hero->alias); | // "hero's lips d
+seg119.cpp	507	disease_effect		orig-zweig		/* Original-Bug 44: | * Recover from Paralyse and Frostschaeden does not work, GE and KK are not recovered. | * In the two if statements below, the condition is reversed. */ | (!disease_ptr->log_1)
+seg119.cpp	526	disease_effect		orig-zweig		/* Original-Bug 44, see above. */ | (!disease_ptr->log_2)
+seg120.cpp	170	rabies_frenzy		orig-zweig		/* useless, see blow. */ | signed char sex_bak;
+seg120.cpp	177	rabies_frenzy		orig-zweig	#ifndef M302de_ORIGINAL_BUGFIX	/* useless, see below. */ |  | sex_bak = hero_rabies->sex;
+seg120.cpp	185	rabies_frenzy		orig-zweig	#ifndef M302de_ORIGINAL_BUGFIX	/* Not a bug, but useless. hero_pos_rabies and hero_rabies are recomputed. */ |  | /* Apparently, sex value 50 is used as a marker. */ | hero_rabies->sex = 50;
+seg120.cpp	197	rabies_frenzy		orig-zweig		/* see above. */ | hero_pos_rabies = 0; | while (get_hero(hero_pos_rabies)->sex != 50) { | hero_pos_rabies++; | } |  | hero_rabies = get_hero(hero_pos_rabies); | hero_rabies->sex = sex_bak;
+seg120.cpp	296	rabies_frenzy		orig-zweig		/* Original-Bug 49: Missing check if the hero is sufficiently skilled in the Sanftmut spell. */ | (hero_2->typus >= HERO_TYPE_HEXE)
+seg120.cpp	306	rabies_frenzy		orig-zweig		/* Original-Bug 49: For a Magier with 4th staffspell, 13 AE are enough. */ | (hero_2->ae >= 15)
+seg120.cpp	340	rabies_frenzy		fix-zweig		/* Original-Bug 49: Missing message if the selected hero cannot cast the spell. */ | else { | sprintf(g_dtp2, "%s BEHERRSCHT DIESEN ZAUBER GAR NICHT.", hero_2->alias); | GUI_output(g_dtp2); | }
+datseg.cpp	752	-		orig-zweig		/* Original-Bug 60: Speer is a melee weapon. | * Original-Bug 61: missing distance-based damage modifier table for the throwing weapon Schneidzahn. */ | {  2,  2,  1,  1,  0,  0, -1,  4 }, // RANGED_W
+datseg.cpp	770	-		orig-zweig		/* Original-Bug 60: | * In ITEMS.DAT, the items "Speer" and "Speer (magisch)" are declared as weapons based on the talent "Speere". | * But in the weapon stats table, they are more a hybrid of a melee
+datseg.cpp	788	-		orig-zweig		{ 1, 6,  99,   0, RANGED_WEAPON_STATS_ID_ARMBRUST,              0,  0 }, // WEAPON_STATS_ID_ARMBRUST              ==  9
+datseg.cpp	853	-		orig-zweig		/* Original-Bug 61: missing distance-based damage modifier table for the throwing weapon Schneidzahn. */ | { 1, 4,  99,   0, -1,                                           0,  0 }, // WEAPON_STATS_ID_S
+datseg.cpp	873	-		orig-zweig		/* Original-Bug 60: | * Speer is a melee weapon. */ | { 1, 3,  99,   5, RANGED_WEAPON_STATS_ID_SPEER__MAGIC,          1,  1 }, // WEAPON_STATS_ID_SPEER__MAGIC          == 61

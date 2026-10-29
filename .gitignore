@@ -1,0 +1,15 @@
+# Nie ins Repo: Originalprogramm, Compiler, Spieldaten, gebaute EXEs
+*.EXE
+*.exe
+*.OBJ
+*.obj
+*.MAP
+Compiler/*
+!Compiler/LIESMICH.txt
+Original/*
+!Original/LIESMICH.txt
+Build/*
+!Build/LIESMICH.txt
+SPIELPFAD.txt
+__pycache__/
+*.pyc

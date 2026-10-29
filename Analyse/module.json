@@ -1,0 +1,3932 @@
+[
+ {
+  "modul": "SEG001",
+  "datei": "seg001.c",
+  "bereich": "Start & System",
+  "titel": "CD-ROM und CD-Audio-Musik",
+  "beschreibung": "Findet ueber MSCDEX das erste CD-ROM-Laufwerk und prueft, ob die Schicksalsklingen-CD eingelegt ist; bei Lesefehlern fordert es zum Einlegen auf. Die Musik laeuft als CD-Audio: Musikdatei wird einem CD-Titel zugeordnet, der Titel bei Ablauf neu gestartet, Pause und Fortsetzen ueber Treiber-Anfragen aus seg013.",
+  "funktionen": [
+   "CD_has_drives",
+   "CD_count_drives",
+   "CD_get_first_drive",
+   "CD_set_drive_num",
+   "CD_driver_request",
+   "CD_read_qchannel_unused",
+   "CD_get_tod",
+   "CD_audio_track_start",
+   "CD_enable_repeat",
+   "CD_bioskey",
+   "CD_audio_stop_hsg",
+   "CD_audio_stop",
+   "CD_audio_pause",
+   "CD_audio_play",
+   "CD_read_toc",
+   "CD_set_track",
+   "CD_read_exe",
+   "CD_insert_msg",
+   "CD_harderr_handler",
+   "CD_check",
+   "CD_init"
+  ],
+  "spieltexte": [],
+  "zeilen": 579,
+  "sprache": "C",
+  "klassen": [],
+  "fehler": [
+   275
+  ],
+  "bright_eyes": "seg001"
+ },
+ {
+  "modul": "SEG002",
+  "datei": "seg002.c",
+  "bereich": "Start & System",
+  "titel": "Kern: main, Spielschleife, Zeit, Eingabe, Ton, Heldenhilfen",
+  "beschreibung": "Das groesste Modul: main() mit Kopierschutz, die Spielschleife, Zugriff auf SCHICK.DAT und TEMP, Musik und Soundeffekte ueber AIL, Maus und Tastatur. Es fuehrt die Spielzeit mit allen Timern (Tageswechsel, Bankzinsen, Schiffspassagen, Modifikationen, Licht, Hunger und Durst) und bietet viele Helfer fuer Helden (LE/AE/AP, Geld, Proben, Gruppen). Ueber datseg.c liegen hier alle globalen Daten.",
+  "funktionen": [
+   "play_music_file",
+   "set_audio_track",
+   "sound_menu",
+   "read_sound_cfg",
+   "init_AIL",
+   "exit_AIL",
+   "read_music_driver",
+   "prepare_midi_playback",
+   "start_midi_playback",
+   "prepare_timbre",
+   "load_midi_file",
+   "do_load_midi_file",
+   "load_music_driver",
+   "do_play_music_file",
+   "stop_midi_playback",
+   "start_midi_playback_IRQ",
+   "midi_stop_sequence_unused",
+   "midi_set_volume_unused",
+   "have_mem_for_sound",
+   "play_voc",
+   "play_voc_delay",
+   "alloc_voc_buffer",
+   "free_voc_buffer",
+   "read_new_voc_file",
+   "read_voc_file",
+   "SND_play_voc",
+   "SND_stop_digi",
+   "SND_set_volume",
+   "load_digi_driver",
+   "read_digi_driver",
+   "open_and_seek_dat",
+   "get_readlength2",
+   "read_archive_file",
+   "seek_archive_file",
+   "load_regular_file",
+   "load_archive_file",
+   "open_temp_file",
+   "copy_from_archive_to_temp",
+   "copy_file_to_temp",
+   "process_nvf_extraction",
+   "mouse_action",
+   "mouse_isr",
+   "is_mouse_in_rect",
+   "mouse_init",
+   "disable_mouse",
+   "mouse_get_button_press_info",
+   "call_mouse_isr",
+   "mouse_irq_init",
+   "mouse_reset_ehandler",
+   "mouse_move_cursor",
+   "mouse_setGMask",
+   "mouse_setCRTpage",
+   "make_ggst_cursor",
+   "call_mouse_bg",
+   "call_mouse",
+   "mouse_bg",
+   "mouse_cursor",
+   "mouse_motion",
+   "handle_gui_input",
+   "get_mouse_action",
+   "handle_input",
+   "flush_keyboard_queue_alt",
+   "game_loop",
+   "timers_daily",
+   "set_market_size",
+   "pal_fade",
+   "pal_fade_in",
+   "dawning",
+   "nightfall",
+   "get_current_season",
+   "do_bank_interest",
+   "do_timers",
+   "sub_ingame_timers",
+   "sub_mod_timers",
+   "get_free_mod_slot",
+   "set_mod_slot",
+   "sub_heal_staffspell_timers",
+   "sub_light_timers",
+   "magical_chainmail_damage",
+   "herokeeping",
+   "check_level_up",
+   "update_travelmap",
+   "set_and_spin_lock",
+   "passages_recalc",
+   "passages_reset",
+   "timewarp",
+   "timewarp_until_time_of_day",
+   "dec_splash",
+   "draw_splash",
+   "timewarp_until_midnight",
+   "flush_keyboard_queue",
+   "error_msg",
+   "wait_for_keypress",
+   "vsync_or_key",
+   "unused_delay",
+   "unused_spinlock",
+   "swap_u32",
+   "swap_u32_unused",
+   "alloc_EMS",
+   "from_EMS",
+   "to_EMS",
+   "clear_menu_icons",
+   "draw_loc_icons",
+   "mod_day_timer",
+   "draw_compass",
+   "can_merge_group",
+   "div16",
+   "item_selector_mouse_select",
+   "item_selector_keyboard_select",
+   "set_automap_tile",
+   "set_automap_tiles",
+   "pause_mark_show",
+   "pause_mark_hide",
+   "check_hero",
+   "check_hero_no2",
+   "check_hero_no3",
+   "is_hero_available_in_group",
+   "sub_ae_splash",
+   "add_hero_ae",
+   "sub_hero_le",
+   "add_hero_le",
+   "add_group_le",
+   "do_starve_damage",
+   "compare_name",
+   "test_attrib",
+   "test_attrib3",
+   "unused_cruft",
+   "get_random_hero",
+   "get_party_money",
+   "set_party_money",
+   "add_party_money",
+   "add_hero_ap",
+   "add_group_ap",
+   "add_hero_ap_all",
+   "sub_hero_ap_all",
+   "get_hero_pos",
+   "inv_slot_of_item",
+   "get_first_hero_with_item",
+   "get_first_hero_with_item_in_group",
+   "sub_group_le",
+   "get_first_hero_available_in_group",
+   "get_second_hero_available_in_group",
+   "count_heroes_available",
+   "count_heroes_available_ignore_npc",
+   "count_heroes_available_in_group",
+   "count_heroes_available_in_group_ignore_npc",
+   "check_group",
+   "main",
+   "schick_alloc",
+   "copy_protection"
+  ],
+  "spieltexte": [
+   "TEXT.LTX",
+   "FIGHTTXT.LTX"
+  ],
+  "zeilen": 5976,
+  "sprache": "C",
+  "klassen": [],
+  "fehler": [
+   39,
+   79,
+   80,
+   127,
+   128,
+   228,
+   229,
+   230,
+   231,
+   232,
+   233,
+   234,
+   235,
+   243,
+   276,
+   277,
+   278,
+   279,
+   280,
+   331,
+   388,
+   403,
+   407,
+   413
+  ],
+  "bright_eyes": "seg002"
+ },
+ {
+  "modul": "SEG003",
+  "datei": "seg003.c",
+  "bereich": "Dungeon",
+  "titel": "Sichtfeld, Tuer-Animation, Leichen",
+  "beschreibung": "Ermittelt aus Position und Blickrichtung die sichtbaren Kartenfelder fuer die 3D-Ansicht in Stadt und Dungeon und dreht die Gruppe. Zeichnet die Bilder der Tuer-Animation und fragt beim Fund einer Leiche, ob man sie untersucht (Boron -20) oder Borons Segen spricht (+20).",
+  "funktionen": [
+   "update_direction",
+   "move",
+   "door_frame",
+   "loot_corpse",
+   "no_way"
+  ],
+  "spieltexte": [
+   "TEXT.LTX"
+  ],
+  "zeilen": 254,
+  "sprache": "C",
+  "klassen": [],
+  "fehler": [
+   281
+  ],
+  "bright_eyes": "seg003"
+ },
+ {
+  "modul": "SEG004",
+  "datei": "seg004.c",
+  "bereich": "Grafik & Oberfläche",
+  "titel": "Grafik-Grundfunktionen und Timer-Interrupt",
+  "beschreibung": "Linien, Rahmen, Rechtecke, Bildkopien, Mauszeiger, Paletten und Warten auf den Strahlruecklauf. Der Timer-Interrupt zaehlt die Spielzeit, spielt die Animationen der Ortsbilder ab und aktualisiert LE/AE-Balken, Sonnenuhr, Reisekarte und Treffer-Splashes.",
+  "funktionen": [
+   "save_and_set_timer",
+   "set_timer",
+   "reset_timer",
+   "init_ani",
+   "disable_ani",
+   "init_ani_busy_loop",
+   "clear_ani",
+   "timer_isr",
+   "unused_gfx_spinlock",
+   "update_status_bars",
+   "draw_bar",
+   "restore_rect",
+   "restore_rect_rle",
+   "mouse_cursor_draw",
+   "mouse_save_bg",
+   "restore_mouse_bg",
+   "load_wallclock_nvf",
+   "update_wallclock",
+   "draw_wallclock",
+   "array_add",
+   "schick_set_video",
+   "schick_reset_video",
+   "clear_ani_pal",
+   "set_ani_pal",
+   "unused_ega1",
+   "unused_ega2",
+   "unused_ega3",
+   "unused_ega4",
+   "unused_ega5",
+   "unused_ega6",
+   "do_h_line",
+   "do_v_line",
+   "do_border",
+   "do_pic_copy",
+   "do_save_rect",
+   "do_fill_rect",
+   "wait_for_vsync",
+   "map_effect"
+  ],
+  "spieltexte": [],
+  "zeilen": 1245,
+  "sprache": "C",
+  "klassen": [],
+  "fehler": [
+   282
+  ],
+  "bright_eyes": "seg004"
+ },
+ {
+  "modul": "SEG005",
+  "datei": "seg005.c",
+  "bereich": "Kampf",
+  "titel": "Kampfanimationen und Kampfmeldungen",
+  "beschreibung": "Spielt die Animationsspuren aller Kaempfer ab, bewegt sie auf dem Schachbrett, laesst Helden und Gegner am Rand fliehen und zeichnet geaenderte Figuren neu. Zeigt die Kampfmeldungen als farbigen Stern mit Schadenszahl und Textzeile.",
+  "funktionen": [
+   "FIG_obj_needs_refresh",
+   "FIG_set_star_color",
+   "FIG_name_3rd_case",
+   "FIG_name_4th_case",
+   "FIG_name_1st_case",
+   "fight_printer",
+   "draw_fight_screen",
+   "set_delay_timer",
+   "fight_delay"
+  ],
+  "spieltexte": [
+   "FIGHTTXT.LTX"
+  ],
+  "zeilen": 1100,
+  "sprache": "C",
+  "klassen": [],
+  "fehler": [
+   4,
+   5,
+   311
+  ],
+  "bright_eyes": "seg005"
+ },
+ {
+  "modul": "SEG006",
+  "datei": "seg006.c",
+  "bereich": "Kampf",
+  "titel": "Kaempferliste und Kampfportraets",
+  "beschreibung": "Verwaltet die sortierte Liste der Objekte auf dem Kampffeld (Suchen, Einfuegen, Entfernen, Sichtbarkeit, Animationsspuren) und zeichnet alle Figuren. Zeigt Portraet und Namen des Helden oder Gegners, der am Zug ist.",
+  "funktionen": [
+   "FIG_get_fighter",
+   "FIG_alloc_fighter_id",
+   "FIG_draw_figures",
+   "FIG_set_gfx",
+   "FIG_call_draw_pic",
+   "FIG_draw_pic",
+   "FIG_get_hero_ptr",
+   "FIG_get_enemy_sheet",
+   "FIG_set_ani_track_id_base",
+   "FIG_make_invisible",
+   "FIG_make_visible",
+   "FIG_set_ani_track_id_weapon",
+   "FIG_remove_from_list",
+   "FIG_add_to_list",
+   "FIG_draw_char_pic",
+   "FIG_draw_enemy_pic"
+  ],
+  "spieltexte": [
+   "MONNAMES"
+  ],
+  "zeilen": 568,
+  "sprache": "C",
+  "klassen": [],
+  "fehler": [
+   283
+  ],
+  "bright_eyes": "seg006"
+ },
+ {
+  "modul": "SEG007",
+  "datei": "seg007.c",
+  "bereich": "Start & System",
+  "titel": "Zufall und Wuerfel",
+  "beschreibung": "Der Zufallsgenerator des Spiels und darauf aufbauende Wuerfelwuerfe n*Wm+x, gepackte Wuerfelformeln der Gegner und Schadensbereiche. Dazu zwei kleine Suchfunktionen fuer Listen.",
+  "funktionen": [
+   "random_interval",
+   "random_schick",
+   "dice_roll",
+   "calc_damage_range",
+   "is_in_int_array",
+   "is_in_byte_array",
+   "dice_template",
+   "damage_range_template"
+  ],
+  "spieltexte": [],
+  "zeilen": 199,
+  "sprache": "C",
+  "klassen": [],
+  "fehler": [
+   284
+  ],
+  "bright_eyes": "seg007"
+ },
+ {
+  "modul": "SEG008",
+  "datei": "seg008.asm",
+  "sprache": "ASM",
+  "bereich": "Grafik & Oberfläche",
+  "titel": "VGA-Grafikroutinen (Assembler)",
+  "beschreibung": "Attics handgeschriebene VGA-Routinen: Videomodus, Palette, Linien, Rechtecke sichern/füllen, pic_copy (Bild mit Transparenz und Ausschnitt), RLE-Entpacker. Dazu 18 unbenutzte Routinen, darunter ein kompletter AdLib/OPL2-Musiktreiber mit eigenem Timer-Interrupt.",
+  "funktionen": [
+   "_swap_u16",
+   "_set_video_mode",
+   "_set_video_page",
+   "_save_display_stat",
+   "vga_unused_set_cursor_pos",
+   "vga_unused_get_cursor_pos",
+   "vga_unused_set_cursor_shape",
+   "vga_unused_set_ega_palette",
+   "_set_color",
+   "_set_palette",
+   "_draw_h_line",
+   "vga_unused_get_line",
+   "vga_unused_put_line",
+   "_draw_h_spaced_dots",
+   "vga_unused_get_column",
+   "vga_unused_put_column",
+   "_pic_copy",
+   "_save_rect",
+   "_fill_rect",
+   "_copy_solid_permuted",
+   "_copy_solid",
+   "_decomp_rle",
+   "opl_unused_write_reg",
+   "opl_unused_calibrate",
+   "opl_unused_reset",
+   "opl_unused_timer_isr",
+   "opl_unused_restore_timer",
+   "opl_unused_install_timer",
+   "opl_unused_open",
+   "opl_unused_close",
+   "opl_unused_stop",
+   "opl_unused_play"
+  ],
+  "klassen": [],
+  "spieltexte": [],
+  "fehler": [
+   285,
+   286
+  ],
+  "zeilen": 1970,
+  "bright_eyes": "seg008"
+ },
+ {
+  "modul": "SEG009",
+  "datei": "seg009.asm",
+  "sprache": "ASM",
+  "bereich": "Dateien & Texte",
+  "titel": "PowerPacker-Entpacker (PP20)",
+  "beschreibung": "Entpackt die mit PowerPacker 2.0 gepackten Bilder rückwärts, vom Ende der gepackten Daten zum Anfang des Ziels; Ziel und Quelle dürfen sich überlappen.",
+  "funktionen": [
+   "_decomp_pp20"
+  ],
+  "klassen": [],
+  "spieltexte": [],
+  "fehler": [],
+  "zeilen": 305,
+  "bright_eyes": "seg009"
+ },
+ {
+  "modul": "SEG010",
+  "datei": "seg010.asm",
+  "sprache": "ASM",
+  "bereich": "Start & System",
+  "titel": "EMS (Expanded Memory)",
+  "beschreibung": "Dünne Hüllen um INT 67h: EMS suchen, Seiten anlegen, einblenden, freigeben, far-Zeiger normalisieren. Trägt die EMM-Kennung und den Seitenrahmen als eigene Daten.",
+  "funktionen": [
+   "EMS_installed",
+   "EMS_get_frame_ptr",
+   "_EMS_get_num_pages_unalloced",
+   "_EMS_alloc_pages",
+   "_EMS_free_pages",
+   "_EMS_map_memory",
+   "_EMS_norm_ptr",
+   "_EMS_init"
+  ],
+  "klassen": [],
+  "spieltexte": [],
+  "fehler": [],
+  "zeilen": 298,
+  "bright_eyes": "seg010"
+ },
+ {
+  "modul": "SEG011",
+  "datei": "AIL/AIL.ASM",
+  "sprache": "ASM",
+  "bereich": "Start & System",
+  "titel": "Miles Audio Interface Library 2.14",
+  "beschreibung": "Zugekaufte Klangbibliothek von John Miles (Miles Design, 24.09.1992): Treiber laden, Musik (XMI) und Digitalklang (VOC) abspielen. Quelltext wie von Miles.",
+  "funktionen": [
+   "read_CMOS",
+   "write_CMOS",
+   "RTC_set_freq",
+   "RTC_enable",
+   "RTC_disable",
+   "RTC_install",
+   "RTC_uninstall",
+   "find_proc",
+   "call_driver",
+   "API_timer",
+   "init_DDA_arrays",
+   "bios_caller",
+   "hook_timer_process",
+   "unhook_timer_process",
+   "set_PIT_divisor",
+   "set_PIT_period",
+   "ul_divide",
+   "program_timers",
+   "AIL_startup",
+   "AIL_shutdown",
+   "AIL_register_timer",
+   "AIL_release_timer_handle",
+   "AIL_release_all_timers",
+   "AIL_start_timer",
+   "AIL_start_all_timers",
+   "AIL_stop_timer",
+   "AIL_stop_all_timers",
+   "AIL_set_timer_period",
+   "AIL_set_timer_frequency",
+   "AIL_set_timer_divisor",
+   "AIL_interrupt_divisor",
+   "AIL_register_driver",
+   "AIL_release_driver_handle",
+   "AIL_describe_driver",
+   "AIL_detect_device",
+   "AIL_init_driver",
+   "AIL_shutdown_driver",
+   "AIL_index_VOC_block",
+   "AIL_register_sound_buffer",
+   "AIL_format_sound_buffer",
+   "AIL_sound_buffer_status",
+   "AIL_play_VOC_file",
+   "AIL_format_VOC_file",
+   "AIL_VOC_playback_status",
+   "AIL_start_digital_playback",
+   "AIL_stop_digital_playback",
+   "AIL_pause_digital_playback",
+   "AIL_resume_digital_playback",
+   "AIL_set_digital_playback_volume",
+   "AIL_digital_playback_volume",
+   "AIL_set_digital_playback_panpot",
+   "AIL_digital_playback_panpot",
+   "AIL_state_table_size",
+   "AIL_register_sequence",
+   "AIL_release_sequence_handle",
+   "AIL_default_timbre_cache_size",
+   "AIL_define_timbre_cache",
+   "AIL_timbre_request",
+   "AIL_install_timbre",
+   "AIL_protect_timbre",
+   "AIL_unprotect_timbre",
+   "AIL_timbre_status",
+   "AIL_start_sequence",
+   "AIL_stop_sequence",
+   "AIL_resume_sequence",
+   "AIL_sequence_status",
+   "AIL_relative_volume",
+   "AIL_relative_tempo",
+   "AIL_set_relative_volume",
+   "AIL_set_relative_tempo",
+   "AIL_beat_count",
+   "AIL_measure_count",
+   "AIL_branch_index",
+   "AIL_controller_value",
+   "AIL_set_controller_value",
+   "AIL_channel_notes",
+   "AIL_send_channel_voice_message",
+   "AIL_send_sysex_message",
+   "AIL_write_display",
+   "AIL_install_callback",
+   "AIL_cancel_callback",
+   "AIL_lock_channel",
+   "AIL_map_sequence_channel",
+   "AIL_release_channel",
+   "AIL_true_sequence_channel",
+   "AIL_unhook",
+   "AIL_hook",
+   "sub_ptr",
+   "block_type",
+   "marker_num",
+   "get_sample_rate",
+   "DP_preformat",
+   "CB_set_vect",
+   "CB_play_VOC",
+   "CB_play_buffer",
+   "next_block",
+   "next_buffer",
+   "process_block",
+   "process_buffer",
+   "DMA_transfer",
+   "xfer_chunk",
+   "DP_describe_driver",
+   "DP_detect_device",
+   "DP_init_driver",
+   "DP_shutdown_driver",
+   "DP_index_VOC_blk",
+   "DP_register_sb",
+   "DP_get_sb_status",
+   "DP_play_VOC_file",
+   "DP_format_VOC_file",
+   "DP_format_sb",
+   "DP_start_d_pb",
+   "DP_stop_d_pb",
+   "DP_get_VOC_status"
+  ],
+  "klassen": [],
+  "spieltexte": [],
+  "fehler": [],
+  "zeilen": 2697,
+  "bright_eyes": "seg011"
+ },
+ {
+  "modul": "SEG013",
+  "datei": "seg013.asm",
+  "sprache": "ASM",
+  "bereich": "Start & System",
+  "titel": "CD-Audio-Anfragen und Stack",
+  "beschreibung": "MSCDEX-Anfrageblöcke (Stop, Play, Resume, IOCTL) und CD-Puffer als far-Daten, dazu der 4-KB-Stack des Programms (Kombinationstyp STACK, Teil von DGROUP).",
+  "funktionen": [],
+  "klassen": [],
+  "spieltexte": [],
+  "fehler": [],
+  "zeilen": 123,
+  "bright_eyes": "seg013"
+ },
+ {
+  "modul": "SEG024",
+  "datei": "seg024.c",
+  "bereich": "Reise & Ereignisse",
+  "titel": "Tagebuch",
+  "beschreibung": "Legt beim Betreten einer Stadt einen Tagebucheintrag mit Datum und Stadt an (hoechstens 23) und zeigt das Tagebuch auf dem Buchbild. Eintraege desselben Tages werden zusammengefasst.",
+  "funktionen": [
+   "diary_show",
+   "diary_new_entry",
+   "diary_print_entry"
+  ],
+  "spieltexte": [
+   "TEXT.LTX"
+  ],
+  "zeilen": 230,
+  "sprache": "C",
+  "klassen": [],
+  "fehler": [
+   287,
+   288,
+   412
+  ],
+  "bright_eyes": "seg024"
+ },
+ {
+  "modul": "SEG025",
+  "datei": "seg025.c",
+  "bereich": "Stadt",
+  "titel": "Orte in der Stadt, Optionsmenue, Schatzkarte",
+  "beschreibung": "Verteiler fuer alle Orte einer Stadt und die einfachen Orte selbst: Buergerhaus mit Story-Texten, Einbruch mit Verhaftung, Informanten, Dungeoneingang, Verlassen von Ort und Dungeon. Dazu das Optionsmenue (Laden, Speichern, Tagebuch, Karte, Musik, Beenden) und die Anzeige der Schatzkartenteile.",
+  "funktionen": [
+   "void",
+   "show_entrance",
+   "show_citizen",
+   "do_house",
+   "do_informer",
+   "enter_map",
+   "show_treasure_map",
+   "game_options",
+   "draw_icon",
+   "show_storytext",
+   "do_location",
+   "leave_location",
+   "leave_dungeon",
+   "tumult",
+   "fade_into",
+   "copy_palette"
+  ],
+  "spieltexte": [
+   "TEXT.LTX",
+   "STORY.LTX",
+   "MAPTEXT.LTX"
+  ],
+  "zeilen": 900,
+  "sprache": "C",
+  "klassen": [],
+  "fehler": [
+   40,
+   41,
+   86,
+   350
+  ],
+  "bright_eyes": "seg025"
+ },
+ {
+  "modul": "SEG026",
+  "datei": "seg026.c",
+  "bereich": "Dateien & Texte",
+  "titel": "Texte laden und Spielstaende",
+  "beschreibung": "Laedt die Textdateien und zerlegt sie in Zeigerlisten. Liest und schreibt Spielstaende samt geaenderter Dateien aus TEMP und den Helden-Dateien; Speichern ausserhalb eines Tempels kostet jeden Helden 1 AP. Dazu CHR-Dateien, Kopfbilder und Tempelsymbole.",
+  "funktionen": [
+   "init_text",
+   "load_tx",
+   "load_tx2",
+   "load_ltx",
+   "split_textbuffer",
+   "load_ggsts_nvf",
+   "prepare_chr_name",
+   "prepare_sg_name",
+   "load_game_state",
+   "save_game_state",
+   "read_chr_temp",
+   "write_chr_temp",
+   "copy_chr_names",
+   "load_in_head",
+   "load_temple_logo"
+  ],
+  "spieltexte": [
+   "TEXT.LTX",
+   "ITEMNAME",
+   "MONNAMES"
+  ],
+  "zeilen": 1306,
+  "sprache": "C",
+  "klassen": [],
+  "fehler": [
+   289,
+   411
+  ],
+  "bright_eyes": "seg026"
+ },
+ {
+  "modul": "SEG027",
+  "datei": "seg027.c",
+  "bereich": "Dateien & Texte",
+  "titel": "Bilder, Figuren, Animationen, Kampflisten laden",
+  "beschreibung": "Entpackt Vollbilder (PP20) und haelt haeufige im Speicher, laedt Kampffiguren mit Puffer in Heap oder EMS und Ortsanimationen aus ANIS. Liest Szenarien und Kampflisten (SCENARIO.LST, FIGHT.LST) und beim Start die gemeinsamen Tabellen.",
+  "funktionen": [
+   "load_pp20",
+   "load_fight_figs",
+   "load_ani",
+   "load_scenario",
+   "count_fight_enemies",
+   "read_fight_lst",
+   "write_fight_lst",
+   "init_common_buffers"
+  ],
+  "spieltexte": [],
+  "zeilen": 743,
+  "sprache": "C",
+  "klassen": [],
+  "fehler": [
+   290,
+   291,
+   312
+  ],
+  "bright_eyes": "seg027"
+ },
+ {
+  "modul": "SEG028",
+  "datei": "seg028.c",
+  "bereich": "Dateien & Texte",
+  "titel": "Stadt- und Dungeongebiete, Karten, Dialoge laden",
+  "beschreibung": "Laedt Texte, Texturen und Paletten fuer Stadt und Dungeon und tauscht die Gebietsdaten (Karte, Automap, Ortstabelle) mit TEMP aus. Dazu Reisekarte, NSC, Splash-Bilder, TLK-Dialoge und Kampfhintergruende.",
+  "funktionen": [
+   "prepare_dungeon_area",
+   "load_dungeon_ddt",
+   "prepare_town_area",
+   "load_town_textures",
+   "load_special_textures",
+   "call_load_buffer",
+   "prepare_area",
+   "load_area_description",
+   "call_load_area",
+   "unused_store",
+   "unused_load",
+   "load_map",
+   "load_npc",
+   "save_npc",
+   "load_splashes",
+   "load_informer_tlk",
+   "load_tlk",
+   "unused_load_archive_file",
+   "load_fightbg"
+  ],
+  "spieltexte": [],
+  "zeilen": 719,
+  "sprache": "C",
+  "klassen": [],
+  "fehler": [
+   42,
+   292
+  ],
+  "bright_eyes": "seg028"
+ },
+ {
+  "modul": "SEG029",
+  "datei": "seg029.c",
+  "bereich": "Grafik & Oberfläche",
+  "titel": "Spielmaske und Heldenleiste",
+  "beschreibung": "Zeichnet den Hauptbildschirm mit Spielmaske, Heldenportraets und -namen, den neun Menue-Icons und der Ortszeile. Helden anderer Gruppen erscheinen grau, Tote als Totenkopf.",
+  "funktionen": [
+   "draw_playmask",
+   "copy_forename",
+   "draw_status_line",
+   "clear_hero_icon",
+   "load_icon",
+   "draw_icons",
+   "draw_main_screen",
+   "clear_loc_line",
+   "select_hero_icon",
+   "deselect_hero_icon"
+  ],
+  "spieltexte": [],
+  "zeilen": 435,
+  "sprache": "C",
+  "klassen": [],
+  "fehler": [
+   43
+  ],
+  "bright_eyes": "seg029"
+ },
+ {
+  "modul": "SEG030",
+  "datei": "seg030.c",
+  "bereich": "Stadt",
+  "titel": "Gespraeche mit Informanten, Datum",
+  "beschreibung": "Fuehrt Gespraeche nach TLK-Dateien als Zustandsautomat und fuellt die Texte mit Heldennamen, Pronomen, Orten und zufaelligen Informanten. Loest an markierten Stellen die Spiellogik aus (Kaempfe in Daspota, Informanten, Haendler, Herberge, Eremit). Baut ausserdem den Datumstext.",
+  "funktionen": [
+   "get_random_known_informer_name",
+   "get_random_unknown_informer_name",
+   "print_date",
+   "prepare_date_str",
+   "do_talk",
+   "talk_switch"
+  ],
+  "spieltexte": [
+   "TEXT.LTX",
+   "DASPOTA.LTX",
+   "INFO1.TLK",
+   "INFO2.TLK",
+   "INFO3.TLK",
+   "INFO4.TLK",
+   "INFO5.TLK",
+   "INFO6.TLK",
+   "INFO7.TLK",
+   "F092.TLK",
+   "F115.TLK",
+   "EREMIT.TLK",
+   "HYGGELIK.TLK",
+   "DASPOTA1.TLK",
+   "DASPOTA2.TLK",
+   "DASPOTA3.TLK"
+  ],
+  "zeilen": 812,
+  "sprache": "C",
+  "klassen": [],
+  "fehler": [
+   44
+  ],
+  "bright_eyes": "seg030"
+ },
+ {
+  "modul": "SEG031",
+  "datei": "seg031.c",
+  "bereich": "Stadt",
+  "titel": "Haendler-, Schmied- und Tavernengespraeche",
+  "beschreibung": "Fuehrt Gespraeche, deren Texte in vier zufaelligen Varianten vorliegen und deren Antworten gemischt werden (Haendler, Schmied, Herberge). Liefert Informanten-Namen und -Hinweise, Tavernensprueche mit Stadtklatsch und Essen und Trinken in der Taverne.",
+  "funktionen": [
+   "do_random_talk",
+   "get_informer_forename",
+   "informer_id_from_current_town",
+   "get_informer_hint",
+   "get_informer_name",
+   "get_informer_name2",
+   "load_current_town_gossip",
+   "get_random_tavern_message",
+   "drink_while_drinking",
+   "eat_while_drinking"
+  ],
+  "spieltexte": [
+   "TEXT.LTX",
+   "TAVERN.TLK",
+   "HERBERG.TLK",
+   "SCHMIED.TLK",
+   "GHANDEL.TLK",
+   "KHANDEL.TLK",
+   "WHANDEL.TLK"
+  ],
+  "zeilen": 450,
+  "sprache": "C",
+  "klassen": [],
+  "fehler": [
+   45,
+   293,
+   340
+  ],
+  "bright_eyes": "seg031"
+ },
+ {
+  "modul": "SEG032",
+  "datei": "seg032.c",
+  "bereich": "Kampf",
+  "titel": "Ablauf eines Kampfes (do_fight, Kampfrunden)",
+  "beschreibung": "do_fight() laedt Szenario, Gegner, Grafiken und Kampftexte, laesst die Runden laufen und wertet den Kampf aus (Beute, AP, Flucht mit Gruppenteilung im Dungeon). FIG_do_round() verteilt BP und Aktionsphasen und wechselt zwischen Helden- und Gegnerzug, die Akteure werden zufaellig gewaehlt.",
+  "funktionen": [
+   "FIG_set_cb_object",
+   "draw_fight_screen_pal",
+   "FIG_choose_next_hero",
+   "FIG_choose_next_enemy",
+   "FIG_count_active_enemies",
+   "FIG_is_enemy_active",
+   "FIG_get_first_active_hero",
+   "FIG_all_heroes_escaped",
+   "FIG_fight_continues",
+   "FIG_do_round",
+   "FIG_load_ship_sprites",
+   "do_fight"
+  ],
+  "spieltexte": [
+   "FIGHTTXT.LTX"
+  ],
+  "zeilen": 1358,
+  "sprache": "C",
+  "klassen": [],
+  "fehler": [
+   5,
+   6,
+   7,
+   8,
+   9,
+   10,
+   186,
+   311,
+   330,
+   362,
+   379,
+   387,
+   410
+  ],
+  "bright_eyes": "seg032"
+ },
+ {
+  "modul": "SEG033",
+  "datei": "seg033.c",
+  "bereich": "Kampf",
+  "titel": "Kampfmenue eines Helden",
+  "beschreibung": "FIG_menu() zeigt das Kampfmenue des aktiven Helden (Bewegen, Angriff, Sichern, Zaubern, Gegenstaende, Werte, Computerkampf, Verlassen) und setzt Aktion, Ziel und BP. NSC, abtruennige Helden und der Computerkampf gehen an die automatische Steuerung; im Endkampf loest ein Angriff das Getuemmel aus.",
+  "funktionen": [
+   "FIG_menu"
+  ],
+  "spieltexte": [
+   "FIGHTTXT.LTX",
+   "TEXT.LTX"
+  ],
+  "zeilen": 887,
+  "sprache": "C",
+  "klassen": [],
+  "fehler": [
+   11,
+   314,
+   322,
+   328,
+   329,
+   379,
+   405
+  ],
+  "bright_eyes": "seg033"
+ },
+ {
+  "modul": "SEG034",
+  "datei": "seg034.c",
+  "bereich": "Kampf",
+  "titel": "Zielauswahl und Bewegung auf dem Schachbrett",
+  "beschreibung": "Zielauswahl per Maus oder Pfeiltasten mit Pruefung von Reichweite und Sichtlinie, Wahl des Bewegungs- oder Fluchtziels mit BP-Anzeige und Ausfuehrung der Bewegung. Gegner, die spaeter in den Kampf kommen, werden auf ein freies Feld gesetzt.",
+  "funktionen": [
+   "FIG_check_hero_attack",
+   "FIG_cb_select_target",
+   "FIG_find_latecomer_position",
+   "FIG_latecomers",
+   "FIG_move_pathlen",
+   "FIG_move_hero"
+  ],
+  "spieltexte": [
+   "FIGHTTXT.LTX"
+  ],
+  "zeilen": 979,
+  "sprache": "C",
+  "klassen": [],
+  "fehler": [
+   12,
+   13,
+   14,
+   315
+  ],
+  "bright_eyes": "seg034"
+ },
+ {
+  "modul": "SEG035",
+  "datei": "seg035.c",
+  "bereich": "Kampf",
+  "titel": "Aufraeumen, Beute, AP und Schusslinie",
+  "beschreibung": "Nach dem Kampf werden ausgeschaltete Gegner aus der Kampfliste entfernt, die Beute zur Auswahl angeboten und das Geld sowie die Abenteuerpunkte verteilt. Ausserdem wird geprueft, ob ein Fernkampf- oder Zauberziel noch in freier Schusslinie liegt.",
+  "funktionen": [
+   "FIG_tidy_enemies",
+   "FIG_loot_enemies",
+   "FIG_split_ap",
+   "check_hero_range_attack"
+  ],
+  "spieltexte": [
+   "FIGHTTXT.LTX",
+   "TEXT.LTX"
+  ],
+  "zeilen": 342,
+  "sprache": "C",
+  "klassen": [],
+  "fehler": [
+   15,
+   16,
+   17,
+   312
+  ],
+  "bright_eyes": "seg035"
+ },
+ {
+  "modul": "SEG036",
+  "datei": "seg036.c",
+  "bereich": "Kampf",
+  "titel": "Computerkampf der Helden (AFIG)",
+  "beschreibung": "Automatische Steuerung von Helden im Computerkampf, von NSC (mit eigenen Fluchtregeln) und von abtruennigen Helden: Flucht, Zauber, Fern- oder Nahkampf, sonst Bewegung zum Ziel. Dazu die Bewegungsanimation eines Helden aus ANI.DAT.",
+  "funktionen": [
+   "load_ani_clip_from_file",
+   "FIG_prepare_hero_ani",
+   "AFIG_change_hero_weapon",
+   "AFIG_can_attack_neighbour",
+   "AFIG_search_spell_target",
+   "AFIG_select_range_target",
+   "AFIG_get_spell",
+   "AFIG_select_autospell",
+   "AFIG_count_heroes",
+   "AFIG_hero_turn"
+  ],
+  "spieltexte": [],
+  "zeilen": 1106,
+  "sprache": "C",
+  "klassen": [],
+  "fehler": [
+   1,
+   18,
+   19,
+   20,
+   294,
+   316,
+   317,
+   318,
+   319,
+   385
+  ],
+  "bright_eyes": "seg036"
+ },
+ {
+  "modul": "SEG037",
+  "datei": "seg037.c",
+  "bereich": "Kampf",
+  "titel": "Zug eines Gegners",
+  "beschreibung": "Entscheidet die Aktion eines Gegners: Sonderregeln einzelner Kaempfe (Gorah, Harpyien, Woelfe, Endkampf), Flucht bei niedriger LE, Zauber aus dem Zauberbuch, Fernkampf oder Nahkampf, sonst Bewegung zum Ziel. Dazu die Bewegungsanimation eines Gegners.",
+  "funktionen": [
+   "copy_ani_sequence",
+   "prepare_enemy_ani",
+   "FIG_enemy_can_attack_neighbour",
+   "FIG_search_range_target",
+   "FIG_get_mspell",
+   "FIG_select_mspell",
+   "FIG_enemy_range_attack",
+   "FIG_enemy_turn"
+  ],
+  "spieltexte": [],
+  "zeilen": 967,
+  "sprache": "C",
+  "klassen": [],
+  "fehler": [
+   19,
+   21,
+   22,
+   23,
+   321
+  ],
+  "bright_eyes": "seg037"
+ },
+ {
+  "modul": "SEG038",
+  "datei": "seg038.c",
+  "bereich": "Kampf",
+  "titel": "Wegsuche auf dem Schachbrett",
+  "beschreibung": "Breitensuche auf einer Kopie des Schachbretts nach dem naechsten Ziel (Nahkampf, Feld fuer Fernangriff, Fluchtfeld oder Bewegungsziel) und Rueckweg mit moeglichst wenigen Richtungswechseln; Ergebnis als Richtungsfolge in g_fig_move_pathdir. Dazu Suche einer Figur auf dem Brett und die Markierung unter dem aktiven Akteur.",
+  "funktionen": [
+   "FIG_search_obj_on_cb",
+   "FIG_init_list_elem",
+   "FIG_unused",
+   "FIG_find_path_to_target_backtrack",
+   "FIG_num_viewdir_changes_of_path",
+   "FIG_find_path_to_target"
+  ],
+  "spieltexte": [],
+  "zeilen": 755,
+  "sprache": "C",
+  "klassen": [],
+  "fehler": [
+   24,
+   25,
+   26,
+   27,
+   28,
+   320
+  ],
+  "bright_eyes": "seg038"
+ },
+ {
+  "modul": "SEG039",
+  "datei": "seg039.c",
+  "bereich": "Kampf",
+  "titel": "Gegner und Helden aufstellen",
+  "beschreibung": "Wuerfelt die Werte der Gegner aus den MONSTER.DAT-Vorlagen aus, setzt Figuren und mehrfeldrige Objekte aufs Schachbrett und legt die Kampffiguren von Gegnern und Helden zu Kampfbeginn an. Dazu Manhattan-Abstand und Art der Fernwaffe eines Helden.",
+  "funktionen": [
+   "manhattan_distance",
+   "FIG_weapon_gfx_id_ranged",
+   "fill_enemy_sheet",
+   "place_obj_on_cb",
+   "FIG_load_enemy_sprites",
+   "FIG_init_enemies",
+   "FIG_init_heroes"
+  ],
+  "spieltexte": [],
+  "zeilen": 551,
+  "sprache": "C",
+  "klassen": [],
+  "fehler": [
+   313,
+   323
+  ],
+  "bright_eyes": "seg039"
+ },
+ {
+  "modul": "SEG040",
+  "datei": "seg040.c",
+  "bereich": "Kampf",
+  "titel": "Schachbrett, Kampfspeicher und Szenario",
+  "beschreibung": "Baut das Schachbrett aus dem Szenario auf (Fluchtfelder, gesperrte Rueckwand), teilt den Kampfspeicher auf und laedt ANI.DAT, WEAPANI.DAT und Grundgrafiken. Die Hindernisse des Szenarios werden als Kampffiguren angelegt.",
+  "funktionen": [
+   "FIG_chessboard_init",
+   "FIG_preload_gfx",
+   "FIG_draw_scenario"
+  ],
+  "spieltexte": [],
+  "zeilen": 330,
+  "sprache": "C",
+  "klassen": [],
+  "fehler": [
+   295
+  ],
+  "bright_eyes": "seg040"
+ },
+ {
+  "modul": "SEG041",
+  "datei": "seg041.c",
+  "bereich": "Kampf",
+  "titel": "Munition, Trefferschaden und Kampfmeldungen",
+  "beschreibung": "Prueft und verbraucht Munition und Wurfwaffen, berechnet den Trefferschaden von Helden und Gegnern (Fernkampfprobe, KK-Zuschlag, Sonderwaffen, Gifte, Ruestung) und zieht Gegnern LE ab, mit Sonderfaellen einzelner Kaempfe. Dazu der Puffer fuer Kampfmeldungen.",
+  "funktionen": [
+   "range_attack_check_ammo",
+   "FIG_output",
+   "FIG_clear_msgs",
+   "FIG_add_msg",
+   "FIG_damage_enemy",
+   "FIG_get_hero_weapon_attack_damage",
+   "FIG_get_enemy_attack_damage",
+   "FANI_clear_ani_tracks",
+   "FIG_weapon_gfx_id_melee"
+  ],
+  "spieltexte": [
+   "FIGHTTXT.LTX"
+  ],
+  "zeilen": 658,
+  "sprache": "C",
+  "klassen": [],
+  "fehler": [
+   1,
+   29,
+   30,
+   324,
+   325,
+   326,
+   393
+  ],
+  "bright_eyes": "seg041"
+ },
+ {
+  "modul": "SEG042",
+  "datei": "seg042.c",
+  "bereich": "Kampf",
+  "titel": "Aktion eines Helden",
+  "beschreibung": "Fuehrt die Aktion eines Helden aus: Nahkampf mit AT/PA, Patzern und Bruchfaktor, Fernkampf mit Geschossflug, Zauber mit Animation und Sonderfaellen (Illusion, Pilz) oder das Benutzen eines Gegenstands.",
+  "funktionen": [
+   "FIG_do_hero_action"
+  ],
+  "spieltexte": [
+   "TEXT.LTX"
+  ],
+  "zeilen": 1079,
+  "sprache": "C",
+  "klassen": [],
+  "fehler": [
+   31,
+   32,
+   33,
+   34,
+   316,
+   390
+  ],
+  "bright_eyes": "seg042"
+ },
+ {
+  "modul": "SEG043",
+  "datei": "seg043.c",
+  "bereich": "Kampf",
+  "titel": "Aktion eines Gegners und Gegenstand benutzen",
+  "beschreibung": "Fuehrt Nahkampf, Fernkampf oder Zauber eines Gegners gegen Helden oder andere Gegner aus, inklusive Patzern, Parade und Waffenschaden beim Helden. Setzt ausserdem im Kampf den Gegenstand aus der linken Hand ein (Miasthmaticum, Hylailer Feuer, sonst use_item).",
+  "funktionen": [
+   "FIG_do_enemy_action",
+   "FIG_use_item"
+  ],
+  "spieltexte": [
+   "FIGHTTXT.LTX"
+  ],
+  "zeilen": 1075,
+  "sprache": "C",
+  "klassen": [],
+  "fehler": [
+   35
+  ],
+  "bright_eyes": "seg043"
+ },
+ {
+  "modul": "SEG044",
+  "datei": "seg044.c",
+  "bereich": "Grafik & Oberfläche",
+  "titel": "Kampfanimation: Figuren",
+  "beschreibung": "Baut die Animationsspuren fuer Angriff, Parade, Gegenstand, Zauber und Tod von Helden und Gegnern aus ANI.DAT und WEAPANI.DAT, einschliesslich Drehung zur Gegenseite und Schwanzteil doppelt grosser Gegner. Merkt sich, wer in der Runde schon pariert hat.",
+  "funktionen": [
+   "copy_ani_seq",
+   "get_seq_header",
+   "FANI_prepare_fight_hero_ani",
+   "FANI_prepare_fight_enemy_ani",
+   "FANI_prepare_spell_hero",
+   "FANI_prepare_spell_enemy"
+  ],
+  "spieltexte": [],
+  "zeilen": 926,
+  "sprache": "C",
+  "klassen": [],
+  "fehler": [],
+  "bright_eyes": "seg044"
+ },
+ {
+  "modul": "SEG045",
+  "datei": "seg045.c",
+  "bereich": "Grafik & Oberfläche",
+  "titel": "Kampfanimation: Geschosse und Zauberwirkung",
+  "beschreibung": "Legt Geschosse (Zauberkugel, -blitz, -stern, Pfeil, Wurfwaffe, Speer) als Kampffigur an und erzeugt ihre Flugbahn bis zum Ziel. Ebenso wird die Wirkungsgrafik von Zaubern (Kuppel, Flamme) am Ziel angezeigt und wieder entfernt.",
+  "funktionen": [
+   "FANI_add_projectile",
+   "FANI_remove_projectile",
+   "FANI_copy_sequence",
+   "FANI_prepare_projectile_ani",
+   "FANI_add_spell",
+   "FANI_remove_spell",
+   "FANI_prepare_hero_spell_ani",
+   "FANI_prepare_enemy_spell_ani"
+  ],
+  "spieltexte": [],
+  "zeilen": 363,
+  "sprache": "C",
+  "klassen": [],
+  "fehler": [],
+  "bright_eyes": "seg045"
+ },
+ {
+  "modul": "SEG046",
+  "datei": "seg046.c",
+  "bereich": "Grafik & Oberfläche",
+  "titel": "Statusbildschirm (Anzeige)",
+  "beschreibung": "Zeichnet den Charakterbogen eines Helden: Portrait, Grunddaten, Zustände, Inventarsymbole und je nach Seite Grundwerte, AT/PA-Werte, Talente oder Zauber. Die Tabellen für Palette und Positionen liegen hier. Bekannt ist Original-Bug 6 (falsche BP-Anzeige bei Überlast).",
+  "funktionen": [
+   "status_show_spell",
+   "status_show_talent",
+   "status_show_talents",
+   "set_status_string",
+   "reset_status_string",
+   "status_show"
+  ],
+  "spieltexte": [
+   "TEXT.LTX",
+   "CHARTEXT.LTX"
+  ],
+  "zeilen": 808,
+  "sprache": "C",
+  "klassen": [],
+  "fehler": [
+   236,
+   237
+  ],
+  "bright_eyes": "seg046"
+ },
+ {
+  "modul": "SEG047",
+  "datei": "seg047.c",
+  "bereich": "Helden & Gruppe",
+  "titel": "Helden- und Gruppenhilfen",
+  "beschreibung": "Sammlung kleiner Helferfunktionen: bester Held nach CH/KK, Krankheit und Gift setzen/abfragen, KK-Probe für Türen, Geldbetrag als Text, AT/PA-Basiswert, Heldenauswahlmenüs sowie Rausch und Ausnüchtern. Neu gefunden: Blätterfehler in der Tempelliste und fehlende Wiederherstellung der Textboxbreite in select_hero_ok_forced.",
+  "funktionen": [
+   "get_hero_CH_best",
+   "get_hero_KK_best",
+   "hero_is_diseased",
+   "hero_is_poisoned",
+   "hero_gets_poisoned",
+   "hero_gets_diseased",
+   "hero_disease_test",
+   "check_hero_KK_unused",
+   "check_heroes_KK",
+   "make_valuta_str",
+   "update_atpa",
+   "menu_enter_delete",
+   "select_hero_from_group",
+   "select_hero_ok",
+   "select_hero_ok_forced",
+   "count_heroes_in_group",
+   "hero_get_drunken",
+   "hero_get_sober"
+  ],
+  "spieltexte": [
+   "TEXT.LTX"
+  ],
+  "zeilen": 752,
+  "sprache": "C",
+  "klassen": [],
+  "fehler": [
+   46,
+   81,
+   238,
+   239,
+   240,
+   241,
+   242,
+   296
+  ],
+  "bright_eyes": "seg047"
+ },
+ {
+  "modul": "SEG048",
+  "datei": "seg048.c",
+  "bereich": "Grafik & Oberfläche",
+  "titel": "Statusmenü (Bedienung)",
+  "beschreibung": "Bedienung des Statusbildschirms mit Inventarauswahl (roter/gelber Rahmen), Umlegen, Übergeben an andere Helden, Ansehen und Verzehren sowie dem Kontextmenü für Name, Gegenstände, Talente, Zauber und Seitenwechsel.",
+  "funktionen": [
+   "reset_item_selector",
+   "status_menu",
+   "status_select_hero"
+  ],
+  "spieltexte": [
+   "TEXT.LTX",
+   "CHARTEXT.LTX"
+  ],
+  "zeilen": 882,
+  "sprache": "C",
+  "klassen": [],
+  "fehler": [],
+  "bright_eyes": "seg048"
+ },
+ {
+  "modul": "SEG049",
+  "datei": "seg049.c",
+  "bereich": "Helden & Gruppe",
+  "titel": "Gruppenverwaltung und Nachtruhe",
+  "beschreibung": "Sortieren der Heldenplätze, Gruppen teilen, vereinigen und wechseln, Helden tauschen und verschieben, dazu die nächtliche Regeneration eines Helden. Beim Tausch werden die Lagerwachen nur in eine Richtung umgehängt (neu).",
+  "funktionen": [
+   "GRP_compare_heroes",
+   "GRP_sort_heroes",
+   "GRP_save_pos",
+   "GRP_split",
+   "GRP_merge",
+   "GRP_switch_to_next",
+   "GRP_swap_heroes",
+   "GRP_move_hero",
+   "GRP_hero_sleep"
+  ],
+  "spieltexte": [
+   "TEXT.LTX"
+  ],
+  "zeilen": 809,
+  "sprache": "C",
+  "klassen": [],
+  "fehler": [
+   243,
+   244,
+   245,
+   246,
+   247,
+   297,
+   298
+  ],
+  "bright_eyes": "seg049"
+ },
+ {
+  "modul": "SEG050",
+  "datei": "seg050.c",
+  "bereich": "Helden & Gruppe",
+  "titel": "Stufenanstieg",
+  "beschreibung": "Stufenaufstieg mit Eigenschaften, MR, LE/AE und Talent-/Zaubersteigerungen, automatisch im Anfängermodus. Neu gefunden: ESC bei der Eigenschaftswahl verändert das Geld (positiv) bzw. senkt IN (negativ); dazu ein Indexfehler bei zufälligen Zaubersteigerungen und eine fehlerhafte MR-Neuberechnung.",
+  "funktionen": [
+   "inc_spell_advanced",
+   "inc_talent_advanced",
+   "inc_talent_novice",
+   "inc_spell_novice",
+   "level_up"
+  ],
+  "spieltexte": [
+   "TEXT.LTX",
+   "CHARTEXT.LTX"
+  ],
+  "zeilen": 1054,
+  "sprache": "C",
+  "klassen": [],
+  "fehler": [
+   248,
+   249,
+   250,
+   251,
+   252,
+   402,
+   408
+  ],
+  "bright_eyes": "seg050"
+ },
+ {
+  "modul": "SEG051",
+  "datei": "seg051.c",
+  "bereich": "Reise & Ereignisse",
+  "titel": "Lager in der Wildnis",
+  "beschreibung": "Lagermenü auf Reisen: Wachen, Vorräte auffüllen, Talente, Magie, Kräutersuche und Schlaf mit möglichem Überfall oder vorbestimmtem Ereignis. Enthält die Kräutertabelle und die Lagerkämpfe.",
+  "funktionen": [
+   "do_wildcamp",
+   "gather_herbs",
+   "replenish_stocks"
+  ],
+  "spieltexte": [
+   "TEXT.LTX"
+  ],
+  "zeilen": 646,
+  "sprache": "C",
+  "klassen": [],
+  "fehler": [
+   129,
+   130,
+   367,
+   378,
+   396
+  ],
+  "bright_eyes": "seg051"
+ },
+ {
+  "modul": "SEG052",
+  "datei": "seg052.c",
+  "bereich": "Stadt",
+  "titel": "Lager in Stadt oder Dungeon",
+  "beschreibung": "Rasten in Stadt oder Dungeon mit Wachen, Talenten, Magie und frei wählbarer Schlafdauer; Zwischenfall ist im Dungeon ein Kampf, in der Stadt ein Diebstahl. Original-Bug 26 (Drehung beim Verlassen).",
+  "funktionen": [
+   "do_area_camp"
+  ],
+  "spieltexte": [
+   "TEXT.LTX"
+  ],
+  "zeilen": 318,
+  "sprache": "C",
+  "klassen": [],
+  "fehler": [
+   47,
+   130,
+   348
+  ],
+  "bright_eyes": "seg052"
+ },
+ {
+  "modul": "SEG053",
+  "datei": "seg053.c",
+  "bereich": "Stadt",
+  "titel": "Heiler",
+  "beschreibung": "Ort Heiler: Wunden, Krankheiten und Gift gegen Bezahlung behandeln; nachts doppelter Preis, Erfolg abhängig von der Heilerqualität. is_hero_healable wird auch von den Heiltalenten benutzt.",
+  "funktionen": [
+   "is_hero_healable",
+   "do_healer"
+  ],
+  "spieltexte": [
+   "TEXT.LTX"
+  ],
+  "zeilen": 371,
+  "sprache": "C",
+  "klassen": [],
+  "fehler": [],
+  "bright_eyes": "seg053"
+ },
+ {
+  "modul": "SEG054",
+  "datei": "seg054.c",
+  "bereich": "Stadt",
+  "titel": "Herberge",
+  "beschreibung": "Ort Herberge: Reden, Essen, Zimmer mieten, Talente, Magie, Schlafen und Wechsel in die Taverne, dazu die Behandlung brauender Helden (Original-Bugs 7-11, 20). Neu: Einzelzimmer und Suite erhalten den Preisaufschlag des Schlafsaals.",
+  "funktionen": [
+   "talk_inn",
+   "get_first_brewing_hero",
+   "do_inn",
+   "TLK_inn"
+  ],
+  "spieltexte": [
+   "TEXT.LTX",
+   "HERBERG.TLK"
+  ],
+  "zeilen": 742,
+  "sprache": "C",
+  "klassen": [],
+  "fehler": [
+   48,
+   49,
+   50,
+   51,
+   52,
+   334,
+   384
+  ],
+  "bright_eyes": "seg054"
+ },
+ {
+  "modul": "SEG055",
+  "datei": "seg055.c",
+  "bereich": "Stadt",
+  "titel": "Haendler: Laden und Haendlergespraeche",
+  "beschreibung": "do_merchant() ist der Laden eines Waffen-, Kraeuter- oder Kraemerhaendlers: Oeffnungszeit, Rauswurf, Warenangebot nach Sortimentsstufe und Typ, Menue Kaufen/Verkaufen/Reden. In den vier grossen Staedten wird bei Schulden bei Stoerrebrandt eine Zahlung verlangt. Die TLK-Funktionen steuern die drei Haendlergespraeche; der dort erfeilschte \"gute Preis\" wirkt nur beim Verkauf und dann zum Nachteil.",
+  "funktionen": [
+   "add_item_to_buy_selector",
+   "do_merchant",
+   "talk_merchant",
+   "TLK_ghandel",
+   "TLK_khandel",
+   "TLK_whandel"
+  ],
+  "spieltexte": [
+   "TEXT.LTX",
+   "GHANDEL.TLK",
+   "KHANDEL.TLK",
+   "WHANDEL.TLK"
+  ],
+  "zeilen": 504,
+  "sprache": "C",
+  "klassen": [],
+  "fehler": [
+   53,
+   332,
+   338
+  ],
+  "bright_eyes": "seg055"
+ },
+ {
+  "modul": "SEG056",
+  "datei": "seg056.c",
+  "bereich": "Stadt",
+  "titel": "Haendler: Einkauf",
+  "beschreibung": "buy_screen() zeigt das Warenangebot seitenweise, fuehrt einen Warenkorb mit Mengen und prueft Geld und Rucksackplaetze; beim Bezahlen kann um bis zu 50 % gefeilscht werden. Jede 10. gekaufte Ware einer Sorte verteuert sie um 10 %. Die Platzpruefung liest die Stapelbarkeit von der falschen Ware, und bei Platzmangel wird trotzdem alles bezahlt.",
+  "funktionen": [
+   "item_selector_item_compare",
+   "buy_screen",
+   "add_item_to_sell_selector"
+  ],
+  "spieltexte": [
+   "TEXT.LTX"
+  ],
+  "zeilen": 690,
+  "sprache": "C",
+  "klassen": [],
+  "fehler": [
+   54,
+   55
+  ],
+  "bright_eyes": "seg056"
+ },
+ {
+  "modul": "SEG057",
+  "datei": "seg057.c",
+  "bereich": "Stadt",
+  "titel": "Haendler: Verkauf",
+  "beschreibung": "sell_screen() zeigt das Gepaeck der Helden mit Ankaufpreisen (halber Kaufpreis, 1 H bei Schaden, 0 bei fremder Ware), merkt Gegenstaende und Mengen mehrerer Helden vor und laesst um einen Aufschlag feilschen. Jede 10. verkaufte Ware einer Sorte verbilligt sie um 10 %.",
+  "funktionen": [
+   "sell_screen"
+  ],
+  "spieltexte": [
+   "TEXT.LTX"
+  ],
+  "zeilen": 565,
+  "sprache": "C",
+  "klassen": [],
+  "fehler": [
+   53
+  ],
+  "bright_eyes": "seg057"
+ },
+ {
+  "modul": "SEG058",
+  "datei": "seg058.c",
+  "bereich": "Stadt",
+  "titel": "Schmied: Reparatur und Gespraech",
+  "beschreibung": "do_smith() ist die Schmiede mit Reden und Reparieren. repair_screen() repariert zerbrochene Waffen und Ruestungen (halber Kaufpreis) oder beschaedigte Ruestung (ein Viertel), mit Feilschen; das Stueck ist nach 6 Stunden oder am naechsten Morgen fertig. TLK_schmied() fuehrt auch in die Zwingfeste.",
+  "funktionen": [
+   "add_item_to_repair_selector",
+   "repair_screen",
+   "do_smith",
+   "talk_smith",
+   "TLK_schmied"
+  ],
+  "spieltexte": [
+   "TEXT.LTX",
+   "SCHMIED.TLK"
+  ],
+  "zeilen": 677,
+  "sprache": "C",
+  "klassen": [],
+  "fehler": [
+   56,
+   57,
+   337
+  ],
+  "bright_eyes": "seg058"
+ },
+ {
+  "modul": "SEG059",
+  "datei": "seg059.c",
+  "bereich": "Stadt",
+  "titel": "Taverne: Hauptmenue; Ereignisse auf See",
+  "beschreibung": "do_tavern() ist die Taverne mit Oeffnungszeiten, Reden, Essen und Trinken (Zechpreller werden ausgesperrt), Talentanwendung (nach frischem Speichern um 50 erschwert) und Wechsel in die Herberge im Kombihaus. Dazu die Seereise-Ereignisse Krakenmolch, Piraten und das Auftauchen des Totenschiffs.",
+  "funktionen": [
+   "do_tavern",
+   "octopus_attack_wrapper",
+   "pirates_attack_wrapper",
+   "prolog_ghostship"
+  ],
+  "spieltexte": [
+   "TEXT.LTX",
+   "SHIP.DTX"
+  ],
+  "zeilen": 305,
+  "sprache": "C",
+  "klassen": [],
+  "fehler": [
+   336,
+   343
+  ],
+  "bright_eyes": "seg059"
+ },
+ {
+  "modul": "SEG060",
+  "datei": "seg060.c",
+  "bereich": "Stadt",
+  "titel": "Taverne: Gespraech mit dem Wirt",
+  "beschreibung": "talk_tavern() fuehrt den Wirtsdialog TAVERN.TLK und fuellt die variablen Textteile (Heldenzahl, Geruechte, Essensqualitaet, Namen). TLK_tavern() ist die Zustandslogik: Runden, Charismaproben, Schlaegereien, Zechen-Proben, NSC und Informanten. Rundenpreise werden in Heller statt Silber abgezogen, und die Zechen-Probe trifft bei geteilter Gruppe die falschen Helden.",
+  "funktionen": [
+   "talk_tavern",
+   "TLK_tavern"
+  ],
+  "spieltexte": [
+   "TAVERN.TLK"
+  ],
+  "zeilen": 784,
+  "sprache": "C",
+  "klassen": [],
+  "fehler": [
+   58,
+   59,
+   60
+  ],
+  "bright_eyes": "seg060"
+ },
+ {
+  "modul": "SEG061",
+  "datei": "seg061.c",
+  "bereich": "Stadt",
+  "titel": "Tempel: Menue, Heldenverwaltung, Wunderwirkungen",
+  "beschreibung": "do_temple() bestimmt den Gott des Tempels und bietet Helden aufnehmen/entlassen/loeschen, Laden, Speichern, Beenden, Wunder und Opfer. Die miracle_*-Funktionen setzen die Wunder um: Heilung, Wiederbelebung, zeitweise Werteaenderung, Waffe magisch machen oder reparieren.",
+  "funktionen": [
+   "do_temple",
+   "char_add",
+   "char_letgo",
+   "char_erase",
+   "miracle_heal_hero",
+   "miracle_resurrect",
+   "miracle_modify",
+   "miracle_weapon"
+  ],
+  "spieltexte": [
+   "TEXT.LTX"
+  ],
+  "zeilen": 634,
+  "sprache": "C",
+  "klassen": [],
+  "fehler": [
+   401
+  ],
+  "bright_eyes": "seg061"
+ },
+ {
+  "modul": "SEG062",
+  "datei": "seg062.c",
+  "bereich": "Stadt",
+  "titel": "Tempel: Wunder erbitten",
+  "beschreibung": "ask_miracle() prueft das Ansehen beim Gott des Tempels, zieht 10 Punkte ab und wuerfelt ein Wunder aus, das je nach Gott Werte, Heilung, Saettigung, Schutz, Waffen oder Krankheit betrifft; der hoechste Wurf belebt einen Helden wieder. Die meisten Wunder sind ueber Zeitgeber gegen Wiederholung gesperrt.",
+  "funktionen": [
+   "ask_miracle"
+  ],
+  "spieltexte": [
+   "WONDER.LTX",
+   "TEXT.LTX"
+  ],
+  "zeilen": 512,
+  "sprache": "C",
+  "klassen": [],
+  "fehler": [
+   61,
+   62,
+   63
+  ],
+  "bright_eyes": "seg062"
+ },
+ {
+  "modul": "SEG063",
+  "datei": "seg063.c",
+  "bereich": "Reise & Ereignisse",
+  "titel": "Hafen und Seereise",
+  "beschreibung": "do_harbor() bietet Passagen, den Hafenmeister und das Anbordgehen; sea_travel() zeichnet die Route auf der Karte, laesst die Zeit laufen und loest Totenschiff, Krakenmolch und Piraten aus. passages_init() wuerfelt Abfahrten, Preise und Schiffstypen der 45 Seerouten aus.",
+  "funktionen": [
+   "passages_init",
+   "do_harbor",
+   "mod_clock_pos",
+   "sea_travel",
+   "get_srout_len"
+  ],
+  "spieltexte": [
+   "HAFEN.LTX",
+   "TEXT.LTX"
+  ],
+  "zeilen": 851,
+  "sprache": "C",
+  "klassen": [],
+  "fehler": [
+   131,
+   132,
+   133,
+   134,
+   137,
+   331,
+   372,
+   415
+  ],
+  "bright_eyes": "seg063"
+ },
+ {
+  "modul": "SEG064",
+  "datei": "seg064.c",
+  "bereich": "Reise & Ereignisse",
+  "titel": "Hafen: Passagen, Preis und Reisedauer",
+  "beschreibung": "prepare_passages() sammelt die abfahrenden Schiffe und ihre Namen, print_passage_price() und get_passage_travel_hours() rechnen Preis und Dauer, get_next_passages() liefert die Auskunft des Hafenmeisters, passage_arrival() die Ankunftsposition. Preis und Tempo werden in 16 Bit gerechnet und laufen ueber; beim Schnellsegler ist sogar Tempo 0 und damit eine Division durch 0 moeglich.",
+  "funktionen": [
+   "get_ship_name",
+   "prepare_passages",
+   "print_passage_price",
+   "get_passage_travel_hours",
+   "get_next_passages",
+   "passage_arrival"
+  ],
+  "spieltexte": [
+   "HAFEN.LTX"
+  ],
+  "zeilen": 364,
+  "sprache": "C",
+  "klassen": [],
+  "fehler": [
+   135,
+   136,
+   137,
+   138
+  ],
+  "bright_eyes": "seg064"
+ },
+ {
+  "modul": "SEG065",
+  "datei": "seg065.c",
+  "bereich": "Grafik & Oberfläche",
+  "titel": "Markt und Sonderszenen",
+  "beschreibung": "do_market() richtet einen Marktstand als Haendler ein. Dazu kommen Zwischenszenen: das Bild vor dem Endkampf, die Animation von Hyggeliks Geist mit Grimring, das Ende bei Zeitablauf und der Abspann mit Belohnung, Heilung und Speichern des beendeten Spiels.",
+  "funktionen": [
+   "do_market",
+   "final_intro",
+   "hyg_ani_extract",
+   "hyg_ani_draw",
+   "hyg_ani_draw_background",
+   "hyg_ani_show",
+   "show_hyggelik_ani",
+   "show_times_up",
+   "show_outro"
+  ],
+  "spieltexte": [
+   "TEXT.LTX",
+   "CHARTEXT.LTX"
+  ],
+  "zeilen": 661,
+  "sprache": "C",
+  "klassen": [],
+  "fehler": [
+   253
+  ],
+  "bright_eyes": "seg065"
+ },
+ {
+  "modul": "SEG066",
+  "datei": "seg066.c",
+  "bereich": "Stadt",
+  "titel": "Stadt: Bewegung, Orte, 3D-Ansicht",
+  "beschreibung": "town_step() ist die Hauptschleife in einer Stadt (Menue, Drehen, Schritte, Zufallsereignisse, Markttag), enter_location() erkennt Orte und Haustueren, Daspota hat eine eigene Variante mit Raeuberhaeusern. do_special_buildings() verzweigt zu den Sondergebaeuden. Die town_*-Funktionen zeichnen die Strassenansicht aus 29 Feldern mit Verdeckung, Texturen und Palette.",
+  "funktionen": [
+   "enter_location",
+   "enter_location_daspota",
+   "do_special_buildings",
+   "TLK_eremit",
+   "do_town",
+   "refresh_floor_and_sky",
+   "town_update_view",
+   "town_set_visual_square_vals",
+   "get_border_index",
+   "town_set_visual_square_tex",
+   "town_water_and_grass",
+   "town_building_textures",
+   "load_town_texture",
+   "town_direction_change",
+   "town_step",
+   "town_do_step",
+   "town_fade_and_colors",
+   "town_update_house_count"
+  ],
+  "spieltexte": [
+   "TEXT.LTX",
+   "THORWAL1.LTX",
+   "THORWAL2.LTX",
+   "DASPOTA.LTX",
+   "EREMIT.TLK"
+  ],
+  "zeilen": 1682,
+  "sprache": "C",
+  "klassen": [],
+  "fehler": [
+   281,
+   299
+  ],
+  "bright_eyes": "seg066"
+ },
+ {
+  "modul": "SEG067",
+  "datei": "seg067.c",
+  "bereich": "Stadt",
+  "titel": "Stadt: Zufallsereignisse, Haendlerauskuenfte",
+  "beschreibung": "city_event_switch() waehlt eines von neun Strassenereignissen: Taschendiebe, Bettler, Kinder, ein Strassenhaendler und harmlose Begebenheiten. waffinfo_*() liefern zufaellige Texte fuer die Haendlergespraeche. In Ereignis 1 werden zwei Texte der Verfolgungsjagd ohne Zusammenhang gezeigt.",
+  "funktionen": [
+   "city_event_switch",
+   "city_event_1",
+   "city_event_2",
+   "city_event_3",
+   "city_event_4",
+   "city_event_5",
+   "city_event_6",
+   "city_event_7",
+   "city_event_8",
+   "city_event_9",
+   "waffinfo_weapons",
+   "waffinfo_herbs",
+   "waffinfo_general"
+  ],
+  "spieltexte": [
+   "STRASSE.LTX",
+   "WAFFINFO.LTX"
+  ],
+  "zeilen": 468,
+  "sprache": "C",
+  "klassen": [],
+  "fehler": [
+   47,
+   64,
+   65
+  ],
+  "bright_eyes": "seg067"
+ },
+ {
+  "modul": "SEG068",
+  "datei": "seg068.c",
+  "bereich": "Stadt",
+  "titel": "Thorwal: Sondergebaeude 1",
+  "beschreibung": "Eisenhof, Immanstadion, Botschaft, Stoerrebrandts Kontor (Konto in Silber, Kredit bis 20 D im Monat), Zeughaus mit Budget des Hetmans, Magistrat, Muehle, Schwarzer Finger, Zwingfeste mit Meister Dramosch und die Akademie (Fluch aufheben, Artefakt analysieren). In der Akademie wird ein verfluchter Held auf Platz 0 uebersehen.",
+  "funktionen": [
+   "THO_eisenhof",
+   "THO_imman",
+   "THO_botschaft",
+   "THO_bank",
+   "THO_arsenal",
+   "THO_magistracy",
+   "THO_mueller",
+   "THO_black_finger",
+   "dramosch_says",
+   "THO_ugdalf",
+   "academy_analues",
+   "THO_academy",
+   "academy_get_equal_item"
+  ],
+  "spieltexte": [
+   "THORWAL1.LTX",
+   "THORWAL2.LTX",
+   "THORWAL.LTX",
+   "TEXT.LTX"
+  ],
+  "zeilen": 815,
+  "sprache": "C",
+  "klassen": [],
+  "fehler": [
+   39,
+   66,
+   67,
+   68,
+   69,
+   339
+  ],
+  "bright_eyes": "seg068"
+ },
+ {
+  "modul": "SEG069",
+  "datei": "seg069.c",
+  "bereich": "Stadt",
+  "titel": "Thorwal: Sondergebaeude 2",
+  "beschreibung": "Audienz bei Hetmann Tronde mit Vergabe des Hauptauftrags und des Empfehlungsschreibens; die drei Ottaskins weisen die Gruppe ab und kaempfen beim dritten Versuch. THO_tav_inn_combi() fuehrt durch die Gasthaeuser mit Taverne und Herberge unter einem Dach.",
+  "funktionen": [
+   "THO_hetmann",
+   "THO_windriders",
+   "THO_tav_inn_combi",
+   "THO_stormchildren",
+   "THO_garaldsson"
+  ],
+  "spieltexte": [
+   "THORWAL1.LTX",
+   "THORWAL.LTX",
+   "TEXT.LTX"
+  ],
+  "zeilen": 349,
+  "sprache": "C",
+  "klassen": [],
+  "fehler": [
+   47,
+   70
+  ],
+  "bright_eyes": "seg069"
+ },
+ {
+  "modul": "SEG070",
+  "datei": "seg070.c",
+  "bereich": "Stadt",
+  "titel": "Phexcaer: Gebaeude 1",
+  "beschreibung": "Fuhrhof, Stadthaus, Spielhaus (Gluecksspiel mit Falschspiel-Proben), Villa Gremob, Bordell, Apotheke und Heiler von Phexcaer, meist kurze Dialoge mit Auskuenften gegen Geld. Bright-Eyes kennt den vertauschten Gewinn im Spielhaus.",
+  "funktionen": [
+   "PHX_fuhrhaus",
+   "PHX_stadthaus",
+   "PHX_spielhaus",
+   "PHX_villa_gremob",
+   "PHX_bordell",
+   "PHX_apotheke",
+   "PHX_healer"
+  ],
+  "spieltexte": [
+   "PHEX1.LTX"
+  ],
+  "zeilen": 533,
+  "sprache": "C",
+  "klassen": [],
+  "fehler": [
+   71,
+   72,
+   73
+  ],
+  "bright_eyes": "seg070"
+ },
+ {
+  "modul": "SEG071",
+  "datei": "seg071.c",
+  "bereich": "Stadt",
+  "titel": "Phexcaer: Gebaeude 2, Alrik Derondan",
+  "beschreibung": "Der Drogentempel mit Tempeldiener oder Ektor Gremob, der Phextempel mit Gespraech der Geweihten vor dem normalen Tempelmenue und das Tavernengespraech mit Alrik Derondan, der fuer 5 D oder bei gutem Charisma einen Hinweis auf Hyggelik gibt.",
+  "funktionen": [
+   "PHX_drogentempel",
+   "PHX_phextempel",
+   "PHX_alrik_derondan"
+  ],
+  "spieltexte": [
+   "PHEX2.LTX"
+  ],
+  "zeilen": 512,
+  "sprache": "C",
+  "klassen": [],
+  "fehler": [
+   74
+  ],
+  "bright_eyes": "seg071"
+ },
+ {
+  "modul": "SEG072",
+  "datei": "seg072.c",
+  "bereich": "Reise & Ereignisse",
+  "titel": "Informanten: Dialoglogik",
+  "beschreibung": "Zustandslogik der Informanten-Gespraeche INFO1..7.TLK: Verzweigungen nach Merkern und Proben, neue Informanten, Kartenteile mit AP, Schifffahrt mit Swafnild und das Einhorn, das spaeter ein fehlendes Kartenteil bringt.",
+  "funktionen": [
+   "INF_jurge_hjore",
+   "INF_yasma_umbrik_isleif",
+   "INF_ragna_beorn_algrid",
+   "INF_eliane_tiomar",
+   "INF_olvir_asgrimm",
+   "INF_treborn_unicorn",
+   "INF_swafnild_unicorn",
+   "count_map_parts",
+   "has_intro_letter"
+  ],
+  "spieltexte": [
+   "INFO1.TLK",
+   "INFO2.TLK",
+   "INFO3.TLK",
+   "INFO4.TLK",
+   "INFO5.TLK",
+   "INFO6.TLK",
+   "INFO7.TLK"
+  ],
+  "zeilen": 893,
+  "sprache": "C",
+  "klassen": [],
+  "fehler": [
+   75,
+   341,
+   342,
+   414
+  ],
+  "bright_eyes": "seg072"
+ },
+ {
+  "modul": "SEG073",
+  "datei": "seg073.c",
+  "bereich": "Stadt",
+  "titel": "Taverne: Geruechte und Informanten",
+  "beschreibung": "Geruechte einer Stadt, die nebenbei Rastplaetze, Reiseereignisse und Informanten bekannt machen; Namen fuer Zechkumpane; der Aufruf des Hetmans, die Totenschiff-Nachricht und das Auftauchen von Informanten in bestimmten Tavernen. tavern_quest_infos() gibt oft einen uninitialisierten Wert zurueck.",
+  "funktionen": [
+   "get_tavern_gossip",
+   "get_drinkmate",
+   "tavern_quest_infos",
+   "tavern_follow_informer"
+  ],
+  "spieltexte": [
+   "TAVERN.TLK",
+   "THORWAL.LTX"
+  ],
+  "zeilen": 749,
+  "sprache": "C",
+  "klassen": [],
+  "fehler": [
+   76,
+   77,
+   333,
+   368
+  ],
+  "bright_eyes": "seg073"
+ },
+ {
+  "modul": "SEG074",
+  "datei": "seg074.c",
+  "bereich": "Grafik & Oberfläche",
+  "titel": "Automap und Zielwahl für TRANSVERSALIS",
+  "beschreibung": "Zeigt die Karte der aktuellen Stadt oder des Dungeons mit allen schon betretenen Feldern, der eigenen und den anderen Gruppen. Große Städte werden seitlich geschoben. Dieselbe Darstellung dient zur Wahl des Teleportziels von TRANSVERSALIS (15 AE).",
+  "funktionen": [
+   "show_automap",
+   "is_discovered",
+   "get_mapval_small",
+   "get_mapval_large",
+   "is_group_in_prison",
+   "render_automap",
+   "draw_automap_square",
+   "draw_automap_entrance",
+   "draw_automap_to_screen",
+   "select_teleport_dest",
+   "get_maploc"
+  ],
+  "spieltexte": [
+   "TEXT.LTX"
+  ],
+  "zeilen": 778,
+  "sprache": "C",
+  "klassen": [],
+  "fehler": [
+   82,
+   83,
+   187,
+   349
+  ],
+  "bright_eyes": "seg074"
+ },
+ {
+  "modul": "SEG075",
+  "datei": "seg075.c",
+  "bereich": "Dungeon",
+  "titel": "Dungeon allgemein 1/2: 3D-Ansicht, Licht, Fallgruben, Betreten",
+  "beschreibung": "Zeichnet die Dungeonansicht aus Decke, Boden und bis zu 22 sichtbaren Feldern und passt die Palette an das Licht an. Dazu Schritt vor und zurück mit Todesfalle, Ebenenwechsel, Türanimation, Fallgruben mit Gruppenteilung und die Startpositionen aller 15 Dungeons.",
+  "funktionen": [
+   "DNG_floor_ceil",
+   "DNG_hide_occluded_squares",
+   "DNG_stub1",
+   "DNG_stub2",
+   "DNG_stub3",
+   "DNG_draw_walls",
+   "DNG_stub4",
+   "DNG_stub5",
+   "is_staff_lvl2_in_group",
+   "DNG_lights",
+   "DNG_timestep",
+   "DNG_update_pos",
+   "DNG_inc_level",
+   "DNG_dec_level",
+   "DNG_open_door",
+   "DNG_close_door",
+   "DNG01_pitfall",
+   "DNG_check_climb_tools",
+   "DNG_pitfall",
+   "DNG_enter_dungeon"
+  ],
+  "spieltexte": [
+   "TEXT.LTX",
+   "SHIP.DTX"
+  ],
+  "zeilen": 1499,
+  "sprache": "C",
+  "klassen": [],
+  "fehler": [
+   84,
+   85,
+   86,
+   281,
+   300
+  ],
+  "bright_eyes": "seg075"
+ },
+ {
+  "modul": "SEG076",
+  "datei": "seg076.c",
+  "bereich": "Dungeon",
+  "titel": "Dungeon allgemein 2/2: Hauptschleife, Menü, Türen, Treppen",
+  "beschreibung": "DNG_step() ist ein Durchlauf der Dungeonschleife mit Menü, Bewegung, Treppen, Türen, Truhen, Hebeln und dem Ereignis-Handler des Dungeons. Türen lassen sich öffnen, sprengen, knacken oder per FORAMEN öffnen. Dazu feste Kämpfe, Falltüren mit Loch darunter und das Wasserfass.",
+  "funktionen": [
+   "DNG_door",
+   "print_msg_with_first_hero",
+   "DNG_pitfall_add_pit",
+   "DNG_step",
+   "DNG_see_stairs",
+   "DNG_see_door",
+   "DNG_see_chest",
+   "do_dungeon",
+   "DNG_fight",
+   "DNG_waterbarrel",
+   "DNG_see_lever"
+  ],
+  "spieltexte": [
+   "TEXT.LTX",
+   "FINAL.DTX"
+  ],
+  "zeilen": 1085,
+  "sprache": "C",
+  "klassen": [],
+  "fehler": [
+   87,
+   88,
+   89,
+   90,
+   91,
+   345,
+   346,
+   354,
+   358
+  ],
+  "bright_eyes": "seg076"
+ },
+ {
+  "modul": "SEG077",
+  "datei": "seg077.c",
+  "bereich": "Dungeon",
+  "titel": "Totenschiff (DNG01)",
+  "beschreibung": "Ereignisse auf dem Totenschiff: Falltüren, Fundstücke, Rattenbisse, die gefangene Ardora, Spalt nach oben und das Verlassen des Schiffs. Die Rätseltruhe MARBO gibt den goldenen Schlüssel, die Schlüsseltruhe ruft den Dämon und startet die Todesfalle mit 30 Schritten.",
+  "funktionen": [
+   "DNG01_handler",
+   "DNG01_chest01_loot",
+   "DNG01_chest02_loot",
+   "DNG01_chest03_loot",
+   "DNG01_chest05_loot",
+   "DNG01_chest07_open",
+   "DNG01_chest07_loot",
+   "DNG01_chest06_loot",
+   "DNG01_chest06_trap",
+   "DNG01_chest06_open",
+   "DNG01_chest00_loot"
+  ],
+  "spieltexte": [
+   "SHIP.DTX",
+   "TEXT.LTX"
+  ],
+  "zeilen": 426,
+  "sprache": "C",
+  "klassen": [],
+  "fehler": [
+   92,
+   93,
+   94,
+   95,
+   96,
+   97,
+   346
+  ],
+  "bright_eyes": "seg077"
+ },
+ {
+  "modul": "SEG078",
+  "datei": "seg078.c",
+  "bereich": "Dungeon",
+  "titel": "Verfallene Herberge (DNG02)",
+  "beschreibung": "Die verfallene Herberge zwischen Ottarje und Daspota mit Zombies bei Nacht, Klebefalle, Gewichtsplatten, Sphärenriss, Versteinerungsfalle, Aufzug und drei Geheimtüren. Die violette Kristall-Apparatur speist die Versteinerungsfalle.",
+  "funktionen": [
+   "DNG02_handler",
+   "DNG02_chest00_loot",
+   "DNG02_chest01_loot",
+   "DNG02_chest02_loot",
+   "DNG02_chest03_loot",
+   "DNG02_chest04_loot",
+   "DNG02_chest05_loot",
+   "DNG02_chest06_open",
+   "DNG02_chest06_loot",
+   "DNG02_fight_intro"
+  ],
+  "spieltexte": [
+   "F046.DTX",
+   "TEXT.LTX"
+  ],
+  "zeilen": 856,
+  "sprache": "C",
+  "klassen": [],
+  "fehler": [
+   93,
+   98,
+   99,
+   100,
+   101,
+   102,
+   103,
+   104
+  ],
+  "bright_eyes": "seg078"
+ },
+ {
+  "modul": "SEG079",
+  "datei": "seg079.c",
+  "bereich": "Dungeon",
+  "titel": "Spinnenhöhle (DNG03)",
+  "beschreibung": "Die Spinnenhöhle zwischen Ottarje und Skjal mit Teleportern, den Rätseln SPINNENNETZ und MACTANS, Speer- und Säuregruben, Kämpfen gegen den Hohepriester, dem Kristallaltar und dem Spinnengelege, dessen Verbrennen eine Todesfalle auslöst.",
+  "funktionen": [
+   "DNG03_handler",
+   "DNG03_chest00_loot",
+   "DNG03_chest01_loot",
+   "DNG03_chest02_loot",
+   "DNG03_chest03_loot",
+   "DNG03_chest04_loot",
+   "DNG03_chest05_loot",
+   "DNG03_chest06_loot",
+   "DNG03_chest07_loot",
+   "DNG03_chest08_loot",
+   "DNG03_chest09_loot",
+   "DNG03_chest12_loot",
+   "DNG03_chest10_loot",
+   "DNG03_chest11_loot",
+   "DNG03_chest12_trap"
+  ],
+  "spieltexte": [
+   "F051.DTX",
+   "TEXT.LTX"
+  ],
+  "zeilen": 658,
+  "sprache": "C",
+  "klassen": [],
+  "fehler": [
+   105,
+   106,
+   351,
+   352,
+   353,
+   363,
+   364
+  ],
+  "bright_eyes": "seg079"
+ },
+ {
+  "modul": "SEG080",
+  "datei": "seg080.c",
+  "bereich": "Dungeon",
+  "titel": "Wolfshöhle (DNG04) und Goblinhöhle (DNG05)",
+  "beschreibung": "Zwei kleine Höhlen: der Wolfsbau mit drei Leichen, Silberhelm, Laterne, Einsturzstellen und einem tiefen Spalt, und die Goblinhöhle mit Abfallberg, totem Wildschwein, Fledermäusen, wehrlosem Goblin und Höhlenbär.",
+  "funktionen": [
+   "DNG04_handler",
+   "DNG04_chest00_open",
+   "DNG04_chest01_open",
+   "DNG04_chest02_open",
+   "DNG04_chest00_loot",
+   "DNG04_chest01_loot",
+   "DNG04_chest02_loot",
+   "DNG05_handler",
+   "DNG05_fight_intro"
+  ],
+  "spieltexte": [
+   "F061.DTX",
+   "F076.DTX",
+   "TEXT.LTX"
+  ],
+  "zeilen": 496,
+  "sprache": "C",
+  "klassen": [],
+  "fehler": [
+   93,
+   107,
+   108,
+   254
+  ],
+  "bright_eyes": "seg080"
+ },
+ {
+  "modul": "SEG081",
+  "datei": "seg081.c",
+  "bereich": "Dungeon",
+  "titel": "Daspota-Schatz (DNG06) und Fallgrube der Kultstätte",
+  "beschreibung": "Das Piratenversteck mit dem Daspota-Schatz: Armbrust- und Falltürfallen, Geheimfach, Tür-Countdown, zwei Hebel für zwei Gruppen und der Schatz selbst. Dazu die Fallgrube der Kultstätte des Namenlosen, aus der Helden mit zwei Seilen gerettet werden müssen.",
+  "funktionen": [
+   "DNG06_handler",
+   "DNG06_fight_intro",
+   "DNG06_chest00_loot",
+   "DNG06_chest01_loot",
+   "DNG09_pitfall"
+  ],
+  "spieltexte": [
+   "F094.DTX",
+   "F126.DTX",
+   "TEXT.LTX"
+  ],
+  "zeilen": 677,
+  "sprache": "C",
+  "klassen": [],
+  "fehler": [
+   86,
+   109,
+   110,
+   111,
+   354,
+   355
+  ],
+  "bright_eyes": "seg081"
+ },
+ {
+  "modul": "SEG082",
+  "datei": "seg082.c",
+  "bereich": "Dungeon",
+  "titel": "Ruine des Schwarzmagiers (DNG07) und Statuen des Namenlosen",
+  "beschreibung": "Die Ruine zwischen Rybon und Thoss mit verschlossener Treppentür, Elfengeist und MU-Elixier, Endlosgang, Giftflasche und dem Kampf um ein Kartenstück. Dazu die Statuen des Namenlosen in der Kultstätte (berühren oder zerschlagen).",
+  "funktionen": [
+   "DNG07_handler",
+   "DNG09_statues"
+  ],
+  "spieltexte": [
+   "F100.DTX",
+   "F126.DTX",
+   "TEXT.LTX"
+  ],
+  "zeilen": 405,
+  "sprache": "C",
+  "klassen": [],
+  "fehler": [
+   70,
+   111
+  ],
+  "bright_eyes": "seg082"
+ },
+ {
+  "modul": "SEG083",
+  "datei": "seg083.c",
+  "bereich": "Dungeon",
+  "titel": "Orkbehausung (DNG08)",
+  "beschreibung": "Die Orkhöhle mit zwölf Strohlagern, Kesseln, Ballista und Brandgeschossen, einem festzuhaltenden Hebel, Speerfalle, Geheimtür und Götzenstatuen. Die Truhen haben eine Schnappfalle, ein Orkrätsel (TAIRACH) und Bronzeschlösser.",
+  "funktionen": [
+   "DNG08_handler",
+   "DNG08_search_bed",
+   "DNG08_chest01_trap",
+   "DNG08_chest00_loot",
+   "DNG08_chest01_loot",
+   "DNG08_chest02_loot",
+   "DNG08_chest02_open",
+   "DNG08_chest03_open",
+   "DNG08_chest04_open",
+   "DNG08_chest05_open",
+   "DNG08_chest04_loot",
+   "DNG08_chest05_loot"
+  ],
+  "spieltexte": [
+   "F108.DTX",
+   "TEXT.LTX"
+  ],
+  "zeilen": 647,
+  "sprache": "C",
+  "klassen": [],
+  "fehler": [
+   99,
+   106,
+   110,
+   111,
+   112,
+   360,
+   366
+  ],
+  "bright_eyes": "seg083"
+ },
+ {
+  "modul": "SEG084",
+  "datei": "seg084.c",
+  "bereich": "Dungeon",
+  "titel": "Kultstätte des Namenlosen (DNG09)",
+  "beschreibung": "Die Kultstätte auf Hjalland mit Statuen, Bolzenfallen, Leitern, Fallgrube, Hebel und Geheimtüren. Am Altar wird die Quest erfüllt, der schwarze Kristall lässt sich nur mit DESTRUCTIBO oder IGNIFAXIUS zerstören.",
+  "funktionen": [
+   "DNG09_handler",
+   "DNG09_fight_intro",
+   "DNG09_chest00_loot",
+   "DNG09_chest01_loot",
+   "DNG09_chest02_loot",
+   "DNG09_chest03_loot",
+   "DNG09_chest04_loot",
+   "DNG09_chest05_loot",
+   "DNG09_chest06_loot",
+   "DNG09_chest04_trap"
+  ],
+  "spieltexte": [
+   "F126.DTX",
+   "TEXT.LTX"
+  ],
+  "zeilen": 640,
+  "sprache": "C",
+  "klassen": [],
+  "fehler": [
+   70,
+   99,
+   113,
+   114
+  ],
+  "bright_eyes": "seg084"
+ },
+ {
+  "modul": "SEG085",
+  "datei": "seg085.c",
+  "bereich": "Dungeon",
+  "titel": "Drachenhort (DNG10)",
+  "beschreibung": "Die Drachenhöhle auf Runin mit Wandlöchern, Schmerzfallen, Trittplatte, Opferschale, Heshthot, Feuersäulen und Mumien. Der Drache lässt seinen Hort plündern oder belohnt die Gruppe für den Platinschlüssel.",
+  "funktionen": [
+   "DNG10_handler",
+   "DNG10_chest00_open",
+   "DNG10_chest00_loot",
+   "DNG10_chest01_loot",
+   "DNG10_chest02_loot",
+   "DNG10_chest03_loot",
+   "DNG10_chest04_loot"
+  ],
+  "spieltexte": [
+   "F129.DTX",
+   "TEXT.LTX"
+  ],
+  "zeilen": 505,
+  "sprache": "C",
+  "klassen": [],
+  "fehler": [
+   115,
+   116,
+   117,
+   361
+  ],
+  "bright_eyes": "seg085"
+ },
+ {
+  "modul": "SEG086",
+  "datei": "seg086.c",
+  "bereich": "Dungeon",
+  "titel": "Piratenhöhle auf Manrek (DNG11)",
+  "beschreibung": "Die Piratenhöhle mit Suppenkessel, Wasserfässern, einem Hebel mit fünf Stellungen für die Geheimtüren, der Swafnir-Statue, die nach einem Opfer den Weg weist, Feuerfallen und dem Boot in den Sturm. Dazu 14 Truhen.",
+  "funktionen": [
+   "DNG11_handler",
+   "DNG11_chest00_loot",
+   "DNG11_chest01_loot",
+   "DNG11_chest02_loot",
+   "DNG11_chest03_loot",
+   "DNG11_chest04_loot",
+   "DNG11_chest05_loot",
+   "DNG11_chest06_loot",
+   "DNG11_chest07_loot",
+   "DNG11_chest08_loot",
+   "DNG11_chest09_loot",
+   "DNG11_chest10_loot",
+   "DNG11_chest11_loot",
+   "DNG11_chest12_loot",
+   "DNG11_chest13_loot",
+   "DNG11_fight_intro"
+  ],
+  "spieltexte": [
+   "F131.DTX",
+   "TEXT.LTX"
+  ],
+  "zeilen": 512,
+  "sprache": "C",
+  "klassen": [],
+  "fehler": [
+   118,
+   119
+  ],
+  "bright_eyes": "seg086"
+ },
+ {
+  "modul": "SEG087",
+  "datei": "seg087.c",
+  "bereich": "Dungeon",
+  "titel": "Alte Zwingfeste in Thorwal (DNG14), Teil 1",
+  "beschreibung": "Der Ereignis-Handler der Zwingfeste über fünf Ebenen: Räuberkämpfe, Phex-Schrein, Giftgasraum, fünf Geheimtüren, Ugdalfs Tür, Schacht, Tauchstrecke, Fundstücke und der Ausgang durch den Zwergenkeller.",
+  "funktionen": [
+   "DNG14_handler"
+  ],
+  "spieltexte": [
+   "THORWAL.DTX"
+  ],
+  "zeilen": 691,
+  "sprache": "C",
+  "klassen": [],
+  "fehler": [
+   120,
+   355,
+   356,
+   416
+  ],
+  "bright_eyes": "seg087"
+ },
+ {
+  "modul": "SEG088",
+  "datei": "seg088.c",
+  "bereich": "Dungeon",
+  "titel": "Alte Zwingfeste (DNG14), Teil 2, und Spiegelrätsel",
+  "beschreibung": "Tauchen durch den überfluteten Gang, Kampfeinleitung und Truhen der Zwingfeste (eine mit dem Plan der Ebene). Dazu das Hebelrätsel an den zwei Spiegeln in Hyggeliks Ruine.",
+  "funktionen": [
+   "DNG14_dive",
+   "DNG14_fight_intro",
+   "DNG14_chest00_loot",
+   "DNG14_chest01_loot",
+   "DNG14_chest02_loot",
+   "DNG14_chest03_loot",
+   "DNG14_chest04_loot",
+   "DNG14_chest05_loot",
+   "DNG14_chest06_loot",
+   "DNG14_chest07_loot",
+   "DNG14_chest07_trap",
+   "DNG15_riddle"
+  ],
+  "spieltexte": [
+   "THORWAL.DTX",
+   "FINAL.DTX"
+  ],
+  "zeilen": 293,
+  "sprache": "C",
+  "klassen": [],
+  "fehler": [
+   110
+  ],
+  "bright_eyes": "seg088"
+ },
+ {
+  "modul": "SEG089",
+  "datei": "seg089.c",
+  "bereich": "Dungeon",
+  "titel": "Hyggeliks Ruine (DNG15)",
+  "beschreibung": "Die Burgruine mit Trümmerfeldern, einsturzgefährdeten Decken, den zwei Spiegeln, verfluchtem Gold und Untoten. Am Ende übergibt Hyggeliks Geist nach dem Kampf gegen die Zombies das Schwert Grimring.",
+  "funktionen": [
+   "DNG15_handler",
+   "DNG15_small_wounds",
+   "DNG15_debris",
+   "DNG15_empty_chest",
+   "DNG15_rotten_clothes_chest",
+   "DNG15_smelling_chest",
+   "DNG15_figures_chest",
+   "DNG15_cursed_money_chest",
+   "DNG15_collapsing_ceiling",
+   "DNG15_clear_way",
+   "DNG15_cursed_money",
+   "DNG15_wounds_and_ladders"
+  ],
+  "spieltexte": [
+   "FINAL.DTX",
+   "TEXT.LTX"
+  ],
+  "zeilen": 807,
+  "sprache": "C",
+  "klassen": [],
+  "fehler": [
+   121,
+   122,
+   362
+  ],
+  "bright_eyes": "seg089"
+ },
+ {
+  "modul": "SEG090",
+  "datei": "seg090.c",
+  "bereich": "Dungeon",
+  "titel": "Zwergenfeste, Mine in Oberorken (DNG12)",
+  "beschreibung": "Die Mine unter Oberorken mit einstürzenden Stollen, zwei Ingerimm-Statuen, Falltüren, der Wasserfalle (der NSC findet die Geheimtür), Rückwärts-Teleportern, der Illusionswand und einer Speerfalle.",
+  "funktionen": [
+   "DNG12_handler",
+   "DNG_clear_corridor",
+   "DNG12_chest00_loot",
+   "DNG12_fight_intro"
+  ],
+  "spieltexte": [
+   "OBER.DTX"
+  ],
+  "zeilen": 582,
+  "sprache": "C",
+  "klassen": [],
+  "fehler": [
+   120,
+   123,
+   124,
+   357
+  ],
+  "bright_eyes": "seg090"
+ },
+ {
+  "modul": "SEG091",
+  "datei": "seg091.c",
+  "bereich": "Dungeon",
+  "titel": "Verlassene Mine in Prem (DNG13)",
+  "beschreibung": "Die alte Mine in Prem mit verschütteten Gängen, die mit Werkzeug schneller freigelegt sind, zwei Leichen, Katzengold, einem Geldbeutel und einsturzgefährdeten Decken. Am Ausgang gibt es AP je betretenem Deckenfeld.",
+  "funktionen": [
+   "DNG13_handler",
+   "DNG13_unblock_passage",
+   "DNG13_chest00_open",
+   "DNG13_chest00_loot",
+   "DNG13_chest01_open",
+   "DNG13_chest01_loot",
+   "DNG13_fight_intro",
+   "DNG13_collapsing_ceiling",
+   "DNG13_collapsing_ceiling_easy"
+  ],
+  "spieltexte": [
+   "PREM.DTX"
+  ],
+  "zeilen": 397,
+  "sprache": "C",
+  "klassen": [],
+  "fehler": [
+   122,
+   125,
+   346,
+   359
+  ],
+  "bright_eyes": "seg091"
+ },
+ {
+  "modul": "SEG092",
+  "datei": "seg092.c",
+  "bereich": "Dungeon",
+  "titel": "Truhen: Fallen, Schlösser und Beute",
+  "beschreibung": "Sucht die Truhe in der Truhentabelle des Dungeons und ruft Schloss-, Öffnungs- und Beutefunktion auf, beim ersten Öffnen kommen AP, Geld und Proviant dazu. Enthält die Fallen (Wunden, Gift, Versteinerung, Ignifax, Fluch, Fulminictus) und die Auswahllisten für Gegenstände.",
+  "funktionen": [
+   "chest_protected_normal",
+   "chest_closed",
+   "chest_protected_heavy",
+   "chest_poisoned1",
+   "chest_poisoned2",
+   "chest_poisoned3",
+   "chest_protected_brutal",
+   "chest_petrified",
+   "chest_ignifax_normal",
+   "chest_ignifax_brutal",
+   "chest_ignifax_heavy",
+   "chest_crossbow_bolts",
+   "chest_cursed",
+   "chest_fulminictus",
+   "loot_simple_chest",
+   "delete_chest_item",
+   "loot_chest",
+   "hero_has_lockpicks",
+   "loot_special_chest",
+   "use_lockpicks_on_chest",
+   "use_key_on_chest",
+   "loot_multi_chest"
+  ],
+  "spieltexte": [
+   "TEXT.LTX"
+  ],
+  "zeilen": 707,
+  "sprache": "C",
+  "klassen": [],
+  "fehler": [
+   216,
+   217,
+   377
+  ],
+  "bright_eyes": "seg092"
+ },
+ {
+  "modul": "SEG093",
+  "datei": "seg093.c",
+  "bereich": "Reise & Ereignisse",
+  "titel": "Reisekarte: Wegenetz-Tabellen und Reisemodus am Wegweiser",
+  "beschreibung": "Enthaelt die Tabellen der Landreise: 59 Landwege mit Laenge, Tempo und Begegnungschancen, die Wegweiser je Stadt, die 25 Haefen mit ihren Seewegen, die Kartenkoordinaten und die Liste der Reiseereignisse je Weg und Meile. do_travel_mode() zeigt am Wegweiser die Reisekarte, beschreibt angeklickte Orte und startet nach der Zielwahl die Reise.",
+  "funktionen": [
+   "do_travel_mode"
+  ],
+  "spieltexte": [
+   "TEXT.LTX",
+   "MAPTEXT.LTX"
+  ],
+  "zeilen": 1069,
+  "sprache": "C",
+  "klassen": [],
+  "fehler": [
+   139,
+   140,
+   141
+  ],
+  "bright_eyes": "seg093"
+ },
+ {
+  "modul": "SEG094",
+  "datei": "seg094.c",
+  "bereich": "Reise & Ereignisse",
+  "titel": "Reisemodus: Landreise Schritt fuer Schritt",
+  "beschreibung": "trv_do_journey() fuehrt die Gruppe ueber einen Landweg, zeichnet die Spur, laesst die Zeit laufen und loest an den Meilenpunkten Reiseereignisse, Zufallsbegegnungen, Wegkaempfe und Informantentreffen aus. Rechtsklick bietet Gewaltmarsch und Lager, abends wird ein Nachtlager erzwungen. Dazu Ankunftsfeld/Blickrichtung im Zielort und die Querverbindung Peilinen/Rovamund - Kravik/Skelellen.",
+  "funktionen": [
+   "prepare_map_marker",
+   "set_textbox_positions",
+   "trv_do_journey",
+   "TM_unused1",
+   "TM_get_track_length",
+   "trv_journey_enter_destination_town",
+   "trv_journey_dest_town_viewdir",
+   "TM_draw_track",
+   "TM_unused2",
+   "TM_draw_track_before_crosslink",
+   "TM_do_journey_crosslink"
+  ],
+  "spieltexte": [
+   "TEXT.LTX",
+   "MAPTEXT.LTX"
+  ],
+  "zeilen": 1068,
+  "sprache": "C",
+  "klassen": [],
+  "fehler": [
+   142,
+   143,
+   144,
+   145,
+   301,
+   341
+  ],
+  "bright_eyes": "seg094"
+ },
+ {
+  "modul": "SEG095",
+  "datei": "seg095.c",
+  "bereich": "Helden & Gruppe",
+  "titel": "NSC: Anwerben, Aufnehmen und Verabschieden",
+  "beschreibung": "In sechs Tavernen koennen die NSC Nariell, Harika, Curian, Ardora, Garsvik und Erwo angetroffen und angeworben werden (Harika verlangt Geld). add_npc() setzt den NSC auf Heldenplatz 7, remove_npc() speichert und entfernt ihn, npc_farewell() laesst ihn nach seiner Mindestzeit gehen.",
+  "funktionen": [
+   "npc_meetings",
+   "npc_farewell",
+   "npc_nariell",
+   "npc_harika",
+   "npc_curian",
+   "npc_ardora",
+   "npc_garsvik",
+   "npc_erwo",
+   "remove_npc",
+   "add_npc"
+  ],
+  "spieltexte": [
+   "NSC.LTX",
+   "TEXT.LTX",
+   "TAVERN.TLK"
+  ],
+  "zeilen": 542,
+  "sprache": "C",
+  "klassen": [],
+  "fehler": [
+   255,
+   256
+  ],
+  "bright_eyes": "seg095"
+ },
+ {
+  "modul": "SEG096",
+  "datei": "seg096.c",
+  "bereich": "Grafik & Oberfläche",
+  "titel": "Textausgabe, Grammatik und 6-Pixel-Schrift",
+  "beschreibung": "Bildet die deutschen Formen von Gegenstands- und Monsternamen (Artikel, Fall, Zahl, \"VON\"-Form, Pronomen) aus Vorlagen wie \"WURF.AXT.AEXTE\". Zeichnet Text mit der 6-Pixel-Schrift in den Bildpuffer, mit Zeilenumbruch, Zentrierung, Tabulator und Farbcodes, und die Rahmenzeilen der Popups.",
+  "funktionen": [
+   "GUI_name_inflect_with_article",
+   "GUI_name_inflect",
+   "GUI_name_base_form",
+   "GUI_grammar_name_to_personal_pronoun",
+   "GUI_get_personal_pronoun",
+   "GUI_get_definite_article",
+   "GUI_write_char_to_screen",
+   "GUI_count_lines",
+   "GUI_print_header",
+   "GUI_print_loc_line",
+   "GUI_print_string",
+   "GUI_print_char",
+   "GUI_lookup_char_width",
+   "GUI_write_fonti_to_screen",
+   "GUI_blank_char",
+   "GUI_font_to_buf",
+   "GUI_write_char_to_screen_xy",
+   "set_textcolor",
+   "get_textcolor",
+   "GUI_unused",
+   "GUI_get_space_for_string",
+   "GUI_get_first_pos_centered",
+   "GUI_draw_popup_line"
+  ],
+  "spieltexte": [],
+  "zeilen": 1034,
+  "sprache": "C",
+  "klassen": [],
+  "fehler": [
+   302,
+   303,
+   409
+  ],
+  "bright_eyes": "seg096"
+ },
+ {
+  "modul": "SEG097",
+  "datei": "seg097.c",
+  "bereich": "Grafik & Oberfläche",
+  "titel": "Textboxen, Auswahlmenues und Texteingabe",
+  "beschreibung": "Alle Popup-Boxen des Spiels: Meldung, Zahlen- und Texteingabe, Ja/Nein, Auswahlliste und Dialogbox mit Bild, samt Maus- und Tastensteuerung. Dazu die Kampf-Einleitungstexte der Dungeons und toter Code fuer eine zweite, 8 Pixel hohe Schrift.",
+  "funktionen": [
+   "GUI_unused1",
+   "GUI_unused2",
+   "GUI_lookup_char_height",
+   "GUI_1c2",
+   "GUI_enter_string",
+   "GUI_draw_radio_bg",
+   "GUI_copy_smth",
+   "GUI_output",
+   "GUI_input",
+   "GUI_bool",
+   "GUI_fill_radio_button",
+   "GUI_dialogbox",
+   "GUI_menu_input",
+   "GUI_radio",
+   "GUI_print_fight_intro_msg",
+   "GUI_dialog_na"
+  ],
+  "spieltexte": [
+   "TEXT.LTX"
+  ],
+  "zeilen": 1007,
+  "sprache": "C",
+  "klassen": [],
+  "fehler": [
+   304,
+   417
+  ],
+  "bright_eyes": "seg097"
+ },
+ {
+  "modul": "SEG098",
+  "datei": "seg098.c",
+  "bereich": "Magie & Talente",
+  "titel": "Zauber auswaehlen, pruefen und sprechen",
+  "beschreibung": "Zaubermenue (Klasse, dann Spruch), Zauberprobe mit MR des Ziels und AE-Kosten; use_spell() ruft den Handler aus seg099-seg101 und zieht die AE ab. Ausserdem Meditation (LE in AE) und Stabzauber der Magier.",
+  "funktionen": [
+   "magic_heal_ani",
+   "FIG_do_spell_damage",
+   "get_attackee_parade",
+   "get_attackee_rs",
+   "get_spell_cost",
+   "use_magic",
+   "can_use_spellclass",
+   "select_spell",
+   "test_spell",
+   "test_spell_group",
+   "select_magic_user",
+   "use_spell"
+  ],
+  "spieltexte": [
+   "TEXT.LTX"
+  ],
+  "zeilen": 923,
+  "sprache": "C",
+  "klassen": [],
+  "fehler": [
+   86,
+   188,
+   189,
+   190,
+   191,
+   319,
+   388,
+   389
+  ],
+  "bright_eyes": "seg098"
+ },
+ {
+  "modul": "SEG099",
+  "datei": "seg099.c",
+  "bereich": "Magie & Talente",
+  "titel": "Zauber-Handler 1/3: Antimagie bis Hellsicht",
+  "beschreibung": "Wirkung und Meldung der Sprueche aus Antimagie, Beherrschung, Daemonologie, Elemente, Bewegung, Heilung sowie Adleraug und Analues. Viele Sprueche sind leer. Enthaelt die Analues-Tabelle der magischen Gegenstaende.",
+  "funktionen": [
+   "spell_beherrschung",
+   "spell_destructibo",
+   "spell_gardanium",
+   "spell_illusionen",
+   "spell_verwandlung",
+   "spell_band",
+   "spell_bannbaladin",
+   "spell_boeser_blick",
+   "spell_grosse_gier",
+   "spell_grosse_ver",
+   "spell_herrdertiere",
+   "spell_horriphobus",
+   "spell_magischerraub",
+   "spell_respondami",
+   "spell_sanftmut",
+   "spell_somnigravis",
+   "spell_zwingtanz",
+   "spell_furor_blut",
+   "spell_geister_bannen",
+   "spell_geister_rufen",
+   "spell_heptagon",
+   "spell_kraehenruf",
+   "spell_skelettarius",
+   "spell_elementare",
+   "spell_nihilatio",
+   "spell_solidirid",
+   "spell_axxeleratus",
+   "spell_foramen",
+   "spell_motoricus",
+   "spell_spurlos",
+   "spell_transversalis",
+   "spell_ueber_eis",
+   "spell_balsam",
+   "spell_hexenspeichel",
+   "spell_klarum_purum",
+   "spell_ruhe_koerper",
+   "spell_tiere_heilen",
+   "spell_adleraug",
+   "spell_analues"
+  ],
+  "spieltexte": [
+   "SPELLTXT.LTX",
+   "TEXT.LTX"
+  ],
+  "zeilen": 1163,
+  "sprache": "C",
+  "klassen": [],
+  "fehler": [
+   192,
+   193,
+   194,
+   195,
+   196,
+   197,
+   198,
+   199,
+   200,
+   201,
+   218,
+   380,
+   381,
+   382,
+   383,
+   386,
+   387
+  ],
+  "bright_eyes": "seg099"
+ },
+ {
+  "modul": "SEG100",
+  "datei": "seg100.c",
+  "bereich": "Magie & Talente",
+  "titel": "Zauber-Handler 2/3: Hellsicht, Illusion, Kampf",
+  "beschreibung": "Handler fuer Hellsicht (Eigenschaften, Exposami, Odem, Penetrizzel), Illusion (Chamaelioni, Duplicatus, Hexenknoten) und Kampfzauber (Blitz, Ignifaxius, Fulminictus, Plumbumbarum u. a.).",
+  "funktionen": [
+   "spell_eigenschaften",
+   "spell_exposami",
+   "spell_odem_arcanum",
+   "spell_penetrizzel",
+   "spell_sensibar",
+   "spell_chamaelioni",
+   "spell_duplicatus",
+   "spell_harmlos",
+   "spell_hexenknoten",
+   "spell_blitz",
+   "spell_ecliptifactus",
+   "spell_eisenrost",
+   "spell_fulminictus",
+   "spell_ignifaxius",
+   "spell_plumbumbarum",
+   "spell_radau",
+   "spell_saft_kraft",
+   "spell_scharfes_auge",
+   "spell_hexenblick",
+   "spell_necropathia"
+  ],
+  "spieltexte": [
+   "SPELLTXT.LTX",
+   "TEXT.LTX"
+  ],
+  "zeilen": 819,
+  "sprache": "C",
+  "klassen": [],
+  "fehler": [
+   200,
+   202,
+   203,
+   204,
+   205,
+   206
+  ],
+  "bright_eyes": "seg100"
+ },
+ {
+  "modul": "SEG101",
+  "datei": "seg101.c",
+  "bereich": "Magie & Talente",
+  "titel": "Zauber-Handler 3/3: Verwandlung und Veraenderung",
+  "beschreibung": "Handler fuer Arcano, Armatrutz, die Eigenschafts-Zauber (+2 fuer 2 Stunden), Feuerbann, Paralue, Salander, Visibili, Brenne toter Stoff (auch fuers Zunderkaestchen), Dunkelheit, Flim Flam und Silentium.",
+  "funktionen": [
+   "spell_adler",
+   "spell_arcano",
+   "spell_armatrutz",
+   "spell_inc_ch",
+   "spell_feuerbann",
+   "spell_inc_ff",
+   "spell_inc_ge",
+   "spell_inc_in",
+   "spell_inc_kk",
+   "spell_inc_kl",
+   "spell_inc_mu",
+   "spell_mutabili",
+   "spell_paralue",
+   "spell_salander",
+   "spell_see",
+   "spell_visibili",
+   "spell_abvenenum",
+   "spell_aeolitus",
+   "spell_brenne",
+   "spell_claudibus",
+   "spell_dunkelheit",
+   "spell_erstarre",
+   "spell_flim_flam",
+   "spell_schmelze",
+   "spell_silentium",
+   "spell_sturmgebr"
+  ],
+  "spieltexte": [
+   "SPELLTXT.LTX",
+   "TEXT.LTX"
+  ],
+  "zeilen": 757,
+  "sprache": "C",
+  "klassen": [],
+  "fehler": [
+   207,
+   208,
+   209,
+   210,
+   213
+  ],
+  "bright_eyes": "seg101"
+ },
+ {
+  "modul": "SEG102",
+  "datei": "seg102.c",
+  "bereich": "Kampf",
+  "titel": "Gegnerzauber im Kampf",
+  "beschreibung": "Gegner sprechen Zauber: AE-Pruefung, Probe auf die Eigenschaften des Gegners (Zauberwert immer 0) und 14 Handler von Verwandlung beenden bis Paralue. Haelt auch die globalen Zeiger auf Zauberer und Ziel.",
+  "funktionen": [
+   "MON_do_spell_damage",
+   "MON_get_target_PA",
+   "MON_get_target_RS",
+   "MON_get_spell_cost",
+   "MON_test_attrib3",
+   "MON_test_talent",
+   "MON_sub_ae",
+   "MON_cast_spell",
+   "mspell_verwandlung",
+   "mspell_bannbaladin",
+   "mspell_boeser_blick",
+   "mspell_horriphobus",
+   "mspell_axxeleratus",
+   "mspell_balsam",
+   "mspell_blitz",
+   "mspell_eisenrost",
+   "mspell_fulminictus",
+   "mspell_ignifaxius",
+   "mspell_plumbumbarum",
+   "mspell_saft_kraft",
+   "mspell_armatrutz",
+   "mspell_paralue"
+  ],
+  "spieltexte": [
+   "SPELLTXT.LTX"
+  ],
+  "zeilen": 837,
+  "sprache": "C",
+  "klassen": [],
+  "fehler": [
+   36,
+   37,
+   207
+  ],
+  "bright_eyes": "seg102"
+ },
+ {
+  "modul": "SEG103",
+  "datei": "seg103.c",
+  "bereich": "Magie & Talente",
+  "titel": "Talente anwenden",
+  "beschreibung": "Talentprobe, Talentauswahl (Stufenanstieg und ortsabhängig) und Ausführung der aktiven Talente: Heilen, Akrobatik, Musizieren, Falschspiel, Taschendiebstahl, Alchimie; dazu die Feilschen-Probe.",
+  "funktionen": [
+   "LVL_select_talent",
+   "get_proper_hero",
+   "test_talent",
+   "select_talent",
+   "use_talent",
+   "GUI_use_talent",
+   "GUI_use_talent2",
+   "bargain"
+  ],
+  "spieltexte": [
+   "TEXT.LTX",
+   "SPELLTXT.LTX"
+  ],
+  "zeilen": 769,
+  "sprache": "C",
+  "klassen": [],
+  "fehler": [
+   78,
+   86,
+   257,
+   258,
+   305,
+   344,
+   406
+  ],
+  "bright_eyes": "seg103"
+ },
+ {
+  "modul": "SEG104",
+  "datei": "seg104.c",
+  "bereich": "Magie & Talente",
+  "titel": "Alchimie und Krankheitsheilung",
+  "beschreibung": "Rezepttabelle und Brauen (mit Warten oder Abtrennen des Brauers), Heilen von Krankheiten mit Talent und Kräutern sowie Hilfen für Gewicht und Talentchancen. Neu: Wundfieber/Blaue Keuche nie heilbar, Textdatei bleibt im Sonderfall geladen.",
+  "funktionen": [
+   "hero_has_ingrendients",
+   "hero_use_ingrendients",
+   "do_alchemy",
+   "plan_alchemy",
+   "has_herb_for_disease",
+   "talent_cure_disease",
+   "get_heaviest_hero",
+   "get_hero_weight",
+   "get_talented_hero_pos"
+  ],
+  "spieltexte": [
+   "TEXT.LTX",
+   "SPELLTXT.LTX"
+  ],
+  "zeilen": 686,
+  "sprache": "C",
+  "klassen": [],
+  "fehler": [
+   257,
+   259,
+   260,
+   261,
+   262,
+   263
+  ],
+  "bright_eyes": "seg104"
+ },
+ {
+  "modul": "SEG105",
+  "datei": "seg105.c",
+  "bereich": "Gegenstände",
+  "titel": "Inventar: Ausrüsten, Aufnehmen, Wegwerfen",
+  "beschreibung": "Wirkungen beim An- und Ablegen, Trage- und Benutzbarkeitsprüfung, Gegenstände an Held oder Gruppe geben, Wegwerfen mit Opfergaben, Zählen, zufälliger Verlust und Auswahlmenü. Neu: Opfer zählen auch bei abgebrochenem Wegwerfen.",
+  "funktionen": [
+   "unequip",
+   "add_equip_boni",
+   "can_hero_use_item",
+   "can_hero_equip_item_at_slot",
+   "where_has_hero_equipped_item",
+   "where_has_hero_incomplete_stack_of_item",
+   "give_new_item_to_hero",
+   "is_item_pleasing_ingerimm",
+   "drop_item",
+   "give_new_item_to_group",
+   "hero_count_item",
+   "group_count_item",
+   "loose_random_item",
+   "select_item_to_drop"
+  ],
+  "spieltexte": [
+   "TEXT.LTX"
+  ],
+  "zeilen": 905,
+  "sprache": "C",
+  "klassen": [],
+  "fehler": [
+   126,
+   219,
+   220,
+   221,
+   305,
+   394
+  ],
+  "bright_eyes": "seg105"
+ },
+ {
+  "modul": "SEG106",
+  "datei": "seg106.c",
+  "bereich": "Gegenstände",
+  "titel": "Inventar: Umlegen, Übergeben, Startausrüstung",
+  "beschreibung": "Umlegen im eigenen Inventar, Übergeben an andere Helden, Gegenstandsbeschreibung, Startausrüstung, Lichtdauer, Gürtelanimation und Wasserschlauchsuche. Neu: falsche Zählung der belegten Inventarplätze in pass_item.",
+  "funktionen": [
+   "two_hand_collision",
+   "move_item",
+   "print_item_description",
+   "pass_item",
+   "startup_equipment",
+   "get_max_light_time",
+   "equip_belt_ani",
+   "get_full_waterskin_inv_slot"
+  ],
+  "spieltexte": [
+   "TEXT.LTX",
+   "CHARTEXT.LTX"
+  ],
+  "zeilen": 926,
+  "sprache": "C",
+  "klassen": [],
+  "fehler": [
+   220,
+   222,
+   223,
+   305,
+   306,
+   307,
+   347,
+   395,
+   397,
+   398,
+   399
+  ],
+  "bright_eyes": "seg106"
+ },
+ {
+  "modul": "SEG107",
+  "datei": "seg107.c",
+  "bereich": "Gegenstände",
+  "titel": "Gegenstände benutzen",
+  "beschreibung": "Verteiler für \"Gegenstand benutzen\" mit Handlern für magische Ladungen, Rezepte, Dokumente, Waffengift, Licht, Heptagon-Buch und magischen Beutel.",
+  "funktionen": [
+   "use_item",
+   "item_invoke_arcano_psychostabilils",
+   "item_read_recipe",
+   "item_read_document",
+   "item_invoke_armatrutz",
+   "item_invoke_flim_flam",
+   "item_read_schuldbuch",
+   "item_read_orkdokument",
+   "item_apply_weapon_poison",
+   "item_use_miasthmaticum",
+   "item_use_hylailer_feuer",
+   "item_read_spellbook_heptagon",
+   "item_ignite",
+   "item_use_beutel"
+  ],
+  "spieltexte": [
+   "TEXT.LTX",
+   "SPELLTXT.LTX"
+  ],
+  "zeilen": 624,
+  "sprache": "C",
+  "klassen": [],
+  "fehler": [
+   76,
+   210,
+   211,
+   224,
+   225,
+   400
+  ],
+  "bright_eyes": "seg107"
+ },
+ {
+  "modul": "SEG108",
+  "datei": "seg108.c",
+  "bereich": "Gegenstände",
+  "titel": "Essen, Trinken, Kräuter und Tränke",
+  "beschreibung": "consume: Nahrung, Getränke, Kräuter und Tränke mit ihren Wirkungen auf Hunger, Durst, LE, AE, Eigenschaften, Gift und Krankheiten; leere Flaschen kommen zurück.",
+  "funktionen": [
+   "consume"
+  ],
+  "spieltexte": [
+   "TEXT.LTX"
+  ],
+  "zeilen": 555,
+  "sprache": "C",
+  "klassen": [],
+  "fehler": [
+   226,
+   227,
+   335,
+   404
+  ],
+  "bright_eyes": "seg108"
+ },
+ {
+  "modul": "SEG109",
+  "datei": "seg109.c",
+  "bereich": "Reise & Ereignisse",
+  "titel": "Reiseereignisse 1/10: Verteiler und Bausteine",
+  "beschreibung": "TRV_event() ruft das Handler-Feld der 145 Reiseereignisse auf und laedt FEATURE.LTX samt passender FEATUREn.LTX. Die Bausteine fuer Kraeuter-, Rast- und Nahrungsplaetze, Herbergen, Huetten, Faehrten, Furten, Faehren, Schusswaffenjagd und Brueckenbau nutzen alle weiteren Ereignis-Module; dazu die Ereignisse 1-10, 12, 18, 19, 23 und 92.",
+  "funktionen": [
+   "TRV_load_textfile",
+   "TRV_event",
+   "TRV_fight_event",
+   "TRV_found_herb_place",
+   "TRV_inside_herb_place",
+   "TRV_found_camp_place",
+   "TRV_found_replenish_place",
+   "TRV_found_inn",
+   "TRV_enter_hut_question",
+   "TRV_follow_trail_question",
+   "TRV_cross_a_ford",
+   "TRV_ford_test",
+   "TRV_ferry",
+   "tevent_001",
+   "tevent_002",
+   "tevent_003",
+   "tevent_004",
+   "TRV_hunt_generic",
+   "tevent_005",
+   "tevent_006",
+   "tevent_007",
+   "TRV_barrier",
+   "tevent_008",
+   "tevent_009",
+   "tevent_010",
+   "tevent_012",
+   "tevent_018",
+   "tevent_019",
+   "tevent_023",
+   "tevent_092"
+  ],
+  "spieltexte": [
+   "FEATURE.LTX",
+   "FEATURE1.LTX",
+   "FEATURE2.LTX",
+   "FEATURE3.LTX",
+   "FEATURE4.LTX",
+   "FEATURE5.LTX",
+   "FEATURE6.LTX",
+   "FEATURE7.LTX",
+   "FEATURE8.LTX",
+   "FEATURE9.LTX",
+   "TEXT.LTX",
+   "F092.TLK"
+  ],
+  "zeilen": 1018,
+  "sprache": "C",
+  "klassen": [],
+  "fehler": [
+   146,
+   147,
+   148,
+   149,
+   150,
+   151,
+   152,
+   153
+  ],
+  "bright_eyes": "seg109"
+ },
+ {
+  "modul": "SEG110",
+  "datei": "seg110.c",
+  "bereich": "Reise & Ereignisse",
+  "titel": "Reiseereignisse 2/10 (11-50)",
+  "beschreibung": "Ereignisse von Peilinen/Rovamund bis Daspota/Skjal: Pfade zur Querverbindung, Leiche, Furten, Schilfmeer am Bodir, Ueberfaelle, sterbende Abenteurerin mit dem Hinweis auf den Daspota-Schatz, Bauer, Zugang zur Verfallenen Herberge und viele Rast-, Kraeuter- und Jagdplaetze.",
+  "funktionen": [
+   "tevent_011",
+   "TRV_swim2",
+   "TRV_a_path",
+   "tevent_013",
+   "tevent_014",
+   "tevent_014_chest",
+   "tevent_015",
+   "tevent_017",
+   "tevent_020",
+   "tevent_021",
+   "tevent_022",
+   "tevent_024",
+   "tevent_025",
+   "tevent_026",
+   "tevent_027",
+   "tevent_028",
+   "tevent_029",
+   "tevent_030",
+   "tevent_031",
+   "tevent_032",
+   "tevent_033",
+   "tevent_034",
+   "tevent_035",
+   "tevent_036",
+   "tevent_039",
+   "tevent_040",
+   "tevent_041",
+   "tevent_042",
+   "tevent_043",
+   "tevent_044",
+   "tevent_045",
+   "tevent_046",
+   "tevent_048",
+   "tevent_049",
+   "tevent_050"
+  ],
+  "spieltexte": [
+   "FEATURE.LTX",
+   "FEATURE1.LTX",
+   "FEATURE2.LTX",
+   "TEXT.LTX"
+  ],
+  "zeilen": 852,
+  "sprache": "C",
+  "klassen": [],
+  "fehler": [
+   105,
+   154,
+   155,
+   156,
+   157,
+   371,
+   373
+  ],
+  "bright_eyes": "seg110"
+ },
+ {
+  "modul": "SEG111",
+  "datei": "seg111.c",
+  "bereich": "Reise & Ereignisse",
+  "titel": "Reiseereignisse 3/10 (53-66)",
+  "beschreibung": "Ereignisse zwischen Ottarje, Skjal, Prem, Kord, Orvil und Ala: Herbergen Langschiff und Adlerfels, Erdrutsch, Jaegerhuette, Pass mit Klamm, Wolfshoehle, Kadaver, Gorahs Lichtung mit dem Druiden (Auftrag Umbriks) und wilde Hunde.",
+  "funktionen": [
+   "tevent_053",
+   "tevent_054",
+   "tevent_055",
+   "tevent_056",
+   "tevent_057",
+   "tevent_058",
+   "tevent_059",
+   "tevent_060",
+   "tevent_061",
+   "tevent_062",
+   "tevent_063",
+   "tevent_064",
+   "tevent_064_chest",
+   "tevent_065",
+   "tevent_066"
+  ],
+  "spieltexte": [
+   "FEATURE.LTX",
+   "FEATURE2.LTX",
+   "FEATURE3.LTX",
+   "TEXT.LTX"
+  ],
+  "zeilen": 743,
+  "sprache": "C",
+  "klassen": [],
+  "fehler": [
+   76,
+   158,
+   159,
+   311,
+   369,
+   370,
+   374,
+   376
+  ],
+  "bright_eyes": "seg111"
+ },
+ {
+  "modul": "SEG112",
+  "datei": "seg112.c",
+  "bereich": "Reise & Ereignisse",
+  "titel": "Reiseereignisse 4/10 (67-77)",
+  "beschreibung": "Ereignisse zwischen Ala, Thoss, Liskor, Oberorken, Felsteyn und Orkanger: verfallene Huette, Ork-Monolith am Thossel, Leiche mit dem Einhornbrief, Wegelagerer, Raeuber mit ihrem Lager und der Zugang zur Goblinhoehle; TRV_swimm() fuer Flussueberquerungen.",
+  "funktionen": [
+   "tevent_067",
+   "tevent_068",
+   "tevent_069",
+   "tevent_070",
+   "tevent_071",
+   "TRV_swimm",
+   "tevent_unused01",
+   "tevent_072",
+   "tevent_073",
+   "tevent_074",
+   "tevent_075",
+   "tevent_076",
+   "tevent_077"
+  ],
+  "spieltexte": [
+   "FEATURE.LTX",
+   "FEATURE3.LTX",
+   "FEATURE4.LTX",
+   "TEXT.LTX"
+  ],
+  "zeilen": 773,
+  "sprache": "C",
+  "klassen": [],
+  "fehler": [
+   160,
+   161,
+   162,
+   373
+  ],
+  "bright_eyes": "seg112"
+ },
+ {
+  "modul": "SEG113",
+  "datei": "seg113.c",
+  "bereich": "Reise & Ereignisse",
+  "titel": "Reiseereignisse 5/10 (80-89, 97-109) und hero_disappear()",
+  "beschreibung": "Ereignisse von Orkanger/Clanegh ueber den Einsiedlersee bis Skelellen/Phexcaer: Tatzelwurm-Spur, Riesenlindwurm, Harpyien, Klamm, Nebeltal, Grat mit Hoehenangst und Zugang zur Orkbehausung. hero_disappear() entfernt Helden oder NSC endgueltig oder in einen Tempel und wird von vielen Modulen benutzt.",
+  "funktionen": [
+   "tevent_080",
+   "tevent_081",
+   "tevent_082",
+   "tevent_083",
+   "tevent_084",
+   "tevent_085",
+   "tevent_086",
+   "tevent_088",
+   "tevent_089",
+   "tevent_097",
+   "tevent_098",
+   "hero_disappear",
+   "tevent_099",
+   "tevent_101",
+   "tevent_102",
+   "tevent_103",
+   "tevent_104",
+   "tevent_105",
+   "tevent_106",
+   "tevent_107",
+   "tevent_108",
+   "tevent_109"
+  ],
+  "spieltexte": [
+   "FEATURE4.LTX",
+   "FEATURE5.LTX",
+   "FEATURE.LTX",
+   "TEXT.LTX"
+  ],
+  "zeilen": 903,
+  "sprache": "C",
+  "klassen": [],
+  "fehler": [
+   80,
+   150,
+   163,
+   164,
+   165,
+   166,
+   167,
+   168,
+   169,
+   264
+  ],
+  "bright_eyes": "seg113"
+ },
+ {
+  "modul": "SEG114",
+  "datei": "seg114.c",
+  "bereich": "Reise & Ereignisse",
+  "titel": "Reiseereignisse 6/10 (110-123)",
+  "beschreibung": "Ereignisse auf dem Weg Skelellen-Phexcaer und um Merske/Rovamund und Orvil/Rovik: Felswand, Nashornjagd, Firun-Tempel in der Wildnis, Hochmoor mit der Hexe Olimone, Steinlawine, Woelfe und Schaefer, Haengebruecke mit Hoehenangst.",
+  "funktionen": [
+   "tevent_110",
+   "tevent_111",
+   "tevent_112",
+   "tevent_113",
+   "tevent_114",
+   "tevent_116",
+   "tevent_117",
+   "tevent_118",
+   "tevent_119",
+   "tevent_122",
+   "tevent_123"
+  ],
+  "spieltexte": [
+   "FEATURE5.LTX",
+   "FEATURE6.LTX",
+   "FEATURE.LTX",
+   "TEXT.LTX"
+  ],
+  "zeilen": 752,
+  "sprache": "C",
+  "klassen": [],
+  "fehler": [
+   150,
+   170,
+   171,
+   172
+  ],
+  "bright_eyes": "seg114"
+ },
+ {
+  "modul": "SEG115",
+  "datei": "seg115.c",
+  "bereich": "Reise & Ereignisse",
+  "titel": "Reiseereignisse 7/10 (16, 47, 90-96, 100, 126-129)",
+  "beschreibung": "Floesser in Not, Steinschlag, Zugaenge zur Hoehle des Daspota-Schatzes, zur Ruine des Schwarzmagiers, zur Kultstaette des Namenlosen und zum Drachenhort, Grat und Felslabyrinth sowie ein Kutter, der die Gruppe nach Ljasdahl, Ottarje oder Varnheim mitnimmt.",
+  "funktionen": [
+   "tevent_016",
+   "tevent_090",
+   "tevent_091",
+   "tevent_093",
+   "tevent_094",
+   "tevent_095",
+   "tevent_096",
+   "tevent_126",
+   "tevent_127",
+   "tevent_128",
+   "tevent_129",
+   "tevent_047",
+   "tevent_100"
+  ],
+  "spieltexte": [
+   "FEATURE5.LTX",
+   "FEATURE7.LTX",
+   "FEATURE8.LTX",
+   "FEATURE9.LTX",
+   "TEXT.LTX"
+  ],
+  "zeilen": 759,
+  "sprache": "C",
+  "klassen": [],
+  "fehler": [
+   150,
+   254
+  ],
+  "bright_eyes": "seg115"
+ },
+ {
+  "modul": "SEG116",
+  "datei": "seg116.c",
+  "bereich": "Reise & Ereignisse",
+  "titel": "Reiseereignisse 8/10 (130-144) und die Alte (F092.TLK)",
+  "beschreibung": "Ereignisse zwischen Brendhil und Manrin, am Einsiedlersee, bei Runin und auf der Querverbindung: Piratenhoehle, Sumpf, Monolith mit Kartenhinweis, Einhorn, Urwald und Hirschjagd. tevent_144 ist das Heerlager der Orks mit dem Endkampf; TLK_old_woman() behandelt das Gespraech mit der Alten.",
+  "funktionen": [
+   "tevent_130",
+   "tevent_131",
+   "tevent_132",
+   "tevent_133",
+   "tevent_134",
+   "tevent_135",
+   "tevent_137",
+   "tevent_138",
+   "tevent_139",
+   "tevent_140",
+   "tevent_141",
+   "tevent_142",
+   "tevent_143",
+   "tevent_144",
+   "tevent_144_unused",
+   "TLK_old_woman",
+   "tevent_136"
+  ],
+  "spieltexte": [
+   "FEATURE7.LTX",
+   "FEATURE8.LTX",
+   "FEATURE.LTX",
+   "TEXT.LTX",
+   "F092.TLK",
+   "INFO7.TLK"
+  ],
+  "zeilen": 747,
+  "sprache": "C",
+  "klassen": [],
+  "fehler": [
+   38,
+   80,
+   150,
+   153,
+   173,
+   174
+  ],
+  "bright_eyes": "seg116"
+ },
+ {
+  "modul": "SEG117",
+  "datei": "seg117.c",
+  "bereich": "Reise & Ereignisse",
+  "titel": "Zufallsbegegnungen, Jagd, Seeungeheuer, Weg zu Hyggeliks Ruine",
+  "beschreibung": "journey_random_encounter() waehlt nach der Landschaft eines Wegs Kampf oder Jagd (Karene, Wildschwein, Auerochse, Nashorn, Hoehlenbaer, Kvillotter); auf See greifen Krakenmolch oder Piraten an. TLK_way_to_ruin() fuehrt durch F115.TLK zu Hyggeliks Ruine, tevent_087 ist die erste Einhornbegegnung.",
+  "funktionen": [
+   "pause_traveling",
+   "resume_traveling",
+   "hunt_karen",
+   "hunt_wildboar",
+   "hunt_cavebear",
+   "hunt_viper",
+   "octopus_attack",
+   "hunt_bison",
+   "hunt_rhino",
+   "pirates_attack",
+   "do_wild8_fight",
+   "journey_random_encounter",
+   "search_ruin1",
+   "tevent_115",
+   "TLK_way_to_ruin",
+   "tevent_087"
+  ],
+  "spieltexte": [
+   "WILD.LTX",
+   "TEXT.LTX",
+   "F115.TLK",
+   "INFO6.TLK"
+  ],
+  "zeilen": 1003,
+  "sprache": "C",
+  "klassen": [],
+  "fehler": [
+   86,
+   175,
+   176,
+   177,
+   178,
+   179,
+   180,
+   181,
+   182,
+   327,
+   375
+  ],
+  "bright_eyes": "seg117"
+ },
+ {
+  "modul": "SEG118",
+  "datei": "seg118.c",
+  "bereich": "Reise & Ereignisse",
+  "titel": "Reiseereignisse 10/10 (37, 38, 51, 52, 78, 79, 120-125, 145)",
+  "beschreibung": "Der Greif mit dem Raetsel \"RAD\", Einhorn, Schneewaechte im Winter, Spinnenhoehle, umgestuerzte Eiche, Steilklippe, Furt und Hirte; tevent_145 laesst am Ende der Querverbindung die Richtung waehlen.",
+  "funktionen": [
+   "tevent_037",
+   "tevent_038",
+   "tevent_078",
+   "tevent_079",
+   "tevent_051",
+   "tevent_052",
+   "tevent_120",
+   "tevent_121",
+   "tevent_124",
+   "tevent_125",
+   "tevent_145"
+  ],
+  "spieltexte": [
+   "FEATURE2.LTX",
+   "FEATURE4.LTX",
+   "FEATURE6.LTX",
+   "FEATURE8.LTX",
+   "FEATURE9.LTX",
+   "FEATURE.LTX",
+   "TEXT.LTX",
+   "INFO6.TLK"
+  ],
+  "zeilen": 640,
+  "sprache": "C",
+  "klassen": [],
+  "fehler": [
+   150,
+   168,
+   183,
+   184,
+   185
+  ],
+  "bright_eyes": "seg118"
+ },
+ {
+  "modul": "SEG119",
+  "datei": "seg119.c",
+  "bereich": "Krankheit & Gift",
+  "titel": "Krankheiten: taegliche Wirkung",
+  "beschreibung": "Einmal am Tag fuer jeden Helden: Verlauf der sieben Krankheiten mit LE-Verlust, Abzuegen, Ansteckung der Gruppe, Genesung und Rueckgabe der Abzuege. KK oder GE auf 0 bedeutet den Tod; Tollwut loest den Tollwutanfall aus.",
+  "funktionen": [
+   "disease_effect"
+  ],
+  "spieltexte": [
+   "TEXT.LTX"
+  ],
+  "zeilen": 659,
+  "sprache": "C",
+  "klassen": [],
+  "fehler": [
+   265,
+   266,
+   267,
+   268,
+   269,
+   270,
+   271
+  ],
+  "bright_eyes": "seg119"
+ },
+ {
+  "modul": "SEG120",
+  "datei": "seg120.c",
+  "bereich": "Start & System",
+  "titel": "Tollwutanfall, Speicher, Spielstart, DOS",
+  "beschreibung": "Der Tollwutanfall mit seinen drei Gegenmitteln, dazu Programmstart (Speicher, Puffer, Paletten, Anfangszustand in Thorwal, TEMP-Verzeichnis und CHR-Dateien), Aufraeumen, Game-Over-Bild und Aufruf des Heldengenerators.",
+  "funktionen": [
+   "rabies_frenzy",
+   "init_global_buffer",
+   "init_memory",
+   "refresh_colors",
+   "get_diskspace",
+   "init_game_state",
+   "err_handler",
+   "prepare_dirs",
+   "cleanup_game",
+   "game_over_screen",
+   "call_gen"
+  ],
+  "spieltexte": [
+   "TEXT.LTX"
+  ],
+  "zeilen": 974,
+  "sprache": "C",
+  "klassen": [],
+  "fehler": [
+   212,
+   272,
+   273,
+   308,
+   309
+  ],
+  "bright_eyes": "seg120"
+ },
+ {
+  "modul": "SEG121",
+  "datei": "seg121.c",
+  "bereich": "Krankheit & Gift",
+  "titel": "Gifte: Wirkung im 5-Minuten-Takt",
+  "beschreibung": "Fuer jeden Helden der Verlauf der neun Gifte: LE- oder AE-Verlust, Abzuege auf Eigenschaften und AT/PA, Ende der Wirkung und Erholung. KK oder GE auf 0 toetet.",
+  "funktionen": [
+   "poison_effect"
+  ],
+  "spieltexte": [
+   "TEXT.LTX"
+  ],
+  "zeilen": 451,
+  "sprache": "C",
+  "klassen": [],
+  "fehler": [
+   267,
+   271,
+   274
+  ],
+  "bright_eyes": "seg121"
+ },
+ {
+  "modul": "SEG122",
+  "datei": "seg122.c",
+  "bereich": "Stadt",
+  "titel": "Leerer Orts-Handler",
+  "beschreibung": "Enthaelt nur die leere Funktion do_location1(), den Orts-Handler fuer LOCTYPE_UNKN1 in der Tabelle von seg025.",
+  "funktionen": [
+   "do_location1"
+  ],
+  "spieltexte": [],
+  "zeilen": 18,
+  "sprache": "C",
+  "klassen": [],
+  "fehler": [],
+  "bright_eyes": "seg122"
+ }
+]

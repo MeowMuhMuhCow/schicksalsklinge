@@ -1,0 +1,14 @@
+alt	neu	art	datei:zeile	begruendung
+hero_has_ingrendients	hero_has_ingredients	funktion	seg104.c:132	Schreibfehler 'ingrendients'; prüft, ob alle Zutaten eines Rezepts vorhanden sind
+hero_use_ingrendients	hero_use_ingredients	funktion	seg104.c:177	Schreibfehler 'ingrendients'; verbraucht die Zutaten eines Rezepts
+item_invoke_arcano_psychostabilils	item_invoke_arcano	funktion	seg107.c:126	Name hat 34 Zeichen (Borland unterscheidet nur 32) und Schreibfehler 'psychostabilils'; passt zu item_invoke_armatrutz/item_invoke_flim_flam
+loose_random_item	lose_random_item	funktion	seg105.c:773	englisch 'lose' (verlieren), nicht 'loose' (locker)
+get_proper_hero	get_best_hero_for_talent	funktion	seg103.c:127	liefert den lebenden Helden der Gruppe mit der höchsten Summe aus den drei Probeneigenschaften und dem Talentwert (nur für Sinnesschärfe im Anfängermodus)
+g_statuspage_sel_inv_slot_3	g_statuspage_sel_slot	variable	seg046.c:38	aktuell ausgewählter Inventarplatz (roter Rahmen) im Statusmenü (seg048)
+g_statuspage_sel_inv_slot_1	g_statuspage_sel_slot_drawn	variable	seg046.c:36	Platz, an dem der rote Rahmen zuletzt gezeichnet wurde (zum Löschen beim Wechsel)
+g_statuspage_sel_inv_slot_4	g_statuspage_target_slot	variable	seg046.c:39	Zielplatz der zweiten Auswahl (gelber Rahmen), -1 = keine Zielauswahl aktiv; 23 = Auge, 24 = Mund
+g_statuspage_sel_inv_slot_2	g_statuspage_target_slot_drawn	variable	seg046.c:37	Platz, an dem der gelbe Rahmen zuletzt gezeichnet wurde
+staffspell_timer	regen_block_timer	feld	hero.h:205	vermutlich: wird nur in GRP_hero_sleep (seg049) gelesen und sperrt dort die Regeneration; gesetzt vom Stabzauber (12 h), misslungenem Wundenheilen (seg103, 24 h) und Brauen im Lager (seg104, 24 h). Für Stabzauber wird er nirgends geprüft
+g_poisons_healer_price	g_poison_strength	variable	datseg.c:2310	vermutlich: nicht nur Heilerpreis (seg053), sondern auch Probenaufschlag Heilkunde Gift (seg103), Giftschaden der Waffe (seg041) und AE-Kosten (seg099) - also die Stärke des Gifts
+g_diseases_healer_price	g_disease_strength	variable	datseg.c:2290	vermutlich: auch Probenaufschlag Heilkunde Krankheiten (seg104), nicht nur Heilerpreis (seg053)
+g_unkn_067	g_seg105_padding	variable	seg105.c:35	wird nirgends benutzt (auch nicht in *.asm); vermutlich Füllbyte zur Wortausrichtung der folgenden Tabelle ds:0xae48

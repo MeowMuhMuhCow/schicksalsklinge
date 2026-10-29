@@ -1,0 +1,7 @@
+modul	stelle	befund	quelle	status
+seg008.asm	pic_copy	bei oben abgeschnittenem Bild rueckt SI um skip_top*width statt *320 vor; fuer Modus 3 (320 breite Quelle) falsch, Modus 3 wird fuenfmal benutzt	Assembler-Welle	zu pruefen
+seg008.asm	opl_unused_calibrate	schreibt Register 2 = 1 statt Register 4 = 1, Timer 1 startet nie, immer Ersatzwert 7000 (Code unbenutzt)	Assembler-Welle	unbenutzt
+seg008.asm	opl_unused_*	and al,0 / jnz springt nie; mov al,al; Befehl 06h speichert opl_section zweimal (Code unbenutzt)	Assembler-Welle	unbenutzt
+seg076.c	DNG_step	Spiegeltext aus FINAL.DTX bei pos == DNG_POS(1,8,5) ohne Pruefung des Dungeons	Spieltext-Welle	zu pruefen
+diverse	sprintf	13 sprintf-Aufrufe mit mehr Argumenten als Platzhaltern (harmlos)	Spieltext-Welle	zu pruefen
+OBER.DTX	seg090:354/413	Code liest OBER.DTX Text 31/32, die deutsche Datei hat nur 0..30	Spieltext-Welle	zu pruefen

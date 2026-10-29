@@ -1,0 +1,418 @@
+nr	bekannt	netz	quelle	notiz
+1	ja	8, 10	S1, S2	
+2	ja	96	S2	
+3	ja	58	S2	
+4	ja	22	S2	
+5	ja	20, 23	S1, S2	
+6	nein			
+7	nein			
+8	ja	20, 23	S1, S2	
+9	nein			
+10	nein			
+11	nein			
+12	nein			
+13	ja	24	S1, S2	
+14	ja	7	S1, S2	
+15	nein			
+16	nein			
+17	nein			
+18	ja	44	S2	
+19	nein			
+20	nein			
+21	ja	32	S1	
+22	ja	42	S1	
+23	nein			
+24	ja	56	S2	
+25	ja	18, 19, 43	S1, S2	
+26	ja	56	S2	
+27	nein			
+28	ja	55	S2	
+29	nein			
+30	nein			
+31	nein			
+32	nein			
+33	nein			
+34	ja	11	S1, S2	
+35	nein			
+36	nein			
+37	nein			
+38	nein			
+39	ja	185	S1, S2	
+40	ja	154	S1	
+41	nein			
+42	nein			
+43	ja	159	S1	
+44	nein			
+45	nein			
+46	nein			
+47	ja	287	S1	
+48	ja	145, 327	S1, S2	
+49	ja	75, 327	S1, S2	
+50	ja	327	S1	
+51	ja	327	S1	
+52	ja	201	S1	
+53	nein			
+54	nein			
+55	nein			
+56	nein			
+57	nein			
+58	nein			
+59	nein			
+60	nein			
+61	nein			
+62	nein			
+63	nein			
+64	nein			
+65	nein			
+66	nein			
+67	ja	274	S2	
+68	ja	186	S1, S2	
+69	ja	186	S1, S2	
+70	nein			
+71	ja	180	S1, S2	
+72	ja	181	S1, S2	
+73	nein			
+74	nein			
+75	ja	195	S1	
+76	ja	190	S1, S2	
+77	nein			
+78	nein			
+79	ja	312	S2	
+80	ja	301	S1	
+81	nein			
+82	ja	152	S1	
+83	nein			
+84	ja	248, 255	S1, S2, S4	
+85	nein			
+86	ja	267	S1, S2	
+87	nein			
+88	ja	306	S1	
+89	ja	152	S1	
+90	ja	246	S1, S2	
+91	nein			
+92	ja	94	S1, S2	
+93	nein			
+94	ja	245	S1, S2	
+95	ja	250	S2	
+96	ja	250	S2	
+97	ja	250	S2	
+98	nein			
+99	ja	302	S1	
+100	ja	302	S1	
+101	nein			
+102	ja	302	S1	
+103	nein			
+104	nein			
+105	ja	258	S2	
+106	ja	257, 290	S1, S2, S4	
+107	nein			
+108	nein			
+109	nein			
+110	nein			
+111	nein			
+112	nein			
+113	nein			
+114	ja	304	S2	
+115	ja	294	S2	
+116	ja	292	S1, S2	
+117	ja	295	S2	
+118	nein			
+119	nein			
+120	ja	279	S2	
+121	nein			
+122	ja	284	S1, S2	
+123	nein			
+124	ja	280	S2	
+125	nein			
+126	nein			
+127	ja	219	S2	
+128	ja	90	S1, S2	
+129	ja	148	S1	
+130	nein			
+131	ja	221	S1	
+132	nein			
+133	nein			
+134	nein			
+135	ja	218	S1, S2	
+136	nein			
+137	nein			
+138	nein			
+139	ja	199	S1	
+140	ja	199	S1	
+141	nein			
+142	ja	226, 230	S1, S2	
+143	nein			
+144	nein			
+145	nein			
+146	ja	93	S1	
+147	nein			
+148	nein			
+149	ja	235	S2	
+150	nein			
+151	ja	231	S1, S2	
+152	nein			
+153	nein			
+154	nein			
+155	nein			
+156	nein			
+157	nein			
+158	ja	234	S2	
+159	nein			
+160	nein			
+161	nein			
+162	nein			
+163	nein			
+164	ja	233	S2	
+165	nein			
+166	ja	38	S1, S2	
+167	ja	233	S2	
+168	ja	233	S2	
+169	nein			
+170	nein			
+171	nein			
+172	nein			
+173	nein			
+174	nein			
+175	nein			
+176	ja	229	S1	
+177	ja	232	S2	
+178	nein			
+179	ja	232	S2	
+180	ja	232	S2	
+181	nein			
+182	nein			
+183	nein			
+184	nein			
+185	ja	234	S2	
+186	ja	72	S1	
+187	nein			
+188	nein			
+189	nein			
+190	ja	63	S1, S2	
+191	ja	71	S2	
+192	nein			
+193	nein			
+194	nein			
+195	ja	23	S2	
+196	ja	23	S2	
+197	nein			
+198	nein			
+199	ja	66	S2	
+200	nein			
+201	nein			
+202	nein			
+203	nein			
+204	nein			
+205	nein			
+206	nein			
+207	ja	64	S1	
+208	nein			
+209	nein			
+210	nein			
+211	nein			
+212	nein			
+213	nein			
+214	nein			
+215	nein			
+216	nein			
+217	nein			
+218	ja	293	S1, S2	
+219	ja	77, 137	S1, S2, S6	
+220	ja	97, 98, 166	S1, S2	
+221	ja	315	S1, S2	
+222	ja	77, 78, 135, 136	S1, S2, S6	
+223	ja	112	S2	
+224	nein			
+225	ja	113	S2	
+226	nein			
+227	nein			
+228	nein			
+229	nein			
+230	nein			
+231	nein			
+232	nein			
+233	ja	312	S2	
+234	ja	90, 312	S1, S2	
+235	nein			
+236	nein			
+237	ja	104	S1, S2	
+238	nein			
+239	nein			
+240	ja	122	S1, S2	
+241	nein			
+242	nein			
+243	ja	144	S1	
+244	nein			
+245	nein			
+246	nein			
+247	nein			
+248	nein			
+249	nein			
+250	ja	134	S1	
+251	nein			
+252	ja	65	S1	
+253	ja	129, 130	S1, S2	
+254	nein			
+255	ja	118	S1	
+256	ja	143	S1	
+257	nein			
+258	nein			
+259	ja	145, 327	S1, S2	
+260	ja	146, 327	S1	
+261	nein			
+262	nein			
+263	nein			
+264	nein			
+265	nein			
+266	nein			
+267	nein			
+268	ja	125	S2	
+269	ja	123	S2	
+270	ja	124	S2	
+271	nein			
+272	nein			
+273	nein			
+274	ja	126	S1	
+275	nein			
+276	nein			
+277	nein			
+278	nein			
+279	nein			
+280	nein			
+281	nein			
+282	nein			
+283	nein			
+284	nein			
+285	nein			
+286	nein			
+287	nein			
+288	nein			
+289	nein			
+290	nein			
+291	nein			
+292	nein			
+293	nein			
+294	nein			
+295	nein			
+296	nein			
+297	nein			
+298	nein			
+299	nein			
+300	nein			
+301	nein			
+302	nein			
+303	nein			
+304	nein			
+305	nein			
+306	nein			
+307	ja	156, 157	S1, S2	
+308	nein			
+309	nein			
+310	nein			
+311	ja	1	S1	aus dem Netz übernommen
+312	ja	2	S1	aus dem Netz übernommen
+313	ja	3	S1, S2	aus dem Netz übernommen
+314	ja	4	S1, S2	aus dem Netz übernommen
+315	ja	6	S1	aus dem Netz übernommen
+316	ja	9	S1	aus dem Netz übernommen
+317	ja	12	S1	aus dem Netz übernommen
+318	ja	13	S1	aus dem Netz übernommen
+319	ja	14	S1	aus dem Netz übernommen
+320	ja	25	S1	aus dem Netz übernommen
+321	ja	27	S1	aus dem Netz übernommen
+322	ja	30	S1	aus dem Netz übernommen
+323	ja	39	S1	aus dem Netz übernommen
+324	ja	45	S1	aus dem Netz übernommen
+325	ja	46	S1, S2	aus dem Netz übernommen
+326	ja	47	S1, S2, S4	aus dem Netz übernommen
+327	ja	50, 51	S1	aus dem Netz übernommen
+328	ja	16	S1	aus dem Netz übernommen
+329	ja	29	S1	aus dem Netz übernommen
+330	ja	59	S2, S5	aus dem Netz übernommen
+331	ja	165, 220	S1	aus dem Netz übernommen
+332	ja	169	S1, S2	aus dem Netz übernommen
+333	ja	172	S1, S2	aus dem Netz übernommen
+334	ja	174	S1, S2	aus dem Netz übernommen
+335	ja	178	S1	aus dem Netz übernommen
+336	ja	179	S1	aus dem Netz übernommen
+337	ja	182	S1, S2	aus dem Netz übernommen
+338	ja	183	S1, S2	aus dem Netz übernommen
+339	ja	187	S1	aus dem Netz übernommen
+340	ja	188	S1, S2	aus dem Netz übernommen
+341	ja	192	S2	aus dem Netz übernommen
+342	ja	197	S1	aus dem Netz übernommen
+343	ja	198	S1	aus dem Netz übernommen
+344	ja	170	S1	aus dem Netz übernommen
+345	ja	52	S1	aus dem Netz übernommen
+346	ja	155	S1, S2	aus dem Netz übernommen
+347	ja	156	S1	aus dem Netz übernommen
+348	ja	243	S1, S2	aus dem Netz übernommen
+349	ja	244	S1, S2	aus dem Netz übernommen
+350	ja	249	S1, S2	aus dem Netz übernommen
+351	ja	256	S1, S2	aus dem Netz übernommen
+352	ja	259	S2, S4	aus dem Netz übernommen
+353	ja	260	S1, S2, S4	aus dem Netz übernommen
+354	ja	266, 271	S1, S2	aus dem Netz übernommen
+355	ja	268, 276	S1, S2	aus dem Netz übernommen
+356	ja	277	S2	aus dem Netz übernommen
+357	ja	281	S2	aus dem Netz übernommen
+358	ja	282	S1, S2	aus dem Netz übernommen
+359	ja	283	S1, S2, S6	aus dem Netz übernommen
+360	ja	291	S1, S2	aus dem Netz übernommen
+361	ja	296	S2	aus dem Netz übernommen
+362	ja	305	S1, S2	aus dem Netz übernommen
+363	ja	261	S1	aus dem Netz übernommen
+364	ja	263	S1, S4	aus dem Netz übernommen
+365	ja	153	S2	aus dem Netz übernommen
+366	ja	207	S1	aus dem Netz übernommen
+367	ja	208	S1, S2	aus dem Netz übernommen
+368	ja	209	S2	aus dem Netz übernommen
+369	ja	210	S1, S2	aus dem Netz übernommen
+370	ja	212	S1	aus dem Netz übernommen
+371	ja	214, 215	S1, S2	aus dem Netz übernommen
+372	ja	223	S1	aus dem Netz übernommen
+373	ja	224	S1	aus dem Netz übernommen
+374	ja	225	S1	aus dem Netz übernommen
+375	ja	229	S1	aus dem Netz übernommen
+376	ja	211	S1	aus dem Netz übernommen
+377	ja	213	S1	aus dem Netz übernommen
+378	ja	227	S1	aus dem Netz übernommen
+379	ja	28	S1	aus dem Netz übernommen
+380	ja	40	S1, S2	aus dem Netz übernommen
+381	ja	41	S1	aus dem Netz übernommen
+382	ja	60	S1, S2	aus dem Netz übernommen
+383	ja	69	S1, S2	aus dem Netz übernommen
+384	ja	74	S1	aus dem Netz übernommen
+385	ja	76	S1	aus dem Netz übernommen
+386	ja	81, 86	S1, S2	aus dem Netz übernommen
+387	ja	61	S1	aus dem Netz übernommen
+388	ja	67	S2	aus dem Netz übernommen
+389	ja	68	S2	aus dem Netz übernommen
+390	ja	88	S1, S2	aus dem Netz übernommen
+391	ja	91	S1	aus dem Netz übernommen
+392	ja	92	S1	aus dem Netz übernommen
+393	ja	95	S2	aus dem Netz übernommen
+394	ja	99	S1	aus dem Netz übernommen
+395	ja	100	S1	aus dem Netz übernommen
+396	ja	101	S1	aus dem Netz übernommen
+397	ja	102	S1	aus dem Netz übernommen
+398	ja	105	S1	aus dem Netz übernommen
+399	ja	106	S2	aus dem Netz übernommen
+400	ja	111	S1, S2	aus dem Netz übernommen
+401	ja	49	S1, S2	aus dem Netz übernommen
+402	ja	65	S1	aus dem Netz übernommen
+403	ja	117	S1, S2	aus dem Netz übernommen
+404	ja	120	S1	aus dem Netz übernommen
+405	ja	138	S5	aus dem Netz übernommen
+406	ja	139	S1	aus dem Netz übernommen
+407	ja	204	S1	aus dem Netz übernommen
+408	ja	119	S1	aus dem Netz übernommen
+409	ja	35, 87	S1	aus dem Netz übernommen
+410	ja	57	S1, S2	aus dem Netz übernommen
+411	ja	205	S1	aus dem Netz übernommen
+412	ja	242	S1	aus dem Netz übernommen
+413	ja	313	S2	aus dem Netz übernommen
+414	ja	314	S2	aus dem Netz übernommen
+415	ja	318	S2	aus dem Netz übernommen
+416	ja	325	S5	aus dem Netz übernommen
+417	ja	317	S2	aus dem Netz übernommen

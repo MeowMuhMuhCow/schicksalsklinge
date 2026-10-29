@@ -1,0 +1,26 @@
+datei	stelle	art	bright_eyes	richtig / neu	begruendung
+seg009.h/.asm	decomp_pp20	Parameternamen	dst, src_data, off, seg, len	packed, dst, eff_off, eff_seg, packed_len	Der 1. Parameter ist die gepackte Datei (wird von hinten gelesen), der 2. das Ziel. Aufrufer seg002/seg027 uebergeben (Puffer der gepackten Datei, Bildpuffer). Bright-Eyes hatte beide vertauscht benannt
+seg094.c/.h	trv_journey_enter_destination_town_viewdir	Name	trv_journey_enter_destination_town_viewdir	trv_journey_dest_town_viewdir	Borland unterscheidet nur 32 Zeichen; der Name war fuer einen C-Compiler gleich trv_journey_enter_destination_town. So kann Attic nicht benannt haben
+seg036.c	AFIG_can_attack_neighbour	Kommentar	mode 1 = Attack heroes and enemies	mode 1 = Helden und abtruennige (renegade) Gegner	Code greift bei mode 1 nur Helden und abtruennige Gegner an (Fund Welle A)
+seg032.c	Gegnerzweig	Kommentar	TODO "seems that (hero->target_object_id) gives better results"	(Kommentar gehoert nur in den Heldenzweig)	aus dem Heldenzweig kopiert (Fund Welle A)
+datseg.h	struct_chest	Struktur	unbenannte Unions	lock.key/lock.mod, loot.func/loot.content	C kennt keine unbenannten Unions; Namen nach Bedeutung (Schloss, Inhalt)
+diverse	// ds:0x...	Adresskommentare	35 falsche Adressen	siehe ds_adressen_korrigiert.tsv	gegen die MAP des bytegleichen Baus geprueft
+seg007.c/seg010.asm	g_emm_sig, g_ems_frame_ptr	Lage	in seg007.cpp ("belong to seg010")	in seg010.asm (_DATA)	Daten des EMS-Moduls gehoeren ins EMS-Modul, Adresse unveraendert
+seg079.c	DNG03_chest10_loot	Name (Vorschlag)	DNG03_chest10_loot	DNG03_chest10_empty	gibt nur "DIE TRUHE IST LEER!" aus (Fund Spieltexte)
+seg079.c	DNG03_chest05_loot	Name (Vorschlag)	DNG03_chest05_loot	DNG03_chest05_ladder	"HIER FUEHRT EINE LEITER IN DIE TIEFE", keine Beute
+seg079.c	DNG03_chest11_loot	Name (Vorschlag)	DNG03_chest11_loot	DNG03_chest11_pittrap	Truhe laesst sich nicht oeffnen, Speerfallgrube
+seg077.c	DNG01_chest00_loot	Name (Vorschlag)	DNG01_chest00_loot	DNG01_chest00_demon	Geistererscheinung wird Daemon, startet Endkampf
+seg117.c	hunt_bison	Name (Vorschlag)	hunt_bison	hunt_aurochs	Text: "AUEROCHSE"
+seg109.c	TRV_hunt_generic	Parameter	city_index	text_start	ist der Textanfang in FEATUREn.LTX, keine Stadt
+seg048.c	status_menu	Kruecke	if (0) { case ...: }	goto	in C erzeugt goto keinen toten Sprung; bytegleich
+seg066.c/.h	get_border_index	Kruecke	Aufruf ueber Funktionszeiger-Cast	Deklaration ohne Prototyp im Header, Prototyp im Modul	so erweitern nur die beiden fruehen Aufrufe das Argument, PUBDEF-Reihenfolge bleibt
+seg002.h/seg065.c/seg116.c	sub_light_timers	Kruecke	Aufruf ueber Funktionszeiger-Cast	Deklaration ohne Prototyp im Header, Aufruf sub_light_timers(100)	seg065/116 uebergeben im Original ein int; seg002 sieht ab der Definition den long-Parameter
+seg008.asm	unused_func01..18	Namen	unused_func01..unused_func18	vga_unused_set_cursor_pos ... opl_unused_play	Funktion jeweils ermittelt (Cursor, EGA-Palette, Zeilen/Spalten, AdLib/OPL2-Treiber)
+seg008.asm	_copy_solid_permuted	Name (Vorschlag)	copy_solid_permuted	copy_solid_mirrored	Routine spiegelt waagerecht, vertauscht nichts
+seg008.asm	_draw_h_spaced_dots	Name (Vorschlag)	draw_h_spaced_dots	(senkrechte Linie)	wird nur mit Abstand 320 aufgerufen = senkrechte Linie
+seg001.c	CD_audio_stop_hsg	Name (Vorschlag)	CD_audio_stop_hsg	CD_audio_stop_reset	STOP kennt keine Adressierungsart; erstes STOP pausiert, zweites setzt zurueck
+seg013.asm	GEN_REQ	Makro	ergab 32 statt 28 Bytes, nie benutzt	neu, 28 Bytes, im Einsatz	
+seg013.h	struct driver_request dummy4/dummy6	Felder (Kommentar)	dummy4, dummy6	Byte-Anzahl (IOCTL) bzw. Sektorzahl (PLAY)	
+datseg.h	g_unkn_083[4]	Platzhalter (Vorschlag)	g_unkn_083	Spalten/Zeilen aus save_display_stat	
+seg004.c	do_save_rect	Parameter (Vorschlag)	dst/src	vertauscht	Kopie laeuft vom Bildschirm in den Puffer
+seg008.cpp	Kopfkommentar	Kommentar	OPL3-Programming	OPL2/AdLib (Port 388h)	nichts OPL3-spezifisch

@@ -1,0 +1,658 @@
+/*
+ * seg041 - Kampf: Munition, Schaden, Kampfmeldungen
+ *
+ * Inhalt:    range_attack_check_ammo() prueft Munition und Wurfwaffen und verbraucht sie
+ *            beim Angriff. FIG_get_hero_weapon_attack_damage() und
+ *            FIG_get_enemy_attack_damage() berechnen den Trefferschaden (Fernkampfprobe
+ *            nach Entfernung und Zielgroesse, KK-Zuschlag, Sonderwaffen, Waffengift,
+ *            Ecliptifactus, Ruestung). FIG_damage_enemy() zieht LE ab und behandelt
+ *            Sonderfaelle (Kultist F126_08, Orkchampion F144, Gorah F064). Dazu der Puffer
+ *            fuer Kampfmeldungen und FIG_weapon_gfx_id_melee().
+ * Aufrufer:  seg033, seg036, seg042, seg043; FIG_damage_enemy() und FIG_add_msg() auch aus
+ *            seg098 und seg102 (Zauber), FIG_add_msg() aus seg002.
+ * Daten:     Listen der stumpfen Waffen und Messer fuer die Waffengrafik.
+ * Besonders: Angstgift auf der Waffe beim Angriff auf einen Helden schreibt ueber einen
+ *            nicht gesetzten Zeiger (enemy_p). Bekannt (Bright-Eyes): Schleuder ohne
+ *            Munition unbenutzbar, Speer als Wurfwaffe (Original-Bug 60). Beschreibungen
+ *            der Parameter von range_attack_check_ammo() und FIG_damage_enemy() waren
+ *            vertauscht.
+ *
+ * Uebersetzen: BCC.EXE -mlarge -O- -c -1 -Yo seg041.c
+ */
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
+#include "v302de.h"
+#include "common.h"
+
+#include "seg002.h"
+#include "seg007.h"
+#include "seg038.h"
+#include "seg039.h"
+#include "seg041.h"
+#include "seg097.h"
+#include "seg103.h"
+#include "seg105.h"
+#include "seg106.h"
+
+static const signed int g_FIG_weapon_gfx_id_melee_blunt_list[9] = {
+	ITEM_ID_KNUEPPEL,
+	ITEM_ID_MORGENSTERN,
+	ITEM_ID_STREITKOLBEN,
+	ITEM_ID_KAMPFSTAB,
+	ITEM_ID_PEITSCHE,
+	ITEM_ID_KRIEGSHAMMER,
+	ITEM_ID_HEXENBESEN,
+	ITEM_ID_ZAUBERSTAB,
+	-1
+}; // ds:0x615c, terminated with -1
+ 
+static const signed int g_FIG_weapon_gfx_id_melee_knife_list[5] = {
+	ITEM_ID_MESSER,
+	ITEM_ID_DOLCH,
+	ITEM_ID_VULKANGLASDOLCH,
+	ITEM_ID_WOLFSMESSER,
+	-1
+}; // ds:0x616e, terminated with -1
+
+
+/**
+ * \brief   check if a range attack can be done
+ *
+ * \param   hero        the hero who attacks
+ * \param   mode        0 = use up one unit of ammunition (or drop the thrown weapon),
+ *                      1 = check only, show a message if there is no ammunition,
+ *                      2 = check only, silently (former text had 1 and 2 swapped)
+ * \return              0 = no ammo / 1 = have ammo
+ */
+signed int range_attack_check_ammo(struct struct_hero *hero, const signed int mode)
+{
+	signed int right_hand_item_id;
+	signed int left_hand_item_id;
+	signed int retval = 0;
+
+	/* read the item ids from the hands */
+	right_hand_item_id = hero->inventory[HERO_INVENTORY_SLOT_RIGHT_HAND].item_id;
+	left_hand_item_id = hero->inventory[HERO_INVENTORY_SLOT_LEFT_HAND].item_id;
+
+	switch (right_hand_item_id) {
+#ifndef M302de_ORIGINAL_BUGFIX
+	/* Original-Bug 60:
+	 * Speer is a melee weapon. */
+		case ITEM_ID_SPEER:
+#endif
+		case ITEM_ID_WURFBEIL:
+		case ITEM_ID_WURFSTERN:
+		case ITEM_ID_WURFAXT:
+		case ITEM_ID_WURFMESSER:
+		case ITEM_ID_SCHNEIDZAHN:
+		case ITEM_ID_WURFDOLCH__MAGIC:
+			{
+				if (!mode) {
+
+					if (g_fig_dropped_counter < 30) {
+						/* potential Original-Bug: Only the item IDs are stored, but not the other item stats. Is this a problem?
+						 * For example, magic_revealed for the ITEM_ID_WURFDOLCH__MAGIC might get lost.
+						 * Moreover, it would be nice to store the owner, to give it back the hero who used the ranged weapon. */
+						g_fig_dropped_weapons[g_fig_dropped_counter] = right_hand_item_id;
+						g_fig_dropped_counter++;
+					}
+
+					drop_item(hero, HERO_INVENTORY_SLOT_RIGHT_HAND, 1);
+
+					if (left_hand_item_id == right_hand_item_id) {
+						move_item(HERO_INVENTORY_SLOT_RIGHT_HAND, HERO_INVENTORY_SLOT_LEFT_HAND, hero);
+					}
+
+				}
+				retval = 1;
+				break;
+			}
+		case ITEM_ID_KURZBOGEN:
+		case ITEM_ID_LANGBOGEN:
+			{
+				if (left_hand_item_id != ITEM_ID_PFEIL) {
+					if (mode != 2) {
+
+						sprintf(g_dtp2, get_tx(8), hero->alias); /* "%s HAT KEINE PFEILE IN DER LINKEN HAND." */
+						GUI_output(g_dtp2);
+					}
+
+				} else {
+					if (!mode) {
+						drop_item(hero, HERO_INVENTORY_SLOT_LEFT_HAND, 1);
+					}
+					retval = 1;
+				}
+				break;
+			}
+		case ITEM_ID_ARMBRUST:
+			{
+				if (left_hand_item_id != ITEM_ID_BOLZEN) {
+					if (mode != 2) {
+
+						sprintf(g_dtp2, get_tx(9), hero->alias); /* "%s HAT KEINE BOLZEN IN DER LINKEN HAND." */
+						GUI_output(g_dtp2);
+					}
+				} else {
+					if (!mode) {
+						drop_item(hero, HERO_INVENTORY_SLOT_LEFT_HAND, 1);
+					}
+					retval = 1;
+				}
+				break;
+			}
+		case ITEM_ID_SCHLEUDER:
+			{
+#ifndef M302de_FEATURE_MOD
+				/* sling does not work in the original game.
+				 * there is no object with the id 999 */
+				/* REMARK: That's true for technical reasons!
+				 * The maximum value of an unsigned char is 255/0xff */
+				if (left_hand_item_id != 999) {
+					if (mode != 2) {
+
+						sprintf(g_dtp2, get_tx(10), hero->alias); /* "%s HAT KEINE STEINE IN DER LINKEN HAND." */
+						GUI_output(g_dtp2);
+					}
+				} else {
+					if (!mode) {
+						drop_item(hero, HERO_INVENTORY_SLOT_LEFT_HAND, 1);
+					}
+					retval = 1;
+				}
+#else
+				/* Feature mod 3:
+				 * Make the sling item usable, based on the following decisions:
+				 * * No ammunition is needed (rationale: stones don't exist in the original game and are ubiquitos)
+				 * * left hand may hold an item (like a shield) (rationale: https://de.wikipedia.org/wiki/Datei:Liber.jpg)
+				 */
+				retval = 1;
+#endif
+				break;
+			}
+	}
+	return retval;
+}
+
+/**
+ * \brief   shows a message box if the string is not empty
+ */
+void FIG_output(char *str)
+{
+	if (*str != 0) {
+		GUI_output(str);
+	}
+}
+
+/**
+ * \brief   clears the fight messages buffer
+ */
+void FIG_clear_msgs(void)
+{
+	memset(g_fig_msg_data, 0 , 20);
+	g_fig_msg_counter = 0;
+}
+
+/**
+ * \brief   adds a fight message (at most 5, the last one gets overwritten)
+ *
+ * \param   f_action    type of the message (e.g. 8 = hero loses LE, 11 = enemy loses LE)
+ * \param   damage      damage points
+ */
+void FIG_add_msg(const signed int f_action, const signed int damage)
+{
+	g_fig_msg_data[g_fig_msg_counter].f_action = f_action;
+	g_fig_msg_data[g_fig_msg_counter].damage = damage;
+	if (g_fig_msg_counter < 4) {
+		g_fig_msg_counter++;
+	}
+}
+
+/**
+ * \brief   damages an enemy
+ *
+ *          This function has some tweaks, dependent on the fight number.
+ *
+ * \param   enemy       pointer to the enemy
+ * \param   damage      the damage
+ * \param   preserve_renegade  impact on 'renegade' flag. 0: reset 'renegade' to 0 (enemy will be hostile again).
+ *                             != 0: not affected (former text had it the wrong way round)
+ */
+void FIG_damage_enemy(struct enemy_sheet *enemy, const signed int damage, const signed int preserve_renegade)
+{
+	signed int i;
+
+	/* subtract the damage from the enemies LE */
+	enemy->le -= damage;
+
+	/* are the enemies LE lower than 0 */
+	if (enemy->le <= 0) {
+
+		enemy->flags.dead = 1;
+		enemy->le = 0;
+
+		if ((g_current_fight_id == FIGHT_ID_F126_08) && (enemy->monster_id == MONSTER_ID_KULTIST__LVL_4)) {
+
+			/* slaying a special cultist */
+			/* set a flag in the status area */
+			gs_dng09_cultist_flag = 0;
+
+		} else if ((g_current_fight_id == FIGHT_ID_F144) && (enemy->monster_id == MONSTER_ID_ORKCHAMPION) && !g_finalfight_tumult) {
+
+			/* slaying the orc champion, ends the fight */
+			g_in_fight = 0;
+
+		} else if ((g_current_fight_id == FIGHT_ID_F064) && (enemy->monster_id == MONSTER_ID_GORAH)) {
+
+			/* slaying Gorah makes everyone flee except Heshthot */
+			for (i = 0; i < 20; i++) {
+				if (g_enemy_sheets[i].actor_sprite_id != ACTOR_SPRITE_ID_HESHTHOT) {
+					g_enemy_sheets[i].flags.scared = 1;
+				}
+			}
+		}
+	}
+
+	if (!preserve_renegade)
+		enemy->flags.renegade = 0;
+}
+
+/**
+ * \brief   calculates the damage of a hit by a hero (melee or ranged; for ranged weapons
+ *          the talent test is done here, on failure the damage is 0)
+ *
+ * \param   hero        the attacking hero
+ * \param   target      the attacked hero, or the attacked enemy (cast to struct struct_hero*)
+ * \param	attack_hero	0 = the attacked one is a foe; 1 = the attacked one is a hero
+ * \return              damage points (at most LE + 1 of the target)
+ */
+signed int FIG_get_hero_weapon_attack_damage(struct struct_hero* hero, struct struct_hero* target, const signed int attack_hero)
+{
+	signed int damage;
+	signed int damage_mod = 0;
+	struct item_stats *item_p_rh;
+	struct weapon_stats *weapon;
+	const struct ranged_weapon_stats *p_rangedtab;
+	signed int target_size;
+	signed int right_hand_item_id;
+	signed int distance;
+	signed int ranged_distance_type;
+	signed int x_hero;
+	signed int y_hero;
+	signed int x_target;
+	signed int y_target;
+	signed int hero_pos;
+	signed char enemy_actor_sprite_id;
+	struct enemy_sheet* enemy_p;
+	signed int weapon_gfx_id;
+
+	if (attack_hero == 0) {
+		enemy_p = (struct enemy_sheet*)target; /* TODO: to attack an enemy enemy_p should be used instead of target */
+	}
+
+	right_hand_item_id = hero->inventory[HERO_INVENTORY_SLOT_RIGHT_HAND].item_id;
+
+	item_p_rh = &g_itemsdat[right_hand_item_id];
+
+	weapon_gfx_id = FIG_weapon_gfx_id_melee(hero);
+
+	if (weapon_gfx_id == WEAPON_GFX_ID_NONE) {
+		/* not a weapon or a ranged weapon */
+		weapon_gfx_id = FIG_weapon_gfx_id_ranged(hero);
+	}
+
+	/* now depending on the item in the right hand, <weapon_gfx_id> is
+	 * -1: not a weapon or broken melee weapon (inluding broken WEAPON_TYPE_WAFFENLOS (i.e. ammunition), broken ITEM_ID_ZAUBERSTAB and broken ITEM_ID_KAMPFSTAB, but no other WEAPON_TYPE_SPEER)
+	 *  0: non-broken knive weapon
+	 *  1: non-broken force weapon (including ITEM_ID_ZAUBERSTAB and ITEM_ID_KAMPFSTAB)
+	 *  2: other non-broken meelee weapon, including WEAPON_TYPE_WAFFENLOS (i.e. ammunition), but not WEAPON_TYPE_SPEER
+	 *  3: any WEAPON_TYPE_SCHUSSWAFFE, broken or not
+	 *  4: any WEAPON_TYPE_WURFWAFFE, broken or not
+	 *  5: any weapon of type WEAPON_TYPE_SPEER with the exception of ITEM_ID_KAMPFSTAB and ITEM_ID_ZAUBERSTAB, broken or not
+	 */
+
+	if (weapon_gfx_id != WEAPON_GFX_ID_NONE) {
+
+		weapon = &g_weapon_stats_table[item_p_rh->item_type_stats_id];
+
+		damage = dice_roll(weapon->damage_d6, 6, weapon->damage_const);
+
+		if (weapon->ranged_index != -1) {
+
+			/* weapon does ranged damage */
+
+			hero_pos = get_hero_pos(hero);
+
+			FIG_search_obj_on_cb(hero_pos + 1, &x_hero, &y_hero);
+			FIG_search_obj_on_cb(hero->target_object_id, &x_target, &y_target);
+
+			distance = manhattan_distance(x_hero, y_hero, x_target, y_target);
+
+			if (distance <= 2) {
+				ranged_distance_type = RANGED_DISTANCE_TYPE_EXTREM_NAH;
+			} else if (distance <= 4) {
+				ranged_distance_type = RANGED_DISTANCE_TYPE_SEHR_NAH;
+			} else if (distance <= 6) {
+				ranged_distance_type = RANGED_DISTANCE_TYPE_NAH;
+			} else if (distance <= 9) {
+				ranged_distance_type = RANGED_DISTANCE_TYPE_MITTEL;
+			} else if (distance <= 15) {
+				ranged_distance_type = RANGED_DISTANCE_TYPE_WEIT;
+			} else if (distance <= 20) {
+				ranged_distance_type = RANGED_DISTANCE_TYPE_SEHR_WEIT;
+			} else {
+				ranged_distance_type = RANGED_DISTANCE_TYPE_EXTREM_WEIT;
+			}
+
+			p_rangedtab = &g_ranged_weapon_stats_table[weapon->ranged_index];
+
+			if (attack_hero) {
+				if (target->typus == HERO_TYPE_ZWERG) {
+					/* ZWERG / DWARF */
+					target_size = TARGET_SIZE_KLEIN;
+				} else {
+					target_size = TARGET_SIZE_MITTEL;
+				}
+			} else {
+				/* size of the enemy */
+				/* TODO: use enemy_p instead of a casted target */
+				target_size = ((struct enemy_sheet*)target)->target_size;
+			}
+
+			/* Original-Bug: For ITEM_ID_SPEER and ITEM_ID_SPEER__MAGIC, a test on TA_SCHUSSWAFFEN will be performed
+			 * The fix of Original-Bug 60 fixes this, too, since ITEM_ID_SPEER and ITEM_ID_SPEER__MAGIC are then pure melee weapons. */
+			damage_mod = (
+				test_talent(
+					hero,
+					(item_p_rh->item_subtype_id == WEAPON_TYPE_WURFWAFFE ? TA_WURFWAFFEN : TA_SCHUSSWAFFEN),
+					p_rangedtab->base_handicap + 2 * ranged_distance_type - 2 * target_size)
+				> 0) ?
+					g_ranged_weapon_stats_table[weapon->ranged_index].damage_modifier[ranged_distance_type] :
+					-damage;
+
+			if (damage_mod != 0) { /* test is redundant */
+				damage += damage_mod;
+			}
+			/* If the talent test was not successful, damage == 0 by now. */
+
+		} else {
+			/* weapon does melee damage */
+
+			damage_mod = hero->attrib[ATTRIB_KK].current + hero->attrib[ATTRIB_KK].mod - weapon->damage_kk_bonus;
+			if (damage_mod > 0) {
+				damage += damage_mod;
+			}
+		}
+	} else {
+		damage = random_schick(6);
+	}
+
+	if (!attack_hero) {
+
+		enemy_actor_sprite_id = enemy_p->actor_sprite_id;
+
+		if ((right_hand_item_id == ITEM_ID_SAEBEL__MAGIC) && (enemy_actor_sprite_id == ACTOR_SPRITE_ID_SKELETT || enemy_actor_sprite_id == ACTOR_SPRITE_ID_ZOMBIE)) {
+
+			/* magic SABRE gives Damage + 1 to SKELETONS and ZOMBIES */
+			damage++;
+
+		} else if (right_hand_item_id == ITEM_ID_KUKRISDOLCH) {
+
+			/* KUKRIS DAGGER / KUKRISDOLCH */
+			/* Interesting */
+			damage = 1000;
+
+			/* drop the KUKRISDOLCH and equip a normal DOLCH / DAGGER */
+			drop_item(hero, HERO_INVENTORY_SLOT_RIGHT_HAND, 1);
+			give_new_item_to_hero(hero, ITEM_ID_DOLCH, 1, 1); /* TODO: what if no free knapsack slot? */
+			move_item(HERO_INVENTORY_SLOT_RIGHT_HAND, inv_slot_of_item(hero, ITEM_ID_DOLCH), hero);
+
+		} else if (right_hand_item_id == ITEM_ID_KUKRIS_MENGBILAR) {
+
+			/* KUKRISMENGBILAR */
+			/* Interesting */
+			damage = 1000;
+
+			/* drop the KUKRISMENGBILAR and equip a normal MENGBILAR  */
+			drop_item(hero, HERO_INVENTORY_SLOT_RIGHT_HAND, 1);
+			give_new_item_to_hero(hero, ITEM_ID_MENGBILAR, 1, 1); /* TODO: what if no free knapsack slot? */
+			move_item(HERO_INVENTORY_SLOT_RIGHT_HAND, inv_slot_of_item(hero, ITEM_ID_MENGBILAR), hero);
+
+		} else if ((right_hand_item_id == ITEM_ID_SILBERSTREITKOLBEN) && (enemy_actor_sprite_id == ACTOR_SPRITE_ID_SKELETT)) {
+
+			/* SILVER MACE / SILBERSTREITKOLBEN gives Damage + 4 to SKELETONS */
+			damage += 4;
+
+		} else if ((right_hand_item_id == ITEM_ID_DAS_SCHWERT_GRIMRING) && (enemy_actor_sprite_id == ACTOR_SPRITE_ID_ORK)) {
+
+			/* DAS SCHWERT GRIMRING gives Damage + 5 to ORCS */
+			damage += 5;
+		}
+	}
+
+	damage += hero->saftkraft;
+
+	if (damage > 0) {
+
+		if (hero->inventory[HERO_INVENTORY_SLOT_RIGHT_HAND].flags.poison_expurgicum) {
+
+			damage += dice_roll(1, 6, 2); /* D6 + 2 damage */
+			hero->inventory[HERO_INVENTORY_SLOT_RIGHT_HAND].flags.poison_expurgicum = 0;
+		}
+
+		if (hero->inventory[HERO_INVENTORY_SLOT_RIGHT_HAND].flags.poison_vomicum) {
+
+			damage += dice_roll(1, 20, 5); /* D20 + 5 damage */
+			hero->inventory[HERO_INVENTORY_SLOT_RIGHT_HAND].flags.poison_vomicum = 0;
+		}
+
+		if (hero->inventory[HERO_INVENTORY_SLOT_RIGHT_HAND].poison_id != POISON_ID_NONE) {
+
+			if (hero->inventory[HERO_INVENTORY_SLOT_RIGHT_HAND].poison_id == POISON_ID_ANGSTGIFT) {
+
+				/* REMARK: enemy_p is only set if attack_hero == 0. If a (renegade) hero hits another
+				 * hero with a weapon poisoned with Angstgift, an uninitialized pointer is written here.
+				 * Original-Bug? */
+				enemy_p->flags.scared = 1;
+				enemy_p->flags.renegade = 0;
+
+			} else {
+				/* the following line is the source for the totally excessive and unbalanced poison damage */
+				damage += 10 * g_poison_strength[hero->inventory[HERO_INVENTORY_SLOT_RIGHT_HAND].poison_id];
+			}
+
+			hero->inventory[HERO_INVENTORY_SLOT_RIGHT_HAND].num_poison_charges--;
+
+			if (!hero->inventory[HERO_INVENTORY_SLOT_RIGHT_HAND].num_poison_charges) {
+				hero->inventory[HERO_INVENTORY_SLOT_RIGHT_HAND].poison_id = POISON_ID_NONE;
+			}
+		}
+	}
+
+	if (hero->ecliptifactus_timer != 0) {
+		damage *= 2;
+	}
+
+	if (gs_tevent071_orcstatue && (hero->typus == HERO_TYPE_ZWERG) && (attack_hero == 0) && (enemy_p->actor_sprite_id == ACTOR_SPRITE_ID_ORK))
+	{
+		damage++;
+	}
+
+	if (!attack_hero) {
+
+		damage -= enemy_p->rs;
+
+		if (enemy_p->flags.petrified) {
+			damage = 0;
+		}
+
+		if (enemy_p->magic && !hero->inventory[HERO_INVENTORY_SLOT_RIGHT_HAND].flags.magic) {
+			damage = 0;
+		}
+
+		if (enemy_p->le < damage) {
+			damage = enemy_p->le + 1;
+		}
+	} else {
+		damage -= target->rs_bonus;
+
+		if (target->flags.petrified) {
+			damage = 0;
+		}
+
+		if (target->le < damage) {
+			damage = target->le + 1;
+		}
+	}
+
+	return damage;
+}
+
+/**
+ * \brief   calculates attack damage from an enemy
+ *
+ * \param   attacker    the enemy which attacks
+ * \param   target    the enemy/hero which gets attacked
+ * \param   is_enemy    1 = if target is an enemy / 0 = target is a hero
+ *
+ */
+
+signed int FIG_get_enemy_attack_damage(const struct enemy_sheet *attacker, struct enemy_sheet *target, const signed int is_enemy)
+{
+	signed int pos;
+	struct struct_hero *hero;
+
+	signed int damage;
+	signed int dice;
+
+	dice = attacker->dam1;
+
+	if ((attacker->dam2 != 0) && (random_schick(100) < 50)) {
+		dice = attacker->dam2;
+	}
+
+	damage = dice_template(dice);
+
+	if (!is_enemy) {
+
+		/* the target is a hero */
+		hero = (struct struct_hero*)target;
+
+		/* subtract RS */
+		damage -= hero->rs_bonus;
+
+		/* Cursed chainmail gives an armor bonus against skeletons and zombies. */
+		if (
+			hero->inventory[HERO_INVENTORY_SLOT_BODY].item_id == ITEM_ID_KETTENHEMD__CURSED
+			&& ((attacker->actor_sprite_id == ACTOR_SPRITE_ID_ZOMBIE) || (attacker->actor_sprite_id == ACTOR_SPRITE_ID_SKELETT))
+		) {
+			damage -= 3;
+		}
+
+		/* Totenkopfguertel (skull belt) nullifies skeleton and zombie attacks. */
+		if (
+			((pos = inv_slot_of_item(hero, ITEM_ID_TOTENKOPFGUERTEL)) != -1)
+			&& ((attacker->actor_sprite_id == ACTOR_SPRITE_ID_ZOMBIE) || (attacker->actor_sprite_id == ACTOR_SPRITE_ID_SKELETT))
+		) {
+			damage = 0;
+
+			/* 4% chance to loose the Totenkopfguertel (skull belt) */
+			if (random_schick(100) < 5) {
+				drop_item(hero, pos, 1);
+				GUI_output(get_tx(11)); /* "DER TOTENKOPFGUERTEL VERLIERT SEINE WIRKUNG UND VERSCHWINDET!" */
+			}
+		}
+
+		/* no damage if the hero is petrified */
+		if (hero->flags.petrified)
+			damage = 0;
+	} else {
+		/* the target is an enemy */
+
+		/* subtract RS */
+		damage -= target->rs;
+
+		if (target->flags.petrified)
+			damage = 0;
+
+		/* check if the target is immune
+		 * against non-magicial weapons */
+		if (target->magic)
+			damage = 0;
+	}
+
+	/* damage bonus */
+	damage += attacker->saftkraft;
+
+	/* half damage */
+	if (attacker->weapon_broken)
+		damage /= 2;
+
+	return damage;
+}
+
+/**
+ * \brief   clears all fight animation tracks (fills them with -1)
+ */
+void FANI_clear_ani_tracks(void)
+{
+	signed int i;
+
+	for (i = 0; i < FANI_TRACK_ID__MAX; i++)
+		memset(&g_fig_ani_tracks[i], -1, 243);
+
+	/* That would be better */
+	/* memset(&g_fig_ani_tracks[0], -1, 243 * 8); */
+}
+
+/**
+ * \brief   returns the weapon_gfx_id of a hero engaged in melee
+ *
+ * \param   hero        pointer to hero
+ *
+ * \return
+ *	-1 = not a weapon or a broken weapon or a ranged weapon (the latter including WEAPON_TYPE_SPEER, but not ITEM_ID_ZAUBERSTAB or ITEM_ID_KAMPFSTAB),
+ *	0 = non-broken knive weapon,
+ *	1 = non-broken force weapon (includes ITEM_ID_ZAUBERSTAB and ITEM_ID_KAMPFSTAB),
+ *	2 = any other non-broken melee weapon, including WEAPON_TYPE_WAFFENLOS (i.e. ammunition), but no WEAPON_TYPE_SPEER
+ */
+signed int FIG_weapon_gfx_id_melee(const struct struct_hero *hero)
+{
+	struct item_stats *item_p;
+
+	signed int item_id;
+	signed int retval;
+
+	/* get the ID of the equipped weapon */
+	item_id = hero->inventory[HERO_INVENTORY_SLOT_RIGHT_HAND].item_id;
+
+	item_p = &g_itemsdat[item_id];
+
+	if (!item_p->flags.weapon || hero->inventory[HERO_INVENTORY_SLOT_RIGHT_HAND].flags.broken ||
+		(item_p->flags.weapon && (
+			(item_p->item_subtype_id == WEAPON_TYPE_SCHUSSWAFFE)
+			|| (item_p->item_subtype_id == WEAPON_TYPE_WURFWAFFE)
+			/* TODO: according to original DSA2/3 rules, weapon type SPEER is a melee discipline. */
+			|| (item_p->item_subtype_id == WEAPON_TYPE_SPEER && (item_id != ITEM_ID_ZAUBERSTAB) && (item_id != ITEM_ID_KAMPFSTAB))
+		))
+	) {
+		retval = WEAPON_GFX_ID_NONE;
+	} else {
+		if (is_in_int_array(item_id, g_FIG_weapon_gfx_id_melee_blunt_list)) {
+
+			retval = WEAPON_GFX_ID_MELEE_BLUNT;
+
+		} else if (is_in_int_array(item_id, g_FIG_weapon_gfx_id_melee_knife_list)) {
+
+			retval = WEAPON_GFX_ID_MELEE_KNIFE;
+
+		} else {
+
+			retval = WEAPON_GFX_ID_MELEE_BLADE;
+		}
+	}
+
+	return retval;
+}

@@ -1,0 +1,3188 @@
+art	name	adresse	modul	art_genauer
+funktion	CD_has_drives		seg001	statisch
+funktion	CD_count_drives		seg001	statisch
+funktion	CD_get_first_drive		seg001	statisch
+funktion	CD_set_drive_num		seg001	statisch
+funktion	CD_driver_request		seg001	statisch
+funktion	CD_read_qchannel_unused		seg001	statisch
+funktion	CD_get_tod		seg001	statisch
+funktion	CD_audio_track_start		seg001	statisch
+funktion	CD_enable_repeat		seg001	statisch
+funktion	CD_bioskey	04AC:030E	seg001	öffentlich
+funktion	CD_audio_stop_hsg		seg001	statisch
+funktion	CD_audio_stop	04AC:034F	seg001	öffentlich
+funktion	CD_audio_pause	04AC:037A	seg001	öffentlich
+funktion	CD_audio_play		seg001	statisch
+funktion	CD_read_toc		seg001	statisch
+funktion	CD_set_track	04AC:04F4	seg001	öffentlich
+funktion	CD_read_exe		seg001	statisch
+funktion	CD_insert_msg		seg001	statisch
+funktion	CD_harderr_handler		seg001	statisch
+funktion	CD_check	04AC:0681	seg001	öffentlich
+funktion	CD_init	04AC:06C6	seg001	öffentlich
+funktion	play_music_file		seg002	statisch
+funktion	set_audio_track	051E:0017	seg002	öffentlich
+funktion	sound_menu	051E:0045	seg002	öffentlich
+funktion	read_sound_cfg	051E:00E6	seg002	öffentlich
+funktion	init_AIL	051E:01E0	seg002	öffentlich
+funktion	exit_AIL	051E:0209	seg002	öffentlich
+funktion	read_music_driver		seg002	statisch
+funktion	prepare_midi_playback		seg002	statisch
+funktion	start_midi_playback		seg002	statisch
+funktion	prepare_timbre		seg002	statisch
+funktion	load_midi_file		seg002	statisch
+funktion	do_load_midi_file		seg002	statisch
+funktion	load_music_driver		seg002	statisch
+funktion	do_play_music_file		seg002	statisch
+funktion	stop_midi_playback		seg002	statisch
+funktion	start_midi_playback_IRQ		seg002	statisch
+funktion	midi_stop_sequence_unused		seg002	statisch
+funktion	midi_set_volume_unused		seg002	statisch
+funktion	have_mem_for_sound	051E:079F	seg002	öffentlich
+funktion	play_voc	051E:0832	seg002	öffentlich
+funktion	play_voc_delay	051E:0856	seg002	öffentlich
+funktion	alloc_voc_buffer	051E:0890	seg002	öffentlich
+funktion	free_voc_buffer		seg002	statisch
+funktion	read_new_voc_file		seg002	statisch
+funktion	read_voc_file		seg002	statisch
+funktion	SND_play_voc		seg002	statisch
+funktion	SND_stop_digi		seg002	statisch
+funktion	SND_set_volume		seg002	statisch
+funktion	load_digi_driver		seg002	statisch
+funktion	read_digi_driver		seg002	statisch
+funktion	open_and_seek_dat		seg002	statisch
+funktion	get_readlength2		seg002	statisch
+funktion	read_archive_file	051E:0C28	seg002	öffentlich
+funktion	seek_archive_file	051E:0C72	seg002	öffentlich
+funktion	load_regular_file	051E:0CB6	seg002	öffentlich
+funktion	load_archive_file	051E:0D27	seg002	öffentlich
+funktion	open_temp_file		seg002	statisch
+funktion	copy_from_archive_to_temp		seg002	statisch
+funktion	copy_file_to_temp	051E:0E57	seg002	öffentlich
+funktion	process_nvf_extraction	051E:0ED2	seg002	öffentlich
+funktion	mouse_action		seg002	statisch
+funktion	mouse_isr	051E:1454	seg002	öffentlich
+funktion	is_mouse_in_rect	051E:1634	seg002	öffentlich
+funktion	mouse_init	051E:165E	seg002	öffentlich
+funktion	disable_mouse	051E:16FD	seg002	öffentlich
+funktion	mouse_get_button_press_info	051E:170E	seg002	öffentlich
+funktion	call_mouse_isr	051E:1742	seg002	öffentlich
+funktion	mouse_irq_init		seg002	statisch
+funktion	mouse_reset_ehandler	051E:17AE	seg002	öffentlich
+funktion	mouse_move_cursor	051E:1802	seg002	öffentlich
+funktion	mouse_setGMask		seg002	statisch
+funktion	mouse_setCRTpage		seg002	statisch
+funktion	make_ggst_cursor	051E:18B3	seg002	öffentlich
+funktion	call_mouse_bg	051E:1921	seg002	öffentlich
+funktion	call_mouse	051E:192B	seg002	öffentlich
+funktion	mouse_bg		seg002	statisch
+funktion	mouse_cursor		seg002	statisch
+funktion	mouse_motion		seg002	statisch
+funktion	handle_gui_input	051E:1A34	seg002	öffentlich
+funktion	get_mouse_action	051E:1CF2	seg002	öffentlich
+funktion	handle_input	051E:1D67	seg002	öffentlich
+funktion	flush_keyboard_queue_alt	051E:1ECC	seg002	öffentlich
+funktion	game_loop		seg002	statisch
+funktion	timers_daily		seg002	statisch
+funktion	set_market_size		seg002	statisch
+funktion	pal_fade	051E:21AB	seg002	öffentlich
+funktion	pal_fade_in	051E:232A	seg002	öffentlich
+funktion	dawning		seg002	statisch
+funktion	nightfall		seg002	statisch
+funktion	get_current_season	051E:25CE	seg002	öffentlich
+funktion	do_bank_interest		seg002	statisch
+funktion	do_timers	051E:274E	seg002	öffentlich
+funktion	sub_ingame_timers	051E:2BF6	seg002	öffentlich
+funktion	sub_mod_timers	051E:2C5E	seg002	öffentlich
+funktion	get_free_mod_slot	051E:2E26	seg002	öffentlich
+funktion	set_mod_slot	051E:2E69	seg002	öffentlich
+funktion	sub_heal_staffspell_timers	051E:2F7A	seg002	öffentlich
+funktion	sub_light_timers	051E:3071	seg002	öffentlich
+funktion	magical_chainmail_damage		seg002	statisch
+funktion	herokeeping	051E:3230	seg002	öffentlich
+funktion	check_level_up		seg002	statisch
+funktion	update_travelmap	051E:37C4	seg002	öffentlich
+funktion	set_and_spin_lock	051E:3B4F	seg002	öffentlich
+funktion	passages_recalc		seg002	statisch
+funktion	passages_reset		seg002	statisch
+funktion	timewarp	051E:3CA6	seg002	öffentlich
+funktion	timewarp_until_time_of_day	051E:3DBB	seg002	öffentlich
+funktion	dec_splash	051E:3EBB	seg002	öffentlich
+funktion	draw_splash		seg002	statisch
+funktion	timewarp_until_midnight	051E:3F9A	seg002	öffentlich
+funktion	flush_keyboard_queue	051E:4016	seg002	öffentlich
+funktion	error_msg		seg002	statisch
+funktion	wait_for_keypress	051E:404F	seg002	öffentlich
+funktion	vsync_or_key	051E:40D1	seg002	öffentlich
+funktion	unused_delay	051E:41A3	seg002	öffentlich
+funktion	unused_spinlock	051E:41B9	seg002	öffentlich
+funktion	swap_u32	051E:41CD	seg002	öffentlich
+funktion	swap_u32_unused		seg002	statisch
+funktion	alloc_EMS	051E:4253	seg002	öffentlich
+funktion	from_EMS	051E:428B	seg002	öffentlich
+funktion	to_EMS	051E:4339	seg002	öffentlich
+funktion	clear_menu_icons	051E:43E7	seg002	öffentlich
+funktion	draw_loc_icons	051E:43FD	seg002	öffentlich
+funktion	mod_day_timer	051E:4485	seg002	öffentlich
+funktion	draw_compass	051E:44AA	seg002	öffentlich
+funktion	can_merge_group	051E:4559	seg002	öffentlich
+funktion	div16	051E:45DB	seg002	öffentlich
+funktion	item_selector_mouse_select	051E:45EA	seg002	öffentlich
+funktion	item_selector_keyboard_select	051E:4658	seg002	öffentlich
+funktion	set_automap_tile	051E:4707	seg002	öffentlich
+funktion	set_automap_tiles	051E:472B	seg002	öffentlich
+funktion	pause_mark_show		seg002	statisch
+funktion	pause_mark_hide		seg002	statisch
+funktion	check_hero	051E:48B1	seg002	öffentlich
+funktion	check_hero_no2		seg002	statisch
+funktion	check_hero_no3		seg002	statisch
+funktion	is_hero_available_in_group	051E:49D8	seg002	öffentlich
+funktion	sub_ae_splash	051E:4A05	seg002	öffentlich
+funktion	add_hero_ae	051E:4A87	seg002	öffentlich
+funktion	sub_hero_le	051E:4ADC	seg002	öffentlich
+funktion	add_hero_le	051E:4DF3	seg002	öffentlich
+funktion	add_group_le	051E:4EFB	seg002	öffentlich
+funktion	do_starve_damage		seg002	statisch
+funktion	compare_name		seg002	statisch
+funktion	test_attrib	051E:4FF9	seg002	öffentlich
+funktion	test_attrib3	051E:504E	seg002	öffentlich
+funktion	unused_cruft		seg002	statisch
+funktion	get_random_hero	051E:515E	seg002	öffentlich
+funktion	get_party_money	051E:51C2	seg002	öffentlich
+funktion	set_party_money	051E:5221	seg002	öffentlich
+funktion	add_party_money	051E:5331	seg002	öffentlich
+funktion	add_hero_ap	051E:5349	seg002	öffentlich
+funktion	add_group_ap	051E:535F	seg002	öffentlich
+funktion	add_hero_ap_all	051E:53E8	seg002	öffentlich
+funktion	sub_hero_ap_all	051E:5452	seg002	öffentlich
+funktion	get_hero_pos	051E:54E9	seg002	öffentlich
+funktion	inv_slot_of_item	051E:5520	seg002	öffentlich
+funktion	get_first_hero_with_item	051E:554C	seg002	öffentlich
+funktion	get_first_hero_with_item_in_group		seg002	statisch
+funktion	sub_group_le	051E:5615	seg002	öffentlich
+funktion	get_first_hero_available_in_group		seg002	statisch
+funktion	get_second_hero_available_in_group		seg002	statisch
+funktion	count_heroes_available	051E:573E	seg002	öffentlich
+funktion	count_heroes_available_ignore_npc		seg002	statisch
+funktion	count_heroes_available_in_group	051E:5799	seg002	öffentlich
+funktion	count_heroes_available_in_group_ignore_npc		seg002	statisch
+funktion	check_group	051E:57F1	seg002	öffentlich
+funktion	main	051E:5816	seg002	öffentlich
+funktion	schick_alloc	051E:5A68	seg002	öffentlich
+funktion	copy_protection		seg002	statisch
+funktion	update_direction	0AE7:000C	seg003	öffentlich
+funktion	move		seg003	statisch
+funktion	door_frame	0AE7:01E1	seg003	öffentlich
+funktion	loot_corpse	0AE7:031E	seg003	öffentlich
+funktion	no_way	0AE7:0424	seg003	öffentlich
+funktion	save_and_set_timer	0B2A:0005	seg004	öffentlich
+funktion	set_timer	0B2A:0029	seg004	öffentlich
+funktion	reset_timer	0B2A:003E	seg004	öffentlich
+funktion	init_ani	0B2A:0055	seg004	öffentlich
+funktion	disable_ani	0B2A:0134	seg004	öffentlich
+funktion	init_ani_busy_loop	0B2A:013F	seg004	öffentlich
+funktion	clear_ani	0B2A:015B	seg004	öffentlich
+funktion	timer_isr	0B2A:0244	seg004	öffentlich
+funktion	unused_gfx_spinlock		seg004	statisch
+funktion	update_status_bars	0B2A:054B	seg004	öffentlich
+funktion	draw_bar	0B2A:08E9	seg004	öffentlich
+funktion	restore_rect	0B2A:0A39	seg004	öffentlich
+funktion	restore_rect_rle	0B2A:0AA4	seg004	öffentlich
+funktion	mouse_cursor_draw	0B2A:0B6B	seg004	öffentlich
+funktion	mouse_save_bg	0B2A:0C26	seg004	öffentlich
+funktion	restore_mouse_bg	0B2A:0CB1	seg004	öffentlich
+funktion	load_wallclock_nvf	0B2A:0D3C	seg004	öffentlich
+funktion	update_wallclock	0B2A:0E31	seg004	öffentlich
+funktion	draw_wallclock	0B2A:0F54	seg004	öffentlich
+funktion	array_add	0B2A:1147	seg004	öffentlich
+funktion	schick_set_video	0B2A:1190	seg004	öffentlich
+funktion	schick_reset_video	0B2A:11C1	seg004	öffentlich
+funktion	clear_ani_pal	0B2A:11DA	seg004	öffentlich
+funktion	set_ani_pal	0B2A:1209	seg004	öffentlich
+funktion	unused_ega1		seg004	statisch
+funktion	unused_ega2		seg004	statisch
+funktion	unused_ega3		seg004	statisch
+funktion	unused_ega4		seg004	statisch
+funktion	unused_ega5		seg004	statisch
+funktion	unused_ega6		seg004	statisch
+funktion	do_h_line	0B2A:1291	seg004	öffentlich
+funktion	do_v_line	0B2A:12E8	seg004	öffentlich
+funktion	do_border	0B2A:1342	seg004	öffentlich
+funktion	do_pic_copy	0B2A:13B7	seg004	öffentlich
+funktion	do_save_rect	0B2A:144C	seg004	öffentlich
+funktion	do_fill_rect	0B2A:14BD	seg004	öffentlich
+funktion	wait_for_vsync	0B2A:150D	seg004	öffentlich
+funktion	map_effect	0B2A:1557	seg004	öffentlich
+funktion	FIG_obj_needs_refresh		seg005	statisch
+funktion	FIG_set_star_color		seg005	statisch
+funktion	FIG_name_3rd_case		seg005	statisch
+funktion	FIG_name_4th_case		seg005	statisch
+funktion	FIG_name_1st_case		seg005	statisch
+funktion	fight_printer		seg005	statisch
+funktion	draw_fight_screen	0C85:0598	seg005	öffentlich
+funktion	set_delay_timer		seg005	statisch
+funktion	fight_delay		seg005	statisch
+funktion	FIG_get_fighter	0E41:000E	seg006	öffentlich
+funktion	FIG_alloc_fighter_id		seg006	statisch
+funktion	FIG_draw_figures	0E41:007F	seg006	öffentlich
+funktion	FIG_set_gfx	0E41:0236	seg006	öffentlich
+funktion	FIG_call_draw_pic	0E41:029E	seg006	öffentlich
+funktion	FIG_draw_pic	0E41:02A8	seg006	öffentlich
+funktion	FIG_get_hero_ptr	0E41:02FA	seg006	öffentlich
+funktion	FIG_get_enemy_sheet	0E41:033C	seg006	öffentlich
+funktion	FIG_set_ani_track_id_base	0E41:036C	seg006	öffentlich
+funktion	FIG_make_invisible	0E41:03BB	seg006	öffentlich
+funktion	FIG_make_visible	0E41:0443	seg006	öffentlich
+funktion	FIG_set_ani_track_id_weapon	0E41:04CB	seg006	öffentlich
+funktion	FIG_remove_from_list	0E41:0512	seg006	öffentlich
+funktion	FIG_add_to_list	0E41:0637	seg006	öffentlich
+funktion	FIG_draw_char_pic	0E41:082B	seg006	öffentlich
+funktion	FIG_draw_enemy_pic	0E41:099F	seg006	öffentlich
+funktion	random_interval	0EF8:000B	seg007	öffentlich
+funktion	random_schick	0EF8:002B	seg007	öffentlich
+funktion	dice_roll	0EF8:007A	seg007	öffentlich
+funktion	calc_damage_range	0EF8:00A0	seg007	öffentlich
+funktion	is_in_int_array	0EF8:00C4	seg007	öffentlich
+funktion	is_in_byte_array	0EF8:00EF	seg007	öffentlich
+funktion	dice_template	0EF8:0119	seg007	öffentlich
+funktion	damage_range_template	0EF8:0186	seg007	öffentlich
+funktion	_swap_u16		seg008	statisch
+funktion	_set_video_mode		seg008	statisch
+funktion	_set_video_page		seg008	statisch
+funktion	_save_display_stat		seg008	statisch
+funktion	vga_unused_set_cursor_pos		seg008	statisch
+funktion	vga_unused_get_cursor_pos		seg008	statisch
+funktion	vga_unused_set_cursor_shape		seg008	statisch
+funktion	vga_unused_set_ega_palette		seg008	statisch
+funktion	_set_color		seg008	statisch
+funktion	_set_palette		seg008	statisch
+funktion	_draw_h_line		seg008	statisch
+funktion	vga_unused_get_line		seg008	statisch
+funktion	vga_unused_put_line		seg008	statisch
+funktion	_draw_h_spaced_dots		seg008	statisch
+funktion	vga_unused_get_column		seg008	statisch
+funktion	vga_unused_put_column		seg008	statisch
+funktion	_pic_copy		seg008	statisch
+funktion	_save_rect		seg008	statisch
+funktion	_fill_rect		seg008	statisch
+funktion	_copy_solid_permuted		seg008	statisch
+funktion	_copy_solid		seg008	statisch
+funktion	_decomp_rle		seg008	statisch
+funktion	opl_unused_write_reg		seg008	statisch
+funktion	opl_unused_calibrate		seg008	statisch
+funktion	opl_unused_reset		seg008	statisch
+funktion	opl_unused_timer_isr		seg008	statisch
+funktion	opl_unused_restore_timer		seg008	statisch
+funktion	opl_unused_install_timer		seg008	statisch
+funktion	opl_unused_open		seg008	statisch
+funktion	opl_unused_close		seg008	statisch
+funktion	opl_unused_stop		seg008	statisch
+funktion	opl_unused_play		seg008	statisch
+funktion	_decomp_pp20		seg009	statisch
+funktion	EMS_installed		seg010	statisch
+funktion	EMS_get_frame_ptr		seg010	statisch
+funktion	_EMS_get_num_pages_unalloced		seg010	statisch
+funktion	_EMS_alloc_pages		seg010	statisch
+funktion	_EMS_free_pages		seg010	statisch
+funktion	_EMS_map_memory		seg010	statisch
+funktion	_EMS_norm_ptr		seg010	statisch
+funktion	_EMS_init		seg010	statisch
+funktion	read_CMOS		seg011	statisch
+funktion	write_CMOS		seg011	statisch
+funktion	RTC_set_freq		seg011	statisch
+funktion	RTC_enable		seg011	statisch
+funktion	RTC_disable		seg011	statisch
+funktion	RTC_install		seg011	statisch
+funktion	RTC_uninstall		seg011	statisch
+funktion	find_proc		seg011	statisch
+funktion	call_driver		seg011	statisch
+funktion	API_timer		seg011	statisch
+funktion	init_DDA_arrays		seg011	statisch
+funktion	bios_caller		seg011	statisch
+funktion	hook_timer_process		seg011	statisch
+funktion	unhook_timer_process		seg011	statisch
+funktion	set_PIT_divisor		seg011	statisch
+funktion	set_PIT_period		seg011	statisch
+funktion	ul_divide		seg011	statisch
+funktion	program_timers		seg011	statisch
+funktion	AIL_startup	1042:06D1	seg011	öffentlich
+funktion	AIL_shutdown	1042:0715	seg011	öffentlich
+funktion	AIL_register_timer		seg011	statisch
+funktion	AIL_release_timer_handle		seg011	statisch
+funktion	AIL_release_all_timers		seg011	statisch
+funktion	AIL_start_timer		seg011	statisch
+funktion	AIL_start_all_timers		seg011	statisch
+funktion	AIL_stop_timer		seg011	statisch
+funktion	AIL_stop_all_timers		seg011	statisch
+funktion	AIL_set_timer_period		seg011	statisch
+funktion	AIL_set_timer_frequency		seg011	statisch
+funktion	AIL_set_timer_divisor		seg011	statisch
+funktion	AIL_interrupt_divisor		seg011	statisch
+funktion	AIL_register_driver	1042:0A1E	seg011	öffentlich
+funktion	AIL_release_driver_handle		seg011	statisch
+funktion	AIL_describe_driver	1042:0AD6	seg011	öffentlich
+funktion	AIL_detect_device	1042:0AFC	seg011	öffentlich
+funktion	AIL_init_driver	1042:0B02	seg011	öffentlich
+funktion	AIL_shutdown_driver		seg011	statisch
+funktion	AIL_index_VOC_block		seg011	statisch
+funktion	AIL_register_sound_buffer		seg011	statisch
+funktion	AIL_format_sound_buffer		seg011	statisch
+funktion	AIL_sound_buffer_status		seg011	statisch
+funktion	AIL_play_VOC_file	1042:0BFF	seg011	öffentlich
+funktion	AIL_format_VOC_file	1042:0C05	seg011	öffentlich
+funktion	AIL_VOC_playback_status	1042:0C0B	seg011	öffentlich
+funktion	AIL_start_digital_playback	1042:0C11	seg011	öffentlich
+funktion	AIL_stop_digital_playback	1042:0C17	seg011	öffentlich
+funktion	AIL_pause_digital_playback		seg011	statisch
+funktion	AIL_resume_digital_playback		seg011	statisch
+funktion	AIL_set_digital_playback_volume	1042:0C29	seg011	öffentlich
+funktion	AIL_digital_playback_volume		seg011	statisch
+funktion	AIL_set_digital_playback_panpot		seg011	statisch
+funktion	AIL_digital_playback_panpot		seg011	statisch
+funktion	AIL_state_table_size	1042:0C41	seg011	öffentlich
+funktion	AIL_register_sequence	1042:0C47	seg011	öffentlich
+funktion	AIL_release_sequence_handle	1042:0C4D	seg011	öffentlich
+funktion	AIL_default_timbre_cache_size	1042:0C53	seg011	öffentlich
+funktion	AIL_define_timbre_cache	1042:0C59	seg011	öffentlich
+funktion	AIL_timbre_request	1042:0C5F	seg011	öffentlich
+funktion	AIL_install_timbre	1042:0C65	seg011	öffentlich
+funktion	AIL_protect_timbre		seg011	statisch
+funktion	AIL_unprotect_timbre		seg011	statisch
+funktion	AIL_timbre_status		seg011	statisch
+funktion	AIL_start_sequence	1042:0C7D	seg011	öffentlich
+funktion	AIL_stop_sequence	1042:0C83	seg011	öffentlich
+funktion	AIL_resume_sequence		seg011	statisch
+funktion	AIL_sequence_status	1042:0C8F	seg011	öffentlich
+funktion	AIL_relative_volume		seg011	statisch
+funktion	AIL_relative_tempo		seg011	statisch
+funktion	AIL_set_relative_volume	1042:0CA1	seg011	öffentlich
+funktion	AIL_set_relative_tempo		seg011	statisch
+funktion	AIL_beat_count		seg011	statisch
+funktion	AIL_measure_count		seg011	statisch
+funktion	AIL_branch_index		seg011	statisch
+funktion	AIL_controller_value		seg011	statisch
+funktion	AIL_set_controller_value		seg011	statisch
+funktion	AIL_channel_notes		seg011	statisch
+funktion	AIL_send_channel_voice_message		seg011	statisch
+funktion	AIL_send_sysex_message		seg011	statisch
+funktion	AIL_write_display		seg011	statisch
+funktion	AIL_install_callback		seg011	statisch
+funktion	AIL_cancel_callback		seg011	statisch
+funktion	AIL_lock_channel		seg011	statisch
+funktion	AIL_map_sequence_channel		seg011	statisch
+funktion	AIL_release_channel		seg011	statisch
+funktion	AIL_true_sequence_channel		seg011	statisch
+funktion	AIL_unhook		seg011	statisch
+funktion	AIL_hook		seg011	statisch
+funktion	sub_ptr		seg011	statisch
+funktion	block_type		seg011	statisch
+funktion	marker_num		seg011	statisch
+funktion	get_sample_rate		seg011	statisch
+funktion	DP_preformat		seg011	statisch
+funktion	CB_set_vect		seg011	statisch
+funktion	CB_play_VOC		seg011	statisch
+funktion	CB_play_buffer		seg011	statisch
+funktion	next_block		seg011	statisch
+funktion	next_buffer		seg011	statisch
+funktion	process_block		seg011	statisch
+funktion	process_buffer		seg011	statisch
+funktion	DMA_transfer		seg011	statisch
+funktion	xfer_chunk		seg011	statisch
+funktion	DP_describe_driver		seg011	statisch
+funktion	DP_detect_device		seg011	statisch
+funktion	DP_init_driver		seg011	statisch
+funktion	DP_shutdown_driver		seg011	statisch
+funktion	DP_index_VOC_blk		seg011	statisch
+funktion	DP_register_sb		seg011	statisch
+funktion	DP_get_sb_status		seg011	statisch
+funktion	DP_play_VOC_file		seg011	statisch
+funktion	DP_format_VOC_file		seg011	statisch
+funktion	DP_format_sb		seg011	statisch
+funktion	DP_start_d_pb		seg011	statisch
+funktion	DP_stop_d_pb		seg011	statisch
+funktion	DP_get_VOC_status		seg011	statisch
+funktion	diary_show	12DB:0000	seg024	öffentlich
+funktion	diary_new_entry		seg024	statisch
+funktion	diary_print_entry		seg024	statisch
+funktion	void		seg025	statisch
+funktion	show_entrance	12DE:0000	seg025	öffentlich
+funktion	show_citizen	12DE:0052	seg025	öffentlich
+funktion	do_house		seg025	statisch
+funktion	do_informer		seg025	statisch
+funktion	enter_map		seg025	statisch
+funktion	show_treasure_map		seg025	statisch
+funktion	game_options		seg025	statisch
+funktion	draw_icon		seg025	statisch
+funktion	show_storytext		seg025	statisch
+funktion	do_location		seg025	statisch
+funktion	leave_location		seg025	statisch
+funktion	leave_dungeon		seg025	statisch
+funktion	tumult		seg025	statisch
+funktion	fade_into		seg025	statisch
+funktion	copy_palette		seg025	statisch
+funktion	init_text	12E5:0000	seg026	öffentlich
+funktion	load_tx		seg026	statisch
+funktion	load_tx2		seg026	statisch
+funktion	load_ltx		seg026	statisch
+funktion	split_textbuffer		seg026	statisch
+funktion	load_ggsts_nvf		seg026	statisch
+funktion	prepare_chr_name		seg026	statisch
+funktion	prepare_sg_name		seg026	statisch
+funktion	load_game_state		seg026	statisch
+funktion	save_game_state		seg026	statisch
+funktion	read_chr_temp		seg026	statisch
+funktion	write_chr_temp		seg026	statisch
+funktion	copy_chr_names		seg026	statisch
+funktion	load_in_head		seg026	statisch
+funktion	load_temple_logo		seg026	statisch
+funktion	load_pp20	12EC:0000	seg027	öffentlich
+funktion	load_fight_figs		seg027	statisch
+funktion	load_ani		seg027	statisch
+funktion	load_scenario		seg027	statisch
+funktion	count_fight_enemies		seg027	statisch
+funktion	read_fight_lst		seg027	statisch
+funktion	write_fight_lst		seg027	statisch
+funktion	init_common_buffers		seg027	statisch
+funktion	prepare_dungeon_area	12F1:0000	seg028	öffentlich
+funktion	load_dungeon_ddt		seg028	statisch
+funktion	prepare_town_area		seg028	statisch
+funktion	load_town_textures		seg028	statisch
+funktion	load_special_textures		seg028	statisch
+funktion	call_load_buffer		seg028	statisch
+funktion	prepare_area		seg028	statisch
+funktion	load_area_description		seg028	statisch
+funktion	call_load_area		seg028	statisch
+funktion	unused_store		seg028	statisch
+funktion	unused_load		seg028	statisch
+funktion	load_map		seg028	statisch
+funktion	load_npc		seg028	statisch
+funktion	save_npc		seg028	statisch
+funktion	load_splashes		seg028	statisch
+funktion	load_informer_tlk		seg028	statisch
+funktion	load_tlk		seg028	statisch
+funktion	unused_load_archive_file		seg028	statisch
+funktion	load_fightbg		seg028	statisch
+funktion	draw_playmask	12F9:0000	seg029	öffentlich
+funktion	copy_forename		seg029	statisch
+funktion	draw_status_line		seg029	statisch
+funktion	clear_hero_icon		seg029	statisch
+funktion	load_icon		seg029	statisch
+funktion	draw_icons		seg029	statisch
+funktion	draw_main_screen		seg029	statisch
+funktion	clear_loc_line		seg029	statisch
+funktion	select_hero_icon		seg029	statisch
+funktion	deselect_hero_icon		seg029	statisch
+funktion	get_random_known_informer_name	12FF:0000	seg030	öffentlich
+funktion	get_random_unknown_informer_name		seg030	statisch
+funktion	print_date		seg030	statisch
+funktion	prepare_date_str		seg030	statisch
+funktion	do_talk		seg030	statisch
+funktion	talk_switch		seg030	statisch
+funktion	do_random_talk	1303:0000	seg031	öffentlich
+funktion	get_informer_forename		seg031	statisch
+funktion	informer_id_from_current_town		seg031	statisch
+funktion	get_informer_hint		seg031	statisch
+funktion	get_informer_name		seg031	statisch
+funktion	get_informer_name2		seg031	statisch
+funktion	load_current_town_gossip		seg031	statisch
+funktion	get_random_tavern_message		seg031	statisch
+funktion	drink_while_drinking		seg031	statisch
+funktion	eat_while_drinking		seg031	statisch
+funktion	FIG_set_cb_object	1309:0000	seg032	öffentlich
+funktion	draw_fight_screen_pal	1309:0032	seg032	öffentlich
+funktion	FIG_choose_next_hero		seg032	statisch
+funktion	FIG_choose_next_enemy		seg032	statisch
+funktion	FIG_count_active_enemies		seg032	statisch
+funktion	FIG_is_enemy_active		seg032	statisch
+funktion	FIG_get_first_active_hero		seg032	statisch
+funktion	FIG_all_heroes_escaped		seg032	statisch
+funktion	FIG_fight_continues		seg032	statisch
+funktion	FIG_do_round		seg032	statisch
+funktion	FIG_load_ship_sprites		seg032	statisch
+funktion	do_fight		seg032	statisch
+funktion	FIG_menu	130F:0000	seg033	öffentlich
+funktion	FIG_check_hero_attack		seg034	statisch
+funktion	FIG_cb_select_target		seg034	statisch
+funktion	FIG_find_latecomer_position		seg034	statisch
+funktion	FIG_latecomers		seg034	statisch
+funktion	FIG_move_pathlen		seg034	statisch
+funktion	FIG_move_hero		seg034	statisch
+funktion	FIG_tidy_enemies	1316:0000	seg035	öffentlich
+funktion	FIG_loot_enemies		seg035	statisch
+funktion	FIG_split_ap		seg035	statisch
+funktion	check_hero_range_attack		seg035	statisch
+funktion	load_ani_clip_from_file		seg036	statisch
+funktion	FIG_prepare_hero_ani		seg036	statisch
+funktion	AFIG_change_hero_weapon		seg036	statisch
+funktion	AFIG_can_attack_neighbour		seg036	statisch
+funktion	AFIG_search_spell_target		seg036	statisch
+funktion	AFIG_select_range_target		seg036	statisch
+funktion	AFIG_get_spell		seg036	statisch
+funktion	AFIG_select_autospell		seg036	statisch
+funktion	AFIG_count_heroes		seg036	statisch
+funktion	AFIG_hero_turn		seg036	statisch
+funktion	copy_ani_sequence		seg037	statisch
+funktion	prepare_enemy_ani		seg037	statisch
+funktion	FIG_enemy_can_attack_neighbour		seg037	statisch
+funktion	FIG_search_range_target		seg037	statisch
+funktion	FIG_get_mspell		seg037	statisch
+funktion	FIG_select_mspell		seg037	statisch
+funktion	FIG_enemy_range_attack		seg037	statisch
+funktion	FIG_enemy_turn		seg037	statisch
+funktion	FIG_search_obj_on_cb	1324:0000	seg038	öffentlich
+funktion	FIG_init_list_elem		seg038	statisch
+funktion	FIG_unused		seg038	statisch
+funktion	FIG_find_path_to_target_backtrack		seg038	statisch
+funktion	FIG_num_viewdir_changes_of_path		seg038	statisch
+funktion	FIG_find_path_to_target		seg038	statisch
+funktion	manhattan_distance	1328:0000	seg039	öffentlich
+funktion	FIG_weapon_gfx_id_ranged	1328:0023	seg039	öffentlich
+funktion	fill_enemy_sheet		seg039	statisch
+funktion	place_obj_on_cb		seg039	statisch
+funktion	FIG_load_enemy_sprites		seg039	statisch
+funktion	FIG_init_enemies		seg039	statisch
+funktion	FIG_init_heroes		seg039	statisch
+funktion	FIG_chessboard_init	132D:0000	seg040	öffentlich
+funktion	FIG_preload_gfx		seg040	statisch
+funktion	FIG_draw_scenario		seg040	statisch
+funktion	range_attack_check_ammo	1330:0000	seg041	öffentlich
+funktion	FIG_output		seg041	statisch
+funktion	FIG_clear_msgs		seg041	statisch
+funktion	FIG_add_msg		seg041	statisch
+funktion	FIG_damage_enemy		seg041	statisch
+funktion	FIG_get_hero_weapon_attack_damage		seg041	statisch
+funktion	FIG_get_enemy_attack_damage		seg041	statisch
+funktion	FANI_clear_ani_tracks		seg041	statisch
+funktion	FIG_weapon_gfx_id_melee		seg041	statisch
+funktion	FIG_do_hero_action	1335:0000	seg042	öffentlich
+funktion	FIG_do_enemy_action	1338:0000	seg043	öffentlich
+funktion	FIG_use_item		seg043	statisch
+funktion	copy_ani_seq		seg044	statisch
+funktion	get_seq_header		seg044	statisch
+funktion	FANI_prepare_fight_hero_ani		seg044	statisch
+funktion	FANI_prepare_fight_enemy_ani		seg044	statisch
+funktion	FANI_prepare_spell_hero		seg044	statisch
+funktion	FANI_prepare_spell_enemy		seg044	statisch
+funktion	FANI_add_projectile	133F:0000	seg045	öffentlich
+funktion	FANI_remove_projectile		seg045	statisch
+funktion	FANI_copy_sequence		seg045	statisch
+funktion	FANI_prepare_projectile_ani		seg045	statisch
+funktion	FANI_add_spell		seg045	statisch
+funktion	FANI_remove_spell		seg045	statisch
+funktion	FANI_prepare_hero_spell_ani		seg045	statisch
+funktion	FANI_prepare_enemy_spell_ani		seg045	statisch
+funktion	status_show_spell	1344:0000	seg046	öffentlich
+funktion	status_show_talent		seg046	statisch
+funktion	status_show_talents		seg046	statisch
+funktion	set_status_string		seg046	statisch
+funktion	reset_status_string		seg046	statisch
+funktion	status_show		seg046	statisch
+funktion	get_hero_CH_best	1348:0000	seg047	öffentlich
+funktion	get_hero_KK_best	1348:006E	seg047	öffentlich
+funktion	hero_is_diseased		seg047	statisch
+funktion	hero_is_poisoned		seg047	statisch
+funktion	hero_gets_poisoned		seg047	statisch
+funktion	hero_gets_diseased		seg047	statisch
+funktion	hero_disease_test		seg047	statisch
+funktion	check_hero_KK_unused		seg047	statisch
+funktion	check_heroes_KK		seg047	statisch
+funktion	make_valuta_str		seg047	statisch
+funktion	update_atpa		seg047	statisch
+funktion	menu_enter_delete		seg047	statisch
+funktion	select_hero_from_group		seg047	statisch
+funktion	select_hero_ok		seg047	statisch
+funktion	select_hero_ok_forced		seg047	statisch
+funktion	count_heroes_in_group		seg047	statisch
+funktion	hero_get_drunken		seg047	statisch
+funktion	hero_get_sober		seg047	statisch
+funktion	reset_item_selector	1350:0000	seg048	öffentlich
+funktion	status_menu		seg048	statisch
+funktion	status_select_hero		seg048	statisch
+funktion	GRP_compare_heroes	1353:0000	seg049	öffentlich
+funktion	GRP_sort_heroes		seg049	statisch
+funktion	GRP_save_pos		seg049	statisch
+funktion	GRP_split		seg049	statisch
+funktion	GRP_merge		seg049	statisch
+funktion	GRP_switch_to_next		seg049	statisch
+funktion	GRP_swap_heroes		seg049	statisch
+funktion	GRP_move_hero		seg049	statisch
+funktion	GRP_hero_sleep		seg049	statisch
+funktion	inc_spell_advanced	1358:0000	seg050	öffentlich
+funktion	inc_talent_advanced		seg050	statisch
+funktion	inc_talent_novice		seg050	statisch
+funktion	inc_spell_novice		seg050	statisch
+funktion	level_up		seg050	statisch
+funktion	do_wildcamp	135C:0000	seg051	öffentlich
+funktion	gather_herbs		seg051	statisch
+funktion	replenish_stocks		seg051	statisch
+funktion	do_area_camp	135F:0000	seg052	öffentlich
+funktion	is_hero_healable	1362:0000	seg053	öffentlich
+funktion	do_healer		seg053	statisch
+funktion	talk_inn	1365:0000	seg054	öffentlich
+funktion	get_first_brewing_hero	1365:0011	seg054	öffentlich
+funktion	do_inn		seg054	statisch
+funktion	TLK_inn		seg054	statisch
+funktion	add_item_to_buy_selector	1369:0000	seg055	öffentlich
+funktion	do_merchant		seg055	statisch
+funktion	talk_merchant		seg055	statisch
+funktion	TLK_ghandel		seg055	statisch
+funktion	TLK_khandel		seg055	statisch
+funktion	TLK_whandel		seg055	statisch
+funktion	item_selector_item_compare	136D:0000	seg056	öffentlich
+funktion	buy_screen		seg056	statisch
+funktion	add_item_to_sell_selector		seg056	statisch
+funktion	sell_screen	1370:0000	seg057	öffentlich
+funktion	add_item_to_repair_selector	1373:0000	seg058	öffentlich
+funktion	repair_screen		seg058	statisch
+funktion	do_smith		seg058	statisch
+funktion	talk_smith		seg058	statisch
+funktion	TLK_schmied		seg058	statisch
+funktion	do_tavern	1377:0000	seg059	öffentlich
+funktion	octopus_attack_wrapper		seg059	statisch
+funktion	pirates_attack_wrapper		seg059	statisch
+funktion	prolog_ghostship		seg059	statisch
+funktion	talk_tavern	137B:0000	seg060	öffentlich
+funktion	TLK_tavern		seg060	statisch
+funktion	do_temple	137E:0000	seg061	öffentlich
+funktion	char_add		seg061	statisch
+funktion	char_letgo		seg061	statisch
+funktion	char_erase		seg061	statisch
+funktion	miracle_heal_hero		seg061	statisch
+funktion	miracle_resurrect		seg061	statisch
+funktion	miracle_modify		seg061	statisch
+funktion	miracle_weapon		seg061	statisch
+funktion	ask_miracle	1383:0000	seg062	öffentlich
+funktion	passages_init	1386:0000	seg063	öffentlich
+funktion	do_harbor		seg063	statisch
+funktion	mod_clock_pos		seg063	statisch
+funktion	sea_travel		seg063	statisch
+funktion	get_srout_len		seg063	statisch
+funktion	get_ship_name	138A:0000	seg064	öffentlich
+funktion	prepare_passages		seg064	statisch
+funktion	print_passage_price		seg064	statisch
+funktion	get_passage_travel_hours		seg064	statisch
+funktion	get_next_passages		seg064	statisch
+funktion	passage_arrival		seg064	statisch
+funktion	do_market	138E:0000	seg065	öffentlich
+funktion	final_intro		seg065	statisch
+funktion	hyg_ani_extract		seg065	statisch
+funktion	hyg_ani_draw		seg065	statisch
+funktion	hyg_ani_draw_background		seg065	statisch
+funktion	hyg_ani_show		seg065	statisch
+funktion	show_hyggelik_ani		seg065	statisch
+funktion	show_times_up		seg065	statisch
+funktion	show_outro		seg065	statisch
+funktion	enter_location	1392:0000	seg066	öffentlich
+funktion	enter_location_daspota		seg066	statisch
+funktion	do_special_buildings		seg066	statisch
+funktion	TLK_eremit		seg066	statisch
+funktion	do_town		seg066	statisch
+funktion	refresh_floor_and_sky		seg066	statisch
+funktion	town_update_view		seg066	statisch
+funktion	town_set_visual_square_vals		seg066	statisch
+funktion	get_border_index		seg066	statisch
+funktion	town_set_visual_square_tex		seg066	statisch
+funktion	town_water_and_grass		seg066	statisch
+funktion	town_building_textures		seg066	statisch
+funktion	load_town_texture		seg066	statisch
+funktion	town_direction_change		seg066	statisch
+funktion	town_step		seg066	statisch
+funktion	town_do_step		seg066	statisch
+funktion	town_fade_and_colors		seg066	statisch
+funktion	town_update_house_count		seg066	statisch
+funktion	city_event_switch	139A:0000	seg067	öffentlich
+funktion	city_event_1		seg067	statisch
+funktion	city_event_2		seg067	statisch
+funktion	city_event_3		seg067	statisch
+funktion	city_event_4		seg067	statisch
+funktion	city_event_5		seg067	statisch
+funktion	city_event_6		seg067	statisch
+funktion	city_event_7		seg067	statisch
+funktion	city_event_8		seg067	statisch
+funktion	city_event_9		seg067	statisch
+funktion	waffinfo_weapons		seg067	statisch
+funktion	waffinfo_herbs		seg067	statisch
+funktion	waffinfo_general		seg067	statisch
+funktion	THO_eisenhof	13A1:0000	seg068	öffentlich
+funktion	THO_imman		seg068	statisch
+funktion	THO_botschaft		seg068	statisch
+funktion	THO_bank		seg068	statisch
+funktion	THO_arsenal		seg068	statisch
+funktion	THO_magistracy		seg068	statisch
+funktion	THO_mueller		seg068	statisch
+funktion	THO_black_finger		seg068	statisch
+funktion	dramosch_says		seg068	statisch
+funktion	THO_ugdalf		seg068	statisch
+funktion	academy_analues		seg068	statisch
+funktion	THO_academy		seg068	statisch
+funktion	academy_get_equal_item		seg068	statisch
+funktion	THO_hetmann	13A8:0000	seg069	öffentlich
+funktion	THO_windriders		seg069	statisch
+funktion	THO_tav_inn_combi		seg069	statisch
+funktion	THO_stormchildren		seg069	statisch
+funktion	THO_garaldsson		seg069	statisch
+funktion	PHX_fuhrhaus	13AC:0000	seg070	öffentlich
+funktion	PHX_stadthaus		seg070	statisch
+funktion	PHX_spielhaus		seg070	statisch
+funktion	PHX_villa_gremob		seg070	statisch
+funktion	PHX_bordell		seg070	statisch
+funktion	PHX_apotheke		seg070	statisch
+funktion	PHX_healer		seg070	statisch
+funktion	PHX_drogentempel	13B1:0000	seg071	öffentlich
+funktion	PHX_phextempel		seg071	statisch
+funktion	PHX_alrik_derondan		seg071	statisch
+funktion	INF_jurge_hjore	13B4:0000	seg072	öffentlich
+funktion	INF_yasma_umbrik_isleif		seg072	statisch
+funktion	INF_ragna_beorn_algrid		seg072	statisch
+funktion	INF_eliane_tiomar		seg072	statisch
+funktion	INF_olvir_asgrimm		seg072	statisch
+funktion	INF_treborn_unicorn		seg072	statisch
+funktion	INF_swafnild_unicorn		seg072	statisch
+funktion	count_map_parts		seg072	statisch
+funktion	has_intro_letter		seg072	statisch
+funktion	get_tavern_gossip	13B9:0000	seg073	öffentlich
+funktion	get_drinkmate		seg073	statisch
+funktion	tavern_quest_infos		seg073	statisch
+funktion	tavern_follow_informer		seg073	statisch
+funktion	show_automap	13BD:0000	seg074	öffentlich
+funktion	is_discovered		seg074	statisch
+funktion	get_mapval_small		seg074	statisch
+funktion	get_mapval_large		seg074	statisch
+funktion	is_group_in_prison		seg074	statisch
+funktion	render_automap		seg074	statisch
+funktion	draw_automap_square		seg074	statisch
+funktion	draw_automap_entrance		seg074	statisch
+funktion	draw_automap_to_screen		seg074	statisch
+funktion	select_teleport_dest		seg074	statisch
+funktion	get_maploc		seg074	statisch
+funktion	DNG_floor_ceil	13C3:0000	seg075	öffentlich
+funktion	DNG_hide_occluded_squares		seg075	statisch
+funktion	DNG_stub1		seg075	statisch
+funktion	DNG_stub2		seg075	statisch
+funktion	DNG_stub3		seg075	statisch
+funktion	DNG_draw_walls		seg075	statisch
+funktion	DNG_stub4		seg075	statisch
+funktion	DNG_stub5		seg075	statisch
+funktion	is_staff_lvl2_in_group		seg075	statisch
+funktion	DNG_lights		seg075	statisch
+funktion	DNG_timestep		seg075	statisch
+funktion	DNG_update_pos		seg075	statisch
+funktion	DNG_inc_level		seg075	statisch
+funktion	DNG_dec_level		seg075	statisch
+funktion	DNG_open_door		seg075	statisch
+funktion	DNG_close_door		seg075	statisch
+funktion	DNG01_pitfall		seg075	statisch
+funktion	DNG_check_climb_tools		seg075	statisch
+funktion	DNG_pitfall		seg075	statisch
+funktion	DNG_enter_dungeon		seg075	statisch
+funktion	DNG_door	13CB:0000	seg076	öffentlich
+funktion	print_msg_with_first_hero		seg076	statisch
+funktion	DNG_pitfall_add_pit		seg076	statisch
+funktion	DNG_step		seg076	statisch
+funktion	DNG_see_stairs		seg076	statisch
+funktion	DNG_see_door		seg076	statisch
+funktion	DNG_see_chest		seg076	statisch
+funktion	do_dungeon		seg076	statisch
+funktion	DNG_fight		seg076	statisch
+funktion	DNG_waterbarrel		seg076	statisch
+funktion	DNG_see_lever		seg076	statisch
+funktion	DNG01_handler	13D1:0000	seg077	öffentlich
+funktion	DNG01_chest01_loot		seg077	statisch
+funktion	DNG01_chest02_loot		seg077	statisch
+funktion	DNG01_chest03_loot		seg077	statisch
+funktion	DNG01_chest05_loot		seg077	statisch
+funktion	DNG01_chest07_open		seg077	statisch
+funktion	DNG01_chest07_loot		seg077	statisch
+funktion	DNG01_chest06_loot		seg077	statisch
+funktion	DNG01_chest06_trap		seg077	statisch
+funktion	DNG01_chest06_open		seg077	statisch
+funktion	DNG01_chest00_loot		seg077	statisch
+funktion	DNG02_handler	13D7:0000	seg078	öffentlich
+funktion	DNG02_chest00_loot		seg078	statisch
+funktion	DNG02_chest01_loot		seg078	statisch
+funktion	DNG02_chest02_loot		seg078	statisch
+funktion	DNG02_chest03_loot		seg078	statisch
+funktion	DNG02_chest04_loot		seg078	statisch
+funktion	DNG02_chest05_loot		seg078	statisch
+funktion	DNG02_chest06_open		seg078	statisch
+funktion	DNG02_chest06_loot		seg078	statisch
+funktion	DNG02_fight_intro		seg078	statisch
+funktion	DNG03_handler	13DD:0000	seg079	öffentlich
+funktion	DNG03_chest00_loot		seg079	statisch
+funktion	DNG03_chest01_loot		seg079	statisch
+funktion	DNG03_chest02_loot		seg079	statisch
+funktion	DNG03_chest03_loot		seg079	statisch
+funktion	DNG03_chest04_loot		seg079	statisch
+funktion	DNG03_chest05_loot		seg079	statisch
+funktion	DNG03_chest06_loot		seg079	statisch
+funktion	DNG03_chest07_loot		seg079	statisch
+funktion	DNG03_chest08_loot		seg079	statisch
+funktion	DNG03_chest09_loot		seg079	statisch
+funktion	DNG03_chest12_loot		seg079	statisch
+funktion	DNG03_chest10_loot		seg079	statisch
+funktion	DNG03_chest11_loot		seg079	statisch
+funktion	DNG03_chest12_trap		seg079	statisch
+funktion	DNG04_handler	13E4:0000	seg080	öffentlich
+funktion	DNG04_chest00_open		seg080	statisch
+funktion	DNG04_chest01_open		seg080	statisch
+funktion	DNG04_chest02_open		seg080	statisch
+funktion	DNG04_chest00_loot		seg080	statisch
+funktion	DNG04_chest01_loot		seg080	statisch
+funktion	DNG04_chest02_loot		seg080	statisch
+funktion	DNG05_handler		seg080	statisch
+funktion	DNG05_fight_intro		seg080	statisch
+funktion	DNG06_handler	13E9:0000	seg081	öffentlich
+funktion	DNG06_fight_intro		seg081	statisch
+funktion	DNG06_chest00_loot		seg081	statisch
+funktion	DNG06_chest01_loot		seg081	statisch
+funktion	DNG09_pitfall		seg081	statisch
+funktion	DNG07_handler	13ED:0000	seg082	öffentlich
+funktion	DNG09_statues		seg082	statisch
+funktion	DNG08_handler	13F0:0000	seg083	öffentlich
+funktion	DNG08_search_bed		seg083	statisch
+funktion	DNG08_chest01_trap		seg083	statisch
+funktion	DNG08_chest00_loot		seg083	statisch
+funktion	DNG08_chest01_loot		seg083	statisch
+funktion	DNG08_chest02_loot		seg083	statisch
+funktion	DNG08_chest02_open		seg083	statisch
+funktion	DNG08_chest03_open		seg083	statisch
+funktion	DNG08_chest04_open		seg083	statisch
+funktion	DNG08_chest05_open		seg083	statisch
+funktion	DNG08_chest04_loot		seg083	statisch
+funktion	DNG08_chest05_loot		seg083	statisch
+funktion	DNG09_handler	13F6:0000	seg084	öffentlich
+funktion	DNG09_fight_intro		seg084	statisch
+funktion	DNG09_chest00_loot		seg084	statisch
+funktion	DNG09_chest01_loot		seg084	statisch
+funktion	DNG09_chest02_loot		seg084	statisch
+funktion	DNG09_chest03_loot		seg084	statisch
+funktion	DNG09_chest04_loot		seg084	statisch
+funktion	DNG09_chest05_loot		seg084	statisch
+funktion	DNG09_chest06_loot		seg084	statisch
+funktion	DNG09_chest04_trap		seg084	statisch
+funktion	DNG10_handler	13FC:0000	seg085	öffentlich
+funktion	DNG10_chest00_open		seg085	statisch
+funktion	DNG10_chest00_loot		seg085	statisch
+funktion	DNG10_chest01_loot		seg085	statisch
+funktion	DNG10_chest02_loot		seg085	statisch
+funktion	DNG10_chest03_loot		seg085	statisch
+funktion	DNG10_chest04_loot		seg085	statisch
+funktion	DNG11_handler	1401:0000	seg086	öffentlich
+funktion	DNG11_chest00_loot		seg086	statisch
+funktion	DNG11_chest01_loot		seg086	statisch
+funktion	DNG11_chest02_loot		seg086	statisch
+funktion	DNG11_chest03_loot		seg086	statisch
+funktion	DNG11_chest04_loot		seg086	statisch
+funktion	DNG11_chest05_loot		seg086	statisch
+funktion	DNG11_chest06_loot		seg086	statisch
+funktion	DNG11_chest07_loot		seg086	statisch
+funktion	DNG11_chest08_loot		seg086	statisch
+funktion	DNG11_chest09_loot		seg086	statisch
+funktion	DNG11_chest10_loot		seg086	statisch
+funktion	DNG11_chest11_loot		seg086	statisch
+funktion	DNG11_chest12_loot		seg086	statisch
+funktion	DNG11_chest13_loot		seg086	statisch
+funktion	DNG11_fight_intro		seg086	statisch
+funktion	DNG14_handler	1408:0000	seg087	öffentlich
+funktion	DNG14_dive	140B:0000	seg088	öffentlich
+funktion	DNG14_fight_intro		seg088	statisch
+funktion	DNG14_chest00_loot		seg088	statisch
+funktion	DNG14_chest01_loot		seg088	statisch
+funktion	DNG14_chest02_loot		seg088	statisch
+funktion	DNG14_chest03_loot		seg088	statisch
+funktion	DNG14_chest04_loot		seg088	statisch
+funktion	DNG14_chest05_loot		seg088	statisch
+funktion	DNG14_chest06_loot		seg088	statisch
+funktion	DNG14_chest07_loot		seg088	statisch
+funktion	DNG14_chest07_trap		seg088	statisch
+funktion	DNG15_riddle		seg088	statisch
+funktion	DNG15_handler	1411:0000	seg089	öffentlich
+funktion	DNG15_small_wounds		seg089	statisch
+funktion	DNG15_debris		seg089	statisch
+funktion	DNG15_empty_chest		seg089	statisch
+funktion	DNG15_rotten_clothes_chest		seg089	statisch
+funktion	DNG15_smelling_chest		seg089	statisch
+funktion	DNG15_figures_chest		seg089	statisch
+funktion	DNG15_cursed_money_chest		seg089	statisch
+funktion	DNG15_collapsing_ceiling		seg089	statisch
+funktion	DNG15_clear_way		seg089	statisch
+funktion	DNG15_cursed_money		seg089	statisch
+funktion	DNG15_wounds_and_ladders		seg089	statisch
+funktion	DNG12_handler	1417:0000	seg090	öffentlich
+funktion	DNG_clear_corridor		seg090	statisch
+funktion	DNG12_chest00_loot		seg090	statisch
+funktion	DNG12_fight_intro		seg090	statisch
+funktion	DNG13_handler	141B:0000	seg091	öffentlich
+funktion	DNG13_unblock_passage		seg091	statisch
+funktion	DNG13_chest00_open		seg091	statisch
+funktion	DNG13_chest00_loot		seg091	statisch
+funktion	DNG13_chest01_open		seg091	statisch
+funktion	DNG13_chest01_loot		seg091	statisch
+funktion	DNG13_fight_intro		seg091	statisch
+funktion	DNG13_collapsing_ceiling		seg091	statisch
+funktion	DNG13_collapsing_ceiling_easy		seg091	statisch
+funktion	chest_protected_normal	1420:0000	seg092	öffentlich
+funktion	chest_closed	1420:0033	seg092	öffentlich
+funktion	chest_protected_heavy	1420:004E	seg092	öffentlich
+funktion	chest_poisoned1	1420:0087	seg092	öffentlich
+funktion	chest_poisoned2		seg092	statisch
+funktion	chest_poisoned3		seg092	statisch
+funktion	chest_protected_brutal		seg092	statisch
+funktion	chest_petrified		seg092	statisch
+funktion	chest_ignifax_normal		seg092	statisch
+funktion	chest_ignifax_brutal		seg092	statisch
+funktion	chest_ignifax_heavy		seg092	statisch
+funktion	chest_crossbow_bolts		seg092	statisch
+funktion	chest_cursed		seg092	statisch
+funktion	chest_fulminictus		seg092	statisch
+funktion	loot_simple_chest		seg092	statisch
+funktion	delete_chest_item		seg092	statisch
+funktion	loot_chest		seg092	statisch
+funktion	hero_has_lockpicks		seg092	statisch
+funktion	loot_special_chest		seg092	statisch
+funktion	use_lockpicks_on_chest		seg092	statisch
+funktion	use_key_on_chest		seg092	statisch
+funktion	loot_multi_chest		seg092	statisch
+funktion	do_travel_mode	1429:0000	seg093	öffentlich
+funktion	prepare_map_marker	142C:0000	seg094	öffentlich
+funktion	set_textbox_positions		seg094	statisch
+funktion	trv_do_journey		seg094	statisch
+funktion	TM_unused1		seg094	statisch
+funktion	TM_get_track_length		seg094	statisch
+funktion	trv_journey_enter_destination_town		seg094	statisch
+funktion	trv_journey_dest_town_viewdir		seg094	statisch
+funktion	TM_draw_track		seg094	statisch
+funktion	TM_unused2		seg094	statisch
+funktion	TM_draw_track_before_crosslink		seg094	statisch
+funktion	TM_do_journey_crosslink		seg094	statisch
+funktion	npc_meetings	1432:0000	seg095	öffentlich
+funktion	npc_farewell		seg095	statisch
+funktion	npc_nariell		seg095	statisch
+funktion	npc_harika		seg095	statisch
+funktion	npc_curian		seg095	statisch
+funktion	npc_ardora		seg095	statisch
+funktion	npc_garsvik		seg095	statisch
+funktion	npc_erwo		seg095	statisch
+funktion	remove_npc		seg095	statisch
+funktion	add_npc		seg095	statisch
+funktion	GUI_name_inflect_with_article	1438:0000	seg096	öffentlich
+funktion	GUI_name_inflect		seg096	statisch
+funktion	GUI_name_base_form		seg096	statisch
+funktion	GUI_grammar_name_to_personal_pronoun		seg096	statisch
+funktion	GUI_get_personal_pronoun		seg096	statisch
+funktion	GUI_get_definite_article		seg096	statisch
+funktion	GUI_write_char_to_screen		seg096	statisch
+funktion	GUI_count_lines		seg096	statisch
+funktion	GUI_print_header		seg096	statisch
+funktion	GUI_print_loc_line		seg096	statisch
+funktion	GUI_print_string		seg096	statisch
+funktion	GUI_print_char		seg096	statisch
+funktion	GUI_lookup_char_width		seg096	statisch
+funktion	GUI_write_fonti_to_screen		seg096	statisch
+funktion	GUI_blank_char		seg096	statisch
+funktion	GUI_font_to_buf		seg096	statisch
+funktion	GUI_write_char_to_screen_xy		seg096	statisch
+funktion	set_textcolor		seg096	statisch
+funktion	get_textcolor		seg096	statisch
+funktion	GUI_unused		seg096	statisch
+funktion	GUI_get_space_for_string		seg096	statisch
+funktion	GUI_get_first_pos_centered		seg096	statisch
+funktion	GUI_draw_popup_line		seg096	statisch
+funktion	GUI_unused1		seg097	statisch
+funktion	GUI_unused2		seg097	statisch
+funktion	GUI_lookup_char_height		seg097	statisch
+funktion	GUI_1c2		seg097	statisch
+funktion	GUI_enter_string		seg097	statisch
+funktion	GUI_draw_radio_bg		seg097	statisch
+funktion	GUI_copy_smth		seg097	statisch
+funktion	GUI_output		seg097	statisch
+funktion	GUI_input		seg097	statisch
+funktion	GUI_bool		seg097	statisch
+funktion	GUI_fill_radio_button		seg097	statisch
+funktion	GUI_dialogbox		seg097	statisch
+funktion	GUI_menu_input		seg097	statisch
+funktion	GUI_radio		seg097	statisch
+funktion	GUI_print_fight_intro_msg		seg097	statisch
+funktion	GUI_dialog_na		seg097	statisch
+funktion	magic_heal_ani		seg098	statisch
+funktion	FIG_do_spell_damage		seg098	statisch
+funktion	get_attackee_parade		seg098	statisch
+funktion	get_attackee_rs		seg098	statisch
+funktion	get_spell_cost		seg098	statisch
+funktion	use_magic		seg098	statisch
+funktion	can_use_spellclass		seg098	statisch
+funktion	select_spell		seg098	statisch
+funktion	test_spell		seg098	statisch
+funktion	test_spell_group		seg098	statisch
+funktion	select_magic_user		seg098	statisch
+funktion	use_spell		seg098	statisch
+funktion	spell_beherrschung	144F:0000	seg099	öffentlich
+funktion	spell_destructibo	144F:00D1	seg099	öffentlich
+funktion	spell_gardanium		seg099	statisch
+funktion	spell_illusionen		seg099	statisch
+funktion	spell_verwandlung		seg099	statisch
+funktion	spell_band		seg099	statisch
+funktion	spell_bannbaladin		seg099	statisch
+funktion	spell_boeser_blick		seg099	statisch
+funktion	spell_grosse_gier		seg099	statisch
+funktion	spell_grosse_ver		seg099	statisch
+funktion	spell_herrdertiere		seg099	statisch
+funktion	spell_horriphobus		seg099	statisch
+funktion	spell_magischerraub		seg099	statisch
+funktion	spell_respondami		seg099	statisch
+funktion	spell_sanftmut		seg099	statisch
+funktion	spell_somnigravis		seg099	statisch
+funktion	spell_zwingtanz		seg099	statisch
+funktion	spell_furor_blut		seg099	statisch
+funktion	spell_geister_bannen		seg099	statisch
+funktion	spell_geister_rufen		seg099	statisch
+funktion	spell_heptagon		seg099	statisch
+funktion	spell_kraehenruf		seg099	statisch
+funktion	spell_skelettarius		seg099	statisch
+funktion	spell_elementare		seg099	statisch
+funktion	spell_nihilatio		seg099	statisch
+funktion	spell_solidirid		seg099	statisch
+funktion	spell_axxeleratus		seg099	statisch
+funktion	spell_foramen		seg099	statisch
+funktion	spell_motoricus		seg099	statisch
+funktion	spell_spurlos		seg099	statisch
+funktion	spell_transversalis		seg099	statisch
+funktion	spell_ueber_eis		seg099	statisch
+funktion	spell_balsam		seg099	statisch
+funktion	spell_hexenspeichel		seg099	statisch
+funktion	spell_klarum_purum		seg099	statisch
+funktion	spell_ruhe_koerper		seg099	statisch
+funktion	spell_tiere_heilen		seg099	statisch
+funktion	spell_adleraug		seg099	statisch
+funktion	spell_analues		seg099	statisch
+funktion	spell_eigenschaften	145E:0000	seg100	öffentlich
+funktion	spell_exposami		seg100	statisch
+funktion	spell_odem_arcanum		seg100	statisch
+funktion	spell_penetrizzel		seg100	statisch
+funktion	spell_sensibar		seg100	statisch
+funktion	spell_chamaelioni		seg100	statisch
+funktion	spell_duplicatus		seg100	statisch
+funktion	spell_harmlos		seg100	statisch
+funktion	spell_hexenknoten		seg100	statisch
+funktion	spell_blitz		seg100	statisch
+funktion	spell_ecliptifactus		seg100	statisch
+funktion	spell_eisenrost		seg100	statisch
+funktion	spell_fulminictus		seg100	statisch
+funktion	spell_ignifaxius		seg100	statisch
+funktion	spell_plumbumbarum		seg100	statisch
+funktion	spell_radau		seg100	statisch
+funktion	spell_saft_kraft		seg100	statisch
+funktion	spell_scharfes_auge		seg100	statisch
+funktion	spell_hexenblick		seg100	statisch
+funktion	spell_necropathia		seg100	statisch
+funktion	spell_adler	1467:0000	seg101	öffentlich
+funktion	spell_arcano	1467:000B	seg101	öffentlich
+funktion	spell_armatrutz	1467:008C	seg101	öffentlich
+funktion	spell_inc_ch		seg101	statisch
+funktion	spell_feuerbann		seg101	statisch
+funktion	spell_inc_ff		seg101	statisch
+funktion	spell_inc_ge		seg101	statisch
+funktion	spell_inc_in		seg101	statisch
+funktion	spell_inc_kk		seg101	statisch
+funktion	spell_inc_kl		seg101	statisch
+funktion	spell_inc_mu		seg101	statisch
+funktion	spell_mutabili		seg101	statisch
+funktion	spell_paralue		seg101	statisch
+funktion	spell_salander		seg101	statisch
+funktion	spell_see		seg101	statisch
+funktion	spell_visibili		seg101	statisch
+funktion	spell_abvenenum		seg101	statisch
+funktion	spell_aeolitus		seg101	statisch
+funktion	spell_brenne		seg101	statisch
+funktion	spell_claudibus		seg101	statisch
+funktion	spell_dunkelheit		seg101	statisch
+funktion	spell_erstarre		seg101	statisch
+funktion	spell_flim_flam		seg101	statisch
+funktion	spell_schmelze		seg101	statisch
+funktion	spell_silentium		seg101	statisch
+funktion	spell_sturmgebr		seg101	statisch
+funktion	MON_do_spell_damage	1472:0000	seg102	öffentlich
+funktion	MON_get_target_PA		seg102	statisch
+funktion	MON_get_target_RS		seg102	statisch
+funktion	MON_get_spell_cost		seg102	statisch
+funktion	MON_test_attrib3		seg102	statisch
+funktion	MON_test_talent		seg102	statisch
+funktion	MON_sub_ae		seg102	statisch
+funktion	MON_cast_spell		seg102	statisch
+funktion	mspell_verwandlung		seg102	statisch
+funktion	mspell_bannbaladin		seg102	statisch
+funktion	mspell_boeser_blick		seg102	statisch
+funktion	mspell_horriphobus		seg102	statisch
+funktion	mspell_axxeleratus		seg102	statisch
+funktion	mspell_balsam		seg102	statisch
+funktion	mspell_blitz		seg102	statisch
+funktion	mspell_eisenrost		seg102	statisch
+funktion	mspell_fulminictus		seg102	statisch
+funktion	mspell_ignifaxius		seg102	statisch
+funktion	mspell_plumbumbarum		seg102	statisch
+funktion	mspell_saft_kraft		seg102	statisch
+funktion	mspell_armatrutz		seg102	statisch
+funktion	mspell_paralue		seg102	statisch
+funktion	LVL_select_talent	147B:0000	seg103	öffentlich
+funktion	get_proper_hero		seg103	statisch
+funktion	test_talent		seg103	statisch
+funktion	select_talent		seg103	statisch
+funktion	use_talent		seg103	statisch
+funktion	GUI_use_talent		seg103	statisch
+funktion	GUI_use_talent2		seg103	statisch
+funktion	bargain		seg103	statisch
+funktion	hero_has_ingrendients		seg104	statisch
+funktion	hero_use_ingrendients		seg104	statisch
+funktion	do_alchemy		seg104	statisch
+funktion	plan_alchemy		seg104	statisch
+funktion	has_herb_for_disease		seg104	statisch
+funktion	talent_cure_disease		seg104	statisch
+funktion	get_heaviest_hero		seg104	statisch
+funktion	get_hero_weight		seg104	statisch
+funktion	get_talented_hero_pos		seg104	statisch
+funktion	unequip	1485:0000	seg105	öffentlich
+funktion	add_equip_boni		seg105	statisch
+funktion	can_hero_use_item		seg105	statisch
+funktion	can_hero_equip_item_at_slot		seg105	statisch
+funktion	where_has_hero_equipped_item		seg105	statisch
+funktion	where_has_hero_incomplete_stack_of_item		seg105	statisch
+funktion	give_new_item_to_hero		seg105	statisch
+funktion	is_item_pleasing_ingerimm		seg105	statisch
+funktion	drop_item		seg105	statisch
+funktion	give_new_item_to_group		seg105	statisch
+funktion	hero_count_item		seg105	statisch
+funktion	group_count_item		seg105	statisch
+funktion	loose_random_item		seg105	statisch
+funktion	select_item_to_drop		seg105	statisch
+funktion	two_hand_collision	148C:0000	seg106	öffentlich
+funktion	move_item		seg106	statisch
+funktion	print_item_description		seg106	statisch
+funktion	pass_item		seg106	statisch
+funktion	startup_equipment		seg106	statisch
+funktion	get_max_light_time		seg106	statisch
+funktion	equip_belt_ani		seg106	statisch
+funktion	get_full_waterskin_inv_slot		seg106	statisch
+funktion	use_item	1491:0000	seg107	öffentlich
+funktion	item_invoke_arcano_psychostabilils		seg107	statisch
+funktion	item_read_recipe		seg107	statisch
+funktion	item_read_document		seg107	statisch
+funktion	item_invoke_armatrutz		seg107	statisch
+funktion	item_invoke_flim_flam		seg107	statisch
+funktion	item_read_schuldbuch		seg107	statisch
+funktion	item_read_orkdokument		seg107	statisch
+funktion	item_apply_weapon_poison		seg107	statisch
+funktion	item_use_miasthmaticum		seg107	statisch
+funktion	item_use_hylailer_feuer		seg107	statisch
+funktion	item_read_spellbook_heptagon		seg107	statisch
+funktion	item_ignite		seg107	statisch
+funktion	item_use_beutel		seg107	statisch
+funktion	consume	1498:0000	seg108	öffentlich
+funktion	TRV_load_textfile	149B:0000	seg109	öffentlich
+funktion	TRV_event	149B:008F	seg109	öffentlich
+funktion	TRV_fight_event		seg109	statisch
+funktion	TRV_found_herb_place		seg109	statisch
+funktion	TRV_inside_herb_place		seg109	statisch
+funktion	TRV_found_camp_place		seg109	statisch
+funktion	TRV_found_replenish_place		seg109	statisch
+funktion	TRV_found_inn		seg109	statisch
+funktion	TRV_enter_hut_question		seg109	statisch
+funktion	TRV_follow_trail_question		seg109	statisch
+funktion	TRV_cross_a_ford		seg109	statisch
+funktion	TRV_ford_test		seg109	statisch
+funktion	TRV_ferry		seg109	statisch
+funktion	tevent_001		seg109	statisch
+funktion	tevent_002		seg109	statisch
+funktion	tevent_003		seg109	statisch
+funktion	tevent_004		seg109	statisch
+funktion	TRV_hunt_generic		seg109	statisch
+funktion	tevent_005		seg109	statisch
+funktion	tevent_006		seg109	statisch
+funktion	tevent_007		seg109	statisch
+funktion	TRV_barrier		seg109	statisch
+funktion	tevent_008		seg109	statisch
+funktion	tevent_009		seg109	statisch
+funktion	tevent_010		seg109	statisch
+funktion	tevent_012		seg109	statisch
+funktion	tevent_018		seg109	statisch
+funktion	tevent_019		seg109	statisch
+funktion	tevent_023		seg109	statisch
+funktion	tevent_092		seg109	statisch
+funktion	tevent_011	14A7:0000	seg110	öffentlich
+funktion	TRV_swim2		seg110	statisch
+funktion	TRV_a_path		seg110	statisch
+funktion	tevent_013		seg110	statisch
+funktion	tevent_014		seg110	statisch
+funktion	tevent_014_chest		seg110	statisch
+funktion	tevent_015		seg110	statisch
+funktion	tevent_017		seg110	statisch
+funktion	tevent_020		seg110	statisch
+funktion	tevent_021		seg110	statisch
+funktion	tevent_022		seg110	statisch
+funktion	tevent_024		seg110	statisch
+funktion	tevent_025		seg110	statisch
+funktion	tevent_026		seg110	statisch
+funktion	tevent_027		seg110	statisch
+funktion	tevent_028		seg110	statisch
+funktion	tevent_029		seg110	statisch
+funktion	tevent_030		seg110	statisch
+funktion	tevent_031		seg110	statisch
+funktion	tevent_032		seg110	statisch
+funktion	tevent_033		seg110	statisch
+funktion	tevent_034		seg110	statisch
+funktion	tevent_035		seg110	statisch
+funktion	tevent_036		seg110	statisch
+funktion	tevent_039		seg110	statisch
+funktion	tevent_040		seg110	statisch
+funktion	tevent_041		seg110	statisch
+funktion	tevent_042		seg110	statisch
+funktion	tevent_043		seg110	statisch
+funktion	tevent_044		seg110	statisch
+funktion	tevent_045		seg110	statisch
+funktion	tevent_046		seg110	statisch
+funktion	tevent_048		seg110	statisch
+funktion	tevent_049		seg110	statisch
+funktion	tevent_050		seg110	statisch
+funktion	tevent_053	14B4:0000	seg111	öffentlich
+funktion	tevent_054	14B4:0039	seg111	öffentlich
+funktion	tevent_055	14B4:004A	seg111	öffentlich
+funktion	tevent_056		seg111	statisch
+funktion	tevent_057		seg111	statisch
+funktion	tevent_058		seg111	statisch
+funktion	tevent_059		seg111	statisch
+funktion	tevent_060		seg111	statisch
+funktion	tevent_061		seg111	statisch
+funktion	tevent_062		seg111	statisch
+funktion	tevent_063		seg111	statisch
+funktion	tevent_064		seg111	statisch
+funktion	tevent_064_chest		seg111	statisch
+funktion	tevent_065		seg111	statisch
+funktion	tevent_066		seg111	statisch
+funktion	tevent_067	14BB:0000	seg112	öffentlich
+funktion	tevent_068		seg112	statisch
+funktion	tevent_069		seg112	statisch
+funktion	tevent_070		seg112	statisch
+funktion	tevent_071		seg112	statisch
+funktion	TRV_swimm		seg112	statisch
+funktion	tevent_unused01		seg112	statisch
+funktion	tevent_072		seg112	statisch
+funktion	tevent_073		seg112	statisch
+funktion	tevent_074		seg112	statisch
+funktion	tevent_075		seg112	statisch
+funktion	tevent_076		seg112	statisch
+funktion	tevent_077		seg112	statisch
+funktion	tevent_080	14C2:0000	seg113	öffentlich
+funktion	tevent_081		seg113	statisch
+funktion	tevent_082		seg113	statisch
+funktion	tevent_083		seg113	statisch
+funktion	tevent_084		seg113	statisch
+funktion	tevent_085		seg113	statisch
+funktion	tevent_086		seg113	statisch
+funktion	tevent_088		seg113	statisch
+funktion	tevent_089		seg113	statisch
+funktion	tevent_097		seg113	statisch
+funktion	tevent_098		seg113	statisch
+funktion	hero_disappear		seg113	statisch
+funktion	tevent_099		seg113	statisch
+funktion	tevent_101		seg113	statisch
+funktion	tevent_102		seg113	statisch
+funktion	tevent_103		seg113	statisch
+funktion	tevent_104		seg113	statisch
+funktion	tevent_105		seg113	statisch
+funktion	tevent_106		seg113	statisch
+funktion	tevent_107		seg113	statisch
+funktion	tevent_108		seg113	statisch
+funktion	tevent_109		seg113	statisch
+funktion	tevent_110	14CB:0000	seg114	öffentlich
+funktion	tevent_111		seg114	statisch
+funktion	tevent_112		seg114	statisch
+funktion	tevent_113		seg114	statisch
+funktion	tevent_114		seg114	statisch
+funktion	tevent_116		seg114	statisch
+funktion	tevent_117		seg114	statisch
+funktion	tevent_118		seg114	statisch
+funktion	tevent_119		seg114	statisch
+funktion	tevent_122		seg114	statisch
+funktion	tevent_123		seg114	statisch
+funktion	tevent_016	14D1:0000	seg115	öffentlich
+funktion	tevent_090		seg115	statisch
+funktion	tevent_091		seg115	statisch
+funktion	tevent_093		seg115	statisch
+funktion	tevent_094		seg115	statisch
+funktion	tevent_095		seg115	statisch
+funktion	tevent_096		seg115	statisch
+funktion	tevent_126		seg115	statisch
+funktion	tevent_127		seg115	statisch
+funktion	tevent_128		seg115	statisch
+funktion	tevent_129		seg115	statisch
+funktion	tevent_047		seg115	statisch
+funktion	tevent_100		seg115	statisch
+funktion	tevent_130	14D8:0000	seg116	öffentlich
+funktion	tevent_131		seg116	statisch
+funktion	tevent_132		seg116	statisch
+funktion	tevent_133		seg116	statisch
+funktion	tevent_134		seg116	statisch
+funktion	tevent_135		seg116	statisch
+funktion	tevent_137		seg116	statisch
+funktion	tevent_138		seg116	statisch
+funktion	tevent_139		seg116	statisch
+funktion	tevent_140		seg116	statisch
+funktion	tevent_141		seg116	statisch
+funktion	tevent_142		seg116	statisch
+funktion	tevent_143		seg116	statisch
+funktion	tevent_144		seg116	statisch
+funktion	tevent_144_unused		seg116	statisch
+funktion	TLK_old_woman		seg116	statisch
+funktion	tevent_136		seg116	statisch
+funktion	pause_traveling		seg117	statisch
+funktion	resume_traveling		seg117	statisch
+funktion	hunt_karen		seg117	statisch
+funktion	hunt_wildboar		seg117	statisch
+funktion	hunt_cavebear		seg117	statisch
+funktion	hunt_viper		seg117	statisch
+funktion	octopus_attack		seg117	statisch
+funktion	hunt_bison		seg117	statisch
+funktion	hunt_rhino		seg117	statisch
+funktion	pirates_attack		seg117	statisch
+funktion	do_wild8_fight		seg117	statisch
+funktion	journey_random_encounter		seg117	statisch
+funktion	search_ruin1		seg117	statisch
+funktion	tevent_115		seg117	statisch
+funktion	TLK_way_to_ruin		seg117	statisch
+funktion	tevent_087		seg117	statisch
+funktion	tevent_037	14E7:0000	seg118	öffentlich
+funktion	tevent_038		seg118	statisch
+funktion	tevent_078		seg118	statisch
+funktion	tevent_079		seg118	statisch
+funktion	tevent_051		seg118	statisch
+funktion	tevent_052		seg118	statisch
+funktion	tevent_120		seg118	statisch
+funktion	tevent_121		seg118	statisch
+funktion	tevent_124		seg118	statisch
+funktion	tevent_125		seg118	statisch
+funktion	tevent_145		seg118	statisch
+funktion	disease_effect	14ED:0000	seg119	öffentlich
+funktion	rabies_frenzy	14F0:0000	seg120	öffentlich
+funktion	init_global_buffer		seg120	statisch
+funktion	init_memory		seg120	statisch
+funktion	refresh_colors		seg120	statisch
+funktion	get_diskspace		seg120	statisch
+funktion	init_game_state		seg120	statisch
+funktion	err_handler		seg120	statisch
+funktion	prepare_dirs		seg120	statisch
+funktion	cleanup_game		seg120	statisch
+funktion	game_over_screen		seg120	statisch
+funktion	call_gen		seg120	statisch
+funktion	poison_effect	14F6:0000	seg121	öffentlich
+funktion	do_location1		seg122	statisch
+funktion	AIL_REGISTER_TIMER	1042:077A	ail	öffentlich
+funktion	AIL_RELEASE_TIMER_HANDLE	1042:0845	ail	öffentlich
+funktion	AIL_RELEASE_ALL_TIMERS	1042:088E	ail	öffentlich
+funktion	AIL_START_TIMER	1042:08AC	ail	öffentlich
+funktion	AIL_START_ALL_TIMERS	1042:08D4	ail	öffentlich
+funktion	AIL_STOP_TIMER	1042:08F2	ail	öffentlich
+funktion	AIL_STOP_ALL_TIMERS	1042:091A	ail	öffentlich
+funktion	AIL_SET_TIMER_PERIOD	1042:0938	ail	öffentlich
+funktion	AIL_SET_TIMER_FREQUENCY	1042:098D	ail	öffentlich
+funktion	AIL_SET_TIMER_DIVISOR	1042:09CE	ail	öffentlich
+funktion	AIL_INTERRUPT_DIVISOR	1042:0A0A	ail	öffentlich
+funktion	AIL_RELEASE_DRIVER_HANDLE	1042:0AA8	ail	öffentlich
+funktion	AIL_SHUTDOWN_DRIVER	1042:0BB4	ail	öffentlich
+funktion	AIL_INDEX_VOC_BLOCK	1042:0BE7	ail	öffentlich
+funktion	AIL_REGISTER_SOUND_BUFFER	1042:0BED	ail	öffentlich
+funktion	AIL_FORMAT_SOUND_BUFFER	1042:0BF3	ail	öffentlich
+funktion	AIL_SOUND_BUFFER_STATUS	1042:0BF9	ail	öffentlich
+funktion	AIL_PAUSE_DIGITAL_PLAYBACK	1042:0C1D	ail	öffentlich
+funktion	AIL_RESUME_DIGITAL_PLAYBACK	1042:0C23	ail	öffentlich
+funktion	AIL_DIGITAL_PLAYBACK_VOLUME	1042:0C2F	ail	öffentlich
+funktion	AIL_SET_DIGITAL_PLAYBACK_PANPOT	1042:0C35	ail	öffentlich
+funktion	AIL_DIGITAL_PLAYBACK_PANPOT	1042:0C3B	ail	öffentlich
+funktion	AIL_PROTECT_TIMBRE	1042:0C6B	ail	öffentlich
+funktion	AIL_UNPROTECT_TIMBRE	1042:0C71	ail	öffentlich
+funktion	AIL_TIMBRE_STATUS	1042:0C77	ail	öffentlich
+funktion	AIL_RESUME_SEQUENCE	1042:0C89	ail	öffentlich
+funktion	AIL_RELATIVE_VOLUME	1042:0C95	ail	öffentlich
+funktion	AIL_RELATIVE_TEMPO	1042:0C9B	ail	öffentlich
+funktion	AIL_SET_RELATIVE_TEMPO	1042:0CA7	ail	öffentlich
+funktion	AIL_BEAT_COUNT	1042:0CAD	ail	öffentlich
+funktion	AIL_MEASURE_COUNT	1042:0CB3	ail	öffentlich
+funktion	AIL_BRANCH_INDEX	1042:0CB9	ail	öffentlich
+funktion	AIL_CONTROLLER_VALUE	1042:0CBF	ail	öffentlich
+funktion	AIL_SET_CONTROLLER_VALUE	1042:0CC5	ail	öffentlich
+funktion	AIL_CHANNEL_NOTES	1042:0CCB	ail	öffentlich
+funktion	AIL_SEND_CHANNEL_VOICE_MESSAGE	1042:0CD1	ail	öffentlich
+funktion	AIL_SEND_SYSEX_MESSAGE	1042:0CD7	ail	öffentlich
+funktion	AIL_WRITE_DISPLAY	1042:0CDD	ail	öffentlich
+funktion	AIL_INSTALL_CALLBACK	1042:0CE3	ail	öffentlich
+funktion	AIL_CANCEL_CALLBACK	1042:0CE9	ail	öffentlich
+funktion	AIL_LOCK_CHANNEL	1042:0CEF	ail	öffentlich
+funktion	AIL_MAP_SEQUENCE_CHANNEL	1042:0CF5	ail	öffentlich
+funktion	AIL_RELEASE_CHANNEL	1042:0CFB	ail	öffentlich
+funktion	AIL_TRUE_SEQUENCE_CHANNEL	1042:0D01	ail	öffentlich
+funktion	CD_audio_repeat_check	04AC:02C4	seg001	öffentlich
+funktion	CD_audio_resume	04AC:03D5	seg001	öffentlich
+funktion	restart_midi_playback_IRQ	051E:06FE	seg002	öffentlich
+funktion	get_archive_file_length	051E:0C0E	seg002	öffentlich
+funktion	mouse_install_handler	051E:174C	seg002	öffentlich
+funktion	swap_u32_halves_unused	051E:4215	seg002	öffentlich
+funktion	get_random_hero_unused	051E:510F	seg002	öffentlich
+funktion	GET_FIRST_HERO_WITH_ITEM_IN_GROU	051E:55B1	seg002	öffentlich
+funktion	GET_FIRST_HERO_AVAILABLE_IN_GROU	051E:5667	seg002	öffentlich
+funktion	GET_SECOND_HERO_AVAILABLE_IN_GRO	051E:56D6	seg002	öffentlich
+funktion	update_visual_squares	0AE7:002C	seg003	öffentlich
+funktion	unused_ega_set_mode	0B2A:1225	seg004	öffentlich
+funktion	unused_ega_map_mask	0B2A:1237	seg004	öffentlich
+funktion	unused_ega_set_reset	0B2A:1249	seg004	öffentlich
+funktion	unused_ega_enable_set_reset	0B2A:125B	seg004	öffentlich
+funktion	unused_ega_read_map	0B2A:126D	seg004	öffentlich
+funktion	unused_ega_bit_mask	0B2A:127F	seg004	öffentlich
+funktion	swap_u16	0F18:0008	seg008	öffentlich
+funktion	set_video_mode	0F18:0014	seg008	öffentlich
+funktion	set_video_page	0F18:002A	seg008	öffentlich
+funktion	save_display_stat	0F18:0040	seg008	öffentlich
+funktion	set_color	0F18:00EA	seg008	öffentlich
+funktion	set_palette	0F18:0119	seg008	öffentlich
+funktion	draw_h_line	0F18:014D	seg008	öffentlich
+funktion	draw_h_spaced_dots	0F18:01AF	seg008	öffentlich
+funktion	pic_copy	0F18:0219	seg008	öffentlich
+funktion	save_rect	0F18:0655	seg008	öffentlich
+funktion	fill_rect	0F18:068C	seg008	öffentlich
+funktion	copy_solid_permuted	0F18:06C5	seg008	öffentlich
+funktion	copy_solid	0F18:0816	seg008	öffentlich
+funktion	decomp_rle	0F18:0967	seg008	öffentlich
+funktion	decomp_pp20	0FF1:0008	seg009	öffentlich
+funktion	EMS_get_num_pages_unalloced	1030:0055	seg010	öffentlich
+funktion	EMS_alloc_pages	1030:0071	seg010	öffentlich
+funktion	EMS_free_pages	1030:0090	seg010	öffentlich
+funktion	EMS_map_memory	1030:00A9	seg010	öffentlich
+funktion	EMS_norm_ptr	1030:00C8	seg010	öffentlich
+funktion	EMS_init	1030:00FD	seg010	öffentlich
+funktion	FIG_check_target_cursor_step	1312:0000	seg034	öffentlich
+funktion	GUI_print_string_font8	1442:0000	seg097	öffentlich
+funktion	magic_target_stars_ani	1449:0000	seg098	öffentlich
+funktion	spell_gardianum	144F:00DC	seg099	öffentlich
+funktion	hero_has_ingredients	1480:0000	seg104	öffentlich
+funktion	do_location_unkn1	14F9:0000	seg122	öffentlich
+daten	req	1238:0000	seg013	far_data
+daten	cd_buf1	1238:00FC	seg013	far_data
+daten	cd_buf2	1238:0420	seg013	far_data
+daten	cd_ioctl_reset_code	ds:0x0094	seg001	vorbelegt
+daten	g_cd_init_successful	ds:0x0095	seg001	vorbelegt
+daten	g_cd_skipmagic	ds:0x00c3	seg001	vorbelegt
+daten	g_items_noplural	ds:0x0270	seg002	vorbelegt
+daten	g_items_pluralwords	ds:0x029e	seg002	vorbelegt
+daten	g_item_name_genders	ds:0x02ac	seg002	vorbelegt
+daten	g_forbidden_item_ids_gaukler	ds:0x03aa	seg002	vorbelegt
+daten	g_forbidden_item_ids_jaeger	ds:0x03d0	seg002	vorbelegt
+daten	g_forbidden_item_ids_krieger	ds:0x03f6	seg002	vorbelegt
+daten	g_forbidden_item_ids_streuner	ds:0x040e	seg002	vorbelegt
+daten	g_forbidden_item_ids_thorwaler	ds:0x0432	seg002	vorbelegt
+daten	g_forbidden_item_ids_zwerg	ds:0x044a	seg002	vorbelegt
+daten	g_forbidden_item_ids_hexe	ds:0x045c	seg002	vorbelegt
+daten	g_forbidden_item_ids_druide	ds:0x04dc	seg002	vorbelegt
+daten	g_forbidden_item_ids_magier	ds:0x054e	seg002	vorbelegt
+daten	g_forbidden_item_ids_auelf	ds:0x05ce	seg002	vorbelegt
+daten	g_forbidden_item_ids_firnelf	ds:0x05ec	seg002	vorbelegt
+daten	g_forbidden_item_ids_waldelf	ds:0x0612	seg002	vorbelegt
+daten	g_forbidden_item_ids_table	ds:0x0638	seg002	vorbelegt
+daten	g_ranged_weapon_stats_table	ds:0x0668	seg002	vorbelegt
+daten	g_weapon_stats_table	ds:0x06b0	seg002	vorbelegt
+daten	g_armor_stats_table	ds:0x0877	seg002	vorbelegt
+daten	g_usable_items_table	ds:0x08a9	seg002	vorbelegt
+daten	g_weapon_poisons	ds:0x08d3	seg002	vorbelegt
+daten	g_herbs_toxic	ds:0x08e7	seg002	vorbelegt
+daten	g_herbs_uneatable	ds:0x08f1	seg002	vorbelegt
+daten	g_elixir_potions	ds:0x08ff	seg002	vorbelegt
+daten	g_bad_elixirs	ds:0x090f	seg002	vorbelegt
+daten	g_attack_items	ds:0x091f	seg002	vorbelegt
+daten	g_monster_name_genders	ds:0x0925	seg002	vorbelegt
+daten	g_staffspell_descriptions	ds:0x0973	seg002	vorbelegt
+daten	g_spell_descriptions	ds:0x099d	seg002	vorbelegt
+daten	g_spellclasses	ds:0x0d03	seg002	vorbelegt
+daten	G_MAGIC_SCHOOL_ANTIMAGIE_SPELL_I	ds:0x0d1b	seg002	vorbelegt
+daten	G_MAGIC_SCHOOL_BEHERRSCHUNG_SPEL	ds:0x0d29	seg002	vorbelegt
+daten	G_MAGIC_SCHOOL_BESCHWOERUNG_SPEL	ds:0x0d35	seg002	vorbelegt
+daten	G_MAGIC_SCHOOL_BEWEGUNG_SPELL_ID	ds:0x0d43	seg002	vorbelegt
+daten	g_magic_school_heilung_spell_ids	ds:0x0d4f	seg002	vorbelegt
+daten	G_MAGIC_SCHOOL_HELLSICHT_SPELL_I	ds:0x0d5b	seg002	vorbelegt
+daten	g_magic_school_kampf_spell_ids	ds:0x0d6b	seg002	vorbelegt
+daten	G_MAGIC_SCHOOL_VERWANDLUNG_SPELL	ds:0x0d7b	seg002	vorbelegt
+daten	G_MAGIC_SCHOOL_VERAENDERUNG_SPEL	ds:0x0d87	seg002	vorbelegt
+daten	g_magic_schools_table	ds:0x0d97	seg002	vorbelegt
+daten	g_spell_handlers	ds:0x0dbb	seg002	vorbelegt
+daten	g_mon_spell_descriptions	ds:0x0f13	seg002	vorbelegt
+daten	g_mon_spellbooks	ds:0x0f8b	seg002	vorbelegt
+daten	g_mon_spellhandlers	ds:0x0fc2	seg002	vorbelegt
+daten	g_talent_descriptions	ds:0x0ffe	seg002	vorbelegt
+daten	g_talentclasses	ds:0x10ce	seg002	vorbelegt
+daten	g_nvftab_figures_rangeweapon	ds:0x10dc	seg002	vorbelegt
+daten	g_nvftab_figures_unconscious	ds:0x11e4	seg002	vorbelegt
+daten	g_gfxtab_offsets_unconscious	ds:0x1210	seg002	vorbelegt
+daten	g_gfxtab_figures_main	ds:0x12c0	seg002	vorbelegt
+daten	g_gfxtab_offsets_main	ds:0x1531	seg002	vorbelegt
+daten	g_nvftab_figures_dead	ds:0x1a13	seg002	vorbelegt
+daten	g_unkn_005	ds:0x1a3f	seg002	vorbelegt
+daten	g_gfx_ani_descriptions_01	ds:0x1a65	seg002	vorbelegt
+daten	g_gfx_ani_descriptions_02	ds:0x1ae7	seg002	vorbelegt
+daten	g_gfx_ani_descriptions_03	ds:0x1b69	seg002	vorbelegt
+daten	g_gfx_ani_descriptions_04	ds:0x1beb	seg002	vorbelegt
+daten	g_gfx_ani_descriptions_05	ds:0x1c6d	seg002	vorbelegt
+daten	g_gfx_ani_descriptions_06	ds:0x1cef	seg002	vorbelegt
+daten	g_gfx_ani_descriptions_07	ds:0x1d71	seg002	vorbelegt
+daten	g_gfx_ani_descriptions_08	ds:0x1df3	seg002	vorbelegt
+daten	g_gfx_ani_descriptions_09	ds:0x1e75	seg002	vorbelegt
+daten	g_gfx_ani_descriptions_10	ds:0x1ef7	seg002	vorbelegt
+daten	g_gfx_ani_descriptions_11	ds:0x1f79	seg002	vorbelegt
+daten	g_gfx_ani_descriptions_12	ds:0x1ffb	seg002	vorbelegt
+daten	g_gfx_ani_descriptions_13	ds:0x207d	seg002	vorbelegt
+daten	g_gfx_ani_descriptions_14	ds:0x20ff	seg002	vorbelegt
+daten	g_gfx_ani_descriptions_15	ds:0x2149	seg002	vorbelegt
+daten	g_gfx_ani_descriptions_16	ds:0x2193	seg002	vorbelegt
+daten	g_gfx_ani_descriptions_17	ds:0x21dd	seg002	vorbelegt
+daten	g_gfx_ani_descriptions_18	ds:0x2227	seg002	vorbelegt
+daten	g_gfx_ani_descriptions_19	ds:0x2271	seg002	vorbelegt
+daten	g_gfx_ani_descriptions_20	ds:0x22bb	seg002	vorbelegt
+daten	g_gfx_ani_descriptions_21	ds:0x2305	seg002	vorbelegt
+daten	g_gfx_ani_descriptions_22	ds:0x234f	seg002	vorbelegt
+daten	g_gfx_ani_descriptions_23	ds:0x2399	seg002	vorbelegt
+daten	g_gfx_ani_descriptions_24	ds:0x23e3	seg002	vorbelegt
+daten	g_gfx_ani_descriptions_25	ds:0x242d	seg002	vorbelegt
+daten	g_gfx_ani_descriptions_26	ds:0x2477	seg002	vorbelegt
+daten	g_gfx_ani_descriptions_27	ds:0x24c1	seg002	vorbelegt
+daten	g_gfx_ani_descriptions_28	ds:0x250b	seg002	vorbelegt
+daten	g_gfx_ani_index	ds:0x2555	seg002	vorbelegt
+daten	G_DOUBLE_SIZE_ACTOR_SPRITE_ID_TA	ds:0x25f9	seg002	vorbelegt
+daten	g_weaponani_table	ds:0x25fe	seg002	vorbelegt
+daten	g_weaponani_types	ds:0x268e	seg002	vorbelegt
+daten	g_food_message_shown	ds:0x26a4	seg002	vorbelegt
+daten	g_ems_enabled	ds:0x26ab	seg002	vorbelegt
+daten	g_fig_initiative	ds:0x26ac	seg002	vorbelegt
+daten	g_fig_msg_counter	ds:0x26ad	seg002	vorbelegt
+daten	g_always_one	ds:0x26af	seg002	vorbelegt
+daten	g_fig_continue_print	ds:0x26b1	seg002	vorbelegt
+daten	g_fig_char_pic	ds:0x26b3	seg002	vorbelegt
+daten	g_fig_enemy_pic	ds:0x26b5	seg002	vorbelegt
+daten	g_gui_entering_savegame	ds:0x26b7	seg002	vorbelegt
+daten	g_check_disease	ds:0x26b9	seg002	vorbelegt
+daten	g_check_poison	ds:0x26bb	seg002	vorbelegt
+daten	g_text_file_index	ds:0x26bd	seg002	vorbelegt
+daten	g_tx_file_index	ds:0x26bf	seg002	vorbelegt
+daten	g_fig_discard	ds:0x26c1	seg002	vorbelegt
+daten	g_palette_allblack2	ds:0x26c3	seg002	vorbelegt
+daten	g_palette_unknown1	ds:0x2723	seg002	vorbelegt
+daten	g_palette_fight1	ds:0x2783	seg002	vorbelegt
+daten	g_palette_special	ds:0x27e3	seg002	vorbelegt
+daten	g_unkn_006	ds:0x2843	seg002	vorbelegt
+daten	g_pp20_index	ds:0x2845	seg002	vorbelegt
+daten	g_request_refresh	ds:0x2846	seg002	vorbelegt
+daten	g_default_mouse_cursor	ds:0x2848	seg002	vorbelegt
+daten	g_cursor_arrow_up	ds:0x2888	seg002	vorbelegt
+daten	g_cursor_arrow_down	ds:0x28c8	seg002	vorbelegt
+daten	g_cursor_arrow_left	ds:0x2908	seg002	vorbelegt
+daten	g_cursor_arrow_right	ds:0x2948	seg002	vorbelegt
+daten	g_mouse_posy_min	ds:0x2988	seg002	vorbelegt
+daten	g_mouse_posx_min	ds:0x298a	seg002	vorbelegt
+daten	g_mouse_posy_max	ds:0x298c	seg002	vorbelegt
+daten	g_mouse_posx_max	ds:0x298e	seg002	vorbelegt
+daten	g_pic_copy_rect	ds:0x2990	seg002	vorbelegt
+daten	g_mouse_locked	ds:0x2998	seg002	vorbelegt
+daten	g_mouse_refresh_flag	ds:0x299a	seg002	vorbelegt
+daten	g_mouse_posx	ds:0x299c	seg002	vorbelegt
+daten	g_mouse_posy	ds:0x299e	seg002	vorbelegt
+daten	g_mouse_posx_bak	ds:0x29a0	seg002	vorbelegt
+daten	g_mouse_posy_bak	ds:0x29a2	seg002	vorbelegt
+daten	g_mouse_moved	ds:0x29a4	seg002	vorbelegt
+daten	g_mouse_pointer_offsetx	ds:0x29a6	seg002	vorbelegt
+daten	g_mouse_pointer_offsety	ds:0x29a8	seg002	vorbelegt
+daten	g_mouse_pointer_offsetx_bak	ds:0x29aa	seg002	vorbelegt
+daten	g_mouse_pointer_offsety_bak	ds:0x29ac	seg002	vorbelegt
+daten	g_ani_enabled	ds:0x29ae	seg002	vorbelegt
+daten	g_unkn_007	ds:0x29b0	seg002	vorbelegt
+daten	g_statusmenu_allowed	ds:0x29b2	seg002	vorbelegt
+daten	g_heroswap_allowed	ds:0x29b4	seg002	vorbelegt
+daten	g_intemple	ds:0x29b6	seg002	vorbelegt
+daten	g_intemple2	ds:0x29b8	seg002	vorbelegt
+daten	g_always_zero3	ds:0x29ba	seg002	vorbelegt
+daten	g_unkn_008	ds:0x29bc	seg002	vorbelegt
+daten	g_action_table_menu	ds:0x29cc	seg002	vorbelegt
+daten	g_action_table_primary	ds:0x29e0	seg002	vorbelegt
+daten	g_action_table_secondary	ds:0x29e4	seg002	vorbelegt
+daten	g_action_table_playmask	ds:0x29e8	seg002	vorbelegt
+daten	g_action_table_status	ds:0x2ad8	seg002	vorbelegt
+daten	g_action_table_merchant	ds:0x2c04	seg002	vorbelegt
+daten	g_char_status_bars	ds:0x2c18	seg002	vorbelegt
+daten	g_disease_strength	ds:0x2c50	seg002	vorbelegt
+daten	g_diseases_healer_bonus	ds:0x2c60	seg002	vorbelegt
+daten	g_poison_strength	ds:0x2c70	seg002	vorbelegt
+daten	g_poisons_healer_bonus	ds:0x2c84	seg002	vorbelegt
+daten	g_dialogbox_lock	ds:0x2c98	seg002	vorbelegt
+daten	g_timers_disabled	ds:0x2c99	seg002	vorbelegt
+daten	g_status_page_mode	ds:0x2c9b	seg002	vorbelegt
+daten	g_status_page_hero	ds:0x2c9d	seg002	vorbelegt
+daten	g_status_page_hunger	ds:0x2c9f	seg002	vorbelegt
+daten	g_status_page_thirst	ds:0x2ca0	seg002	vorbelegt
+daten	g_missing_file_guilock	ds:0x2ca1	seg002	vorbelegt
+daten	g_basepos_x	ds:0x2ca2	seg002	vorbelegt
+daten	g_basepos_y	ds:0x2ca4	seg002	vorbelegt
+daten	g_dng_loaded_dungeon_id	ds:0x2ca6	seg002	vorbelegt
+daten	g_town_loaded_town_id	ds:0x2ca7	seg002	vorbelegt
+daten	g_travel_map_loaded	ds:0x2ca8	seg002	vorbelegt
+daten	g_unkn_009	ds:0x2ca9	seg002	vorbelegt
+daten	g_ani_unknown_flag	ds:0x2cca	seg002	vorbelegt
+daten	g_area_prepared	ds:0x2ccb	seg002	vorbelegt
+daten	g_unkn_010	ds:0x2ccd	seg002	vorbelegt
+daten	g_always_zero4	ds:0x2cce	seg002	vorbelegt
+daten	g_current_ani	ds:0x2ccf	seg002	vorbelegt
+daten	g_fig_figure1	ds:0x2cd1	seg002	vorbelegt
+daten	g_fig_figure2	ds:0x2cd3	seg002	vorbelegt
+daten	g_in_fight	ds:0x2cd5	seg002	vorbelegt
+daten	g_fight_round	ds:0x2cd7	seg002	vorbelegt
+daten	g_unkn_011	ds:0x2cd9	seg002	vorbelegt
+daten	g_talented_hero_pos	ds:0x2cdb	seg002	vorbelegt
+daten	g_gui_buttons_pos	ds:0x2cdd	seg002	vorbelegt
+daten	g_hero_pic_posx	ds:0x2d01	seg002	vorbelegt
+daten	g_levelup_ta_rise	ds:0x2d0f	seg002	vorbelegt
+daten	g_levelup_sp_rise	ds:0x2d1b	seg002	vorbelegt
+daten	g_levelup_spta_conv	ds:0x2d21	seg002	vorbelegt
+daten	g_mr_modificators	ds:0x2d27	seg002	vorbelegt
+daten	gs_datseg_status_start	ds:0x2d34	seg002	vorbelegt
+daten	gs_active_group_id	ds:0x2d35	seg002	vorbelegt
+daten	gs_group_member_counts	ds:0x2d36	seg002	vorbelegt
+daten	gs_total_hero_counter	ds:0x2d3c	seg002	vorbelegt
+daten	gs_viewdir	ds:0x2d3d	seg002	vorbelegt
+daten	gs_groups_viewdir	ds:0x2d3e	seg002	vorbelegt
+daten	gs_x	ds:0x2d44	seg002	vorbelegt
+daten	gs_y	ds:0x2d46	seg002	vorbelegt
+daten	gs_groups_x	ds:0x2d48	seg002	vorbelegt
+daten	gs_groups_y	ds:0x2d54	seg002	vorbelegt
+daten	gs_town_loc_type	ds:0x2d60	seg002	vorbelegt
+daten	gs_town_groups_loctype	ds:0x2d61	seg002	vorbelegt
+daten	gs_town_id	ds:0x2d67	seg002	vorbelegt
+daten	gs_groups_town_id	ds:0x2d68	seg002	vorbelegt
+daten	gs_dungeon_id	ds:0x2d6e	seg002	vorbelegt
+daten	gs_groups_dungeon_id	ds:0x2d6f	seg002	vorbelegt
+daten	gs_dungeon_level	ds:0x2d75	seg002	vorbelegt
+daten	gs_groups_dng_level	ds:0x2d76	seg002	vorbelegt
+daten	gs_viewdir_bak	ds:0x2d7c	seg002	vorbelegt
+daten	gs_groups_viewdir_bak	ds:0x2d7d	seg002	vorbelegt
+daten	gs_x_bak	ds:0x2d83	seg002	vorbelegt
+daten	gs_y_bak	ds:0x2d85	seg002	vorbelegt
+daten	gs_groups_x_bak	ds:0x2d87	seg002	vorbelegt
+daten	gs_groups_y_bak	ds:0x2d93	seg002	vorbelegt
+daten	gs_town_loc_type_bak	ds:0x2d9f	seg002	vorbelegt
+daten	gs_town_groups_loctype_bak	ds:0x2da0	seg002	vorbelegt
+daten	gs_town_id_bak	ds:0x2da6	seg002	vorbelegt
+daten	gs_groups_town_id_bak	ds:0x2da7	seg002	vorbelegt
+daten	gs_dungeon_id_bak	ds:0x2dad	seg002	vorbelegt
+daten	gs_groups_dungeon_id_bak	ds:0x2dae	seg002	vorbelegt
+daten	gs_dungeon_level_bak	ds:0x2db4	seg002	vorbelegt
+daten	gs_groups_dng_level_bak	ds:0x2db5	seg002	vorbelegt
+daten	gs_day_timer	ds:0x2dbb	seg002	vorbelegt
+daten	gs_day_of_week	ds:0x2dbf	seg002	vorbelegt
+daten	gs_day_of_month	ds:0x2dc0	seg002	vorbelegt
+daten	gs_month	ds:0x2dc1	seg002	vorbelegt
+daten	gs_year	ds:0x2dc2	seg002	vorbelegt
+daten	gs_special_date_id	ds:0x2dc3	seg002	vorbelegt
+daten	gs_ingame_timers	ds:0x2dc4	seg002	vorbelegt
+daten	gs_modification_timers	ds:0x2e2c	seg002	vorbelegt
+daten	g_unkn_012	ds:0x314c	seg002	vorbelegt
+daten	gs_gods_estimation	ds:0x314e	seg002	vorbelegt
+daten	gs_tav_cheated_flags	ds:0x318a	seg002	vorbelegt
+daten	gs_smith_repairitems	ds:0x31e2	seg002	vorbelegt
+daten	gs_dng_pos_bak	ds:0x330e	seg002	vorbelegt
+daten	gs_deathtrap_steps	ds:0x3310	seg002	vorbelegt
+daten	gs_deathtrap	ds:0x3312	seg002	vorbelegt
+daten	gs_dng01_amulet_taken	ds:0x3314	seg002	vorbelegt
+daten	gs_dng01_sabre_taken	ds:0x3315	seg002	vorbelegt
+daten	gs_dng01_crossbow_taken	ds:0x3316	seg002	vorbelegt
+daten	gs_dng01_ardora_freed	ds:0x3317	seg002	vorbelegt
+daten	g_unkn_013	ds:0x3318	seg002	vorbelegt
+daten	gs_dng01_key_taken	ds:0x3319	seg002	vorbelegt
+daten	gs_dng01_corpse_looted	ds:0x331a	seg002	vorbelegt
+daten	gs_weather1	ds:0x331b	seg002	vorbelegt
+daten	gs_weather2	ds:0x331d	seg002	vorbelegt
+daten	gs_daspota_fightflags	ds:0x331f	seg002	vorbelegt
+daten	gs_treasure_maps	ds:0x3332	seg002	vorbelegt
+daten	gs_debtbook_read_flag	ds:0x333c	seg002	vorbelegt
+daten	gs_orcdocument_read_flag	ds:0x333d	seg002	vorbelegt
+daten	gs_gardianum_used_ae	ds:0x333e	seg002	vorbelegt
+daten	gs_min_map_parts	ds:0x3340	seg002	vorbelegt
+daten	gs_subvention	ds:0x3342	seg002	vorbelegt
+daten	gs_otta_windriders	ds:0x3344	seg002	vorbelegt
+daten	gs_otta_stormchildren	ds:0x3346	seg002	vorbelegt
+daten	gs_otta_garaldsson	ds:0x3348	seg002	vorbelegt
+daten	gs_heard_announce	ds:0x334a	seg002	vorbelegt
+daten	gs_got_main_quest	ds:0x334c	seg002	vorbelegt
+daten	gs_quested_months	ds:0x334e	seg002	vorbelegt
+daten	gs_monthly_credit	ds:0x3350	seg002	vorbelegt
+daten	gs_got_letter_jad	ds:0x3352	seg002	vorbelegt
+daten	gs_visited_miller	ds:0x3354	seg002	vorbelegt
+daten	gs_quest_ugdalf	ds:0x3356	seg002	vorbelegt
+daten	gs_academy_daily_curse	ds:0x3358	seg002	vorbelegt
+daten	gs_academy_daily_ident	ds:0x335a	seg002	vorbelegt
+daten	gs_bank_deposit	ds:0x335c	seg002	vorbelegt
+daten	gs_days_to_cens	ds:0x335e	seg002	vorbelegt
+daten	gs_debt_days	ds:0x3360	seg002	vorbelegt
+daten	gs_in_academy	ds:0x3362	seg002	vorbelegt
+daten	gs_informer_flags	ds:0x3364	seg002	vorbelegt
+daten	gs_tav_kicked_flags	ds:0x3374	seg002	vorbelegt
+daten	gs_town_outlawed_flags	ds:0x33cc	seg002	vorbelegt
+daten	gs_inn_kicked_flags	ds:0x3400	seg002	vorbelegt
+daten	gs_got_letter_het	ds:0x344a	seg002	vorbelegt
+daten	g_unkn_015	ds:0x344b	seg002	vorbelegt
+daten	gs_jurge_awaits_letter	ds:0x344c	seg002	vorbelegt
+daten	gs_umbrik_quest_gorah	ds:0x344d	seg002	vorbelegt
+daten	g_unkn_016	ds:0x344e	seg002	vorbelegt
+daten	gs_isleif_jandas_regards	ds:0x344f	seg002	vorbelegt
+daten	gs_isleif_map_given	ds:0x3450	seg002	vorbelegt
+daten	gs_ragna_asked_map	ds:0x3451	seg002	vorbelegt
+daten	gs_beorn_litt_bold	ds:0x3452	seg002	vorbelegt
+daten	gs_beorn_medi_bold	ds:0x3453	seg002	vorbelegt
+daten	gs_beorn_very_bold	ds:0x3454	seg002	vorbelegt
+daten	gs_eliane_quest_nameless	ds:0x3455	seg002	vorbelegt
+daten	gs_olvir_start_hetmann	ds:0x3456	seg002	vorbelegt
+daten	gs_olvir_start_hyggelik	ds:0x3457	seg002	vorbelegt
+daten	gs_olvir_start_hasgar	ds:0x3458	seg002	vorbelegt
+daten	gs_olvir_interrupted	ds:0x3459	seg002	vorbelegt
+daten	gs_olvir_singing_hetmann	ds:0x345a	seg002	vorbelegt
+daten	gs_olvir_singing_hyggelik	ds:0x345b	seg002	vorbelegt
+daten	gs_olvir_singing_hasgar	ds:0x345c	seg002	vorbelegt
+daten	gs_swafnild_tp1	ds:0x345d	seg002	vorbelegt
+daten	gs_swafnild_tp2	ds:0x345e	seg002	vorbelegt
+daten	gs_swafnild_tp3	ds:0x345f	seg002	vorbelegt
+daten	gs_swafnild_tp4	ds:0x3460	seg002	vorbelegt
+daten	gs_swafnild_destination	ds:0x3461	seg002	vorbelegt
+daten	gs_swafnild_nomap	ds:0x3462	seg002	vorbelegt
+daten	gs_treborn_date	ds:0x3463	seg002	vorbelegt
+daten	gs_unicorn_hero_pos	ds:0x3464	seg002	vorbelegt
+daten	gs_unicorn_get_map	ds:0x3465	seg002	vorbelegt
+daten	gs_unicorn_timer_hours	ds:0x3466	seg002	vorbelegt
+daten	gs_algrid_treborns_hint	ds:0x3467	seg002	vorbelegt
+daten	gs_tiomar_drinkmate	ds:0x3468	seg002	vorbelegt
+daten	gs_tiomar_awaits_letter	ds:0x3469	seg002	vorbelegt
+daten	gs_unicorn_hero_ptr	ds:0x346a	seg002	vorbelegt
+daten	gs_npc_meet_tavern	ds:0x346e	seg002	vorbelegt
+daten	gs_npc_months	ds:0x3470	seg002	vorbelegt
+daten	gs_smith_kicked_flags	ds:0x3472	seg002	vorbelegt
+daten	gs_smith_flogged_flags	ds:0x34a4	seg002	vorbelegt
+daten	gs_merchant_kicked_flags	ds:0x34d6	seg002	vorbelegt
+daten	gs_merchant_kicked2_flags	ds:0x3534	seg002	vorbelegt
+daten	gs_merchant_offended_flags	ds:0x3592	seg002	vorbelegt
+daten	gs_quest_deadship	ds:0x35f0	seg002	vorbelegt
+daten	g_unkn_017	ds:0x35f1	seg002	vorbelegt
+daten	gs_quest_deadship_done	ds:0x35f2	seg002	vorbelegt
+daten	gs_always_one2	ds:0x35f3	seg002	vorbelegt
+daten	gs_dng03_spidereggs_burned	ds:0x35f4	seg002	vorbelegt
+daten	g_unkn_018	ds:0x35f5	seg002	vorbelegt
+daten	gs_dng06_dasptreas_found	ds:0x35f7	seg002	vorbelegt
+daten	g_unkn_019	ds:0x35f8	seg002	vorbelegt
+daten	gs_quest_nameless_done	ds:0x35fa	seg002	vorbelegt
+daten	g_unkn_020	ds:0x35fb	seg002	vorbelegt
+daten	gs_dng14_ugdalf_done	ds:0x35ff	seg002	vorbelegt
+daten	gs_got_grimring	ds:0x3600	seg002	vorbelegt
+daten	gs_npc_timers	ds:0x3601	seg002	vorbelegt
+daten	gs_tlk_tav_firstinfo	ds:0x3608	seg002	vorbelegt
+daten	gs_tlk_tav_infopromise	ds:0x3609	seg002	vorbelegt
+daten	gs_tlk_tav_round	ds:0x360a	seg002	vorbelegt
+daten	gs_tlk_tav_freebeer	ds:0x360b	seg002	vorbelegt
+daten	gs_tlk_tav_drinkcount	ds:0x360c	seg002	vorbelegt
+daten	gs_tlk_tav_informersex	ds:0x360d	seg002	vorbelegt
+daten	g_unkn_021	ds:0x360e	seg002	vorbelegt
+daten	gs_tlk_tav_followinformer	ds:0x360f	seg002	vorbelegt
+daten	gs_tlk_tav_crowdedness	ds:0x3610	seg002	vorbelegt
+daten	gs_tlk_tav_testdrunk	ds:0x3611	seg002	vorbelegt
+daten	gs_current_informer	ds:0x3612	seg002	vorbelegt
+daten	gs_dungeon_light	ds:0x3613	seg002	vorbelegt
+daten	gs_show_travel_map	ds:0x3614	seg002	vorbelegt
+daten	gs_hermit_visited	ds:0x3615	seg002	vorbelegt
+daten	gs_dungeon_gfx_style	ds:0x3616	seg002	vorbelegt
+daten	gs_estorik_known	ds:0x3617	seg002	vorbelegt
+daten	gs_dialog_partners	ds:0x3618	seg002	vorbelegt
+daten	gs_dialog_states	ds:0x3794	seg002	vorbelegt
+daten	GS_DNG02_SPHAERENRISS_TIMER_ACTI	ds:0x3c94	seg002	vorbelegt
+daten	gs_dng02_wanderer_corpse_looted	ds:0x3c95	seg002	vorbelegt
+daten	gs_dng02_apparatus_destroyed	ds:0x3c96	seg002	vorbelegt
+daten	GS_DNG02_SPHAERENRISS_TIMER_HOUR	ds:0x3c97	seg002	vorbelegt
+daten	gs_dng02_sphaerenriss_activated	ds:0x3c98	seg002	vorbelegt
+daten	gs_dng02_raven_destroyed	ds:0x3c99	seg002	vorbelegt
+daten	gs_dng02_secret_door_status_1	ds:0x3c9a	seg002	vorbelegt
+daten	gs_dng02_secret_door_status_2	ds:0x3c9b	seg002	vorbelegt
+daten	gs_dng02_secret_door_status_3	ds:0x3c9c	seg002	vorbelegt
+daten	gs_dng03_lever_trap	ds:0x3c9d	seg002	vorbelegt
+daten	gs_dng03_lever_chest11	ds:0x3c9e	seg002	vorbelegt
+daten	gs_dng03_sanctum_smashed	ds:0x3c9f	seg002	vorbelegt
+daten	gs_dng04_corpse0_flag	ds:0x3ca0	seg002	vorbelegt
+daten	gs_dng04_corpse1_flag	ds:0x3ca1	seg002	vorbelegt
+daten	gs_dng04_corpse2_flag	ds:0x3ca2	seg002	vorbelegt
+daten	gs_dng04_gap_flag	ds:0x3ca3	seg002	vorbelegt
+daten	gs_dng04_helmet_flag	ds:0x3ca4	seg002	vorbelegt
+daten	gs_dng04_lantern_flag	ds:0x3ca5	seg002	vorbelegt
+daten	gs_dng04_deepgap_flag	ds:0x3ca6	seg002	vorbelegt
+daten	gs_dng06_pitdoor_flag	ds:0x3ca7	seg002	vorbelegt
+daten	gs_dng06_proviant_flag	ds:0x3ca8	seg002	vorbelegt
+daten	gs_dng06_money_flag	ds:0x3ca9	seg002	vorbelegt
+daten	gs_dng06_goldkey_flag	ds:0x3caa	seg002	vorbelegt
+daten	gs_dng06_countdown_timer	ds:0x3cab	seg002	vorbelegt
+daten	gs_dng06_lever_flag	ds:0x3cac	seg002	vorbelegt
+daten	gs_dng06_book_flag	ds:0x3cad	seg002	vorbelegt
+daten	gs_dng06_fight19_flag	ds:0x3cae	seg002	vorbelegt
+daten	gs_dng05_proviant_flag	ds:0x3caf	seg002	vorbelegt
+daten	gs_dng05_bats_flag	ds:0x3cb0	seg002	vorbelegt
+daten	gs_dng05_god_flag	ds:0x3cb1	seg002	vorbelegt
+daten	gs_dng07_mu_elixir_flag	ds:0x3cb2	seg002	vorbelegt
+daten	gs_dng07_anti_mu_elixir_flag	ds:0x3cb3	seg002	vorbelegt
+daten	gs_dng07_flicker_flag	ds:0x3cb4	seg002	vorbelegt
+daten	gs_dng07_poison_flag	ds:0x3cb5	seg002	vorbelegt
+daten	gs_dng07_poison_timer	ds:0x3cb6	seg002	vorbelegt
+daten	gs_dng08_bed_00	ds:0x3cba	seg002	vorbelegt
+daten	gs_dng08_bed_01	ds:0x3cbb	seg002	vorbelegt
+daten	gs_dng08_bed_02	ds:0x3cbc	seg002	vorbelegt
+daten	gs_dng08_bed_03	ds:0x3cbd	seg002	vorbelegt
+daten	gs_dng08_bed_04	ds:0x3cbe	seg002	vorbelegt
+daten	gs_dng08_bed_05	ds:0x3cbf	seg002	vorbelegt
+daten	gs_dng08_bed_06	ds:0x3cc0	seg002	vorbelegt
+daten	gs_dng08_bed_07	ds:0x3cc1	seg002	vorbelegt
+daten	gs_dng08_bed_08	ds:0x3cc2	seg002	vorbelegt
+daten	gs_dng08_bed_09	ds:0x3cc3	seg002	vorbelegt
+daten	gs_dng08_bed_10	ds:0x3cc4	seg002	vorbelegt
+daten	gs_dng08_bed_11	ds:0x3cc5	seg002	vorbelegt
+daten	gs_dng08_timer1	ds:0x3cc6	seg002	vorbelegt
+daten	gs_dng08_timer2	ds:0x3cc7	seg002	vorbelegt
+daten	gs_dng08_bundles_done	ds:0x3cc8	seg002	vorbelegt
+daten	gs_dng08_ballista_done	ds:0x3cc9	seg002	vorbelegt
+daten	gs_dng08_chest2_looted	ds:0x3cca	seg002	vorbelegt
+daten	gs_dng08_secret_door_status	ds:0x3ccb	seg002	vorbelegt
+daten	gs_dng08_chest0_looted	ds:0x3ccc	seg002	vorbelegt
+daten	gs_dng08_chest35_looted	ds:0x3ccd	seg002	vorbelegt
+daten	gs_daspota_location01_loot	ds:0x3cce	seg002	vorbelegt
+daten	gs_daspota_location02_loot	ds:0x3ceb	seg002	vorbelegt
+daten	gs_daspota_location03_loot	ds:0x3cfa	seg002	vorbelegt
+daten	gs_daspota_location04_loot	ds:0x3d09	seg002	vorbelegt
+daten	gs_daspota_location05_loot	ds:0x3d12	seg002	vorbelegt
+daten	gs_daspota_location06_loot	ds:0x3d31	seg002	vorbelegt
+daten	gs_daspota_location07_loot	ds:0x3d4a	seg002	vorbelegt
+daten	gs_daspota_location08_loot	ds:0x3d51	seg002	vorbelegt
+daten	gs_daspota_location10_loot	ds:0x3d60	seg002	vorbelegt
+daten	gs_daspota_location12_loot	ds:0x3d67	seg002	vorbelegt
+daten	gs_daspota_location13_loot	ds:0x3d7c	seg002	vorbelegt
+daten	gs_daspota_location14_loot	ds:0x3d85	seg002	vorbelegt
+daten	gs_daspota_location16_loot	ds:0x3d8a	seg002	vorbelegt
+daten	gs_daspota_location18_loot	ds:0x3d8f	seg002	vorbelegt
+daten	gs_tevent004_flag	ds:0x3da2	seg002	vorbelegt
+daten	gs_tevent005_flag	ds:0x3da3	seg002	vorbelegt
+daten	gs_tevent008_flag	ds:0x3da4	seg002	vorbelegt
+daten	gs_tevent009_flag	ds:0x3da5	seg002	vorbelegt
+daten	gs_tevent011_flag	ds:0x3da6	seg002	vorbelegt
+daten	gs_tevent013_flag	ds:0x3da7	seg002	vorbelegt
+daten	gs_tevent014_flag	ds:0x3da8	seg002	vorbelegt
+daten	gs_tevent016_flag	ds:0x3da9	seg002	vorbelegt
+daten	gs_tevent017_flag	ds:0x3daa	seg002	vorbelegt
+daten	gs_tevent020_flag	ds:0x3dab	seg002	vorbelegt
+daten	gs_tevent021_flag	ds:0x3dac	seg002	vorbelegt
+daten	gs_tevent022_flag	ds:0x3dad	seg002	vorbelegt
+daten	gs_tevent022_track_flag	ds:0x3dae	seg002	vorbelegt
+daten	gs_tevent024_flag	ds:0x3daf	seg002	vorbelegt
+daten	gs_tevent025_flag	ds:0x3db0	seg002	vorbelegt
+daten	gs_tevent028_flag	ds:0x3db1	seg002	vorbelegt
+daten	gs_tevent030_flag	ds:0x3db2	seg002	vorbelegt
+daten	gs_tevent031_flag	ds:0x3db3	seg002	vorbelegt
+daten	gs_tevent032_flag	ds:0x3db4	seg002	vorbelegt
+daten	gs_tevent032_herb_flag	ds:0x3db5	seg002	vorbelegt
+daten	gs_tevent034_flag	ds:0x3db6	seg002	vorbelegt
+daten	gs_tevent035_flag	ds:0x3db7	seg002	vorbelegt
+daten	gs_tevent036_flag	ds:0x3db8	seg002	vorbelegt
+daten	gs_tevent036_herb_flag	ds:0x3db9	seg002	vorbelegt
+daten	gs_tevent037_flag	ds:0x3dba	seg002	vorbelegt
+daten	gs_tevent039_flag	ds:0x3dbb	seg002	vorbelegt
+daten	gs_tevent040_flag	ds:0x3dbc	seg002	vorbelegt
+daten	gs_tevent041_flag	ds:0x3dbd	seg002	vorbelegt
+daten	gs_tevent042_flag	ds:0x3dbe	seg002	vorbelegt
+daten	gs_tevent043_flag	ds:0x3dbf	seg002	vorbelegt
+daten	gs_tevent048_flag	ds:0x3dc0	seg002	vorbelegt
+daten	gs_tevent048_track_flag	ds:0x3dc1	seg002	vorbelegt
+daten	gs_tevent049_flag	ds:0x3dc2	seg002	vorbelegt
+daten	gs_tevent050_flag	ds:0x3dc3	seg002	vorbelegt
+daten	gs_tevent050_herb_flag	ds:0x3dc4	seg002	vorbelegt
+daten	gs_tevent051_flag	ds:0x3dc5	seg002	vorbelegt
+daten	gs_tevent053_flag	ds:0x3dc6	seg002	vorbelegt
+daten	gs_tevent058_flag	ds:0x3dc7	seg002	vorbelegt
+daten	gs_tevent061_flag	ds:0x3dc8	seg002	vorbelegt
+daten	gs_tevent064_flag	ds:0x3dc9	seg002	vorbelegt
+daten	gs_tevent066_flag	ds:0x3dca	seg002	vorbelegt
+daten	gs_tevent066_track_flag	ds:0x3dcb	seg002	vorbelegt
+daten	gs_tevent067_flag	ds:0x3dcc	seg002	vorbelegt
+daten	gs_tevent069_flag	ds:0x3dcd	seg002	vorbelegt
+daten	gs_tevent070_flag	ds:0x3dce	seg002	vorbelegt
+daten	gs_tevent070_herb_flag	ds:0x3dcf	seg002	vorbelegt
+daten	gs_tevent070_trail_flag	ds:0x3dd0	seg002	vorbelegt
+daten	gs_tevent071_flag	ds:0x3dd1	seg002	vorbelegt
+daten	gs_tevent_unused_herb_flag	ds:0x3dd2	seg002	vorbelegt
+daten	gs_tevent064_ambush_flag	ds:0x3dd3	seg002	vorbelegt
+daten	g_unkn_022	ds:0x3dd4	seg002	vorbelegt
+daten	gs_teventu02_flag	ds:0x3dd5	seg002	vorbelegt
+daten	gs_teventu03_flag	ds:0x3dd6	seg002	vorbelegt
+daten	gs_teventu04_flag	ds:0x3dd7	seg002	vorbelegt
+daten	gs_teventu05_flag	ds:0x3dd8	seg002	vorbelegt
+daten	gs_teventu06_flag	ds:0x3dd9	seg002	vorbelegt
+daten	gs_tevent071_orcstatue	ds:0x3dda	seg002	vorbelegt
+daten	gs_met_unicorn_flag	ds:0x3ddb	seg002	vorbelegt
+daten	gs_find_hyggelik	ds:0x3ddc	seg002	vorbelegt
+daten	gs_tevent072_flag	ds:0x3ddd	seg002	vorbelegt
+daten	gs_tevent073_flag	ds:0x3dde	seg002	vorbelegt
+daten	gs_tevent074_flag	ds:0x3ddf	seg002	vorbelegt
+daten	gs_tevent075_flag	ds:0x3de0	seg002	vorbelegt
+daten	gs_tevent076_flag	ds:0x3de1	seg002	vorbelegt
+daten	gs_tevent077_flag	ds:0x3de2	seg002	vorbelegt
+daten	gs_tevent079_flag	ds:0x3de3	seg002	vorbelegt
+daten	gs_tevent080_flag	ds:0x3de4	seg002	vorbelegt
+daten	gs_tevent080_tatzelwurm	ds:0x3de5	seg002	vorbelegt
+daten	gs_tevent081_flag	ds:0x3de6	seg002	vorbelegt
+daten	gs_tevent083_flag	ds:0x3de7	seg002	vorbelegt
+daten	gs_tevent084_flag	ds:0x3de8	seg002	vorbelegt
+daten	gs_tevent085_flag	ds:0x3de9	seg002	vorbelegt
+daten	gs_tevent085_herb_flag	ds:0x3dea	seg002	vorbelegt
+daten	gs_tevent086_flag	ds:0x3deb	seg002	vorbelegt
+daten	gs_tevent088_flag	ds:0x3dec	seg002	vorbelegt
+daten	gs_tevent091_flag	ds:0x3ded	seg002	vorbelegt
+daten	gs_tevent093_flag	ds:0x3dee	seg002	vorbelegt
+daten	gs_daspota_treasure_hint	ds:0x3def	seg002	vorbelegt
+daten	gs_teventu07_flag	ds:0x3df0	seg002	vorbelegt
+daten	gs_teventu08_flag	ds:0x3df1	seg002	vorbelegt
+daten	gs_tevent099_flag	ds:0x3df2	seg002	vorbelegt
+daten	gs_tevent100_flag	ds:0x3df3	seg002	vorbelegt
+daten	gs_tevent101_flag	ds:0x3df4	seg002	vorbelegt
+daten	gs_tevent106_flag	ds:0x3df5	seg002	vorbelegt
+daten	gs_tevent108_flag	ds:0x3df6	seg002	vorbelegt
+daten	gs_tevent109_flag	ds:0x3df7	seg002	vorbelegt
+daten	gs_tevent111_flag	ds:0x3df8	seg002	vorbelegt
+daten	gs_tevent112_flag	ds:0x3df9	seg002	vorbelegt
+daten	gs_tevent112_herb_flag	ds:0x3dfa	seg002	vorbelegt
+daten	gs_tevent115_flag	ds:0x3dfb	seg002	vorbelegt
+daten	gs_tevent116_flag	ds:0x3dfc	seg002	vorbelegt
+daten	gs_tevent118_flag	ds:0x3dfd	seg002	vorbelegt
+daten	gs_tevent119_flag	ds:0x3dfe	seg002	vorbelegt
+daten	gs_tevent120_flag	ds:0x3dff	seg002	vorbelegt
+daten	gs_tevent122_flag	ds:0x3e00	seg002	vorbelegt
+daten	g_unkn_023	ds:0x3e01	seg002	vorbelegt
+daten	gs_tevent128_flag	ds:0x3e02	seg002	vorbelegt
+daten	gs_tevent128_herb_flag	ds:0x3e03	seg002	vorbelegt
+daten	gs_tevent129_flag	ds:0x3e04	seg002	vorbelegt
+daten	gs_tevent131_flag	ds:0x3e05	seg002	vorbelegt
+daten	gs_tevent132_flag	ds:0x3e06	seg002	vorbelegt
+daten	gs_tevent132_herb_flag	ds:0x3e07	seg002	vorbelegt
+daten	gs_tevent134_flag	ds:0x3e08	seg002	vorbelegt
+daten	gs_tevent137_flag	ds:0x3e09	seg002	vorbelegt
+daten	gs_tevent138_flag	ds:0x3e0a	seg002	vorbelegt
+daten	gs_teventu09_flag	ds:0x3e0b	seg002	vorbelegt
+daten	gs_tevent140_flag	ds:0x3e0c	seg002	vorbelegt
+daten	gs_tevent140_herb_flag	ds:0x3e0d	seg002	vorbelegt
+daten	gs_tevent141_flag	ds:0x3e0e	seg002	vorbelegt
+daten	gs_tevent142_flag	ds:0x3e0f	seg002	vorbelegt
+daten	g_unkn_024	ds:0x3e10	seg002	vorbelegt
+daten	gs_teventu10_flag	ds:0x3e11	seg002	vorbelegt
+daten	gs_teventu11_flag	ds:0x3e12	seg002	vorbelegt
+daten	gs_teventu12_flag	ds:0x3e13	seg002	vorbelegt
+daten	gs_teventu13_flag	ds:0x3e14	seg002	vorbelegt
+daten	gs_tevent114_olimone_flag	ds:0x3e15	seg002	vorbelegt
+daten	gs_tevent074_fight_result	ds:0x3e16	seg002	vorbelegt
+daten	gs_tevent077_fight_result	ds:0x3e17	seg002	vorbelegt
+daten	gs_random_tlk_hero	ds:0x3e18	seg002	vorbelegt
+daten	gs_ruin_hero	ds:0x3e1c	seg002	vorbelegt
+daten	gs_main_acting_hero	ds:0x3e20	seg002	vorbelegt
+daten	gs_tevent073_corpse	ds:0x3e24	seg002	vorbelegt
+daten	gs_tevent014_chest	ds:0x3e27	seg002	vorbelegt
+daten	gs_tevent064_hut_content	ds:0x3e2b	seg002	vorbelegt
+daten	gs_tevent064_chest	ds:0x3e3e	seg002	vorbelegt
+daten	gs_palette_floor	ds:0x3e53	seg002	vorbelegt
+daten	gs_palette_buildings	ds:0x3eb3	seg002	vorbelegt
+daten	gs_palette_sky	ds:0x3f13	seg002	vorbelegt
+daten	gs_need_letter	ds:0x3f73	seg002	vorbelegt
+daten	gs_gremob_invited	ds:0x3f74	seg002	vorbelegt
+daten	gs_harlot_date	ds:0x3f75	seg002	vorbelegt
+daten	gs_drug_timer	ds:0x3f76	seg002	vorbelegt
+daten	gs_ptemple_closed	ds:0x3f77	seg002	vorbelegt
+daten	gs_alrik_derondan	ds:0x3f78	seg002	vorbelegt
+daten	gs_alrik_derondan_insulted	ds:0x3f79	seg002	vorbelegt
+daten	gs_dng13_lantern_flag	ds:0x3f7a	seg002	vorbelegt
+daten	gs_dng13_corpse0_flag	ds:0x3f7b	seg002	vorbelegt
+daten	gs_dng13_corpse1_flag	ds:0x3f7c	seg002	vorbelegt
+daten	gs_dng13_passage1_flag	ds:0x3f7d	seg002	vorbelegt
+daten	gs_dng13_passage2_flag	ds:0x3f7e	seg002	vorbelegt
+daten	gs_dng13_passage3_flag	ds:0x3f7f	seg002	vorbelegt
+daten	gs_dng13_passage4_flag	ds:0x3f80	seg002	vorbelegt
+daten	gs_dng13_passage5_flag	ds:0x3f81	seg002	vorbelegt
+daten	gs_dng13_money_flag	ds:0x3f82	seg002	vorbelegt
+daten	gs_dng13_chest_equips	ds:0x3f83	seg002	vorbelegt
+daten	gs_dng13_chest0_content	ds:0x3f90	seg002	vorbelegt
+daten	gs_dng13_chest1_content	ds:0x3f96	seg002	vorbelegt
+daten	gs_dng12_tunnel1	ds:0x3f9b	seg002	vorbelegt
+daten	gs_dng12_tunnel2	ds:0x3f9c	seg002	vorbelegt
+daten	gs_dng12_tunnel3	ds:0x3f9d	seg002	vorbelegt
+daten	gs_dng12_tunnel4	ds:0x3f9e	seg002	vorbelegt
+daten	gs_dng12_ingerimm_sacrifice	ds:0x3f9f	seg002	vorbelegt
+daten	gs_dng12_ingerimm_hint	ds:0x3fa0	seg002	vorbelegt
+daten	gs_dng12_watertrap_water_runs	ds:0x3fa1	seg002	vorbelegt
+daten	gs_dng12_watertrap_timer	ds:0x3fa2	seg002	vorbelegt
+daten	gs_dng12_watertrap_active	ds:0x3fa6	seg002	vorbelegt
+daten	gs_dng12_obstacle_hp	ds:0x3fa7	seg002	vorbelegt
+daten	gs_dng12_obstacle_active	ds:0x3fa8	seg002	vorbelegt
+daten	gs_dng12_speartrap_active	ds:0x3fa9	seg002	vorbelegt
+daten	gs_dng12_chest1_content	ds:0x3faa	seg002	vorbelegt
+daten	gs_dng14_money_flag	ds:0x3fb6	seg002	vorbelegt
+daten	gs_dng14_alarm_flag	ds:0x3fb7	seg002	vorbelegt
+daten	gs_dng14_secretdoor1	ds:0x3fb8	seg002	vorbelegt
+daten	gs_dng14_secretdoor2	ds:0x3fb9	seg002	vorbelegt
+daten	gs_dng14_secretdoor3	ds:0x3fba	seg002	vorbelegt
+daten	gs_dng14_secretdoor4	ds:0x3fbb	seg002	vorbelegt
+daten	gs_dng14_secretdoor5	ds:0x3fbc	seg002	vorbelegt
+daten	gs_dng14_poisontrap	ds:0x3fbd	seg002	vorbelegt
+daten	gs_dng14_lvl2_fight	ds:0x3fbe	seg002	vorbelegt
+daten	gs_dng14_booty_flag	ds:0x3fbf	seg002	vorbelegt
+daten	gs_dng14_torches_flag	ds:0x3fc0	seg002	vorbelegt
+daten	gs_dng14_spear_flag	ds:0x3fc1	seg002	vorbelegt
+daten	gs_dng14_hatchet_flag	ds:0x3fc2	seg002	vorbelegt
+daten	gs_dng14_ring_flag	ds:0x3fc3	seg002	vorbelegt
+daten	gs_dng14_orknase_flag	ds:0x3fc4	seg002	vorbelegt
+daten	gs_dng14_spooky_flag	ds:0x3fc5	seg002	vorbelegt
+daten	gs_dng14_cellarexit_flag	ds:0x3fc6	seg002	vorbelegt
+daten	gs_dng14_chest_pantry	ds:0x3fc7	seg002	vorbelegt
+daten	gs_dng14_chest_gear	ds:0x3fd0	seg002	vorbelegt
+daten	gs_dng14_chest_barrel	ds:0x3fdd	seg002	vorbelegt
+daten	gs_dng14_chest_x1	ds:0x3fe4	seg002	vorbelegt
+daten	gs_dng14_chest_x2	ds:0x3feb	seg002	vorbelegt
+daten	gs_dng14_chest_x3	ds:0x3ffb	seg002	vorbelegt
+daten	gs_dng14_chest_x4	ds:0x4006	seg002	vorbelegt
+daten	gs_dng14_chest_x5	ds:0x4014	seg002	vorbelegt
+daten	gs_dng14_chest_x6	ds:0x401e	seg002	vorbelegt
+daten	gs_dng14_chest_x7	ds:0x4026	seg002	vorbelegt
+daten	gs_dng14_chest_x8	ds:0x402d	seg002	vorbelegt
+daten	gs_dng14_fullmap_flag	ds:0x403a	seg002	vorbelegt
+daten	gs_dng02_chest00_content	ds:0x403b	seg002	vorbelegt
+daten	gs_dng02_chest01_content	ds:0x403d	seg002	vorbelegt
+daten	gs_dng02_chest06_content	ds:0x4041	seg002	vorbelegt
+daten	gs_dng02_chest02_content	ds:0x4045	seg002	vorbelegt
+daten	gs_dng02_chest03_content	ds:0x404d	seg002	vorbelegt
+daten	gs_dng02_chest05_content	ds:0x4055	seg002	vorbelegt
+daten	gs_dng03_chest00_content	ds:0x405d	seg002	vorbelegt
+daten	gs_dng03_chest01_content	ds:0x4064	seg002	vorbelegt
+daten	gs_dng03_chest02_content	ds:0x406c	seg002	vorbelegt
+daten	gs_dng03_chest03_content	ds:0x4079	seg002	vorbelegt
+daten	gs_dng03_chest04_content	ds:0x407c	seg002	vorbelegt
+daten	gs_dng03_chest06_content	ds:0x4085	seg002	vorbelegt
+daten	gs_dng03_chest07_content	ds:0x408d	seg002	vorbelegt
+daten	gs_dng03_chest08_content	ds:0x408f	seg002	vorbelegt
+daten	gs_dng03_chest09_content	ds:0x4093	seg002	vorbelegt
+daten	gs_dng03_chest12_content	ds:0x409e	seg002	vorbelegt
+daten	gs_dng04_chest_corpse0	ds:0x40a5	seg002	vorbelegt
+daten	gs_dng04_chest_corpse1	ds:0x40a9	seg002	vorbelegt
+daten	gs_dng04_chest_corpse2	ds:0x40b5	seg002	vorbelegt
+daten	gs_dng06_chest1_content	ds:0x40bf	seg002	vorbelegt
+daten	gs_dng06_chest_dasptreas	ds:0x40cf	seg002	vorbelegt
+daten	gs_dng08_chest1_content	ds:0x40e0	seg002	vorbelegt
+daten	gs_dng08_chest2_content	ds:0x40eb	seg002	vorbelegt
+daten	gs_dng08_chest4_content	ds:0x40ed	seg002	vorbelegt
+daten	gs_dng08_chest5_content	ds:0x40ef	seg002	vorbelegt
+daten	gs_dng09_lever1_flag	ds:0x40f5	seg002	vorbelegt
+daten	gs_dng09_bolttrap1_flag	ds:0x40f6	seg002	vorbelegt
+daten	gs_dng09_bolttrap2_flag	ds:0x40f7	seg002	vorbelegt
+daten	gs_dng09_bolttrap3_flag	ds:0x40f8	seg002	vorbelegt
+daten	gs_dng09_cultist_flag	ds:0x40f9	seg002	vorbelegt
+daten	gs_dng09_lever2_flag	ds:0x40fa	seg002	vorbelegt
+daten	gs_dng09_bolttrap4_flag	ds:0x40fb	seg002	vorbelegt
+daten	gs_dng09_crystal_flag	ds:0x40fc	seg002	vorbelegt
+daten	gs_dng09_pit_flag	ds:0x40fd	seg002	vorbelegt
+daten	g_unkn_025	ds:0x40fe	seg002	vorbelegt
+daten	gs_dng09_altar_flag	ds:0x40ff	seg002	vorbelegt
+daten	gs_dng09_secretdoor1	ds:0x4100	seg002	vorbelegt
+daten	gs_dng09_secretdoor2	ds:0x4101	seg002	vorbelegt
+daten	gs_dng09_chest0	ds:0x4102	seg002	vorbelegt
+daten	gs_dng09_chest1	ds:0x410e	seg002	vorbelegt
+daten	gs_dng09_chest2	ds:0x4118	seg002	vorbelegt
+daten	gs_dng09_chest3	ds:0x4120	seg002	vorbelegt
+daten	gs_dng09_chest5	ds:0x4135	seg002	vorbelegt
+daten	gs_dng09_chest6	ds:0x4139	seg002	vorbelegt
+daten	gs_dng10_corpse_flag	ds:0x4140	seg002	vorbelegt
+daten	gs_dng10_lever_found	ds:0x4141	seg002	vorbelegt
+daten	gs_dng10_hole_state	ds:0x4142	seg002	vorbelegt
+daten	gs_dng10_lever_state	ds:0x4143	seg002	vorbelegt
+daten	gs_dng10_hole_damage	ds:0x4144	seg002	vorbelegt
+daten	gs_dng10_floorplate_found	ds:0x4145	seg002	vorbelegt
+daten	gs_dng10_floorplate_loads	ds:0x4146	seg002	vorbelegt
+daten	gs_dng10_mummy_lever	ds:0x4147	seg002	vorbelegt
+daten	gs_dng10_heshtot	ds:0x4148	seg002	vorbelegt
+daten	gs_dng10_dragon_quest	ds:0x4149	seg002	vorbelegt
+daten	gs_dng10_hoard_plundered	ds:0x414a	seg002	vorbelegt
+daten	gs_dng10_chest0_content	ds:0x414b	seg002	vorbelegt
+daten	gs_dng10_chest1_content	ds:0x4150	seg002	vorbelegt
+daten	gs_dng10_chest2_content	ds:0x4154	seg002	vorbelegt
+daten	gs_dng10_chest3_content	ds:0x4158	seg002	vorbelegt
+daten	gs_dng10_chest4_content	ds:0x415b	seg002	vorbelegt
+daten	gs_dng11_waterbarrel1	ds:0x415d	seg002	vorbelegt
+daten	gs_dng11_waterbarrel2	ds:0x415e	seg002	vorbelegt
+daten	gs_dng11_swafnir_sacrifice	ds:0x415f	seg002	vorbelegt
+daten	gs_dng11_swafnir_hint	ds:0x4160	seg002	vorbelegt
+daten	gs_dng11_firetrap1_active	ds:0x4161	seg002	vorbelegt
+daten	gs_dng11_firetrap1_flag	ds:0x4162	seg002	vorbelegt
+daten	gs_dng11_firetrap2_active	ds:0x4163	seg002	vorbelegt
+daten	gs_dng11_firetrap2_flag	ds:0x4164	seg002	vorbelegt
+daten	gs_dng11_secretdoor1_flag	ds:0x4165	seg002	vorbelegt
+daten	gs_dng11_secretdoor2_flag	ds:0x4166	seg002	vorbelegt
+daten	gs_dng11_secretdoor3_flag	ds:0x4167	seg002	vorbelegt
+daten	gs_dng11_lever_flag	ds:0x4168	seg002	vorbelegt
+daten	gs_dng11_proviant1_flag	ds:0x4169	seg002	vorbelegt
+daten	gs_dng11_proviant2_flag	ds:0x416a	seg002	vorbelegt
+daten	gs_dng11_chest3	ds:0x416b	seg002	vorbelegt
+daten	gs_dng11_chest4	ds:0x417a	seg002	vorbelegt
+daten	gs_dng11_chest5	ds:0x4185	seg002	vorbelegt
+daten	gs_dng11_chest6	ds:0x418a	seg002	vorbelegt
+daten	gs_dng11_chest7	ds:0x4191	seg002	vorbelegt
+daten	gs_dng11_chest8	ds:0x4192	seg002	vorbelegt
+daten	gs_dng11_chest9	ds:0x4198	seg002	vorbelegt
+daten	gs_dng11_chest10	ds:0x419e	seg002	vorbelegt
+daten	gs_dng11_chest11	ds:0x41a9	seg002	vorbelegt
+daten	gs_dng11_chest12	ds:0x41ad	seg002	vorbelegt
+daten	gs_dng11_chest13	ds:0x41ba	seg002	vorbelegt
+daten	gs_dng11_chest14	ds:0x41c0	seg002	vorbelegt
+daten	gs_dng15_took_cursed_money	ds:0x41c6	seg002	vorbelegt
+daten	gs_dng15_door_nailed	ds:0x41c7	seg002	vorbelegt
+daten	gs_dng15_reached_hands	ds:0x41c8	seg002	vorbelegt
+daten	gs_dng15_lever_south	ds:0x41c9	seg002	vorbelegt
+daten	gs_dng15_lever_north	ds:0x41ca	seg002	vorbelegt
+daten	gs_dng15_took_hoe	ds:0x41cb	seg002	vorbelegt
+daten	gs_dng15_ceilings	ds:0x41cc	seg002	vorbelegt
+daten	gs_dng15_cursed_money	ds:0x41de	seg002	vorbelegt
+daten	gs_dng15_undead_fight	ds:0x41e4	seg002	vorbelegt
+daten	gs_dng15_chest_equips	ds:0x41e5	seg002	vorbelegt
+daten	gs_dng01_chest1_content	ds:0x41ec	seg002	vorbelegt
+daten	gs_dng01_chest2_content	ds:0x41f4	seg002	vorbelegt
+daten	gs_dng01_chest3_content	ds:0x41fe	seg002	vorbelegt
+daten	gs_dng01_chest5_content	ds:0x4200	seg002	vorbelegt
+daten	gs_dng01_chest7_content	ds:0x420d	seg002	vorbelegt
+daten	gs_unconscious_message	ds:0x4212	seg002	vorbelegt
+daten	gs_food_message	ds:0x4219	seg002	vorbelegt
+daten	g_unkn_026	ds:0x4220	seg002	vorbelegt
+daten	gs_town_locdata	ds:0x4222	seg002	vorbelegt
+daten	gs_town_typeindex	ds:0x4224	seg002	vorbelegt
+daten	gs_dng03_priest_fight_place	ds:0x4226	seg002	vorbelegt
+daten	gs_dng03_chest12_loads	ds:0x4227	seg002	vorbelegt
+daten	gs_trv_i	ds:0x4228	seg002	vorbelegt
+daten	gs_travel_step_counter	ds:0x422a	seg002	vorbelegt
+daten	gs_journey_forced_march_le_cost	ds:0x422c	seg002	vorbelegt
+daten	gs_travel_total_steps	ds:0x422e	seg002	vorbelegt
+daten	gs_travel_total_distance	ds:0x4230	seg002	vorbelegt
+daten	gs_travel_total_duration	ds:0x4232	seg002	vorbelegt
+daten	gs_travel_duration_per_step	ds:0x4234	seg002	vorbelegt
+daten	gs_travel_mousehover	ds:0x4236	seg002	vorbelegt
+daten	gs_travel_distance_made	ds:0x4238	seg002	vorbelegt
+daten	gs_travel_distance_per_step	ds:0x423a	seg002	vorbelegt
+daten	gs_travel_distance_per_18_hours	ds:0x423c	seg002	vorbelegt
+daten	gs_sea_travel_passage_id	ds:0x423e	seg002	vorbelegt
+daten	gs_journey_random_encounter_flag	ds:0x4240	seg002	vorbelegt
+daten	GS_JOURNEY_RANDOM_ENCOUNTER_POSI	ds:0x4242	seg002	vorbelegt
+daten	gs_journey_olvir_treborn_flag	ds:0x4244	seg002	vorbelegt
+daten	GS_JOURNEY_OLVIR_TREBORN_POSITIO	ds:0x4246	seg002	vorbelegt
+daten	gs_journey_fight_flag	ds:0x4248	seg002	vorbelegt
+daten	gs_journey_fight_position	ds:0x424a	seg002	vorbelegt
+daten	gs_travel_speed	ds:0x424c	seg002	vorbelegt
+daten	gs_passage_deadship_flag	ds:0x424e	seg002	vorbelegt
+daten	gs_passage_deadship_position	ds:0x4250	seg002	vorbelegt
+daten	gs_passage_octopus_flag	ds:0x4252	seg002	vorbelegt
+daten	gs_passage_octopus_position	ds:0x4254	seg002	vorbelegt
+daten	gs_passage_pirates_flag	ds:0x4256	seg002	vorbelegt
+daten	gs_passage_pirates_position	ds:0x4258	seg002	vorbelegt
+daten	gs_travel_course_ptr	ds:0x425a	seg002	vorbelegt
+daten	gs_travel_course_start	ds:0x425e	seg002	vorbelegt
+daten	gs_travel_course_ptr2	ds:0x4262	seg002	vorbelegt
+daten	gs_sea_travel_courses	ds:0x4266	seg002	vorbelegt
+daten	gs_tevents_tab_ptr	ds:0x426a	seg002	vorbelegt
+daten	gs_travel_route_ptr	ds:0x426e	seg002	vorbelegt
+daten	gs_journey_tevents	ds:0x4272	seg002	vorbelegt
+daten	gs_sea_travel_psgbooked_flag	ds:0x42ae	seg002	vorbelegt
+daten	gs_sea_travel_psgbooked_timer	ds:0x42af	seg002	vorbelegt
+daten	gs_sea_travel_passage_speed1	ds:0x42b0	seg002	vorbelegt
+daten	gs_current_sea_route_id	ds:0x42b1	seg002	vorbelegt
+daten	gs_harbor_options	ds:0x42b2	seg002	vorbelegt
+daten	gs_sea_travel_passage_price	ds:0x432a	seg002	vorbelegt
+daten	gs_sea_travel_passage_speed2	ds:0x432c	seg002	vorbelegt
+daten	gs_travel_map_ptr	ds:0x432e	seg002	vorbelegt
+daten	gs_forcedmarch_timer	ds:0x4332	seg002	vorbelegt
+daten	gs_travel_detour	ds:0x4333	seg002	vorbelegt
+daten	gs_current_signpost_typeindex	ds:0x4334	seg002	vorbelegt
+daten	gs_journey_direction	ds:0x4336	seg002	vorbelegt
+daten	gs_travel_destination_town_id	ds:0x4338	seg002	vorbelegt
+daten	gs_travel_destination_x	ds:0x433a	seg002	vorbelegt
+daten	gs_travel_destination_y	ds:0x433c	seg002	vorbelegt
+daten	gs_travel_destination_viewdir	ds:0x433e	seg002	vorbelegt
+daten	gs_tm_unused_signpost_ptr	ds:0x4340	seg002	vorbelegt
+daten	gs_trv_signpost_menu_town_ids	ds:0x4344	seg002	vorbelegt
+daten	gs_journey_destination_town_id	ds:0x434a	seg002	vorbelegt
+daten	gs_dng08_waterbarrel	ds:0x434c	seg002	vorbelegt
+daten	gs_dng13_collapsecount	ds:0x434d	seg002	vorbelegt
+daten	gs_dng13_herocount	ds:0x434e	seg002	vorbelegt
+daten	gs_camp_incident	ds:0x434f	seg002	vorbelegt
+daten	gs_known_monsters	ds:0x4351	seg002	vorbelegt
+daten	gs_nameless_destroyed	ds:0x439f	seg002	vorbelegt
+daten	gs_deadship_final	ds:0x43a0	seg002	vorbelegt
+daten	gs_dng09_lever_fast	ds:0x43a1	seg002	vorbelegt
+daten	gs_dng11_soup_supply	ds:0x43a2	seg002	vorbelegt
+daten	gs_arsenal_money	ds:0x43a3	seg002	vorbelegt
+daten	gs_announce_day	ds:0x43a5	seg002	vorbelegt
+daten	gs_known_persons	ds:0x43a6	seg002	vorbelegt
+daten	gs_diary_entry_counter	ds:0x43ba	seg002	vorbelegt
+daten	gs_diary_entries	ds:0x43bc	seg002	vorbelegt
+daten	gs_datseg_status_end	ds:0x4474	seg002	vorbelegt
+daten	g_fading_state	ds:0x4475	seg002	vorbelegt
+daten	g_music_enabled	ds:0x4476	seg002	vorbelegt
+daten	g_snd_effects_enabled	ds:0x4477	seg002	vorbelegt
+daten	g_unkn_028	ds:0x4478	seg002	vorbelegt
+daten	g_music_current_track	ds:0x447a	seg002	vorbelegt
+daten	g_snd_voc_enabled	ds:0x447c	seg002	vorbelegt
+daten	_stklen	ds:0x447e	seg002	vorbelegt
+daten	g_str_file_missing_ptr	ds:0x4480	seg002	vorbelegt
+daten	g_mouse_irq_init	ds:0x4484	seg002	vorbelegt
+daten	g_unkn_030	ds:0x4486	seg002	vorbelegt
+daten	g_pause_string	ds:0x448a	seg002	vorbelegt
+daten	g_npc_last_farewellcheck	ds:0x4494	seg002	vorbelegt
+daten	g_check_party	ds:0x4495	seg002	vorbelegt
+daten	g_food_mod	ds:0x4496	seg002	vorbelegt
+daten	g_travel_herokeeping	ds:0x4497	seg002	vorbelegt
+daten	g_floor_fade_palette	ds:0x4498	seg002	vorbelegt
+daten	g_building_fade_palette	ds:0x44f8	seg002	vorbelegt
+daten	g_sky_fade_palette	ds:0x4558	seg002	vorbelegt
+daten	g_special_screen	ds:0x45b8	seg002	vorbelegt
+daten	g_special_dates	ds:0x45b9	seg002	vorbelegt
+daten	g_months_spring	ds:0x463a	seg002	vorbelegt
+daten	g_months_winter	ds:0x463e	seg002	vorbelegt
+daten	g_months_summer	ds:0x4642	seg002	vorbelegt
+daten	g_bank_heller	ds:0x4646	seg002	vorbelegt
+daten	g_consume_quiet	ds:0x4648	seg002	vorbelegt
+daten	g_herokeeping_flag	ds:0x4649	seg002	vorbelegt
+daten	g_unkn_031	ds:0x464a	seg002	vorbelegt
+daten	g_level_ap_tab	ds:0x464e	seg002	vorbelegt
+daten	g_delay_or_keypress_flag	ds:0x46a2	seg002	vorbelegt
+daten	g_merchant_items_posx	ds:0x46a3	seg002	vorbelegt
+daten	g_merchant_items_posy	ds:0x46c1	seg002	vorbelegt
+daten	g_refresh_status_line	ds:0x46df	seg002	vorbelegt
+daten	g_dsa_version_string	ds:0x46e0	seg002	vorbelegt
+daten	g_game_version	ds:0x46ec	seg002	vorbelegt
+daten	g_unkn_032	ds:0x46f2	seg002	vorbelegt
+daten	g_version_token1	ds:0x46f8	seg002	vorbelegt
+daten	g_version_token2	ds:0x46f9	seg002	vorbelegt
+daten	g_version_token3	ds:0x46fa	seg002	vorbelegt
+daten	g_version_token4	ds:0x46fb	seg002	vorbelegt
+daten	g_questions_handbook	ds:0x46fc	seg002	vorbelegt
+daten	g_questions_map	ds:0x47ba	seg002	vorbelegt
+daten	g_snd_menu_title	ds:0x47d8	seg002	vorbelegt
+daten	g_snd_menu_radio1	ds:0x47e9	seg002	vorbelegt
+daten	g_snd_menu_radio2	ds:0x47f5	seg002	vorbelegt
+daten	g_snd_menu_radio3	ds:0x47ff	seg002	vorbelegt
+daten	g_snd_menu_radio4	ds:0x480b	seg002	vorbelegt
+daten	g_fname_sound_cfg	ds:0x481d	seg002	vorbelegt
+daten	g_fname_sound_adv2	ds:0x4827	seg002	vorbelegt
+daten	g_fname_digi_adv	ds:0x4831	seg002	vorbelegt
+daten	g_snd_txt_disabled_mem	ds:0x483a	seg002	vorbelegt
+daten	g_snd_txt_hw_not_found	ds:0x486d	seg002	vorbelegt
+daten	g_fname_sound_adv	ds:0x488c	seg002	vorbelegt
+daten	g_snd_txt_hw_not_found2	ds:0x4896	seg002	vorbelegt
+daten	g_str_file_missing	ds:0x48b5	seg002	vorbelegt
+daten	g_unkn_033	ds:0x48c9	seg002	vorbelegt
+daten	g_fname_schick_dat	ds:0x48ca	seg002	vorbelegt
+daten	g_snd_txt_disabled_mem2	ds:0x48d5	seg002	vorbelegt
+daten	g_diary_string1	ds:0x4900	seg002	vorbelegt
+daten	g_diary_string2	ds:0x490e	seg002	vorbelegt
+daten	g_diary_string3	ds:0x491f	seg002	vorbelegt
+daten	g_diary_string4	ds:0x493a	seg002	vorbelegt
+daten	g_diary_string5	ds:0x4940	seg002	vorbelegt
+daten	g_diary_string6	ds:0x4949	seg002	vorbelegt
+daten	g_diary_string7	ds:0x495c	seg002	vorbelegt
+daten	g_unkn_034	ds:0x496f	seg002	vorbelegt
+daten	g_visual_square_north	ds:0x4970	seg002	vorbelegt
+daten	g_visual_square_east	ds:0x49ae	seg002	vorbelegt
+daten	g_visual_square_south	ds:0x49ec	seg002	vorbelegt
+daten	g_visual_square_west	ds:0x4a2a	seg002	vorbelegt
+daten	g_noway_string	ds:0x4a68	seg002	vorbelegt
+daten	g_pic_copy_flag	ds:0x4a92	seg004	vorbelegt
+daten	g_delay_factor	ds:0x4b66	seg005	vorbelegt
+daten	g_fig_star_timer	ds:0x4b79	seg005	vorbelegt
+daten	g_fig_star_printed	ds:0x4b94	seg005	vorbelegt
+daten	g_str_temp_xx	ds:0x4b95	seg005	vorbelegt
+daten	g_fight_figs_index	ds:0x4b9e	seg006	vorbelegt
+daten	g_random_schick_seed	ds:0x4ba0	seg007	vorbelegt
+daten	g_emm_sig	ds:0x4ba2	seg010	vorbelegt
+daten	g_ems_frame_ptr	ds:0x4baa	seg010	vorbelegt
+daten	g_renderbuf_in_use_flag	ds:0x4c3a	seg025	vorbelegt
+daten	g_str_temp_fmt_ptr	ds:0x4c88	seg026	vorbelegt
+daten	g_fnames_v302de	ds:0x4c8c	seg026	vorbelegt
+daten	g_loaded_head_id	ds:0x515c	seg026	vorbelegt
+daten	g_str_temp_fmt	ds:0x515e	seg026	vorbelegt
+daten	g_fn_v302de_XXX	ds:0x5166	seg026	vorbelegt
+daten	g_fn_v302de_000	ds:0x5167	seg026	vorbelegt
+daten	g_fn_v302de_001	ds:0x5170	seg026	vorbelegt
+daten	g_fn_v302de_002	ds:0x517b	seg026	vorbelegt
+daten	g_fn_v302de_003	ds:0x5186	seg026	vorbelegt
+daten	g_fn_v302de_004	ds:0x5191	seg026	vorbelegt
+daten	g_fn_v302de_005	ds:0x519c	seg026	vorbelegt
+daten	g_fn_v302de_006	ds:0x51a6	seg026	vorbelegt
+daten	g_fn_v302de_007	ds:0x51ad	seg026	vorbelegt
+daten	g_fn_v302de_008	ds:0x51b9	seg026	vorbelegt
+daten	g_fn_v302de_009	ds:0x51c3	seg026	vorbelegt
+daten	g_fn_v302de_010	ds:0x51cd	seg026	vorbelegt
+daten	g_fn_v302de_011	ds:0x51d8	seg026	vorbelegt
+daten	g_fn_v302de_012	ds:0x51de	seg026	vorbelegt
+daten	g_fn_v302de_013	ds:0x51e4	seg026	vorbelegt
+daten	g_fn_v302de_014	ds:0x51ee	seg026	vorbelegt
+daten	g_fn_v302de_015	ds:0x51f7	seg026	vorbelegt
+daten	g_fn_v302de_016	ds:0x51fd	seg026	vorbelegt
+daten	g_fn_v302de_017	ds:0x5205	seg026	vorbelegt
+daten	g_fn_v302de_018	ds:0x5211	seg026	vorbelegt
+daten	g_fn_v302de_019	ds:0x5219	seg026	vorbelegt
+daten	g_fn_v302de_020	ds:0x5225	seg026	vorbelegt
+daten	g_fn_v302de_021	ds:0x522e	seg026	vorbelegt
+daten	g_fn_v302de_022	ds:0x523b	seg026	vorbelegt
+daten	g_fn_v302de_023	ds:0x5240	seg026	vorbelegt
+daten	g_fn_v302de_024	ds:0x5249	seg026	vorbelegt
+daten	g_fn_v302de_025	ds:0x524f	seg026	vorbelegt
+daten	g_fn_v302de_026	ds:0x5259	seg026	vorbelegt
+daten	g_fn_v302de_027	ds:0x5265	seg026	vorbelegt
+daten	g_fn_v302de_028	ds:0x5270	seg026	vorbelegt
+daten	g_fn_v302de_029	ds:0x527b	seg026	vorbelegt
+daten	g_fn_v302de_030	ds:0x5288	seg026	vorbelegt
+daten	g_fn_v302de_031	ds:0x5295	seg026	vorbelegt
+daten	g_fn_v302de_032	ds:0x52a2	seg026	vorbelegt
+daten	g_fn_v302de_033	ds:0x52ad	seg026	vorbelegt
+daten	g_fn_v302de_034	ds:0x52ba	seg026	vorbelegt
+daten	g_fn_v302de_035	ds:0x52c5	seg026	vorbelegt
+daten	g_fn_v302de_036	ds:0x52d2	seg026	vorbelegt
+daten	g_fn_v302de_037	ds:0x52dd	seg026	vorbelegt
+daten	g_fn_v302de_038	ds:0x52e8	seg026	vorbelegt
+daten	g_fn_v302de_039	ds:0x52f8	seg026	vorbelegt
+daten	g_fn_v302de_040	ds:0x5303	seg026	vorbelegt
+daten	g_fn_v302de_041	ds:0x5310	seg026	vorbelegt
+daten	g_fn_v302de_042	ds:0x531a	seg026	vorbelegt
+daten	g_fn_v302de_043	ds:0x5328	seg026	vorbelegt
+daten	g_fn_v302de_044	ds:0x5335	seg026	vorbelegt
+daten	g_fn_v302de_045	ds:0x5342	seg026	vorbelegt
+daten	g_fn_v302de_046	ds:0x534f	seg026	vorbelegt
+daten	g_fn_v302de_047	ds:0x535c	seg026	vorbelegt
+daten	g_fn_v302de_048	ds:0x5369	seg026	vorbelegt
+daten	g_fn_v302de_049	ds:0x5375	seg026	vorbelegt
+daten	g_fn_v302de_050	ds:0x5380	seg026	vorbelegt
+daten	g_fn_v302de_051	ds:0x538a	seg026	vorbelegt
+daten	g_fn_v302de_052	ds:0x5396	seg026	vorbelegt
+daten	g_fn_v302de_053	ds:0x539e	seg026	vorbelegt
+daten	g_fn_v302de_054	ds:0x53a8	seg026	vorbelegt
+daten	g_fn_v302de_055	ds:0x53b6	seg026	vorbelegt
+daten	g_fn_v302de_056	ds:0x53c0	seg026	vorbelegt
+daten	g_fn_v302de_057	ds:0x53cd	seg026	vorbelegt
+daten	g_fn_v302de_058	ds:0x53da	seg026	vorbelegt
+daten	g_fn_v302de_059	ds:0x53e3	seg026	vorbelegt
+daten	g_fn_v302de_060	ds:0x53ee	seg026	vorbelegt
+daten	g_fn_v302de_061	ds:0x53f7	seg026	vorbelegt
+daten	g_fn_v302de_062	ds:0x5404	seg026	vorbelegt
+daten	g_fn_v302de_063	ds:0x5410	seg026	vorbelegt
+daten	g_fn_v302de_064	ds:0x541a	seg026	vorbelegt
+daten	g_fn_v302de_065	ds:0x5423	seg026	vorbelegt
+daten	g_fn_v302de_066	ds:0x542f	seg026	vorbelegt
+daten	g_fn_v302de_067	ds:0x5439	seg026	vorbelegt
+daten	g_fn_v302de_068	ds:0x5446	seg026	vorbelegt
+daten	g_fn_v302de_069	ds:0x5453	seg026	vorbelegt
+daten	g_fn_v302de_070	ds:0x5460	seg026	vorbelegt
+daten	g_fn_v302de_071	ds:0x546b	seg026	vorbelegt
+daten	g_fn_v302de_072	ds:0x5477	seg026	vorbelegt
+daten	g_fn_v302de_073	ds:0x5484	seg026	vorbelegt
+daten	g_fn_v302de_074	ds:0x548f	seg026	vorbelegt
+daten	g_fn_v302de_075	ds:0x549b	seg026	vorbelegt
+daten	g_fn_v302de_076	ds:0x54a8	seg026	vorbelegt
+daten	g_fn_v302de_077	ds:0x54b5	seg026	vorbelegt
+daten	g_fn_v302de_078	ds:0x54bf	seg026	vorbelegt
+daten	g_fn_v302de_079	ds:0x54cb	seg026	vorbelegt
+daten	g_fn_v302de_080	ds:0x54d6	seg026	vorbelegt
+daten	g_fn_v302de_081	ds:0x54e1	seg026	vorbelegt
+daten	g_fn_v302de_082	ds:0x54ee	seg026	vorbelegt
+daten	g_fn_v302de_083	ds:0x54fb	seg026	vorbelegt
+daten	g_fn_v302de_084	ds:0x5508	seg026	vorbelegt
+daten	g_fn_v302de_085	ds:0x5513	seg026	vorbelegt
+daten	g_fn_v302de_086	ds:0x5520	seg026	vorbelegt
+daten	g_fn_v302de_087	ds:0x552b	seg026	vorbelegt
+daten	g_fn_v302de_088	ds:0x5538	seg026	vorbelegt
+daten	g_fn_v302de_089	ds:0x5543	seg026	vorbelegt
+daten	g_fn_v302de_090	ds:0x554e	seg026	vorbelegt
+daten	g_fn_v302de_091	ds:0x555b	seg026	vorbelegt
+daten	g_fn_v302de_092	ds:0x5566	seg026	vorbelegt
+daten	g_fn_v302de_093	ds:0x5573	seg026	vorbelegt
+daten	g_fn_v302de_094	ds:0x557d	seg026	vorbelegt
+daten	g_fn_v302de_095	ds:0x558a	seg026	vorbelegt
+daten	g_fn_v302de_096	ds:0x5597	seg026	vorbelegt
+daten	g_fn_v302de_097	ds:0x55a4	seg026	vorbelegt
+daten	g_fn_v302de_098	ds:0x55b1	seg026	vorbelegt
+daten	g_fn_v302de_099	ds:0x55be	seg026	vorbelegt
+daten	g_fn_v302de_100	ds:0x55cb	seg026	vorbelegt
+daten	g_fn_v302de_101	ds:0x55d7	seg026	vorbelegt
+daten	g_fn_v302de_102	ds:0x55e2	seg026	vorbelegt
+daten	g_fn_v302de_103	ds:0x55ec	seg026	vorbelegt
+daten	g_fn_v302de_104	ds:0x55f8	seg026	vorbelegt
+daten	g_fn_v302de_105	ds:0x5600	seg026	vorbelegt
+daten	g_fn_v302de_106	ds:0x560a	seg026	vorbelegt
+daten	g_fn_v302de_107	ds:0x5617	seg026	vorbelegt
+daten	g_fn_v302de_108	ds:0x5621	seg026	vorbelegt
+daten	g_fn_v302de_109	ds:0x562e	seg026	vorbelegt
+daten	g_fn_v302de_110	ds:0x563b	seg026	vorbelegt
+daten	g_fn_v302de_111	ds:0x5644	seg026	vorbelegt
+daten	g_fn_v302de_112	ds:0x564f	seg026	vorbelegt
+daten	g_fn_v302de_113	ds:0x5658	seg026	vorbelegt
+daten	g_fn_v302de_114	ds:0x5665	seg026	vorbelegt
+daten	g_fn_v302de_115	ds:0x5671	seg026	vorbelegt
+daten	g_fn_v302de_116	ds:0x567b	seg026	vorbelegt
+daten	g_fn_v302de_117	ds:0x5684	seg026	vorbelegt
+daten	g_fn_v302de_118	ds:0x5690	seg026	vorbelegt
+daten	g_fn_v302de_119	ds:0x569a	seg026	vorbelegt
+daten	g_fn_v302de_120	ds:0x56a7	seg026	vorbelegt
+daten	g_fn_v302de_121	ds:0x56b4	seg026	vorbelegt
+daten	g_fn_v302de_122	ds:0x56c1	seg026	vorbelegt
+daten	g_fn_v302de_123	ds:0x56cc	seg026	vorbelegt
+daten	g_fn_v302de_124	ds:0x56d8	seg026	vorbelegt
+daten	g_fn_v302de_125	ds:0x56e5	seg026	vorbelegt
+daten	g_fn_v302de_126	ds:0x56f0	seg026	vorbelegt
+daten	g_fn_v302de_127	ds:0x56fd	seg026	vorbelegt
+daten	g_fn_v302de_128	ds:0x570a	seg026	vorbelegt
+daten	g_fn_v302de_129	ds:0x5717	seg026	vorbelegt
+daten	g_fn_v302de_130	ds:0x5723	seg026	vorbelegt
+daten	g_fn_v302de_131	ds:0x572e	seg026	vorbelegt
+daten	g_fn_v302de_132	ds:0x5739	seg026	vorbelegt
+daten	g_fn_v302de_133	ds:0x5745	seg026	vorbelegt
+daten	g_fn_v302de_134	ds:0x574f	seg026	vorbelegt
+daten	g_fn_v302de_135	ds:0x5758	seg026	vorbelegt
+daten	g_fn_v302de_136	ds:0x5764	seg026	vorbelegt
+daten	g_fn_v302de_137	ds:0x5771	seg026	vorbelegt
+daten	g_fn_v302de_138	ds:0x577b	seg026	vorbelegt
+daten	g_fn_v302de_139	ds:0x5786	seg026	vorbelegt
+daten	g_fn_v302de_140	ds:0x5791	seg026	vorbelegt
+daten	g_fn_v302de_141	ds:0x579c	seg026	vorbelegt
+daten	g_fn_v302de_142	ds:0x57a8	seg026	vorbelegt
+daten	g_fn_v302de_143	ds:0x57b4	seg026	vorbelegt
+daten	g_fn_v302de_144	ds:0x57c0	seg026	vorbelegt
+daten	g_fn_v302de_145	ds:0x57cb	seg026	vorbelegt
+daten	g_fn_v302de_146	ds:0x57d5	seg026	vorbelegt
+daten	g_fn_v302de_147	ds:0x57df	seg026	vorbelegt
+daten	g_fn_v302de_148	ds:0x57e7	seg026	vorbelegt
+daten	g_fn_v302de_149	ds:0x57f2	seg026	vorbelegt
+daten	g_fn_v302de_150	ds:0x57fb	seg026	vorbelegt
+daten	g_fn_v302de_151	ds:0x5807	seg026	vorbelegt
+daten	g_fn_v302de_152	ds:0x5811	seg026	vorbelegt
+daten	g_fn_v302de_153	ds:0x5817	seg026	vorbelegt
+daten	g_fn_v302de_154	ds:0x5821	seg026	vorbelegt
+daten	g_fn_v302de_155	ds:0x5822	seg026	vorbelegt
+daten	g_fn_v302de_156	ds:0x5823	seg026	vorbelegt
+daten	g_fn_v302de_157	ds:0x582c	seg026	vorbelegt
+daten	g_fn_v302de_158	ds:0x5838	seg026	vorbelegt
+daten	g_fn_v302de_159	ds:0x5839	seg026	vorbelegt
+daten	g_fn_v302de_160	ds:0x5846	seg026	vorbelegt
+daten	g_fn_v302de_161	ds:0x5853	seg026	vorbelegt
+daten	g_fn_v302de_162	ds:0x5860	seg026	vorbelegt
+daten	g_fn_v302de_163	ds:0x586a	seg026	vorbelegt
+daten	g_fn_v302de_164	ds:0x5874	seg026	vorbelegt
+daten	g_fn_v302de_165	ds:0x587e	seg026	vorbelegt
+daten	g_fn_v302de_166	ds:0x5888	seg026	vorbelegt
+daten	g_fn_v302de_167	ds:0x5892	seg026	vorbelegt
+daten	g_fn_v302de_168	ds:0x589c	seg026	vorbelegt
+daten	g_fn_v302de_169	ds:0x58a6	seg026	vorbelegt
+daten	g_fn_v302de_170	ds:0x58b2	seg026	vorbelegt
+daten	g_fn_v302de_171	ds:0x58be	seg026	vorbelegt
+daten	g_fn_v302de_172	ds:0x58ca	seg026	vorbelegt
+daten	g_fn_v302de_173	ds:0x58d6	seg026	vorbelegt
+daten	g_fn_v302de_174	ds:0x58df	seg026	vorbelegt
+daten	g_fn_v302de_175	ds:0x58ea	seg026	vorbelegt
+daten	g_fn_v302de_176	ds:0x58f7	seg026	vorbelegt
+daten	g_fn_v302de_177	ds:0x5903	seg026	vorbelegt
+daten	g_fn_v302de_178	ds:0x590c	seg026	vorbelegt
+daten	g_fn_v302de_179	ds:0x5919	seg026	vorbelegt
+daten	g_fn_v302de_180	ds:0x5926	seg026	vorbelegt
+daten	g_fn_v302de_181	ds:0x592f	seg026	vorbelegt
+daten	g_fn_v302de_182	ds:0x593a	seg026	vorbelegt
+daten	g_fn_v302de_183	ds:0x5946	seg026	vorbelegt
+daten	g_fn_v302de_184	ds:0x5953	seg026	vorbelegt
+daten	g_fn_v302de_185	ds:0x595f	seg026	vorbelegt
+daten	g_fn_v302de_186	ds:0x596c	seg026	vorbelegt
+daten	g_fn_v302de_187	ds:0x5977	seg026	vorbelegt
+daten	g_fn_v302de_188	ds:0x5982	seg026	vorbelegt
+daten	g_fn_v302de_189	ds:0x598d	seg026	vorbelegt
+daten	g_fn_v302de_190	ds:0x5998	seg026	vorbelegt
+daten	g_fn_v302de_191	ds:0x59a4	seg026	vorbelegt
+daten	g_fn_v302de_192	ds:0x59b1	seg026	vorbelegt
+daten	g_fn_v302de_193	ds:0x59be	seg026	vorbelegt
+daten	g_fn_v302de_194	ds:0x59cb	seg026	vorbelegt
+daten	g_fn_v302de_195	ds:0x59d8	seg026	vorbelegt
+daten	g_fn_v302de_196	ds:0x59e5	seg026	vorbelegt
+daten	g_fn_v302de_197	ds:0x59f2	seg026	vorbelegt
+daten	g_fn_v302de_198	ds:0x59ff	seg026	vorbelegt
+daten	g_fn_v302de_199	ds:0x5a0c	seg026	vorbelegt
+daten	g_fn_v302de_200	ds:0x5a19	seg026	vorbelegt
+daten	g_fn_v302de_201	ds:0x5a26	seg026	vorbelegt
+daten	g_fn_v302de_202	ds:0x5a32	seg026	vorbelegt
+daten	g_fn_v302de_203	ds:0x5a3e	seg026	vorbelegt
+daten	g_fn_v302de_204	ds:0x5a4a	seg026	vorbelegt
+daten	g_fn_v302de_205	ds:0x5a56	seg026	vorbelegt
+daten	g_fn_v302de_206	ds:0x5a60	seg026	vorbelegt
+daten	g_fn_v302de_207	ds:0x5a6b	seg026	vorbelegt
+daten	g_fn_v302de_208	ds:0x5a75	seg026	vorbelegt
+daten	g_fn_v302de_209	ds:0x5a7e	seg026	vorbelegt
+daten	g_fn_v302de_210	ds:0x5a87	seg026	vorbelegt
+daten	g_fn_v302de_211	ds:0x5a94	seg026	vorbelegt
+daten	g_fn_v302de_212	ds:0x5aa1	seg026	vorbelegt
+daten	g_fn_v302de_213	ds:0x5aad	seg026	vorbelegt
+daten	g_fn_v302de_214	ds:0x5ab8	seg026	vorbelegt
+daten	g_fn_v302de_215	ds:0x5ac1	seg026	vorbelegt
+daten	g_fn_v302de_216	ds:0x5aca	seg026	vorbelegt
+daten	g_fn_v302de_217	ds:0x5ad2	seg026	vorbelegt
+daten	g_fn_v302de_218	ds:0x5ade	seg026	vorbelegt
+daten	g_fn_v302de_219	ds:0x5aea	seg026	vorbelegt
+daten	g_fn_v302de_220	ds:0x5af6	seg026	vorbelegt
+daten	g_fn_v302de_221	ds:0x5b00	seg026	vorbelegt
+daten	g_fn_v302de_222	ds:0x5b0d	seg026	vorbelegt
+daten	g_fn_v302de_223	ds:0x5b1a	seg026	vorbelegt
+daten	g_fn_v302de_224	ds:0x5b25	seg026	vorbelegt
+daten	g_fn_v302de_225	ds:0x5b31	seg026	vorbelegt
+daten	g_fn_v302de_226	ds:0x5b39	seg026	vorbelegt
+daten	g_fn_v302de_227	ds:0x5b45	seg026	vorbelegt
+daten	g_fn_v302de_228	ds:0x5b50	seg026	vorbelegt
+daten	g_fn_v302de_229	ds:0x5b5b	seg026	vorbelegt
+daten	g_fn_v302de_230	ds:0x5b66	seg026	vorbelegt
+daten	g_fn_v302de_231	ds:0x5b72	seg026	vorbelegt
+daten	g_fn_v302de_232	ds:0x5b7b	seg026	vorbelegt
+daten	g_fn_v302de_233	ds:0x5b86	seg026	vorbelegt
+daten	g_fn_v302de_234	ds:0x5b90	seg026	vorbelegt
+daten	g_fn_v302de_235	ds:0x5b96	seg026	vorbelegt
+daten	g_fn_v302de_236	ds:0x5ba0	seg026	vorbelegt
+daten	g_fn_v302de_237	ds:0x5bad	seg026	vorbelegt
+daten	g_fn_v302de_238	ds:0x5bba	seg026	vorbelegt
+daten	g_fn_v302de_239	ds:0x5bc4	seg026	vorbelegt
+daten	g_fn_v302de_240	ds:0x5bce	seg026	vorbelegt
+daten	g_fn_v302de_241	ds:0x5bd7	seg026	vorbelegt
+daten	g_fn_v302de_242	ds:0x5be4	seg026	vorbelegt
+daten	g_fn_v302de_243	ds:0x5bed	seg026	vorbelegt
+daten	g_fn_v302de_244	ds:0x5bf6	seg026	vorbelegt
+daten	g_fn_v302de_245	ds:0x5bff	seg026	vorbelegt
+daten	g_fn_v302de_246	ds:0x5c08	seg026	vorbelegt
+daten	g_fn_v302de_247	ds:0x5c11	seg026	vorbelegt
+daten	g_fn_v302de_248	ds:0x5c1a	seg026	vorbelegt
+daten	g_fn_v302de_249	ds:0x5c23	seg026	vorbelegt
+daten	g_fn_v302de_250	ds:0x5c2c	seg026	vorbelegt
+daten	g_fn_v302de_251	ds:0x5c35	seg026	vorbelegt
+daten	g_fn_v302de_252	ds:0x5c3e	seg026	vorbelegt
+daten	g_fn_v302de_253	ds:0x5c47	seg026	vorbelegt
+daten	g_fn_v302de_254	ds:0x5c50	seg026	vorbelegt
+daten	g_fn_v302de_255	ds:0x5c59	seg026	vorbelegt
+daten	g_fn_v302de_256	ds:0x5c65	seg026	vorbelegt
+daten	g_fn_v302de_257	ds:0x5c6f	seg026	vorbelegt
+daten	g_fn_v302de_258	ds:0x5c78	seg026	vorbelegt
+daten	g_fn_v302de_259	ds:0x5c81	seg026	vorbelegt
+daten	g_fn_v302de_260	ds:0x5c8a	seg026	vorbelegt
+daten	g_fn_v302de_261	ds:0x5c93	seg026	vorbelegt
+daten	g_fn_v302de_262	ds:0x5c9c	seg026	vorbelegt
+daten	g_fn_v302de_263	ds:0x5ca5	seg026	vorbelegt
+daten	g_fn_v302de_264	ds:0x5cae	seg026	vorbelegt
+daten	g_fn_v302de_265	ds:0x5cb7	seg026	vorbelegt
+daten	g_fn_v302de_266	ds:0x5cc0	seg026	vorbelegt
+daten	g_fn_v302de_267	ds:0x5cc9	seg026	vorbelegt
+daten	g_fn_v302de_268	ds:0x5cd2	seg026	vorbelegt
+daten	g_fn_v302de_269	ds:0x5cdb	seg026	vorbelegt
+daten	g_fn_v302de_270	ds:0x5ce4	seg026	vorbelegt
+daten	g_fn_v302de_271	ds:0x5cf0	seg026	vorbelegt
+daten	g_fn_v302de_272	ds:0x5cfa	seg026	vorbelegt
+daten	g_fn_v302de_273	ds:0x5d03	seg026	vorbelegt
+daten	g_fn_v302de_274	ds:0x5d0c	seg026	vorbelegt
+daten	g_fn_v302de_275	ds:0x5d15	seg026	vorbelegt
+daten	g_fn_v302de_276	ds:0x5d1e	seg026	vorbelegt
+daten	g_fn_v302de_277	ds:0x5d27	seg026	vorbelegt
+daten	g_fn_v302de_278	ds:0x5d30	seg026	vorbelegt
+daten	g_fn_v302de_279	ds:0x5d39	seg026	vorbelegt
+daten	g_fn_v302de_280	ds:0x5d42	seg026	vorbelegt
+daten	g_fn_v302de_281	ds:0x5d4b	seg026	vorbelegt
+daten	g_fn_v302de_282	ds:0x5d54	seg026	vorbelegt
+daten	g_fn_v302de_283	ds:0x5d5d	seg026	vorbelegt
+daten	g_fn_v302de_284	ds:0x5d66	seg026	vorbelegt
+daten	g_fn_v302de_285	ds:0x5d6f	seg026	vorbelegt
+daten	g_fn_v302de_286	ds:0x5d7b	seg026	vorbelegt
+daten	g_fn_v302de_287	ds:0x5d85	seg026	vorbelegt
+daten	g_fn_v302de_288	ds:0x5d91	seg026	vorbelegt
+daten	g_fn_v302de_289	ds:0x5d9b	seg026	vorbelegt
+daten	g_fn_v302de_290	ds:0x5da3	seg026	vorbelegt
+daten	g_fn_v302de_291	ds:0x5dab	seg026	vorbelegt
+daten	g_fn_v302de_292	ds:0x5db3	seg026	vorbelegt
+daten	g_fn_v302de_293	ds:0x5dbb	seg026	vorbelegt
+daten	g_fn_v302de_294	ds:0x5dc3	seg026	vorbelegt
+daten	g_fn_v302de_295	ds:0x5dcb	seg026	vorbelegt
+daten	g_fn_v302de_296	ds:0x5dd3	seg026	vorbelegt
+daten	g_fn_v302de_297	ds:0x5ddb	seg026	vorbelegt
+daten	g_fn_v302de_298	ds:0x5de3	seg026	vorbelegt
+daten	g_fn_v302de_299	ds:0x5dec	seg026	vorbelegt
+daten	g_fn_v302de_300	ds:0x5df5	seg026	vorbelegt
+daten	g_fn_v302de_301	ds:0x5dfe	seg026	vorbelegt
+daten	g_fn_v302de_302	ds:0x5e07	seg026	vorbelegt
+daten	g_fn_v302de_303	ds:0x5e10	seg026	vorbelegt
+daten	g_fn_v302de_304	ds:0x5e19	seg026	vorbelegt
+daten	g_fn_v302de_305	ds:0x5e22	seg026	vorbelegt
+daten	g_fn_v302de_306	ds:0x5e2b	seg026	vorbelegt
+daten	g_fn_v302de_307	ds:0x5e34	seg026	vorbelegt
+daten	g_chr_file_suffix	ds:0x5e3e	seg026	vorbelegt
+daten	g_savegame_suffix	ds:0x5e43	seg026	vorbelegt
+daten	g_all_files_wildcard	ds:0x5e48	seg026	vorbelegt
+daten	g_all_chr_wildcard	ds:0x5e4c	seg026	vorbelegt
+daten	g_empty_string1	ds:0x5e52	seg026	vorbelegt
+daten	g_empty_string2	ds:0x5e53	seg026	vorbelegt
+daten	g_savegame_suffix2	ds:0x5e54	seg026	vorbelegt
+daten	g_savegame_suffix3	ds:0x5e59	seg026	vorbelegt
+daten	g_all_chr_wildcard2	ds:0x5e5e	seg026	vorbelegt
+daten	g_all_chr_wildcard3	ds:0x5e64	seg026	vorbelegt
+daten	g_fig_dropped_counter	ds:0x5f12	seg032	vorbelegt
+daten	g_max_enemies	ds:0x5f16	seg032	vorbelegt
+daten	g_finalfight_tumult	ds:0x5f30	seg033	vorbelegt
+daten	g_autofight_magic	ds:0x5f31	seg033	vorbelegt
+daten	g_cb_obj_nonobstacle	ds:0x5f46	seg034	vorbelegt
+daten	g_gfxtab_double_size_extra_ox	ds:0x6028	seg039	vorbelegt
+daten	g_gfxtab_double_size_extra_oy	ds:0x602c	seg039	vorbelegt
+daten	g_gfxtab_double_size_x1	ds:0x6030	seg039	vorbelegt
+daten	g_gfxtab_double_size_x2	ds:0x6034	seg039	vorbelegt
+daten	g_gfxtab_double_size_extra_x1	ds:0x6038	seg039	vorbelegt
+daten	g_gfxtab_double_size_extra_x2	ds:0x603c	seg039	vorbelegt
+daten	g_gfxtab_obj_offset_x	ds:0x6060	seg040	vorbelegt
+daten	g_gfxtab_obj_offset_y	ds:0x60de	seg040	vorbelegt
+daten	g_mspell_unmushroom_flag	ds:0x618e	seg043	vorbelegt
+daten	g_statuspage_sel_slot_drawn	ds:0x636e	seg046	vorbelegt
+daten	g_statuspage_target_slot_drawn	ds:0x636f	seg046	vorbelegt
+daten	g_statuspage_sel_slot	ds:0x6370	seg046	vorbelegt
+daten	g_statuspage_target_slot	ds:0x6371	seg046	vorbelegt
+daten	g_statuspage_palette	ds:0x6372	seg046	vorbelegt
+daten	g_invslot_iconxy_table	ds:0x63d2	seg046	vorbelegt
+daten	g_statuspage_spellclasses_1_xy	ds:0x642e	seg046	vorbelegt
+daten	g_statuspage_spellclasses_2_xy	ds:0x645e	seg046	vorbelegt
+daten	g_statuspage_talentclasses_xy	ds:0x6476	seg046	vorbelegt
+daten	g_hero_sel_exclude	ds:0x64a2	seg047	vorbelegt
+daten	g_forbid_ta_falschspiel	ds:0x6532	seg048	vorbelegt
+daten	g_autoinc_spells_witch	ds:0x6544	seg050	vorbelegt
+daten	g_autoinc_spells_druid	ds:0x654a	seg050	vorbelegt
+daten	g_autoinc_spells_mage_index	ds:0x662a	seg050	vorbelegt
+daten	g_autoinc_spells_gelf	ds:0x664e	seg050	vorbelegt
+daten	g_autoinc_spells_self	ds:0x665c	seg050	vorbelegt
+daten	g_autoinc_spells_ielf	ds:0x666a	seg050	vorbelegt
+daten	g_magic_school_spellranges	ds:0x6682	seg050	vorbelegt
+daten	g_gather_herbs_table	ds:0x669c	seg051	vorbelegt
+daten	g_gather_herbs_special	ds:0x66d0	seg051	vorbelegt
+daten	g_merchant_descr_table	ds:0x6870	seg055	vorbelegt
+daten	g_tavern_descr_table	ds:0x6c84	seg060	vorbelegt
+daten	g_sea_routes	ds:0x6f00	seg063	vorbelegt
+daten	g_travel_by_ship	ds:0x7070	seg063	vorbelegt
+daten	g_market_descr_table	ds:0x70a8	seg066	vorbelegt
+daten	g_hyg_ani_x0	ds:0x71b8	seg066	vorbelegt
+daten	g_hyg_ani_x1	ds:0x71bd	seg066	vorbelegt
+daten	g_hyg_ani_x2	ds:0x71be	seg066	vorbelegt
+daten	g_hyg_ani_x3	ds:0x71bf	seg066	vorbelegt
+daten	g_hyg_ani_x5	ds:0x71c2	seg066	vorbelegt
+daten	g_hyg_ani_x6	ds:0x71c3	seg066	vorbelegt
+daten	g_hyg_ani_x7	ds:0x71c4	seg066	vorbelegt
+daten	g_hyg_ani_y9	ds:0x71c7	seg066	vorbelegt
+daten	g_can_merge_group	ds:0x7c41	seg066	vorbelegt
+daten	g_town_city_event_active	ds:0x7c42	seg067	vorbelegt
+daten	g_tmap_double1	ds:0x7c9a	seg072	vorbelegt
+daten	g_tmap_double2	ds:0x7c9b	seg072	vorbelegt
+daten	g_swafnild_traveled	ds:0x7c9c	seg072	vorbelegt
+daten	g_palette_fight2	ds:0x7d0e	seg074	vorbelegt
+daten	g_automap_bitmask	ds:0x7d4a	seg074	vorbelegt
+daten	g_automap_selx	ds:0x7de5	seg074	vorbelegt
+daten	g_automap_sely	ds:0x7de7	seg074	vorbelegt
+daten	g_unkn_055	ds:0x7de9	seg074	vorbelegt
+daten	g_dng_gfxtab_wood	ds:0x7dea	seg075	vorbelegt
+daten	g_dng_gfxtab_stone	ds:0x841a	seg075	vorbelegt
+daten	g_dng_gfxtab_marble	ds:0x8a4a	seg075	vorbelegt
+daten	g_dng_level_changed	ds:0x9312	seg076	vorbelegt
+daten	g_dng01_specialchests	ds:0x9314	seg077	vorbelegt
+daten	g_dng01_str_marbo	ds:0x93d1	seg077	vorbelegt
+daten	g_dng02_specialchests	ds:0x93d8	seg078	vorbelegt
+daten	g_dng03_specialchests	ds:0x9480	seg079	vorbelegt
+daten	g_dng03_str_spinnennetz	ds:0x95a6	seg079	vorbelegt
+daten	g_dng03_str_mactans	ds:0x95b2	seg079	vorbelegt
+daten	g_dng04_specialchests	ds:0x95ba	seg080	vorbelegt
+daten	g_dng05_trash_flag	ds:0x960e	seg080	vorbelegt
+daten	g_dng06_specialchests	ds:0x9610	seg081	vorbelegt
+daten	g_dng07_specialchests	ds:0x9668	seg082	vorbelegt
+daten	g_dng08_specialchests	ds:0x9692	seg083	vorbelegt
+daten	g_dng09_specialchests	ds:0x972e	seg084	vorbelegt
+daten	g_dng10_specialchests	ds:0x97d6	seg085	vorbelegt
+daten	g_dng11_specialchests	ds:0x9854	seg086	vorbelegt
+daten	g_dng14_specialchests	ds:0x9990	seg088	vorbelegt
+daten	g_dng15_specialchests	ds:0x9a4e	seg089	vorbelegt
+daten	g_dng12_specialchests	ds:0x9d04	seg090	vorbelegt
+daten	g_dng12_obstacle_tries	ds:0x9d43	seg090	vorbelegt
+daten	g_dng12_watertrap_bak	ds:0x9d45	seg090	vorbelegt
+daten	g_dng13_specialchests	ds:0x9d48	seg091	vorbelegt
+daten	g_land_routes	ds:0x9dc6	seg093	vorbelegt
+daten	g_signposts_linked_lroute_001	ds:0x9fd9	seg093	vorbelegt
+daten	g_signposts_linked_lroute_002	ds:0x9fdb	seg093	vorbelegt
+daten	g_signposts_linked_lroute_003	ds:0x9fdd	seg093	vorbelegt
+daten	g_signposts_linked_lroute_004	ds:0x9fdf	seg093	vorbelegt
+daten	g_signposts_linked_lroute_005	ds:0x9fe1	seg093	vorbelegt
+daten	g_signposts_linked_lroute_006	ds:0x9fe4	seg093	vorbelegt
+daten	g_signposts_linked_lroute_007	ds:0x9fe6	seg093	vorbelegt
+daten	g_signposts_linked_lroute_008	ds:0x9fe8	seg093	vorbelegt
+daten	g_signposts_linked_lroute_009	ds:0x9fea	seg093	vorbelegt
+daten	g_signposts_linked_lroute_010	ds:0x9fec	seg093	vorbelegt
+daten	g_signposts_linked_lroute_011	ds:0x9fee	seg093	vorbelegt
+daten	g_signposts_linked_lroute_012	ds:0x9ff0	seg093	vorbelegt
+daten	g_signposts_linked_lroute_013	ds:0x9ff2	seg093	vorbelegt
+daten	g_signposts_linked_lroute_014	ds:0x9ff4	seg093	vorbelegt
+daten	g_signposts_linked_lroute_015	ds:0x9ff6	seg093	vorbelegt
+daten	g_signposts_linked_lroute_016	ds:0x9ff8	seg093	vorbelegt
+daten	g_signposts_linked_lroute_017	ds:0x9ffa	seg093	vorbelegt
+daten	g_signposts_linked_lroute_018	ds:0x9ffc	seg093	vorbelegt
+daten	g_signposts_linked_lroute_019	ds:0x9ffe	seg093	vorbelegt
+daten	g_signposts_linked_lroute_020	ds:0xa000	seg093	vorbelegt
+daten	g_signposts_linked_lroute_021	ds:0xa002	seg093	vorbelegt
+daten	g_signposts_linked_lroute_022	ds:0xa004	seg093	vorbelegt
+daten	g_signposts_linked_lroute_023	ds:0xa006	seg093	vorbelegt
+daten	g_signposts_linked_lroute_024	ds:0xa008	seg093	vorbelegt
+daten	g_signposts_linked_lroute_025	ds:0xa00a	seg093	vorbelegt
+daten	g_signposts_linked_lroute_026	ds:0xa00c	seg093	vorbelegt
+daten	g_signposts_linked_lroute_027	ds:0xa00e	seg093	vorbelegt
+daten	g_signposts_linked_lroute_028	ds:0xa010	seg093	vorbelegt
+daten	g_signposts_linked_lroute_029	ds:0xa012	seg093	vorbelegt
+daten	g_signposts_linked_lroute_030	ds:0xa014	seg093	vorbelegt
+daten	g_signposts_linked_lroute_031	ds:0xa016	seg093	vorbelegt
+daten	g_signposts_linked_lroute_032	ds:0xa018	seg093	vorbelegt
+daten	g_signposts_linked_lroute_033	ds:0xa01a	seg093	vorbelegt
+daten	g_signposts_linked_lroute_034	ds:0xa01c	seg093	vorbelegt
+daten	g_signposts_linked_lroute_035	ds:0xa01e	seg093	vorbelegt
+daten	g_signposts_linked_lroute_036	ds:0xa020	seg093	vorbelegt
+daten	g_signposts_linked_lroute_037	ds:0xa022	seg093	vorbelegt
+daten	g_signposts_linked_lroute_038	ds:0xa024	seg093	vorbelegt
+daten	g_signposts_linked_lroute_039	ds:0xa026	seg093	vorbelegt
+daten	g_signposts_linked_lroute_040	ds:0xa028	seg093	vorbelegt
+daten	g_signposts_linked_lroute_041	ds:0xa02a	seg093	vorbelegt
+daten	g_signposts_linked_lroute_042	ds:0xa02c	seg093	vorbelegt
+daten	g_signposts_linked_lroute_043	ds:0xa02e	seg093	vorbelegt
+daten	g_signposts_linked_lroute_044	ds:0xa030	seg093	vorbelegt
+daten	g_signposts_linked_lroute_045	ds:0xa032	seg093	vorbelegt
+daten	g_signposts_linked_lroute_046	ds:0xa034	seg093	vorbelegt
+daten	g_signposts_linked_lroute_047	ds:0xa036	seg093	vorbelegt
+daten	g_signposts_linked_lroute_048	ds:0xa038	seg093	vorbelegt
+daten	g_signposts_linked_lroute_049	ds:0xa03e	seg093	vorbelegt
+daten	g_signposts_linked_lroute_050	ds:0xa040	seg093	vorbelegt
+daten	g_signposts_linked_lroute_051	ds:0xa042	seg093	vorbelegt
+daten	g_signposts_linked_lroute_052	ds:0xa044	seg093	vorbelegt
+daten	g_signposts_linked_lroute_053	ds:0xa046	seg093	vorbelegt
+daten	g_signposts_linked_lroute_054	ds:0xa048	seg093	vorbelegt
+daten	g_signposts_linked_lroute_055	ds:0xa04a	seg093	vorbelegt
+daten	g_signposts_linked_lroute_056	ds:0xa04c	seg093	vorbelegt
+daten	g_signposts_linked_lroute_057	ds:0xa04e	seg093	vorbelegt
+daten	g_signposts_linked_lroute_058	ds:0xa050	seg093	vorbelegt
+daten	g_signposts_linked_lroute_059	ds:0xa053	seg093	vorbelegt
+daten	g_signposts_linked_lroute_060	ds:0xa055	seg093	vorbelegt
+daten	g_signposts_linked_lroute_061	ds:0xa057	seg093	vorbelegt
+daten	g_signposts_linked_lroute_062	ds:0xa05a	seg093	vorbelegt
+daten	g_signposts_linked_lroute_063	ds:0xa05d	seg093	vorbelegt
+daten	g_signposts_linked_lroute_064	ds:0xa05f	seg093	vorbelegt
+daten	g_signposts_linked_lroute_065	ds:0xa062	seg093	vorbelegt
+daten	g_signposts_linked_lroute_066	ds:0xa064	seg093	vorbelegt
+daten	g_signposts_linked_lroute_067	ds:0xa066	seg093	vorbelegt
+daten	g_signposts_linked_lroute_068	ds:0xa068	seg093	vorbelegt
+daten	g_signposts_linked_lroute_069	ds:0xa06a	seg093	vorbelegt
+daten	g_signposts_linked_lroute_070	ds:0xa06c	seg093	vorbelegt
+daten	g_signposts_linked_lroute_071	ds:0xa06e	seg093	vorbelegt
+daten	g_signposts_linked_lroute_072	ds:0xa070	seg093	vorbelegt
+daten	g_signposts_linked_lroute_073	ds:0xa072	seg093	vorbelegt
+daten	g_signposts_linked_lroute_074	ds:0xa074	seg093	vorbelegt
+daten	g_signposts_linked_lroute_075	ds:0xa076	seg093	vorbelegt
+daten	g_signposts_linked_lroute_076	ds:0xa078	seg093	vorbelegt
+daten	g_signposts_linked_lroute_077	ds:0xa07a	seg093	vorbelegt
+daten	g_signposts_linked_lroute_078	ds:0xa07c	seg093	vorbelegt
+daten	g_signposts_linked_lroute_079	ds:0xa07e	seg093	vorbelegt
+daten	g_signposts_linked_lroute_080	ds:0xa080	seg093	vorbelegt
+daten	g_signposts_linked_lroute_081	ds:0xa082	seg093	vorbelegt
+daten	g_signposts_linked_lroute_082	ds:0xa084	seg093	vorbelegt
+daten	g_signposts_linked_lroute_083	ds:0xa086	seg093	vorbelegt
+daten	g_signposts_linked_lroute_084	ds:0xa088	seg093	vorbelegt
+daten	g_signposts_linked_lroute_085	ds:0xa08a	seg093	vorbelegt
+daten	g_signposts_linked_lroute_086	ds:0xa08c	seg093	vorbelegt
+daten	g_signposts_linked_lroute_087	ds:0xa08e	seg093	vorbelegt
+daten	g_signposts_linked_lroute_088	ds:0xa090	seg093	vorbelegt
+daten	g_signposts_linked_lroute_089	ds:0xa092	seg093	vorbelegt
+daten	g_signposts_linked_lroute_090	ds:0xa094	seg093	vorbelegt
+daten	g_signposts_linked_lroute_091	ds:0xa096	seg093	vorbelegt
+daten	g_signposts_linked_lroute_092	ds:0xa098	seg093	vorbelegt
+daten	g_signposts_linked_lroute_093	ds:0xa09a	seg093	vorbelegt
+daten	g_signposts_linked_lroute_094	ds:0xa09c	seg093	vorbelegt
+daten	g_signposts_linked_lroute_095	ds:0xa09e	seg093	vorbelegt
+daten	g_signposts_linked_lroute_096	ds:0xa0a0	seg093	vorbelegt
+daten	g_signposts_linked_lroute_097	ds:0xa0a2	seg093	vorbelegt
+daten	g_signposts_linked_lroute_098	ds:0xa0a4	seg093	vorbelegt
+daten	g_signposts_linked_lroute_099	ds:0xa0a6	seg093	vorbelegt
+daten	g_signposts_linked_lroute_100	ds:0xa0a8	seg093	vorbelegt
+daten	g_signposts_linked_lroute_101	ds:0xa0aa	seg093	vorbelegt
+daten	g_signposts_linked_lroute_102	ds:0xa0ac	seg093	vorbelegt
+daten	g_signposts_linked_lroute_103	ds:0xa0ae	seg093	vorbelegt
+daten	g_signposts_linked_lroute_104	ds:0xa0b0	seg093	vorbelegt
+daten	g_signposts_linked_lroute_105	ds:0xa0b2	seg093	vorbelegt
+daten	g_signposts	ds:0xa0b4	seg093	vorbelegt
+daten	g_harbors_linked_sea_routes_01	ds:0xa330	seg093	vorbelegt
+daten	g_harbors_linked_sea_routes_02	ds:0xa336	seg093	vorbelegt
+daten	g_harbors_linked_sea_routes_03	ds:0xa339	seg093	vorbelegt
+daten	g_harbors_linked_sea_routes_04	ds:0xa33d	seg093	vorbelegt
+daten	g_harbors_linked_sea_routes_05	ds:0xa341	seg093	vorbelegt
+daten	g_harbors_linked_sea_routes_06	ds:0xa345	seg093	vorbelegt
+daten	g_harbors_linked_sea_routes_07	ds:0xa349	seg093	vorbelegt
+daten	g_harbors_linked_sea_routes_08	ds:0xa34b	seg093	vorbelegt
+daten	g_harbors_linked_sea_routes_09	ds:0xa353	seg093	vorbelegt
+daten	g_harbors_linked_sea_routes_10	ds:0xa358	seg093	vorbelegt
+daten	g_harbors_linked_sea_routes_11	ds:0xa35f	seg093	vorbelegt
+daten	g_harbors_linked_sea_routes_12	ds:0xa362	seg093	vorbelegt
+daten	g_harbors_linked_sea_routes_13	ds:0xa367	seg093	vorbelegt
+daten	g_harbors_linked_sea_routes_14	ds:0xa36b	seg093	vorbelegt
+daten	g_harbors_linked_sea_routes_15	ds:0xa36e	seg093	vorbelegt
+daten	g_harbors_linked_sea_routes_16	ds:0xa375	seg093	vorbelegt
+daten	g_harbors_linked_sea_routes_17	ds:0xa37b	seg093	vorbelegt
+daten	g_harbors_linked_sea_routes_18	ds:0xa37f	seg093	vorbelegt
+daten	g_harbors_linked_sea_routes_19	ds:0xa388	seg093	vorbelegt
+daten	g_harbors_linked_sea_routes_20	ds:0xa38b	seg093	vorbelegt
+daten	g_harbors_linked_sea_routes_21	ds:0xa390	seg093	vorbelegt
+daten	g_harbors_linked_sea_routes_22	ds:0xa393	seg093	vorbelegt
+daten	g_harbors_linked_sea_routes_23	ds:0xa397	seg093	vorbelegt
+daten	g_harbors_linked_sea_routes_24	ds:0xa39a	seg093	vorbelegt
+daten	g_harbors_linked_sea_routes_25	ds:0xa3a0	seg093	vorbelegt
+daten	g_harbors	ds:0xa3a3	seg093	vorbelegt
+daten	g_town_positions	ds:0xa43f	seg093	vorbelegt
+daten	g_tevents_tab	ds:0xa66d	seg093	vorbelegt
+daten	g_traveling	ds:0xa842	seg094	vorbelegt
+daten	g_str_s_s	ds:0xab32	seg096	vorbelegt
+daten	g_str_von_s_s	ds:0xab38	seg096	vorbelegt
+daten	g_spell_special_aecost	ds:0xac0e	seg098	vorbelegt
+daten	g_seg105_padding	ds:0xae47	seg105	vorbelegt
+daten	g_ignite_mode	ds:0xaee8	seg107	vorbelegt
+daten	g_travel_event_active	ds:0xb132	seg109	vorbelegt
+daten	g_travel_event_axes	ds:0xb135	seg109	vorbelegt
+daten	g_tevent064_chest_descr	ds:0xb154	seg111	vorbelegt
+daten	g_color_black	ds:0xb22d	seg120	vorbelegt
+daten	g_cd_audio_duration_bak	ds:0xbc38	seg001	nicht vorbelegt
+daten	g_cd_audio_pause_tod	ds:0xbc3c	seg001	nicht vorbelegt
+daten	g_cd_audio_track	ds:0xbc40	seg001	nicht vorbelegt
+daten	g_unkn_071	ds:0xbc42	seg001	nicht vorbelegt
+daten	g_cd_audio_start_tod	ds:0xbc4a	seg001	nicht vorbelegt
+daten	g_cd_audio_duration	ds:0xbc4e	seg001	nicht vorbelegt
+daten	g_cd_drive_num	ds:0xbc52	seg001	nicht vorbelegt
+daten	g_unkn_072	ds:0xbc54	seg001	nicht vorbelegt
+daten	ds	ds:0xbc58	seg002	nicht vorbelegt
+daten	dummy	ds:0xbc59	seg002	nicht vorbelegt
+daten	g_sample_ad_length	ds:0xbc5a	seg002	nicht vorbelegt
+daten	g_sample_ad_idx_entry	ds:0xbc5c	seg002	nicht vorbelegt
+daten	g_playmask_us	ds:0xbc62	seg002	nicht vorbelegt
+daten	g_gfxbuf_wait_keypress	ds:0xbc63	seg002	nicht vorbelegt
+daten	g_splash_ae	ds:0xbcc7	seg002	nicht vorbelegt
+daten	g_splash_le	ds:0xbccb	seg002	nicht vorbelegt
+daten	g_hero_splash_timer	ds:0xbccf	seg002	nicht vorbelegt
+daten	g_spinlock_flag	ds:0xbcd6	seg002	nicht vorbelegt
+daten	g_map_townmark_state	ds:0xbcd8	seg002	nicht vorbelegt
+daten	g_freeze_timers	ds:0xbcda	seg002	nicht vorbelegt
+daten	g_mouse_handler_bak	ds:0xbcdb	seg002	nicht vorbelegt
+daten	g_archive_file_offset	ds:0xbcdf	seg002	nicht vorbelegt
+daten	g_archive_file_remaining	ds:0xbce3	seg002	nicht vorbelegt
+daten	g_archive_file_length	ds:0xbce7	seg002	nicht vorbelegt
+daten	g_ail_digi_driver_buf2	ds:0xbceb	seg002	nicht vorbelegt
+daten	g_ail_voc_buffer	ds:0xbcef	seg002	nicht vorbelegt
+daten	g_ail_digi_driver_buf	ds:0xbcf3	seg002	nicht vorbelegt
+daten	g_ail_digi_driver_descr	ds:0xbcf7	seg002	nicht vorbelegt
+daten	g_ail_digi_driver_id	ds:0xbcfb	seg002	nicht vorbelegt
+daten	g_use_cdaudio_flag	ds:0xbcfd	seg002	nicht vorbelegt
+daten	g_ail_music_inactive	ds:0xbcff	seg002	nicht vorbelegt
+daten	g_sample_ad_handle	ds:0xbd01	seg002	nicht vorbelegt
+daten	g_ail_timbre_cache_size	ds:0xbd03	seg002	nicht vorbelegt
+daten	g_ail_state_table_size	ds:0xbd05	seg002	nicht vorbelegt
+daten	g_ail_music_driver_buf2	ds:0xbd09	seg002	nicht vorbelegt
+daten	g_ail_midi_buffer	ds:0xbd0d	seg002	nicht vorbelegt
+daten	g_ail_timbre_cache	ds:0xbd11	seg002	nicht vorbelegt
+daten	g_ail_state_table	ds:0xbd15	seg002	nicht vorbelegt
+daten	g_ail_music_driver_buf	ds:0xbd19	seg002	nicht vorbelegt
+daten	g_ail_music_driver_descr	ds:0xbd1d	seg002	nicht vorbelegt
+daten	g_ail_sequence	ds:0xbd21	seg002	nicht vorbelegt
+daten	g_ail_music_driver_id	ds:0xbd23	seg002	nicht vorbelegt
+daten	g_pregame_state	ds:0xbd25	seg002	nicht vorbelegt
+daten	g_area_camp_area_type	ds:0xbd27	seg002	nicht vorbelegt
+daten	g_current_fight	ds:0xbd28	seg002	nicht vorbelegt
+daten	g_scenario_buf	ds:0xbd2c	seg002	nicht vorbelegt
+daten	g_fightobj_buf	ds:0xbd30	seg002	nicht vorbelegt
+daten	g_heroes	ds:0xbd34	seg002	nicht vorbelegt
+daten	g_new_menu_icons	ds:0xbd38	seg002	nicht vorbelegt
+daten	g_unkn_073	ds:0xbd41	seg002	nicht vorbelegt
+daten	g_steptarget_front	ds:0xbd4d	seg002	nicht vorbelegt
+daten	g_steptarget_back	ds:0xbd4e	seg002	nicht vorbelegt
+daten	g_viewdir_flag_bogus	ds:0xbd4f	seg002	nicht vorbelegt
+daten	g_visual_squares_tex	ds:0xbd50	seg002	nicht vorbelegt
+daten	g_unkn_074	ds:0xbd6d	seg002	nicht vorbelegt
+daten	g_visual_square_vals	ds:0xbd6e	seg002	nicht vorbelegt
+daten	g_unkn_075	ds:0xbd8b	seg002	nicht vorbelegt
+daten	g_ems_unused_tab	ds:0xbd8c	seg002	nicht vorbelegt
+daten	g_ems_travelmap_handle	ds:0xbd90	seg002	nicht vorbelegt
+daten	g_ems_unused_handle	ds:0xbd92	seg002	nicht vorbelegt
+daten	g_map_size_x	ds:0xbd94	seg002	nicht vorbelegt
+daten	g_dng_map	ds:0xbd95	seg002	nicht vorbelegt
+daten	g_radio_name_list	ds:0xbf95	seg002	nicht vorbelegt
+daten	g_gui_box_bg_buf	ds:0xbff9	seg002	nicht vorbelegt
+daten	g_textbox_width	ds:0xbffd	seg002	nicht vorbelegt
+daten	g_textbox_pos_x	ds:0xbfff	seg002	nicht vorbelegt
+daten	g_textbox_pos_y	ds:0xc001	seg002	nicht vorbelegt
+daten	g_game_mode	ds:0xc003	seg002	nicht vorbelegt
+daten	g_item_selector_sell	ds:0xc005	seg002	nicht vorbelegt
+daten	g_item_selector_buy	ds:0xc009	seg002	nicht vorbelegt
+daten	g_pic_copy	ds:0xc00d	seg002	nicht vorbelegt
+daten	g_locations_tab	ds:0xc025	seg002	nicht vorbelegt
+daten	g_buffer8_ptr	ds:0xc3a9	seg002	nicht vorbelegt
+daten	g_tx2_index	ds:0xc3ad	seg002	nicht vorbelegt
+daten	g_tx_index	ds:0xc3b1	seg002	nicht vorbelegt
+daten	g_text_ltx_index	ds:0xc3b5	seg002	nicht vorbelegt
+daten	g_unkn_077	ds:0xc3b9	seg002	nicht vorbelegt
+daten	g_random_schick_seed2	ds:0xc3bf	seg002	nicht vorbelegt
+daten	g_game_state	ds:0xc3c1	seg002	nicht vorbelegt
+daten	g_unkn_078	ds:0xc3c3	seg002	nicht vorbelegt
+daten	g_game_paused_flag	ds:0xc3c5	seg002	nicht vorbelegt
+daten	g_have_mouse	ds:0xc3c7	seg002	nicht vorbelegt
+daten	g_unused_spinlock_flag	ds:0xc3c9	seg002	nicht vorbelegt
+daten	g_update_statusline	ds:0xc3cb	seg002	nicht vorbelegt
+daten	g_unkn_079	ds:0xc3cd	seg002	nicht vorbelegt
+daten	g_mouse1_doubleclick	ds:0xc3cf	seg002	nicht vorbelegt
+daten	g_mouse_leftclick_event	ds:0xc3d1	seg002	nicht vorbelegt
+daten	g_mouse_rightclick_event	ds:0xc3d3	seg002	nicht vorbelegt
+daten	g_mouse1_event2	ds:0xc3d5	seg002	nicht vorbelegt
+daten	g_keystroke_ascii_code	ds:0xc3d7	seg002	nicht vorbelegt
+daten	g_action_id	ds:0xc3d9	seg002	nicht vorbelegt
+daten	g_buffer9_ptr	ds:0xc3db	seg002	nicht vorbelegt
+daten	g_unkn_080	ds:0xc3df	seg002	nicht vorbelegt
+daten	g_ani_width	ds:0xc3e7	seg002	nicht vorbelegt
+daten	g_ani_unknown1	ds:0xc3e9	seg002	nicht vorbelegt
+daten	g_ani_unknown2	ds:0xc3eb	seg002	nicht vorbelegt
+daten	g_ani_height	ds:0xc3ed	seg002	nicht vorbelegt
+daten	g_ani_areacount	ds:0xc3ee	seg002	nicht vorbelegt
+daten	g_ani_area_table	ds:0xc3ef	seg002	nicht vorbelegt
+daten	g_ani_main_ptr	ds:0xce35	seg002	nicht vorbelegt
+daten	g_ani_compr_flag	ds:0xce39	seg002	nicht vorbelegt
+daten	g_ani_palette_size	ds:0xce3a	seg002	nicht vorbelegt
+daten	g_ani_palette	ds:0xce3b	seg002	nicht vorbelegt
+daten	g_ani_posy	ds:0xce3f	seg002	nicht vorbelegt
+daten	g_ani_posx	ds:0xce41	seg002	nicht vorbelegt
+daten	g_ani_unknown4	ds:0xce43	seg002	nicht vorbelegt
+daten	g_unkn_081	ds:0xce47	seg002	nicht vorbelegt
+daten	g_gui_text_buffer	ds:0xce87	seg002	nicht vorbelegt
+daten	g_last_cursor	ds:0xcec7	seg002	nicht vorbelegt
+daten	g_current_cursor	ds:0xcecb	seg002	nicht vorbelegt
+daten	g_ggst_cursor	ds:0xcecf	seg002	nicht vorbelegt
+daten	g_mouse_bg_bak	ds:0xcf0f	seg002	nicht vorbelegt
+daten	g_dng_init_flag	ds:0xd00f	seg002	nicht vorbelegt
+daten	g_dng_extra_action	ds:0xd011	seg002	nicht vorbelegt
+daten	g_redraw_menuicons	ds:0xd013	seg002	nicht vorbelegt
+daten	g_buffer9_ptr2	ds:0xd015	seg002	nicht vorbelegt
+daten	g_buffer9_ptr3	ds:0xd019	seg002	nicht vorbelegt
+daten	g_buffer_monster_tab	ds:0xd01d	seg002	nicht vorbelegt
+daten	g_buffer_wfigs_tab	ds:0xd0ad	seg002	nicht vorbelegt
+daten	g_buffer_mfigs_tab	ds:0xd159	seg002	nicht vorbelegt
+daten	g_buffer_anis_tab	ds:0xd205	seg002	nicht vorbelegt
+daten	g_trv_track_pixel_bak	ds:0xd299	seg002	nicht vorbelegt
+daten	g_fig_star_gfx	ds:0xd29d	seg002	nicht vorbelegt
+daten	g_monnames_buffer	ds:0xd2a1	seg002	nicht vorbelegt
+daten	g_buffer5_ptr	ds:0xd2a5	seg002	nicht vorbelegt
+daten	g_buffer10_ptr	ds:0xd2a9	seg002	nicht vorbelegt
+daten	g_popup	ds:0xd2ad	seg002	nicht vorbelegt
+daten	g_buffer6_ptr	ds:0xd2b1	seg002	nicht vorbelegt
+daten	g_buffer7_ptr	ds:0xd2b5	seg002	nicht vorbelegt
+daten	g_text_ltx_buffer	ds:0xd2b9	seg002	nicht vorbelegt
+daten	g_splash_buffer	ds:0xd2bd	seg002	nicht vorbelegt
+daten	g_buf_font6	ds:0xd2c1	seg002	nicht vorbelegt
+daten	g_textcolor_index	ds:0xd2c5	seg002	nicht vorbelegt
+daten	g_textcolor_bg	ds:0xd2c7	seg002	nicht vorbelegt
+daten	g_textcolor_fg	ds:0xd2c9	seg002	nicht vorbelegt
+daten	g_gui_text_centered	ds:0xd2d1	seg002	nicht vorbelegt
+daten	g_textline_unknown	ds:0xd2d3	seg002	nicht vorbelegt
+daten	g_textline_maxlen	ds:0xd2d5	seg002	nicht vorbelegt
+daten	g_textline_posy	ds:0xd2d7	seg002	nicht vorbelegt
+daten	g_textline_posx	ds:0xd2d9	seg002	nicht vorbelegt
+daten	g_fig_figure2_buf	ds:0xd2db	seg002	nicht vorbelegt
+daten	g_fig_figure1_buf	ds:0xd2df	seg002	nicht vorbelegt
+daten	g_objects_nvf_buf	ds:0xd2e3	seg002	nicht vorbelegt
+daten	g_buf_icon	ds:0xd2e7	seg002	nicht vorbelegt
+daten	g_text_output_buf	ds:0xd2eb	seg002	nicht vorbelegt
+daten	g_text_input_buf	ds:0xd2ef	seg002	nicht vorbelegt
+daten	g_dtp2	ds:0xd2f3	seg002	nicht vorbelegt
+daten	g_icon	ds:0xd2f7	seg002	nicht vorbelegt
+daten	g_vga_backbuffer	ds:0xd2fb	seg002	nicht vorbelegt
+daten	g_vga_memstart	ds:0xd2ff	seg002	nicht vorbelegt
+daten	g_renderbuf_ptr	ds:0xd303	seg002	nicht vorbelegt
+daten	g_unkn_082	ds:0xd307	seg002	nicht vorbelegt
+daten	g_gameinit_flag	ds:0xd309	seg002	nicht vorbelegt
+daten	g_video_page_bak	ds:0xd30b	seg002	nicht vorbelegt
+daten	g_video_mode_bak	ds:0xd30d	seg002	nicht vorbelegt
+daten	g_unkn_083	ds:0xd30f	seg002	nicht vorbelegt
+daten	g_txt_tabpos	ds:0xd313	seg002	nicht vorbelegt
+daten	g_townpal_buf	ds:0xd321	seg002	nicht vorbelegt
+daten	g_fig_escape_position	ds:0xd325	seg002	nicht vorbelegt
+daten	g_wildcamp_sleep_quality	ds:0xd32d	seg002	nicht vorbelegt
+daten	g_gather_herbs_mod	ds:0xd32f	seg002	nicht vorbelegt
+daten	g_replenish_stocks_mod	ds:0xd331	seg002	nicht vorbelegt
+daten	g_fig_msg_data	ds:0xd333	seg002	nicht vorbelegt
+daten	g_enemy_sheets	ds:0xd34b	seg002	nicht vorbelegt
+daten	g_fig_move_pathdir	ds:0xd823	seg002	nicht vorbelegt
+daten	g_fig_enemy_parry_action_used	ds:0xd82d	seg002	nicht vorbelegt
+daten	g_fig_hero_parry_action_used	ds:0xd84b	seg002	nicht vorbelegt
+daten	g_chessboard	ds:0xd852	seg002	nicht vorbelegt
+daten	g_fig_spellgfx_buf	ds:0xd856	seg002	nicht vorbelegt
+daten	g_fig_projectile_buf	ds:0xd85a	seg002	nicht vorbelegt
+daten	g_fig_cb_selector_buf	ds:0xd85e	seg002	nicht vorbelegt
+daten	g_fig_cb_marker_buf	ds:0xd862	seg002	nicht vorbelegt
+daten	g_spellobj_nvf_buf	ds:0xd866	seg002	nicht vorbelegt
+daten	g_weapons_nvf_buf	ds:0xd86a	seg002	nicht vorbelegt
+daten	g_fightobj_buf_seek_ptr	ds:0xd86e	seg002	nicht vorbelegt
+daten	g_nr_of_enemies	ds:0xd872	seg002	nicht vorbelegt
+daten	g_fightobj_list	ds:0xd874	seg002	nicht vorbelegt
+daten	g_fig_ani_tracks	ds:0xd8ce	seg002	nicht vorbelegt
+daten	g_fig_list_elem	ds:0xe066	seg002	nicht vorbelegt
+daten	g_fig_list_array	ds:0xe089	seg002	nicht vorbelegt
+daten	g_fig_list_head	ds:0xe108	seg002	nicht vorbelegt
+daten	g_location_market_flag	ds:0xe10c	seg002	nicht vorbelegt
+daten	g_wallclock_redraw	ds:0xe10d	seg002	nicht vorbelegt
+daten	g_wallclock_y	ds:0xe10f	seg002	nicht vorbelegt
+daten	g_wallclock_x	ds:0xe111	seg002	nicht vorbelegt
+daten	g_wallclock_update	ds:0xe113	seg002	nicht vorbelegt
+daten	g_memslots_mon	ds:0xe115	seg002	nicht vorbelegt
+daten	g_memslots_wfig	ds:0xe119	seg002	nicht vorbelegt
+daten	g_memslots_mfig	ds:0xe11d	seg002	nicht vorbelegt
+daten	g_memslots_anis	ds:0xe121	seg002	nicht vorbelegt
+daten	g_monster_dat_buf	ds:0xe125	seg002	nicht vorbelegt
+daten	g_monnames_index	ds:0xe129	seg002	nicht vorbelegt
+daten	g_market_itemsaldo_table	ds:0xe12d	seg002	nicht vorbelegt
+daten	g_itemsdat	ds:0xe22b	seg002	nicht vorbelegt
+daten	g_itemsname	ds:0xe22f	seg002	nicht vorbelegt
+daten	g_timer_tick_counter	ds:0xe234	seg004	nicht vorbelegt
+daten	g_ani_change_dir	ds:0xe238	seg004	nicht vorbelegt
+daten	g_ani_area_status	ds:0xe24c	seg004	nicht vorbelegt
+daten	g_ani_area_timeout	ds:0xe260	seg004	nicht vorbelegt
+daten	g_bc_timer	ds:0xe274	seg004	nicht vorbelegt
+daten	g_fig_gfxbuffers	ds:0xe278	seg005	nicht vorbelegt
+daten	g_fig_figlist_readd	ds:0xe298	seg005	nicht vorbelegt
+daten	g_fig_ani_state	ds:0xe2a8	seg005	nicht vorbelegt
+daten	g_fig_actor_grammar	ds:0xe2b8	seg005	nicht vorbelegt
+daten	g_fig_target_grammar	ds:0xe2bc	seg005	nicht vorbelegt
+daten	g_figobj_unkn_y1	ds:0xe2c0	seg005	nicht vorbelegt
+daten	g_figobj_unkn_y1_bak	ds:0xe2c2	seg005	nicht vorbelegt
+daten	g_figobj_unkn_x1	ds:0xe2c4	seg005	nicht vorbelegt
+daten	g_figobj_unkn_x1_bak	ds:0xe2c6	seg005	nicht vorbelegt
+daten	g_figobj_unkn_y2	ds:0xe2c8	seg005	nicht vorbelegt
+daten	g_figobj_unkn_y2_bak	ds:0xe2ca	seg005	nicht vorbelegt
+daten	g_figobj_unkn_x2	ds:0xe2cc	seg005	nicht vorbelegt
+daten	g_figobj_unkn_x2_bak	ds:0xe2ce	seg005	nicht vorbelegt
+daten	g_delay_timer	ds:0xe2d0	seg005	nicht vorbelegt
+daten	g_saved_files_buf	ds:0xe2d2	seg026	nicht vorbelegt
+daten	g_last_save_time	ds:0xe2d6	seg026	nicht vorbelegt
+daten	g_savegame_names	ds:0xe2da	seg026	nicht vorbelegt
+daten	g_dialog_title	ds:0xe308	seg030	nicht vorbelegt
+daten	g_dialog_informer	ds:0xe30c	seg030	nicht vorbelegt
+daten	g_dialog_next_state	ds:0xe30e	seg030	nicht vorbelegt
+daten	g_dialog_done	ds:0xe310	seg030	nicht vorbelegt
+daten	g_dialog_state	ds:0xe312	seg030	nicht vorbelegt
+daten	g_tlk_id	ds:0xe314	seg030	nicht vorbelegt
+daten	g_current_fight_id	ds:0xe316	seg032	nicht vorbelegt
+daten	g_autofight	ds:0xe318	seg032	nicht vorbelegt
+daten	g_fig_dropped_weapons	ds:0xe31a	seg032	nicht vorbelegt
+daten	g_chessboard_cpy	ds:0xe356	seg038	nicht vorbelegt
+daten	G_FIG_DOUBLE_SIZE_FIGHTER_ID_TAB	ds:0xe35a	seg040	nicht vorbelegt
+daten	g_fig_double_size_count	ds:0xe36f	seg040	nicht vorbelegt
+daten	g_fightobj_buf_freespace	ds:0xe370	seg040	nicht vorbelegt
+daten	g_buffer_weapanidat	ds:0xe374	seg040	nicht vorbelegt
+daten	g_buffer_anidat	ds:0xe378	seg040	nicht vorbelegt
+daten	g_fig_list_buffer	ds:0xe37c	seg040	nicht vorbelegt
+daten	g_figobj_gfxheight_table	ds:0xe380	seg040	nicht vorbelegt
+daten	g_figobj_gfxwidth_table	ds:0xe384	seg040	nicht vorbelegt
+daten	g_figobj_gfxbuf_table	ds:0xe388	seg040	nicht vorbelegt
+daten	g_fig_spellgfx_id	ds:0xe38c	seg040	nicht vorbelegt
+daten	g_fig_projectile_id	ds:0xe38d	seg040	nicht vorbelegt
+daten	g_fig_cb_marker_id	ds:0xe38e	seg040	nicht vorbelegt
+daten	g_fig_cb_selector_id	ds:0xe38f	seg040	nicht vorbelegt
+daten	g_spell_illusionen	ds:0xe3a4	seg042	nicht vorbelegt
+daten	g_fig_target_dead	ds:0xe3a6	seg042	nicht vorbelegt
+daten	g_fig_attacker_dead	ds:0xe3a8	seg042	nicht vorbelegt
+daten	g_fig_critical_fail_backfire_1	ds:0xe3aa	seg042	nicht vorbelegt
+daten	g_fig_critical_fail_backfire_2	ds:0xe3ac	seg042	nicht vorbelegt
+daten	g_current_cursor_bak	ds:0xe3ae	seg048	nicht vorbelegt
+daten	g_inc_spells_counter	ds:0xe3b2	seg050	nicht vorbelegt
+daten	g_inc_talents_counter	ds:0xe3b6	seg050	nicht vorbelegt
+daten	g_talents_buffer	ds:0xe3ba	seg050	nicht vorbelegt
+daten	g_wildcamp_guards	ds:0xe3be	seg051	nicht vorbelegt
+daten	g_wildcamp_herbstatus	ds:0xe3c1	seg051	nicht vorbelegt
+daten	g_wildcamp_replstatus	ds:0xe3c8	seg051	nicht vorbelegt
+daten	g_wildcamp_magicstatus	ds:0xe3cf	seg051	nicht vorbelegt
+daten	g_wildcamp_guardstatus	ds:0xe3d6	seg051	nicht vorbelegt
+daten	g_area_camp_guards	ds:0xe3de	seg052	nicht vorbelegt
+daten	g_area_camp_magicstatus	ds:0xe3e1	seg052	nicht vorbelegt
+daten	g_area_camp_guardstatus	ds:0xe3e8	seg052	nicht vorbelegt
+daten	g_booked_inn_days	ds:0xe3f0	seg054	nicht vorbelegt
+daten	g_sleep_quality	ds:0xe3f1	seg054	nicht vorbelegt
+daten	g_buy_shopping_cart	ds:0xe3f2	seg056	nicht vorbelegt
+daten	g_price_modificator	ds:0xe3f6	seg058	nicht vorbelegt
+daten	g_temple_god	ds:0xe3f8	seg061	nicht vorbelegt
+daten	g_sea_travel_passage_type	ds:0xe3fa	seg063	nicht vorbelegt
+daten	g_buffer9_ptr4	ds:0xe3fc	seg066	nicht vorbelegt
+daten	g_town_house_count	ds:0xe400	seg066	nicht vorbelegt
+daten	g_buffer11_ptr	ds:0xe404	seg066	nicht vorbelegt
+daten	g_town_refresh_direction	ds:0xe408	seg066	nicht vorbelegt
+daten	g_town_refresh_y_target	ds:0xe40a	seg066	nicht vorbelegt
+daten	g_town_refresh_x_target	ds:0xe40c	seg066	nicht vorbelegt
+daten	g_always_zero1	ds:0xe40e	seg066	nicht vorbelegt
+daten	g_always_zero2	ds:0xe410	seg066	nicht vorbelegt
+daten	g_entrance_angle	ds:0xe412	seg066	nicht vorbelegt
+daten	g_town_tex	ds:0xe414	seg066	nicht vorbelegt
+daten	g_combo_mode	ds:0xe42c	seg069	nicht vorbelegt
+daten	g_str_beorn_npc_name	ds:0xe42e	seg072	nicht vorbelegt
+daten	g_automap_buf	ds:0xe442	seg074	nicht vorbelegt
+daten	g_dng_refresh_direction	ds:0xe482	seg076	nicht vorbelegt
+daten	g_dng_refresh_y_target	ds:0xe484	seg076	nicht vorbelegt
+daten	g_dng_refresh_x_target	ds:0xe486	seg076	nicht vorbelegt
+daten	g_dng_map_ptr	ds:0xe488	seg076	nicht vorbelegt
+daten	g_dng_floor_tex	ds:0xe48c	seg076	nicht vorbelegt
+daten	g_dng_gfxtab	ds:0xe48d	seg076	nicht vorbelegt
+daten	g_unkn_090	ds:0xe491	seg076	nicht vorbelegt
+daten	g_lockpick_try_counter	ds:0xe492	seg076	nicht vorbelegt
+daten	g_dungeon_fights_buf	ds:0xe494	seg076	nicht vorbelegt
+daten	g_dungeon_stairs_buf	ds:0xe498	seg076	nicht vorbelegt
+daten	g_dungeon_doors_buf	ds:0xe49c	seg076	nicht vorbelegt
+daten	g_get_extra_loot	ds:0xe4a0	seg076	nicht vorbelegt
+daten	g_journey_crosslink_status	ds:0xe4a2	seg094	nicht vorbelegt
+daten	g_trv_menu_selection	ds:0xe4a3	seg094	nicht vorbelegt
+daten	g_current_town_over	ds:0xe4a5	seg094	nicht vorbelegt
+daten	g_current_town_overy	ds:0xe4a7	seg094	nicht vorbelegt
+daten	g_current_town_overx	ds:0xe4a9	seg094	nicht vorbelegt
+daten	g_selected_town_aniy	ds:0xe4ab	seg094	nicht vorbelegt
+daten	g_selected_town_anix	ds:0xe4ad	seg094	nicht vorbelegt
+daten	g_current_town_aniy	ds:0xe4af	seg094	nicht vorbelegt
+daten	g_current_town_anix	ds:0xe4b1	seg094	nicht vorbelegt
+daten	g_unkn_091	ds:0xe4b3	seg094	nicht vorbelegt
+daten	g_trv_crosslink_pixel_bak	ds:0xe4b4	seg094	nicht vorbelegt
+daten	g_good_camp_place	ds:0xe4c8	seg094	nicht vorbelegt
+daten	G_JOURNEY_TEVENT_RELATIVE_POSITI	ds:0xe4c9	seg094	nicht vorbelegt
+daten	g_gui_print_char	ds:0xe4d8	seg096	nicht vorbelegt
+daten	g_dialogbox_indent_height	ds:0xe4d9	seg096	nicht vorbelegt
+daten	g_dialogbox_indent_width	ds:0xe4db	seg096	nicht vorbelegt
+daten	g_unkn_092	ds:0xe4dd	seg096	nicht vorbelegt
+daten	g_grammar_bufs	ds:0xe4e3	seg096	nicht vorbelegt
+daten	g_menu_default_select	ds:0xe5ac	seg097	nicht vorbelegt
+daten	g_menu_input_busy	ds:0xe5ae	seg097	nicht vorbelegt
+daten	g_menu_selected	ds:0xe5b0	seg097	nicht vorbelegt
+daten	g_spelltest_result	ds:0xe5b2	seg102	nicht vorbelegt
+daten	g_spelltarget_e	ds:0xe5b4	seg102	nicht vorbelegt
+daten	g_spelltarget	ds:0xe5b8	seg102	nicht vorbelegt
+daten	g_spelluser	ds:0xe5bc	seg102	nicht vorbelegt
+daten	g_spelluser_e	ds:0xe5c0	seg102	nicht vorbelegt
+daten	g_alchemy_missing_item	ds:0xe5c4	seg104	nicht vorbelegt
+daten	g_used_item_desc	ds:0xe5c6	seg107	nicht vorbelegt
+daten	g_used_item_id	ds:0xe5ca	seg107	nicht vorbelegt
+daten	g_used_item_inv_slot	ds:0xe5cc	seg107	nicht vorbelegt
+daten	g_itemuser	ds:0xe5ce	seg107	nicht vorbelegt
+daten	g_event_ani_busy	ds:0xe5d2	seg117	nicht vorbelegt
+daten	g_wallclock_update_bak	ds:0xe5d3	seg117	nicht vorbelegt
+daten	g_textbox_width_bak	ds:0xe5d5	seg117	nicht vorbelegt
+daten	g_basepos_y_bak	ds:0xe5d7	seg117	nicht vorbelegt
+daten	g_basepos_x_bak	ds:0xe5d9	seg117	nicht vorbelegt
+daten	g_buffersize	ds:0xe5dc	seg120	nicht vorbelegt
+daten	g_global_buffer_ptr	ds:0xe5e0	seg120	nicht vorbelegt
+daten	g_large_buf	ds:0xe5e4	seg120	nicht vorbelegt

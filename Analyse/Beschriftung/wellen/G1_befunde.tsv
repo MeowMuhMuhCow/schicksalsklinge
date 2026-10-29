@@ -1,0 +1,106 @@
+datei	zeile	art	bisher	richtig	begruendung
+seg001.c	104	name	Sprungmarke has_cd	no_drive	Sprung bei BX == 0, also wenn KEIN Laufwerk vorhanden ist
+seg001.c	164	platzhalter	CD_unused1	CD_read_qchannel_unused	liest per IOCTL 0Ch (req[3], 11 Byte) die Audio-Q-Channel-Info = aktuelle Abspielposition; nie aufgerufen (static, umbenannt)
+seg001.c	390	platzhalter	CD_0432	CD_read_toc	liest Audio-Disk-Info (IOCTL 0Ah) und je Titel die Track-Info (0Bh) nach cd_buf1 (static, umbenannt)
+seg001.c	352	kommentar	set current position to maximum signed int	Spieldauer auf Maximum, damit die Wiederholung waehrend der Pause nicht ausloest	g_cd_audio_pos ist die Spieldauer in Ticks, keine Position (Zusatzkommentar, Original stehen gelassen)
+seg001.c	320	kommentar	stop audio playback in HSG and redbook format	zweimal STOP AUDIO: erstes haelt an, zweites setzt zurueck	req[0] und req[1] sind beide STOP (85h); das Adressierungs-Byte ist bei STOP bedeutungslos
+seg001.c	263	name	CD_enable_repeat	CD_audio_repeat_check (Vorschlag, siehe umbenennen.tsv)	Funktion fuehrt die Wiederholung aus, schaltet sie nicht ein; Kommentar ergaenzt
+seg001.c	362	name	CD_audio_play	CD_audio_resume (Vorschlag)	RESUME AUDIO, setzt nur fort; Kommentar ergaenzt
+seg001.c	39	platzhalter	cd_dummy0	IOCTL-Steuercode 2 (Reset Drive) fuer req[8]	gedeutet, Umbenennung vorgeschlagen; req[8] wird nie benutzt
+seg001.c	244	platzhalter	req[5].dummy4/dummy6	Sektorenanzahl (Low/High) der PLAY-AUDIO-Anfrage	MSCDEX-Request-Header Offset 0x12; Feldumbenennung vorgeschlagen
+seg001.c	244	originalfehler_neu	(uint16_t)track_start - 150 / track_start >> 16	Uebertrag ins High-Word fehlt	ist das Low-Word der Titellaenge < 150, wird 65536 Frames zu lang gespielt; bei normalen Titellaengen (< 14 min) harmlos
+seg002.c	1075	parameter	index	handle	alle Aufrufer (seg025-028) uebergeben das Dateihandle
+seg002.c	1596	parameter	irq_no	event_mask	Wert landet in CX von INT 33h/0Ch = Ereignismaske (Aufruf mit 0x1f), keine IRQ-Nummer
+seg002.c	1665	parameter	a3, a4	mask_off, mask_seg	INT 33h/09h: DX = Offset, ES = Segment der Cursormaske
+seg002.c	2280	parameter	p2	target	Zielpalette des Ueberblendens
+seg002.c	2332	parameter	p2, v3	target, step	Zielpalette und Einblendschritt
+seg002.c	778	platzhalter	cruft_1	midi_stop_sequence_unused	haelt die MIDI-Sequenz an (AIL_stop_sequence); nie aufgerufen (static)
+seg002.c	788	platzhalter	cruft_2	midi_set_volume_unused	setzt die MIDI-Lautstaerke; nie aufgerufen (static)
+seg002.c	345	name	ul_save	pause_mark_show	sichert 8x8 Pixel oben links und schreibt dort "P" (Pause per Leertaste); static
+seg002.c	346	name	ul_blit	pause_mark_hide	stellt die 8x8 Pixel wieder her; static
+seg002.c	2444	name	do_census	do_bank_interest	berechnet die monatlichen Bankzinsen (5 % Guthaben, 15 % Schulden p. a.); "census" ist im Englischen Volkszaehlung; static
+seg002.c	5728	platzhalter	l3	diskspace	Ergebnis von get_diskspace(), negativ = fehlende Bytes
+seg002.c	4316	kommentar	set src / set dst	vertauscht	nvf.dst = g_icon war mit "set src" kommentiert und umgekehrt
+seg002.c	4309	kommentar	Not in town or dungeon	nur in Stadt oder Dungeon	Bedingung ist dungeon_id != NONE || town_id != NONE; Zusatz ergaenzt
+seg002.c	3281	kommentar	check if someone ... has the magic bread bag	magischer Wasserschlauch	aus dem Essens-Teil kopiert
+seg002.c	3642	kommentar	Intervall [0 .. frequency + frequency_modifier]	[0 .. frequency * (10 + modifier) / 10]	random_interval(0, f*10 + f*mod) / 10; Modifikator verlaengert um 20 %/40 %
+seg002.c	3631	kommentar	note that dec_ptr_bs returns ...	Post-Dekrement	dec_ptr_bs gibt es im heutigen Code nicht mehr
+seg002.c	2701	kommentar	unknown timer	Gewaltmarsch-Timer	Variable heisst gs_forcedmarch_timer
+seg002.c	2839	kommentar	if timer > 0 continue	nur abgelaufene Timer behandeln	Bedingung ist time_left <= 0
+seg002.c	1801	kommentar	set cursor size 8x8 / 0x0	Hotspot (8,8) bzw. (0,0)	g_mouse_pointer_offsetx/y ist der Versatz des Hotspots, nicht die Groesse
+seg002.c	1393	kommentar	We use the one of DOSBox ...	Borland-Fassung benutzt int86x()	Hinweis stammt aus der DOSBox-Zeit; Erlaeuterung ergaenzt
+seg002.c	4809	kommentar	unknown yet (2x)	Aktion Warten / Meldung WIRD BEWUSSTLOS	gs_unconscious_message wird in herokeeping() ausgegeben
+seg002.c	4937	parameter	\param index	\param hero_pos	Doku passte nicht zum Parameternamen (do_starve_damage)
+seg002.c	5511	parameter	\param group	\param group_id	Doku passte nicht zum Parameternamen
+seg002.c	3754	kommentar	difference of 23 hours	24 Stunden; zusaetzlich 23 statt 24 beim Tageswechsel	Bright-Eyes-Kommentar zu Original-Bug 38 praezisiert
+seg002.c	433	platzhalter	dummy	2. Wort in SOUND.CFG, nicht ausgewertet (vermutlich MIDI-IRQ)	nur als vermutlich gekennzeichnet
+seg002.c	482	kommentar	-	Musik immer ueber CD-Audio	if (0) in read_sound_cfg: der MIDI-Treiber wird in der Borland-Fassung nie geladen
+seg002.c	2777	kommentar	vaule, sourrounding, xoordinate, unsonscious, enought	value, surrounding, coordinate, unconscious, enough	Tippfehler
+seg002.c	2546	originalfehler_be	What about herokeeping()? Original-Bug?	kein Fehler	herokeeping() laeuft bei jeder Eingabeabfrage; das stuendliche Essen loest magical_chainmail_damage() ueber g_herokeeping_flag aus
+seg002.c	2820	originalfehler_neu	h_index = -1 vor der Schleife	h_index je Timer zuruecksetzen	laeuft ein Timer mit ungueltigem Ziel nach einem gueltigen ab, wird die Aenderung beim Helden des vorigen Timers abgezogen
+seg002.c	2899	originalfehler_neu	sp->target = sp->modifier = 0	gs_modification_timers[j]...	Aufraeumen ungueltiger Ziele setzt nur den aktuellen Eintrag zurueck
+seg002.c	2942	originalfehler_neu	Hack in get_free_mod_slot()	-	bei abgeschalteten Timern wird Slot 0 nicht frei, aber neu vergeben; die alte Aenderung bleibt dauerhaft
+seg002.c	4282	originalfehler_neu	if (icons_bak[i] != -1)	i < 9 pruefen	Lesen hinter dem Feld icons_bak[9]; schlimmstenfalls ein unnoetiges Neuzeichnen
+seg002.c	1290	originalfehler_neu	NVF-Typ 1: Versatz mit ungesetzten width/height	width/height je Bild lesen	Bright-Eyes hat nur per #if !BORLANDC korrigiert, ohne Original-Bug-Vermerk; vermutlich kommt Typ 1 nicht vor
+seg002.c	1909	originalfehler_be	Original-Bug? <= ACTION_ID_HERO_NPC + 1	bestaetigt, harmlos	keine Maustabelle liefert 0xf8
+seg002.c	2238	originalfehler_be	gs_academy_daily_ident wird nie zurueckgesetzt	bestaetigt	seg068 sagt "VERSUCHT ES MORGEN"; im Original klappt die Identifizierung nur einmal im Spiel
+seg002.c	3676	originalfehler_be	route++ fehlt	bestaetigt, Fix stimmt	Folge: ausser Thorwal-Prem bleiben alle Schiffe bis Mitternacht im Hafen
+seg002.c	3732	originalfehler_be	time / MINUTES(5) rundet ab	bestaetigt, Fix stimmt	Reste aus timer_bak werden im Fix mitgezaehlt
+seg002.c	3749	originalfehler_be	hour_diff falsch	bestaetigt, Begruendung ergaenzt	zusaetzlich 23 statt 24 beim Tageswechsel (eine Stunde zu wenig); Fix zaehlt volle Stunden korrekt
+seg002.c	3773	originalfehler_be	stuendliche Timer fehlen in timewarp	bestaetigt	do_timers() ueberspringt sie bei g_freeze_timers
+seg002.c	4670	originalfehler_be	Fix: if (!g_in_fight && g_mouse1_doubleclick) draw_bar(...)	g_pp20_index == ARCHIVE_FILE_PLAYM_UK	Bright-Eyes-Fix fragwuerdig: Doppelklick-Merker hat nichts mit dem Bildschirmmodus zu tun
+seg002.c	5215	originalfehler_be	get_random_hero	bestaetigt	Positionen 0..n-1 statt der Plaetze der Gruppe; auch wenn alle tot sind, endlos
+seg002.c	5697	originalfehler_be	check_group	plausibel	nur der NSC bleibt handlungsfaehig
+seg002.c	3073	originalfehler_be	g_check_poison	plausibel	poison_effect() laeuft nur in game_loop()
+seg002.c	1365	originalfehler_be	retval bei RLE nicht gesetzt	bestaetigt	Rueckgabe dann unbestimmt; Fix nur fuer den Debug-Build
+seg003.c	59	name	move	update_visual_squares (Vorschlag)	die Funktion bewegt nichts; Doku ergaenzt
+seg003.c	150	platzhalter	l1	src_width	Zeilenbreite des Quellbildes
+seg003.c	124	kommentar	-	Eintraege 29/30 = vorne/hinten	die Tabellen haben 31 Eintraege
+seg003.c	175	originalfehler_neu	height -= y	height += y	Hoehe waechst statt zu schrumpfen; ohne Folgen, da y immer >= 0
+seg004.c	1053	parameter	y, x1, x2	x, y1, y2	Spalte und Zeilen waren vertauscht benannt (dst = x1 * 320 + y)
+seg004.c	1155	parameter	w, h	x2, y2	es sind Koordinaten der unteren rechten Ecke (width = w - x + 1)
+seg004.c	578	parameter	n, m	width, height	
+seg004.c	606	parameter	v1	mode	restore_rect_rle: 2 = Farbe 0 durchsichtig
+seg004.c	93	parameter	v1	mode	0 = zeichnen+starten, 1 = nur zeichnen, 2 = nur starten, Bit 7 = Flag
+seg004.c	518	platzhalter	lost	filled	es ist der gefuellte (sichtbare) Teil des Balkens, nicht der verlorene
+seg004.c	536	kommentar	draw 4 ... lines	3 Linien	Schleife i < 3
+seg004.c	839	originalfehler_be	off-by-one with pos > 80	bis zu 4 zu viel	Teiler 771 statt 810; pos 81..84 lesen g_wallclock_palette_day (16, 20, 60, 0): Sonne/Mond springen am Ende
+seg004.c	983	platzhalter	unused_ega1..6	EGA-Register gedeutet	Umbenennung vorgeschlagen
+seg004.c	1088	platzhalter	g_pic_copy.v1..v4	v1/v2 = Quellversatz in Modus 3, v3/v4 unbenutzt	aus pic_copy() in seg008 abgeleitet; Feldumbenennung vorgeschlagen
+seg005.c	319	kommentar	case 5: hero successful parade	erfolgreiche Parade von Held oder Gegner	FIG_add_msg(5, 0) in seg042 und seg043
+seg005.c	410	kommentar	array[0] of array[9]	8 Elemente	g_fig_gfxbuffers[8]
+seg005.c	78	parameter	\param fighter	\param p_fighter	
+seg005.c	749	originalfehler_be	Bug 5 (Leiche geht verloren)	Begruendung schluessig	nicht im Spiel nachgeprueft
+seg005.c	791	originalfehler_be	Bug 4 (Schwanz bleibt auf dem Feld)	Begruendung schluessig	nicht im Spiel nachgeprueft
+seg006.c	58	platzhalter	FIG_set_array	FIG_alloc_fighter_id	sucht und belegt die erste freie Kaempfer-ID (static)
+seg006.c	453	kommentar	position of the hero	1-basiert	
+seg006.c	503	kommentar	0 = left side, 1 = right side	0 = oben links, 1 = unten links	beide Rahmen haben x = 1
+seg006.c	505	kommentar	ID of the enemy	Objekt-ID (10..29)	
+seg007.c	45	originalfehler_neu	__abs__(retval) % val	-	bei 0x8000 bleibt der Betrag negativ; random_schick() liefert dann 0 oder negative Werte (z. B. -1 bei W6)
+seg007.c	139	kommentar	-	Format der Wuerfelformel	ergaenzt
+seg024.c	129	originalfehler_neu	gs_diary_entries[counter - 1]	-	liest bei leerem Tagebuch vor das Feld
+seg024.c	221	originalfehler_neu	y2 = line * 7	(line - startline) * 7	kopiert zu viele leere Zeilen; wegen Modus 2 unsichtbar
+seg025.c	219	originalfehler_neu	while (get_hero(i)->group_id == active)	alle Helden der Gruppe pruefen	ist die Gruppe nicht lueckenlos ab Platz 0, bleiben Mitglieder frei oder niemand wird verhaftet
+seg025.c	204	originalfehler_neu	unarrested	nur andere Gruppen zaehlen	Bedingung ist dadurch fast immer wahr
+seg025.c	188	originalfehler_be	nur !dead geprueft	plausibel	
+seg025.c	852	kommentar	each hero looses 1W6 LE	ein Wurf fuer alle	sub_group_le(random_schick(6))
+seg026.c	715	kommentar	-	Verweis wird gelesen und ueberschrieben	save_game_state() schreibt dort den Offset der CHR-Daten
+seg026.c	1203	kommentar	ptr: pointer / # of CHR-files	Puffer-Layout / Anzahl passender Helden	
+seg026.c	1072	originalfehler_neu	do { ... } while (done == 0)	while statt do-while	praktisch immer CHR-Dateien vorhanden
+seg027.c	142	parameter	\param fig_old	\param fig	Doku passte nicht zum Parameternamen
+seg027.c	558	kommentar	scenario_id of scenarios	Anzahl der Szenarien	
+seg027.c	618	kommentar	no enemy and enemy does not appear	Gegner vorhanden und in Runde 1	Kommentar sagte das Gegenteil der Bedingung
+seg027.c	238	originalfehler_neu	p_tab[fig]	-	vermutlich: Ende der letzten Figur wird hinter der Tabelle gelesen, Puffern schlaegt fehl
+seg027.c	148	originalfehler_be	when using EMS ... something strange happens	unbelegt	keine Ursache im Code erkennbar
+seg028.c	268	parameter	arg	town_tile	9 = TOWN_TILE_INN_OR_TAVERN (FINGER.NVF), sonst TOWN_TILE_MERCHANT (LTURM.NVF)
+seg028.c	366	originalfehler_neu	150 * sizeof(struct location) + 100	-	koennte g_buffer8_ptr usw. ueberschreiben; Dateien sind kurz genug
+seg028.c	175	originalfehler_neu	arr[i] = arr[i + 1]	-	latent: fehlen Haustyp 1 und 2, bleibt arr[1] ungesetzt
+seg029.c	241	originalfehler_be	TODO: j < 4	Original-Bug	von Bright-Eyes nur als TODO vermerkt; mit NSC kostet Wundfieber beim Heiler -10 Heller und die Heilprobe hat Zuschlag -1 statt 6
+seg029.c	260	parameter	\param pos	\param hero_pos	
+seg029.c	279	parameter	\param icon	\param icon_id	Tippfehler icoc_buffer, index if
+seg030.c	55	kommentar	name of an unknown informer	bekannter Informant	aus get_random_unknown_informer_name kopiert
+seg030.c	496	originalfehler_neu	Mischen der Antworten	-	Ergebnis wird nie benutzt; Antworten stehen in do_talk() immer in derselben Reihenfolge
+seg031.c	179	originalfehler_neu	opt0_txt..opt2_txt	mit 0 bzw. txt_offset vorbelegen	leere Antworten koennen beim Mischen auf sichtbare Plaetze rutschen
+seg031.c	36	platzhalter	unkn	vermutlich Geschlecht	Feldumbenennung vorgeschlagen
+seg031.c	281	kommentar	\brief ?	Informant der aktuellen Stadt	
+seg031.c	268	originalfehler_be	get_informer_forename ohne break	Fix stimmt	toter Code

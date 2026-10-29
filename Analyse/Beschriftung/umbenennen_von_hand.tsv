@@ -1,0 +1,7 @@
+dummy4	count_lo	feld	seg013.h:10
+dummy6	count_hi	feld	seg013.h:11
+move	update_visual_squares	funktion	seg003.c:59
+v1	src_x	feld	datseg.h:78
+v2	src_y	feld	datseg.h:79
+unkn	sex	feld	datseg.h:555
+unkn1	is_ranged	feld	seg037.c:524

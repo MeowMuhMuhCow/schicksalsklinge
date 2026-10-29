@@ -1,0 +1,22 @@
+alt	neu	art	datei:zeile	begruendung
+GUI_print_header	GUI_print_text	funktion	seg096.c:664	gibt den ganzen umgebrochenen Text einer Box (oder die Ortszeile) aus und liefert die Zeilenzahl, kein Kopf
+GUI_unused	GUI_count_cr_unused	funktion	seg096.c:902	zaehlt die CR im String; nie aufgerufen
+GUI_unused1	GUI_print_string_font8	funktion	seg097.c:128	GUI_print_string fuer die 8-Pixel-Schrift; nie aufgerufen
+GUI_unused2	GUI_print_char_font8	funktion	seg097.c:178	GUI_print_char fuer die 8-Pixel-Schrift
+GUI_1c2	GUI_write_font8_to_screen	funktion	seg097.c:216	Gegenstueck zu GUI_write_fonti_to_screen fuer die 8-Pixel-Schrift
+GUI_lookup_char_height	GUI_lookup_char_width_font8	funktion	seg097.c:191	liefert Glyphe und BREITE der 8-Pixel-Schrift, keine Hoehe
+g_gui_char_height	g_gui_char_width_font8	variable	seg097.c:47	Breitentabelle der 8-Pixel-Schrift (static); Typ struct_char_height ist gleich aufgebaut wie struct_char_width und koennte entfallen
+GUI_copy_smth	GUI_restore_box_bg	funktion	seg097.c:423	kopiert den in GUI_draw_radio_bg gesicherten Hintergrund zurueck
+GUI_draw_radio_bg	GUI_draw_popup_box	funktion	seg097.c:389	zeichnet jede Popup-Box (auch ohne Radio-Knoepfe, z. B. GUI_input) und sichert den Hintergrund
+g_gui_buffer_unkn	g_gui_box_bg_buf	variable	seg097.c:400	Puffer fuer den Hintergrund unter der Popup-Box (do_save_rect/do_pic_copy); Definition in seg002.c:153
+g_spell_select_str_key	g_spell_select_str_hl	variable	seg098.c:52	enthaelt "\xf2%s\xf0" (hervorgehoben); die Namen _key und _key_color sind vertauscht (static)
+g_spell_select_str_key_color	g_spell_select_str_plain	variable	seg098.c:53	enthaelt nur "%s" ohne Farbcode (static)
+g_spell_select_str_keyval_color	g_spell_select_str_hl_val	variable	seg098.c:54	einheitlich zu g_spell_select_str_hl (static)
+g_spell_select_ones	g_spell_select_class_usable	variable	seg098.c:55	Vorlage fuer "Zauberklasse anwendbar" je Klasse (static)
+magic_heal_ani	magic_target_stars_ani	funktion	seg098.c:65	Sternchen auf dem Bild des Zielhelden nach jedem gelungenen Zauber ausserhalb des Kampfes, nicht nur Heilung
+spell_gardanium	spell_gardianum	funktion	seg099.c:174	Tippfehler, der Zauber heisst Gardianum Paradei
+gs_gardanium_used_ae	gs_gardianum_used_ae	variable	seg099.c:195	Tippfehler wie oben (Variable wird nur geschrieben)
+MON_test_talent	MON_test_spell	funktion	seg102.c:271	prueft einen Gegnerzauber (mit MR des Ziels), kein Talent
+g_palette_unknown2	g_palette_textbox	variable	seg120.c:70	Farben 0xd8..0xdf der Textboxen (Radio-Knopf 0xd8/0xd9, Texthintergrund 0xdf; vermutlich) (static)
+g_palette_unknown3	g_palette_textcolors	variable	seg120.c:81	Farben 0xc8..0xca = Textfarben 1..3 (rot, gelb, blau), vgl. init_game_state (static)
+do_location1	do_location_unkn1	funktion	seg122.c:15	leerer Handler fuer LOCTYPE_UNKN1 (optional, nur zur Einheitlichkeit)

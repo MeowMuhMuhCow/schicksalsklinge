@@ -1,0 +1,183 @@
+datei	zeile	art	bisher	richtig	begruendung
+seg046.c	2	kommentar	englischer Kopf (Status)	deutscher Steckbrief-Kopf	Vorgabe
+seg046.c	133	kommentar	ID of the the first spell	ID of the first spell	Tippfehler
+seg046.c	276	name	l1	be_odd_malus	-1 bei ungerader BE: die AT trägt den Rundungsrest von BE/2
+seg046.c	413	kommentar	uncounscious	unconscious	Tippfehler
+seg046.c	512	kommentar	advanded	advanced	Tippfehler
+seg046.c	322	kommentar	print inventory and silouette values	pages 1 and 2: print inventory icons, height and weight	beschreibt, was gezeichnet wird
+seg046.c	465	kommentar	(keiner)	CHARTEXT 49: Steuerzeichen 0xF1 = rote Schrift	Text sieht leer aus (offene_textstellen.tsv); es ist ein Farbcode
+seg046.c	467	kommentar	(keiner)	CHARTEXT 50: Steuerzeichen 0xF0 = normale Farbe	dito
+seg046.c	692	kommentar	(keiner)	"at/pa = Werte ""MOMENTAN"", j = Basis der Zeile ""PROBE"""	Zuordnung zum Format von CHARTEXT 5
+seg046.c	14	originalfehler_be	BP-Anzeige bei Last >= 110 %	bestätigt	seg032 FIG_do_round setzt BP = 1 ab KK*110 <= load, der Bogen zeigt 8-1-2-2 = 3; Fix (bp = 1) stimmt
+seg047.c	2	kommentar	englischer Kopf	deutscher Steckbrief-Kopf	Vorgabe
+seg047.c	44	kommentar	(keiner)	Rückgabe undefiniert, wenn kein Held passt	retval wird nur im Treffer gesetzt (auch get_hero_KK_best)
+seg047.c	73	kommentar	index of the hero first hero	index of the first hero	Satzfehler
+seg047.c	150	parameter	\param poison	\param poison_id	Doxygen-Name passte nicht zum Parameter
+seg047.c	156	kommentar	TODO already poisoned?	Hinweis: wie Original-Bug 46	auch bei Gift werden log_1..3 gelöscht
+seg047.c	244	kommentar	not used	bestätigt per grep	kein Aufrufer
+seg047.c	261	kommentar	hero_check_KK_unused	check_hero_KK_unused	falscher Funktionsname im Kommentar
+seg047.c	299	kommentar	d can overflow on D > 65536	Überlauf ab 32768 D	d ist signed int (16 Bit)
+seg047.c	348	originalfehler_be	AT-Basis nach DSA3 (MU+KK+GE)/5	eher Regelabweichung als Programmfehler	DSA1 hat nur einen AT/PA-Basiswert; der Code rechnet konsequent mit (IN+KK+GE)/5
+seg047.c	382	parameter	\param ptr pointer	Liste der Tempelhelden, 32-Byte-Einträge, Name ab Offset 16	aus dem Zugriff ptr + 32*i + 16
+seg047.c	422	originalfehler_neu	if (i_min > entries)	>= wäre richtig	"bei 20, 30, ... Helden im Tempel erscheint eine Seite nur mit ""MEHR HELDEN"""
+seg047.c	470	platzhalter	TODO: find out what that means	ausgeschlossener Held, danach -1	Nutzer: seg049 (NPC), seg103 (Heiler), seg120
+seg047.c	457	name	bak_2, bak_3	basepos_x_bak, basepos_y_bak	sichern g_basepos_x/_y (in allen drei Auswahlfunktionen)
+seg047.c	643	originalfehler_neu	else-Zweig von select_hero_ok_forced	tw_bak zurückschreiben, -1 liefern	ohne wählbaren Helden bleibt die Textboxbreite 3 und es wird Held 0 geliefert (Aufrufer nutzen get_hero() ungeprüft)
+seg047.c	695	kommentar	Reset bad attributes (in hero_get_drunken)	change bad attributes	beim Betrinken wird nichts zurückgesetzt
+seg047.c	720	kommentar	This is checked twice	mit Angabe des Aufrufers	seg002 prüft hero->drunk vor dem Aufruf
+seg047.c	271	originalfehler_be	Held 0 ungeprüft	bestätigt	KK von Slot 0 zählt auch, wenn er tot oder in einer anderen Gruppe ist
+seg047.c	15	originalfehler_be	Protokollbytes gelöscht	bestätigt	log_1..3 werden bei erneuter Erkrankung überschrieben
+seg048.c	2	kommentar	englischer Kopf ohne Compilerzeile	deutscher Steckbrief-Kopf	Vorgabe
+seg048.c	85	kommentar	(kein Doxygen)	\brief ergänzt	
+seg048.c	97	kommentar	mark the actual selected item	select the first knapsack slot	setzt die Auswahl auf Platz 7
+seg048.c	128	name	l_di	answer	Ergebnis von GUI_radio
+seg048.c	129	name	flag1	done	Menü verlassen
+seg048.c	130	name	flag2	force_redraw	kompletter Neuaufbau
+seg048.c	136	name	flag3	disease_id	Ergebnis von hero_is_diseased
+seg048.c	139	name	flag4	trade_mode	Übergabe an anderen Helden aktiv
+seg048.c	137	name	l1	num_options	Zahl der Menüpunkte (6/7 Anfänger, 9/10 Fortgeschritten)
+seg048.c	135	name	hero1	owner_hero	Besitzer des ausgewählten Gegenstands (gibt ab)
+seg048.c	134	name	hero2	shown_hero	angezeigter Held (erhält im Handelsmodus)
+seg048.c	214	kommentar	set the new ??? border (9x)	je nach Farbe: gelber Zielrahmen (8), roter Auswahlrahmen (9), Rahmen löschen (30)	Farben aus g_statuspage_palette
+seg048.c	267	kommentar	next possible hero (LEFT_KEY)	previous possible hero	Pfeil links geht rückwärts
+seg048.c	597	kommentar	(keiner)	19 = MAPTEXT.LTX	Zahlkonstante erklärt (3x)
+seg048.c	612	kommentar	show ATPA values	Fall 6 ist im Anfängermodus ZURÜCK/KRANKHEIT	Menü hängt vom Modus ab (num_options)
+seg048.c	649	kommentar	(keiner)	absichtliches Durchfallen	ohne Krankheit ist Punkt 9 ZURÜCK
+seg049.c	2	kommentar	englischer Kopf	deutscher Steckbrief-Kopf	Vorgabe
+seg049.c	41	kommentar	(keine Doxygen-Kommentare im Modul)	\brief für alle 9 Funktionen	Sortierordnung: aktive Gruppe, leere Plätze, andere Gruppen
+seg049.c	150	name	refresh	skip_redraw	"Bit 0x8000 unterdrückt draw_status_line; ""refresh"" war umgekehrt"
+seg049.c	350	originalfehler_neu	if (state || mode != 2)	Bedingung immer wahr	im else-Zweig ist state immer 1; mode 2 hat dort keine Wirkung (harmlos)
+seg049.c	295	originalfehler_neu	do-while ohne Abbruch	Endlosschleife möglich	"vermutlich: wenn keine Gruppe handlungsfähig ist (oder alle im Kerker und ""nein"") endet die Schleife nicht"
+seg049.c	422	kommentar	(keiner)	Variable wiederverwendet	Schleife über 7 Helden
+seg049.c	436	name	l2..l5	guardstatus_bak, magicstatus_bak, replstatus_bak, herbstatus_bak	gesicherte Lagerstatus von hero_pos_1
+seg049.c	457	originalfehler_neu	nur guards[i] == hero_pos_1 wird umgesetzt	auch hero_pos_2 -> hero_pos_1	nach dem Tausch zeigt eine Wache auf den falschen Helden
+seg049.c	623	originalfehler_neu	nur guards[i] == src_pos wird umgesetzt	auch dst_pos -> src_pos	wie GRP_swap_heroes
+seg049.c	606	originalfehler_neu	while (g_hero_pic_posx[--dst_pos] > g_mouse_posx)	Grenzprüfung vor dem Zugriff	bei Maus-x 1..2 wird vor ds:0x2d01 gelesen; Ergebnis wird auf 0 begrenzt (harmlos)
+seg049.c	615	kommentar	(keiner)	immer wahr	dst_pos startet bei 6 und wird mindestens einmal verringert
+seg049.c	649	kommentar	100	FIG_ACTION_PARRY	wie in GRP_swap_heroes
+seg049.c	718	kommentar	swap LE and AE	der höhere Wurf geht an LE	genauer
+seg049.c	799	kommentar	TODO staffspell	Erklärung ergänzt	staffspell_timer wird nur hier gelesen
+seg049.c	14	originalfehler_be	Teilen mit NPC	bestätigt	Bedingung zählt einen NPC, auch wenn er in einer anderen Gruppe ist
+seg049.c	229	originalfehler_be	Teilen mit NPC	bestätigt	dito für die Abbruchbedingung
+seg049.c	708	originalfehler_be	le_regen < 0	bestätigt (vermutlich)	bei Ergebnis 0 gibt es keine Regeneration, bei -1 aber 1 Punkt
+seg050.c	2	kommentar	englischer Kopf	deutscher Steckbrief-Kopf	Vorgabe
+seg050.c	106	kommentar	Wahrnehmung	Hellsicht	Zauberklasse TEXT.LTX 198
+seg050.c	110	kommentar	"""Visionen"""	"""Illusion"" (SP 45..48)"	"eine Klasse ""Visionen"" gibt es nicht"
+seg050.c	130	parameter	\param spell (2x)	\param spell_id	Doxygen-Name
+seg050.c	240	parameter	\param talent (2x)	\param talent_id	Doxygen-Name
+seg050.c	256	kommentar	used up legal increase	3 Fehlversuche	Bedingung ist tries == 3
+seg050.c	363	kommentar	use 2W6 else 3W6	gleichverteilt 2..12 / 3..18	random_interval ist keine Würfelsumme (Feature-Mod 2)
+seg050.c	489	name	v2	rounds	Durchläufe der automatischen Steigerung
+seg050.c	490	name	v3	lowered	negative Eigenschaft gesenkt
+seg050.c	573	originalfehler_neu	GUI_radio(...) - 1 ohne ESC-Prüfung	ESC abfangen	"ESC/Rechtsklick bei ""WELCHE POSITIVE EIGENSCHAFT"": l_si = -2, attrib[-2] = Bytes 2/3 von hero->money (Offset 0x2e/0x2f) werden erhöht: +16842752 H (ca. 168427 D)"
+seg050.c	614	originalfehler_neu	GUI_radio(...) - 1 ohne ESC-Prüfung	ESC abfangen	"ESC/Rechtsklick bei ""WELCHE NEGATIVE EIGENSCHAFT"": l_si + 7 = 5, es wird versucht IN zu senken (fast sicher)"
+seg050.c	657	originalfehler_neu	if (hero->mr != mr)	mit Basiswert vergleichen	Meldung trotz unveränderter MR; steigt die Basis genau um den Bonus, geht der Bonus verloren
+seg050.c	670	originalfehler_neu	nur HERO_INVENTORY_SLOT_LEFT_HAND	beide Hände	add_equip_boni gibt MR+2 auch in der rechten Hand; nach dem Stufenanstieg fehlt der Bonus, beim Ablegen wird er trotzdem abgezogen
+seg050.c	727	kommentar	change talent increasements into AE	spell increases	Code ändert saved_spell_increases, Text 40 spricht von Zaubern
+seg050.c	731	kommentar	trade 10 talent increasements into 1W6+2 AE	spell increases, 3..8 gleichverteilt	dito
+seg050.c	804	kommentar	which-specific ... talent value at most 11	witch-specific ... spell value below 11	Tippfehler, Bedingung < 11
+seg050.c	794	originalfehler_neu	i wird pro Runde nicht zurückgesetzt	i = 1 zu Rundenbeginn	erste Schleife (Hexe, Elfen) läuft nur in Runde 1; harmlos, da die dritte Schleife sie wiederholt
+seg050.c	965	originalfehler_neu	random_schick(SP__END)	random_schick(SP__END - 1)	Index 86 ist saved_spell_increases: Versuch verpufft (wird -1 und evtl. wieder +1)
+seg050.c	115	kommentar	(keiner)	Zähler erklärt	
+seg051.c	2	kommentar	englischer Kopf	deutscher Steckbrief-Kopf	Vorgabe
+seg051.c	66	kommentar	(keiner)	Bedeutung erklärt	vgl. gather_herbs
+seg051.c	80	kommentar	(kein Doxygen)	\brief mit Bedeutung von g_good_camp_place	0/1/99 aus seg094, seg109
+seg051.c	88	name	l_si	watch	aktuelle Wache 0..2
+seg051.c	89	name	l_di	redraw_locline	"Ortszeile ""LAGER"" neu schreiben"
+seg051.c	97	name	l3, l4, l5, l6	sleep_hours, watch_hours, watch_hours_left, hours_left	Schlafdauer bis 8 Uhr und Wachdauer
+seg051.c	101	name	have_guards	incident_preset	gesetzt, wenn gs_camp_incident schon vorher von einem Ereignis bestimmt war (seg110, seg111, seg116); hat mit Wachen nichts zu tun
+seg051.c	102	name	l8	hours_slept	wird hochgezählt, aber nie gelesen
+seg051.c	179	originalfehler_be	answer nicht geprüft	bestätigt, Wirkung ergänzt	"bei ESC: herbstatus[-1] = g_wildcamp_guards[2] (anfangs -1) -> Meldung ""KEINE ZWEI DINGE"""
+seg051.c	323	kommentar	(keiner)	Wahrscheinlichkeiten	60 > random_schick(100)
+seg051.c	375	kommentar	(keiner)	Bedingung erklärt	
+seg051.c	408	kommentar	(keiner)	Erklärung	gs_camp_incident wird zum Helden auf Wache, ausgewertet in seg110
+seg051.c	427	kommentar	(kein Doxygen)	\brief, \param, \return	hours ist Stunden - 1; Rückgabe immer 0
+seg051.c	316	originalfehler_neu	Wachdauer sleep_hours/3		bei weniger als 3 Stunden Schlaf ist die Wachdauer 0, der Zähler erreicht nie 0; Zwischenfall nur in Wache 0 möglich (auch seg052)
+seg052.c	2	kommentar	englischer Kopf	deutscher Steckbrief-Kopf	Vorgabe
+seg052.c	54	name	l_di	watch	aktuelle Wache 0..2
+seg052.c	57	name	l3	redraw_locline	Ortszeile neu schreiben
+seg052.c	60	name	l5, l6, l7	watch_hours, watch_hours_left, hours_left	
+seg052.c	63	name	l8	hours_slept	nie gelesen
+seg052.c	295	kommentar	(keiner)	hours - 10	8 Stunden ergeben Qualität -2
+seg052.c	11	originalfehler_be	Drehung um 180 Grad	bestätigt	leave_location (seg025) dreht gs_viewdir immer um; der Fix dreht zurück
+seg053.c	2	kommentar	englischer Kopf	deutscher Steckbrief-Kopf	Vorgabe
+seg053.c	80	kommentar	check if hero can healed by a healer	by a healer or a healing talent	auch von seg103/seg104 benutzt
+seg053.c	105	name	request_refresh	redraw_locline	lokales Flag für die Ortszeile; der zugehörige Block ist toter Code (wird vor der ersten Abfrage schon 0)
+seg053.c	103	kommentar	(keiner)	0/1/2 erklärt	nachts doppelter Preis
+seg053.c	121	kommentar	[1,15]	[1,17]	nur Nicht-Borland-Code, nicht geändert: Tabelle enthält 17
+seg054.c	2	kommentar	englischer Kopf	deutscher Steckbrief-Kopf	Vorgabe
+seg054.c	167	name	refresh	redraw_locline	nur die Ortszeile wird neu geschrieben
+seg054.c	464	kommentar	higher food quality -> higher price	Preisaufschlag der Herberge	price_mod ist der Preisaufschlag, die Qualität steckt in 6 - quality/4
+seg054.c	523	originalfehler_neu	price_einzelzimmer += price_schlafsaal * mod / 100	price_einzelzimmer * mod / 100 (ebenso Suite)	Kopierfehler: Einzelzimmer und Suite bekommen nur den Aufschlag von 5 H statt 30/100 H
+seg054.c	537	kommentar	(keiner)	Werte von g_sleep_quality	
+seg054.c	170	originalfehler_be	magic_act[6]	bestätigt	Index 6 (NPC) schreibt hinter das Feld
+seg054.c	140	originalfehler_be	Curian in der Herberge	bestätigt	Schleife bis i < 6 übersieht Slot 6
+seg054.c	195	originalfehler_be	Einzelheld	bestätigt	
+seg103.c	2	kommentar	englischer Kopf	deutscher Steckbrief-Kopf	Vorgabe
+seg103.c	39	platzhalter	struct dummy	struct str6	Hilfstyp zum Kopieren des 6-Byte-Formatstrings auf den Stack
+seg103.c	268	platzhalter	struct dummy2	struct talent_ids6	Hilfstyp für die 6 Talent-IDs
+seg103.c	51	kommentar	(kein Doxygen)	\brief LVL_select_talent	einziger Aufrufer seg050 mit show_values = 1
+seg103.c	150	kommentar	add current and maximum attibute values	drei Probeneigenschaften + Talentwert	es wird kein Maximalwert addiert
+seg103.c	181	parameter	\param talent	\param talent_id	
+seg103.c	183	kommentar	(kein \return)	Rückgabewerte	
+seg103.c	321	kommentar	TEXT.LTX 48..56: Waffentalent (7x)	TEXT.LTX 48..99: Talentname	es sind Heil-, Körper-, Gesellschafts- und Handwerkstalente
+seg103.c	321	originalfehler_neu	get_ttx(a.a[6] + 48)		liest hinter das 6-Element-Feld (harmlos, nie angezeigt)
+seg103.c	521	originalfehler_be	TODO: Why STAFFSPELL ?? BUG!	vermutlich kein Fehler	staffspell_timer wirkt als Regenerationssperre (nur in GRP_hero_sleep gelesen); heal_timer ist bereits gesetzt
+seg103.c	749	originalfehler_neu	get_hero(6)->npc_id == NPC_HARIKA	auch Gruppe/Zustand prüfen	vermutlich: Bonus auch, wenn Harika in einer anderen Gruppe steht
+seg103.c	147	originalfehler_be	get_proper_hero	bestätigt	bewusstlose/versteinerte Helden können für Sinnesschärfe gewählt werden
+seg104.c	2	kommentar	englischer Kopf	deutscher Steckbrief-Kopf	Vorgabe
+seg104.c	139	kommentar	ingrendients	ingredients	Tippfehler (2x)
+seg104.c	210	kommentar	(keiner)	Verhalten beim Abbruch	Probe wird auch beim Abbruch gewürfelt
+seg104.c	273	name	l5	new_group_id	erste leere Gruppe
+seg104.c	278	name	array	recipe_ids	Rezeptindex je Menüeintrag
+seg104.c	400	originalfehler_be	TODO: Why STAFFSPELL ??	vermutlich Absicht	Brauer regeneriert in der nächsten Nacht nicht
+seg104.c	435	originalfehler_neu	sprintf(get_tx(49), Zutat)		SPELLTXT 49 enthält kein %s: die fehlende Zutat wird nie genannt
+seg104.c	453	kommentar	(kein Doxygen)	Rückgabewerte 0/ID/99/999	
+seg104.c	506	parameter	flag	from_event	1 nur aus seg120 (Tollwut): SPELLTXT laden, Diagnoseprobe entfällt
+seg104.c	557	originalfehler_neu	Erfolg nur für disease_id != WUNDFIEBER/BLAUE_KEUCHE		vermutlich: diese Krankheiten sind per Talent nie heilbar, trotzdem wird eine gelungene Probe als Misslingen mit 3 SP ausgegeben und retval > 0 zurückgegeben
+seg104.c	602	originalfehler_neu	Wiederherstellen von tx_file_bak im if	nach dem if	Patient tot/versteinert beim Aufruf aus seg120: SPELLTXT.LTX bleibt geladen
+seg104.c	411	originalfehler_be	freie Gruppe suchen	bestätigt	kein Grenztest der Schleife
+seg105.c	2	kommentar	englischer Kopf	deutscher Steckbrief-Kopf	Vorgabe
+seg105.c	35	platzhalter	g_unkn_067	unbenutztes Füllbyte (vermutlich)	kein Zugriff in *.c/*.asm
+seg105.c	38	platzhalter	\brief TODO	\brief beschrieben	
+seg105.c	278	kommentar	not used	bestätigt	kein Aufrufer
+seg105.c	327	kommentar	greater than KK*10	at least KK*100	Code: KK*100 <= load
+seg105.c	401	originalfehler_neu			liest ein Element hinter das Inventar (harmlos)
+seg105.c	620	originalfehler_neu	Opferprüfung unabhängig von retval	nur bei retval != 0	"Dreizack/Netz bzw. Axt/Rüstung zählen als Opfer, auch wenn ""WIRKLICH WEGWERFEN?"" verneint wurde"
+seg105.c	627	kommentar	pirate cafe	pirate cave	Tippfehler
+seg105.c	649	platzhalter	dummy	mode_unused	nie gelesen; Aufrufer übergeben 1 (einmal 0), vermutlich einst der mode von give_new_item_to_hero
+seg105.c	644	kommentar	gives one item	gives quantity items	
+seg105.c	660	name	vc	drop_slot	Platz des wegzuwerfenden Gegenstands
+seg105.c	825	name	va, str, di, bak2, bak3	more_idx, slot_of_entry, first_entry, basepos_x_bak, basepos_y_bak	"Seitenumschaltung ""MEHR"""
+seg105.c	785	originalfehler_be	Endlosschleife	bestätigt	auch wenn nur unwegwerfbare Gegenstände da sind
+seg106.c	2	kommentar	englischer Kopf ohne Compilerzeile	deutscher Steckbrief-Kopf	Vorgabe
+seg106.c	73	kommentar	inventary	inventory	Tippfehler
+seg106.c	109	kommentar	is it inv_slot_2 -> inv_slot_1 ...? probably slot_2 -> slot_1	Inhalte werden getauscht, Richtung egal	Aufrufer: seg048 (Auswahl, Ziel), startup_equipment (Körper, Rucksack)
+seg106.c	114	originalfehler_neu	Tausch zweier Körperplätze	beide Richtungen prüfen	vermutlich: verdrängter Gegenstand landet ungeprüft am anderen Körperplatz ohne add_equip_boni, beim späteren Ablegen wird unequip erneut abgezogen (RS/BE-Drift)
+seg106.c	127	name	v3	do_exchange	Tausch durchführen
+seg106.c	363	name	flag	do_swap	Tausch statt Stapel zusammenführen
+seg106.c	588	originalfehler_neu	num_filled_inv_slots -- / ++ beim Tausch	unverändert lassen	Zähler driftet: hero1 zu niedrig, hero2 zu hoch
+seg106.c	649	originalfehler_neu	fehlendes hero2->num_filled_inv_slots++	++ ergänzen	Stapel in leeren Platz übergeben: Zähler von hero2 zu niedrig
+seg106.c	731	originalfehler_neu	Bedingungsreihenfolge	i < 4 zuerst	liest bei 4 Gegenständen hinter die Zeile (harmlos)
+seg106.c	914	originalfehler_be	Suche ab Rucksack	bestätigt	Wasserschlauch in der Hand wird nicht gefunden
+seg106.c	181	originalfehler_be	Stapel > 99, Zähler	bestätigt	Fix verringert num_filled_inv_slots
+seg107.c	2	kommentar	englischer Kopf	deutscher Steckbrief-Kopf	Vorgabe
+seg107.c	110	kommentar	don't consume poison	Kräuter/Tränke werden verzehrt, Waffengifte gehen an den Handler	genauer
+seg107.c	233	kommentar	(keiner)	0xde = SPELLTXT.LTX	Zahlkonstante (2x)
+seg107.c	369	kommentar	SLEPPING POISON / SCHALFGIFT	SLEEPING POISON / SCHLAFGIFT	Tippfehler
+seg107.c	452	kommentar	(keiner)	Wirkung im Kampfcode	2x
+seg107.c	473	kommentar	"common.h: ""+3"""	+2	Code addiert 2; Kommentar in common.h (Enum) sollte zentral berichtigt werden
+seg107.c	506	originalfehler_be	Fix ohne Nummer	bestätigt	Öl und Laterne beim zuletzt zaubernden Helden gesucht, beim Benutzer geändert
+seg107.c	13	originalfehler_be	g_ignite_mode bleibt stehen	bestätigt	
+seg107.c	599	kommentar	wether	whether	Tippfehler
+seg108.c	2	kommentar	englischer Kopf	deutscher Steckbrief-Kopf	Vorgabe
+seg108.c	35	kommentar	owner gives consumer an item	consumer verzehrt aus dem Inventar von owner	
+seg108.c	94	kommentar	consume quietly	Meldung, außer g_consume_quiet	Kommentar war umgekehrt (2x)
+seg108.c	274	originalfehler_neu	Tarnele ohne Text		g_dtp2 ist leer -> leere Meldung (vermutlich leere Box)
+seg108.c	370	kommentar	copperbottle	bronze flask	ITEM_ID_BRONZEFLASCHE
+seg108.c	424	kommentar	3 Rounds of sleep	3 Nächte doppelte Regeneration	ruhe_koerper in GRP_hero_sleep
+seg108.c	526	originalfehler_neu			Antikrankheitselixier ohne Krankheit schreibt in disease[0] (harmlos)
+datseg.h	2115	kommentar	g_wildcamp_replstatus/herbstatus: seg049, seg052	seg049, seg051, seg109	Nutzerliste falsch (nicht geändert, Header)
+datseg.h	2117	kommentar	g_wildcamp_guards: seg049, seg052	seg049, seg051	Nutzerliste falsch (nicht geändert, Header)
+datseg.h	2196	kommentar	g_itemuser: seg049, seg107	seg107	Nutzerliste falsch (nicht geändert, Header)
+common.h	2169	kommentar	'Heptagon' spell +3	+2	item_read_spellbook_heptagon addiert 2 (nicht geändert, Header)

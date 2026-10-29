@@ -1,0 +1,8 @@
+alt	neu	art	datei:zeile	begruendung
+g_sea_travel_sleep_quality	g_sea_travel_passage_type	variable	seg063.c:170	haelt die PASSAGE_TYPE des gebuchten Schiffs, die erst als Index in die Schlafbonus-Tabelle den Schlafwert liefert
+g_hyg_ani_x9	g_hyg_ani_y9	variable	seg065.c:366	enthaelt y-Koordinaten (48, 38, 38) fuer Bild 8, wird als y an hyg_ani_draw() gegeben; definiert in seg066.c
+get_border_index	get_town_tile_type	funktion	seg066.c:1006	liefert den TOWN_TILE_*-Typ eines Kartenwerts (seg074 nennt das Ergebnis tile_type) und setzt g_entrance_angle; mit Rand hat das nichts zu tun
+g_tex_floor	g_town_tex	variable	seg066.c:1242	Feld aller Stadttexturen: [0] TFLOOR, [1] TDIVERSE (Himmel u.a.), [2..5] HOUSE1-4 (seg028), nicht nur Boden
+g_str_beorn_hjall	g_str_beorn_npc_name	variable	seg072.c:318	enthaelt nicht Beorns Namen, sondern den des NSC (Erwo), der bei Beorn die Gruppe verlaesst; nur in seg072 benutzt (koennte static sein)
+has_intro_letter	has_hetman_letter	funktion	seg072.c:889	prueft nur ITEM_ID_EMPFEHLUNGSSCHREIBEN__HETMAN; es gibt ein zweites Empfehlungsschreiben (Siebenstein), das Tiomar verlangt
+gs_tlk_tav_fullness	gs_tlk_tav_crowdedness	variable	seg060.c:675	gibt an, wie voll die Taverne ist (1..3): Preis der Runde 20*n, bei 3 Aechtung nach Schlaegerei; "fullness" laesst an Saettigung denken

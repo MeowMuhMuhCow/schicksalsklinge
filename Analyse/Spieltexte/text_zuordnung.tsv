@@ -1,0 +1,100 @@
+Modul	Funktion	Zugriff	Datei	Begruendung
+*	*	get_ttx	TEXT.LTX	global geladen (load_ltx in seg026/seg120), Makro g_text_ltx_index
+seg002.c	*	get_tx	FIGHTTXT.LTX	load_tx(ARCHIVE_FILE_FIGHTTXT_LTX) in derselben Funktion
+seg005.c	*	get_tx	FIGHTTXT.LTX	Kampf: do_fight() laedt FIGHTTXT.LTX (seg032)
+seg025.c	*	get_tx	STORY.LTX	load_tx(ARCHIVE_FILE_STORY_LTX) in derselben Funktion
+seg030.c	*	get_tx	DASPOTA.LTX	nur Zweig g_tlk_id==3 (DASPOTA1.TLK) -> Stadt-LTX von Daspota
+seg033.c	*	get_tx	FIGHTTXT.LTX	Kampfsystem: do_fight() laedt FIGHTTXT.LTX
+seg034.c	*	get_tx	FIGHTTXT.LTX	Kampfsystem: do_fight() laedt FIGHTTXT.LTX
+seg035.c	*	get_tx	FIGHTTXT.LTX	Kampfsystem: do_fight() laedt FIGHTTXT.LTX
+seg041.c	*	get_tx	FIGHTTXT.LTX	Kampfsystem: do_fight() laedt FIGHTTXT.LTX
+seg043.c	*	get_tx	FIGHTTXT.LTX	Kampfsystem: do_fight() laedt FIGHTTXT.LTX
+seg046.c	*	get_tx2	CHARTEXT.LTX	load_tx2(ARCHIVE_FILE_CHARTEXT_LTX) (Statusmenue/Stufenanstieg/Outro)
+seg048.c	*	get_tx2	CHARTEXT.LTX	load_tx2(ARCHIVE_FILE_CHARTEXT_LTX) in derselben Funktion
+seg050.c	*	get_tx2	CHARTEXT.LTX	load_tx2(ARCHIVE_FILE_CHARTEXT_LTX) (Statusmenue/Stufenanstieg/Outro) (je Funktion)
+seg059.c	*	get_tx	SHIP.DTX	load_tx(ARCHIVE_FILE_DNGS_DTX + 1) in derselben Funktion
+seg060.c	*	get_tx	TAVERN.TLK	load_tlk(ARCHIVE_FILE_TAVERN_TLK) in derselben Funktion
+seg062.c	*	get_tx2	WONDER.LTX	load_tx2(ARCHIVE_FILE_WONDER_LTX) in derselben Funktion
+seg063.c	*	get_tx	HAFEN.LTX	load_tx(ARCHIVE_FILE_HAFEN_LTX) in derselben Funktion
+seg064.c	*	get_tx	HAFEN.LTX	load_tx(ARCHIVE_FILE_HAFEN_LTX) in do_harbor
+seg065.c	*	get_tx2	CHARTEXT.LTX	load_tx2(ARCHIVE_FILE_CHARTEXT_LTX) in derselben Funktion
+seg066.c	*	get_tx	DASPOTA.LTX	Stadt Daspota, Stadt-LTX geladen
+seg066.c	*	get_tx2	THORWAL1.LTX	Thorwal, Gebaeudetyp < 41 -> THORWAL1.LTX
+seg067.c	*	get_tx	STRASSE.LTX	city_event_switch(): load_tx(ARCHIVE_FILE_STRASSE_LTX)
+seg068.c	*	get_tx	THORWAL.LTX	Spezialgebaeude in Thorwal: Stadt-LTX THORWAL.LTX
+seg068.c	THO_bank,THO_botschaft,THO_eisenhof,THO_imman	get_tx2	THORWAL1.LTX	Gebaeudetyp 32..37 < 41 -> THORWAL1.LTX
+seg068.c	THO_academy,THO_arsenal,THO_black_finger,THO_magistracy,THO_mueller,THO_ugdalf,academy_analues,dramosch_says	get_tx2	THORWAL2.LTX	Gebaeudetyp >= 41 (Zeughaus, Magistrat, Akademie ...) -> THORWAL2.LTX
+seg069.c	*	get_tx	THORWAL.LTX	Spezialgebaeude in Thorwal: Stadt-LTX THORWAL.LTX
+seg069.c	*	get_tx2	THORWAL1.LTX	Gebaeudetyp 11..31 < 41 -> THORWAL1.LTX
+seg070.c	*	get_tx2	PHEX1.LTX	Phexcaer, Gebaeudetyp > 3 -> PHEX1.LTX
+seg071.c	*	get_tx2	PHEX2.LTX	Phexcaer, Gebaeudetyp <= 3 bzw. load_tx2(ARCHIVE_FILE_PHEX2_LTX) -> PHEX2.LTX (je Funktion)
+seg073.c	*	get_tx	TAVERN.TLK	Kneipe: TAVERN.TLK geladen (seg060)
+seg077.c	*	get_tx	SHIP.DTX	Dungeon 1: prepare_dungeon_area() load_tx(gs_dungeon_id + ARCHIVE_FILE_DNGS_DTX)
+seg078.c	*	get_tx	F046.DTX	Dungeon 2: prepare_dungeon_area() load_tx(gs_dungeon_id + ARCHIVE_FILE_DNGS_DTX)
+seg079.c	*	get_tx	F051.DTX	Dungeon 3: prepare_dungeon_area() load_tx(gs_dungeon_id + ARCHIVE_FILE_DNGS_DTX)
+seg080.c	DNG04_chest00_loot,DNG04_chest00_open,DNG04_chest01_loot,DNG04_chest01_open,DNG04_chest02_loot,DNG04_chest02_open,DNG04_handler	get_tx	F061.DTX	Dungeon 4: prepare_dungeon_area() load_tx(gs_dungeon_id + ARCHIVE_FILE_DNGS_DTX)
+seg080.c	DNG05_fight_intro,DNG05_handler	get_tx	F076.DTX	Dungeon 5: prepare_dungeon_area() load_tx(gs_dungeon_id + ARCHIVE_FILE_DNGS_DTX)
+seg081.c	DNG06_chest01_loot,DNG06_fight_intro,DNG06_handler	get_tx	F094.DTX	Dungeon 6: prepare_dungeon_area() load_tx(gs_dungeon_id + ARCHIVE_FILE_DNGS_DTX)
+seg081.c	DNG09_pitfall	get_tx	F126.DTX	Dungeon 9: prepare_dungeon_area() load_tx(gs_dungeon_id + ARCHIVE_FILE_DNGS_DTX)
+seg082.c	DNG07_handler	get_tx	F100.DTX	Dungeon 7: prepare_dungeon_area() load_tx(gs_dungeon_id + ARCHIVE_FILE_DNGS_DTX)
+seg082.c	DNG09_statues	get_tx	F126.DTX	Dungeon 9: prepare_dungeon_area() load_tx(gs_dungeon_id + ARCHIVE_FILE_DNGS_DTX)
+seg083.c	*	get_tx	F108.DTX	Dungeon 8: prepare_dungeon_area() load_tx(gs_dungeon_id + ARCHIVE_FILE_DNGS_DTX)
+seg084.c	*	get_tx	F126.DTX	Dungeon 9: prepare_dungeon_area() load_tx(gs_dungeon_id + ARCHIVE_FILE_DNGS_DTX)
+seg085.c	*	get_tx	F129.DTX	Dungeon 10: prepare_dungeon_area() load_tx(gs_dungeon_id + ARCHIVE_FILE_DNGS_DTX)
+seg086.c	*	get_tx	F131.DTX	Dungeon 11: prepare_dungeon_area() load_tx(gs_dungeon_id + ARCHIVE_FILE_DNGS_DTX)
+seg087.c	*	get_tx	THORWAL.DTX	Dungeon 14: prepare_dungeon_area() load_tx(gs_dungeon_id + ARCHIVE_FILE_DNGS_DTX)
+seg088.c	DNG15_riddle	get_tx	FINAL.DTX	Dungeon 15: prepare_dungeon_area() load_tx(gs_dungeon_id + ARCHIVE_FILE_DNGS_DTX)
+seg088.c	DNG14_chest02_loot,DNG14_chest05_loot,DNG14_chest07_trap,DNG14_dive,DNG14_fight_intro	get_tx	THORWAL.DTX	Dungeon 14: prepare_dungeon_area() load_tx(gs_dungeon_id + ARCHIVE_FILE_DNGS_DTX)
+seg089.c	*	get_tx	FINAL.DTX	Dungeon 15: prepare_dungeon_area() load_tx(gs_dungeon_id + ARCHIVE_FILE_DNGS_DTX)
+seg090.c	*	get_tx	OBER.DTX	Dungeon 12: prepare_dungeon_area() load_tx(gs_dungeon_id + ARCHIVE_FILE_DNGS_DTX)
+seg091.c	*	get_tx	PREM.DTX	Dungeon 13: prepare_dungeon_area() load_tx(gs_dungeon_id + ARCHIVE_FILE_DNGS_DTX)
+seg093.c	*	get_tx	MAPTEXT.LTX	Reisemodus: MAPTEXT.LTX (TRV_event laedt es danach wieder)
+seg094.c	*	get_tx	MAPTEXT.LTX	Reisemodus: MAPTEXT.LTX (TRV_event laedt es danach wieder)
+seg095.c	*	get_tx	NSC.LTX	load_tx(ARCHIVE_FILE_NSC_LTX) in derselben Funktion
+seg099.c	*	get_tx	SPELLTXT.LTX	Zauber/Talente: load_tx(ARCHIVE_FILE_SPELLTXT_LTX) vor dem Handler
+seg100.c	*	get_tx	SPELLTXT.LTX	Zauber/Talente: load_tx(ARCHIVE_FILE_SPELLTXT_LTX) vor dem Handler
+seg101.c	*	get_tx	SPELLTXT.LTX	Zauber/Talente: load_tx(ARCHIVE_FILE_SPELLTXT_LTX) vor dem Handler
+seg102.c	*	get_tx	SPELLTXT.LTX	Zauber/Talente: load_tx(ARCHIVE_FILE_SPELLTXT_LTX) vor dem Handler
+seg103.c	*	get_tx	SPELLTXT.LTX	load_tx(ARCHIVE_FILE_SPELLTXT_LTX) in derselben Funktion
+seg104.c	*	get_tx	SPELLTXT.LTX	Zauber/Talente (je Funktion)
+seg106.c	*	get_tx2	CHARTEXT.LTX	load_tx2(ARCHIVE_FILE_CHARTEXT_LTX) (Statusmenue/Stufenanstieg/Outro)
+seg107.c	*	get_tx	SPELLTXT.LTX	load_tx(ARCHIVE_FILE_SPELLTXT_LTX) in derselben Funktion
+seg109.c	*	get_tx	FEATURE.LTX	TRV_load_textfile(): load_tx(ARCHIVE_FILE_FEATURE_LTX)
+seg109.c	*	get_tx2	FEATURE1.LTX	TRV_load_textfile(): tevent_NNN -> FEATUREn.LTX
+seg110.c	tevent_011,tevent_014,tevent_014_chest,tevent_020,tevent_022,tevent_026,tevent_027,tevent_029	get_tx2	FEATURE1.LTX	TRV_load_textfile(): Ereignisnummer -> FEATUREn.LTX
+seg110.c	TRV_a_path,TRV_swim2	get_tx2	FEATURE1.LTX	nur aus tevent_011 aufgerufen
+seg110.c	tevent_031,tevent_033,tevent_035,tevent_041,tevent_044,tevent_045,tevent_046,tevent_048	get_tx2	FEATURE2.LTX	TRV_load_textfile(): Ereignisnummer -> FEATUREn.LTX
+seg111.c	*	get_tx2	FEATURE3.LTX	TRV_load_textfile(): tevent_NNN -> FEATUREn.LTX
+seg112.c	*	get_tx	FEATURE.LTX	TRV_load_textfile(): load_tx(ARCHIVE_FILE_FEATURE_LTX)
+seg112.c	tevent_067	get_tx2	FEATURE3.LTX	TRV_load_textfile(): Ereignisnummer -> FEATUREn.LTX
+seg112.c	tevent_070,tevent_071,tevent_073,tevent_074,tevent_075,tevent_076,tevent_077	get_tx2	FEATURE4.LTX	TRV_load_textfile(): Ereignisnummer -> FEATUREn.LTX
+seg112.c	TRV_swimm,tevent_unused01	get_tx2	FEATURE4.LTX	aus tevent_071 (und tevent_unused01) aufgerufen, Texte passen
+seg113.c	*	get_tx	FEATURE.LTX	TRV_load_textfile(): load_tx(ARCHIVE_FILE_FEATURE_LTX)
+seg113.c	tevent_080,tevent_084,tevent_086	get_tx2	FEATURE4.LTX	TRV_load_textfile(): Ereignisnummer -> FEATUREn.LTX
+seg113.c	tevent_098,tevent_099,tevent_101,tevent_103,tevent_104,tevent_107,tevent_108	get_tx2	FEATURE5.LTX	TRV_load_textfile(): Ereignisnummer -> FEATUREn.LTX
+seg114.c	*	get_tx	FEATURE.LTX	TRV_load_textfile(): load_tx(ARCHIVE_FILE_FEATURE_LTX)
+seg114.c	tevent_110	get_tx2	FEATURE5.LTX	TRV_load_textfile(): Ereignisnummer -> FEATUREn.LTX
+seg114.c	tevent_111,tevent_113,tevent_114,tevent_117,tevent_122,tevent_123	get_tx2	FEATURE6.LTX	TRV_load_textfile(): Ereignisnummer -> FEATUREn.LTX
+seg115.c	tevent_090,tevent_094,tevent_095,tevent_096	get_tx2	FEATURE5.LTX	TRV_load_textfile(): Ereignisnummer -> FEATUREn.LTX
+seg115.c	tevent_126,tevent_127,tevent_129	get_tx2	FEATURE7.LTX	TRV_load_textfile(): Ereignisnummer -> FEATUREn.LTX
+seg115.c	tevent_016	get_tx2	FEATURE8.LTX	TRV_load_textfile(): Ereignisnummer -> FEATUREn.LTX
+seg115.c	tevent_047,tevent_100	get_tx2	FEATURE9.LTX	TRV_load_textfile(): Ereignisnummer -> FEATUREn.LTX
+seg116.c	*	get_tx	FEATURE.LTX	TRV_load_textfile(): load_tx(ARCHIVE_FILE_FEATURE_LTX)
+seg116.c	tevent_130,tevent_131,tevent_133,tevent_135,tevent_137,tevent_139	get_tx2	FEATURE7.LTX	TRV_load_textfile(): Ereignisnummer -> FEATUREn.LTX
+seg116.c	tevent_143,tevent_144,tevent_144_unused	get_tx2	FEATURE8.LTX	TRV_load_textfile(): Ereignisnummer -> FEATUREn.LTX
+seg117.c	*	get_tx2	WILD.LTX	pause_traveling(): load_tx2(ARCHIVE_FILE_WILD_LTX) (Jagd, Krakenmolch, Piraten)
+seg118.c	*	get_tx	FEATURE.LTX	TRV_load_textfile(): load_tx(ARCHIVE_FILE_FEATURE_LTX)
+seg118.c	tevent_051,tevent_052	get_tx2	FEATURE2.LTX	TRV_load_textfile(): Ereignisnummer -> FEATUREn.LTX
+seg118.c	tevent_078	get_tx2	FEATURE4.LTX	TRV_load_textfile(): Ereignisnummer -> FEATUREn.LTX
+seg118.c	tevent_124,tevent_125	get_tx2	FEATURE6.LTX	TRV_load_textfile(): Ereignisnummer -> FEATUREn.LTX
+seg118.c	tevent_145	get_tx2	FEATURE8.LTX	TRV_load_textfile(): Ereignisnummer -> FEATUREn.LTX
+seg118.c	tevent_037	get_tx2	FEATURE9.LTX	TRV_load_textfile(): Ereignisnummer -> FEATUREn.LTX
+seg075.c	DNG_timestep	get_tx	SHIP.DTX	nur gs_deathtrap==1 (Totenschiff), Hand-Kommentar
+seg076.c	DNG_door, DNG_step	get_tx	FINAL.DTX / jeweilige DTX	Zweige mit gs_dungeon_id==DUNGEON_ID_HYGGELIKS_RUINE, Index 0 = Dungeonname, Hand-Kommentar
+seg066.c	town_step	get_tx	Stadt-LTX (gs_town_id+77)	Index 0 = Ortsname, Hand-Kommentar
+seg030.c	do_talk	get_tx2	Dialog-TLK (talk_id+156)	Indizes berechnet, nicht kommentiert
+seg031.c	do_random_talk	get_tx	Dialog-TLK (load_tlk)	Indizes berechnet, nicht kommentiert
+seg053..seg059	do_healer,do_inn,do_merchant,do_smith,do_tavern	get_tx	Stadt-LTX	Index gs_town_locdata (berechnet), nicht kommentiert
+seg025.c	game_options	get_tx	MAPTEXT.LTX	load_tx(ARCHIVE_FILE_MAPTEXT_LTX) direkt davor (Index gs_town_id-1 = Ortsname, Hand-Kommentar)
+seg031.c	get_random_tavern_message	get_tx	TAVERN.TLK	in der Kneipe per load_tlk(ARCHIVE_FILE_TAVERN_TLK) geladen (147..166, Hand-Kommentar)
+seg109.c	TRV_hunt_generic,TRV_barrier	get_tx2	FEATURE1..8.LTX	Textbeginn als Parameter vom aufrufenden tevent, nicht kommentiert

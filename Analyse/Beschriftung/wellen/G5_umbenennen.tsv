@@ -1,0 +1,33 @@
+alt	neu	art	datei:zeile	begruendung
+DNG_stub1	DNG_render_view	funktion	seg075.c:654	zeichnet die komplette Dungeonansicht (Boden/Decke, Sichtfelder, Kopie auf den Bildschirm); nur in seg075 benutzt
+DNG_stub2	DNG_draw_doorframe	funktion	seg075.c:671	vermutlich: zeichnet Bild 0x36 oben, wenn die Gruppe auf einer offenen/zerstoerten Tuer steht und vor einer Wand
+DNG_stub3	DNG_set_squares_tex	funktion	seg075.c:691	bestimmt fuer jedes Sichtfeld die Grafik (g_visual_squares_tex) aus der Feldart
+DNG_stub4	DNG_draw_squares	funktion	seg075.c:810	zeichnet die 22 Sichtfelder von hinten nach vorn
+DNG_stub5	DNG_show_view	funktion	seg075.c:876	Kompass, Kopie des Renderpuffers auf den Bildschirm, Lichtpalette
+DNG_draw_walls	DNG_draw_image	funktion	seg075.c:727	zeichnet jede Dungeongrafik (Wand, Tuer, Treppe, Truhe), nicht nur Waende
+g_dng_stub3_unkn0	g_dng_tex_wall	variable	seg075.c:321	Grafiknummern je Sichtfeld fuer Feldart 10/11/15 (Wand)
+g_dng_stub3_unkn1	g_dng_tex_pit	variable	seg075.c:322	Feldart 6 (Grube)
+g_dng_stub3_unkn2	g_dng_tex_pit_in_ceiling	variable	seg075.c:323	Feldart 5 (Loch in der Decke)
+g_dng_stub3_unkn3	g_dng_tex_stair_up	variable	seg075.c:324	Feldart 4 (Treppe hoch)
+g_dng_stub3_unkn4	g_dng_tex_stair_down	variable	seg075.c:325	Feldart 3 (Treppe runter)
+g_dng_stub3_unkn5	g_dng_tex_blocker	variable	seg075.c:326	Feldart 7 (DNG_TILE_BLOCKER)
+g_dng_stub3_unkn6	g_dng_tex_closed_door	variable	seg075.c:327	Feldart 1 (geschlossene Tuer)
+g_dng_stub3_unkn7	g_dng_tex_open_door	variable	seg075.c:328	Feldart 2 (offene Tuer)
+g_dng_stub3_unkn8	g_dng_tex_smashed_door	variable	seg075.c:329	Feldart 9 (zerstoerte Tuer)
+g_dng_stub3_unkn9	g_dng_tex_chest	variable	seg075.c:330	Feldart 8 (Truhe)
+g_dng_stub4_unkn0	g_dng_square_pos	variable	seg075.c:331	Grundposition der Sichtfelder (Normalfall)
+g_dng_stub4_unkn1	g_dng_square_pos_stairs	variable	seg075.c:339	Grundposition bei Treppen (Feldart 3/4)
+g_dng_stub4_unkn2	g_dng_square_pos_pit	variable	seg075.c:363	Grundposition bei Gruben (Feldart 6)
+g_dng_stub4_unkn3	g_dng_square_pos_pit_ceil	variable	seg075.c:387	Grundposition bei Loch in der Decke (Feldart 5)
+g_dng_stub4_unkn4	g_dng_square_draw_order	variable	seg075.c:411	Reihenfolge, in der die Sichtfelder gezeichnet werden (hinten nach vorn)
+g_dng_stub6_str_comma	g_dng01_str_comma	variable	seg075.c:412	nur in DNG01_pitfall (Namensliste)
+g_dng_stub6_str_and	g_dng01_str_and	variable	seg075.c:413	nur in DNG01_pitfall (Namensliste)
+DNG_see_stairs	DNG_use_stairs	funktion	seg076.c:729	sieht keine Treppe, sondern bringt die Gruppe beim Betreten des Treppenfeldes auf die Zielebene
+gs_dng03_highpriest_killed	gs_dng03_priest_fight_place	variable	seg079.c:307	vermutlich: speichert nur, welcher der beiden Kampforte zuerst betreten wurde (14 oder 16), nichts ueber einen Tod
+gs_dng11_unknown2_flag	gs_dng11_firetrap2_active	variable	seg086.c:160	schaltet die Feuerfalle (0,11,8); Startwert 1, die Swafnir-Statue setzt 0
+gs_dng11_unknown1_flag	gs_dng11_firetrap1_active	variable	seg086.c:140	zweiter Schalter der Feuerfalle (0,12,10); vermutlich, wird nie gesetzt
+gs_dng15_unknown_flag	gs_dng15_door_nailed	variable	seg076.c:155	sperrt Oeffnen/Schliessen der Tuer (1,9,3) mit dem angenagelten Skelett (FINAL.DTX 18); Startwert 1, wird nie geloescht (die Tuer oeffnet nur DNG15_riddle direkt); datseg.h nennt faelschlich seg088 als Nutzer
+DNG_clear_corridor	DNG12_clear_corridor	funktion	seg090.c:544	nur fuer die Stollen der Zwergenfeste (DNG12), Texte aus OBER.DTX
+DNG13_collapsing_ceiling_easy	DNG13_collapsing_ceiling_hard	funktion	seg091.c:342	Schleichen-1 ist schwerer als -4 der anderen Variante, Schaden 1W6+5 statt 1W6+4; "easy" passt nicht (vermutlich)
+gs_dng11_efferd_hint	gs_dng11_swafnir_hint	variable	seg086.c:131	die Statue stellt Swafnir dar (F131.DTX Text 12 "HULDIGUNG AN SWAFNIR"), vermutlich besser nach ihr benannt
+gs_dng11_efferd_sacrifice	gs_dng11_swafnir_sacrifice	variable	seg086.c:129	Opfer (Dreizack/Netz) vor der Swafnir-Statue, gesetzt in seg105

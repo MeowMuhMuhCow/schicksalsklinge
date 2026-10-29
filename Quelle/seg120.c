@@ -1,0 +1,974 @@
+/*
+ * seg120 - Tollwutanfall, Speicher, Spielstart und DOS-Hilfen
+ *
+ * Inhalt:    rabies_frenzy(): Tollwutanfall eines Helden mit Auswahl (bewusstlos
+ *            schlagen, beruhigen, Sanftmut). Programmstart: Speicher anlegen und
+ *            den globalen Puffer aufteilen, Paletten setzen, Anfangszustand
+ *            (Travia-Tempel in Thorwal, Tag 17, Monat 1, Jahr 15), TEMP-Verzeichnis
+ *            anlegen und die CHR-Dateien dorthin kopieren. Aufraeumen beim Beenden,
+ *            Game-Over-Bild, Start des Heldengenerators GEN.EXE.
+ * Aufrufer:  disease_effect() (seg119, Tollwut); Start und Spielschleife in
+ *            seg002 (init_memory, init_game_state, prepare_dirs, call_gen,
+ *            game_over_screen, cleanup_game); refresh_colors() auch aus seg032,
+ *            seg050, seg065, seg095; cleanup_game() auch aus seg001.
+ * Daten:     Paletten (g_palette_textbox/3/4, g_palette_general), Texte fuer
+ *            Speicher- und TEMP-Fehler, g_buffersize, g_global_buffer_ptr.
+ * Besonders: "Beruhigen" (BE markiert) und "Sanftmut" (neu) werten misslungene
+ *            Proben als Erfolg (!= 0 statt > 0). init_memory() meldet den
+ *            fehlenden Speicher mit falscher Konstante. call_gen() laeuft nach
+ *            gescheitertem Start von GEN.EXE mit freigegebenem Puffer weiter.
+ *
+ * Uebersetzen: BCC.EXE -mlarge -O- -c -1 -Yo seg120.c
+ */
+
+#include <stdio.h>
+#include <string.h>
+#include <stdlib.h>
+#include <fcntl.h>
+
+#if defined(__BORLANDC__)
+#include <ALLOC.H>
+#include <CONIO.H>
+#include <DIR.H>
+#include <DOS.H>
+#include <IO.H>
+#include <PROCESS.H>
+#else
+#if defined(_WIN32)
+#include <io.h>
+#else
+#include <unistd.h>
+#endif
+#endif
+
+#include "v302de.h"
+#include "common.h"
+
+#include "seg001.h"
+#include "seg002.h"
+#include "seg004.h"
+#include "seg007.h"
+#include "seg008.h"
+#include "seg010.h"
+#include "seg026.h"
+#include "seg027.h"
+#include "seg028.h"
+#include "seg029.h"
+#include "seg047.h"
+#include "seg049.h"
+#include "seg063.h"
+#include "seg096.h"
+#include "seg097.h"
+#include "seg098.h"
+#include "seg104.h"
+#include "seg120.h"
+
+static uint8_t g_color_white[3] = { 0x3f, 0x3f, 0x3f }; // ds:0xb22a
+
+uint8_t g_color_black[3] = { 0, 0, 0 }; // ds:0xb22d
+
+static uint8_t g_palette_textbox[8][3] = {
+	{ 0x00, 0x00, 0x00 },
+	{ 0x38, 0x30, 0x28 },
+	{ 0x38, 0x30, 0x10 },
+	{ 0x30, 0x28, 0x0c },
+	{ 0x2c, 0x24, 0x08 },
+	{ 0x28, 0x20, 0x04 },
+	{ 0x18, 0x14, 0x00 },
+	{ 0x0b, 0x19, 0x0c }
+}; // ds:0xb230 /* Farben 0xd8..0xdf der Textboxen, u. a. Radio-Knoepfe (0xd8/0xd9) und Texthintergrund (0xdf) */
+
+static uint8_t g_palette_textcolors[3][3] = {
+	{ 0x30, 0x00, 0x00 },
+	{ 0x30, 0x30, 0x00 },
+	{ 0x00, 0x00, 0x30 }
+}; // ds:0xb248 /* Farben 0xc8..0xca = Textfarben 1..3 (g_textcolor_fg[1..3], Steuerbytes 0xF1..0xF3): rot, gelb, blau */
+
+static uint8_t g_palette_unknown4[32][3] = {
+	{ 0x00, 0x00, 0x00 },
+	{ 0x38, 0x30, 0x28 },
+	{ 0x30, 0x24, 0x1c },
+	{ 0x24, 0x18, 0x10 },
+	{ 0x20, 0x14, 0x0c },
+	{ 0x18, 0x0c, 0x08 },
+	{ 0x14, 0x08, 0x04 },
+	{ 0x0c, 0x04, 0x00 },
+	{ 0x3c, 0x38, 0x00 },
+	{ 0x38, 0x28, 0x00 },
+	{ 0x30, 0x1c, 0x00 },
+	{ 0x2c, 0x14, 0x00 },
+	{ 0x3c, 0x24, 0x00 },
+	{ 0x3c, 0x0c, 0x00 },
+	{ 0x3c, 0x00, 0x08 },
+	{ 0x3c, 0x00, 0x20 },
+	{ 0x00, 0x10, 0x00 },
+	{ 0x00, 0x14, 0x00 },
+	{ 0x00, 0x1c, 0x00 },
+	{ 0x04, 0x20, 0x00 },
+	{ 0x04, 0x28, 0x00 },
+	{ 0x1c, 0x38, 0x3c },
+	{ 0x14, 0x2c, 0x34 },
+	{ 0x0c, 0x1c, 0x30 },
+	{ 0x04, 0x0c, 0x28 },
+	{ 0x00, 0x00, 0x24 },
+	{ 0x10, 0x10, 0x10 },
+	{ 0x14, 0x14, 0x14 },
+	{ 0x1c, 0x1c, 0x1c },
+	{ 0x24, 0x24, 0x24 },
+	{ 0x30, 0x30, 0x30 },
+	{ 0x3c, 0x3c, 0x3c }
+}; // ds:0xb251
+
+static uint8_t g_palette_general[32][3] = {
+	{ 0x00, 0x00, 0x00 },
+	{ 0x00, 0x00, 0x3f },
+	{ 0x00, 0x00, 0x24 },
+	{ 0x3c, 0x30, 0x28 },
+	{ 0x3c, 0x2c, 0x24 },
+	{ 0x3c, 0x28, 0x1c },
+	{ 0x38, 0x24, 0x18 },
+	{ 0x34, 0x20, 0x14 },
+	{ 0x30, 0x1c, 0x14 },
+	{ 0x28, 0x18, 0x10 },
+	{ 0x24, 0x14, 0x0c },
+	{ 0x1c, 0x10, 0x0c },
+	{ 0x18, 0x0c, 0x08 },
+	{ 0x14, 0x0c, 0x08 },
+	{ 0x38, 0x38, 0x38 },
+	{ 0x30, 0x30, 0x30 },
+	{ 0x2c, 0x2c, 0x2c },
+	{ 0x28, 0x28, 0x28 },
+	{ 0x20, 0x20, 0x20 },
+	{ 0x1c, 0x1c, 0x1c },
+	{ 0x14, 0x14, 0x14 },
+	{ 0x10, 0x10, 0x10 },
+	{ 0x00, 0x3f, 0x00 },
+	{ 0x00, 0x24, 0x00 },
+	{ 0x3c, 0x38, 0x00 },
+	{ 0x34, 0x2c, 0x00 },
+	{ 0x28, 0x20, 0x00 },
+	{ 0x3c, 0x18, 0x10 },
+	{ 0x30, 0x10, 0x08 },
+	{ 0x24, 0x0c, 0x04 },
+	{ 0x10, 0x08, 0x04 },
+	{ 0x3c, 0x3c, 0x3c }
+}; // ds:0xb2b1
+
+static const char g_str_backslash_temp[6] = "\\TEMP"; // ds:0xb311
+static const char g_str_not_enough_mem[124] = "\x0a\x0aNot enough memory!\x0a\"Realms of Arkania - Blade of Destiny\" needs %ld Byte more memory!\x0aPlease uninstall resident programs!"; // ds:0xb317
+static const char g_str_drive_x[4] = "X:\\"; // ds:0xb393
+static char g_str_temp_dir_fail[280] = "\xf2!!!!! ACHTUNG !!!!!\xf0\x40\x40""DAS SCHWARZE AUGE\x40KANN KEIN TEMPOR\x8eRES VERZEICHNIS ANLEGEN UND IST DAHER NICHT LAUFF\x8eHIG. WAHRSCHEINLICH VERSUCHEN SIE, DAS SPIEL AUF EINEM\xf2 SCHREIBGESCH\x9aTZTEN LAUFWERK\xf0\x40ZU STARTEN. BITTE INSTALLIEREN SIE DAS SPIEL AUF EINE FESTPLATTE.\x40\x40-TASTE ZUM BEENDEN-"; // ds:0xb397
+static const char g_all_files_wildcard2[4] = "*.*"; // ds:0xb4af
+static const char g_all_chr_wildcard4[6] = "*.CHR"; // ds:0xb4b3
+static const char g_all_files_wildcard3[4] = "*.*"; // ds:0xb4b9
+static char g_str_gen_exe[8] = "gen.exe"; // ds:0xb4bd
+static char g_str_gen_exe2[8] = "gen.exe"; // ds:0xb4c5
+static const char g_str_gen_b[2] = "b"; // ds:0xb4cd
+static const char g_str_gen_a[2] = "a"; // ds:0xb4cf
+static const char g_str_gen_n[2] = "n"; // ds:0xb4d1
+static const char g_str_gen_1[2] = "1"; // ds:0xb4d3
+static const char g_str_gen_generation[11] = "Generation"; // ds:0xb4d5
+
+
+uint32_t g_buffersize;		// ds:0xe5dc, size of the global buffer
+HugePt g_global_buffer_ptr;	// ds:0xe5e0, points to the start of the global buffer
+signed char g_large_buf; 		// ds:0xe5e4
+
+/* Borlandified and identical */
+void rabies_frenzy(struct struct_hero* hero_rabies, signed int hero_pos_rabies)
+{
+	signed int answer;
+	signed int hero_pos;
+	signed int done = 0;
+	signed int tw_bak;
+	struct struct_hero *hero_2;
+	signed int group_bak;
+	signed int group_id;
+
+#ifndef M302de_ORIGINAL_BUGFIX
+	/* useless, see below. */
+	signed char sex_bak;
+#endif
+
+	group_bak = gs_active_group_id;
+
+#ifndef M302de_ORIGINAL_BUGFIX
+	/* useless, see below. */
+
+	sex_bak = hero_rabies->sex;
+#endif
+
+	group_id = hero_rabies->group_id;
+
+#ifndef M302de_ORIGINAL_BUGFIX
+	/* Not a bug, but useless. hero_pos_rabies and hero_rabies are recomputed. */
+
+	/* Apparently, sex value 50 is used as a marker. */
+	hero_rabies->sex = 50;
+#endif
+
+	/* switch to the group of the hero */
+	while (gs_active_group_id != group_id) {
+		GRP_switch_to_next(1);
+	}
+
+#ifndef M302de_ORIGINAL_BUGFIX
+	/* see above. */
+	hero_pos_rabies = 0;
+	while (get_hero(hero_pos_rabies)->sex != 50) {
+		hero_pos_rabies++;
+	}
+
+	hero_rabies = get_hero(hero_pos_rabies);
+	hero_rabies->sex = sex_bak;
+#endif
+
+	if (g_pp20_index == ARCHIVE_FILE_PLAYM_UK) {
+		draw_status_line();
+	}
+
+	while (done == 0) {
+
+		if (count_heroes_available_in_group() > 1) {
+
+			sprintf(g_dtp2, get_ttx(741), hero_rabies->alias, GUI_get_personal_pronoun(hero_rabies->sex, GRAMMAR_CASE_4TH), GUI_get_personal_pronoun(hero_rabies->sex, GRAMMAR_CASE_4TH)); /* "%s HAT PLÖTZLICH SCHAUM VOR DEM MUND UND BEGINNT WILD UM SICH ZU@SC..." */
+			// "hero_rabies is affected by a rabies frenzy. What to do? ..."
+
+			sprintf(g_dtp2 + 500, get_ttx(742), hero_rabies->alias); /* "BEWUSSTLOS GESCHLAGEN HABT?" */
+			// "knock him out"
+
+			sprintf(g_dtp2 + 600, get_ttx(743), hero_rabies->alias); /* "BERUHIGT HABT?" */
+			// "calm him down"
+
+			tw_bak = g_textbox_width;
+			g_textbox_width = 6;
+
+			answer = GUI_dialogbox(hero_rabies->pic, hero_rabies->alias,
+						g_dtp2, 3, g_dtp2 + 500, g_dtp2 + 600, get_ttx(744)); /* "DEN ZAUBER SANFTMUT ANGEWANDT HABT?" */
+			// "cast spell Sanftmut"
+
+			g_textbox_width = tw_bak;
+
+			if (answer == 1) {
+				/* knock the rabies hero out */
+
+				sub_hero_le(hero_rabies, hero_rabies->le / 2);
+
+				sprintf(g_dtp2, get_ttx(745), hero_rabies->alias); /* "IHR HABT %s BEWUSSTLOS GESCHLAGEN!" */
+				// "you did it"
+
+				GUI_output(g_dtp2);
+
+				g_hero_sel_exclude = hero_pos_rabies;
+
+				// now heal him
+				answer = select_hero_ok(get_ttx(395)); /* "WER SOLL EIN TALENT ANWENDEN?" */
+
+				if (answer != -1) {
+
+					talent_cure_disease(get_hero(answer), hero_rabies, 10, 1);
+				}
+
+				done = 1;
+
+			} else if (answer == 2) {
+				/* calm the rabies hero down */
+
+				for (hero_pos = 0; hero_pos <= 6; hero_pos++) {
+
+					/* one of the other heroes must pass CH+0 */
+					/* Original-Bug: other hero should be in same group, not dead, etc. */
+					if ((hero_pos != hero_pos_rabies) && (test_attrib(get_hero(hero_pos), ATTRIB_CH, 0) != 0))
+						/* Original-Bug: should be 'test_attrib(get_hero(i), ATTRIB_CH, 0) > 0'
+						 * (found by siebenstreich 2021-08-15) */
+					{
+						done = 1;
+						sprintf(g_dtp2, get_ttx(746), hero_rabies->alias); /* "ES GELINGT EUCH, %s ZU BERUHIGEN!" */
+						// "success. rabies hero is calmed down!"
+
+						GUI_output(g_dtp2);
+
+						g_hero_sel_exclude = hero_pos_rabies;
+
+						answer = select_hero_ok(get_ttx(395)); /* "WER SOLL EIN TALENT ANWENDEN?" */
+
+						if (answer != -1) {
+							talent_cure_disease(get_hero(answer), hero_rabies, 10, 1);
+						}
+						break;
+					}
+				}
+			} else if (answer == 3) {
+				/* cast Sanftmut spell */
+
+				g_hero_sel_exclude = hero_pos_rabies;
+
+				answer = select_hero_ok(get_ttx(213)); /* "ZAUBER SPRECHEN" */
+
+				if (answer != -1) {
+
+					hero_2 = get_hero(answer);
+
+					/* check that hero_2 can cast the spell Sanftmut */
+					if
+#ifndef M302de_ORIGINAL_BUGFIX
+						/* Original-Bug 49: Missing check if the hero is sufficiently skilled in the Sanftmut spell. */
+						(hero_2->typus >= HERO_TYPE_HEXE)
+#else
+						(hero_2->typus >= HERO_TYPE_HEXE && hero_2->spells[SP_SANFTMUT] >= -5)
+#endif
+					{
+
+						/* need 15 AE for Sanftmut spell. */
+						if
+#ifndef M302de_ORIGINAL_BUGFIX
+							/* Original-Bug 49: For a Magier with 4th staffspell, 13 AE are enough. */
+							(hero_2->ae >= 15)
+#else
+							(hero_2->ae >= 15 || (hero_2->staff_level >= 4 && hero_2->ae >= 13))
+#endif
+						{
+
+							/* spell must succeed */
+							/* Original-Fehler (neu, wie beim Beruhigen oben): test_spell() liefert bei
+							 * misslungener Probe 0 oder einen negativen Wert (z. B. -1 beim Patzer);
+							 * nur 0 zaehlt hier als Fehlschlag. Richtig waere '> 0'. */
+							if (test_spell(hero_2, SP_SANFTMUT, 0)) {
+
+								done = 1;
+
+								sub_ae_splash(hero_2, 15);
+
+								sprintf(g_dtp2, get_ttx(746), hero_rabies->alias); /* "ES GELINGT EUCH, %s ZU BERUHIGEN!" */
+								// "success!"
+
+								GUI_output(g_dtp2);
+
+								g_hero_sel_exclude = hero_pos_rabies;
+
+								answer = select_hero_ok(get_ttx(395)); /* "WER SOLL EIN TALENT ANWENDEN?" */
+
+								if ((answer != -1) && (answer != hero_pos_rabies)) {
+									talent_cure_disease(get_hero(answer), hero_rabies, 10, 1);
+								}
+							}
+						} else {
+							sprintf(g_dtp2, get_ttx(607), hero_2->alias); /* "%s HAT NICHT GENÜGEND ASTRALENERGIE FÜR DIESEN ZAUBER." */
+							// "doesn't have enough AE"
+							GUI_output(g_dtp2);
+						}
+					}
+#ifdef M302de_ORIGINAL_BUGFIX
+					/* Original-Bug 49: Missing message if the selected hero cannot cast the spell. */
+					else {
+						sprintf(g_dtp2, "%s BEHERRSCHT DIESEN ZAUBER GAR NICHT.", hero_2->alias);
+						GUI_output(g_dtp2);
+					}
+#endif
+				}
+			}
+		} else {
+
+			sprintf(g_dtp2, get_ttx(747), hero_rabies->alias); /* "%s HAT PLÖTZLICH SCHAUM VOR DEM MUND UND BEGINNT WILD UM SICH ZU@SC..." */
+			// "rabies hero about to go berserk..."
+
+			GUI_output(g_dtp2);
+
+			done = 1;
+		}
+
+		if (done == 0) {
+			/* every other hero in the group looses 1W6+2 LE */
+			hero_2 = get_hero(0);
+			for (hero_pos = 0; hero_pos <= 6; hero_pos++, hero_2++) {
+
+				if ((hero_pos != hero_pos_rabies) && (hero_2->typus != HERO_TYPE_NONE) &&
+					(hero_2->group_id == gs_active_group_id) && !hero_2->flags.dead)
+				{
+					sub_hero_le(hero_2, dice_roll(1, 6, 2));
+				}
+			}
+
+			sprintf(g_dtp2, get_ttx(791), hero_rabies->alias); /* "%s SCHLÄGT WIE EIN BERSERKER AUF DEN REST DER GRUPPE EIN!" */
+			// "goes berserk on the group!"
+
+			GUI_output(g_dtp2);
+
+			done = 1;
+		}
+	}
+
+	/* switch back to the group */
+	while (gs_active_group_id != group_bak) {
+		GRP_switch_to_next(1);
+	}
+
+	if (g_pp20_index == ARCHIVE_FILE_PLAYM_UK) {
+		draw_status_line();
+	}
+}
+
+/* Borlandified and identical */
+void init_global_buffer(void)
+{
+#if defined(__BORLANDC__)
+	g_global_buffer_ptr = (HugePt)schick_alloc(g_buffersize);
+#else
+	g_global_buffer_ptr = (HugePt)schick_alloc(g_buffersize + 1190 * sizeof(char*) / 2);
+#endif
+	g_renderbuf_ptr = (unsigned char*)(g_global_buffer_ptr + 8L);
+
+	/* REMARK: the game saves space for 1190 strings,
+	 * 		 840 are permanent from TEXT.LTX (837),
+	 * 		 150 are variable dialog or tx (???),
+	 * 		 200 are variable informer or tx2 (???).
+	 * 		 The last two depend on the situation.
+	 **/
+	g_text_ltx_buffer = (char*)(((HugePt)g_renderbuf_ptr) + 65000L);
+	g_text_ltx_index = (char**)(((HugePt)g_text_ltx_buffer) + 30500L);
+	g_tx_index = &g_text_ltx_index[840];
+	g_tx2_index = &g_text_ltx_index[990];
+
+	g_objects_nvf_buf = (unsigned char*)(((HugePt)g_text_ltx_index) + 1190L * sizeof(char*));
+	g_dtp2 = (char*)(((HugePt)g_objects_nvf_buf) + 3400L);
+	g_text_input_buf = (char*)(g_dtp2 + 1500);
+	g_text_output_buf = (char*)(((HugePt)g_dtp2) + 1524L);
+	g_buffer5_ptr = (char*)(((HugePt)g_text_output_buf) + 300L);
+	g_buffer6_ptr = (unsigned char*)(((HugePt)g_buffer5_ptr) + 3880L);
+	g_buffer7_ptr = (char*)(((HugePt)g_buffer6_ptr) + 2200L);
+	g_buffer8_ptr = (unsigned char*)(((HugePt)g_buffer7_ptr) + 10000L);
+	g_buffer9_ptr = (HugePt)(((HugePt)g_buffer7_ptr) + 22008L);
+
+	g_buffer9_ptr3 = (HugePt)(g_buffer9_ptr2 = (unsigned char*)g_buffer9_ptr);
+	g_ani_unknown4 = 0;
+}
+
+/* Borlandified and identical */
+signed int init_memory(void)
+{
+	signed int error = 0;
+	uint32_t freemem;
+
+	/* disable EMS memory */
+	g_ems_enabled = 0;
+
+#if defined(__BORLANDC__)
+	if (EMS_init()) {
+		_OvrInitEms(0, 0, 0);
+	} else {
+		;
+	}
+
+	/* set the pointer for the framebuffer */
+	g_vga_backbuffer = g_vga_memstart = (unsigned char*)MK_FP(0x0a000, 0x0000);
+#else
+	g_vga_memstart = (unsigned char*)calloc(320 * 200, sizeof(unsigned char));
+	g_vga_backbuffer = g_vga_memstart;
+
+#endif
+
+	/* allocate small chunks of memory */
+#if defined(__BORLANDC__)
+	g_itemsname		= (char**)schick_alloc(254 * sizeof(char*));
+#else
+	g_itemsname		= (char**)schick_alloc(255 * sizeof(char*));
+#endif
+	g_itemsdat 		= (struct item_stats*)schick_alloc(255 * sizeof(struct item_stats));
+	g_monnames_buffer	= (char*)schick_alloc(950);
+#if defined(__BORLANDC__)
+	g_monnames_index	= (char**)schick_alloc(77 * sizeof(char*));
+#else
+	g_monnames_index	= (char**)schick_alloc(79 * sizeof(char*));
+#endif
+	g_memslots_anis		= (struct struct_memslot_ani*)schick_alloc(37 * sizeof(struct struct_memslot_ani));
+	g_memslots_mfig		= (struct struct_memslot_fig*)schick_alloc(43 * sizeof(struct struct_memslot_fig));
+	g_memslots_wfig		= (struct struct_memslot_fig*)schick_alloc(43 * sizeof(struct struct_memslot_fig));
+	g_memslots_mon		= (struct struct_memslot_fig*)schick_alloc(36 * sizeof(struct struct_memslot_fig));
+	g_heroes		= (struct struct_hero*)schick_alloc(7 * sizeof(struct struct_hero));
+	g_dungeon_fights_buf	= (unsigned char*)schick_alloc(630);
+	g_dungeon_doors_buf	= (struct dungeon_door*)schick_alloc(45 * sizeof(struct dungeon_door));
+	g_dungeon_stairs_buf	= (unsigned char*)schick_alloc(80);
+	g_buf_font6		= (unsigned char*)schick_alloc(592);
+	g_splash_buffer		= (unsigned char*)schick_alloc(1000);
+	g_trv_track_pixel_bak	= (unsigned char*)schick_alloc(500);
+	g_chessboard		= (signed char*)schick_alloc(625);
+	g_popup			= (unsigned char*)(schick_alloc(1673) + 8);
+	g_icon			= (unsigned char*)(schick_alloc(1500) + 8);
+	g_buf_icon		= (unsigned char*)schick_alloc(5184);
+	g_townpal_buf		= (unsigned char*)schick_alloc(288);
+
+#if defined(__BORLANDC__)
+	freemem = farcoreleft();
+#else
+	/* DUMMY value for newer systems */
+	freemem = 357000L;
+#endif
+
+	if (freemem > 334000L) {
+
+		if (freemem >= 357000L) {
+			g_buffersize = 357000L;
+			g_large_buf = 1;
+		} else {
+			g_buffersize = 334000L;
+			g_large_buf = 0;
+		}
+
+		init_global_buffer();
+
+	} else {
+
+		/* Original-Fehler: verlangt werden mehr als 334000 Byte, gemeldet wird aber
+		 * 329000 - freemem; bei 329000..334000 freien Bytes erscheint eine negative
+		 * Zahl, sonst eine um 5000 zu kleine. */
+		printf(g_str_not_enough_mem, 329000L - freemem);
+
+		wait_for_keypress();
+		error = 1;
+	}
+
+	if (!error) {
+
+		init_text();
+
+		g_fig_figure1_buf = (unsigned char*)(g_buffer9_ptr3 + 180000L);
+		if (g_large_buf == 1) {
+			g_fig_figure1_buf += 23000L;
+		}
+
+		g_fig_figure2_buf = (unsigned char*)(((HugePt)g_fig_figure1_buf) - 20000L);
+		g_buffer10_ptr = (unsigned char*)(((HugePt)g_fig_figure2_buf) - 16771L);
+	}
+
+	return error;
+}
+
+/* Borlandified and identical */
+void refresh_colors(void)
+{
+	set_color((uint8_t*)g_color_black, 0);
+	set_color((uint8_t*)g_color_white, 0xff);
+	set_palette((uint8_t*)g_palette_textbox, 0xd8, 8);
+	set_palette((uint8_t*)g_palette_textcolors, 0xc8, 3);
+	set_palette((uint8_t*)g_palette_unknown4, 0x40, 0x20);
+	set_palette((uint8_t*)g_palette_general, 0x20, 0x20);
+	set_palette((uint8_t*)g_palette_unknown1, 0x60, 0x20);
+}
+
+
+/* Borlandified and identical */
+/* freier Platz auf dem aktuellen Laufwerk minus 200 KB Reserve */
+int32_t get_diskspace(void)
+{
+#if defined(__BORLANDC__)
+	struct dfree df;
+	int32_t space;
+
+	getdfree(getdisk() + 1, &df);
+
+	space = (int32_t)df.df_avail * (int32_t)df.df_bsec * df.df_sclus;
+
+	return space - 204800;
+#else
+	return 8 * 1024 * 1024;
+#endif
+}
+
+/* Borlandified and identical */
+void init_game_state(void)
+{
+	signed int i;
+
+	refresh_colors();
+
+	g_textcolor_fg[1] = 0xc8;
+	g_textcolor_fg[2] = 0xc9;
+	g_textcolor_fg[3] = 0xca;
+
+	clear_menu_icons();
+
+	for (i = 0; i < 254; i++) {
+		g_market_itemsaldo_table[i] = 0;
+	}
+
+	gs_town_loc_type_bak = LOCTYPE_NONE;
+	/* Travia Temple in Thorwal */
+	gs_town_loc_type = LOCTYPE_TEMPLE;
+	gs_town_typeindex = 1;
+	gs_x_bak = 9;
+	gs_y_bak = 9;
+	gs_x = 9; //     Why gs_x == gs_x_bak ...
+	gs_y = 8; // ... but gs_y != gs_y_bak ??
+	gs_viewdir_bak = NORTH;
+	gs_viewdir = NORTH;
+	gs_dungeon_id = DUNGEON_ID_NONE;
+
+	gs_town_id_bak = gs_town_id = TOWN_ID_THORWAL;
+
+	g_textbox_width = 3;
+
+	/* timer */
+	gs_day_timer = HOURS(24) - 1;
+	timewarp_until_time_of_day(1);
+	gs_day_timer = HOURS(8);
+	gs_day_of_week = 4;
+	gs_day_of_month = 17;
+	gs_month = 1;
+	gs_year = 15;
+
+	g_pic_copy.dst = g_vga_memstart;
+
+	load_wallclock_nvf();
+	passages_init();
+
+	g_current_ani = -1;
+	g_wallclock_update = 1;
+
+	g_gui_box_bg_buf = g_renderbuf_ptr;
+	load_splashes();
+}
+
+/* Borlandified and identical */
+int err_handler(void)
+{
+#if defined(__BORLANDC__)
+	hardresume(3);
+#endif
+	return 1;
+}
+
+/* Borlandified and nearly identical */
+void prepare_dirs(void)
+{
+#if defined(__BORLANDC__)
+	signed int done;
+	signed int handle;
+	signed int drive;
+	signed int drive_bak;
+	signed int errorval;
+	struct ffblk blk;
+	char gamepath[40];
+
+	harderr((int(*)(int, int, int, int))err_handler);
+
+	drive_bak = drive = getdisk();
+
+	errorval = 0;
+	while (errorval != 2) {
+
+		setdisk(drive);
+
+		/* copy "X:\\" */
+		strcpy(gamepath, g_str_drive_x);
+
+		/* set drive name in path */
+		gamepath[0] = drive + 'A';
+
+		if (drive_bak == drive) {
+			getcurdir(0, &gamepath[3]);
+		} else {
+			gamepath[2] = '\0';
+		}
+
+		strcpy(g_text_output_buf, gamepath);
+		/* "\\TEMP" */
+		strcat(g_text_output_buf, g_str_backslash_temp);
+
+		if (!chdir(g_text_output_buf)) {
+			/*	check if it's possible to change to TEMP-dir: OK
+				change to gamepath */
+
+			chdir(gamepath);
+			errorval = 2;
+
+		} else {
+
+			if (mkdir(g_text_output_buf)) {
+				errorval = 1;
+			} else {
+				errorval = 2;
+			}
+		}
+
+		if (errorval == 1) {
+
+			/* ERROR, cant write => exit */
+
+			GUI_output(g_str_temp_dir_fail);
+
+			cleanup_game();
+
+			exit(0);
+		}
+	}
+
+	/* delete *.* in TEMP-dir */
+	sprintf(g_text_output_buf, g_str_temp_fmt_ptr, g_all_files_wildcard2);
+
+	done = findfirst(g_text_output_buf, &blk, 0);
+
+	if (!done) {
+
+		do {
+			sprintf(g_text_output_buf, g_str_temp_fmt_ptr, blk.ff_name);
+
+			unlink(g_text_output_buf);
+
+			done = findnext(&blk);
+
+		} while (!done);
+	}
+
+	/* search for "*.CHR" in the gamepath */
+	done = findfirst(g_all_chr_wildcard4, &blk, 0);
+
+	while (!done) {
+
+		/* open CHR-file and copy it into TEMP-dir */
+		handle = open(blk.ff_name, O_BINARY | O_RDWR);
+
+		/* REMARK: size of CHR files differs from floppy to CD version */
+		_read(handle, g_renderbuf_ptr, sizeof(struct struct_hero));
+
+		close(handle);
+
+		sprintf(g_text_output_buf, g_str_temp_fmt_ptr, blk.ff_name); /* contains a filename */
+
+		handle = _creat(g_text_output_buf, 0);
+
+		write(handle, g_renderbuf_ptr, sizeof(struct struct_hero));
+
+		close(handle);
+
+		done = findnext(&blk);
+	}
+
+	setdisk(drive_bak);
+#endif
+}
+
+/* Borlandified and identical */
+void cleanup_game(void)
+{
+#if defined(__BORLANDC__)
+	struct ffblk blk;
+#endif
+	signed int i;
+	signed int done;
+
+#if defined(__BORLANDC__)
+	/* disable AIL */
+	exit_AIL();
+
+	/* disable CD-Audio */
+	if (g_cd_init_successful) {
+		CD_audio_stop();
+	}
+
+	/* free EMS memory */
+	if (g_ems_enabled != 0) {
+
+		for (i = 0; i < 37; i++) {
+			/* TODO: test for ems_handle missing */
+			if (g_memslots_anis[i].figure) {
+				EMS_free_pages(g_memslots_anis[i].ems_handle);
+			}
+		}
+
+		/* free male and female hero fight figures */
+		for (i = 0; i < 43; i++) {
+
+			if (g_memslots_mfig[i].figure && g_memslots_mfig[i].ems_handle)
+			{
+				EMS_free_pages(g_memslots_mfig[i].ems_handle);
+			}
+
+			if (g_memslots_wfig[i].figure && g_memslots_wfig[i].ems_handle)
+			{
+				EMS_free_pages(g_memslots_wfig[i].ems_handle);
+			}
+		}
+
+		/* free enemy fight figures */
+		for (i = 0; i < 36; i++) {
+
+			if (g_memslots_mon[i].figure && g_memslots_mon[i].ems_handle)
+			{
+				EMS_free_pages(g_memslots_mon[i].ems_handle);
+			}
+		}
+
+		if (g_ems_unused_handle) {
+			EMS_free_pages(g_ems_unused_handle);
+		}
+
+		/* free map memory */
+		if (g_ems_travelmap_handle != 0) {
+			EMS_free_pages(g_ems_travelmap_handle);
+		}
+	}
+
+	/* delete all files in TEMP */
+
+	sprintf(g_text_output_buf, g_str_temp_fmt_ptr, g_all_files_wildcard3);
+
+	done = findfirst(g_text_output_buf, &blk, 0);
+
+	if (done == 0) {
+
+		do {
+			/* delete each found file */
+			sprintf(g_text_output_buf, g_str_temp_fmt_ptr, blk.ff_name);
+
+			unlink(g_text_output_buf);
+
+			done = findnext(&blk);
+
+		} while (!done);
+	}
+#endif
+
+	/* misc cleanups */
+	call_mouse_bg();
+	disable_mouse();
+	reset_timer();
+	schick_reset_video();
+#if defined(__BORLANDC__)
+	clrscr();
+#endif
+
+#if !defined(__BORLANDC__)
+	if (g_vga_memstart) {
+		free(g_vga_memstart);
+		g_vga_memstart = NULL;
+		g_vga_backbuffer = NULL;
+	}
+#endif
+}
+
+/**
+ * \brief   shows the game over screen
+ */
+/* Borlandified and identical */
+void game_over_screen(void)
+{
+	signed int handle;
+
+	disable_ani();
+
+	set_audio_track(ARCHIVE_FILE_VICTORY_XMI);
+
+	/* load SKULL.NVF */
+	handle = load_archive_file(ARCHIVE_FILE_SKULL_NVF);
+
+	read_archive_file(handle, g_renderbuf_ptr, 64200);
+
+	close(handle);
+
+	call_mouse_bg();
+
+	g_wallclock_update = 0;
+
+	wait_for_vsync();
+
+	set_palette(g_palette_allblack2, 0x00, 0x20);
+	set_palette(g_palette_allblack2, 0x20, 0x20);
+
+	memcpy((void*)g_vga_memstart, (void*)g_renderbuf_ptr, 320 * 200);
+
+	set_palette((uint8_t*)g_renderbuf_ptr + 64002L, 0x00, 0x40);
+
+	wait_for_keypress();
+
+	/* TODO: update window */
+	memset((void*)g_vga_memstart, 0, 320 * 200);
+
+	wait_for_vsync();
+
+	set_palette(g_palette_allblack2, 0x00, 0x20);
+	set_palette(g_palette_allblack2, 0x20, 0x20);
+
+	call_mouse();
+
+	g_pp20_index = -1;
+}
+
+/* Borlandified and identical */
+void call_gen(void)
+{
+#if defined(__BORLANDC__)
+	uint32_t freemem;
+	signed int retval;
+
+	call_mouse_bg();
+
+	exit_AIL();
+
+	/* free the global buffer */
+	free((HugePt)g_global_buffer_ptr);
+
+	freemem = farcoreleft();
+
+	/* ret = spawnl(0, "gen.exe", "gen.exe", "b", gamemode == 2 ? "a" : "n", "1", NULL); */
+	retval = spawnl(0, g_str_gen_exe, g_str_gen_exe2, g_str_gen_b,
+			(g_game_mode == GAME_MODE_ADVANCED ? g_str_gen_a : g_str_gen_n),
+			g_str_gen_1, NULL);
+
+	call_mouse();
+
+	if (retval == -1) {
+
+		/* perror("Generation") */
+		perror(g_str_gen_generation);
+
+		wait_for_keypress();
+
+		/* vermutlich Original-Fehler: kein exit(). Das Spiel laeuft danach ohne den
+		 * oben freigegebenen globalen Puffer, ohne Maus, Timer und AIL weiter. */
+		cleanup_game();
+	} else {
+
+		init_AIL(16000);
+
+		init_global_buffer();
+
+		mouse_init();
+
+		set_timer();
+
+		init_text();
+
+		init_common_buffers();
+
+		refresh_colors();
+
+		load_wallclock_nvf();
+
+		if (have_mem_for_sound()) {
+
+			read_sound_cfg();
+
+			alloc_voc_buffer(20000);
+		} else {
+			exit_AIL();
+		}
+
+		g_fig_figure1_buf = (unsigned char*)(g_buffer9_ptr3 + 180000L);
+		if (g_large_buf == 1) {
+			g_fig_figure1_buf += 23000L;
+		}
+
+		g_fig_figure2_buf = (unsigned char*)(((HugePt)g_fig_figure1_buf) - 20000L);
+		g_buffer10_ptr = (unsigned char*)(((HugePt)g_fig_figure2_buf) - 16771L);
+
+		gs_day_timer = HOURS(24) - 1;
+		timewarp_until_time_of_day(1);
+		gs_day_timer = HOURS(8);
+
+		gs_day_of_week = 4;
+		gs_day_of_month = 17;
+		gs_month = 1;
+		gs_year = 15;
+	}
+#endif
+}

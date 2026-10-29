@@ -1,0 +1,188 @@
+datei	zeile	art	bisher	richtig	begruendung
+seg055.c	46	kommentar	...armor items in the sell list being at most 30	buy list (Waffen Plaetze 0..69, Ruestungen 70..99)	die Tabelle ist g_item_selector_buy in do_merchant(), nicht die Verkaufsliste
+seg055.c	151	kommentar	merchant descrition	merchant description; Preisformel ergaenzt	Tippfehler, Preis = Grundpreis + price_mod Prozent
+seg055.c	167	kommentar	(kein Kommentar)	Doxygen fuer do_merchant()	Funktion war undokumentiert
+seg055.c	343	kommentar	debt logic for merchants	Einheit von gs_bank_deposit ergaenzt (Silber: -1000 = 100 D, +500 = 50 D = 5000 H)	sonst wirkt "+= 500" bei "-= 5000" wie ein Fehler; Text 762 nennt 50 Dukaten
+seg055.c	353	kommentar	Textkommentar zu ttx(762) = Text von 761	eigener Text 762 (Zahlungsaufforderung 50 D)	gekuerzter Kommentar war mit 761 identisch
+seg055.c	419	kommentar	(kein Kommentar)	Doxygen fuer talk_merchant()	
+seg055.c	439	kommentar	gs_merchant_kicked2_flags[0] is always zero	das ganze Feld wird nie beschrieben, Zustand 1 fuehrt immer zu 3	grep: einziger Zugriff ist der Lesezugriff hier, Index ist gs_town_typeindex, nicht 0
+seg055.c	464	originalfehler_neu	TLK_khandel Zustand 11 / TLK_whandel Zustand 25: g_price_modificator = 3	Rabatt beim Kaufen	g_price_modificator wird in buy_screen() gar nicht benutzt, nur in sell_screen() (Verkaufserloes * 3/4). Der versprochene "besonders gute Preis" (WHANDEL.TLK Text 66) verschlechtert also den Verkauf statt den Einkauf zu verbilligen. Beim Schmied (seg058) wirkt der Wert richtig
+seg056.c	56	parameter	\param p1_in / p2_in; "1 -> p1 > p1"	p_item_1 / p_item_2; "p1 > p2"; Vergleich des Gesamtpreises in Heller	Doxygen passte nicht zu den Parameternamen, Tippfehler
+seg056.c	83	kommentar	multi use	Verwendungen aufgezaehlt (Index, Menueantwort, 1 = dazu / 2 = zurueck, hero_pos)	
+seg056.c	84	name	l4	num_items	Menge der Ware im Korb bzw. eingegebene Menge
+seg056.c	87	name	l6	item_selector_pos_old	vorher markierte Position, fuer den Rahmen
+seg056.c	91	name	l8	refresh_items	Warenfeld neu zeichnen
+seg056.c	102	name	l9	price_delta	Preis der hinzugefuegten/entfernten Menge
+seg056.c	104	name	nice	cart_len	Zahl der Eintraege in g_buy_shopping_cart (wird an bargain() als Warenanzahl gegeben)
+seg056.c	106	name	offended	deal	0 = noch kein Handel, 1 = Feilschen erfolgreich, 2 = ohne Rabatt; "beleidigt" ist gs_merchant_offended_flags
+seg056.c	112	name	l12	nothing_given	erste Ware konnte gar nicht verteilt werden, dann wird nicht bezahlt
+seg056.c	113	name	l13	not_all_given	nicht alles verteilt, Text 566
+seg056.c	117	name	l15	refresh_info	Infozeile und Heldennamen neu ausgeben
+seg056.c	118	name	l16	cart_pos	Position der gewaehlten Ware im Warenkorb oder -1
+seg056.c	122	kommentar	TODO: The shopping cart has space for 62.5 items ? Grollo in thorwal sells 69 items.	Korb enthaelt nur gewaehlte Warensorten, Grenze sind die freien Rucksackplaetze (max. 112); memset loescht nur 250 Byte, Eintraege werden aber vor dem Lesen geschrieben	Grollos Angebot ist nicht der Korb; Puffer g_fig_figure1_buf ist gross genug
+seg056.c	335	kommentar	(kein Kommentar)	0x1b (DE "+") = dazu, 0x35 (DE "-") und Rechtsklick = zurueck	common.h:57/63 beschreibt es umgekehrt (']' decrease, '/' increase), Code: KEY_SCAN_CODE_SLASH setzt l3 = 2 = zurueckgeben
+common.h	57	kommentar	"the ']' key ... to decrease the number of items" / "the '/' key ... to increase"	umgekehrt: 0x1b (DE "+") erhoeht, 0x35 (DE "-") verringert	buy_screen(): KEY_SCAN_CODE_SLASH -> l3 = 2 (zurueckgeben); Header nicht geaendert
+seg056.c	365	originalfehler_neu	num_slots_needed += ... g_itemsdat[item_id].flags.stackable ? quantity/100+1 : quantity	g_itemsdat[g_buy_shopping_cart[l_di].item_id].flags.stackable, und die neue Ware mitzaehlen	Stapelbarkeit kommt von der gerade gewaehlten Ware statt vom Korbeintrag: z.B. 50 Pfeile im Korb zaehlen als 50 Plaetze, wenn danach eine Waffe gewaehlt wird ("DIE GRUPPE KANN KEINE WEITEREN GEGENSTAENDE AUFNEHMEN"), umgekehrt zu wenig. Ausserdem fehlt die neue Ware in der Pruefung free_slots < num_slots_needed (einer zu viel moeglich)
+seg056.c	583	originalfehler_neu	price = price - price * percent / 100; set_party_money(p_money)	nur die verteilten Waren bezahlen	passt nicht alles in die Rucksaecke (not_all_given, Text 566), wird trotzdem der ganze Korb bezahlt; nur wenn die erste Ware gar nicht verteilt wird, entfaellt die Zahlung. Folge des Platzfehlers oben
+seg056.c	364	originalfehler_be	Original-Bug: 199 stackable items need 3 slots (99 + 99 + 1), not 2	Begruendung stimmt	quantity/100+1 ergibt fuer 199 nur 2; richtig waere (quantity+98)/99. Kein Fix im Code
+seg056.c	429	kommentar	TODO: check that	memmove-Laenge 248 - 2*cart_pos ist fuer 4-Byte-Eintraege ausreichend (cart_len <= 62), sonst harmlos	Laenge passt eher zu 2-Byte-Eintraegen, ueberschuessige Bytes stehen hinter cart_len
+seg056.c	568	kommentar	REMARK: write to g_itemsdat ?	ja, Grundpreis +10 % je 10 gekaufte Stueck, gilt bis Programmende	g_itemsdat wird in seg120 aus ITEMS.DAT geladen und nicht gespeichert
+seg056.c	631	parameter	\param shop_ptr; "position if the item in the sales array"	\param merchant; Position in g_item_selector_sell; Preisregeln ergaenzt	Parametername war falsch
+seg057.c	45	kommentar	shows the sell-screen an provides interaction	Tippfehler; \param und Preisformel ergaenzt	
+seg057.c	61	name	nice	num_items	Mehrfachnutzung: angezeigte Menge, Verkaufsmenge, Gesamtzahl fuer bargain()
+seg057.c	65	name	l5	item_selector_pos_old	zuvor markierte Position
+seg057.c	69	name	flag_unknown_3	refresh_items	Warenfeld neu zeichnen (Seitenwechsel, Auswahl)
+seg057.c	71	name	flag_unknown_1	choose_hero	loest select_hero_ok("WER MOECHTE ETWAS VERKAUFEN?") aus, gesetzt durch Menue "ANDERER HELD"
+seg057.c	72	name	flag_unknown_2	refresh_hero	Held gewechselt oder verkauft: Verkaufsliste neu aufbauen, Geld neu anzeigen
+seg057.c	84	name	l12	deal	0 = kein Handel, 1 = Feilschen erfolgreich, 2 = ohne Aufschlag
+seg057.c	90	name	l15	inv_slot	Inventarplatz des gewaehlten Gegenstands
+seg057.c	326	kommentar	Is ACTION == ACTION_ID_DECREASE_ITEM_COUNT_BY_RIGHT_CLICK possible at all?	nein	wird nur in buy_screen() gesetzt, handle_gui_input() setzt g_action_id jedesmal zurueck (seg002)
+seg057.c	347	originalfehler_neu	Erloes * g_price_modificator / 4	Aufschlag statt Abschlag, bzw. Rabatt in buy_screen()	nach erfolgreichem Haendlergespraech (KHANDEL Zustand 11, WHANDEL Zustand 25 "BESONDERS GUTEN PREIS") ist der Wert 3: Verkauf bringt nur 75 %, Einkauf bleibt unveraendert
+seg057.c	486	kommentar	REMARK: write to g_itemsdat ?	ja, Grundpreis -10 % je 10 verkaufte Stueck, bis Programmende	g_itemsdat wird nicht gespeichert
+seg058.c	100	kommentar	add all items of a hero to the repair list	fuegt einen Gegenstand mit Reparaturpreis ein	Funktion bearbeitet nur inv_slot; die Schleife steht in repair_screen()
+seg058.c	144	kommentar	price => 1 HELLER	Preis 0 = nicht reparierbar (Text 487)	Code setzt price = 0; repair_screen() gibt dann "ICH REPARIERE NUR WAFFEN UND RUESTUNGEN, DIE IRGENDWIE BESCHAEDIGT SIND" aus
+seg058.c	150	kommentar	price => 1 HELLER	Preis 0 = nicht reparierbar	wie oben (kopierter Kommentar aus add_item_to_sell_selector)
+seg058.c	159	parameter	\param smith_ptr; "an provides"	\param smith; smith_id = gs_town_typeindex	Parametername falsch, Tippfehler
+seg058.c	174	name	val	num_items	Menge eines Stapels fuer die Anzeige
+seg058.c	178	name	l6	item_selector_pos_old	zuvor markierte Position
+seg058.c	182	name	l8	refresh_items	Warenfeld neu zeichnen
+seg058.c	184	name	l10	choose_hero	Menue "ANDERER HELD": Held neu waehlen
+seg058.c	185	name	l11	refresh_hero	Liste fuer neuen Helden aufbauen
+seg058.c	198	name	l12	deal	0 = kein Handel, 1 = Feilschen erfolgreich, 2 = ohne Rabatt
+seg058.c	295	originalfehler_neu	make_valuta_str(g_dtp2, hero2->money)	get_party_money() anzeigen (wie sell_screen)	angezeigt wird nur das Geld des gewaehlten Helden, bezahlt wird aus der Gruppenkasse (p_money = get_party_money())
+seg058.c	453	originalfehler_neu	if (percent == 0 && p_money > price)	p_money >= price	bei 0 % und genau passendem Geld wird eine Feilschprobe fuer 0 % verlangt (WER SOLL FEILSCHEN?); kleiner Grenzfehler, vermutlich unbeabsichtigt
+seg058.c	604	kommentar	TODO: why should it be 3??? Better make a backup	3 ist die Standardbreite, wird an vielen Stellen so zurueckgesetzt	seg002/seg025 setzen ebenfalls 3 bzw. sichern tw_bak
+seg058.c	635	kommentar	(kein Kommentar)	Doxygen fuer talk_smith() und TLK_schmied()	Zustaende 0/30 beschrieben (Gurthags Keller, Zwingfeste)
+seg059.c	41	kommentar	(kein Kommentar)	Doxygen fuer do_tavern() (Oeffnungszeiten, g_combo_mode)	
+seg059.c	52	name	l3	reduction	Abzug von Hunger und Durst nach dem Essen
+seg059.c	54	kommentar	int32_t p_money_after;	Mehrfachnutzung als Essenspreis vermerkt	Variable haelt zuerst den Preis in Silber, dann in Heller
+seg059.c	56	name	bonus	handicap	Wert wird als Erschwernis an GUI_use_talent2(handicap, ...) gegeben; 50 laesst die Probe praktisch scheitern, ist also kein Bonus
+seg059.c	213	kommentar	talent test will be +50 if the game was saved up to 2 minutes ago	Probe um 50 erschwert	"+50" klang nach Bonus; test_talent() zieht handicap vom Talentwert ab
+seg059.c	271	name	bak1 / bak2	basepos_x_bak / basepos_y_bak	Sicherung von g_basepos_x/y
+seg059.c	244	kommentar	(kein Kommentar)	Doxygen fuer octopus_attack_wrapper(), pirates_attack_wrapper(), prolog_ghostship()	Aufrufer sea_travel() (seg063)
+seg060.c	134	kommentar	(kein Kommentar)	Doxygen fuer talk_tavern() und TLK_tavern()	gs_tlk_tav_fullness erklaert (Andrang 1..3)
+seg060.c	237	kommentar	print quality [-1, 2..20]  2 = best, 20 = worse	[1..20], 1 = beste; -1 ist Tabellenende; 15 faellt in zwei Bereiche	Bedingungen beginnen bei 1 (1..3 = GANZ HERVORRAGEND); Ueberschneidung 13..15/15..18 harmlos
+seg060.c	428	originalfehler_neu	tmp = 20 * gs_tlk_tav_fullness; p_money -= tmp	tmp = 200 * gs_tlk_tav_fullness (Heller)	Texte 18 und 31 nennen "%d SILBERTALER" mit demselben Wert 20*fullness, das Gruppengeld wird aber in Heller gefuehrt (vgl. do_tavern: *10). Die Runde kostet nur ein Zehntel, auch die Geldpruefung in Zustand 24/29/40. Zuordnung Zustand -> Text vermutet
+seg060.c	713	originalfehler_neu	Zustand 130: tmp = count * (6 - quality/4) + price_mod%; p_money -= tmp	tmp * 10 (wie do_tavern)	in do_tavern() ist das Ergebnis Silber und wird mit 10 multipliziert (Text 473 "FUER %d SILBERSTUECKE"); im Gespraech wird es als Heller abgezogen
+seg060.c	641	originalfehler_neu	Zustand 108/109: if (gs_tlk_tav_testdrunk < count_heroes_in_group()) ... get_hero(gs_tlk_tav_testdrunk)	alle Heldenplaetze 0..6 mit Pruefung group_id durchlaufen	count_heroes_in_group() zaehlt nur lebende Helden der aktiven Gruppe; Zustand 109 prueft nur typus und dead. Bei geteilter Gruppe werden fremde Helden auf Zechen geprueft (und betrunken), Helden auf hoeheren Plaetzen (z.B. NSC auf Platz 6) nie
+seg060.c	363	originalfehler_neu	gs_tlk_tav_firstinfo, gs_tlk_tav_infopromise, gs_tlk_tav_round	beim Gespraechsbeginn in talk_tavern() zuruecksetzen (wie fullness, testdrunk, drinkcount)	werden nur gesetzt (und infopromise in Zustand 71 geloescht), nie zurueckgesetzt und stehen im Spielstand. Nach der ersten Information in irgendeiner Taverne verzweigen Zustand 73/85/87 dauerhaft anders. Vermutlich unbeabsichtigt, Dialogwirkung nicht im Spiel geprueft
+seg060.c	551	kommentar	gs_tlk_tav_freebeer = 1;	Hinweis: wird nie gelesen	grep ueber alle Module: nur diese Zuweisung
+seg060.c	662	kommentar	TODO: this variable is unsigned	harmlos, Werte 0..7	gs_tlk_tav_testdrunk ist uint8_t, wird nur bis zur Heldenzahl erhoeht und wieder auf 0 gesetzt
+seg061.c	84	kommentar	should be passed as a parameter to asm_miracles()	ask_miracle() (seg062)	eine Funktion asm_miracles gibt es nicht
+seg061.c	88	kommentar	(kein Kommentar)	Doxygen fuer do_temple(), char_add(), char_letgo(), char_erase(), miracle_resurrect()	Rueckgabewert von char_erase() beschrieben (wird von beiden Aufrufern ignoriert)
+seg061.c	141	kommentar	(kein Kommentar)	typeindex 58 = Firun-Tempel in der Wildnis	58 steht in g_firun_temples_typeindex; kein Laden/Speichern dort
+seg061.c	597	kommentar	neither broken nor magic magic	Tippfehler	
+seg062.c	36	kommentar	(kein Kommentar)	Doxygen fuer ask_miracle() mit Wahrscheinlichkeitsformel	
+seg062.c	98	originalfehler_be	Original-Bug 43: Praios-Pruefung auf Zauberkundige wirkungslos (beide Zweige setzen 1)	Begruendung stimmt, Fix (0 setzen) richtig; zusaetzlich prueft die Schleife Heldenplaetze 0..n-1 statt Gruppenmitglieder	for (i = 0; gs_group_member_counts[...] > i; i++) get_hero(i) - bei geteilter Gruppe falsche Helden, auch mit Fix
+seg062.c	141	originalfehler_neu	if (hero->flags.transformed) { ... }	Gruppe und gods_pissed wie im renegade-Zweig pruefen	Praios (Wurf 8) und Hesinde (4..6) heben die Verwandlung auch bei Helden anderer Gruppen oder mit Goetterzorn auf; vermutlich unbeabsichtigt
+seg062.c	249	kommentar	apparently, does not have an impact anywhere	bestaetigt: Timer wird nirgends gelesen	grep ueber alle Module
+seg062.c	317	originalfehler_neu	Firun Wurf 9: set_mod_slot(..., get_random_hero() ...)	alle Helden der Gruppe (wie miracle_modify)	Text 20 "IHR VERSPUERT KEINEN HUNGER UND DURST MEHR." spricht alle an, die Wirkung (hunger_timer, Hunger/Durst 0) bekommt nur ein zufaelliger Held; sprintf uebergibt einen Namen, den der Text nicht nutzt. Vermutlich unbeabsichtigt
+seg062.c	459	kommentar	BetÃ¶ren (zerstoerte Kodierung)	Betoeren	UTF-8 doppelt kodiert in Latin-1-Datei (2 Stellen)
+seg063.c	65	kommentar	//BUG	base_speed ist int8_t, 150 wird als -106 gelesen	Kommentar sagte nicht, worin der Fehler besteht
+seg063.c	145	kommentar	(kein Kommentar)	Zweck der beiden identischen Tabellen	
+seg063.c	170	kommentar	g_sea_travel_sleep_quality	enthaelt die Passageart, Index in die Schlafbonus-Tabelle	do_harbor(): g_sea_travel_sleep_quality = g_ship_table[...].passage_type
+seg063.c	173	kommentar	(kein Kommentar)	Doxygen fuer passages_init(), do_harbor(), sea_travel(), get_srout_len()	
+seg063.c	179	name	si	rnd	Wurf W100 fuer den Schiffstyp
+seg063.c	226	name	flag	first_refresh	Swafnild kann nur beim ersten Aufbau des Hafens erscheinen
+seg063.c	228	name	a	sleepbonus	Kopie von g_sea_travel_sleepbonus_table1/2 (auch in sea_travel)
+seg063.c	569	name	val	quarter	Kartenviertel der Stadt (0..3)
+seg063.c	591	parameter	passage_id	route_id	Index in g_sea_routes (gs_current_sea_route_id); passage_id ist der davon abgeleitete gs_sea_travel_passage_id
+seg063.c	563	kommentar	\brief (leer)	Uhr in das der Stadt diagonal gegenueberliegende Kartenviertel	
+seg063.c	399	originalfehler_neu	if (p_money < 10L) { GUI_output(get_tx(8)); } else if (answer == 1 || answer == 2)	Geldpruefung erst bei Antwort 1/2	waehlt man "DEN GELDHAI VERLASSEN" mit weniger als 1 Silberling, bruellt der Hafenmeister trotzdem "IHR HABT NOCH NICHT EINMAL EINEN EINZIGEN SILBERLING?"
+seg063.c	390	kommentar	Saemtliche Routern erfragen	Routen	Tippfehler
+seg063.c	493	originalfehler_neu	for (i = 0; i < 6; i++) g_food_message_shown[i] = 0;	i <= 6	g_food_message_shown hat 7 Eintraege, der NSC behaelt eine alte Hunger-/Durst-Meldungssperre; geringe Auswirkung
+seg063.c	682	kommentar	(kein Kommentar)	Zweitnutzung von gs_travel_distance_per_18_hours als zurueckgelegte Strecke	wird nach dem Auswuerfeln der Ereignispositionen auf 0 gesetzt und pro Schritt erhoeht
+seg063.c	739	originalfehler_be	Original-Bug 34: Efferds Schutz verhindert Krakenmolch, nicht Piraten	Beschreibung stimmt; ob Piraten gemeint waren, ist Auslegung (Text: "SCHUTZ AUF WASSER")	Fix ergaenzt die Timerpruefung, schluessig
+seg063.c	90	originalfehler_be	Original-Bug 25: Prem-Manrin 54 statt vermutlich 310 (Byteueberlauf)	Rechnung stimmt (310 - 256 = 54), Fix 255 ist ein Notbehelf	distance ist unsigned char
+seg064.c	41	parameter	passage_type	ship_type	Aufrufer uebergibt ent->ship_type, der Doxygen-Text nennt Schiffstypen (0 Langschiff, 5 Kuestensegler, ...)
+seg064.c	34	kommentar	returns a pointer to the name of a ship	zufaelliger Name aus HAFEN.LTX 42..121, \return ergaenzt	
+seg064.c	142	parameter	\param route_pointer; "base price per unit of distance"	\param route; Heller je 10 km	Parametername falsch
+seg064.c	156	originalfehler_neu	unsigned int di; di = di * route->distance;	in 32 Bit rechnen	Disassembly: imul dx, nur ax wird weiterverwendet. Karracke auf Prem-Hjalsingor (210 km) ab price_mod 90: z.B. pm 100 -> 73500 mod 65536 = 7964 -> 80 H statt 735 H. Luxuspassage (45 H) ueberlaeuft auf Routen ab 115 km teilweise, auf 210 km immer. Der angezeigte und bezahlte Preis ist dann ein Bruchteil
+seg064.c	191	originalfehler_neu	gs_sea_travel_passage_speed2 = ROUNDED_DIVISION(base_speed * (gs_weather2 + 6) * (gs_weather1 * 15 + 100), 1000L)	Produkt in long rechnen, base_speed unsigned	Disassembly: zwei imul mit 16-Bit-Ergebnis, danach xor dx,dx. Ueberlauf fuer base_speed' >= 27 (Langschiff 50, Karracke 42, Kuestenlangschiff 37, Kuestensegler 33); Schnellsegler (-43) ergibt Modulo-Werte 0..64. Bei weather1=6, weather2=2 ist das Tempo des Schnellseglers 0: Anzeige = Distanz in Stunden, beim Buchen wird gs_travel_speed = 0 und sea_travel() teilt durch 0 (Absturz). Auch kleine Tempi (1..6) sind moeglich und lassen gs_travel_total_duration (int16) ueberlaufen
+seg064.c	212	originalfehler_be	Original-Bug 35: nur wenige Stundenwerte wegen ungenauer Umrechnung	Begruendung unvollstaendig: die Wertelisten im Kommentar gelten nicht fuer das Original	siehe originalfehler_neu: 16-Bit-Ueberlauf und base_speed -106 bestimmen die Werte; der Fix ROUNDED_DIVISION(10*distance, speed2) teilt bei speed2 = 0 durch 0
+seg064.c	92	originalfehler_be	Original-Bug 23: Schiffsnamen bei jedem Blick neu ausgewuerfelt	Begruendung stimmt, Fix (Name aus price_mod % 10) schluessig	Bereich 42..121 bleibt gleich (0x2a + 0..9 statt 0x29 + 1..10)
+seg064.c	246	kommentar	1 = passages next days "Ankommende Routen erfragen"	Abfahrten in 1-2 Tagen ("ANKOMMENDE SCHIFFE ERFRAGEN"), 2 = alle Routen	Text HAFEN.LTX 1/2
+seg064.c	285	kommentar	(kein Kommentar)	Doxygen fuer passage_arrival() (Rueckgabe immer 0)	
+seg065.c	47	kommentar	(kein Kommentar)	Doxygen fuer do_market(), final_intro(), show_hyggelik_ani(), show_times_up(), show_outro() und die vier hyg_ani-Helfer	
+seg065.c	56	name	type_bak	typeindex_bak	sichert gs_town_typeindex
+seg065.c	57	name	dir_bak / dir_bak_bak	viewdir_bak / viewdir_bak_bak	sichern gs_viewdir bzw. gs_viewdir_bak
+seg065.c	411	name	bak1 / bak2	basepos_x_bak / basepos_y_bak	show_times_up(): Sicherung von g_basepos_x/y
+seg065.c	208	name	hyg_ani_1	hyg_ani_extract	static: entpackt ein NVF-Bild und liefert den Zeiger dahinter
+seg065.c	230	name	hyg_ani_2	hyg_ani_draw	static: zeichnet ein Bild an (x, y) in den Renderpuffer
+seg065.c	246	name	hyg_ani_3	hyg_ani_draw_background	static: kopiert den Hintergrund in den Renderpuffer
+seg065.c	261	name	hyg_ani_4	hyg_ani_show	static: Renderpuffer auf den Bildschirm
+seg065.c	366	kommentar	(kein Kommentar)	g_hyg_ani_x9 enthaelt y-Werte	wird als y-Argument von hyg_ani_draw() benutzt
+seg065.c	620	kommentar	/* ??? */	le_max_malus wird geloescht, le_max aber nicht erhoeht	siehe Bright-Eyes-Fix "restore permanent LE-damage" direkt darueber
+seg065.c	606	originalfehler_be	Original-Bug: restore permanent LE-damage at the end of game	Befund stimmt (malus wird ohne Ausgleich geloescht); Fix ist eine Designentscheidung (Heilung gratis)	im Original bleibt le_max dauerhaft vermindert, nur der Merker ist weg
+seg065.c	632	kommentar	better check use get_sober()	Tippfehler	
+seg066.c	188	platzhalter	g_seg066_0bad_unkn0..7	g_visual_square_tex_house1, _house2, _house3, _house4, _water_grass, _signpost, _inn, _merchant	static Tabellen: Texturnummer je sichtbarem Feld, ausgewaehlt in town_set_visual_square_tex() nach TOWN_TILE-Typ 2,3,4(+1 Tempel),5,6/7,8,9,10
+seg066.c	185	name	g_mapval_to_loctype	g_mapval_to_town_tile	static: Obergrenzen der Kartenwerte je TOWN_TILE-Typ, kein LOCTYPE
+seg066.c	321	kommentar	REMARK: this is int16_t	Aufbau: 3 Teile je {x, y, nvf_no (-1 = keins, Bit 15 = gespiegelt)}	aus town_building_textures(): ptr[0..2], ptr[3..5], ptr[6..8]
+seg066.c	439	kommentar	signed int g_entrance_angle;	Seite des Eingangs relativ zur Blickrichtung, 2 = zur Gruppe	get_border_index(): ((val & 3) + 4 - gs_viewdir) & 3; town_step() betritt Haeuser nur bei 2
+seg066.c	444	kommentar	(kein Kommentar)	Doxygen fuer enter_location(), enter_location_daspota(), do_special_buildings(), TLK_eremit(), do_town(), town_update_view(), town_set_visual_square_vals(), get_border_index(), town_set_visual_square_tex(), load_town_texture(), town_direction_change(), town_step(), town_fade_and_colors(), town_update_house_count()	
+seg066.c	452	name	b_index	tile_type	Rueckgabe von get_border_index() ist der TOWN_TILE-Typ (2..5 = Haus); in enter_location() und enter_location_daspota()
+seg066.c	615	name	type	typeindex	do_special_buildings(): Kopie von gs_town_typeindex
+seg066.c	1118	name	l4 (town_building_textures) / v4 (load_town_texture)	tex_set	184 + Index in g_tex_floor; 232/233 = Sondertexturen in g_buffer7_ptr
+seg066.c	1240	kommentar	accesses memory outside of the texture array if v4 is 48 or 49!?	ja, aber nur ein Zeigerwert wird gelesen und gleich ersetzt	harmlos
+seg066.c	1267	originalfehler_neu	copy_height -= y;	copy_height += y;	bei y < 0 wird die Hoehe vergroessert statt verkleinert und es werden |y| Zeilen zu viel kopiert; mit den vorhandenen Versatztabellen wird y < 0 vermutlich nie erreicht
+seg066.c	1004	originalfehler_neu	while (g_mapval_to_town_tile[i] < val) i++;	Schleife auf 12 begrenzen	fuer Kartenwerte >= 0xf0 wird hinter das Feld gelesen (naechste Tabelle: 0x01, 0xff), Ergebnis 12; vermutlich kommen solche Werte in Stadtkarten nicht vor
+seg066.c	1028	kommentar	(kein Kommentar)	Zweig bi == -1 ist tot; Tempel nutzt Haus-3-Texturen	get_border_index() liefert i-1 mit i >= 1
+seg066.c	724	kommentar	(kein Kommentar)	TLK_eremit Zustand 6 heilt alle Heldenplaetze ohne Gruppenpruefung	add_hero_le() ueberspringt Tote; Helden anderer Gruppen werden mitgeheilt
+seg066.c	1494	parameter	{-1 = no, 1 = yes}	{1 = vorwaerts, -1 = rueckwaerts}	Aufrufer: town_do_step(1) / town_do_step(-1)
+seg066.c	1600	kommentar	(kein Kommentar)	0x120 umfasst drei aufeinanderfolgende Paletten	der #else-Zweig (3*0x20) kopiert nur die Bodenpalette
+seg066.c	92	kommentar	(kein Kommentar)	Zweck von g_hyg_ani_x*, x9 sind y-Werte	
+seg067.c	70	kommentar	a hero may loose W20 S to a pickpocket	lose; nur wenn die Sinnesschaerfe+2-Probe misslingt	Tippfehler, Bedingung ergaenzt (auch Ereignis 2)
+seg067.c	121	originalfehler_neu	randval = random_schick(5) - 1; ... get_tx(randval + 24)	Texte 24, 25, 29, 30 (randval + 26 fuer 3 und 4)	randval 2 zeigt die dreiteilige Mauer-Geschichte 26/27/28; die anderen Werte zeigen 24, 25, 27, 28, also Teil 2 oder 3 der Geschichte ohne Anfang ("IHR HABT ETWAS SCHWIERIGKEITEN MIT DER MAUER..."), die Texte 29 und 30 (Dieb entkommt) erscheinen nie
+seg067.c	124	kommentar	24..28 zufällig, z.B. "DEN SEID IHR WOHL LOS."	24, 25, 27 oder 28; Beispieltext aus 24	Text 23 gehoert zu den Saetzen 20..23
+seg067.c	198	kommentar	a beggar asks for 1D and tells some gossip	falscher Bettler (Text 91..94 "WIE VON WUNDERHAND GESUNDET")	
+seg067.c	231	platzhalter	random city event 5: ??	Kinder (Texte 99..102), harmlos	STRASSE.LTX 99..102
+seg067.c	254	kommentar	z.B. "<JEDOCH, UMSONST IST DER TOD, SAGTE M..."	z.B. Text 99 "EIN KIND BLEIBT VOR EUCH STEHEN..."	zitierter Text war Nr. 98 (Ereignis 4)
+seg067.c	261	kommentar	meet a merchant	Strassenhaendler, 3. Antwort oeffnet den Laden (Haendler 93)	
+seg067.c	420	kommentar	return a pointer to a weapon related information	Textbereich und Aufrufer (Haendlergespraech in seg031) ergaenzt (alle drei waffinfo-Funktionen)	
+seg067.c	289	originalfehler_be	Original-Bug 24: Strassenhaendler ueberschreibt gs_town_typeindex	Begruendung stimmt, Fix richtig	town_step() ruft city_event_switch() nach enter_location(); Chance 1 % * 1/9 = 1/900; typeindex 93 ist in keiner Tempelliste -> Praios
+seg067.c	301	originalfehler_be	Original-Bug 27: Drehung um 180 Grad nach dem Strassenhaendler	Beschreibung stimmt (leave_location() in do_merchant()), Fix schluessig	
+seg067.c	33	kommentar	1 = city event active	Wirkung ergaenzt: vsync_or_key() erlaubt dann Pause mit Leertaste	seg002 vsync_or_key()
+seg068.c	43	kommentar	(kein Kommentar)	Doxygen fuer alle 13 Funktionen (Gebaeude, Ugdalf-Zustaende, Bankeinheit)	
+seg068.c	102	kommentar	loosing team (2x)	losing	Tippfehler
+seg068.c	88	kommentar	(kein Kommentar)	Eintritt laut Text 1 Heller, wird nicht abgezogen	kleiner Widerspruch Text/Code
+seg068.c	325	originalfehler_neu	set_party_money(gs_arsenal_money); ... do_merchant();	Schuldenabfrage im Zeughaus unterdruecken bzw. Budget getrennt fuehren	do_merchant() fragt in Thorwal bei Stoerrebrandt-Schulden ab 100 D nach 50 D und zieht sie vom Gruppengeld ab, das hier das Zeughausbudget ist: Schulden werden mit Staatsgeld bezahlt. Der Rest des Budgets wird auf ganze Dukaten abgerundet. Vermutlich unbeabsichtigt
+seg068.c	145	name	l3	excess	Kreditueberschreitung ueber 200 S
+seg068.c	545	name	buffer1_bak	tx_file_index_bak	Sicherung von g_tx_file_index; 222 = ARCHIVE_FILE_SPELLTXT_LTX
+seg068.c	593	originalfehler_neu	for (i = cursed_hero_pos = 0; ...) ... if (cursed_hero_pos == 0)	-1 als "kein verfluchter Held"	ist der erste Held (Platz 0) verflucht, sagt Aranda "KEINER VON EUCH HAT EINEN FLUCH AUF SICH" (Text 67); er kann hier nicht entflucht werden, solange er auf Platz 0 steht
+seg068.c	660	originalfehler_neu	GUI_input(get_tx2(63), 0);	sprintf(g_dtp2, get_tx2(63), hero->alias)	Text 63 "NACH ETWA EINER HALBEN STUNDE BEMERKT %s, DASS ES IHM ..." erscheint mit wortwoertlichem "%s" (beide Zahlungswege)
+seg068.c	498	originalfehler_be	Original-Bug: bei jedem Betreten der Zwingfeste 20 D	Begruendung stimmt, Fix richtig	gs_quest_ugdalf bleibt 1, bis das Verlies den Auftrag loest; mit 2 greift weiter "!gs_dng14_ugdalf_done" fuer den Zugang, aber kein Geld
+seg068.c	771	kommentar	(Ergaenzung)	Bedingungen: Grundpreis >= Preis, nicht zerbrochen, Plaetze 0..5	
+seg069.c	31	kommentar	signed int g_combo_mode;	Werte 0/1/2 erklaert	do_tavern(): 2 = in die Herberge wechseln, THO_tav_inn_combi() wertet aus
+seg069.c	34	kommentar	(kein Kommentar)	Doxygen fuer alle 5 Funktionen (Typeindex-Zuordnung im Kombihaus)	
+seg069.c	64	originalfehler_neu	for (i = 0; i < 14; i++) gs_gods_estimation[i] += answer;	for (i = 1; i < GOD_ID__END; i++)	Index 0 ist kein Gott, Ifirn (14) bekommt den Segen des Hetmanns nicht. Gleiches Muster in seg082.c:352 (nicht geprueft)
+seg069.c	201	originalfehler_neu	leave_location() in do_tavern/do_inn, THO_tav_inn_combi und do_special_buildings	nur ein leave_location()	jeder Aufruf dreht die Gruppe um 180 Grad: nur Taverne oder nur Herberge = 3 Aufrufe (gewendet), Taverne und Herberge = 4 (nicht gewendet), sofort verlassen = 1. Aehnlich Eisenhof und Zeughaus (do_smith/do_merchant + do_special_buildings = 2, nicht gewendet). Vgl. Bright-Eyes Bug 26/27
+seg069.c	207	name	type_bak	typeindex_bak	sichert gs_town_typeindex des Kombihauses
+seg070.c	36	kommentar	carriage station / stadthaus of Phexcaer / ...	\brief der 7 Funktionen um Inhalt und Kosten ergaenzt	
+seg070.c	128	kommentar	the Party looses 10D	loses	Tippfehler (auch "you loose")
+seg070.c	165	kommentar	Gambling +3	Falschspiel +3 (Erschwernis)	test_talent(hero, TA_FALSCHSPIEL, 3): positiver Wert erschwert
+seg070.c	144	name	counter	num_passed	Zahl der Helden mit bestandener Falschspielprobe
+seg070.c	174	originalfehler_be	#ifdef M302de_ORIGINAL_BUGFIX ... (count_heroes_in_group() >> 1) >= counter	Fix richtig; bisher ohne Erklaerung, Kommentar "Original-Bug" ergaenzt	im Original verliert die Gruppe, wenn mehr als die Haelfte die Probe besteht; der Kommentar "you loose: at least the half ... have not passed" beschrieb nur das Verhalten mit Fix
+seg070.c	176	originalfehler_neu	PHX_spielhaus(): kein timewarp()	timewarp(HOURS(...))	Text "NACH EINIGEN STUNDEN HABT IHR %d DUKATEN VERLOREN/GEWONNEN", die Spielzeit bleibt stehen; geringe Auswirkung
+seg070.c	115	originalfehler_be	Original-Bug: ESC ruft GUI_radio() erneut mit -1 Optionen auf	Begruendung stimmt, Fix (eigene Variable answer2) richtig	answer wird als Optionszahl und als Antwort benutzt
+seg070.c	287	kommentar	this check is bogus	answer ist hier immer 3	GUI_radio-Schleife laesst nur 1..3 durch
+seg071.c	32	kommentar	(kein Kommentar)	Doxygen fuer PHX_drogentempel()	Zahlungen 20 D bzw. 25 D je Held
+seg071.c	196	originalfehler_neu	gs_ptemple_closed wird nie gesetzt	vermutlich nach Text 56 setzen	Bright-Eyes vermerkt nur, dass der Zweig nie laeuft. Text 60 "DER BETRAUM IST VERSCHLOSSEN ... OFFENSICHTLICH IST DIE GEWEIHTE NICHT DA" ist unerreichbar; nach der Beleidigung (Text 56 "DAS WERDET IHR BEREUEN ... VERSCHWINDET HIER") passiert nichts. Vermutung
+seg071.c	204	kommentar	saving the no of the old location	Typ des Ortes (gs_town_loc_type)	
+seg071.c	399	kommentar	(kein Kommentar)	Flag wird nie gelesen	grep ueber alle Module; ebenso gs_harlot_date (seg070) nur geschrieben
+seg071.c	365	name	l_di	topic	Gespraechsthema: 1 = Preis fuer Hyggelik-Hinweis, 2 = Wer seid ihr, 3 = Hinweis, 0 = Ende
+seg071.c	360	kommentar	the dialog with ALRIK DERONDAN	Ort und Bedingung ergaenzt	Aufruf aus seg073 bei gs_alrik_derondan
+seg072.c	716	kommentar	test FF+2 / test FF+5	GE+2 / GE+5	Code prueft ATTRIB_GE (Gewandtheit), nicht Fingerfertigkeit
+seg072.c	742	kommentar	between 3 and 5 days	37..60 Stunden (1,5 bis 2,5 Tage)	random_schick(24) + 36 Stunden; der Zaehler wird in seg002 stuendlich verringert (in timewarp() erst mit Bright-Eyes-Fix 39)
+seg072.c	203	kommentar	TODO: check what happens here (Isleif, Zustaende 15/19, 16/20)	nichts, die Zweige sind leer	die Vergleiche stehen im Binaercode, ohne Wirkung
+seg072.c	221	kommentar	TODO: what does that mean ?	gs_isleif_map_given: Karte in Zustand 17 schon uebergeben; Zustand 24 verzweigt danach	
+seg072.c	639	originalfehler_be	Original-BUG: this would reactivate algrid	Begruendung zweifelhaft	Algrids Dialog fragt gs_algrid_treborns_hint in Zustand 3/4 ab; das Zuruecksetzen auf 1 ermoeglicht gerade das neue Gespraech nach Treborns Hinweis. Vermutlich gewollt
+seg072.c	39	kommentar	signed char g_swafnild_traveled;	Bedeutung ergaenzt	do_harbor() (seg063) wertet aus
+seg072.c	41	kommentar	char g_str_beorn_hjall[20];	Inhalt: Name des NSC (Erwo) als Dialogtitel	INF_ragna_beorn_algrid() Zustand 6: strcpy(..., get_hero(6)->alias), g_dialog_title zeigt darauf
+seg072.c	44	kommentar	dialog logic for the informers ...	Dialogdatei INFO1..7.TLK je Funktion ergaenzt	
+seg072.c	867	kommentar	counts the collected parts of the treasure map	Teile 0..8, ohne Hjores Teil 9	
+seg073.c	568	kommentar	generates the name of a drinkmate and copies it to a buffer	Aufbau des Namens und \return ergaenzt	
+seg073.c	596	kommentar	\return TODO {0, 1}	1 = Informant/Totenschiff (TLK_tavern Zustand 144), 0 = nichts (133)	seg060.c TLK_tavern Zustand 132
+seg073.c	602	originalfehler_be	TODO: should be initialized with 0 / Original-Bug: which return value here? (2 Stellen)	Befund stimmt, betrifft aber alle Wege ohne Ereignis	auch wenn kein Zweig passt oder der Zufallswurf fuer Jurge/Ragna/Beorn/Asgrimm/Algrid misslingt, wird ein zufaelliger Stapelwert zurueckgegeben; TLK_tavern() verzweigt dann zufaellig zu 133 oder 144
+seg073.c	154	originalfehler_be	Orig-Bug: Informants can be reenabled if they had been set to 2	Begruendung stimmt	update_informer_cond() setzt im Original ohne Pruefung 1 (v302de.h), Fix prueft auf 0; betrifft Eliane und Asgrimm
+seg073.c	615	kommentar	not used in the game	bestaetigt: gs_announce_day wird nie gelesen	grep
+seg073.c	703	kommentar	(case-Zweige ohne Kommentar)	Informant je Fall benannt (Jurge, Ragna, Beorn, Asgrimm, Algrid)	INFO1/3/5.TLK Partner wie in seg072
