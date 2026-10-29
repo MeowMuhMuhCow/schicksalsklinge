@@ -35,6 +35,11 @@ Für alle, die nur spielen wollen. Nötig sind Windows und Schicksalsklinge von 
 3. **`BLADEM_FIX_WICHTIG_STARTEN.bat`** (wichtige Fehler) oder **`BLADEM_FIX_ALLES_STARTEN.bat`** (alle) doppelklicken.
    Das Spiel startet mit den GOG-Daten. Die Spielstände landen in eigenen Ordnern unter `Build\`, die echten bleiben unberührt.
 
+**Funktionieren meine Spielstände weiter?** Ja. Die Bugfix-Fassung ändert das Speicherformat nicht, kein Feld, keine
+Größe. Eure alten Spielstände aus dem GOG-Ordner erscheinen beim Laden automatisch und lassen sich weiterspielen.
+Was ihr mit der Bugfix-Fassung neu speichert, landet in einem eigenen Ordner unter `Build\`. Eure Original-Spielstände
+werden dabei nie überschrieben. Und weil das Format gleich bleibt, kann man jederzeit zurück zum Original.
+
 Der Patch (`Patch\*.ndp`, je 35–60 KB) enthält nur die geänderten Bytes, kein Originalprogramm. Ohne gekauftes
 Spiel lässt sich damit nichts anfangen.
 
