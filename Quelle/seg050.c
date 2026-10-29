@@ -491,6 +491,9 @@ void level_up(const signed int hero_pos)
 	signed int i;
 	struct struct_hero *hero;
 	signed int text_file_index_bak;
+#if FIX_0250
+	signed int mr_bonus;
+#endif
 
 	hero = get_hero(hero_pos);
 
@@ -572,6 +575,12 @@ void level_up(const signed int hero_pos)
 			/* Original-Bug: ESC or the right mouse button gives l_si = -2. attrib[-2] are the
 			 * two upper bytes of hero->money. Unless they are >= 20, the loop ends and both bytes
 			 * are incremented below: money += 65536 + 16777216 H (about 168427 D), no attribute rises. */
+#if FIX_0248
+			/* Fix 248: Abbruch (ESC, rechte Maustaste) wiederholt die Abfrage */
+			if (l_si < 0) {
+				l_si = -2;
+			} else
+#endif
 			if (hero->attrib[l_si].normal >= 20) {
 
 				l_si = -2;
@@ -613,6 +622,12 @@ void level_up(const signed int hero_pos)
 
 			/* Original-Bug: ESC or the right mouse button gives l_si = -2, i.e. attrib[5] = IN.
 			 * The loop ends and the hero tries to lower his IN (success is very likely). */
+#if FIX_0249
+			/* Fix 249: Abbruch (ESC, rechte Maustaste) wiederholt die Abfrage */
+			if (l_si < 0) {
+				l_si = -2;
+			} else
+#endif
 			if (hero->attrib[l_si + 7].normal <= 2) {
 
 				l_si = -2;
@@ -657,6 +672,30 @@ void level_up(const signed int hero_pos)
 	/* Original-Bug: hero->mr contains the boni of MR items, mr does not. With such an item
 	 * the message appears although the base MR did not change; if the base MR rises by
 	 * exactly the bonus, nothing is updated and the bonus is lost (unequip subtracts it later). */
+#if FIX_0250
+	/* Fix 250: mit dem Grundwert vergleichen; die Boni der MR-Gegenstaende so aufschlagen wie
+	 * add_equip_boni() (Stirnreif, roter Ring in beiden Haenden) und give_new_item_to_hero() (je Amulett +5) */
+	mr_bonus = 0;
+	if (hero->inventory[HERO_INVENTORY_SLOT_HEAD].item_id == ITEM_ID_STIRNREIF__MR_BONUS) {
+		mr_bonus += 2;
+	}
+	if (hero->inventory[HERO_INVENTORY_SLOT_LEFT_HAND].item_id == ITEM_ID_RING__RED) {
+		mr_bonus += 2;
+	}
+	if (hero->inventory[HERO_INVENTORY_SLOT_RIGHT_HAND].item_id == ITEM_ID_RING__RED) {
+		mr_bonus += 2;
+	}
+	for (i = 0; i < NR_HERO_INVENTORY_SLOTS; i++) {
+		if (hero->inventory[i].item_id == ITEM_ID_AMULETT__MR_BONUS) {
+			mr_bonus += 5;
+		}
+	}
+
+	if (hero->mr - mr_bonus != mr) {
+
+		/* set new basic MR plus the boni */
+		hero->mr = mr + mr_bonus;
+#else
 	if (hero->mr != mr) {
 
 		/* set new basic MR */
@@ -675,6 +714,7 @@ void level_up(const signed int hero_pos)
 		if (inv_slot_of_item(hero, ITEM_ID_AMULETT__MR_BONUS) != -1) {
 			hero->mr += 5;
 		}
+#endif
 
 		/* show the user the new MR value */
 		sprintf(g_dtp2, get_tx2(41), hero->mr); /* "DIE MAGIERESISTENZ HAT SICH AUF %d VERÄNDERT!" */
@@ -700,7 +740,13 @@ void level_up(const signed int hero_pos)
 		/* a magic user */
 
 		/* add spell increasements */
+#if FIX_0402
+		/* Fix 402: aufgesparte Zaubersteigerungen hoechstens 127 (signed char) */
+		hero->saved_spell_increases = ((signed int)hero->saved_spell_increases + g_levelup_sp_rise[hero->typus - 7] > 127) ?
+						127 : hero->saved_spell_increases + g_levelup_sp_rise[hero->typus - 7];
+#else
 		hero->saved_spell_increases += g_levelup_sp_rise[hero->typus - 7];
+#endif
 
 		i += 2;
 
@@ -796,6 +842,10 @@ void level_up(const signed int hero_pos)
 			while (hero->saved_spell_increases != 0 && rounds < 3) {
 
 				rounds++;
+#if FIX_0251
+				/* Fix 251: jede Runde wieder beim ersten Zauber beginnen */
+				i = 1;
+#endif
 
 				switch (hero->typus) {
 
@@ -964,7 +1014,12 @@ void level_up(const signed int hero_pos)
 			while (hero->saved_spell_increases != 0) {
 				/* Original-Bug: random_schick(SP__END) gives 1..86, but 85 is the last spell.
 				 * Index 86 is hero->saved_spell_increases, that try is wasted. */
+#if FIX_0252
+				/* Fix 252: nur echte Zauber 1..SP__END-1 */
+				inc_spell_novice(hero, random_schick(SP__END - 1));
+#else
 				inc_spell_novice(hero, random_schick(SP__END));
+#endif
 			}
 		}
 
@@ -1000,7 +1055,13 @@ void level_up(const signed int hero_pos)
 						i = spta_convs;
 					}
 
+#if FIX_0402
+					/* Fix 402: hoechstens 127 (signed char) */
+					hero->saved_spell_increases = ((signed int)hero->saved_spell_increases + i > 127) ?
+									127 : hero->saved_spell_increases + i;
+#else
 					hero->saved_spell_increases += i;
+#endif
 					hero->saved_talent_increases -= i;
 				}
 			}

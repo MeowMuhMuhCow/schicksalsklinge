@@ -491,7 +491,7 @@ void mspell_balsam(void)
 	/* set pointer to an enemy target */
 	g_spelltarget_e = &g_enemy_sheets[g_spelluser_e->target_object_id - 10];
 
-#ifndef M302de_ORIGINAL_BUGFIX
+#if !FIX_0036
 	/* Original-Bug:
 	 * very strange behavior.
 	 * If LE loss is less then 14, 7 LE will be healed, price AE = LE.
@@ -518,7 +518,7 @@ void mspell_balsam(void)
 		g_spelltarget_e->le += g_mspell_ae_cost;
 	}
 #else
-	/* Fix:
+	/* Fix 36: halben Verlust, mindestens 7, hoechstens bis zum Maximum heilen (Bright-Eyes-Fix)
 	 * Let's do it this way:
 	 * Heal (missing LE)/2 LE, but at least 7, as long as it won't be healed above max.
 	 * If not enouh AE available, number of healed LE is lowered accordingly. */
@@ -792,9 +792,17 @@ void mspell_armatrutz(void)
 	 * i * i >= AE, der Bonus bis i kann also mehr AE kosten, als der Gegner hat;
 	 * MON_sub_ae() kappt dann bei 0. */
 	i = 0;
+#if FIX_0207
+	/* Fix 207: groesster Bonus, dessen Quadrat die AE nicht uebersteigt */
+	while ((i * i) <= g_spelluser_e->ae) {
+		i++;
+	}
+	--i;
+#else
 	while ((i * i) < g_spelluser_e->ae) {
 		i++;
 	}
+#endif
 
 	rs_bonus = random_interval(1, i);
 

@@ -127,7 +127,12 @@ void tevent_057(void)
 				/* TODO: Original-Bug: that condition does not make sense */
 				/* Vermutlich gemeint: kein Seil UND keine Strickleiter -> schwerer Sturz. So stuerzt
 				 * schwer, wer eine Strickleiter hat oder kein Seil; leicht nur mit Seil ohne Strickleiter. */
+#if FIX_0158
+				/* Fix 158: schwerer Sturz nur ohne Seil und ohne Strickleiter */
+				if (get_first_hero_with_item(ITEM_ID_SEIL) == -1 && get_first_hero_with_item(ITEM_ID_STRICKLEITER) == -1)
+#else
 				if (get_first_hero_with_item(ITEM_ID_SEIL) == -1 || get_first_hero_with_item(ITEM_ID_STRICKLEITER) != -1)
+#endif
 				{
 
 					sprintf(g_dtp2, get_tx2(8), hero->alias, GUI_get_personal_pronoun(hero->sex, GRAMMAR_CASE_1ST)); /* "UNTER %s LÖST SICH EIN FELSBLOCK, UND IN EINEM HAUFEN GERÖLL GEHT %..." */
@@ -495,6 +500,26 @@ void tevent_064(void)
 
 				hero = get_hero(select_hero_ok_forced(get_ttx(317))); /* "WELCHER HELD SOLL MAGIE ANWENDEN?" */
 
+#if FIX_0159
+				/* Fix 159: Nicht-Magier oder misslungener Silentium fuehren zurueck in die Auswahl
+				 * (bei Misserfolg mit Text 102 "LEIDER MISSLINGT DER SILENTIUM") */
+				if (hero->typus < HERO_TYPE_HEXE) {
+					GUI_output(get_ttx(330));
+				} else if (test_spell(hero, SP_SILENTIUM_SILENTILLE, 0) > 0) {
+
+					approach_flag = 1;
+
+					sub_ae_splash(hero, 2);
+
+					gs_tevent064_ambush_flag = 1;
+
+					GUI_output(get_tx2(53));
+				} else {
+					sub_ae_splash(hero, 1);
+
+					silentium_flag = 1;
+				}
+#else
 				if (hero->typus < HERO_TYPE_HEXE) {
 					GUI_output(get_ttx(330)); /* "DIESE OPTION IST AUSSCHLIESSLICH MAGIEKUNDIGEN VORBEHALTEN!" */
 				} else {
@@ -520,6 +545,7 @@ void tevent_064(void)
 						GUI_output(get_ttx(606)); /* "ZAUBER LEIDER MISSLUNGEN!" */
 					}
 				}
+#endif
 
 			} else if (answer == 2) {
 

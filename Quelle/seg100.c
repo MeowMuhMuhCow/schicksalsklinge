@@ -48,7 +48,8 @@ void spell_eigenschaften(void)
 
 	damage_range_template(g_spelltarget_e->dam1, &min, &max);
 
-#ifndef M302de_ORIGINAL_BUGFIX
+#if !FIX_0202
+	/* Fix 202 (FIX_0202 = 1 laesst die Kuerzung weg): Nahkampfschaden ungekuerzt anzeigen */
 	/* Original-Bug 63:
 	 * When casting the spell "Eigenschaften seid gelesen", the displayed damage range is only 80% of the true numbers.
 	 *
@@ -106,7 +107,12 @@ void spell_exposami(void)
 			/* Original-Fehler: '<=' liest auch arr[count], der noch nicht beschrieben ist.
 			 * Steht dort zufaellig dieselbe monster_id, wird der Muell hochgezaehlt und
 			 * der Monstertyp fehlt in der Liste. Richtig waere '<'. */
+#if FIX_0203
+			/* Fix 203: nur beschriebene Eintraege vergleichen */
+			for (j = 0; j < count; j++) {
+#else
 			for (j = 0; j <= count; j++) {
+#endif
 				if (arr[j][0] == id) {
 					/* found an entry with this id */
 					arr[j][1]++;
@@ -176,15 +182,12 @@ void spell_odem_arcanum(void)
 
 	inv_pos = select_item_to_drop(get_spelluser());
 
-#ifdef M302de_ORIGINAL_BUGFIX
-	/* If the player cancels item selection or has no items select_item_to_drop() returns -1.
-	   The original uses the return value to calculate an index, whithout checking for this. */
+#if FIX_0200
+	/* Fix 200: Abbruch der Gegenstandswahl (-1) nicht als Inventarplatz benutzen (g_dtp2 ist schon leer) */
 	if (inv_pos == -1)
 	{
-		sprintf(g_dtp2, "");
 		return;
 	}
-
 #endif
 
 	item_id = get_spelluser()->inventory[inv_pos].item_id;
@@ -478,6 +481,10 @@ void spell_eisenrost(void)
 			sprintf(g_dtp2, get_tx(89)); /* "TIERE HABEN KEINE WAFFEN, DIE MAN ZERBRECHEN LASSEN KANN!" */
 			/* g_spell_special_aecost bleibt -1: volle Kosten, obwohl nichts passiert
 			 * (Bannbaladin setzt in diesem Fall 0) */
+#if FIX_0205
+			/* Fix 205: keine Kosten, wie bei Bannbaladin */
+			g_spell_special_aecost = 0;
+#endif
 #else
 			strcpy(g_dtp2, get_tx(89)); /* "TIERE HABEN KEINE WAFFEN, DIE MAN ZERBRECHEN LASSEN KANN!" */
 #endif
@@ -732,6 +739,9 @@ void spell_saft_kraft(void)
 	signed int target;
 	signed int mod_slot;
 	signed int rounds;
+#if FIX_0206
+	char *p;
+#endif
 
 	rounds = random_schick(20);
 
@@ -763,8 +773,9 @@ void spell_saft_kraft(void)
 	/* set ae costs */
 	g_spell_special_aecost = rounds;
 
-#ifdef M302de_ORIGINAL_BUGFIX
-	char *p = get_tx(96); /* "%s VERWANDLET SICH IN EINE KAMPFMASCHINE." */
+#if FIX_0206
+	/* Fix 206: Tippfehler im geladenen Text zur Laufzeit berichtigen */
+	p = get_tx(96); /* "%s VERWANDLET SICH IN EINE KAMPFMASCHINE." */
 
 	if (p[10] == 'L' && p[11] == 'E') {
 		/* change "VERWANDLET" into "VERWANDELT" */

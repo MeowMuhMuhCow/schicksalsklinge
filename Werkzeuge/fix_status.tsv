@@ -1,0 +1,148 @@
+nr	umgesetzt	grund (bei teilweise/nein; bei ja optional)
+1	nein	unsicher (Wurfspeer moeglich); braucht Aenderungen der Waffentabelle im Datensegment
+2	nein	braucht eine Fernkampftabelle im Datensegment
+3	nein	Datenfehler in MONSTER.DAT (Spieldaten)
+4	nein	residentes Modul seg005 hat keinen Platz (die Behebung wuerde das Segment um 6 Byte verlaengern, dort gibt es keinen toten Code zum Ausgleich)
+5	nein	residentes Modul seg005 hat keinen Platz (+68 Byte, kein toter Code zum Ausgleich); der Teil fuer den Patzer-Tod steht unter Nr. 8 (seg032)
+10	nein	Mit allen 7 Plaetzen koennte der NSC allein durch einen anderen Ausgang fliehen und eine reine NSC-Gruppe bilden - die kennt das Spiel nicht (siehe Nr. 80, 243); ohne Fix bleibt der NSC bei der Restgruppe, folgenlos
+21	nein	Absicht unklar (unsicher): ob Gegner im Handgemenge nicht schiessen duerfen, ist eine Regelfrage
+26	nein	das Zielfeld liegt im Datensegment (darf nicht wachsen); die 10 Byte dahinter (g_fig_enemy_parry_action_used[0..9]) werden nie benutzt, lange Wege brauchen die 20 Byte - folgenlos
+29	nein	braucht Platz fuer ganze Inventareintraege und Besitzer je Wurf - neue Daten im Datensegment
+33	nein	Designfrage (unsicher): Gegner haben keinen Bruchfaktor, vermutlich bewusst
+35	nein	ohne Wirkung: FIG_remove_from_list(..., 1) laesst die alten Werte des Gegners in g_fig_list_elem stehen, double_size ist also schon richtig
+37	nein	Absicht unklar (unsicher): ob der Gegnerzauber laenger wirken soll als der Heldenzauber, ist nicht belegbar
+42	nein	ohne Wirkung: keine Stadt hat die Kombination (Haustyp 1 und 2 fehlen)
+44	nein	Absicht unklar: die gemischten Antworten zu benutzen waere eine sichtbare Spielaenderung, das Mischen zu streichen aendert nichts Sichtbares
+47	teilweise	nach dem Lager in Stadt und Dungeon und nach dem Strassenhaendler wird die Drehung zurueckgenommen (Bright-Eyes-Fix); die mehrfachen Aufrufe in Haeusern mit Taverne und Herberge (THO_tav_inn_combi, do_special_buildings) bleiben, dort haengt die Richtung vom Ablauf ab
+51	ja	dieselbe Stelle wie Nr. 50 (FIX_0051 folgt FIX_0050)
+53	teilweise	der gute Preis verschlechtert den Verkauf nicht mehr (Haendler setzen g_price_modificator nicht mehr auf 3); welche Verguenstigung gemeint war (Rabatt beim Kauf oder mehr Erloes), ist nicht belegbar (Spielbalance)
+55	nein	unsicher: Meldung 566 ("DAS NAECHSTE MAL SOLLTET IHR VORHER ETWAS PLATZ ...") deutet auf Absicht; mit Nr. 54 passt der Korb jetzt zum freien Platz
+58	nein	unsicher: die Wirkung der Merker auf den Dialog ist nicht geprueft; sie stehen im Spielstand und koennen gewollt dauerhaft sein
+66	teilweise	im Zeughaus keine Schuldenabfrage mehr (das Budget des Hetmanns zahlt keine Stoerrebrandt-Schulden); dass der Rest des Budgets auf ganze Dukaten abgerundet wird, bleibt (gs_arsenal_money steht in Dukaten im Spielstand)
+73	nein	wie viele Stunden "einige" sein sollen, ist nicht belegbar
+74	nein	unsicher: ob die Geweihte nach der Beleidigung fuer immer verschwinden und der Tempel geschlossen bleiben soll, ist nicht belegbar
+92	nein	Designluecke (unsicher): ob der verwandelte Magierstab auch am Spalt helfen soll, ist nicht belegbar
+99	nein	die Druckplatten muessten bei jedem Teleport und Gruppenwechsel in mehreren Dungeons neu ausgewertet werden - ein Umbau der Handler, kein eindeutiger Einzelfix
+100	nein	Neuauswertung aller Gruppen auf den Platten waere ein Umbau der Plattenlogik; der eindeutige Teil (Summe in der Schleife) ist Nr. 102
+104	nein	ob der Kampf schon stattfand, steht nur in der Kampfliste; welcher Kampf zur Szene gehoert, ist im Handler nicht verknuepft
+112	nein	ob der Inhalt der Raetseltruhe immer ganz genommen wird, ist offen; der Merker wuerde uebrig gebliebene Gegenstaende sperren
+116	nein	unsicher, als Absicht lesbar (Text 13 fragt nur nach dem Entschaerfen); ein Ausloesen bei unentdeckter Platte waere eine neue Falle
+120	nein	unsicher, nicht gemessen; die zuletzt ausgewertete Zeitmarke zu merken braucht eine neue Variable (Datensegment)
+123	nein	der Zaehler muesste in den Spielstand (neues Feld)
+124	nein	unsicher: die Texte fehlen in der Spieldatei OBER.DTX; welcher vorhandene Text passt, ist nicht belegbar
+131	nein	die Entfernung steht als Byte in der Tabelle g_sea_routes (Datensegment, Spielstand)
+134	nein	Auslegung (unsicher): ob Efferds Schutz auch vor Piraten schuetzen soll, ist nicht belegbar
+139	nein	die Hafenliste steht im Datensegment (Tabelle g_harbors_linked_sea_routes_10)
+140	nein	die Hafentabelle g_harbors steht im Datensegment
+141	nein	Eintrag der Ereignistabelle im Datensegment, Datenfehler (unsicher)
+143	nein	unsicher: welcher feste Wert gemeint war, ist nicht belegbar (197 waere langsamer als normal)
+146	nein	die Axt-Liste liegt im Datensegment; welche Aexte gemeint sind, ist ausserdem nicht belegt
+147	nein	unsicher: ob FEATURE.LTX 15..19 als Formattexte gedacht sind, laesst sich ohne die Spieldaten nicht pruefen; Spieltext
+155	nein	folgenlos: ausgewertet wird nur Bit 0, das bei beiden Werten gleich ist
+157	nein	Spieltext (FEATURE2.LTX) mit zwei statt drei Platzhaltern
+169	nein	unsicher: Umweg plus Rueckweg koennten gemeint sein
+172	nein	unklar, welche Bedingung gemeint war: -99 hiesse ein patzender Hoehenangst-Wurf (also gerade keine Angst) laesst den Helden abstuerzen; test_talent() == -1 ist ebenfalls zufaellig eng
+173	nein	unsicher, ob Absicht
+175	nein	Tabelle im Datensegment; welche Landschaft fuer Typ 7 gemeint war, ist nicht belegt (mit Fix 181 liest Typ 7 weiter die verschobene Spalte)
+180	ja	anders als Bright-Eyes: die Schleife endet nur, ueber Bord Gerissene bleiben wie im Original in der Gruppe
+186	nein	Absicht unklar (Spielbalance): ob eine ganze Gruppe mit Visibili an jedem Kampf vorbeischleichen soll, ist nicht belegbar
+192	nein	der Schutzschirm ist nicht umgesetzt; eine Wirkung waere neue Spielmechanik ohne belegte Absicht (wie viel AE welchen Zauber abwehren)
+194	nein	Spieltext (SPELLTXT.LTX) ohne %s; ein %s laesst sich nicht ohne Textaenderung einfuegen
+198	nein	Balancefrage: ob 7 AE auch fuer weniger fehlende LE (oder bei voller LE) gelten sollen, ist nicht belegt
+204	nein	Breite/Hoehe und das Zuruecksetzen bei Kampfende braeuchten neuen Speicher im Datensegment bzw. Zugriff auf eine statische Variable aus einem anderen Modul
+209	nein	unsicher, im Spiel nicht nachgeprueft; Behandlung des Schwanzteils waere ein groesserer Eingriff in die Kampfliste
+212	teilweise	Zauberwert und Stabrabatt geprueft; die fehlende Meldung braeuchte einen neuen Text
+213	nein	Wirkung fehlt ganz; Umsetzung waere neue Spielmechanik (welcher Feuerschaden wie stark)
+214	teilweise	Absturz verhindert (Meldung nicht benutzbar); das usable-Bit in ITEMS.DAT bleibt
+215	nein	Datenfehler in ITEMS.DAT, ohne regulaeren Fundort folgenlos
+218	nein	fehlende Gegenstandswirkungen waeren neue Spielmechanik; Texte stehen in den Spieldaten
+220	ja	Zaehler an den drei Stellen richtig gefuehrt, Stapel beim Zusammenlegen auf 99 begrenzt; in alten Spielstaenden bereits verschobene Zaehler bleiben
+226	teilweise	kein alter Text mehr; eine eigene Meldung braeuchte einen neuen Text
+232	nein	Gift alle 5 Minuten auch waehrend Rast und Reise auszuwerten hiesse bei langer Rast dutzende Meldungsfenster und meist den Tod (Shurinknollengift endet nicht von selbst); ob das so gewollt ist, ist offen - im Zweifel nicht
+242	teilweise	Textbreite wird zurueckgesetzt; die Rueckgabe bleibt 0 statt -1, weil alle Aufrufer das Ergebnis ungeprueft mit get_hero() benutzen
+261	nein	Spieltext (SPELLTXT.LTX) ohne %s; der Name laesst sich nicht ohne Textaenderung einfuegen
+262	nein	unsicher, ob die beiden Krankheiten per Talent heilbar sein sollen; eine eigene Meldung braeuchte einen neuen Text
+268	nein	braucht einen eigenen Merker im Heldendatensatz (Spielstand) und der Bright-Eyes-Fix einen neuen Text
+271	nein	unsicher, Folgen nicht geprueft; die Ursache Schlachtfeldfieber ist mit Fix 270 behoben
+276	nein	unsicher, ob NVF-Typ 1 mit Index > 0 im Spiel vorkommt; residentes Modul
+277	nein	folgenlos (kein Aufrufer wertet den Wert aus); residentes Modul
+278	nein	folgenlos (der Wert kommt nie vor); residentes Modul
+279	nein	folgenlos (hoechstens ein unnoetiges Neuzeichnen); residentes Modul
+285	nein	unsicher, ob der Fall im Spiel vorkommt; Assembler-Modul mit fester Laenge
+286	nein	kein Fix noetig (toter Code)
+291	nein	unsicher und folgenlos: read_archive_file() begrenzt auf das Dateiende, ob die letzte Figur je so geladen wird, ist offen
+295	nein	toter Zweig ohne Wirkung, kein Fehler im Spiel
+297	nein	ohne Wirkung: im else-Zweig ist state immer 1
+300	nein	unsicher, im Spiel nicht geprueft: welcher Ausschnitt eines gespiegelten Bildes richtig ist, liesse sich nur am Bild klaeren
+302	nein	unsicher: Bright-Eyes' Umbau aendert bei Gegenstaenden ohne Plural auch Artikel im 1./4. Fall; die Abfrage == 1 in GUI_name_inflect trifft ohnehin nur den 2. Fall - ob das Original hier absichtlich so formt, ist nicht belegbar
+303	nein	braucht einen neuen Tabelleneintrag im Datensegment; folgenlos, der einzige Aufrufer nutzt den 4. Fall
+305	nein	folgenlos: nur Lesezugriffe hinter dem Feld, das Ergebnis wird nie benutzt
+310	nein	kein Fix noetig (ueberzaehlige Argumente sind harmlos)
+311	nein	braeuchte eigene Texte fuer die Flucht Gorahs; die Spielwerte (Rune, Huette) bei Flucht sind Auslegungssache
+314	nein	Absicht unklar: beide Menuepunkte tauschen nur mit belegten Rucksackplaetzen; ein Ablegen auf einen leeren Platz waere eine neue Bedienung
+315	nein	Absicht unklar (Spielbalance): ob bewusstlose oder schlafende Figuren die Schusslinie freigeben sollen, ist nicht belegbar
+317	nein	KI-Entscheidung des Computerkampfs, kein eindeutiger Fehler: nach einer Bewegung mit weniger als 3 Rest-BP ist kein Angriff mehr moeglich; ob der Held trotzdem weiterziehen soll, ist nicht belegbar
+318	nein	KI-Schwaeche, kein eindeutiger Fehler (unsicher); eine zielabhaengige Zauberwahl waere neues Verhalten
+320	nein	Absicht nicht belegbar: die Fluchtraender unterscheiden sich bewusst je Hintergrund (Schiff), und Helden im Computerkampf fliehen ueber dieselbe Suche ebenfalls nach rechts
+321	nein	kann Absicht sein (unsicher): ein umstellter Fliehender wehrt sich nicht
+323	nein	Datenfehler in MONSTER.DAT (Spieldaten), kann gewollt sein (unsicher)
+324	nein	Designaenderung (Resistenzen nach Handbuch), keine Fehlerbehebung
+325	nein	is_animal steht in MONSTER.DAT (Spieldaten); ob Daemonen giftimmun sein sollen, ist eine Regelfrage (unsicher)
+326	nein	eigene Wirkungen je Gift waeren neue Regeln; welche Wirkung gedacht war, ist nicht belegbar (Spielbalance)
+327	teilweise	nach verlorenem oder abgebrochenem Kampf kein Ausruestungsbildschirm; welche Folgen eine Flucht haben soll, ist offen
+331	nein	Neuberechnen beim Laden aenderte das Angebot gegenueber dem Original auch ohne Ausnutzen; welcher Stand gelten soll, ist offen
+333	nein	Tabelle der Geruechte im Datensegment, Datenfehler
+334	nein	Absicht unklar: der Merker steuert nur den Gespraechsbeginn mit dem Wirt; Zimmer und Essen zu verweigern waere eine neue Regel ohne eigenen Text
+335	nein	unsicher: ob Wein/Schnaps eine Zechenprobe haben sollen, ist nicht belegt (Balance)
+337	nein	kann gewollt sein (unsicher): Gurthag spricht nach dem Kellerausgang nicht mehr mit der Gruppe
+338	nein	fuer Treborns Laden gibt es keinen eigenen Ortstext; ein Sonderfall braucht einen neuen Text
+340	nein	Datenfehler in der Tabelle g_informer_tab (Datensegment)
+341	teilweise	die Olvir/Treborn-Begegnung wiederholt sich nicht mehr auf derselben Reise; dass Algrids Hinweis (Treborn = bekannt) sein erstes Treffen verhindert, bleibt - getrennte Merker braeuchten ein neues Feld im Spielstand
+342	nein	der Satz steht fest im Dialog (Spieldaten)
+345	nein	der Kampf startet beim ersten Drehen oder Menue; ihn schon beim Ankommen auszuloesen braucht einen eigenen Merker (Datensegment) fuer alle Wege (Treppe, Falltuer, Teleporter)
+346	nein	die Vergleichsposition gs_dng_pos_bak je Gruppe zu fuehren braucht neue Felder im Spielstand
+348	nein	unsicher; Kaempfe je Dungeon waeren neue Daten
+349	nein	welche Dungeon-Feldtypen begehbar sind, ist ohne Pruefung an den Plaenen (Totenschiff) nicht sicher; eine falsche Sperre wuerde Teleporte verhindern
+350	nein	die Todesfalle (gs_deathtrap) ist ein einziger Wert im Spielstand; sie je Gruppe zu fuehren aendert das Spielstandformat
+352	nein	fuer die leere Giftdorn-Truhe gibt es keinen eigenen Text
+353	nein	den Altarzustand zu merken braucht ein neues Feld im Spielstand
+354	nein	Absicht unklar: ob der gesicherte Stein die Tuer (0,11,1) sperren soll, ist nicht belegbar; eine Meldung braucht einen neuen Text
+355	nein	der Rest muesste als Truhe gespeichert werden - neue Daten im Spielstand
+356	nein	Absicht unklar (unsicher): feste Grenze von fuenf Seilen
+357	nein	Raumgrenzen und Zeitpruefung der Falle sind Daten- und Designfragen; die richtige Ausdehnung ist nicht belegbar
+358	nein	unsicher: wie die Tueren wieder verschlossen werden, ist nicht gefunden; Absicht nicht belegbar
+359	nein	die Felder einzeln zu merken braucht neue Merker im Spielstand
+360	nein	einmal je Lager braeuchte einen Merker je Strohlager (Spielstand)
+361	nein	Absicht unklar: ob Hort und Auftragsbelohnung sich ausschliessen sollen, ist nicht belegbar
+362	nein	der Merker ist ein Byte im Spielstand ohne Gruppenbezug; die Fluchwirkung je Gruppe zu fuehren aendert das Spielstandformat, und die gemeinte Wirkung des Fluchs ist unklar
+365	nein	braucht je Gruppe gesicherte Werte, also eine Aenderung des Spielstands
+366	nein	welcher feste Ausgangsort gemeint war, ist nicht belegbar
+368	nein	eigene Hinweis-Merker braeuchten neue Felder im Spielstand
+369	nein	welche Fahrtrichtung zu Umbrik zurueckfuehrt, ist aus dem Code nicht sicher abzuleiten
+370	nein	unklar, was nach einer Flucht der Helden gelten soll (Gorah lebt ja noch)
+371	nein	welche Fahrtrichtung die Strecke als vorwaerts fuehrt, ist aus dem Code nicht sicher abzuleiten; im Zweifel nicht
+373	nein	unsicher, kann Absicht sein
+374	nein	do_wildcamp() setzt die Status selbst zurueck; sie zu uebernehmen braeuchte einen neuen Zustand (Datensegment) oder Eingriff in seg051
+379	nein	Absicht unklar (Spielbalance): Axxeleratus gibt eine zweite Aktion; ob sie neue BP und eine neue Wahl bekommen sollte, ist nicht belegbar - ein neues Menue mit neuen BP waere eine Regelaenderung
+380	nein	unklar, ob die zwei Attacken gewollt sind; zuruecksetzen ginge nur an allen Stellen, die renegade loeschen, und der Ausgangswert ist im Gegnerblatt nicht gespeichert
+381	nein	folgenlos (tote Gegner kaempfen nicht); welche Meldung/Kosten richtig waeren, ist offen
+382	nein	Zauber nicht umgesetzt; Umsetzung waere neue Spielmechanik
+383	nein	unsicher: nicht geprueft, ob gs_town_id auf der Reise noch die Abreisestadt haelt
+384	nein	ein Merker am Helden braeuchte ein Feld in der Heldenstruktur (Spielstand); die Sperre selbst ist gewollt
+386	nein	braucht neue Eintraege und Texte (Spieldaten/Datensegment)
+390	teilweise	Paraden Held gegen Held pruefen jetzt bf -99; Curians Stab mit bf 5 steht in CURIAN.NPC (Spieldaten) und bleibt
+391	nein	Datenfehler (Sperrliste im Datensegment)
+392	nein	unsicher; Waffentabelle im Datensegment
+393	nein	es gibt keinen Munitionsgegenstand (Id 999 passt nicht in ein Byte); Bright-Eyes macht die Schleuder als Feature-Mod ohne Munition benutzbar - eine Designentscheidung, keine Fehlerbehebung
+395	nein	eine passende Meldung braeuchte einen neuen Text
+396	nein	die Weitergabe an die Gruppe aenderte den Ablauf (Wegwerf-Abfrage); geringer Nutzen
+399	nein	unsicher, ob Stab/Besen mit Schild gewollt verboten sein sollen (Stab ist als Speer gefuehrt)
+404	ja	eine laufende Elixierwirkung auf dieselbe Eigenschaft wird nur erneuert (Meldung bleibt)
+406	nein	unsicher; Behinderung bei Talentproben waere neue Spielregel (welche Talente, wie viel), nicht belegt
+409	nein	Grenze des Grammatiksystems; braucht neue Tabellen im Datensegment
+411	nein	aendert die Dateinamen von Spielstaenden mit Umlaut im Namen; was das Original dabei schreibt, haengt von Bytes vor der ctype-Tabelle ab - vorhandene Spielstaende koennten nicht mehr gefunden werden
+412	nein	die Formatstrings des Tagebuchs (Datensegment) verlangen Tag und Monatsnamen; eine eigene Zeile fuer die Namenlosen Tage braucht einen neuen Text
+413	nein	keine Fehlfunktion des Spiels, haengt vom Rechner bzw. den DOSBox-Zyklen ab
+414	nein	unsicher; das Spielstandfeld haelt einen Zeiger - ein anderer Inhalt im selben Feld vertruege sich nicht mit vorhandenen Spielstaenden
+415	nein	es gibt keine eigene Reisemusik; welches Stueck gemeint war, ist nicht belegbar
+416	nein	folgenlos: do_fight() prueft selbst, ob der Kampf erledigt ist

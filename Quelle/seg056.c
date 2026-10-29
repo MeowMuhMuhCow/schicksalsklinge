@@ -118,6 +118,9 @@ void buy_screen(void)
 	signed int cart_pos;
 	signed int num_slots_needed;
 	struct nvf_extract_desc nvf;
+#if FIX_0054
+	signed int fix_slots_new; /* Plaetze, die die neue Ware zusaetzlich braucht */
+#endif
 
 	/* Only the first 250 bytes (62 entries of 4 bytes) are cleared, but entries are always written
 	 * before they are read (cart_len). The cart holds the chosen kinds of goods, not the merchant's
@@ -359,6 +362,12 @@ void buy_screen(void)
 					cart_pos = l_di;
 				}
 
+#if FIX_0054
+				/* Fix 54: Stapelbarkeit des Korbeintrags, 99 Stueck je Platz */
+				num_slots_needed += (g_buy_shopping_cart[l_di].item_id != 0) && g_itemsdat[g_buy_shopping_cart[l_di].item_id].flags.stackable ?
+						(g_buy_shopping_cart[l_di].quantity + 98) / 99 :
+						g_buy_shopping_cart[l_di].quantity;
+#else
 				num_slots_needed += (g_buy_shopping_cart[l_di].item_id != 0) && g_itemsdat[item_id].flags.stackable ?
 					/* Original-Bug: the following formula is wrong.
 					 * 199 stackable items need 3 slots (99 + 99 + 1), not 2. */
@@ -367,6 +376,7 @@ void buy_screen(void)
 					 * that is about to be added are not counted in the check below. */
 						g_buy_shopping_cart[l_di].quantity / 100 + 1 :
 						g_buy_shopping_cart[l_di].quantity;
+#endif
 			}
 
 			if (cart_pos != -1) {
@@ -407,11 +417,22 @@ void buy_screen(void)
 
 					price_delta = (int32_t)g_item_selector_buy[item_selector_pos + item_selector_page_offset].price * g_item_selector_buy[item_selector_pos + item_selector_page_offset].price_unit * num_items;
 
+#if FIX_0054
+					/* Fix 54: die zusaetzlich gekaufte Ware mitzaehlen */
+					fix_slots_new = g_itemsdat[item_id].flags.stackable ?
+						(g_buy_shopping_cart[cart_pos].quantity + num_items + 98) / 99 - (g_buy_shopping_cart[cart_pos].quantity + 98) / 99 :
+						num_items;
+#endif
+
 					if (l3 == 1 && price + price_delta > p_money) {
 
 						GUI_output(get_ttx(401)); /* "SOVIEL GELD HABT IHR DOCH GAR NICHT!" */
 
+#if FIX_0054
+					} else if (l3 == 1 && free_slots < num_slots_needed + fix_slots_new) {
+#else
 					} else if (l3 == 1 && free_slots < num_slots_needed) {
+#endif
 
 						GUI_output(get_ttx(438)); /* "DIE GRUPPE KANN KEINE WEITEREN GEGENSTÄNDE AUFNEHMEN!" */
 
@@ -467,7 +488,14 @@ void buy_screen(void)
 
 							GUI_output(get_ttx(401)); /* "SOVIEL GELD HABT IHR DOCH GAR NICHT!" */
 
+#if FIX_0054
+						/* Fix 54: die neue Ware mitzaehlen */
+						} else if (free_slots < num_slots_needed +
+							(g_itemsdat[g_item_selector_buy[item_selector_pos + item_selector_page_offset].item_id].flags.stackable ?
+								(num_items + 98) / 99 : num_items)) {
+#else
 						} else if (free_slots < num_slots_needed) {
+#endif
 
 							GUI_output(get_ttx(438)); /* "DIE GRUPPE KANN KEINE WEITEREN GEGENSTÄNDE AUFNEHMEN!" */
 

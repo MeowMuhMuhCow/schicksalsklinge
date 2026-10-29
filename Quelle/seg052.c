@@ -196,6 +196,12 @@ void do_area_camp(void)
 				if (hours > 0) {
 
 					watch_hours = hours / 3;
+#if FIX_0130
+					/* Fix 130: mindestens 1 Stunde je Wache, sonst wechselt die Wache nie */
+					if (watch_hours == 0) {
+						watch_hours = 1;
+					}
+#endif
 					watch_hours_left = watch_hours;
 					watch = 0;
 
@@ -249,6 +255,10 @@ void do_area_camp(void)
 
 					if (done != 0) {
 
+#if FIX_0313
+						/* Fix 313: im Dungeon erst nach dem Kampf loeschen, FIG_init_heroes() weckt die Wache */
+						if (g_area_camp_area_type != AREA_TYPE_DUNGEON)
+#endif
 						gs_camp_incident = -1;
 
 						if (g_area_camp_area_type == AREA_TYPE_DUNGEON) {
@@ -258,6 +268,9 @@ void do_area_camp(void)
 							g_fig_discard = 1;
 
 							do_fight(g_dcampfights[random_schick(4) - 1]);
+#if FIX_0313
+							gs_camp_incident = -1;
+#endif
 
 							if (g_game_state == GAME_STATE_MAIN) {
 								draw_main_screen();
@@ -309,8 +322,9 @@ void do_area_camp(void)
 
 	/* Original-Bug 26: After leaving a camp in town/dungeon-mode, the party is rotated by 180 degrees. This does not make sense. */
 	leave_location();
-#ifdef M302de_ORIGINAL_BUGFIX
-	/* The rotation is performed in the function leave_location().
+#if FIX_0047
+	/* Fix 47 (teilweise): Drehung nach dem Lager zuruecknehmen (Bright-Eyes-Fix zu Original-Bug 26)
+	 * The rotation is performed in the function leave_location().
 	 * We fix the bug in a hacky way by simply correcting the rotation afterwards. */
 	gs_viewdir = REVERSE_VIEWDIR(gs_viewdir); /* rotate by 180 degrees */
 #endif

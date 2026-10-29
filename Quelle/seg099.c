@@ -281,7 +281,8 @@ void spell_verwandlung(void)
 			sprintf(g_dtp2,	get_ttx(565), get_spelltarget()->alias); /* "DER FLUCH WIRD VON %s GENOMMEN, UND ALLE EIGENSCHAFTEN STEIGEN WIEDER!" */
 		} else {
 
-#ifdef M302de_ORIGINAL_BUGFIX
+#if FIX_0193
+			/* Fix 193: %S im geladenen Text zu %s machen */
 			/* Broken format string, %S must be %s */
 			get_tx(5)[5] = 's'; /* "AUF %S RUHT GAR KEIN VERWANDLUNGSZAUBER." */
 #endif
@@ -655,6 +656,12 @@ void spell_skelettarius(void)
 	signed int x;
 	signed int y;
 	signed char attacks_left_bak;
+#if FIX_0195
+	signed char object_id_bak;
+#endif
+#if FIX_0196
+	uint8_t* buf_seek_ptr_bak;
+#endif
 
 	/* Set pointer to enemy target */
 	g_spelltarget_e = &g_enemy_sheets[get_spelluser()->target_object_id - 10];
@@ -689,15 +696,17 @@ void spell_skelettarius(void)
 		if (p_fighter->double_size != -1) {
 			FIG_remove_from_list(g_fig_double_size_fighter_id_table[p_fighter->double_size], 0);
 		}
-#ifdef M302de_ORIGINAL_BUGFIX
+#if FIX_0195
+		/* Fix 195: object_id des Ziels sichern (darunterliegende Leiche bleibt waehlbar) */
 		/* Original-Bug 1:
 		 * If the dead target enemy is lying on top of the body of another dead enemy,
 		 * after the 'Skelettarius' the other body is still displayed, but cannot be selected for 'Skelettarius'.
 		 *
 		 * Fix: store and restore the fighter.object_id value. */
-		signed char object_id_bak = p_fighter->object_id;
+		object_id_bak = p_fighter->object_id;
 #endif
-#ifdef M302de_ORIGINAL_BUGFIX
+#if FIX_0196
+		/* Fix 196: Grafikpuffer des ersetzten Gegners (je Gegner 0x508 Byte) fuer den Zombie wiederverwenden */
 		/* Original-Bug 2:
 		 * reported at https://www.crystals-dsa-foren.de/showthread.php?tid=5039&pid=148171#pid148171
 		 * Every 'Skelettarius' spell adds 1288 (=0x508) bytes at the end of g_fightobj_buf for the animation of the fighter.
@@ -710,7 +719,7 @@ void spell_skelettarius(void)
 		 * https://www.crystals-dsa-foren.de/showthread.php?tid=5039&pid=148252#pid148252
 		 * https://www.crystals-dsa-foren.de/showthread.php?tid=5191&pid=166097#pid166097
 		 * */
-                uint8_t* buf_seek_ptr_bak = g_fightobj_buf_seek_ptr; /* backup the entry of g_fightobj_buf_seek_ptr */
+		buf_seek_ptr_bak = g_fightobj_buf_seek_ptr; /* backup the entry of g_fightobj_buf_seek_ptr */
 		g_fightobj_buf_seek_ptr = p_fighter->gfxbuf;
 #endif
 
@@ -721,7 +730,7 @@ void spell_skelettarius(void)
 		fill_enemy_sheet(get_spelluser()->target_object_id - 10, 0x10, 0); /* 0x10 = Zombie (MONNAMES 16) */
 
 		FIG_load_enemy_sprites(g_spelltarget_e, x, y);
-#ifdef M302de_ORIGINAL_BUGFIX
+#if FIX_0196
 		/* Original-Bug 2:
 		 * set g_fightobj_buf_freespace and g_fightobj_buf_seek_ptr to the correct values as discussed above */
 		g_fightobj_buf_freespace += 0x508L;
@@ -733,7 +742,7 @@ void spell_skelettarius(void)
 		g_spelltarget_e->flags.renegade = 1;
 		g_spelltarget_e->attacks_left = attacks_left_bak;
 
-#ifdef M302de_ORIGINAL_BUGFIX
+#if FIX_0195
 		/* Original-Bug 1:
 		 * restore the fighter.object_id value. */
 		p_fighter = FIG_get_fighter(g_spelltarget_e->fighter_id);
@@ -812,11 +821,12 @@ void spell_foramen(void)
 	signed int y;
 
 	if
-#ifndef M302de_ORIGINAL_BUGFIX
+#if !FIX_0197
 	/* Original-Bug 28:
 	 * Free Foramen spell (from the spellcast menu) can open closed dors only if the 'open door' submenu has been activated before (showing the three symbols smash, pick and spell). */
 	(g_dng_extra_action != DNG_MENU_MODE_UNLOCK_DOOR)
 #else
+	/* Fix 197: freies Foramen auch vor einer geschlossenen Tuer ohne geoeffnetes Tuermenue */
 	(gs_dungeon_id == DUNGEON_ID_NONE || (g_dng_extra_action != DNG_MENU_MODE_UNLOCK_DOOR && g_dng_extra_action != DNG_MENU_MODE_OPEN_DOOR))
 #endif
 	{
@@ -986,6 +996,17 @@ void spell_hexenspeichel(void)
 
 	if (le != -1) {
 
+#if FIX_0199
+		/* Fix 199: hoechstens die fehlenden LE heilen, je LE 2 AE, und nicht mehr AE ausgeben, als da sind */
+		if (get_spelltarget()->le_max - get_spelltarget()->le < le) {
+			g_spell_special_aecost = (get_spelltarget()->le_max - get_spelltarget()->le) * 2;
+		} else {
+			g_spell_special_aecost = le * 2;
+		}
+		if (get_spelluser()->ae < g_spell_special_aecost) {
+			g_spell_special_aecost = get_spelluser()->ae;
+		}
+#else
 		if (get_spelltarget()->le_max - get_spelltarget()->le < le * 2) {
 
 			g_spell_special_aecost = (get_spelltarget()->le_max - get_spelltarget()->le) * 2;
@@ -1002,6 +1023,7 @@ void spell_hexenspeichel(void)
 				g_spell_special_aecost = le * 2;
 			}
 		}
+#endif
 
 		add_hero_le(get_spelltarget(), g_spell_special_aecost / 2);
 	}
@@ -1111,7 +1133,8 @@ char* spell_analues(void)
 
 	inv_slot = select_item_to_drop(get_spelluser());
 
-#ifdef M302de_ORIGINAL_BUGFIX
+#if FIX_0200
+	/* Fix 200: Abbruch der Gegenstandswahl (-1) nicht als Inventarplatz benutzen */
 	/* If the player cancels item selection or has no items select_item_to_drop() returns -1.
 	The original uses the return value to calculate an index, whithout checking for this. */
 	if (inv_slot == -1) item_id = 0;
@@ -1146,6 +1169,10 @@ char* spell_analues(void)
 					break;
 				} else {
 					/* nothing found string */
+#if FIX_0201
+					/* Fix 201: am Zuschlag gescheitert -> halbe AE wie bei misslungenem Zauber */
+					g_spell_special_aecost = get_spell_cost(SP_ANALUES_ARCANSTRUKTUR, 1);
+#endif
 					strcpy(g_text_output_buf, get_tx(55)); /* "<TUT MIR LEID, ICH KANN NICHT SAGEN, WAS FÜR EIN ZAUBER HIER ANGEWE..." */
 					break;
 				}

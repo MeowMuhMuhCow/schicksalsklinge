@@ -430,7 +430,12 @@ void TLK_tavern(const signed int answer)
 		 * (states 24, 27, 28, 29, 34, 40). */
 		drink_while_drinking(10);
 
+#if FIX_0059
+		/* Fix 59: der Preis ist in Silbertalern genannt, das Geld wird in Hellern gefuehrt */
+		tmp = 200 * gs_tlk_tav_crowdedness;
+#else
 		tmp = 20 * gs_tlk_tav_crowdedness;
+#endif
 
 		p_money = get_party_money();
 
@@ -442,7 +447,12 @@ void TLK_tavern(const signed int answer)
 
 		drink_while_drinking(10);
 
+#if FIX_0059
+		/* Fix 59: der Preis ist in Silbertalern genannt, das Geld wird in Hellern gefuehrt */
+		tmp = 200 * gs_tlk_tav_crowdedness;
+#else
 		tmp = 20 * gs_tlk_tav_crowdedness;
+#endif
 
 		p_money = get_party_money();
 
@@ -456,7 +466,12 @@ void TLK_tavern(const signed int answer)
 
 		drink_while_drinking(10);
 
+#if FIX_0059
+		/* Fix 59: der Preis ist in Silbertalern genannt, das Geld wird in Hellern gefuehrt */
+		tmp = 200 * gs_tlk_tav_crowdedness;
+#else
 		tmp = 20 * gs_tlk_tav_crowdedness;
+#endif
 
 		p_money = get_party_money();
 
@@ -468,7 +483,12 @@ void TLK_tavern(const signed int answer)
 
 		drink_while_drinking(10);
 
+#if FIX_0059
+		/* Fix 59: der Preis ist in Silbertalern genannt, das Geld wird in Hellern gefuehrt */
+		tmp = 200 * gs_tlk_tav_crowdedness;
+#else
 		tmp = 20 * gs_tlk_tav_crowdedness;
+#endif
 
 		p_money = get_party_money();
 
@@ -498,7 +518,12 @@ void TLK_tavern(const signed int answer)
 
 		drink_while_drinking(10);
 
+#if FIX_0059
+		/* Fix 59: der Preis ist in Silbertalern genannt, das Geld wird in Hellern gefuehrt */
+		tmp = 200 * gs_tlk_tav_crowdedness;
+#else
 		tmp = 20 * gs_tlk_tav_crowdedness;
+#endif
 
 		p_money = get_party_money();
 
@@ -510,7 +535,12 @@ void TLK_tavern(const signed int answer)
 
 		drink_while_drinking(10);
 
+#if FIX_0059
+		/* Fix 59: der Preis ist in Silbertalern genannt, das Geld wird in Hellern gefuehrt */
+		tmp = 200 * gs_tlk_tav_crowdedness;
+#else
 		tmp = 20 * gs_tlk_tav_crowdedness;
+#endif
 
 		p_money = get_party_money();
 
@@ -643,7 +673,12 @@ void TLK_tavern(const signed int answer)
 		 * does not check the group: heroes of another group are tested, heroes in higher slots
 		 * of the active group (behind a dead hero or an empty slot, the NPC in slot 6) are skipped. */
 
+#if FIX_0060
+		/* Fix 60: alle 7 Plaetze durchgehen, Zustand 109 prueft die Gruppe */
+		if (gs_tlk_tav_testdrunk < 7) {
+#else
 		if (gs_tlk_tav_testdrunk < count_heroes_in_group()) {
+#endif
 			g_dialog_next_state = (109);
 		} else {
 			g_dialog_next_state = (111);
@@ -654,7 +689,12 @@ void TLK_tavern(const signed int answer)
 
 		g_dialog_next_state = (108);
 
-		if ((get_hero(gs_tlk_tav_testdrunk)->typus) && !get_hero(gs_tlk_tav_testdrunk)->flags.dead && gs_tlk_tav_drinkcount)
+		if ((get_hero(gs_tlk_tav_testdrunk)->typus) && !get_hero(gs_tlk_tav_testdrunk)->flags.dead && gs_tlk_tav_drinkcount
+#if FIX_0060
+			/* Fix 60: nur Helden der aktiven Gruppe */
+			&& (get_hero(gs_tlk_tav_testdrunk)->group_id == gs_active_group_id)
+#endif
+			)
 		{
 			g_dialog_next_state = (test_talent(get_hero(gs_tlk_tav_testdrunk), TA_ZECHEN, gs_tlk_tav_drinkcount - 8) > 0 ? 108 : 110);
 		}
@@ -715,6 +755,10 @@ void TLK_tavern(const signed int answer)
 
 		tmp = count_heroes_in_group() * (6 - g_tavern_descr_table[gs_town_typeindex].quality / 4);
 		tmp += (tmp * g_tavern_descr_table[gs_town_typeindex].price_mod) / 100;
+#if FIX_0059
+		/* Fix 59: Silberstuecke wie in do_tavern(), also mal 10 Heller */
+		tmp *= 10;
+#endif
 		p_money = get_party_money();
 		p_money -= tmp;
 		set_party_money(p_money);

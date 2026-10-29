@@ -11,7 +11,14 @@ Wichtig: Die Module werden immer in derselben Reihenfolge und im selben DOSBox-L
 bei der Registerwahl fuer switch nicht vorbelegten Speicher; das Ergebnis kann von der vorher uebersetzten Datei
 abhaengen (so bei Sternenschweif O030 beobachtet).
 
-Aufruf:  python bauen.py [--projekt ORDNER] [--compiler ORDNER] [--dosbox DOSBox.exe] [--baudir ORDNER] [--sichtbar]"""
+Aufruf:  python bauen.py [wichtig|alles] [--exploits-lassen] [--fixflags "..."]
+                         [--projekt ORDNER] [--compiler ORDNER] [--dosbox DOSBox.exe] [--baudir ORDNER] [--sichtbar]
+
+Fix-Modus (python bauen.py wichtig | alles): nach dem Standardbau (FIX_BUGS=0, muss bytegleich sein) zusaetzlich die
+Fehlerbehebungen einschalten (Quelle\\s_fix.h: FIX_BUGS=1 "wichtig" = kritisch + mittel, 2 "alles"), alle Module mit
+den Schaltern neu uebersetzen, residente Module auf ihre Originallaenge auffuellen (Werkzeuge\\segpad.py), linken und
+gegen den Standardbau pruefen (Werkzeuge\\fixcheck.py) -> Build\\BLADEM_FIX_WICHTIG.EXE bzw. BLADEM_FIX_ALLES.EXE.
+ALLE BEHEBUNGEN SIND IM SPIEL UNGETESTET (siehe Bauen\\FIXES.md)."""
 import os, sys, re, shutil, stat, hashlib, subprocess, time, argparse, tempfile
 
 HIER = os.path.dirname(os.path.abspath(__file__))
@@ -137,9 +144,74 @@ class Dos:
         return time.time() - t0
 
 
+def fix_bau(projekt, root, dosbox, sichtbar, flags, name):
+    """Fix-Modus (Portierung von Werkzeuge/build_fix.sh): alle Module mit den Schaltern neu uebersetzen, residente
+    Module (SEG001..SEG013) auf die Laenge des Standardbaus auffuellen, linken, mit fixcheck pruefen."""
+    werkz = os.path.join(projekt, 'Werkzeuge')
+    segpad, fixcheck = finde_ci(werkz, 'segpad.py'), finde_ci(werkz, 'fixcheck.py')
+    if not segpad or not fixcheck: abbruch('Fix-Modus: Werkzeuge\\segpad.py oder fixcheck.py fehlt')
+    src = os.path.join(root, 'SRC'); fix = os.path.join(root, 'FIX')
+    rmtree(fix); copytree(os.path.join(projekt, 'Quelle'), fix)
+    for f in os.listdir(fix):
+        if f.upper().endswith(('.OBJ', '.EXE', '.MAP', '.LOG')): os.remove(os.path.join(fix, f))
+    aflags = re.sub(r'-D', '/d', flags)
+    bat = open(finde_ci(fix, 'build.bat'), encoding='cp437').read().replace('\r', '').split('\n')
+    cmds = []
+    for l in bat:
+        t = l.strip()
+        if not re.search(r'\\(BCC|TASM)\.EXE', t, re.I) or t.upper().startswith('@REM') or 'SETDATE' in t.upper(): continue
+        t = re.sub(r'\.\.\\BIN\\', r'C:\\BC\\BIN\\', t, flags=re.I)
+        if re.search(r'BCC\.EXE', t, re.I):
+            t = re.sub(r'(BCC\.EXE)\s', lambda m: m.group(1) + ' ' + flags + ' ', t, count=1, flags=re.I)
+        else:
+            m = re.search(r'(\w+\.ASM)', t, re.I)
+            a_ = finde_ci(fix, m.group(1)) if m else None
+            if a_ and re.search(r'^\s*IF\b.*\bFIX_\d{4}', open(a_, encoding='cp437').read(), re.I | re.M):
+                t = re.sub(r'(TASM\.EXE)\s', lambda m: m.group(1) + ' ' + aflags + ' ', t, count=1, flags=re.I)
+        cmds.append(t + ' >> UEBERS.LOG')
+    say(f'[5/7] Fix-Modus ({flags}): {len(cmds)} Module mit Schaltern uebersetzen')
+    open(os.path.join(fix, 'UEBERS.BAT'), 'w', newline='\r\n').write('@ECHO OFF\n' + '\n'.join(cmds) + '\n')
+    t = Dos(dosbox, root, sichtbar).run('FIX', ['CALL UEBERS.BAT'], 1800, 'Fix-Uebersetzen')
+    log = open(os.path.join(fix, 'UEBERS.LOG'), 'rb').read().decode('cp437', 'replace') if os.path.exists(os.path.join(fix, 'UEBERS.LOG')) else ''
+    fehler = [l for l in log.replace('\r', '').split('\n') if re.match(r'(Error \S+ \d+:|Fatal |\*\*Error|\*\*Fatal)', l)]
+    objs = sorted(f.upper() for f in os.listdir(fix) if f.upper().endswith('.OBJ'))
+    ref = sorted(f.upper() for f in os.listdir(src) if f.upper().endswith('.OBJ'))
+    say(f'      {len(objs)} OBJ-Dateien, {t:.0f} s')
+    for l in fehler[:30]: say('      ' + l)
+    if fehler: abbruch('Fix-Modus: Uebersetzungsfehler (siehe oben bzw. Build\\bau.log)')
+    if objs != ref: abbruch(f'Fix-Modus: {len(objs)} statt {len(ref)} OBJ-Dateien')
+    say('[6/7] residente Module auf ihre Originallaenge auffuellen (segpad)')
+    n = 0
+    for o in objs:
+        if not re.match(r'SEG0(0[1-9]|1[0-3])\.OBJ$', o): continue
+        r = subprocess.run([sys.executable, '-I', segpad, finde_ci(fix, o), finde_ci(src, o)], capture_output=True, text=True)
+        if r.returncode: say(r.stdout + r.stderr); abbruch(f'Fix-Modus: {o} passt nicht in sein residentes Segment')
+        if 'Nullbytes' in r.stdout: n += 1
+    say(f'      {n} residente Module aufgefuellt')
+    say('[7/7] Fix-EXE linken und pruefen (fixcheck gegen den Standardbau)')
+    Dos(dosbox, root, sichtbar).run('FIX', ['C:\\BC\\BIN\\BC.EXE /b BLADEM.PRJ > LINK.LOG'], 600, 'Fix-Linken')
+    exe = finde_ci(fix, 'BLADEM.EXE')
+    if not exe: abbruch('Fix-Modus: keine EXE erzeugt (Linkfehler, siehe FIX\\LINK.LOG im Bauordner)')
+    r = subprocess.run([sys.executable, '-I', fixcheck, exe, finde_ci(fix, 'BLADEM.MAP'),
+                        finde_ci(src, 'BLADEM.EXE'), finde_ci(src, 'BLADEM.MAP')], capture_output=True, text=True)
+    for l in (r.stdout + r.stderr).strip().split('\n'): say('      ' + l)
+    if r.returncode: abbruch('Fix-Modus: fixcheck meldet Fehler - die Fix-EXE wird nicht ausgegeben')
+    ziel = os.path.join(projekt, 'Build', f'BLADEM_FIX_{name}.EXE')
+    shutil.copyfile(exe, ziel)
+    shutil.copyfile(finde_ci(fix, 'BLADEM.MAP'), os.path.join(projekt, 'Build', f'BLADEM_FIX_{name}.MAP'))
+    say(f'      Build\\BLADEM_FIX_{name}.EXE  {os.path.getsize(ziel)} Byte  MD5 {md5(ziel)}')
+    say('      ALLE BEHEBUNGEN SIND IM SPIEL UNGETESTET - Rueckmeldungen willkommen (Bauen\\FIXES.md)')
+    return ziel
+
+
 def main():
     global LOG
     ap = argparse.ArgumentParser(description='baut BLADEM.EXE aus dem Quelltext')
+    ap.add_argument('fix', nargs='?', choices=['wichtig', 'alles'], type=str.lower,
+                    help='zusaetzlich die Fix-EXE bauen: wichtig (FIX_BUGS=1) oder alles (FIX_BUGS=2)')
+    ap.add_argument('--exploits-lassen', action='store_true',
+                    help='Fix-Modus: Fehler, die dem Spieler nuetzen, nicht beheben (FIX_EXPLOITS=0)')
+    ap.add_argument('--fixflags', default='', help='Fix-Modus: weitere Schalter fuer BCC, z. B. "-DFIX_0040=0"')
     ap.add_argument('--projekt'); ap.add_argument('--compiler'); ap.add_argument('--dosbox')
     ap.add_argument('--baudir'); ap.add_argument('--sichtbar', action='store_true')
     a = ap.parse_args()
@@ -155,7 +227,8 @@ def main():
         say('Hinweis: Original\\SCHICKM.EXE ist nicht die CD-Fassung 3.02 (andere MD5). Verglichen wird trotzdem.')
     root = baudir(a.baudir); say('Bauordner:', root)
 
-    say('[1/4] Bauordner vorbereiten')
+    N = 7 if a.fix else 4
+    say(f'[1/{N}] Bauordner vorbereiten')
     rmtree(root); os.makedirs(root)
     for t in ('BIN', 'INCLUDE', 'LIB'):
         copytree(finde_ci(comp, t), os.path.join(root, 'BC', t))
@@ -171,7 +244,7 @@ def main():
         s = l.strip()
         if not re.search(r'\\(BCC|TASM)\.EXE', s, re.I) or s.upper().startswith('@REM') or 'SETDATE' in s.upper(): continue
         cmds.append(re.sub(r'\.\.\\BIN\\', r'C:\\BC\\BIN\\', s, flags=re.I) + ' >> UEBERS.LOG')
-    say(f'[2/4] {len(cmds)} Module uebersetzen (BCC 3.1 / TASM 3.1)')
+    say(f'[2/{N}] {len(cmds)} Module uebersetzen (BCC 3.1 / TASM 3.1)')
     open(os.path.join(src, 'UEBERS.BAT'), 'w', newline='\r\n').write('@ECHO OFF\n' + '\n'.join(cmds) + '\n')
     t = Dos(dosbox, root, a.sichtbar).run('SRC', ['CALL UEBERS.BAT'], 1800, 'Uebersetzen')
     objs = [f for f in os.listdir(src) if f.upper().endswith('.OBJ')]
@@ -181,7 +254,7 @@ def main():
     for l in fehler[:30]: say('      ' + l)
     if fehler: abbruch('Uebersetzungsfehler (siehe oben bzw. Build\\bau.log)')
 
-    say('[3/4] in der Entwicklungsumgebung linken (BC.EXE /b BLADEM.PRJ)')
+    say(f'[3/{N}] in der Entwicklungsumgebung linken (BC.EXE /b BLADEM.PRJ)')
     exe = os.path.join(src, 'BLADEM.EXE')
     if os.path.exists(exe): os.remove(exe)
     Dos(dosbox, root, a.sichtbar).run('SRC', ['C:\\BC\\BIN\\BC.EXE /b BLADEM.PRJ > LINK.LOG'], 600, 'Linken')
@@ -193,19 +266,30 @@ def main():
     for f in ('BLADEM.MAP',):
         if os.path.exists(os.path.join(src, f)): shutil.copyfile(os.path.join(src, f), os.path.join(projekt, 'Build', f))
 
-    say('[4/4] Vergleich mit dem Original')
+    say(f'[4/{N}] Vergleich mit dem Original' + (' (Standardbau, Vergleichsfassung fuer den Fix-Modus)' if a.fix else ''))
     m = md5(ziel); say('      gebaut:   ', m)
+    gleich = False
     if orig:
         say('      Original: ', md5(orig))
-        if open(ziel, 'rb').read() == open(orig, 'rb').read():
-            say(''); say('BYTEGLEICH mit dem Original'); return 0
         a_, b_ = open(ziel, 'rb').read(), open(orig, 'rb').read()
-        d = next((i for i in range(min(len(a_), len(b_))) if a_[i] != b_[i]), min(len(a_), len(b_)))
-        say(''); say(f'ABWEICHUNG vom Original: erste Differenz bei Byte {d} (0x{d:x}), Groesse {len(a_)} / {len(b_)}')
-        return 1
-    if m == ORIGINAL_MD5:
-        say(''); say('BYTEGLEICH mit dem Original (MD5)'); return 0
-    say('Original\\SCHICKM.EXE fehlt - nur MD5-Vergleich, und der weicht ab.'); return 1
+        gleich = a_ == b_
+        if not gleich:
+            d = next((i for i in range(min(len(a_), len(b_))) if a_[i] != b_[i]), min(len(a_), len(b_)))
+            say(''); say(f'ABWEICHUNG vom Original: erste Differenz bei Byte {d} (0x{d:x}), Groesse {len(a_)} / {len(b_)}')
+    else:
+        gleich = m == ORIGINAL_MD5
+        if not gleich: say('Original\\SCHICKM.EXE fehlt - nur MD5-Vergleich, und der weicht ab.')
+    if gleich: say(''); say('BYTEGLEICH mit dem Original')
+    if not a.fix:
+        return 0 if gleich else 1
+    if not gleich:
+        abbruch('Fix-Modus nur nach bytegleichem Standardbau (er ist die Vergleichsfassung fuer fixcheck)')
+    flags = ('-DFIX_BUGS=1' if a.fix == 'wichtig' else '-DFIX_BUGS=2') + (' -DFIX_EXPLOITS=0' if a.exploits_lassen else '')
+    flags = (flags + ' ' + a.fixflags).strip()
+    say('')
+    fix_bau(projekt, root, dosbox, a.sichtbar, flags, a.fix.upper())
+    say(''); say(f'Fix-EXE fertig: Build\\BLADEM_FIX_{a.fix.upper()}.EXE - starten mit BLADEM_FIX_{a.fix.upper()}_STARTEN.bat')
+    return 0
 
 
 if __name__ == '__main__':

@@ -126,6 +126,12 @@ signed int DNG06_handler(void)
 		 * Original-Bug: the loop only checks the hero slots 0 and 1 instead of counting the heroes of
 		 * the group. If neither slot belongs to the group, l3 == 0 and the "%s UND %s WAREN " text
 		 * uses the uninitialized pointer hero_second; if only one of them does, only one hero is hit. */
+#if FIX_0109
+		/* Fix 109: die ersten beiden handlungsfaehigen Helden der Gruppe treffen */
+		hero_first = get_first_hero_available_in_group();
+		hero_second = (struct struct_hero*)get_second_hero_available_in_group();
+		l3 = (hero_second != NULL ? 2 : 1);
+#else
 		hero = get_hero(0);
 		for (i = l3 = 0; i < 2; i++, hero++)
 		{
@@ -140,6 +146,7 @@ signed int DNG06_handler(void)
 		{
 			hero_second = (struct struct_hero*)get_second_hero_available_in_group();
 		}
+#endif
 
 		sprintf(g_dtp2, (char*)(l3 == 1 ? g_str_s_war : g_str_s_und_s_waren),
 			hero_first->alias, hero_second->alias);
@@ -322,6 +329,10 @@ signed int DNG06_handler(void)
 			for (i = l3 = 0; i < 6; i++)
 			{
 				if (gs_groups_x[i] == 3 && gs_groups_y[i] == 6 &&
+#if FIX_0110
+					/* Fix 110: die andere Gruppe muss in diesem Dungeon auf dieser Ebene stehen */
+					gs_groups_dungeon_id[i] == gs_dungeon_id && gs_groups_dng_level[i] == gs_dungeon_level &&
+#endif
 					gs_active_group_id != i)
 				{
 					hero = get_hero(0);
@@ -362,6 +373,10 @@ signed int DNG06_handler(void)
 			for (i = l3 = 0; i < 6; i++)
 			{
 				if (gs_groups_x[i] == 1 && gs_groups_y[i] == 2 &&
+#if FIX_0110
+					/* Fix 110: die andere Gruppe muss in diesem Dungeon auf dieser Ebene stehen */
+					gs_groups_dungeon_id[i] == gs_dungeon_id && gs_groups_dng_level[i] == gs_dungeon_level &&
+#endif
 					gs_active_group_id != i)
 				{
 					hero = get_hero(0);
@@ -565,10 +580,20 @@ void DNG09_pitfall(void)
 		/* Original-Bug: the loop starts at the first available hero, not at hero 0, but still runs over
 		 * 7 slots. If that hero is not at position 0, it reads behind the last hero slot (and may call
 		 * test_talent() on it). Should start with get_hero(0). */
+#if FIX_0111
+		/* Fix 111: bei Platz 0 beginnen */
+		hero = get_hero(0);
+#endif
 		for (i = l3 = 0; i <= 6; i++, hero++)
 		{
 			if ((hero->typus != HERO_TYPE_NONE) && (hero->group_id == gs_active_group_id) &&
-				!hero->flags.dead && test_talent(hero, TA_GEFAHRENSINN, 4) > 0)
+#if FIX_0086
+				/* Fix 86: nur handlungsfaehige Helden */
+				check_hero(hero) &&
+#else
+				!hero->flags.dead &&
+#endif
+				test_talent(hero, TA_GEFAHRENSINN, 4) > 0)
 				/* TODO: potential Original-Bug: Why should 'petrified' or 'uncouscious' (or maybe other properties ) be o.k. here?? */
 			{
 				l3 = 1;

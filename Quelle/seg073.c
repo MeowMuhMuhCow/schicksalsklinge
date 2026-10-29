@@ -603,6 +603,11 @@ signed int tavern_quest_infos(void)
 	 * Alrik, informer not met by chance, no matching tavern) a random stack value is returned.
 	 * The value is the informer id (1 Jurge, 6 Ragna, 7 Beorn, 8 Asgrimm, 14 Algrid). */
 
+#if FIX_0077
+	/* Fix 77: vorbelegen, sonst wird ein Stapelwert zurueckgegeben */
+	relevant_info = 0;
+#endif
+
 	if (!gs_heard_announce) {
 
 		/* print the announcement from the hetmann */

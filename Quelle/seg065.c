@@ -618,8 +618,11 @@ void show_outro(void)
 			add_hero_ae(hero, hero->ae_max);
 
 			/* ??? the permanent LE loss is forgotten, but le_max is not restored (see the fix above) */
-#ifndef M302de_ORIGINAL_BUGFIX
+#if !FIX_0253
 			hero->le_max_malus = 0;
+#else
+			/* Fix 253: den Merker fuer den bleibenden LE-Verlust behalten (das LE-Maximum bleibt ja gesenkt),
+			 * damit er sich spaeter noch heilen laesst. Die Bright-Eyes-Variante (gratis heilen) waere eine Designentscheidung. */
 #endif
 			hero->hunger = 0;
 			hero->thirst = 0;

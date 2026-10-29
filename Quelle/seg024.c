@@ -130,7 +130,12 @@ void diary_new_entry(void)
 	entry = &gs_diary_entries[gs_diary_entry_counter - 1];
 
 	/* avoid double entries for the same town */
+#if FIX_0287
+	/* Fix 287: bei leerem Tagebuch nicht mit gs_diary_entries[-1] vergleichen */
+	if ((gs_diary_entry_counter == 0) || (gs_town_id != entry->town_id)) {
+#else
 	if (gs_town_id != entry->town_id) {
+#endif
 
 		/* make a pointer to the current entry */
 		entry = &gs_diary_entries[gs_diary_entry_counter];
@@ -220,7 +225,12 @@ signed int diary_print_entry(signed int line)
 	g_pic_copy.x2 = 319;
 	/* gemeint war vermutlich (line - startline) * 7; es werden zu viele (leere) Zeilen kopiert,
 	 * wegen Modus 2 (Farbe 0 durchsichtig) ohne sichtbare Folgen */
+#if FIX_0288
+	/* Fix 288: nur die gedruckten Zeilen kopieren */
+	g_pic_copy.y2 = (line - startline) * 7;
+#else
 	g_pic_copy.y2 = line * 7;
+#endif
 	g_pic_copy.src = (uint8_t*)g_buffer9_ptr;
 	g_pic_copy.dst = &g_renderbuf_ptr[(startline * 2240) + 9600];
 	do_pic_copy(2);

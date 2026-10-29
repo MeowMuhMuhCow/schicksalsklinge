@@ -199,6 +199,10 @@ signed int DNG07_handler(void)
 			/* ORIGINAL-BUG: forgot to set hero */
 			/* REMARK: hero is still the first available hero, so the loop runs behind the last hero
 			 * slot if that hero is not at position 0. Should start with get_hero(0). */
+#if FIX_0111
+			/* Fix 111: bei Platz 0 beginnen (hero zeigte noch auf den ersten handlungsfaehigen Helden) */
+			hero = get_hero(0);
+#endif
 			for (i = 0; i <= 6; i++, hero++)
 			{
 				if ((hero->typus != HERO_TYPE_NONE) && (hero->group_id == gs_active_group_id) && !hero->flags.dead)
@@ -280,6 +284,10 @@ signed int DNG07_handler(void)
 			/* ORIGINAL-BUG: forgot to set hero */
 			/* REMARK: as above; additionally heroes of other groups who lose the flag here are not
 			 * checked, and leaving the dungeon any other way keeps MU +3. */
+#if FIX_0111
+			/* Fix 111: bei Platz 0 beginnen (hero zeigte noch auf den ersten handlungsfaehigen Helden) */
+			hero = get_hero(0);
+#endif
 			for (i = 0; i <= 6; i++, hero++)
 			{
 				if ((hero->typus != HERO_TYPE_NONE) && hero->flags.encouraged)
@@ -384,7 +392,12 @@ void DNG09_statues(const signed int prob, const signed int bonus)
 			/* increase estimation */
 			/* Original-Bug: the god ids are 1..14 (GOD_ID_PRAIOS..GOD_ID_IFIRN). The loop changes the
 			 * unused entry 0 and skips Ifirn (14). Compare seg112: for (i = 1; i <= 14; i++). */
+#if FIX_0070
+			/* Fix 70: Goetter 1..14 (Praios bis Ifirn) */
+			for (i = 1; i <= 14; i++) {
+#else
 			for (i = 0; i < 14; i++) {
+#endif
 				gs_gods_estimation[i] += bonus;
 			}
 

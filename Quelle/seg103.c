@@ -145,7 +145,12 @@ struct struct_hero* get_best_hero_for_talent(const signed int talent_id)
 		if ((hero_i->typus != HERO_TYPE_NONE) &&
 			(hero_i->group_id == gs_active_group_id) &&
 			/* TODO: potential Original-Bug: What if petrified / unconscious etc.? */
+#if FIX_0086
+			/* Fix 86: nur handlungsfaehige Helden */
+			check_hero(hero_i)) {
+#else
 			!hero_i->flags.dead) {
+#endif
 
 			/* add the three attributes of the talent test (current + mod) and the talent value */
 			cur =	hero_i->attrib[g_talent_descriptions[talent_id].attrib1].current +
@@ -530,8 +535,15 @@ signed int use_talent(const signed int hero_pos, signed char handicap, const sig
 								/* 35% chance: infected with Wundfieber disease */
 								sprintf(g_dtp2, get_ttx(699), hero->alias, patient->alias); /* "DIE GÖTTER SEIEN VERFLUCHT.@HÄTTE %s DAS NUR NICHT VERSUCHT!@DAS KU..." */
 
+#if FIX_0258
+								/* Fix 258: eine laufende Erkrankung oder Genesung nicht von vorn beginnen */
+								if (patient->disease[DISEASE_ID_WUNDFIEBER].status == DISEASE_STATUS_HEALTHY) {
+#endif
 								patient->disease[DISEASE_ID_WUNDFIEBER].status = DISEASE_STATUS_DISEASED;
 								patient->disease[DISEASE_ID_WUNDFIEBER].time_counter = 0;
+#if FIX_0258
+								}
+#endif
 
 							} else {
 								/* 65% chance: just failed, no infection */
@@ -746,7 +758,12 @@ signed int bargain(const struct struct_hero *hero, const signed int items, const
 	signed char handicap = handicap_init;
 
 	/* NPC Harika gets a bonus on bargain */
+#if FIX_0078
+	/* Fix 78: Harika hilft nur, wenn sie in der aktiven Gruppe und handlungsfaehig ist */
+	if ((get_hero(6)->npc_id == NPC_HARIKA) && (get_hero(6)->group_id == gs_active_group_id) && check_hero(get_hero(6))) {
+#else
 	if (get_hero(6)->npc_id == NPC_HARIKA) { /* Remark: not checked whether Harika is in the active group or alive */
+#endif
 		handicap -= 2;
 	}
 

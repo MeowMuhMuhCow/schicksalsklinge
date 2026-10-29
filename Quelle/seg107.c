@@ -116,8 +116,22 @@ void use_item(const signed int inv_slot, const signed int hero_pos)
 				GUI_output(get_ttx(638)); /* "LEIDER IST ALLE GESPEICHERTE MAGIE AUFGEBRAUCHT." */
 			} else {
 				/* usable item, but not poison, herb, or potion */
+#if FIX_0214
+				/* Fix 214 (teilweise): Gegenstaende mit Nummer ausserhalb der Benutzen-Tabelle (magisches
+				 * Bastardschwert) gelten als nicht benutzbar, statt ins Leere zu springen */
+				if (g_used_item_desc->item_type_stats_id >= USABLE_ITEM_STATS_ID__END) {
+					sprintf(g_dtp2, get_ttx(571), GUI_name_inflect_with_article(
+						INFLECT_INDEFINITE_ARTICLE | INFLECT_SINGULAR | INFLECT_1ST_CASE,
+						g_used_item_id,
+						INFLECT_NAME_TYPE_ITEM
+					));
+					GUI_output(g_dtp2);
+				} else
+#endif
+				{
 				func = g_use_item_handlers[g_usable_items_table[g_used_item_desc->item_type_stats_id].handler_id];
 				func();
+				}
 			}
 	}
 }
@@ -309,10 +323,32 @@ void item_apply_weapon_poison(void)
 
 	signed int bottle_id;
 
+#if FIX_0400
+	/* Fix 400: Klassensperre (z. B. Krieger und Gifte) auch beim Benutzen pruefen */
+	if (!can_hero_use_item(g_itemuser, g_used_item_id)) {
+
+		sprintf(g_dtp2, get_ttx(221), g_itemuser->alias,
+			get_ttx((g_itemuser->sex != 0 ? 593 : 9) + g_itemuser->typus),
+			GUI_name_inflect_with_article(
+				INFLECT_INDEFINITE_ARTICLE | INFLECT_SINGULAR | INFLECT_4TH_CASE,
+				g_used_item_id,
+				INFLECT_NAME_TYPE_ITEM
+			));
+
+		GUI_output(g_dtp2);
+		return;
+	}
+#endif
+
 	if ((g_itemuser->inventory[HERO_INVENTORY_SLOT_RIGHT_HAND].item_id != ITEM_ID_NONE) &&
 		(g_itemuser->inventory[HERO_INVENTORY_SLOT_RIGHT_HAND].item_id != ITEM_ID_KURZBOGEN) &&
 		(g_itemuser->inventory[HERO_INVENTORY_SLOT_RIGHT_HAND].item_id != ITEM_ID_LANGBOGEN) &&
-		(g_itemuser->inventory[HERO_INVENTORY_SLOT_RIGHT_HAND].item_id != ITEM_ID_ARMBRUST))
+		(g_itemuser->inventory[HERO_INVENTORY_SLOT_RIGHT_HAND].item_id != ITEM_ID_ARMBRUST)
+#if FIX_0224
+		/* Fix 224: auch die Schleuder ist eine Fernwaffe */
+		&& (g_itemuser->inventory[HERO_INVENTORY_SLOT_RIGHT_HAND].item_id != ITEM_ID_SCHLEUDER)
+#endif
+		)
 		/* TODO: potential Original-Bug: What about sling? */
 	{
 
@@ -492,20 +528,23 @@ void item_ignite(void)
 
 		/* refill burning lantern */
 
-#ifdef M302de_ORIGINAL_BUGFIX
-		if (get_spelluser() != g_itemuser) {
-			g_spelluser = g_itemuser;
-		}
-#endif
-
 		/* look for oil at the spelluser() */
+#if FIX_0225
+		/* Fix 225: Oel und Laterne beim Benutzer suchen, nicht beim letzten Zauberer */
+		inv_slot = inv_slot_of_item(g_itemuser, ITEM_ID_OEL);
+#else
 		inv_slot = inv_slot_of_item(get_spelluser(), ITEM_ID_OEL);
+#endif
 
 		if (inv_slot != -1) {
 			/* look for the burning lantern at the spelluser() ??? */
 			/* Original-Bug: oil and lantern are searched at get_spelluser() (the last caster), but changed at
 			 * g_itemuser. If they differ, a wrong slot of g_itemuser is changed/dropped. Fixed by M302de_ORIGINAL_BUGFIX above. */
+#if FIX_0225
+			refill_inv_slot = inv_slot_of_item(g_itemuser, ITEM_ID_LATERNE__LIT);
+#else
 			refill_inv_slot = inv_slot_of_item(get_spelluser(), ITEM_ID_LATERNE__LIT);
+#endif
 
 			/* reset the burning time of the lantern */
 			g_itemuser->inventory[refill_inv_slot].lighting_timer = 100;
@@ -549,7 +588,8 @@ void item_ignite(void)
 		}
 	}
 
-#ifdef M302de_ORIGINAL_BUGFIX
+#if FIX_0211
+	/* Fix 211: Anzuendmodus zuruecksetzen, sonst findet "Brenne toter Stoff" danach nur noch diese Art */
 	/* Original-Bug 54:
 	 * Use a torch to ignite it. After that, it is not possible to ignite a
 	 * lantern with the spell "Brenne toter Stoff".

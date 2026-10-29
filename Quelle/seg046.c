@@ -500,7 +500,8 @@ void status_show(const signed int index)
 				bp -= 2;
 			}
 
-#ifdef M302de_ORIGINAL_BUGFIX
+#if FIX_0237
+			/* Fix 237: ab 110 % Last nur 1 BP, wie im Kampf (FIG_do_round) */
 			if (hero->attrib[ATTRIB_KK].current * 110 <= hero->load) {
 				/* Original-Bug 6: status screen shows wrong number of BP if the load is at least 110% of the carrying capacity.
 				   (3 BP shown, but in fact only 1 BP, see function FIG_do_round in seg032.cpp) */

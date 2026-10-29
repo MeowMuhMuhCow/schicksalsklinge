@@ -94,7 +94,7 @@ void PHX_stadthaus(void)
 
 	} else {
 
-#ifdef M302de_ORIGINAL_BUGFIX
+#if FIX_0071
 		signed int answer2;
 #endif
 		money = get_party_money();
@@ -102,8 +102,8 @@ void PHX_stadthaus(void)
 		/* reuse answer as number of options */
 		answer = money >= 1000 ? 3 : 1;
 
-#ifdef M302de_ORIGINAL_BUGFIX
-
+#if FIX_0071
+		/* Fix 71: eigene Variable fuer die Antwort, answer bleibt die Zahl der Optionen (Bright-Eyes-Fix) */
 		do {
 			answer2 = GUI_radio(get_tx2(19), (signed char)answer, get_tx2(21), get_tx2(20),	get_tx2(22)); /* "<FÜR NACHFORSCHUNGEN JEDER AR..." / "<KOMMT GAR NICHT IN FRAGE!>" / "<ABER SELBSTVERSTÄNDLICH.>" / "<ABER NUR ZÄHNEKNIRSCHEND.>" */
 
@@ -174,7 +174,8 @@ void PHX_spielhaus(void)
 		/* Original-Bug: the condition is inverted, the group loses if more than half of the
 		 * heroes passed the Falschspiel test. The fix lets it lose if at most half passed.
 		 * REMARK: texts 30/31 speak of some hours, but no time passes. */
-#ifdef M302de_ORIGINAL_BUGFIX
+#if FIX_0072
+		/* Fix 72: verloren wird, wenn hoechstens die Haelfte beim Falschspiel Erfolg hatte (Bright-Eyes-Fix) */
 		if ((count_heroes_in_group() >> 1) >= num_passed) {
 #else
 		if ((count_heroes_in_group() >> 1) < num_passed) {

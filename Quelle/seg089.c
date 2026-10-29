@@ -700,6 +700,20 @@ void DNG15_collapsing_ceiling(uint8_t* ptr)
 		 * places) has no effect, the group just walks through, and text 45 of FINAL.DTX ("DER GANG
 		 * IST ... BLOCKIERT. IHR KOENNT VERSUCHEN, DEN GANG WIEDER FREIZURAEUMEN.") is never shown.
 		 * Probably it should block the way and offer DNG15_clear_way() like case 4. */
+#if FIX_0121
+		case 3:
+		{
+			/* Fix 121: der verschuettete Gang sperrt den Weg; Freiraeumen anbieten (Text 45) */
+			if (GUI_bool(get_tx(45))) /* "DER GANG IST ... BLOCKIERT. IHR KOENNT VERSUCHEN, DEN GANG WIEDER FREIZURAEUMEN." */
+			{
+				DNG15_clear_way(ptr);
+			} else {
+				gs_x = gs_x_bak;
+				gs_y = gs_y_bak;
+			}
+			break;
+		}
+#endif
 		case 4:
 		{
 			if (random_schick(100) >= 65)
@@ -742,7 +756,12 @@ void DNG15_clear_way(uint8_t* ptr)
 	/* ... the group saves 30 minutes ingame time. */
 	/* Original-Bug: the code does the opposite: with all four tools (i == 1) it takes 1 hour,
 	 * without them 30 minutes. */
+#if FIX_0122
+	/* Fix 122: mit Werkzeug 30 Minuten, ohne eine Stunde */
+	timewarp(i ? MINUTES(30) : HOURS(1));
+#else
 	timewarp(!i ? MINUTES(30) : HOURS(1));
+#endif
 
 	/* With a probability of 60% the ceiling crashes down. */
 	if (random_schick(100) <= 60)

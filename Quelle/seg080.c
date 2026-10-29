@@ -151,7 +151,13 @@ signed int DNG04_handler(void)
 
 			/* Original-BUG: assumption the leader is at pos 0 */
 			/* CH-5 for 1 day */
+#if FIX_0093
+			/* Fix 93: der erste handlungsfaehige Held, mit seiner Position (vgl. Nr. 254) */
+			hero = get_first_hero_available_in_group();
+			set_mod_slot(i, DAYS(1), (uint8_t*)&hero->attrib[ATTRIB_CH].current, -5, (signed char)get_hero_pos(hero));
+#else
 			set_mod_slot(i, DAYS(1), (uint8_t*)&get_hero(0)->attrib[ATTRIB_CH].current, -5, 0);
+#endif
 		}
 
 	} else if (target_pos == DNG_POS(0,14,14) && target_pos != gs_dng_pos_bak)
@@ -223,7 +229,12 @@ signed int DNG04_handler(void)
 				/* Original-Bug: pos must be the position of the hero (here 0 is passed). For a hero
 				 * not at position 0 hero_disappear() writes the CHR file of hero 0 (and for the NPC
 				 * save_npc() is not called). */
+#if FIX_0107
+				/* Fix 107: die Position des abgestuerzten Helden */
+				hero_disappear(hero, get_hero_pos(hero), -1);
+#else
 				hero_disappear(hero, 0, -1);
+#endif
 			}
 		}
 	}
@@ -267,6 +278,10 @@ signed int DNG04_handler(void)
 				/* Original-Bug: forgot to check if the hero is dead */
 				if ((random_schick(100) <= 10) &&
 					(hero->typus != HERO_TYPE_NONE) &&
+#if FIX_0108
+					/* Fix 108: keine toten Helden */
+					!hero->flags.dead &&
+#endif
 					(hero->group_id == gs_active_group_id))
 				{
 					sub_hero_le(hero, 2);
@@ -378,7 +393,12 @@ signed int DNG05_handler(void)
 			tmp = get_free_mod_slot();
 			/* Original-Bug: who = 0, but hero is the first available hero (compare DNG04 above).
 			 * The modification is stored relative to hero 0 and is undone wrongly if hero 0 changes. */
+#if FIX_0254
+			/* Fix 254: who = Position dieses Helden */
+			set_mod_slot(tmp, DAYS(1), (uint8_t*)&hero->attrib[ATTRIB_CH].current, -5, (signed char)get_hero_pos(hero));
+#else
 			set_mod_slot(tmp, DAYS(1), (uint8_t*)&hero->attrib[ATTRIB_CH].current, -5, 0);
+#endif
 
 			add_party_money(20L);
 		}

@@ -241,7 +241,12 @@ void draw_status_line(void)
 			/* Original-Bug: bestaetigt. Fuer Platz 6 (NSC) landen [6][4] und [6][5] in g_disease_strength[0..1].
 			 * Folge, solange ein NSC dabei ist: Wundfieber kostet beim Heiler -1 * 10 Heller statt 60,
 			 * und die Probe "Heilen Krankheiten" auf Wundfieber hat Zuschlag -1 statt 6 (seg053, seg104). */
+#if FIX_0043
+			/* Fix 43: das Feld hat 4 Werte je Held (sonst wird beim NSC g_disease_strength ueberschrieben) */
+			for (j = 0; j < 4; j++) {
+#else
 			for (j = 0; j < 6; j++) {
+#endif
 				g_char_status_bars[i][j] = -1;
 			}
 		}

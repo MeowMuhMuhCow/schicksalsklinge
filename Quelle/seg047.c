@@ -154,12 +154,24 @@ void hero_gets_poisoned(struct struct_hero *hero, const signed int poison_id)
 	if (!hero->flags.dead) {
 		/* TODO: Original-Bug?: What if the hero is already poisoned? */
 		/* Remark: probably the same problem as Original-Bug 46: the log bytes of the suffered effects are reset. */
+#if FIX_0238
+		/* Fix 238: die Protokollbytes der erlittenen Verluste nur bei einem gesunden Helden loeschen,
+		 * sonst gibt das Ende der Vergiftung sie nie zurueck */
+		if (hero->poison[poison_id].status == POISON_STATUS_HEALTHY) {
+			hero->poison[poison_id].log_1 = 0;
+			hero->poison[poison_id].log_2 = 0;
+			hero->poison[poison_id].log_3 = 0;
+		}
+		hero->poison[poison_id].status = POISON_STATUS_POISONED;
+		hero->poison[poison_id].time_counter = 0;
+#else
 
 		hero->poison[poison_id].status = POISON_STATUS_POISONED;
 		hero->poison[poison_id].time_counter = 0;
 		hero->poison[poison_id].log_1 = 0;
 		hero->poison[poison_id].log_2 = 0;
 		hero->poison[poison_id].log_3 = 0;
+#endif
 	}
 }
 
@@ -206,11 +218,23 @@ void hero_gets_diseased(struct struct_hero *hero, const signed int disease_id)
 		D1_INFO("%s erkrankt an %s\n", hero->alias, get_ttx(disease_id + 0x193)); /* TEXT.LTX 404..410: Krankheit */
 #endif
 
+#if FIX_0240
+		/* Fix 240: die Protokollbytes der erlittenen Verluste nur bei einem gesunden Helden loeschen,
+		 * sonst gibt die Genesung sie nie zurueck (Verluste wuerden dauerhaft) */
+		if (hero->disease[disease_id].status == DISEASE_STATUS_HEALTHY) {
+			hero->disease[disease_id].log_1 = 0;
+			hero->disease[disease_id].log_2 = 0;
+			hero->disease[disease_id].log_3 = 0;
+		}
+		hero->disease[disease_id].status = DISEASE_STATUS_DISEASED;
+		hero->disease[disease_id].time_counter = 0;
+#else
 		hero->disease[disease_id].status = DISEASE_STATUS_DISEASED;
 		hero->disease[disease_id].time_counter = 0;
 		hero->disease[disease_id].log_1 = 0;
 		hero->disease[disease_id].log_2 = 0;
 		hero->disease[disease_id].log_3 = 0;
+#endif
 	}
 }
 
@@ -266,6 +290,16 @@ signed int check_heroes_KK(const signed int val)
 	struct struct_hero *hero;
 	signed int sum;
 
+#if FIX_0081
+	/* Fix 81: die ersten beiden handlungsfaehigen Helden der aktiven Gruppe */
+	hero = get_first_hero_available_in_group();
+
+	sum = hero->attrib[ATTRIB_KK].current + hero->attrib[ATTRIB_KK].mod;
+
+	if ((hero = get_second_hero_available_in_group()) != NULL) {
+		sum += hero->attrib[ATTRIB_KK].current + hero->attrib[ATTRIB_KK].mod;
+	}
+#else
 	hero = get_hero(0);
 
 	/* Orig-BUG: not checked if hero is valid */
@@ -277,6 +311,7 @@ signed int check_heroes_KK(const signed int val)
 	if (hero->typus && (hero->group_id == gs_active_group_id) && !hero->flags.dead) {
 		sum += hero->attrib[ATTRIB_KK].current + hero->attrib[ATTRIB_KK].mod;
 	}
+#endif
 
 #if !defined(__BORLANDC__)
 	D1_INFO("Pruefe KK der ersten beiden Helden (%d) >= %d: ", sum, val);
@@ -299,6 +334,9 @@ void make_valuta_str(char *dst, int32_t money) {
 	/* Orig-BUG: d is a signed int and overflows for more than 32767 D (the old comment said 65536) */
 	signed int d = 0;
 	signed int s = 0;
+#if FIX_0296
+	int32_t money_d = money / 100;
+#endif
 
 	/*	These loops are not very performant.
 		They take longer the more money you have.
@@ -322,6 +360,13 @@ void make_valuta_str(char *dst, int32_t money) {
 		money -= 10;
 	}
 
+#if FIX_0296
+	/* Fix 296: ab 32768 Dukaten die Dukaten als long ausgeben (Format "%dD %dS %dH": ab Zeichen 2 folgt "D ...") */
+	if ((money_d > 32767L) && (get_ttx(748)[0] == '%') && (get_ttx(748)[1] == 'd')) {
+		ltoa(money_d, dst, 10);
+		sprintf(dst + strlen(dst), get_ttx(748) + 2, s, (signed int)money);
+	} else
+#endif
 	sprintf(dst, get_ttx(748), d, s, (signed int)money); /* "%dD %dS %dH" */
 }
 
@@ -421,7 +466,12 @@ signed int menu_enter_delete(char* ptr, const signed int entries, const signed i
 
 			/* Original-Bug: should be '>=': with 20, 30, ... heroes the last page
 			 * contains no hero, only "MEHR HELDEN". */
+#if FIX_0046
+			/* Fix 46: auch bei genau 20, 30, ... Helden zurueck zur ersten Seite */
+			if (i_min >= entries) {
+#else
 			if (i_min > entries) {
+#endif
 				i_min = 0;
 			}
 
@@ -644,6 +694,10 @@ signed int select_hero_ok_forced(char *title)
 		 * in the first slot) is returned instead of -1. Callers use the result
 		 * unchecked with get_hero(). */
 		g_talented_hero_pos = -1;
+#if FIX_0242
+		/* Fix 242 (teilweise): Textbreite zuruecksetzen; die Rueckgabe bleibt 0 (die Aufrufer pruefen nicht auf -1) */
+		g_textbox_width = tw_bak;
+#endif
 		return 0;
 	}
 }

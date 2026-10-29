@@ -181,6 +181,27 @@ void GRP_save_pos(signed int group_id)
 	}
 }
 
+#if FIX_0243
+/* Fix 243: handlungsfaehige Helden der aktiven Gruppe ohne den NSC (Platz 6) zaehlen
+ * (wie count_heroes_available_in_group(), Bright-Eyes: count_heroes_available_in_group_ignore_npc) */
+static signed int fix_count_group_no_npc(void)
+{
+	signed int i;
+	signed int cnt = 0;
+	struct struct_hero *hero = get_hero(0);
+
+	for (i = 0; i < 6; i++, hero++) {
+		if (hero->typus && (hero->group_id == gs_active_group_id) && !hero->flags.dead &&
+			!hero->flags.petrified && !hero->flags.unconscious && !hero->flags.renegade)
+		{
+			cnt++;
+		}
+	}
+
+	return cnt;
+}
+#endif
+
 /**
  * \brief   menu "split group": the selected heroes form a new group at the current position
  */
@@ -190,12 +211,13 @@ void GRP_split(void)
 	signed int not_empty;
 	signed int answer;
 
-#ifndef M302de_ORIGINAL_BUGFIX
+#if !FIX_0243
 	/* Original-Bug 13:
 	 * Split group does not work if the active group consists of 2 available heroes and there is an NPC in another group. */
 	if (count_heroes_available_in_group() <= (get_hero(6)->typus != HERO_TYPE_NONE ? 2 : 1))
 #else
-	if (count_heroes_available_in_group_ignore_npc() <= 1)
+	/* Fix 243: den NSC nicht mitzaehlen, egal in welcher Gruppe er ist (Bright-Eyes-Fix) */
+	if (fix_count_group_no_npc() <= 1)
 #endif
 	{
 		/* don't allow to split a group consisting of a single hero or of a single hero + NPC */
@@ -225,12 +247,12 @@ void GRP_split(void)
 			}
 
 		}
-#ifndef M302de_ORIGINAL_BUGFIX
+#if !FIX_0243
 	/* Original-Bug 14:
 	 * Split group does not allow to select all but one available hero of the active group if there is an NPC in another group. */
 		while (count_heroes_available_in_group() > (get_hero(6)->typus != HERO_TYPE_NONE ? 2 : 1));
 #else
-		while (count_heroes_available_in_group_ignore_npc() > 1);
+		while (fix_count_group_no_npc() > 1);
 #endif
 
 		if (not_empty) {
@@ -302,6 +324,10 @@ void GRP_switch_to_next(const signed int mode)
 	signed int group_id;
 	signed int done = 0;
 	signed int dng_level;
+#if FIX_0244
+	signed int tries = 0;
+	signed int jailed = 0;	/* 1 = eine Gruppe sitzt im Kerker, 2 = schon bis 6 Uhr gewartet */
+#endif
 
 	group_id = gs_active_group_id;
 
@@ -312,6 +338,30 @@ void GRP_switch_to_next(const signed int mode)
 		if (group_id == 6) {
 			group_id = 0;
 		}
+
+#if FIX_0244
+		/* Fix 244: nach einer vollen Runde ohne handlungsfaehige Gruppe nicht endlos weitersuchen:
+		 * im Menue bei der aktiven Gruppe bleiben; nach einem Ereignis bis 6 Uhr warten, wenn eine
+		 * Gruppe im Kerker sitzt (dann kommt sie frei), sonst ist das Spiel verloren */
+		if (++tries > 6) {
+
+			tries = 0;
+
+			if ((mode != 0) && (jailed == 1)) {
+
+				timewarp_until_time_of_day(HOURS(6));
+				jailed = 2;
+
+			} else {
+				if ((mode != 0) && (jailed == 0)) {
+					g_game_state = GAME_STATE_DEAD;
+				}
+
+				group_id = gs_active_group_id;
+				break;
+			}
+		}
+#endif
 
 		if (gs_group_member_counts[group_id] != 0) {
 
@@ -324,6 +374,11 @@ void GRP_switch_to_next(const signed int mode)
 					if (get_hero(hero_pos)->jail) {
 						/* hero is in prison */
 						state = 2;
+#if FIX_0244
+						if (!jailed) {
+							jailed = 1;
+						}
+#endif
 					} else {
 						/* hero is free */
 						state = 1;
@@ -457,6 +512,12 @@ void GRP_swap_heroes(void)
 				if (g_wildcamp_guards[i] == hero_pos_1) { /* Original-Bug: a guard on hero_pos_2 is not changed to hero_pos_1 */
 					g_wildcamp_guards[i] = hero_pos_2;
 				}
+#if FIX_0245
+				/* Fix 245: auch die Wache des zweiten Helden mitnehmen */
+				else if (g_wildcamp_guards[i] == hero_pos_2) {
+					g_wildcamp_guards[i] = hero_pos_1;
+				}
+#endif
 			}
 
 			/* save hero1 in tmp */
@@ -603,7 +664,12 @@ void GRP_move_hero(const signed int src_pos)
 		do_pic_copy(0);
 
 		dst_pos = 6;
+#if FIX_0298
+		/* Fix 298: nicht vor die Tabelle lesen (Ergebnis wie bisher, hoechstens 0) */
+		while ((--dst_pos > 0) && (g_hero_pic_posx[dst_pos] > g_mouse_posx))
+#else
 		while (g_hero_pic_posx[--dst_pos] > g_mouse_posx) /* for mouse x < 3 this reads before the table; dst_pos is clamped below */
+#endif
 		{
 			;
 		}
@@ -623,6 +689,12 @@ void GRP_move_hero(const signed int src_pos)
 					if (g_wildcamp_guards[i] == src_pos) { /* Original-Bug: a guard on dst_pos is not changed to src_pos */
 						g_wildcamp_guards[i] = dst_pos;
 					}
+#if FIX_0245
+					/* Fix 245: auch die Wache auf dem Zielplatz mitnehmen */
+					else if (g_wildcamp_guards[i] == dst_pos) {
+						g_wildcamp_guards[i] = src_pos;
+					}
+#endif
 				}
 
 				memcpy(g_renderbuf_ptr, src, sizeof(struct struct_hero));
@@ -706,12 +778,21 @@ void GRP_hero_sleep(struct struct_hero *hero, const signed int quality)
 					ae_regen = random_schick(6) + quality;
 
 					/* Original-Bug: next operator should be <= */
+#if FIX_0246
+					/* Fix 246: auch Ergebnis 0 auf 1 setzen */
+					if (le_regen <= 0) {
+#else
 					if (le_regen < 0) {
+#endif
 						le_regen = 1;
 					}
 
 					/* Original-Bug: next operator should be <= */
+#if FIX_0246
+					if (ae_regen <= 0) {
+#else
 					if (ae_regen < 0) {
+#endif
 						ae_regen = 1;
 					}
 

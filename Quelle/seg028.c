@@ -362,11 +362,12 @@ void load_area_description(const signed int type)
 			/* TODO: is that neccessary ? */
 			memset(g_locations_tab, -1, 150 * sizeof(struct location));
 
-#if defined(__BORLANDC__)
+#if defined(__BORLANDC__) && !FIX_0292
 			/* Original-Bug (latent): liest bis zu 100 Byte mehr, als g_locations_tab[150] fasst;
 			 * dahinter liegen g_buffer8_ptr, g_tx2_index usw. Die Stadtdateien sind kurz genug. */
 			g_locations_tab_size = _read(handle, g_locations_tab, 150 * sizeof(struct location) + 100);
 #else
+			/* Fix 292: nur so viel lesen, wie g_locations_tab fasst */
 			g_locations_tab_size = _read(handle, g_locations_tab, 150 * sizeof(struct location));
 #endif
 

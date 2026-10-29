@@ -85,7 +85,12 @@ static signed int load_ani_clip_from_file(int8_t *dst, const signed int clip_num
 	if (clip_num < 0)
 		return 0;
 
+#if FIX_0294
+	/* Fix 294: gueltig sind 0..clip_num_max-1 */
+	if (clip_num >= clip_num_max)
+#else
 	if (clip_num > clip_num_max)
+#endif
 		return 0;
 
 	/* set p_datitem to the first (0) ani sequence */
@@ -238,6 +243,10 @@ signed int AFIG_switch_to_melee_weapon(struct struct_hero *hero)
 		/* grab the first melee weapon in the knapsack,
 		 * and exchange it with the broken weapon. */
 		if (item_p->flags.weapon &&
+#if FIX_0316
+			/* Fix 316: keine zerbrochene Waffe nehmen */
+			!hero->inventory[pos].flags.broken &&
+#endif
 			(item_p->item_subtype_id != WEAPON_TYPE_SCHUSSWAFFE) &&
 			(item_p->item_subtype_id != WEAPON_TYPE_WURFWAFFE) &&
 			(item_p->item_subtype_id != WEAPON_TYPE_SPEER)) // Original-Bug: WEAPON_TYPE_SPEER is a melee weapon category.
@@ -328,6 +337,10 @@ signed int AFIG_can_attack_neighbour(const signed int start_x, const signed int 
 		if (
 			(target_object_id >= 10) && (target_object_id < 30)
 			&& !((struct enemy_flags)g_enemy_sheets[target_object_id - 10].flags).dead
+#if FIX_0018
+			/* Fix 18: uebergelaufene Gegner (Boeser Blick) kaempfen auf der Seite der Helden */
+			&& !g_enemy_sheets[target_object_id - 10].flags.renegade
+#endif
 		) {
 			return 1;
 		} else {
@@ -439,14 +452,24 @@ signed int AFIG_search_line_target(const signed int x, const signed int y, const
 			if (
 				(target_object_id >= 10) && (target_object_id < 30)
 				&& !((struct enemy_flags)g_enemy_sheets[target_object_id - 10].flags).dead
+#if FIX_0018
+				/* Fix 18: uebergelaufene Gegner nicht angreifen */
+				&& !g_enemy_sheets[target_object_id - 10].flags.renegade
+#endif
 			) {
 				will_attack = 1;
 				done = 1;
 			} else if (
 				(target_object_id != 0)
 				&& (
-#ifdef M302de_ORIGINAL_BUGFIX
-					(target_object_id > 0) &&
+#if FIX_0019
+					/* Fix 19: Fluchtfelder (negative Ids) sind kein Held, sie beenden die Suche */
+					(target_object_id < 0) ||
+#endif
+#if FIX_0018
+					/* Fix 18: ein uebergelaufener Gegner steht in der Schusslinie wie ein Held */
+					((target_object_id >= 10) && (target_object_id < 30)
+						&& !((struct enemy_flags)g_enemy_sheets[target_object_id - 10].flags).dead) ||
 #endif
 					(
 						((target_object_id < 10)
@@ -666,6 +689,15 @@ signed int AFIG_select_autospell(struct struct_hero *hero, const signed int hero
 
 		/* reset the target of the hero */
 		hero->target_object_id = 0;
+
+#if FIX_0319
+		/* Fix 319: einen Zauber mit Zauberwert unter -5 kann der Held nicht wirken (test_spell() liefert 0,
+		 * use_spell() zieht trotzdem die halben AE ab) - dann in diesem Zug nicht zaubern */
+		if (hero->spells[spell_id] < -5) {
+			done = 1;
+			continue;
+		}
+#endif
 
 		if ((spell_mode = AFIG_get_spell_target_mode(spell_id, renegade)) != -1) {
 
@@ -937,8 +969,14 @@ void AFIG_hero_turn(struct struct_hero *hero, const signed int hero_pos, signed 
 			/* if the hero is surrounded on all four sides, he cannot flee.
 			 * REMARK: the bounds (hero_x + 1 <= 25) are too wide, the board is 0..23 */
 			if (
+#if FIX_0020
+				/* Fix 20: Grenze 23 (das Feld ist 0..23) */
+				(hero_x - 1 >= 0) && (hero_x + 1 <= 23)
+				&& (hero_y -1 >= 0) && (hero_y + 1 <= 23)
+#else
 				(hero_x - 1 >= 0) && (hero_x + 1 <= 25)
 				&& (hero_y -1 >= 0) && (hero_y + 1 <= 25)
+#endif
 				&& (get_cb_val(hero_x, hero_y + 1) != 0)
 				&& (get_cb_val(hero_x, hero_y - 1) != 0)
 				&& (get_cb_val(hero_x + 1, hero_y) != 0)
@@ -1005,7 +1043,12 @@ void AFIG_hero_turn(struct struct_hero *hero, const signed int hero_pos, signed 
 				&& (hero->ae > 10)	/* AE > 10 */
 				&& (try_autospell != 0)
 				&& (g_current_fight_id != FIGHT_ID_F144)	/* not in the final fight */
+#if FIX_0385
+				/* Fix 385: ein NSC (Curian) zaubert auch im normalen Kampf, nicht nur im Computerkampf mit Magie */
+				&& (g_autofight_magic || (hero->npc_id > 0))
+#else
 				&& g_autofight_magic /* magic activated in auto fight */
+#endif
 			) {
 				if (AFIG_select_autospell(hero, hero_pos, hero->flags.renegade, x, y))
 				{
@@ -1016,6 +1059,28 @@ void AFIG_hero_turn(struct struct_hero *hero, const signed int hero_pos, signed 
 					try_autospell = 0;
 				}
 			}
+
+#if FIX_0316
+			/* Fix 316: ist die Waffe zerbrochen und liegt eine heile Nahkampfwaffe im Rucksack, zu ihr greifen */
+			if ((hero->action_id == FIG_ACTION_MOVE) && (hero->fight_bp_left > 2) &&
+				g_itemsdat[hero->inventory[HERO_INVENTORY_SLOT_RIGHT_HAND].item_id].flags.weapon &&
+				hero->inventory[HERO_INVENTORY_SLOT_RIGHT_HAND].flags.broken)
+			{
+				for (i = HERO_INVENTORY_SLOT_KNAPSACK_1; i < NR_HERO_INVENTORY_SLOTS; i++) {
+
+					cnt = hero->inventory[i].item_id;
+
+					if (g_itemsdat[cnt].flags.weapon && !hero->inventory[i].flags.broken &&
+						(g_itemsdat[cnt].item_subtype_id != WEAPON_TYPE_SCHUSSWAFFE) &&
+						(g_itemsdat[cnt].item_subtype_id != WEAPON_TYPE_WURFWAFFE) &&
+						(g_itemsdat[cnt].item_subtype_id != WEAPON_TYPE_SPEER))
+					{
+						AFIG_switch_to_melee_weapon(hero);
+						break;
+					}
+				}
+			}
+#endif
 
 			if ((hero->action_id == FIG_ACTION_MOVE) && (hero->fight_bp_left > 0)) {
 

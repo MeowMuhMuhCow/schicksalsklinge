@@ -254,6 +254,42 @@ signed int do_alchemy(struct struct_hero* hero, const signed int recipe_id, cons
 
 }
 
+#if FIX_0259
+/* Fix 259: handlungsfaehige Helden der aktiven Gruppe ohne NSC (wie count_heroes_available_in_group_ignore_npc()
+ * bei Bright-Eyes, die es im Original nicht gibt) */
+static signed int fix_count_group_no_npc(void)
+{
+	signed int i;
+	signed int cnt = 0;
+	struct struct_hero *hero_i = get_hero(0);
+
+	for (i = 0; i < 6; i++, hero_i++) {
+		if (hero_i->typus && (hero_i->group_id == gs_active_group_id) && !hero_i->flags.dead &&
+			!hero_i->flags.petrified && !hero_i->flags.unconscious && !hero_i->flags.renegade)
+		{
+			cnt++;
+		}
+	}
+
+	return cnt;
+}
+#endif
+
+#if FIX_0260
+/* Fix 260: erste freie der 6 Gruppen, -1 wenn alle belegt sind */
+static signed int fix_free_group(void)
+{
+	signed int i;
+
+	for (i = 0; i < 6; i++) {
+		if (gs_group_member_counts[i] == 0) {
+			return i;
+		}
+	}
+	return -1;
+}
+#endif
+
 /**
  * \brief   talent Alchimie: choose a recipe and brew it
  *
@@ -351,13 +387,18 @@ signed int plan_alchemy(struct struct_hero *hero)
 							retval = 0;
 						} else {
 							if (
-#ifndef M302de_ORIGINAL_BUGFIX
+#if !FIX_0259
 								/* Original-Bug 12: If the total number of heroes is >= 2, and the current group consists only of a single available hero (+possibly the non-brewing NPC),
 								 * the option to separate that hero from the group is shown, resulting in an active group which is empty or contains only the NPC and dead/petrified/unconscious/renegade heroes
 								 * See https://www.crystals-dsa-foren.de/showthread.php?tid=98&pid=166399#pid166399 and the following posts. */
 								(gs_total_hero_counter > 1) &&
 #else
-								((hero == get_hero(6)) || (count_heroes_available_in_group_ignore_npc() > 1)) && /* still allow to single out the NPC if he is the brewing hero */
+								/* Fix 259: nur abtrennen, wenn in der aktiven Gruppe noch ein handlungsfaehiger Held bleibt */
+								((hero == get_hero(6)) || (fix_count_group_no_npc() > 1)) &&
+#endif
+#if FIX_0260
+								/* Fix 260: Abtrennen nur anbieten, wenn eine der 6 Gruppen frei ist */
+								(fix_free_group() != -1) && /* still allow to single out the NPC if he is the brewing hero */
 #endif
 								(gs_town_loc_type != LOCTYPE_WILDCAMP) &&
 								(g_alchemy_recipes[recipe_index].duration > 8)
@@ -409,7 +450,11 @@ signed int plan_alchemy(struct struct_hero *hero)
 
 								/* find an empty group */
 								/* Original-Bug: only 6 groups, but 7 heroes might cause an 'out of boundary' here */
+#if FIX_0260
+								new_group_id = fix_free_group();
+#else
 								for (new_group_id = 0; gs_group_member_counts[new_group_id] != 0; new_group_id++);
+#endif
 
 								hero->group_id = (signed char)new_group_id;
 								gs_group_member_counts[new_group_id]++;
@@ -601,10 +646,18 @@ signed int talent_cure_disease(struct struct_hero *healer, struct struct_hero *p
 
 		/* Original-Bug: this is inside 'if (is_hero_healable(patient))', so the text file is not
 		 * restored if the patient cannot be healed (dead or petrified). */
+#if !FIX_0263
 		if ((from_event != 0) && (tx_file_bak != -1) && (tx_file_bak != ARCHIVE_FILE_SPELLTXT_LTX)) {
 			load_tx(tx_file_bak);
 		}
+#endif
 	}
+#if FIX_0263
+	/* Fix 263: Textdatei auch bei nicht heilbarem Patienten zurueckladen */
+	if ((from_event != 0) && (tx_file_bak != -1) && (tx_file_bak != ARCHIVE_FILE_SPELLTXT_LTX)) {
+		load_tx(tx_file_bak);
+	}
+#endif
 
 	return retval;
 }

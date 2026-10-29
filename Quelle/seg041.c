@@ -455,8 +455,16 @@ signed int FIG_get_hero_weapon_attack_damage(struct struct_hero* hero, struct st
 				/* REMARK: enemy_p is only set if attack_hero == 0. If a (renegade) hero hits another
 				 * hero with a weapon poisoned with Angstgift, an uninitialized pointer is written here.
 				 * Original-Bug? */
+#if FIX_0030
+				/* Fix 30: Angstgift wirkt nur auf Gegner, beim Helden ist enemy_p nicht gesetzt */
+				if (!attack_hero) {
+					enemy_p->flags.scared = 1;
+					enemy_p->flags.renegade = 0;
+				}
+#else
 				enemy_p->flags.scared = 1;
 				enemy_p->flags.renegade = 0;
+#endif
 
 			} else {
 				/* the following line is the source for the totally excessive and unbalanced poison damage */

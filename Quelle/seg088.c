@@ -235,12 +235,19 @@ void DNG15_riddle(void)
 	for (i = other_group_in_position = 0; i < 6; i++) {
 
 		if (pos == DNG_POS(1,8,1) && gs_groups_x[i] == 8 &&
+#if FIX_0110
+			/* Fix 110: die andere Gruppe muss in diesem Dungeon auf dieser Ebene stehen */
+			gs_groups_dungeon_id[i] == gs_dungeon_id && gs_groups_dng_level[i] == gs_dungeon_level &&
+#endif
 			gs_groups_y[i] == 5 && gs_active_group_id != i)
 		{
 			other_group_in_position = 1;
 		}
 
 		if (pos == DNG_POS(1,8,5) && gs_groups_x[i] == 8 &&
+#if FIX_0110
+			gs_groups_dungeon_id[i] == gs_dungeon_id && gs_groups_dng_level[i] == gs_dungeon_level &&
+#endif
 			gs_groups_y[i] == 1 && gs_active_group_id != i)
 		{
 			other_group_in_position = 1;

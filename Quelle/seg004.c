@@ -801,12 +801,22 @@ void update_wallclock(void)
 		}
 
 		/* d ist hoechstens HOURS(12) = 64800, d / 771 also bis 84; g_wallclock_pos_y hat aber nur 81 Werte */
+#if FIX_0282
+		/* Fix 282: Teiler 810 = HOURS(12) / 80, die Positionen bleiben in 0..80 */
+		if (((d / 810L) != g_wallclock_pos) || g_wallclock_redraw) {
+#else
 		if (((d / 771L) != g_wallclock_pos) || g_wallclock_redraw) {
+#endif
 
 			g_wallclock_redraw = 0;
 			night = ((gs_day_timer >= HOURS(7)) && (gs_day_timer <= HOURS(19))) ? 0 : 1;
+#if FIX_0282
+			draw_wallclock((signed int)(d / 810), night);
+			g_wallclock_pos = d / 810;
+#else
 			draw_wallclock((signed int)(d / 771), night);
 			g_wallclock_pos = d / 771;
+#endif
 		}
 	}
 }

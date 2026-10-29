@@ -181,6 +181,10 @@ signed int DNG08_handler(void)
 			 * is not at position 0, the loop checks and feeds the wrong slots (up to behind the last
 			 * hero), while the CH modification goes to get_hero(i). Same in the second cauldron and
 			 * the spear trap below. The cauldron can be used again after 24 hours (gs_dng08_timer1/2). */
+#if FIX_0111
+			/* Fix 111: bei Platz 0 beginnen (hero zeigte noch auf den ersten handlungsfaehigen Helden) */
+			hero = get_hero(0);
+#endif
 			for (i = 0; i <= 6; i++, hero++)
 			{
 				if ((hero->typus != HERO_TYPE_NONE) && (hero->group_id == gs_active_group_id) &&
@@ -205,6 +209,10 @@ signed int DNG08_handler(void)
 		{
 			GUI_output(get_tx(6)); /* "SCHMECKT ZUM KOTZEN, FÜLLT ABER WENIGSTENS DEN MAGEN." */
 
+#if FIX_0111
+			/* Fix 111: bei Platz 0 beginnen (hero zeigte noch auf den ersten handlungsfaehigen Helden) */
+			hero = get_hero(0);
+#endif
 			for (i = 0; i <= 6; i++, hero++)
 			{
 				if ((hero->typus != HERO_TYPE_NONE) && (hero->group_id == gs_active_group_id) && !hero->flags.dead)
@@ -313,6 +321,10 @@ signed int DNG08_handler(void)
 		for (i = tmp = 0; i < 6; i++)
 		{
 			if (gs_groups_x[i] == 11 && gs_groups_y[i] == 11 &&
+#if FIX_0110
+				/* Fix 110: die andere Gruppe muss in diesem Dungeon auf dieser Ebene stehen */
+				gs_groups_dungeon_id[i] == gs_dungeon_id && gs_groups_dng_level[i] == gs_dungeon_level &&
+#endif
 				gs_active_group_id != i)
 			{
 				tmp = 1;
@@ -330,6 +342,10 @@ signed int DNG08_handler(void)
 	{
 		GUI_output(get_tx(20)); /* "VOR EUCH TUT SICH EINE SPEERGESPICKTE FALLE AUF." */
 
+#if FIX_0111
+		/* Fix 111: bei Platz 0 beginnen (hero zeigte noch auf den ersten handlungsfaehigen Helden) */
+		hero = get_hero(0);
+#endif
 		for (i = 0; i <= 6; i++, hero++)
 		{
 			if ((hero->typus != HERO_TYPE_NONE) && (hero->group_id == gs_active_group_id) &&

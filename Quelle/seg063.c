@@ -394,7 +394,12 @@ void do_harbor(void)
 
 				p_money = get_party_money();
 
+#if FIX_0132
+				/* Fix 132: Geld nur pruefen, wenn die Gruppe etwas wissen will (nicht beim Verlassen) */
+				if ((answer == 1 || answer == 2) && (p_money < 10L)) {
+#else
 				if (p_money < 10L) {
+#endif
 
 					/* REMARK: also shown if the party only wanted to leave (answer 3) */
 					GUI_output(get_tx(8)); /* "<WAS?> BRÜLLT DER HAFENMEISTER ERBÖST.@<IHR HABT NOCH NICHT EINMAL..." */
@@ -491,7 +496,12 @@ void do_harbor(void)
 				g_travel_herokeeping = 0;
 
 				/* REMARK: the NPC (slot 6) is left out, unlike in do_tavern() */
+#if FIX_0133
+				/* Fix 133: auch den NSC */
+				for (i = 0; i <= 6; i++) {
+#else
 				for (i = 0; i < 6; i++) {
+#endif
 					g_food_message_shown[i] = 0;
 				}
 
@@ -530,6 +540,12 @@ void do_harbor(void)
 					gs_y_bak = gs_travel_destination_y;
 					gs_viewdir = ((gs_travel_destination_viewdir + 2) & 3);
 
+#if FIX_0372
+				/* Fix 372: nur der Umweg ins Totenschiff fuehrt dorthin; bei 99 (Gruppe tot, Kampf verlassen)
+				 * ist schon eine andere Gruppe aktiv, sie bleibt, wo sie ist (wie bei der Landreise, seg093) */
+				} else if (gs_travel_detour != DUNGEON_ID_TOTENSCHIFF) {
+					done = 1;
+#endif
 				} else {
 					done = 1;
 					DNG_enter_dungeon(DUNGEON_ID_TOTENSCHIFF);
@@ -553,7 +569,12 @@ void do_harbor(void)
 		copy_palette();
 		leave_location();
 
+#if FIX_0372
+	/* Fix 372: bei 99 ist eine andere Gruppe aktiv, ihr Ort bleibt (wie bei der Landreise, seg093) */
+	} else if (gs_travel_detour != 99) {
+#else
 	} else {
+#endif
 
 		gs_town_id = TOWN_ID_NONE;
 	}

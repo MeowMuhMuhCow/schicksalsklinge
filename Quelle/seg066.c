@@ -1008,9 +1008,20 @@ signed int get_town_tile_type(const unsigned char val)
 	signed int i;
 
 	i = 0;
+#if FIX_0299
+	/* Fix 299: nicht hinter die Tabelle lesen (Ergebnis bleibt 12) */
+	while ((i < 12) && (g_mapval_to_town_tile[i] < val)) {
+#else
 	while (g_mapval_to_town_tile[i] < val) {
+#endif
 		i++;
 	}
+#if FIX_0299
+	/* wie das Original (dort stand hinter der Tabelle 0x01, 0xff): Ergebnis 12 */
+	if (i == 12) {
+		i = 13;
+	}
+#endif
 
 	g_entrance_angle = ((((val & 3) + 4) - gs_viewdir) & 3);
 
@@ -1266,7 +1277,12 @@ void load_town_texture(signed int x, signed int y, signed int nvf_no, signed int
 		if (y + copy_height > 0) {
 			/* Original-Bug? should be copy_height += y (like copy_width += x); with y < 0
 			 * this copies |y| rows too many. Probably never reached with the given tables. */
+#if FIX_0281
+			/* Fix 281: Anschnitt oben verkleinert die Hoehe */
+			copy_height += y;
+#else
 			copy_height -= y;
+#endif
 			src += __abs__(y) * width;
 			y = 0;
 		}

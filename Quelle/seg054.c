@@ -136,13 +136,14 @@ struct struct_hero* get_first_brewing_hero(void)
 	signed int i;
 
 	hero = get_hero(0);
-# ifndef M302de_ORIGINAL_BUGFIX
+# if !FIX_0048
 	/* Original-Bug 11: If NPC Curian got separated from the group for brewing a recipe at an inn,
 	 * he is stuck in the inn. When the group enters the inn where they left him, no dialog appears.
 	 * Also, switch group does not help, as his group cannot be selected.
 	 * ("In dieser Gruppe ist momentan niemand in der Lage, etwas zu tun.") */
 	for (i = 0; i < 6; i++, hero++)
 # else
+	/* Fix 48: auch den NSC (Platz 6) finden (Bright-Eyes-Fix) */
 	for (i = 0; i < 7; i++, hero++)
 # endif
 	{
@@ -156,6 +157,35 @@ struct struct_hero* get_first_brewing_hero(void)
 	return NULL;
 }
 
+#if FIX_0050
+/* Fix 50: eine Gruppe mit der aktiven vereinen (der Rumpf von GRP_merge() fuer eine einzelne Gruppe) */
+static void fix_merge_group(const signed int group_id)
+{
+	signed int hero_pos;
+
+	gs_groups_viewdir[group_id] = gs_groups_x[group_id]
+		= gs_groups_y[group_id] = gs_groups_town_id[group_id]
+		= gs_groups_dungeon_id[group_id] = gs_groups_dng_level[group_id]
+		= gs_groups_viewdir_bak[group_id] = gs_groups_x_bak[group_id]
+		= gs_groups_y_bak[group_id] = gs_town_groups_loctype_bak[group_id]
+		= gs_groups_town_id_bak[group_id] = gs_groups_dungeon_id_bak[group_id]
+		= gs_groups_dng_level_bak[group_id] = 0;
+
+	gs_group_member_counts[group_id] = 0;
+
+	for (hero_pos = 0; hero_pos <= 6; hero_pos++) {
+
+		if ((get_hero(hero_pos)->typus != HERO_TYPE_NONE) && (get_hero(hero_pos)->group_id == group_id))
+		{
+			get_hero(hero_pos)->group_id = gs_active_group_id;
+			gs_group_member_counts[gs_active_group_id]++;
+		}
+	}
+
+	GRP_sort_heroes();
+}
+#endif
+
 /**
  * \brief   location handler for inns
  */
@@ -166,13 +196,17 @@ void do_inn(void)
 	signed int done;
 	signed int redraw_locline;
 	signed int portion_size;
-# ifndef M302de_ORIGINAL_BUGFIX
+# if !FIX_0049
 	/* Original-Bug 7: NPC Curian cannot do magic actions in an inn.
 	 * Problem: no space allocated for the NPC (= seventh hero). */
 	signed char magic_act[6];
 # else
+	/* Fix 49: Platz fuer den NSC (Bright-Eyes-Fix) */
 	signed char magic_act[7];
 # endif
+#if FIX_0050
+	signed int finalize_alchemy;
+#endif
 	struct struct_hero* hero;
 	struct struct_hero* hero2;
 	const struct inn_descr *inn;
@@ -191,7 +225,7 @@ void do_inn(void)
 	stay = 0;
 	g_sleep_quality = -1;
 
-#ifndef M302de_ORIGINAL_BUGFIX
+#if !FIX_0050
 	/* Original-Bug 8:
 	 * If a group of >=2 heroes enters an inn where another hero is brewing,
 	 * a textbox is shown with the possibility to interrupt the brewing process.
@@ -287,16 +321,12 @@ void do_inn(void)
 		}
 	}
 #else
-	/* fix Original-Bug 8, 9, 10, 20 */
+	/* Fix 50 (und 51): jeden brauenden Helden im Haus einzeln behandeln, auch beim Einzelhelden; nur die
+	 * Gruppe eines abgeschlossenen oder abgebrochenen Brauers wird aufgeloest (Bright-Eyes-Fix fuer
+	 * Original-Bug 8, 9, 10, 20; hier statt GRP_merge(), das alle Gruppen im Haus vereint) */
 	hero = get_first_hero_available_in_group();
 	if (hero->flags.brewing) {
-		/* situation: 'switch groups' just switched to a group consisting of a single hero which has been separated for brewing a long recipe in an inn */
-		/* ASSERT */
-		/*
-		if (gs_group_member_counts[gs_active_group_id] != 1) {
-			D1_INFO("FEHLER: Gruppengroesse eines brauenden Helden ist nicht 1.");
-		}
-		*/
+		/* 'switch groups' just switched to the group of a single hero brewing in this inn */
 		draw_status_line();
 
 		if (hero->recipe_timer != 0) {
@@ -304,10 +334,6 @@ void do_inn(void)
 			sprintf(g_dtp2, get_ttx(733), hero->alias, hero->recipe_timer, (char*)(hero->recipe_timer < 2 ? get_ttx(735) : get_ttx(736))); /* "%s BEFINDET SICH INMITTEN EIN..." / "TAG" / "TAGE" */
 
 			answer = GUI_radio(g_dtp2, 2, get_ttx(734), get_ttx(537)); /* "VERSUCH ABBRECHEN" / "NÄCHSTE GRUPPE" */
-			/* <HERO> befindet sich inmitten eines alchimistischen Versuchs, der wohl noch <DAYS> Tage dauert.
-			 * * Versuch abbrechen
-			 * * Weiter brauen lassen
-			 */
 
 			if (answer == 1) {
 				/* abort brewing */
@@ -329,7 +355,7 @@ void do_inn(void)
 			{
 				draw_status_line();
 
-				signed int finalize_alchemy = -1;
+				finalize_alchemy = -1;
 
 				if (hero->recipe_timer != 0) {
 
@@ -339,10 +365,6 @@ void do_inn(void)
 					g_textbox_width = 4;
 
 					answer = GUI_radio(g_dtp2, 2, get_ttx(734), get_ttx(562)); /* "VERSUCH ABBRECHEN" / "WEITER BRAUEN LASSEN" */
-					/* <HERO> befindet sich inmitten eines alchimistischen Versuchs, der wohl noch <DAYS> Tage dauert.
-					 * * Versuch abbrechen
-					 * * Weiter brauen lassen
-					 */
 
 					g_textbox_width = tw_bak;
 
@@ -354,40 +376,13 @@ void do_inn(void)
 					/* hero brewing, HERO_RECIPE_TIMER == 0. STAFFSPELL_TIMER not checked */
 					finalize_alchemy = 0;
 				}
+
 				if (finalize_alchemy != -1) {
 
 					do_alchemy(hero, hero->recipe_id, finalize_alchemy);
 
-					signed char group_id = hero->group_id;
-
-					/* ASSERT */
-					/*
-					if (gs_group_member_counts[group_id] != 1) {
-						D1_INFO("FEHLER: Gruppengroesse eines brauenden Helden ist nicht 1.");
-					}
-					*/
-
-					/* the following lines are taken (& adjusted) from function GRP_merge (seg049.cpp) */
-					gs_groups_viewdir[group_id] = 0;
-					gs_groups_x[group_id] = 0;
-					gs_groups_y[group_id] = 0; /* TODO: remove one of them */
-					gs_groups_y[group_id] = 0;
-					gs_groups_town_id[group_id] = 0;
-					gs_groups_dungeon_id[group_id] = 0;
-					gs_groups_dng_level[group_id] = 0;
-					gs_groups_viewdir_bak[group_id] = 0;
-					gs_groups_x_bak[group_id] = 0;
-					gs_groups_y_bak[group_id] = 0;
-					gs_town_groups_loctype_bak[group_id] = LOCTYPE_NONE;
-					gs_groups_town_id_bak[group_id] = 0;
-					gs_groups_dungeon_id_bak[group_id] = 0;
-					gs_groups_dng_level_bak[group_id] = 0;
-					gs_group_member_counts[group_id] = 0;
-
-					gs_group_member_counts[gs_active_group_id]++;
-					hero->group_id = gs_active_group_id;
-
-					GRP_sort_heroes();
+					/* nur diese Gruppe mit der aktiven vereinen (wie in GRP_merge()) */
+					fix_merge_group(hero->group_id);
 				}
 			}
 		}
@@ -400,7 +395,7 @@ void do_inn(void)
 
 		draw_loc_icons(g_combo_mode == 0 ? 7 : 8, MENU_ICON_TALK, MENU_ICON_ORDER_FOOD, MENU_ICON_BOOK_BED, MENU_ICON_APPLY_TALENT, MENU_ICON_MAGIC, MENU_ICON_SLEEP, MENU_ICON_LEAVE, MENU_ICON_TAVERN);
 
-# ifndef M302de_ORIGINAL_BUGFIX
+# if !FIX_0049
 	/* Original-Bug 7: NPC Curian cannot do magic actions in an inn. */
 		for (i = 0; i < 6; i++)
 # else
@@ -522,8 +517,14 @@ void do_inn(void)
 			price_schlafsaal += price_schlafsaal * inn->price_mod / 100;
 			/* Original-Bug: the modifier is taken from the (already modified) dormitory price
 			 * instead of price_einzelzimmer / price_suite. */
+#if FIX_0052
+			/* Fix 52: Aufschlag vom eigenen Preis */
+			price_einzelzimmer += price_einzelzimmer * inn->price_mod / 100;
+			price_suite += price_suite * inn->price_mod / 100;
+#else
 			price_einzelzimmer += price_schlafsaal * inn->price_mod / 100;
 			price_suite += price_schlafsaal * inn->price_mod / 100;
+#endif
 
 			tw_bak = g_textbox_width;
 			g_textbox_width = 5;

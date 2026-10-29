@@ -201,15 +201,29 @@ signed int DNG01_handler(void)
 			if (get_first_hero_with_item(ITEM_ID_SEIL) != -1 || get_first_hero_with_item(ITEM_ID_STRICKLEITER) != -1)
 			{
 				/* Original-Bug: better get_first_hero_available_in_group() */
+#if FIX_0093
+				/* Fix 93: der erste handlungsfaehige Held klettert */
+				if (test_talent(get_first_hero_available_in_group(), TA_KLETTERN, 0) > 0)
+#else
 				if (test_talent(get_hero(0), TA_KLETTERN, 0) > 0)
+#endif
 				{
 					/* Original-Bug: '32 * ' should probably be '16 *'. */
+#if FIX_0094
+					/* Fix 94: Dungeonkarten sind 16 Felder breit */
+					g_dng_map[16 * gs_y + gs_x] = DNG_TILE_PIT_IN_CEILING << 4;
+#else
 					g_dng_map[32 * gs_y + gs_x] = DNG_TILE_PIT_IN_CEILING << 4;
+#endif
 
 					DNG_dec_level();
 
 					/* Original-Bug: '32 * ' should probably be '16 *'. */
+#if FIX_0094
+					g_dng_map[16 * gs_y + gs_x] = DNG_TILE_PIT << 4;
+#else
 					g_dng_map[32 * gs_y + gs_x] = DNG_TILE_PIT << 4;
+#endif
 
 					gs_y++;
 				}
@@ -232,7 +246,7 @@ signed int DNG01_handler(void)
 			GUI_output(get_tx(15)); /* "MIT TIEFEN ZÜGEN ATMET IHR DIE SEELUFT EIN, ALS IHR DAS SCHIFF WIED..." */
 
 			if
-#ifndef M302de_ORIGINAL_BUGFIX
+#if !FIX_0095
 			/* Original-Bug 30:
 			 * After killing the demon on the death ship, it begins to sink. The party has 30 remaining steps to leave the ship. Succeeding in this, the corresponding message of the sinking death ship (present in the data) is not displayed.
 			 * Apparently, the bug is not present in the floppy version. However, there was the bug that an activated dungeon death trap will not be deactivated when leaving the dungeon. Fixing this bug in the CD-version,  Attic has introduced this new (and much less critical) bug.
@@ -243,6 +257,7 @@ signed int DNG01_handler(void)
 
 				(gs_deathtrap == 1 && gs_deathtrap_steps != 0)
 #else
+				/* Fix 95: leave_dungeon() hat gs_deathtrap schon geloescht (Bright-Eyes-Fix zu Original-Bug 30) */
 				(gs_quest_deadship_done == 1)
 #endif
 			{
@@ -330,8 +345,9 @@ void DNG01_chest07_loot(struct struct_chest* chest)
 
 void DNG01_chest06_loot(struct struct_chest* chest)
 {
-#ifdef M302de_ORIGINAL_BUGFIX
-	/* Enabling the extra loot in function DNG01_chest06_open() (formerly called DNG01_chest6_x1) also causes the special chest handler to call this function instead of DNG01_chest06_open().
+#if FIX_0097
+	/* Fix 97 (Teil 2): den Goldschluessel nur einmal (die Truhe gilt nach Fix 97 als offen)
+	 * Enabling the extra loot in function DNG01_chest06_open() (formerly called DNG01_chest6_x1) also causes the special chest handler to call this function instead of DNG01_chest06_open().
 	   Without this additional check the player will always get another golden key and the same text as the first time the chest is successfully opened.*/
 	if (!gs_dng01_key_taken)
 	{
@@ -341,7 +357,8 @@ void DNG01_chest06_loot(struct struct_chest* chest)
 
 	/* Original-Bug: The string 14 from SHIP.DTX needs a pointer to the name of the hero, not an integer.
 	 */
-#ifdef M302de_ORIGINAL_BUGFIX
+#if FIX_0096
+	/* Fix 96: den Namen statt der Zahl 10 einsetzen (Bright-Eyes-Fix) */
 	sprintf(g_text_output_buf, get_tx(14), (get_first_hero_available_in_group())->alias); /* "LEISE KNARREND ÖFFNET SICH, WIE VON GEISTERHAND,DIE TRUHE. %s ENTNI..." */
 #else
 	sprintf(g_text_output_buf, get_tx(14), 10); /* "LEISE KNARREND ÖFFNET SICH, WIE VON GEISTERHAND,DIE TRUHE. %s ENTNI..." */
@@ -350,7 +367,7 @@ void DNG01_chest06_loot(struct struct_chest* chest)
 
 	gs_dng01_key_taken = 1;
 
-#ifdef M302de_ORIGINAL_BUGFIX
+#if FIX_0097
 	/* We also need to close the if-block...*/
 	}
 	else 
@@ -383,8 +400,9 @@ void DNG01_chest06_open(struct struct_chest* chest)
 			// correct answer
 			chest->loot.func(chest);
 
-			// Original-Bug: enable the extra loot, here 10 AP
-#ifdef M302de_ORIGINAL_BUGFIX
+			/* Original-Bug: enable the extra loot, here 10 AP */
+#if FIX_0097
+			/* Fix 97: die Zusatzbelohnung (10 AP) freischalten (Bright-Eyes-Fix) */
 			g_get_extra_loot = 1;
 #endif
 		} else if (chest->trap){

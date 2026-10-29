@@ -803,7 +803,12 @@ void FIG_move_hero(struct struct_hero *hero, const signed int hero_pos, signed i
 
 							sel_y = -1;
 
+#if FIX_0012
+							/* Fix 12: wie am linken Rand reicht ein BP mehr als der Weg */
+							if (hero->fight_bp_left > bp_cost) {
+#else
 							if (bp_cost < (hero->fight_bp_left - 1)) {
+#endif
 
 								g_fig_move_pathdir[path_end] = 1;
 								g_fig_move_pathdir[path_end + 1] = -1;
@@ -813,7 +818,12 @@ void FIG_move_hero(struct struct_hero *hero, const signed int hero_pos, signed i
 
 							sel_y = 24;
 
+#if FIX_0012
+							/* Fix 12: wie am linken Rand reicht ein BP mehr als der Weg */
+							if (hero->fight_bp_left > bp_cost) {
+#else
 							if (bp_cost < (hero->fight_bp_left - 1)) {
+#endif
 
 								g_fig_move_pathdir[path_end] = 3;
 								g_fig_move_pathdir[path_end + 1] = -1;
@@ -831,10 +841,16 @@ void FIG_move_hero(struct struct_hero *hero, const signed int hero_pos, signed i
 					 * object_id_bak_escape), so the following checks use the value of an earlier cursor
 					 * position (uninitialized on the first pass). An escape square can thus be shown
 					 * as "ZIEL: BLOCKIERT". Original-Bug? */
+#if FIX_0013
+					/* Fix 13: im Fluchtfall den gerade gelesenen Inhalt des Randfelds pruefen */
+					if (escape_dir != 0) {
+						object_id_bak = object_id_bak_escape;
+					}
+#endif
 					if (object_id_bak >= 50) {
 
 						problem = 3; /* target square blocked */
-#ifndef M302de_ORIGINAL_BUGFIX
+#if !FIX_0014
 					} else if (object_id_bak >= 10) {
 
 						/* target square contains an enemy (including the tail of a double-size enemy) */
@@ -867,8 +883,7 @@ void FIG_move_hero(struct struct_hero *hero, const signed int hero_pos, signed i
 						 * This results in the incorrect message "ZIEL: 99 BP" if the target is pointing at a dead/unconscious hero
 						 * which is not reachable within the available BP or not reachable at all. */
 #else
-						/* Bug fix:
-						 * flatten the nested if branches. */
+						/* Fix 14: if-Kette flach (Bright-Eyes-Fix), damit Weg und BP auch bei Leichen geprueft werden */
 
 					} else if ((object_id_bak >= 10) && !g_enemy_sheets[(object_id_bak - 10 - (object_id_bak >= 30 ? 20 : 0))].flags.dead) { /* check 'dead' flag */
 						/* target square contains a non-dead enemy (including the tail of a double-size enemy) */

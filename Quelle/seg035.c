@@ -98,10 +98,30 @@ void FIG_loot_enemies(void)
 
 	g_autofight = 0;
 
+#if FIX_0015
+	/* Fix 15: auch loot_names[30] belegen, dorthin schreibt "MEHR" auf Seite 2 bei genau 30 Stueck */
+	for (loot_num = 0; loot_num < 31; loot_num++) {
+#else
 	for (loot_num = 0; loot_num < 30; loot_num++) {
+#endif
 
 		loot_names[loot_num] = (char*)(g_buffer9_ptr + 40 * loot_num);
 	}
+
+#if FIX_0016
+	/* Fix 16: den Knochen mit Rune aus der Beuteliste nehmen, statt die Liste an ihm abzubrechen
+	 * (die Gegenstaende dahinter werden sonst nie angeboten) */
+	for (loot_num = 0; loot_num < 30; loot_num++) {
+
+		while (g_current_fight->loot[loot_num] == ITEM_ID_KNOCHEN_MIT_RUNE) {
+
+			for (item_cnt = loot_num; item_cnt < 29; item_cnt++) {
+				g_current_fight->loot[item_cnt] = g_current_fight->loot[item_cnt + 1];
+			}
+			g_current_fight->loot[29] = 0;
+		}
+	}
+#endif
 
 	do {
 		loot_num = item_cnt = 0;
@@ -294,7 +314,12 @@ signed int check_hero_range_attack(const struct struct_hero *hero, const signed 
 		retval = 0;
 	}
 
+#if FIX_0017
+	/* Fix 17: Schusslinie nur pruefen, wenn die Meldung nicht schon kam */
+	if (retval && (manhattan_distance(hero_x, hero_y, target_x, target_y) != 1)) {
+#else
 	if (manhattan_distance(hero_x, hero_y, target_x, target_y) != 1) {
+#endif
 
 		/* exchange coordinates if needed */
 		if (hero_x > target_x) {

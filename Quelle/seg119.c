@@ -155,7 +155,12 @@ void disease_effect(void)
 					}
 				}
 
+#if FIX_0265
+				/* Fix 265: 5 % wie vorgesehen */
+				if (random_schick(100) <= 5) {
+#else
 				if (random_schick(100) < 5) {
+#endif
 					/* 5% chance of worsening to Blaue Keuche */
 					/* (tatsaechlich 4 %: random_schick(100) < 5 heisst 1..4; anderswo steht "<=") */
 
@@ -182,6 +187,11 @@ void disease_effect(void)
 					 * also noch D6-1 LE Verlust durch den eben beendeten Dumpfschaedel */
 				}
 
+#if FIX_0266
+				/* Fix 266: nach der Verschlimmerung keinen Dumpfschaedel-Schaden mehr */
+				if (disease_ptr->status != DISEASE_STATUS_DISEASED) {
+				} else
+#endif
 				if (disease_ptr->time_counter > dice_roll(1, 3, 4)) { /* number of days infected > D3 + 4 */
 					// Original-Bug? forgot? disease_ptr->time_counter = 0; -- harmlos: der Genesungsblock direkt darunter setzt time_counter = 0
 					disease_ptr->status = DISEASE_STATUS_RECOVER;
@@ -356,7 +366,8 @@ void disease_effect(void)
 				} else {
 
 					if
-#ifndef M302de_ORIGINAL_BUGFIX
+#if !FIX_0269
+					/* Fix 269: FIX_0269 = 1 dreht die Bedingung um (Verlust vorhanden -> zurueckgeben) */
 					/* Original-Bug 44:
 					 * Recover from Paralyse and Frostschaden does not work, GE and KK are not recovered.
 					 * In the two if statements below, the condition is reversed. */
@@ -375,7 +386,8 @@ void disease_effect(void)
 					}
 
 					if
-#ifndef M302de_ORIGINAL_BUGFIX
+#if !FIX_0269
+					/* Fix 269: FIX_0269 = 1 dreht die Bedingung um (Verlust vorhanden -> zurueckgeben) */
 					/* Original-Bug 44, see above. */
 					(!disease_ptr->log_2)
 #else
@@ -452,7 +464,7 @@ void disease_effect(void)
 
 				/* Original-Bug 45: It is impossible to fully recover from Schlachtenfieber.
 				 * There is no way to get the status back to DISEASE_STATUS_HEALTHY. */
-#ifndef M302de_ORIGINAL_BUGFIX
+#if !FIX_0270
 				if (disease_ptr->log_3) {
 
 					disease_ptr->log_3 = 0;
@@ -464,6 +476,7 @@ void disease_effect(void)
 				// "hero's lips do not look yellow any more"
 				GUI_output(g_dtp2);
 #else
+				/* Fix 270: nach der Rueckgabe der KK wird der Held gesund */
 				if (disease_ptr->log_3) {
 					disease_ptr->log_3 = 0;
 					hero->attrib[ATTRIB_KK].current += 5;
@@ -528,7 +541,8 @@ void disease_effect(void)
 					disease_ptr->status = DISEASE_STATUS_HEALTHY;
 				} else {
 					if
-#ifndef M302de_ORIGINAL_BUGFIX
+#if !FIX_0269
+					/* Fix 269: FIX_0269 = 1 dreht die Bedingung um (Verlust vorhanden -> zurueckgeben) */
 					/* Original-Bug 44:
 					 * Recover from Paralyse and Frostschaeden does not work, GE and KK are not recovered.
 					 * In the two if statements below, the condition is reversed. */
@@ -547,7 +561,8 @@ void disease_effect(void)
 					}
 
 					if
-#ifndef M302de_ORIGINAL_BUGFIX
+#if !FIX_0269
+					/* Fix 269: FIX_0269 = 1 dreht die Bedingung um (Verlust vorhanden -> zurueckgeben) */
 					/* Original-Bug 44, see above. */
 					(!disease_ptr->log_2)
 #else

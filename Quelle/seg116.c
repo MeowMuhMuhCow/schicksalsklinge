@@ -160,11 +160,12 @@ void tevent_133(void)
 
 	if (answer == 1) {
 
-#ifndef M302de_ORIGINAL_BUGFIX
+#if !FIX_0150
 		/* Original-Bug 53:
 		 * If the party was already traveling backward, the new direction should be forward. */
 		gs_journey_direction = JOURNEY_DIRECTION_CHANGE_TO_BACKWARD;
 #else
+		/* Fix 150: Umkehren kehrt die aktuelle Richtung um */
 		gs_journey_direction = (gs_journey_direction == JOURNEY_DIRECTION_FORWARD ? JOURNEY_DIRECTION_CHANGE_TO_BACKWARD : JOURNEY_DIRECTION_CHANGE_TO_FORWARD);
 #endif
 
@@ -329,7 +330,13 @@ void tevent_135(void)
 					GUI_output(g_dtp2);
 				}
 
+#if FIX_0080
+				/* Fix 80: der NSC allein versucht es nicht noch einmal; die Spielschleife prueft die Gruppe */
+				g_check_party = 1;
+				if (count_heroes_available_in_group() > is_hero_available_in_group(get_hero(6))) {
+#else
 				if (count_heroes_available_in_group()) { /* potential Original-Bug: Does this make sense if there is only the NPC left? (Can it happen?) */
+#endif
 
 					if (!GUI_bool(get_tx2(59))) { /* "WOLLT IHR ES NOCH EINMAL VERSUCHEN?" */
 						done = 1;
@@ -626,7 +633,12 @@ void tevent_144(void)
 				if (grimring_hero_pos == -1) {
 					/* Grimring wurde abgelegt: dann kaempft Platz 0, auch wenn dieser Held nicht in
 					 * der Gruppe ist oder nicht kaempfen kann (vermutlich nicht bedacht) */
+#if FIX_0038
+					/* Fix 38: dann den ersten handlungsfaehigen Helden der Gruppe nehmen */
+					grimring_hero_pos = get_hero_pos(get_first_hero_available_in_group());
+#else
 					grimring_hero_pos = 0;
+#endif
 				}
 
 				if (grimring_hero_pos == 6) {
@@ -688,7 +700,13 @@ void TLK_old_woman(const signed int state)
 		hero = get_hero(0);
 		for (hero_pos = counter = 0; hero_pos <= 6; hero_pos++, hero++) {
 			/* Original-Bug: check if this is really a hero in the current group and alive before test_talent((struct struct_hero*)) */
+#if FIX_0153
+			/* Fix 153: nur lebende Helden der aktiven Gruppe (wie count_heroes_in_group()) */
+			if ((hero->typus != HERO_TYPE_NONE) && (hero->group_id == gs_active_group_id) && !hero->flags.dead &&
+				(test_talent(hero, TA_VERSTECKEN, -5) > 0)) {
+#else
 			if (test_talent(hero, TA_VERSTECKEN, -5) > 0) {
+#endif
 				counter++;
 			}
 		}
@@ -708,7 +726,13 @@ void TLK_old_woman(const signed int state)
 		hero = get_hero(0);
 		for (hero_pos = counter = 0; hero_pos <= 6; hero_pos++, hero++) {
 			/* Original-Bug: check if this is really a hero in the current group and alive before test_talent((struct struct_hero*)) */
+#if FIX_0153
+			/* Fix 153: nur lebende Helden der aktiven Gruppe (wie count_heroes_in_group()) */
+			if ((hero->typus != HERO_TYPE_NONE) && (hero->group_id == gs_active_group_id) && !hero->flags.dead &&
+				(test_talent(hero, TA_VERSTECKEN, -5) > 0)) {
+#else
 			if (test_talent(hero, TA_VERSTECKEN, -5) > 0) {
+#endif
 				counter++;
 			}
 		}
@@ -719,10 +743,15 @@ void TLK_old_woman(const signed int state)
 
 	} else if (state == 33) {
 
+#if FIX_0174
+		/* Fix 174: statt Endlosschleife das Gespraech beenden */
+		g_dialog_done = 1;
+#else
 		/* Infinity-Loop */
 		/* (das Spiel haengt, falls F092.TLK diesen Zustand je erreicht; vermutlich nie benutzt) */
 		do {
 		} while (1);
+#endif
 
 	} else if (state == 34) {
 		g_dialog_next_state = (gs_town_id == TOWN_ID_FELSTEYN ? 35 : 39);

@@ -334,7 +334,12 @@ void loot_chest(struct struct_chest *chest, char *text_non_empty, char *text_emp
 	/* Original-Bug: 20 bytes are too short for some item names (e.g. "MAGISCHER BROTBEUTEL" needs 21,
 	 * "REZEPT FUER STARKEN HEILTRANK" 29). The name then runs into the next entry, which loses its
 	 * terminator; the last entry would overflow the array. loot_simple_chest() uses 30 bytes. */
+#if FIX_0216
+	/* Fix 216: 30 Byte je Name wie in loot_simple_chest() */
+	char names[20][30];
+#else
 	char names[20][20];
+#endif
 
 	chest->lock.key = 0;
 
@@ -658,10 +663,19 @@ void loot_multi_chest(uint8_t *content, char *msg)
 				len = strlen(temp_str);
 
 				/* REMARK: GUI_input() returns -1 on ESC, so the question cannot be cancelled */
+#if FIX_0217
+				/* Fix 217: ESC (oder eine negative Eingabe) nimmt nichts mit */
+				i = (quantity = content[pos + 1]) > 1 ? GUI_input(get_ttx(593), len) : quantity; /* "WIE VIELE MITNEHMEN?" */
+
+				if (i < 0) {
+					i = 0;
+				}
+#else
 				do {
 					i = (quantity = content[pos + 1]) > 1 ? GUI_input(get_ttx(593), len) : quantity; /* "WIE VIELE MITNEHMEN?" */
 
 				} while (i < 0);
+#endif
 
 				if (i > quantity) {
 					i = quantity;

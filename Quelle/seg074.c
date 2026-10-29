@@ -329,7 +329,7 @@ void render_automap(const signed int x_off)
 		}
 	}
 
-#ifndef M302de_ORIGINAL_BUGFIX
+#if !FIX_0082
 	/* draw yellow arrow at the position of the active group */
 
 	/* Original-Bug 31: If there is another group on the same map square as the active group, the automap will mark that square by a purple arrow (for the other group) instead of a yellow one (for the active group).
@@ -337,7 +337,12 @@ void render_automap(const signed int x_off)
 	/* REMARK: not always true: the player can scroll the map so that the group is off screen.
 	 * The visible columns are 0..15, so "<= 16" should be "< 16": a group in column 16 is drawn
 	 * right of the map (same for the purple arrows and the cross below). */
+#if FIX_0083
+	/* Fix 83: sichtbar sind die Spalten 0..15 */
+	if (((gs_x - x_off) >= 0) && ((gs_x - x_off) < 16)) {
+#else
 	if (((gs_x - x_off) >= 0) && ((gs_x - x_off) <= 16)) { /* shouldn't this always be true? */
+#endif
 
 		draw_automap_square(gs_x - x_off, gs_y, MAP_TILE_YELLOW_ARROW, gs_viewdir);
 	}
@@ -353,7 +358,11 @@ void render_automap(const signed int x_off)
 			(gs_groups_dungeon_id[group_i] == gs_dungeon_id) &&
 			!is_group_in_prison(group_i) &&
 			(gs_groups_x[group_i] - x_off >= 0) &&
+#if FIX_0083
+			(gs_groups_x[group_i] - x_off < 16))
+#else
 			(gs_groups_x[group_i] - x_off <= 16))
+#endif
 		{
 			draw_automap_square(gs_groups_x[group_i] - x_off,
 					gs_groups_y[group_i],
@@ -362,19 +371,28 @@ void render_automap(const signed int x_off)
 		}
 	}
 
-#ifdef M302de_ORIGINAL_BUGFIX
+#if FIX_0082
 	/* draw yellow arrow at the position of the active group */
 
-	/* Original-Bug 31: see above.
+	/* Fix 82: gelben Pfeil zuletzt zeichnen (Bright-Eyes-Fix zu Original-Bug 31)
 	 * Fix: Move the code block drawing the yellow arrow after the one drawing the purple arrows. */
+#if FIX_0083
+	/* Fix 83: sichtbar sind die Spalten 0..15 */
+	if (((gs_x - x_off) >= 0) && ((gs_x - x_off) < 16)) {
+#else
 	if (((gs_x - x_off) >= 0) && ((gs_x - x_off) <= 16)) { /* shouldn't this always be true? */
+#endif
 
 		draw_automap_square(gs_x - x_off, gs_y, MAP_TILE_YELLOW_ARROW, gs_viewdir);
 	}
 #endif
 
 	/* In the target selector screen of the Transversalis spell, mark the target with a cross */
+#if FIX_0083
+	if (((g_automap_selx - x_off) >= 0) && ((g_automap_selx - x_off) < 16)) {
+#else
 	if (((g_automap_selx - x_off) >= 0) && ((g_automap_selx - x_off) <= 16)) {
+#endif
 
 		draw_automap_square(g_automap_selx - x_off, g_automap_sely, MAP_TILE_CROSS, -1);
 	}
@@ -628,7 +646,12 @@ signed int select_teleport_dest(void)
 		} else if ((g_action_id == KEY_SCAN_CODE_ARROW_DOWN) &&
 			/* Original-Bug: should be "< 15". From row 15 is_discovered(x, 16) reads behind
 			 * g_automap_buf[64], so the cross may move one row below the map. */
+#if FIX_0187
+			/* Fix 187: das Kreuz bleibt auf der Karte (Zeilen 0..15) */
+			(g_automap_sely < 15) &&
+#else
 			(g_automap_sely < 16) &&
+#endif
 			is_discovered(g_automap_selx, g_automap_sely + 1))
 		{
 			g_automap_sely++;

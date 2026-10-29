@@ -87,9 +87,16 @@ void ask_miracle(void)
 				case GOD_ID_PRAIOS: {
 					no_spellcaster_in_group = 1;
 
+#if FIX_0061
+					/* Fix 61: alle Helden der Gruppe pruefen, ein Zauberkundiger verhindert das Praios-Wunder (Bright-Eyes-Fix) */
+					for (i = 0; i <= 6; i++) {
+						if (((get_hero(i))->typus >= HERO_TYPE_HEXE) && ((get_hero(i))->group_id == gs_active_group_id)) {
+							no_spellcaster_in_group = 0;
+						}
+					}
+#else
 					for (i = 0; gs_group_member_counts[gs_active_group_id] > i; i++) {
 						if ((get_hero(i))->typus >= HERO_TYPE_HEXE) {
-#ifndef M302de_ORIGINAL_BUGFIX
 							/* Original-Bug 43:
 								The implementation of Praios miracles suggests that Praios only grants miracles to groups without spellcasters.
 								This fits the lore that Praios hates magic.
@@ -98,11 +105,9 @@ void ask_miracle(void)
 								REMARK: the loop also runs over the hero slots 0..n-1 instead of the members of the group.
 							*/
 							no_spellcaster_in_group = 1;
-#else
-							no_spellcaster_in_group = 0;
-#endif
 						}
 					}
+#endif
 
 					// Praios doesn't like groups with spellcasters.
 					if (no_spellcaster_in_group != 0) {
@@ -144,7 +149,12 @@ void ask_miracle(void)
 
 								hero = get_hero(i);
 
+#if FIX_0062
+								/* Fix 62: nur Helden der aktiven Gruppe ohne Goetterzorn (wie im renegade-Zweig) */
+								if (hero->flags.transformed && (hero->group_id == gs_active_group_id) && !hero->flags.gods_pissed) {
+#else
 								if (hero->flags.transformed) {
+#endif
 
 									hero->flags.transformed = 0;
 
@@ -275,7 +285,12 @@ void ask_miracle(void)
 
 							hero = get_hero(i);
 
+#if FIX_0062
+							/* Fix 62: nur Helden der aktiven Gruppe ohne Goetterzorn (wie im renegade-Zweig) */
+							if (hero->flags.transformed && (hero->group_id == gs_active_group_id) && !hero->flags.gods_pissed) {
+#else
 							if (hero->flags.transformed) {
+#endif
 
 								hero->flags.transformed = 0;
 
@@ -316,6 +331,22 @@ void ask_miracle(void)
 						/* "Ihr verspuert keinen Hunger oder Durst mehr." */
 						/* sated for 7 days. REMARK: only one random hero, although the text addresses all ("IHR") */
 						if (!gs_ingame_timers[INGAME_TIMER_FIRUN_SATED]) {
+#if FIX_0063
+							/* Fix 63: alle Helden der Gruppe sind satt (der Text spricht alle an) */
+							miracle_modify((uint8_t*)&get_hero(0)->hunger_timer - (uint8_t*)get_hero(0), DAYS(7), 1);
+
+							for (i = 0; i <= 6; i++) {
+								if (((get_hero(i))->typus != HERO_TYPE_NONE) && ((get_hero(i))->group_id == gs_active_group_id) &&
+									!(get_hero(i))->flags.dead && !(get_hero(i))->flags.gods_pissed)
+								{
+									(get_hero(i))->hunger = (get_hero(i))->thirst = 0;
+								}
+							}
+
+							strcpy(g_dtp2, get_tx2(20)); /* "IHR VERSPUERT KEINEN HUNGER UND DURST MEHR." */
+							gs_ingame_timers[INGAME_TIMER_FIRUN_SATED] = DAYS(7);
+						}
+#else
 
 							i = get_random_hero();
 
@@ -330,6 +361,7 @@ void ask_miracle(void)
 								gs_ingame_timers[INGAME_TIMER_FIRUN_SATED] = DAYS(7);
 							}
 						}
+#endif
 					}
 					break;
 				}

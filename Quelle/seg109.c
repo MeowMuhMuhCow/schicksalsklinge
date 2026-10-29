@@ -349,8 +349,9 @@ void TRV_found_replenish_place(const signed int herb_hint)
 		*/
 		/* Anmerkung zum Bugfix: hero_pos <= 7 schreibt Index 7, die Felder haben aber nur 7 Eintraege
 		 * (herb/repl/magicstatus); harmlos, weil die Nachbarfelder ebenfalls genullt werden, sauber waere < 7. */
-#ifdef M302de_ORIGINAL_BUGFIX
-		for (hero_pos = 0; hero_pos <= 7; hero_pos++) {
+#if FIX_0148
+		/* Fix 148: Status aller Helden zuruecksetzen, replenish_stocks() fragt selbst nach dem Helden (Plaetze 0..6) */
+		for (hero_pos = 0; hero_pos < 7; hero_pos++) {
 
 			g_wildcamp_replstatus[hero_pos] =
 				g_wildcamp_herbstatus[hero_pos] =
@@ -368,7 +369,8 @@ void TRV_found_replenish_place(const signed int herb_hint)
 
 		/* Original-Bug: the second argument is is the counter of replenish tries, not the position of the leader.
 		 * Trigger:	Leave the first two hero slots empty and call this function. */
-#ifdef M302de_ORIGINAL_BUGFIX
+#if FIX_0149
+		/* Fix 149: zweiter Parameter ist der Versuchszaehler, nicht die Heldenposition */
 		replenish_stocks(-3, 0);
 #else
 		replenish_stocks(-3, hero_pos);
@@ -494,11 +496,12 @@ signed int TRV_cross_a_ford(char *msg, const signed int time, const signed int h
 			answer = GUI_bool(get_tx(39)); /* "WOLLT IHR WIRKLICH UMKEHREN?" */
 
 			if (answer == 1) {
-#ifndef M302de_ORIGINAL_BUGFIX
+#if !FIX_0150
 				/* Original-Bug 53:
 				 * If the party was already traveling backward, the new direction should be forward. */
 				done = gs_journey_direction = JOURNEY_DIRECTION_CHANGE_TO_BACKWARD; // this is value 1
 #else
+				/* Fix 150: Umkehren kehrt die aktuelle Richtung um */
 				gs_journey_direction = (gs_journey_direction == JOURNEY_DIRECTION_FORWARD ? JOURNEY_DIRECTION_CHANGE_TO_BACKWARD : JOURNEY_DIRECTION_CHANGE_TO_FORWARD);
 				done = 1;
 #endif
@@ -530,10 +533,11 @@ void TRV_ford_test(const signed int handicap, const signed int time)
 			/* Genauer: test_attrib() liefert nur bei W20 = GE - handicap + 1 genau 0; die 95 % gelten
 			 * daher fuer 0 <= GE - handicap <= 18, sonst 100 % (W20 = 20 liefert -99 = "Erfolg").
 			 * Der Bugfix mit "< 0" laesst das Ergebnis 0 weiter gelingen; richtig waere "<= 0". */
-#ifndef M302de_ORIGINAL_BUGFIX
+#if !FIX_0151
 			if (test_attrib(hero, ATTRIB_GE, handicap) == 0)
 #else
-			if (test_attrib(hero, ATTRIB_GE, handicap) < 0)
+			/* Fix 151: gewoehnliche GE-Probe, jedes Ergebnis <= 0 ist misslungen */
+			if (test_attrib(hero, ATTRIB_GE, handicap) <= 0)
 #endif
 			{
 				/* test failed */
@@ -569,8 +573,15 @@ signed int TRV_ferry(char *msg, signed int price)
 	signed int answer;
 	const signed int heroes_num = count_heroes_in_group();
 	uint32_t p_money;
+#if FIX_0152
+	/* Fix 152: Preis bei jedem Versuch aus dem Grundpreis berechnen */
+	const signed int fix_base_price = price;
+#endif
 
 	do {
+#if FIX_0152
+		price = fix_base_price;
+#endif
 
 		sprintf(g_dtp2, get_tx(28), (char*)msg, price, 5 * price); /* "IHR STEHT AM UFER DES %s. HIER FÜHRT EINE WENIG VERTRAUENERWECKENDE..." */
 
@@ -621,7 +632,13 @@ signed int TRV_ferry(char *msg, signed int price)
 				/* Original-Bug? What if the ferry was entered in backward direction, is this possible? */
 				/* Ja: die Faehr-Ereignisse 3, 6, 23 sind wiederholbar und loesen auch rueckwaerts aus.
 				 * Dann bleibt die Gruppe trotz "UMKEHREN" auf Rueckwaertskurs (wie Original-Bug 53). */
+#if FIX_0150
+				/* Fix 150: Umkehren kehrt die aktuelle Richtung um */
+				gs_journey_direction = (gs_journey_direction == JOURNEY_DIRECTION_FORWARD ? JOURNEY_DIRECTION_CHANGE_TO_BACKWARD : JOURNEY_DIRECTION_CHANGE_TO_FORWARD);
+				done = 1;
+#else
 				gs_journey_direction = done = JOURNEY_DIRECTION_CHANGE_TO_BACKWARD; // this is value 1
+#endif
 			}
 		}
 
@@ -909,7 +926,13 @@ void TRV_barrier(const signed int text_start)
 					 * anderer Gruppen und tote Helden (leere Plaetze scheitern praktisch immer). */
 					for (i = tools_num = 0; i <= 6; i++, hero++)
 					{
+#if FIX_0153
+						/* Fix 153: nur lebende Helden der aktiven Gruppe */
+						if (hero->typus && (hero->group_id == gs_active_group_id) && !hero->flags.dead &&
+							(test_talent(hero, TA_WILDNISLEBEN, 0) > 0)) {
+#else
 						if (test_talent(hero, TA_WILDNISLEBEN, 0) > 0) {
+#endif
 							tools_num++;
 						}
 					}

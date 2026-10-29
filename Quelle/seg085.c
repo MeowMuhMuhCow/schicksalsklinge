@@ -138,7 +138,14 @@ signed int DNG10_handler(void)
 			/* set hole found */
 			/* Original-Bug: this overwrites the state 2 (stone removed), so the test "== 2" below is
 			 * never true and the question about the loose stone is asked again every time. */
+#if FIX_0115
+			/* Fix 115: den Zustand "Stein entfernt" (2) nicht ueberschreiben */
+			if (!gs_dng10_hole_state) {
+				gs_dng10_hole_state = 1;
+			}
+#else
 			gs_dng10_hole_state = 1;
+#endif
 
 			if (gs_dng10_hole_state == 2 || GUI_bool(get_tx(6))) /* "EIN STEIN IN DER WAND SCHEINT LOSE ZU SEIN.@WOLLT IHR IHN ENTFERNEN?" */
 			{
@@ -209,6 +216,21 @@ signed int DNG10_handler(void)
 		/* INFO: collection bowl */
 		if (GUI_bool(get_tx(17))) /* "VOR EUCH STEHT EINE STATUE MIT OPFERSCHALE.@WOLLT IHR ETWAS GELDHIN..." */
 		{
+#if FIX_0117
+			/* Fix 117: in 32 Bit rechnen; ESC (-1) und Ueberlaeufe (<= 0) bringen kein Geld */
+			p_money = (int32_t)GUI_input(get_tx(18), 6) * 10;
+
+			if (p_money <= 0) {
+				/* nichts hineingeworfen */
+			} else if (get_party_money() < p_money)
+			{
+				GUI_output(get_ttx(401));
+			} else {
+				GUI_output( (p_money >= 1000) ? get_tx(20) : get_tx(19));
+
+				set_party_money( get_party_money() - p_money);
+			}
+#else
 			answer = GUI_input(get_tx(18), 6) * 10; /* "WIEVIELE SILBERSTÜCKE WOLLT IHR HINEINWERFEN?" */
 			/* Original-Bug: GUI_input() returns -1 on ESC, so answer == -10 passes the money test and
 			 * set_party_money() below adds 10 Heller (1 silver piece) to the party. */
@@ -222,6 +244,7 @@ signed int DNG10_handler(void)
 
 				set_party_money( get_party_money() - answer);
 			}
+#endif
 		}
 
 	} else if (target_pos == DNG_POS(0,6,12) && target_pos != gs_dng_pos_bak && gs_viewdir == SOUTH)

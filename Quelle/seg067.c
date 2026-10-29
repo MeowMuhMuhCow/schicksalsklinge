@@ -121,7 +121,12 @@ void city_event_1(void)
 				/* Original-Bug? randval is 0, 1, 3 or 4, so the texts 24, 25, 27 and 28 are shown. 27 and 28 are the
 				 * 2nd and 3rd part of the story above and make no sense alone, 29 and 30 are never shown.
 				 * Probably get_tx(randval < 2 ? randval + 24 : randval + 26) was intended. */
-				sprintf(g_dtp2,	get_tx(randval + 24), hero->alias); /* 24, 25, 27 oder 28, z.B. "IHR RENNT HINTER IHM HER UND BRÜLLT AUS LEIBESKRÄFTEN..." */
+#if FIX_0064
+				/* Fix 64: Texte 24, 25, 29, 30 (26..28 sind die dreiteilige Geschichte oben) */
+				sprintf(g_dtp2,	get_tx(randval < 2 ? randval + 24 : randval + 26), hero->alias);
+#else
+				sprintf(g_dtp2,	get_tx(randval + 24), hero->alias);
+#endif /* 24, 25, 27 oder 28, z.B. "IHR RENNT HINTER IHM HER UND BRÜLLT AUS LEIBESKRÄFTEN..." */
 				GUI_output(g_dtp2);
 			}
 		}
@@ -264,7 +269,7 @@ void city_event_6(void)
 {
 	signed int answer;
 	signed int loc_bak;
-#ifdef M302de_ORIGINAL_BUGFIX
+#if FIX_0065
 	/* Original-Bug 24 */
 	signed int type_bak;
 #endif
@@ -285,8 +290,8 @@ void city_event_6(void)
 		} else if (answer == 3) {
 			loc_bak = gs_town_loc_type;
 			gs_town_loc_type = LOCTYPE_MERCHANT;
-#ifdef M302de_ORIGINAL_BUGFIX
-	/* Original-Bug 24:
+#if FIX_0065
+	/* Fix 65: Gebaeudetyp sichern (Bright-Eyes-Fix, Original-Bug 24)
 	 * When entering a building in Thorwal, Prem, Phexcaer or Oberorken between 8:00 and 20:00 o'clock, the street merchant (random city event) shows up with a chance 1:900. Selecting the third answer in the text box, the merchant screen appears. After leaving the street merchant, the entered building is corrupted. For example, an entered temple will be a Praios temple (which otherwise does not exist in the game), or an entered tavern may offer negative food prices.
 	 */
 			type_bak = gs_town_typeindex;
@@ -294,13 +299,14 @@ void city_event_6(void)
 			gs_town_typeindex = MERCHANT_TYPEINDEX_STREET_MERCHANT;
 			do_merchant();
 			gs_town_loc_type = loc_bak;
-#ifdef M302de_ORIGINAL_BUGFIX
-	/* Original-Bug 24 */
+#if FIX_0065
+	/* Fix 65: Gebaeudetyp zurueckschreiben */
 			gs_town_typeindex = type_bak;
 #endif
 	/* Original-Bug 27: After leaving the street merchant (random city event), the party is rotated by 180 degrees. This doesn't make too much sense, and it is inconsistent to the similar situation of visiting a merchant at a market, where no rotation is performed. If moreover the street merchant happens to appear when the party is about to enter some building, after leaving the street merchant and then leaving the building the party will *not* be rotated. */
-#ifdef M302de_ORIGINAL_BUGFIX
-	/* fix analogous to to Original-Bug 26.
+#if FIX_0047
+	/* Fix 47 (teilweise): Drehung von leave_location() zuruecknehmen (Bright-Eyes-Fix zu Original-Bug 27)
+	 * fix analogous to to Original-Bug 26.
 	 * The rotation is performed in the function leave_location(), which has been called in do_merchant() above.
 	 * We fix the bug in a hacky way by simply correcting the rotation afterwards. */
 			gs_viewdir = REVERSE_VIEWDIR(gs_viewdir); /* rotate by 180 degrees */

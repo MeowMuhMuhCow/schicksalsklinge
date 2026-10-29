@@ -100,6 +100,10 @@ void do_random_talk(const signed int talk_id, const signed int informer_id)
 	do {
 		answer = optioncount = 0;
 		state_ptr = &states_tab[g_dialog_state];
+#if FIX_0045
+		/* Fix 45: fehlende Antworten auf txt_offset setzen, dann schuetzt sie die Pruefung beim Mischen */
+		opt0_txt = opt1_txt = opt2_txt = 0;
+#endif
 
 		if (g_tlk_id == 13 && g_dialog_state >= 20) {
 			txt_id_rand = opt0_rand = opt1_rand = opt2_rand = 0;
@@ -265,7 +269,8 @@ char* get_informer_forename(void)
 			} while (tmp != ' ');
 
 			strncpy(g_text_output_buf, get_ttx(p_info->name_id), i);
-#ifdef M302de_ORIGINAL_BUGFIX
+#if FIX_0293
+			/* Fix 293: nach dem Fund aufhoeren (Bright-Eyes-Fix) */
 			break;
 #endif
 		}

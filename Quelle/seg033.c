@@ -388,7 +388,12 @@ void FIG_menu(struct struct_hero *hero, const signed int hero_pos, signed int x,
 									 * (index outside g_enemy_sheets). Original-Bug? */
 									if (target_object_id != -99) {
 
+#if FIX_0011
+										/* Fix 11: begehbare Objekte (Id >= 50) wie im Angriffszweig abweisen */
+										if ((target_object_id < 0) || (target_object_id >= 50)) {
+#else
 										if (target_object_id < 0) {
+#endif
 											GUI_output(get_tx(28)); /* "UNGÜLTIGES ZIEL!" */
 
 										} else if ((target_object_id == 0) && (spell_description->target_type != 4))
@@ -864,6 +869,20 @@ void FIG_menu(struct struct_hero *hero, const signed int hero_pos, signed int x,
 						hero->target_object_id = 0;
 						done = 0;
 					}
+#if FIX_0322
+					/* Fix 322: alte Nahkampfoption nur, wenn das Ziel (Kopf oder Schwanz) noch direkt daneben steht */
+					else if ((hero->action_id == FIG_ACTION_MELEE_ATTACK) &&
+						!(FIG_search_obj_on_cb(hero->target_object_id, &target_x, &target_y) &&
+							(manhattan_distance(x, y, target_x, target_y) < 2)) &&
+						!((hero->target_object_id >= 10) && (hero->target_object_id < 30) &&
+							FIG_search_obj_on_cb(hero->target_object_id + 20, &target_x, &target_y) &&
+							(manhattan_distance(x, y, target_x, target_y) < 2)))
+					{
+						hero->action_id = FIG_ACTION_WAIT;
+						hero->target_object_id = 0;
+						done = 0;
+					}
+#endif
 				}
 			}
 		}

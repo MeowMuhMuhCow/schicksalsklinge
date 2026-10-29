@@ -258,7 +258,12 @@ signed int GUI_enter_string(char* dst, signed int x, const signed int y, const s
 			 * (als Leerstelle) und setzt pos und dst eine Stelle hinter das Namensende.
 			 * Danach getippte Zeichen landen hinter der 0 und fehlen im Ergebnis,
 			 * solange man nicht zuerst die Ruecktaste drueckt. */
+#if FIX_0304
+			/* Fix 304: nur die Zeichen des alten Namens ausgeben, Schreibstelle direkt dahinter */
+			if ((g_gui_entering_savegame) && (length > si)) {
+#else
 			if ((g_gui_entering_savegame) && (length >= si)) {
+#endif
 				GUI_print_char(' ', x_pos, y);
 				GUI_print_char(*dst, x_pos, y);
 				pos++;

@@ -67,12 +67,13 @@ void spell_armatrutz(void)
 	signed int mod_slot;
 
 	/* calc the maximal RS bonus */
-#ifndef M302de_ORIGINAL_BUGFIX
+#if !FIX_0207
 	/* Original-Bug: you can get one RS point more that you have AE for */
 	while (max_bonus * max_bonus < get_spelluser()->ae) {
 		max_bonus++;
 	}
 #else
+	/* Fix 207: groesster Bonus, dessen Quadrat die AE nicht uebersteigt */
 	while (max_bonus * max_bonus <= get_spelluser()->ae) {
 		max_bonus++;
 	}
@@ -431,6 +432,10 @@ void spell_paralue(void)
 		/* Achtung: geprueft wird hier der ALTE Wert von g_spelltarget (vom letzten Zauber),
 		 * er wird erst danach gesetzt. War das alte Ziel der Zauberer selbst, scheitert
 		 * Paralue still mit 0 AE, egal auf wen er jetzt gesprochen wird. */
+#if FIX_0208
+		/* Fix 208: erst das neue Ziel setzen, dann pruefen */
+		g_spelltarget = get_hero(get_spelluser()->target_object_id - 1);
+#endif
 		if (get_spelltarget() != get_spelluser()) {
 
 			/* set the target  */
@@ -580,7 +585,7 @@ void spell_brenne(void)
 
 	g_spell_special_aecost = 0;
 
-#ifndef M302de_ORIGINAL_BUGFIX
+#if !FIX_0210
 	/* Original-Bug 55:
 	 * Using the second (third, firth...) un-lit torch in the inventory to ignite it,
 	 * actually the first torch will be ignited. (provided the hero also has a tinder box)
@@ -599,6 +604,7 @@ void spell_brenne(void)
 		lantern_inv_slot = inv_slot_of_item(get_spelluser(), ITEM_ID_LATERNE__UNLIT);
 	}
 #else
+	/* Fix 210: den benutzten Inventarplatz anzuenden, nicht die erste Fackel/Laterne */
 	/* For the fix, we rely on the stored inventory slot of the used item in g_used_item_inv_slot */
 	if (g_ignite_mode == IGNITE_MODE_USE_TORCH) {
 		torch_inv_slot = g_used_item_inv_slot;

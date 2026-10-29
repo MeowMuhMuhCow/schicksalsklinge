@@ -543,6 +543,12 @@ signed int drop_item(struct struct_hero *hero, const signed int inv_slot, signed
 			/* this item is droppable */
 			if (p_item->flags.stackable) {
 
+#if FIX_0394
+				/* Fix 394: bei einem einzelnen Stueck nicht nach der Menge fragen */
+				if ((quantity == -1) && (hero->inventory[inv_slot].quantity == 1)) {
+					quantity = 1;
+				}
+#endif
 				if (quantity == -1) {
 					sprintf(g_dtp2,	get_ttx(219), (char*)GUI_name_inflect_with_article( /* "WIE VIELE %s SOLL ICH WEGWERFEN?" */
 						INFLECT_INDEFINITE_ARTICLE | INFLECT_PLURAL | INFLECT_4TH_CASE,
@@ -621,6 +627,11 @@ signed int drop_item(struct struct_hero *hero, const signed int inv_slot, signed
 		 * (undroppable item, "WIRKLICH WEGWERFEN?" answered with no, quantity 0),
 		 * so the sacrifice counts although the hero keeps the item. */
 
+#if FIX_0126
+		/* Fix 126: Opfer zaehlen nur, wenn wirklich etwas weggeworfen wurde */
+		if (retval && !(p_item->flags.stackable && (quantity == 0)))
+		{
+#endif
 		/* check for the pirate cave on Manrek to bring Efferd a gift */
 		if ((item_id == ITEM_ID_DREIZACK || item_id == ITEM_ID_NETZ) &&
 			(gs_dungeon_id == DUNGEON_ID_PIRATENHOEHLE) && (gs_x == 9) && (gs_y == 9))
@@ -635,6 +646,9 @@ signed int drop_item(struct struct_hero *hero, const signed int inv_slot, signed
 		{
 			gs_dng12_ingerimm_sacrifice = 1;
 		}
+#if FIX_0126
+		}
+#endif
 	}
 
 	return retval;
@@ -781,6 +795,17 @@ void lose_random_item(struct struct_hero *hero, const signed int chance, char *t
 
 	if (random_schick(100) > chance)
 		return;
+
+#if FIX_0221
+	/* Fix 221: ohne ablegbaren Gegenstand nichts verlieren (sonst Endlosschleife) */
+	for (inv_slot = 0; inv_slot < NR_HERO_INVENTORY_SLOTS; inv_slot++) {
+		item_id = hero->inventory[inv_slot].item_id;
+		if (item_id != 0 && !g_itemsdat[item_id].flags.undroppable)
+			break;
+	}
+	if (inv_slot == NR_HERO_INVENTORY_SLOTS)
+		return;
+#endif
 
 	/* Original-Bug: infinite loop if the hero has no item */
 	do {

@@ -127,12 +127,13 @@ void npc_farewell(void)
 							 * However, these "free" attempts are missing at the next level-up.
 							 * This does not make sense. */
 
-#ifdef M302de_ORIGINAL_BUGFIX
+#if FIX_0255
+							/* Fix 255: Steigerungsversuche sichern, inc_talent_novice() zieht sie ab */
 							char ta_rise_bak = hero_i->saved_talent_increases;
 #endif
 							/* All non-dead heroes in the same group get a chance to increase TA_SCHLEICHEN */
 							inc_talent_novice(hero_i, TA_SCHLEICHEN);
-#ifdef M302de_ORIGINAL_BUGFIX
+#if FIX_0255
 							/* The unwanted reduction is done within the function inc_talent_novice(). We revert it. */
 							hero_i->saved_talent_increases = ta_rise_bak;
 #endif
@@ -471,6 +472,10 @@ void npc_erwo(void)
 void remove_npc(const signed int head_index, const signed char days,
 		const signed int index, char *name, char *text)
 {
+#if FIX_0256
+	/* Fix 256: Zustand des NSC vor dem Loeschen merken, sonst wird der Timer immer -1 */
+	signed int npc_ok;
+#endif
 
 	if (g_fading_state != 0)
 		refresh_colors();
@@ -489,6 +494,9 @@ void remove_npc(const signed int head_index, const signed char days,
 		GUI_dialogbox((uint8_t*)g_dtp2, name, text, 0);
 	}
 
+#if FIX_0256
+	npc_ok = check_hero(get_hero(6));
+#endif
 	/* clear the NPC from memory */
 	memset((void*)get_hero(6), 0, sizeof(struct struct_hero));
 
@@ -504,7 +512,11 @@ void remove_npc(const signed int head_index, const signed char days,
 			so the parameter days is useless */
 	/* Folge: gs_npc_timers[] wird immer -1, der NSC ist nie wieder anzutreffen
 	 * (npc_meetings() verlangt Timer 0, seg002 zaehlt nur Timer != -1 herunter). */
+#if FIX_0256
+	if (npc_ok)
+#else
 	if (check_hero(get_hero(6)))
+#endif
 		gs_npc_timers[index - ARCHIVE_FILE_NPCS + 1] = days;
 	else
 		gs_npc_timers[index - ARCHIVE_FILE_NPCS + 1] = -1;

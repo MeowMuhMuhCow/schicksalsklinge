@@ -27,6 +27,33 @@ Doppelklick auf **`BAUEN.bat`**. Dauer etwa eine halbe bis zwei Minuten, vier Sc
 | Protokoll | `Build\bau.log` |
 | Arbeitsordner (wird bei jedem Bau geleert) | `%TEMP%\schicksalsklinge_bau` |
 
+## Fix-Fassungen (Fehlerbehebungen)
+
+`BAUEN.bat wichtig` bzw. `BAUEN.bat alles` baut nach dem normalen Bau zusätzlich eine EXE mit eingeschalteten
+Fehlerbehebungen (Schalter `FIX_nnnn` in `Quelle\s_fix.h`, Liste mit Gründen in `FIXES.md`). Dauer etwa so lang wie
+ein zweiter Bau. **Alle Behebungen sind im Spiel ungetestet – Tester willkommen.**
+
+| Aufruf | Ergebnis | Inhalt |
+|---|---|---|
+| `BAUEN.bat wichtig` | `Build\BLADEM_FIX_WICHTIG.EXE` | Behebungen der Kategorien *kritisch* und *mittel* (`FIX_BUGS=1`) |
+| `BAUEN.bat alles` | `Build\BLADEM_FIX_ALLES.EXE` | zusätzlich alle *egal*-Fehler (`FIX_BUGS=2`) |
+
+Gestartet werden sie mit `BLADEM_FIX_WICHTIG_STARTEN.bat` bzw. `BLADEM_FIX_ALLES_STARTEN.bat` im Projektordner
+(neben `BLADEM_STARTEN.bat`). Die Startdateien kopieren die Fix-EXE als `BLADEM.EXE` nach `Build\Fix_Wichtig` bzw.
+`Build\Fix_Alles` (DOS kennt nur 8.3-Namen) und legen Spielstände in eigene Ordner
+`Build\Testspielstaende_Fix_Wichtig` bzw. `Build\Testspielstaende_Fix_Alles`.
+
+Der normale Bau läuft im Fix-Modus immer mit: er muss weiterhin **BYTEGLEICH** melden und ist die Vergleichsfassung.
+Der Fix-Bau übersetzt alle Module mit `-DFIX_BUGS=1` bzw. `=2`, füllt geänderte residente Module auf ihre
+Originallänge auf (`Werkzeuge\segpad.py`; wird eines länger, bricht der Bau ab), linkt und prüft mit
+`Werkzeuge\fixcheck.py`: residente Segmente an gleicher Stelle, Datensegment Byte für Byte unverändert, alle
+Overlay-Einsprünge zeigen auf dieselben Funktionen. Die Spielstände bleiben mit dem Original austauschbar (keine
+Behebung ändert Strukturen oder das Spielstandformat).
+
+Weitere Optionen: `BAUEN.bat alles --exploits-lassen` (Fehler, die dem Spieler nützen, bleiben drin, `FIX_EXPLOITS=0`),
+`BAUEN.bat alles --fixflags "-DFIX_0222=0"` (einzelne Schalter übersteuern). Die EXE heißt dann trotzdem
+`BLADEM_FIX_ALLES.EXE`.
+
 ## Was der Bau macht
 
 | Schritt | Was passiert |
@@ -45,6 +72,8 @@ Wer eine Datei in `Quelle\` ändert, baut mit seiner Änderung. Die EXE ist dann
 | `BYTEGLEICH mit dem Original` | alles richtig |
 | `ABWEICHUNG vom Original: erste Differenz bei Byte …` | gebaut, aber nicht gleich (Quelle geändert?) |
 | `Uebersetzungsfehler` | ein Modul übersetzt nicht, die Zeilen stehen im Protokoll |
+| `Fix-Modus: ... passt nicht in sein residentes Segment` | eine Behebung macht ein residentes Modul länger – so nicht baubar |
+| `Fix-Modus: fixcheck meldet Fehler` | die Fix-EXE wäre mit dem Original nicht verträglich, sie wird nicht ausgegeben |
 | `Borland C++ 3.1 nicht gefunden` | `Compiler\BIN\BCC.EXE` fehlt |
 | `DOSBox nicht gefunden` | GOG-Pfad anders: DOSBox-Ordner nach `Bauen\DOSBox\` kopieren oder `--dosbox PFAD` |
 | `Python 3 wurde nicht gefunden` | Schritt 1 oben fehlt |
@@ -55,6 +84,8 @@ Wer eine Datei in `Quelle\` ändert, baut mit seiner Änderung. Die EXE ist dann
 
 | Option | Wirkung |
 |---|---|
+| `wichtig` / `alles` | zusätzlich die Fix-EXE bauen (siehe oben) |
+| `--exploits-lassen`, `--fixflags "..."` | nur mit `wichtig`/`alles`, siehe oben |
 | `--sichtbar` | DOSBox-Fenster zeigen |
 | `--dosbox PFAD` | andere DOSBox |
 | `--compiler ORDNER` | Compiler woanders |

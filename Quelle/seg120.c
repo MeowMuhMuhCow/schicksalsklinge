@@ -278,7 +278,13 @@ void rabies_frenzy(struct struct_hero* hero_rabies, signed int hero_pos_rabies)
 
 					/* one of the other heroes must pass CH+0 */
 					/* Original-Bug: other hero should be in same group, not dead, etc. */
+#if FIX_0273
+					/* Fix 273: nur handlungsfaehige Helden der Gruppe, CH-Probe gelungen (> 0) */
+					if ((hero_pos != hero_pos_rabies) && (get_hero(hero_pos)->group_id == gs_active_group_id) &&
+						check_hero(get_hero(hero_pos)) && (test_attrib(get_hero(hero_pos), ATTRIB_CH, 0) > 0))
+#else
 					if ((hero_pos != hero_pos_rabies) && (test_attrib(get_hero(hero_pos), ATTRIB_CH, 0) != 0))
+#endif
 						/* Original-Bug: should be 'test_attrib(get_hero(i), ATTRIB_CH, 0) > 0'
 						 * (found by siebenstreich 2021-08-15) */
 					{
@@ -311,20 +317,22 @@ void rabies_frenzy(struct struct_hero* hero_rabies, signed int hero_pos_rabies)
 
 					/* check that hero_2 can cast the spell Sanftmut */
 					if
-#ifndef M302de_ORIGINAL_BUGFIX
+#if !FIX_0212
 						/* Original-Bug 49: Missing check if the hero is sufficiently skilled in the Sanftmut spell. */
 						(hero_2->typus >= HERO_TYPE_HEXE)
 #else
+						/* Fix 212 (teilweise): Zauberwert pruefen (die Meldung "beherrscht den Zauber nicht" braeuchte einen neuen Text) */
 						(hero_2->typus >= HERO_TYPE_HEXE && hero_2->spells[SP_SANFTMUT] >= -5)
 #endif
 					{
 
 						/* need 15 AE for Sanftmut spell. */
 						if
-#ifndef M302de_ORIGINAL_BUGFIX
+#if !FIX_0212
 							/* Original-Bug 49: For a Magier with 4th staffspell, 13 AE are enough. */
 							(hero_2->ae >= 15)
 #else
+							/* Fix 212: Magier mit 4. Stabzauber zahlen 2 AE weniger (sub_ae_splash) */
 							(hero_2->ae >= 15 || (hero_2->staff_level >= 4 && hero_2->ae >= 13))
 #endif
 						{
@@ -333,7 +341,12 @@ void rabies_frenzy(struct struct_hero* hero_rabies, signed int hero_pos_rabies)
 							/* Original-Fehler (neu, wie beim Beruhigen oben): test_spell() liefert bei
 							 * misslungener Probe 0 oder einen negativen Wert (z. B. -1 beim Patzer);
 							 * nur 0 zaehlt hier als Fehlschlag. Richtig waere '> 0'. */
+#if FIX_0273
+							/* Fix 273: nur eine gelungene Probe (> 0) beruhigt */
+							if (test_spell(hero_2, SP_SANFTMUT, 0) > 0) {
+#else
 							if (test_spell(hero_2, SP_SANFTMUT, 0)) {
+#endif
 
 								done = 1;
 
@@ -521,7 +534,12 @@ signed int init_memory(void)
 		/* Original-Fehler: verlangt werden mehr als 334000 Byte, gemeldet wird aber
 		 * 329000 - freemem; bei 329000..334000 freien Bytes erscheint eine negative
 		 * Zahl, sonst eine um 5000 zu kleine. */
+#if FIX_0308
+		/* Fix 308: der wirkliche Fehlbetrag */
+		printf(g_str_not_enough_mem, 334000L - freemem);
+#else
 		printf(g_str_not_enough_mem, 329000L - freemem);
+#endif
 
 		wait_for_keypress();
 		error = 1;
@@ -926,6 +944,10 @@ void call_gen(void)
 		/* vermutlich Original-Fehler: kein exit(). Das Spiel laeuft danach ohne den
 		 * oben freigegebenen globalen Puffer, ohne Maus, Timer und AIL weiter. */
 		cleanup_game();
+#if FIX_0309
+		/* Fix 309: nach dem Aufraeumen beenden statt ohne Puffer weiterzulaufen */
+		exit(0);
+#endif
 	} else {
 
 		init_AIL(16000);

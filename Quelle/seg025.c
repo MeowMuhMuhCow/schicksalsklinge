@@ -185,7 +185,12 @@ void do_house(void)
 		for (i = 0; i < 6; i++, hero++) {
 
 			if ((hero->typus != HERO_TYPE_NONE) && (hero->group_id == gs_active_group_id) &&
+#if FIX_0086
+				/* Fix 86: nur handlungsfaehige Helden (nicht versteinert, bewusstlos ...) */
+				check_hero(hero) &&
+#else
 				!hero->flags.dead && /* Original-Bug: What if petrified, sleeping etc. */
+#endif
 				(test_talent(hero, TA_VERSTECKEN, -2) <= 0))
 			{
 				/* every hero must pass a sneak -2 test */
@@ -207,7 +212,12 @@ void do_house(void)
 
 						hero = get_hero(i);
 
+#if FIX_0040
+						/* Fix 40: nur Helden anderer Gruppen zaehlen, die aktive wird ja gerade verhaftet */
+						if (check_hero(hero) && !hero->jail && (hero->group_id != gs_active_group_id)) {
+#else
 						if (check_hero(hero) && !hero->jail) {
+#endif
 							unarrested = 1;
 						}
 					}
@@ -219,12 +229,21 @@ void do_house(void)
 						/* Original-Bug: verhaftet ab Platz 0 nur, solange die Plaetze zur aktiven Gruppe gehoeren.
 						 * Liegt die Gruppe nicht lueckenlos ab Platz 0, bleiben Mitglieder frei
 						 * oder es wird niemand verhaftet. */
+#if FIX_0041
+						/* Fix 41: alle 7 Plaetze der aktiven Gruppe verhaften (auch den NSC) */
+						for (i = 0; i <= 6; i++) {
+							if ((get_hero(i)->typus != HERO_TYPE_NONE) && (get_hero(i)->group_id == gs_active_group_id)) {
+								get_hero(i)->jail = 1;
+							}
+						}
+#else
 						while (get_hero(i)->group_id == gs_active_group_id)
 						{
 							/* imprison hero */
 							get_hero(i)->jail = 1;
 							i++;
 						}
+#endif
 
 						GRP_switch_to_next(1);
 

@@ -775,6 +775,7 @@ void restart_midi_playback_IRQ(void)
 }
 
 #if defined(__BORLANDC__)
+#if !FIX_PLATZ_SEG002	/* nie aufgerufen; entfaellt mit Behebungen in diesem residenten Modul (Platz) */
 static void midi_stop_sequence_unused(void)
 /* This function is never called */
 /* (hiess cruft_1) haelt die MIDI-Sequenz an, ohne sie freizugeben */
@@ -800,6 +801,7 @@ static void midi_set_volume_unused(const signed int volume)
 		}
 	}
 }
+#endif
 #endif
 
 /* prueft, ob genug Speicher fuer den Musiktreiber da ist (1 = ja) und schaltet bei
@@ -1576,6 +1578,7 @@ void disable_mouse(void)
 }
 
 #if defined(__BORLANDC__)
+#if !FIX_PLATZ_SEG002	/* nie aufgerufen; entfaellt mit Behebungen in diesem residenten Modul (Platz) */
 void mouse_get_button_press_info(int16_t *a1, int16_t *a2, int16_t *a3, int16_t *a4)
 {
 	int16_t tmp;
@@ -1584,6 +1587,7 @@ void mouse_get_button_press_info(int16_t *a1, int16_t *a2, int16_t *a3, int16_t 
 
 	mouse_action(a1, a2, a3, a4, &tmp);
 }
+#endif
 
 void call_mouse_isr(void)
 {
@@ -1662,6 +1666,7 @@ void mouse_move_cursor(const signed int x, const signed int y)
 #if defined(__BORLANDC__)
 /* unused */
 /* INT 33h, Funktion 9: Grafik-Mauszeiger definieren (Hotspot, Maske bei mask_seg:mask_off) */
+#if !FIX_PLATZ_SEG002	/* nie aufgerufen; entfaellt mit Behebungen in diesem residenten Modul (Platz) */
 static void mouse_setGMask(const uint16_t h_spot, const uint16_t v_spot, uint16_t mask_off, uint16_t mask_seg)
 {
 	int16_t l1 = 9;
@@ -1685,6 +1690,7 @@ static void mouse_setCRTpage(const uint16_t page)
 
 	mouse_action(&l1, &l3, &l4, &l5, &l6);
 }
+#endif
 #endif
 
 
@@ -2234,9 +2240,10 @@ static void timers_daily(void)
 	/* enable disease check */
 	g_check_disease = 1;
 
-#ifdef M302de_ORIGINAL_BUGFIX
-	/* Original-Bug: Reenable identifying item in the academy */
+#if FIX_0039
+	/* Fix 39: Akademie identifiziert und bricht Flueche am naechsten Tag wieder */
 	gs_academy_daily_ident = 0;
+	gs_academy_daily_curse = 0;
 #endif
 
 	/* Decrase monthly credit cens timer (bank) */
@@ -2433,6 +2440,35 @@ signed int get_current_season(void)
 }
 
 
+#if FIX_0079
+/* Fix 79: die stuendlichen Sondertimer aus do_timers() (Einhorn, Sphaerenriss, Orkmist-Faesser),
+ * auch fuer die Stundenschleife in timewarp() */
+static void fix_hourly_timers(void)
+{
+	/* decrement unicorn timer */
+	if (gs_unicorn_get_map && gs_unicorn_timer_hours)
+	{
+		gs_unicorn_timer_hours--;
+	}
+
+	/* handle sphere timer */
+	if (gs_dng02_sphaerenriss_timer_hours) {
+
+		if (!(--gs_dng02_sphaerenriss_timer_hours)) {
+			gs_dng02_sphaerenriss_activated = 1;
+		}
+	}
+
+	/* barrels with orc muck in the orc dungeon */
+	if (gs_dng08_timer1) {
+		gs_dng08_timer1--;
+	}
+	if (gs_dng08_timer2) {
+		gs_dng08_timer2--;
+	}
+}
+#endif
+
 /**
  * \brief   calc census for the bank depot
  *
@@ -2546,6 +2582,9 @@ void do_timers(void)
 			/* (Nein: magical_chainmail_damage() setzt g_herokeeping_flag, herokeeping() selbst laeuft bei jeder
 			 * Eingabeabfrage (handle_input/handle_gui_input) und isst/trinkt dann einmal pro Stunde.) */
 
+#if FIX_0079
+			fix_hourly_timers();
+#else
 			/* decrement unicorn timer */
 			if (gs_unicorn_get_map && gs_unicorn_timer_hours)
 			{
@@ -2567,6 +2606,7 @@ void do_timers(void)
 			if (gs_dng08_timer2) {
 				gs_dng08_timer2--;
 			}
+#endif
 		}
 
 		/* reset the day timer to 24h time */
@@ -2853,6 +2893,10 @@ void sub_mod_timers(const int32_t val)
 			if (sp->target) {
 				/* target is a hero/npc */
 
+#if FIX_0229
+				/* Fix 229: Held fuer jeden Timer neu suchen */
+				h_index = -1;
+#endif
 				/* get the hero index from the target */
 				target = sp->target;
 				for (j = 0; j <= 6; j++) {
@@ -2900,8 +2944,14 @@ void sub_mod_timers(const int32_t val)
 					 * zurueckgesetzt wird also nur der aktuelle Eintrag, die anderen bleiben stehen. */
 					for (j = 0; j < 100; j++) {
 						if (gs_modification_timers[j].target == target) {
+#if FIX_0230
+							/* Fix 230: alle Eintraege des ungueltigen Ziels zuruecksetzen */
+							gs_modification_timers[j].target = gs_modification_timers[j].modifier = 0;
+							gs_modification_timers[j].offset = 0;
+#else
 							sp->target = sp->modifier = 0;
 							sp->offset = 0;
+#endif
 						}
 					}
 				}
@@ -2946,7 +2996,15 @@ signed int get_free_mod_slot(void)
 		/* set timer of slot 0 to 1 */
 		gs_modification_timers[0].time_left = 1;
 		/* subtract one from each mod timer -> timer in slot 0 will be freed. */
+#if FIX_0231
+		/* Fix 231: auch im Kampf (g_timers_disabled) wirklich freigeben */
+		i = g_timers_disabled;
+		g_timers_disabled = 0;
 		sub_mod_timers(1);
+		g_timers_disabled = i;
+#else
+		sub_mod_timers(1);
+#endif
 
 		/* now timer slot 0 can be used again. */
 		return 0;
@@ -3426,7 +3484,12 @@ static void check_level_up(void)
 				 * Adjust AP requirement for level up to match the original DSA 2/3 rules.
 				 * Without this mod, it is "off by one".
 				 * For example, for level 2, 100 AP should be enough, but the game requires 101 AP. */
+#if FIX_0403
+				/* Fix 403: Aufstieg schon bei genau der geforderten AP-Zahl */
+				(g_level_ap_tab[hero->level] <= hero->ap)
+#else
 				(g_level_ap_tab[hero->level] < hero->ap)
+#endif
 				/* could be easily done without accessing the data segment by the formula level_ap_tab[i] = 50 * i * (i+1) */
 #else
 				(50 * hero->level * (hero->level + 1) <= hero->ap)
@@ -3672,11 +3735,12 @@ static void passages_reset(void)
 	signed int i;
 	struct sea_route *route = &g_sea_routes[0];
 
-#ifndef M302de_ORIGINAL_BUGFIX
+#if !FIX_0127
 	/* Original-Bug 36: the loop operates only on the first sea route (which is Thorwal-Prem) */
 	/* Folge: auf allen anderen Routen faehrt das Schiff nicht um 9 Uhr ab, sondern bleibt bis Mitternacht. */
 	for (i = 0; i < (SEA_ROUTE_ID__END - 1); i++)
 #else
+	/* Fix 127: alle Seerouten zuruecksetzen */
 	for (i = 0; i < (SEA_ROUTE_ID__END - 1); route++, i++)
 #endif
 	{
@@ -3728,7 +3792,7 @@ void timewarp(const int32_t time)
 
 	sub_mod_timers(time);
 
-#ifndef M302de_ORIGINAL_BUGFIX
+#if !FIX_0233
 	/* Original-Bug 37:
 	 * Healing time-offs, staffspell time-offs and timers for the consumption of burning lanterns and torches
 	 * do not get updated in certain situations, like a step forward in a town or dungeon.
@@ -3739,11 +3803,12 @@ void timewarp(const int32_t time)
 	sub_heal_staffspell_timers(time / MINUTES(5));
 	sub_light_timers(time / MINUTES(15));
 #else
+	/* Fix 233: den Rest der angebrochenen 5 bzw. 15 Minuten mitrechnen */
 	sub_heal_staffspell_timers((time + (timer_bak % MINUTES(5))) / MINUTES(5));
 	sub_light_timers((time + (timer_bak % MINUTES(15)))/ MINUTES(15));
 #endif
 
-#ifndef M302de_ORIGINAL_BUGFIX
+#if !FIX_0234
 	/* fixes Original-Bugs 38 and 39.
 	 *
 	 * Original-Bug 38:
@@ -3770,6 +3835,10 @@ void timewarp(const int32_t time)
 		for (i = 0; hour_diff > i; i++) {
 			magical_chainmail_damage();
 			herokeeping();
+#if FIX_0079
+			/* Fix 79: stuendliche Sondertimer mitzaehlen */
+			fix_hourly_timers();
+#endif
 			/* Original-Bug 39: Timers for 2nd encounter of the unicorn, Sphaerenriss in verfallene Herberge
 			 * and two timers for barrels with orc muck in the orc dungeon are not affected from passing in-game time.
 			 * Reason: They are present in do_timers(), but missing at this place.
@@ -3777,33 +3846,14 @@ void timewarp(const int32_t time)
 		}
 	}
 #else
-	/* fix Original-Bug 38. better not overcomplicate things... */
+	/* Fix 234: Zahl der ueberschrittenen vollen Stunden */
 	for (i = 0; i < (time + (timer_bak % HOURS(1))) / HOURS(1); ++i) {
 		magical_chainmail_damage();
 		herokeeping();
-
-		/* fix Original-Bug 39. add missing timers. */
-		/* timer for 2nd encounter of the unicorn */
-		if (gs_unicorn_get_map && gs_unicorn_timer_hours != 0)
-		{
-			gs_unicorn_timer_hours--;
-		}
-
-		/* timer for Sphaerenriss in verfallene Herberge */
-		if (gs_dng02_sphaerenriss_timer_hours) {
-
-			if (!(--gs_dng02_sphaerenriss_timer_hours)) {
-				gs_dng02_sphaerenriss_activated = 1;
-			}
-		}
-
-		/* timer for barrels with orc muck in the orc dungeon */
-		if (gs_dng08_timer1) {
-			gs_dng08_timer1--;
-		}
-		if (gs_dng08_timer2) {
-			gs_dng08_timer2--;
-		}
+#if FIX_0079
+		/* Fix 79: stuendliche Sondertimer mitzaehlen */
+		fix_hourly_timers();
+#endif
 	}
 #endif
 
@@ -3819,7 +3869,8 @@ void timewarp(const int32_t time)
  */
 void timewarp_until_time_of_day(const int32_t time)
 {
-#ifdef M302de_ORIGINAL_BUGFIX
+#if FIX_0079 || FIX_0233 || FIX_0234
+	/* Fixes 79, 233, 234: timewarp() benutzen, das die Behebungen schon enthaelt (gleich viele Takte) */
 	/* The code of the function replicates the one of timewarp(..)
 	 * Better call timewarp(..), such that we don't have to apply the same bugfixes twice.
 	 * The bypassed code below suffers from Original-Bug 37 and 38. */
@@ -3933,6 +3984,10 @@ void timewarp_until_midnight(void)
 	/* only called at a single place, at the Swafnild encounter in seg072.cpp */
 {
 	/* TODO: This doesn't look all correct to me... Have all timers been considered? Why not call timewarp_until_time_of_day(..)? */
+#if FIX_0128
+	/* Fix 128: gewoehnlicher Zeitsprung bis Mitternacht (feste Uhrzeiten, Licht und Stunden werden richtig gezaehlt) */
+	timewarp(HOURS(24) - gs_day_timer);
+#else
 	int32_t ticks_left;
 	signed int td_bak;
 
@@ -3961,6 +4016,7 @@ void timewarp_until_midnight(void)
 
 	/* restore the timer status */
 	g_timers_disabled = td_bak;
+#endif
 }
 
 void flush_keyboard_queue(void)
@@ -3976,10 +4032,12 @@ void flush_keyboard_queue(void)
 /* unused */
 /* zeigt msg als Kopfzeile und wartet je Zeile 150 Takte oder bis zum Tastendruck */
 #if defined(__BORLANDC__)
+#if !FIX_PLATZ_SEG002	/* nie aufgerufen; entfaellt mit Behebungen in diesem residenten Modul (Platz) */
 static void error_msg(char *msg)
 {
 	vsync_or_key(150 * GUI_print_text(msg));
 }
+#endif
 #endif
 
 /* wartet auf Taste oder Mausklick; Leertaste pausiert (kleines "P" oben links) bis zum naechsten Tastendruck */
@@ -4100,6 +4158,7 @@ void vsync_or_key(const signed int duration)
 }
 
 #if defined(__BORLANDC__)
+#if !FIX_PLATZ_SEG002	/* nie aufgerufen; entfaellt mit Behebungen in diesem residenten Modul (Platz) */
 /* unused */
 void unused_delay(const signed int no)
 {
@@ -4119,6 +4178,7 @@ void unused_spinlock(void)
 	while (g_unused_spinlock_flag) {
 	}
 }
+#endif
 #endif
 
 /**
@@ -4145,6 +4205,7 @@ int32_t swap_u32(uint32_t v)
 #if defined(__BORLANDC__)
 /* unused */
 /* vertauscht nur die beiden 16-Bit-Haelften, nicht die Bytes */
+#if !FIX_PLATZ_SEG002	/* nie aufgerufen; entfaellt mit Behebungen in diesem residenten Modul (Platz) */
 uint32_t swap_u32_halves_unused(uint32_t v)
 {
 	int16_t a[2];
@@ -4158,6 +4219,7 @@ uint32_t swap_u32_halves_unused(uint32_t v)
 
 	return readds((uint8_t*)ptr);
 }
+#endif
 #endif
 
 #if defined(__BORLANDC__)
@@ -4665,6 +4727,12 @@ void sub_ae_splash(struct struct_hero *hero, signed int ae_cost)
 
 		g_update_statusline = tmp;
 
+#if FIX_0280
+		/* Fix 280: AE-Leiste ausserhalb des Kampfes im 3D-Bildschirm neu zeichnen */
+		if (!g_in_fight && (g_pp20_index == ARCHIVE_FILE_PLAYM_UK)) {
+			draw_bar(1, get_hero_pos(hero), hero->ae, hero->ae_max, 0);
+		}
+#endif
 #ifdef M302de_ORIGINAL_BUGFIX
 		/* AE bar was not updated in pseudo 3D mode */
 		/* Anmerkung: die Bedingung prueft g_mouse1_doubleclick, das mit dem Bildschirmmodus nichts zu tun hat;
@@ -4972,6 +5040,7 @@ static void do_starve_damage(struct struct_hero *hero, const signed int hero_pos
 
 #if defined(__BORLANDC__)
 /* unused */
+#if !FIX_PLATZ_SEG002	/* nie aufgerufen; entfaellt mit Behebungen in diesem residenten Modul (Platz) */
 static signed int compare_name(const char *name)
 {
 	signed int i;
@@ -4985,6 +5054,7 @@ static signed int compare_name(const char *name)
 
 	return 0;
 }
+#endif
 #endif
 
 /**
@@ -5190,6 +5260,7 @@ signed int test_attrib3(const struct struct_hero* hero, const signed int attrib_
 #if defined(__BORLANDC__)
 /* nie aufgerufen: zufaelliger Held (Position 0..5) der aktiven Gruppe, ohne Pruefung auf Tod;
  * -1, wenn es keine Helden gibt. Vorlaeufer von get_random_hero(). */
+#if !FIX_PLATZ_SEG002	/* nie aufgerufen; entfaellt mit Behebungen in diesem residenten Modul (Platz) */
 signed int get_random_hero_unused(void)
 {
 	signed int hero_pos;
@@ -5206,6 +5277,7 @@ signed int get_random_hero_unused(void)
 	return hero_pos;
 }
 #endif
+#endif
 
 /**
  * \brief   selects a hero randomly
@@ -5216,6 +5288,21 @@ signed int get_random_hero_unused(void)
 	number of heroes in the group */
 signed int get_random_hero(void)
 {
+#if FIX_0235
+	/* Fix 235: alle 7 Plaetze wuerfeln (auch den NSC); ohne lebenden Helden der Gruppe keine Endlosschleife */
+	signed int cur_hero;
+
+	if (!count_heroes_in_group()) {
+		return 0;
+	}
+
+	do {
+		cur_hero = random_schick(7) - 1;
+
+	} while (!get_hero(cur_hero)->typus || (get_hero(cur_hero)->group_id != gs_active_group_id) || get_hero(cur_hero)->flags.dead);
+
+	return cur_hero;
+#else
 	signed int cur_hero;
 
 	do {
@@ -5247,6 +5334,7 @@ signed int get_random_hero(void)
 	} while (!get_hero(cur_hero)->typus || (get_hero(cur_hero)->group_id != gs_active_group_id) || get_hero(cur_hero)->flags.dead);
 
 	return cur_hero;
+#endif
 }
 
 /**
@@ -5301,7 +5389,12 @@ void set_party_money(int32_t money)
 		if (heroes > 1) {
 			heroes--;
 		} else {
+#if FIX_0407
+			/* Fix 407: der NSC allein bekommt den Betrag, nicht dazu */
+			hero->money = money;
+#else
 			hero->money += money;
+#endif
 			heroes = 0;
 		}
 	}
@@ -5309,6 +5402,10 @@ void set_party_money(int32_t money)
 	if (heroes != 0) {
 
 		hero_money = money / heroes;
+#if FIX_0407
+		/* Fix 407: der Rest der Teilung geht an den ersten Helden */
+		money -= hero_money * heroes;
+#endif
 
 		hero = get_hero(0);
 
@@ -5317,7 +5414,12 @@ void set_party_money(int32_t money)
 			if (hero->typus && (hero->group_id == gs_active_group_id) && !hero->flags.dead) {
 
 				/* account the money to hero */
+#if FIX_0407
+				hero->money = hero_money + money;
+				money = 0;
+#else
 				hero->money = hero_money;
+#endif
 			} else {
 				if (hero->group_id == gs_active_group_id) {
 					hero->money = 0;
@@ -5694,6 +5796,12 @@ signed int count_heroes_available_in_group_ignore_npc(void)
 void check_group(void)
 /* called from only a single position, namely the petrification trap in 'Verfallene Herberge' in DNG02_handler in seg078.cpp */
 {
+#if FIX_0080
+	/* Fix 80: die Pruefung von game_loop() anstossen, die den NSC allein nicht als handlungsfaehige
+	 * Gruppe zaehlt (Spielende bzw. Gruppenwechsel beim naechsten Durchlauf) */
+	g_check_party = 1;
+#else
+
 	/* Original-Bug 15:
 	 * If the group steps into the petrification trap in "Verfallene Herberge" and all but the NPC get petrified
 	 * (for example, Curian (MR 6) equipped with the red ring (MR +2) of Gorah's chest), the group is still active
@@ -5719,6 +5827,7 @@ void check_group(void)
 	{
 		GRP_switch_to_next(2);
 	}
+#endif
 }
 
 int main(int argc, char** argv)

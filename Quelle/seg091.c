@@ -329,7 +329,12 @@ void DNG13_collapsing_ceiling(void)
 		/* if all items are available, it takes 6 hours instead of one day */
 		/* Original-Bug: the code does the opposite: without the tools 6 hours, with them one day
 		 * (compare DNG13_unblock_passage() and DNG13_collapsing_ceiling_hard(), which are right). */
+#if FIX_0122
+		/* Fix 122: mit Werkzeug 6 Stunden, ohne einen Tag */
+		timewarp(has_items ? HOURS(6) : DAYS(1));
+#else
 		timewarp(has_items == 0 ? HOURS(6) : DAYS(1));
+#endif
 	}
 }
 

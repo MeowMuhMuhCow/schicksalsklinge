@@ -119,7 +119,12 @@ void tevent_067(void)
 		/* Fehler im Original: Text 82 ("DIE SPUR AUFNEHMEN?") stammt von tevent_066 und passt nicht zu den
 		 * Antworten; gemeint war vermutlich 91 ("... HALB ZUSAMMENGEFALLENEN HUETTE ... WOLLT IHR"). */
 		do {
+#if FIX_0160
+			/* Fix 160: die zur Antwort passende Frage (Text 91) */
+			answer = GUI_radio(get_tx2(91), 2, get_tx2(92), get_tx2(93));
+#else
 			answer = GUI_radio(get_tx2(82), 2, get_tx2(92), get_tx2(93)); /* "DIE SPUR AUFNEHMEN?" / "AUF DEN WEG UMKEHREN?" / "HIER RASTEN?" */
+#endif
 
 		} while (answer == -1);
 
@@ -512,12 +517,21 @@ void tevent_074(void)
 
 				/* Fehler im Original: verlangt sind "FUENFZEHN DUKATEN PRO PERSON" (Text 50), abgezogen
 				 * werden 1500 Heller = 15 D fuer die ganze Gruppe (ebenso tevent_077) */
+#if FIX_0162
+				/* Fix 162: 15 Dukaten pro Person, wie im Text verlangt */
+				if (p_money < 1500L * count_heroes_in_group()) {
+#else
 				if (p_money < 1500) {
+#endif
 					/* not enough money, so fight */
 					gs_tevent074_fight_result = TRV_fight_event(FIGHT_ID_F074, 74);
 				} else {
 					/* pay 1500 */
+#if FIX_0162
+					p_money -= 1500L * count_heroes_in_group();
+#else
 					p_money -= 1500;
+#endif
 					set_party_money(p_money);
 				}
 
@@ -742,12 +756,21 @@ void tevent_077(void)
 
 				p_money = get_party_money();
 
+#if FIX_0162
+				/* Fix 162: 15 Dukaten pro Person, wie im Text verlangt */
+				if (p_money < 1500L * count_heroes_in_group()) {
+#else
 				if (p_money < 1500) {
+#endif
 					/* not enough money, so fight */
 					gs_tevent077_fight_result = TRV_fight_event(FIGHT_ID_F077, 77);
 				} else {
 					/* pay 1500 */
+#if FIX_0162
+					p_money -= 1500L * count_heroes_in_group();
+#else
 					p_money -= 1500;
+#endif
 					set_party_money(p_money);
 				}
 

@@ -148,7 +148,7 @@ void FIG_find_path_to_target_backtrack(int8_t *dist_table_ptr, signed int target
 	signed int success;
 	signed int lowest_num_viewdir_changes;
 	signed int num_viewdir_changes;
-#ifndef M302de_ORIGINAL_BUGFIX
+#if !FIX_0024
 	/* potential Original-Bug:
 	 * best_viewdir is not initialized and may stay so in case that FIG_find_path_to_target_backtrack
 	 * is called with equal target and hero/enemy position.
@@ -157,6 +157,7 @@ void FIG_find_path_to_target_backtrack(int8_t *dist_table_ptr, signed int target
 	 */
 	signed int best_viewdir;
 #else
+	/* Fix 24: best_viewdir vorbelegen (Bright-Eyes-Fix) */
 	signed int best_viewdir = FIG_VIEWDIR__BEGIN;
 #endif
 	int8_t *path_cur;
@@ -227,8 +228,10 @@ void FIG_find_path_to_target_backtrack(int8_t *dist_table_ptr, signed int target
 						 * (another, maybe better fix would be to add the missing tests of the tail-condition in FIG_find_path_to_target)
 						 * See discussion at https://www.crystals-dsa-foren.de/showthread.php?tid=5191&pid=165957#pid165957
 						 */
-#ifdef M302de_ORIGINAL_BUGFIX
-						(dist == dist_bak-1) ||
+#if FIX_0025
+						/* Fix 25: beim Fluchtziel im ersten Rueckschritt keinen Platz fuer den Schwanz verlangen, die
+						 * Vorwaertssuche prueft ihn dort auch nicht (sonst Endlosschleife, Bright-Eyes-Fix, hier nur fuer die Flucht) */
+						(target_is_escape_square && (dist == dist_bak - 1)) ||
 #endif
 						(
 							double_size && /* this check is redundant, as we had (!double_size) || ... before */
@@ -434,8 +437,8 @@ signed int FIG_find_path_to_target(uint8_t *actor_ptr, const signed int actor_id
 					 * However, in the target selection of the hero movement, tail parts of double-size enemies are allowed.
 					 * The weird outcome is that dead tail-parts can be entered, but not crossed by heroes.
 					 * For enemies, squares with dead tail-parts are blocked completely. */
-#ifdef M302de_ORIGINAL_BUGFIX
-					/* make dead tail-parts walkable */
+#if FIX_0027
+					/* Fix 27: tote Schwanzteile begehbar machen (Bright-Eyes-Fix) */
 				} else if ((object_id_or_dist_entry >= 30) && (object_id_or_dist_entry < 50) && g_enemy_sheets[object_id_or_dist_entry - 30].flags.dead) {
 					/* test 'dead' flag */
 					*(g_chessboard_cpy + y * 25 + x) = 0;
@@ -471,10 +474,11 @@ signed int FIG_find_path_to_target(uint8_t *actor_ptr, const signed int actor_id
 
 
 							if ((new_y < 0) || (new_y > 23) || (new_x < 0) ||
-#ifndef M302de_ORIGINAL_BUGFIX
+#if !FIX_0028
 								/* Original-Bug: new_y > 23 gets checked twice, new_x > 23 is missing */
 								(new_y > 23)
 #else
+								/* Fix 28: rechten Rand pruefen (Bright-Eyes-Fix) */
 								(new_x > 23)
 #endif
 							) {
@@ -521,10 +525,11 @@ signed int FIG_find_path_to_target(uint8_t *actor_ptr, const signed int actor_id
 							new_x = x + ranged_dist * coordinate_offset.offset[viewdir].x;
 
 							if ((new_y < 0) || (new_y > 23) || (new_x < 0) ||
-#ifndef M302de_ORIGINAL_BUGFIX
+#if !FIX_0028
 								/* Original-Bug: new_y > 23 gets checked twice, new_x > 23 is missing */
 								(new_y > 23)
 #else
+								/* Fix 28: rechten Rand pruefen (Bright-Eyes-Fix) */
 								(new_x > 23)
 #endif
 							) {

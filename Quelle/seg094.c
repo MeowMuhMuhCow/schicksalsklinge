@@ -289,7 +289,7 @@ void trv_do_journey(const signed int land_route_id, const signed int reverse)
 	struct struct_journey_tevent *tevent_ptr;
 	signed int bak1;
 	signed int bak2;
-#ifndef M302de_ORIGINAL_BUGFIX
+#if !FIX_0142
 	/* After fixing Original-Bug 50, 51, and 52, this is not needed any more. */
 	signed int last_tevent_id;
 #endif
@@ -297,7 +297,7 @@ void trv_do_journey(const signed int land_route_id, const signed int reverse)
 
 	g_traveling = 1;
 
-#ifndef M302de_ORIGINAL_BUGFIX
+#if !FIX_0142
 	/* After fixing Original-Bug 50, 51, and 52, this is not needed any more. */
 	last_tevent_id = -1;
 #endif
@@ -519,6 +519,10 @@ void trv_do_journey(const signed int land_route_id, const signed int reverse)
 			do_informer();
 			g_basepos_x = bak1;
 			g_basepos_y = bak2;
+#if FIX_0341
+			/* Fix 341 (teilweise): die Begegnung nur einmal je Reise */
+			gs_journey_olvir_treborn_flag = 0;
+#endif
 
 		}
 
@@ -536,12 +540,12 @@ void trv_do_journey(const signed int land_route_id, const signed int reverse)
 				{
 					if (gs_journey_tevents[gs_trv_i].tevent_id)
 					{
-#ifndef M302de_ORIGINAL_BUGFIX
+#if !FIX_0142
 						TRV_event(gs_journey_tevents[(last_tevent_id = gs_trv_i)].tevent_id);
 #else
 
-						/* Fix Original-Bug 50, 51, 52.
-						 * Set the correct relative position of the last tevent. */
+						/* Fix 142: Lage direkt nach dem Ereignis setzen, bei Richtungswechsel durch das Ereignis
+						 * stehen lassen (Bright-Eyes-Fix zu Original-Bug 50, 51, 52) */
 						TRV_event(gs_journey_tevents[gs_trv_i].tevent_id);
 
 						if (gs_journey_direction != JOURNEY_DIRECTION_CHANGE_TO_FORWARD && gs_journey_direction != JOURNEY_DIRECTION_CHANGE_TO_BACKWARD) {
@@ -561,7 +565,7 @@ void trv_do_journey(const signed int land_route_id, const signed int reverse)
 								/* traveling backward => now the event can only be triggered moving in forward direction. */
 								g_journey_tevent_relative_position[gs_trv_i] = TEVENT_POSITION_AHEAD;
 							}
-#ifdef M302de_ORIGINAL_BUGFIX
+#if FIX_0142
 						}
 							/* Otherwise, the travel event handler wants to reverse the traveling direction.
 							 * This means that the event was not really settled
@@ -723,7 +727,7 @@ void trv_do_journey(const signed int land_route_id, const signed int reverse)
 					 * we deactivate this a-posteriori adjustement of the relative position.
 					 * Instead, the relative position is set to the correct state right after handling the travel event.
 					 */
-#ifndef M302de_ORIGINAL_BUGFIX
+#if !FIX_0142
 					/* Original-Bug 50, 51, and 52 */
 					if ( last_tevent_id != -1) {
 						g_journey_tevent_relative_position[last_tevent_id] = (gs_journey_direction == JOURNEY_DIRECTION_CHANGE_TO_BACKWARD ? TEVENT_POSITION_AHEAD : TEVENT_POSITION_BEHIND);
@@ -1008,6 +1012,12 @@ void TM_draw_track(const signed int route_id, const signed int length, const sig
 			/* move the pointer */
 			ptr += (!direction ? 2 : -2);
 		} else {
+#if FIX_0145
+			/* Fix 145: erst zurueckschreiben, dann weitersetzen (wie beim Zeichnen) */
+			*(fb_start + ptr[1] * 320 + ptr[0]) = g_trv_crosslink_pixel_bak[i];
+
+			ptr += (!direction ? 2 : -2);
+#else
 			/* move the pointer */
 			/* Fehler im Original: der Zeiger wird hier VOR dem Zurueckschreiben weitergesetzt.
 			 * Punkt 0 bleibt daher in Wegfarbe stehen, Punkt i+1 bekommt das Pixel von Punkt i. */
@@ -1015,6 +1025,7 @@ void TM_draw_track(const signed int route_id, const signed int length, const sig
 
 			/* restore the pixel from the map */
 			*(fb_start + ptr[1] * 320 + ptr[0]) = g_trv_crosslink_pixel_bak[i];
+#endif
 		}
 	}
 }

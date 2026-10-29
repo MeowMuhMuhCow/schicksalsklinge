@@ -35,6 +35,9 @@
 #include "seg027.h"
 #include "seg029.h"
 #include "seg047.h"
+#if FIX_0401
+#include "seg049.h"
+#endif
 #include "seg061.h"
 #include "seg062.h"
 #include "seg095.h"
@@ -384,6 +387,10 @@ void char_letgo(const signed int temple_id)
 					write_chr_temp(hero_pos);
 
 					memset(hero, 0, sizeof(struct struct_hero));
+#if FIX_0401
+					/* Fix 401: die Heldenplaetze wieder lueckenlos sortieren (viele Stellen setzen das voraus) */
+					GRP_sort_heroes();
+#endif
 
 					draw_main_screen();
 					init_ani(2);

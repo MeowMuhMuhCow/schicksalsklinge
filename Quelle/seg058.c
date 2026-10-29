@@ -293,7 +293,12 @@ void repair_screen(struct smith_descr *smith, const signed int smith_id)
 					do_fill_rect(g_vga_memstart, 26, 26, 105, 33, 0);
 
 					/* REMARK: shows the money of this hero, but the repair is paid from the party money */
+#if FIX_0056
+					/* Fix 56: das Geld der Gruppe zeigen, daraus wird bezahlt */
+					make_valuta_str(g_dtp2, get_party_money());
+#else
 					make_valuta_str(g_dtp2, hero2->money);
+#endif
 					GUI_print_string(g_dtp2, 104 - GUI_get_space_for_string(g_dtp2, 0), 26);
 				}
 
@@ -452,7 +457,12 @@ void repair_screen(struct smith_descr *smith, const signed int smith_id)
 
 						/* REMARK: with exactly enough money (p_money == price) or too little money a
 						 * bargain test for 0% follows; with too little money it ends with text 401. */
+#if FIX_0057
+						/* Fix 57: auch bei genau passendem Geld */
+						if (percent == 0 && p_money >= price) {
+#else
 						if (percent == 0 && p_money > price) {
+#endif
 
 							GUI_output(get_ttx(489)); /* "<SOLCHE KUNDEN SOLLTE ICH ÖFTERS MAL HABEN!>, MEINT DER SCHMIED." */
 							deal = 2;

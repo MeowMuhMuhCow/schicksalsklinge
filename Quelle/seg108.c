@@ -31,6 +31,26 @@
 #include "seg097.h"
 #include "seg105.h"
 
+#if FIX_0404
+/* Fix 404: laufende Elixierwirkung (+5) auf derselben Eigenschaft des Helden suchen, -1 wenn keine */
+static signed int fix_elixir_slot(const struct struct_hero *hero, const uint8_t *ptr)
+{
+	signed int i;
+
+	if (hero->timer_id != 0) {
+		for (i = 0; i < 100; i++) {
+			if ((gs_modification_timers[i].time_left > 0) && (gs_modification_timers[i].target == hero->timer_id) &&
+				(gs_modification_timers[i].modifier == 5) &&
+				(gs_modification_timers[i].offset == (uint16_t)(ptr - (const uint8_t*)hero)))
+			{
+				return i;
+			}
+		}
+	}
+	return -1;
+}
+#endif
+
 /**
  * \brief   consumer eats, drinks or takes an item from the inventory of owner
  *
@@ -273,6 +293,10 @@ void consume(struct struct_hero *owner, struct struct_hero *consumer, const sign
 					/* Tarnelle: doubled regeneration in the next night */
 					/* Remark: no text is prepared, GUI_output() below gets the empty string */
 					consumer->ruhe_koerper = 1;
+#if FIX_0226
+					/* Fix 226 (teilweise): keinen alten Text zeigen; ein leerer Text oeffnet kein Fenster */
+					*g_dtp2 = '\0';
+#endif
 					break;
 				}
 				}
@@ -296,8 +320,16 @@ void consume(struct struct_hero *owner, struct struct_hero *consumer, const sign
 				give_new_item_to_hero(owner, ITEM_ID_GLASFLASCHE, 2, 1);
 
 				/* Attribute +5 for 1h */
+#if FIX_0404
+				/* Fix 404: wirkt schon ein Elixier auf diese Eigenschaft, nur seine Dauer erneuern (kein weiteres +5) */
+				if ((tmp = fix_elixir_slot(consumer, (uint8_t*)(&consumer->attrib[tmp2 - 1].current))) != -1) {
+					gs_modification_timers[tmp].time_left = HOURS(1);
+				} else
+#endif
+				{
 				tmp = get_free_mod_slot();
 				set_mod_slot(tmp, HOURS(1), (uint8_t*)(&consumer->attrib[tmp2 - 1].current), 5, (signed char)consumer_hero_pos);
+				}
 
 				/* prepare output */
 				sprintf(g_dtp2, get_ttx(509), consumer->alias, get_ttx(411 + tmp2), 5); /* "BEI %s SCHNELLT %s UM %d PUNKTE IN DIE HÖHE!" / TEXT.LTX 412..: Eigenschaft */
@@ -527,8 +559,14 @@ void consume(struct struct_hero *owner, struct struct_hero *consumer, const sign
 
 					disease_id = hero_is_diseased(consumer);
 
+#if FIX_0227
+					/* Fix 227: ohne Krankheit nichts aendern (disease[0] ist unbenutzt) */
+					if (disease_id != 0)
+#endif
+					{
 					consumer->disease[disease_id].status = DISEASE_STATUS_RECOVER;
 					consumer->disease[disease_id].time_counter = 0;
+					}
 
 					/* give owner a glassbottle */
 					give_new_item_to_hero(owner, ITEM_ID_GLASFLASCHE, 2, 1);

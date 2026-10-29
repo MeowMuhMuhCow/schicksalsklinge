@@ -289,11 +289,12 @@ void tevent_095(void)
 				TRV_load_textfile(-1);
 			} else {
 
-#ifndef M302de_ORIGINAL_BUGFIX
+#if !FIX_0150
 				/* Original-Bug 53:
 				 * If the party was already traveling backward, the new direction should be forward. */
 				gs_journey_direction = done = JOURNEY_DIRECTION_CHANGE_TO_BACKWARD; // this is value 1
 #else
+				/* Fix 150: Umkehren kehrt die aktuelle Richtung um */
 				gs_journey_direction = (gs_journey_direction == JOURNEY_DIRECTION_FORWARD ? JOURNEY_DIRECTION_CHANGE_TO_BACKWARD : JOURNEY_DIRECTION_CHANGE_TO_FORWARD);
 				done = 1;
 #endif
@@ -728,7 +729,12 @@ void tevent_100(void)
 					/* Fehler im Original: als Besitzer wird Platz 0 eingetragen, nicht die Position von hero;
 					 * set_mod_slot() rechnet den Versatz relativ zu Held 0 und haengt den Timer an dessen
 					 * timer_id - geht schief, wenn die Helden bis zum Ablauf umsortiert werden. */
+#if FIX_0254
+					/* Fix 254: Position des betroffenen Helden als Besitzer eintragen */
+					set_mod_slot(tmp, DAYS(1), (uint8_t*)&hero->attrib[ATTRIB_GE].current, -2, (signed char)get_hero_pos(hero));
+#else
 					set_mod_slot(tmp, DAYS(1), (uint8_t*)&hero->attrib[ATTRIB_GE].current, -2, 0);
+#endif
 
 					timewarp(MINUTES(15));
 
@@ -744,11 +750,12 @@ void tevent_100(void)
 
 		} else if (tmp == 3) {
 
-#ifndef M302de_ORIGINAL_BUGFIX
+#if !FIX_0150
 			/* Original-Bug 53:
 			 * If the party was already traveling backward, the new direction should be forward. */
 			gs_journey_direction = JOURNEY_DIRECTION_CHANGE_TO_BACKWARD;
 #else
+			/* Fix 150: Umkehren kehrt die aktuelle Richtung um */
 			gs_journey_direction = (gs_journey_direction == JOURNEY_DIRECTION_FORWARD ? JOURNEY_DIRECTION_CHANGE_TO_BACKWARD : JOURNEY_DIRECTION_CHANGE_TO_FORWARD);
 #endif
 		}

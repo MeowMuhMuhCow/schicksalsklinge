@@ -102,6 +102,27 @@ signed int two_hand_collision(struct struct_hero* hero, const signed int item_id
 	return retval;
 }
 
+#if FIX_0222
+/* Fix 222: Meldung "... KANN AN DIESER POSITION NICHT GETRAGEN WERDEN" (wie in move_item()) */
+static void fix_msg_not_here(const signed int item_id)
+{
+	if (is_in_int_array(item_id, g_items_pluralwords))
+		sprintf(g_dtp2, get_ttx(222), GUI_name_inflect_with_article(
+			INFLECT_OMIT_ARTICLE | INFLECT_SINGULAR | INFLECT_1ST_CASE,
+			item_id,
+			INFLECT_NAME_TYPE_ITEM
+		), get_ttx(557));
+	else
+		sprintf(g_dtp2, get_ttx(222), GUI_name_inflect_with_article(
+			INFLECT_INDEFINITE_ARTICLE | INFLECT_SINGULAR | INFLECT_1ST_CASE,
+			item_id,
+			INFLECT_NAME_TYPE_ITEM
+		), get_ttx(556));
+
+	GUI_output(g_dtp2);
+}
+#endif
+
 /* Borlandified and identical */
 /**
  * \brief   moves an item inside the inventory of a hero
@@ -176,15 +197,23 @@ void move_item(signed int inv_slot_1, signed int inv_slot_2, struct struct_hero 
 					if ((item_id_2 == item_id_1) && g_itemsdat[item_id_1].flags.stackable) {
 						/* merge them */
 
+#if FIX_0220
+						/* Fix 220: Stapel hoechstens 99, beim Zusammenlegen den Platzzaehler senken */
+						if (hero->inventory[inv_slot_1].quantity + hero->inventory[inv_slot_2].quantity > STACK_SIZE_MAX) {
+							hero->inventory[inv_slot_2].quantity -= STACK_SIZE_MAX - hero->inventory[inv_slot_1].quantity;
+							hero->inventory[inv_slot_1].quantity = STACK_SIZE_MAX;
+						} else {
+							hero->inventory[inv_slot_1].quantity += hero->inventory[inv_slot_2].quantity;
+							memset((uint8_t*)&hero->inventory[inv_slot_2], 0, sizeof(struct inventory));
+							hero->num_filled_inv_slots--;
+						}
+#else
 						/* add quantity of item at inv_slot_2 to item at inv_slot_1 */
 						hero->inventory[inv_slot_1].quantity += hero->inventory[inv_slot_2].quantity;
 						/* Original-Bug: Might result in a stack size bigger than STACK_SIZE_MAX */
 
 						/* delete item at inv_slot_2 */
 						memset((uint8_t*)&hero->inventory[inv_slot_2], 0, sizeof(struct inventory));
-#ifdef M302de_ORIGINAL_BUGFIX
-						/* Decrement the item counter */
-						hero->num_filled_inv_slots--;
 #endif
 					} else {
 						if (!can_hero_use_item(hero, item_id_2)) {
@@ -218,11 +247,51 @@ void move_item(signed int inv_slot_1, signed int inv_slot_2, struct struct_hero 
 
 								GUI_output(g_dtp2);
 							} else {
+#if FIX_0398
+								/* Fix 398: Tausch zwischen den Haenden kann keine Zweihandkollision ergeben
+								 * (die andere Hand haelt den umgelegten Gegenstand selbst) */
+								if (!(((inv_slot_1 == HERO_INVENTORY_SLOT_RIGHT_HAND) || (inv_slot_1 == HERO_INVENTORY_SLOT_LEFT_HAND)) &&
+									  ((inv_slot_2 == HERO_INVENTORY_SLOT_RIGHT_HAND) || (inv_slot_2 == HERO_INVENTORY_SLOT_LEFT_HAND))) &&
+									two_hand_collision(hero, item_id_2, inv_slot_1)) {
+#else
 								if (two_hand_collision(hero, item_id_2, inv_slot_1)) {
+#endif
 
 									sprintf(g_dtp2, get_ttx(829), hero->alias); /* "%s KANN KEINE ZWEIHÄNDIGE WAFFE IN DER EINEN UND ETWAS ANDERES IN D..." */
 									GUI_output(g_dtp2);
 
+#if FIX_0222
+								/* Fix 222: liegen beide Plaetze am Koerper, auch den verdraengten Gegenstand pruefen
+								 * und die Boni beider Gegenstaende umbuchen */
+								} else if ((inv_slot_2 < HERO_INVENTORY_SLOT_KNAPSACK_1) && (item_id_1 != 0) &&
+									!can_hero_equip_item_at_slot(item_id_1, inv_slot_2)) {
+
+									fix_msg_not_here(item_id_1);
+
+								} else if ((inv_slot_2 < HERO_INVENTORY_SLOT_KNAPSACK_1) && (item_id_1 != 0) &&
+									!(((inv_slot_1 == HERO_INVENTORY_SLOT_RIGHT_HAND) || (inv_slot_1 == HERO_INVENTORY_SLOT_LEFT_HAND)) &&
+									  ((inv_slot_2 == HERO_INVENTORY_SLOT_RIGHT_HAND) || (inv_slot_2 == HERO_INVENTORY_SLOT_LEFT_HAND))) &&
+									two_hand_collision(hero, item_id_1, inv_slot_2)) {
+
+									sprintf(g_dtp2, get_ttx(829), hero->alias);
+									GUI_output(g_dtp2);
+
+								} else {
+									if (item_id_1 != 0) {
+										unequip(hero, item_id_1, inv_slot_1);
+									}
+									if (inv_slot_2 < HERO_INVENTORY_SLOT_KNAPSACK_1) {
+										unequip(hero, item_id_2, inv_slot_2);
+									}
+
+									add_equip_boni(hero, hero, item_id_2, inv_slot_2, inv_slot_1);
+
+									if (inv_slot_2 < HERO_INVENTORY_SLOT_KNAPSACK_1) {
+										add_equip_boni(hero, hero, item_id_1, inv_slot_1, inv_slot_2);
+									}
+									do_exchange = 1;
+								}
+#else
 								} else {
 									if (item_id_1 != 0) {
 										unequip(hero, item_id_1, inv_slot_1);
@@ -231,6 +300,7 @@ void move_item(signed int inv_slot_1, signed int inv_slot_2, struct struct_hero 
 									add_equip_boni(hero, hero, item_id_2, inv_slot_2, inv_slot_1);
 									do_exchange = 1;
 								}
+#endif
 							}
 						}
 					}
@@ -247,14 +317,22 @@ void move_item(signed int inv_slot_1, signed int inv_slot_2, struct struct_hero 
 			if ((item_id_2 == item_id_1) && g_itemsdat[item_id_1].flags.stackable) {
 				/* merge them */
 
+#if FIX_0220
+				/* Fix 220: Stapel hoechstens 99, beim Zusammenlegen den Platzzaehler senken */
+				if (hero->inventory[inv_slot_1].quantity + hero->inventory[inv_slot_2].quantity > STACK_SIZE_MAX) {
+					hero->inventory[inv_slot_2].quantity -= STACK_SIZE_MAX - hero->inventory[inv_slot_1].quantity;
+					hero->inventory[inv_slot_1].quantity = STACK_SIZE_MAX;
+				} else {
+					hero->inventory[inv_slot_1].quantity += hero->inventory[inv_slot_2].quantity;
+					memset(&hero->inventory[inv_slot_2], 0, sizeof(struct inventory));
+					hero->num_filled_inv_slots--;
+				}
+#else
 				/* add quantity of item at inv_slot_2 to item at inv_slot_1 */
 				hero->inventory[inv_slot_1].quantity += hero->inventory[inv_slot_2].quantity;
 
 				/* delete item at inv_slot_2 */
 				memset(&hero->inventory[inv_slot_2], 0, sizeof(struct inventory));
-#ifdef M302de_ORIGINAL_BUGFIX
-				/* Decrement the item counter */
-				hero->num_filled_inv_slots--;
 #endif
 			} else {
 
@@ -506,9 +584,10 @@ pass_item_label2:
 
 				sprintf(g_dtp2,	get_ttx(210), hero1->inventory[pos1].quantity, (char*)GUI_name_inflect_with_article( /* "WIE VIELE DER %d %s SOLLEN AN %s ÜBERGEBEN WERDEN?" */
 				/* get_ttx(210): "WIE VIELE DER %d^%s SOLLEN an %s ÃœBERGEBEN WERDEN" */
-#ifndef M302de_ORIGINAL_BUGFIX
+#if !FIX_0306
 					INFLECT_INDEFINITE_ARTICLE | INFLECT_PLURAL | INFLECT_4TH_CASE,
 #else
+					/* Fix 306: "WIE VIELE DER ..." verlangt den 2. Fall */
 					// this is 2nd case, not 4th
 					INFLECT_INDEFINITE_ARTICLE | INFLECT_PLURAL | INFLECT_2ND_CASE,
 #endif
@@ -559,6 +638,14 @@ pass_item_label2:
 				sprintf(g_dtp2,	get_ttx(779), hero2->alias); /* "%s HAT DAS ZUMUTBARE LIMIT AN GEWICHT BEREITS ERREICHT!" */
 				GUI_output(g_dtp2);
 
+#if FIX_0397
+			/* Fix 397: beim Tausch auch die Traglast des Gebenden pruefen, wenn er dadurch schwerer wird */
+			} else if ((item_weight2 > item_weight1) &&
+				(hero1->attrib[ATTRIB_KK].current * 100 <= hero1->load + item_weight2 - item_weight1)) {
+
+				sprintf(g_dtp2,	get_ttx(779), hero1->alias);
+				GUI_output(g_dtp2);
+#endif
 			} else {
 				if (pos1 < 7) {
 					unequip(hero1, item_id1, pos1);
@@ -587,8 +674,11 @@ pass_item_label2:
 				/* item counter */
 				/* Original-Bug: this is an exchange, both heroes keep their number of filled slots.
 				 * hero1's counter gets too low, hero2's too high (cf. the weak check in give_new_item_to_hero). */
+#if !FIX_0220
+				/* (Fix 220: beim Tausch behalten beide Helden ihre Zahl belegter Plaetze) */
 				hero1->num_filled_inv_slots--;
 				hero2->num_filled_inv_slots++;
+#endif
 
 				/* special items */
 				if (item_id2 == ITEM_ID_SICHEL__MAGIC) {
@@ -618,9 +708,10 @@ pass_item_label2:
 
 			sprintf(g_dtp2,	get_ttx(210), hero1->inventory[pos1].quantity, (char*)GUI_name_inflect_with_article( /* "WIE VIELE DER %d %s SOLLEN AN %s ÜBERGEBEN WERDEN?" */
 			/* get_ttx(210): "WIE VIELE DER %d^%s SOLLEN an %s ÃœBERGEBEN WERDEN" */
-#ifndef M302de_ORIGINAL_BUGFIX
+#if !FIX_0306
 				INFLECT_INDEFINITE_ARTICLE | INFLECT_PLURAL | INFLECT_4TH_CASE,
 #else
+				/* Fix 306: "WIE VIELE DER ..." verlangt den 2. Fall */
 				// this is 2nd case, not 4th
 				INFLECT_INDEFINITE_ARTICLE | INFLECT_PLURAL | INFLECT_2ND_CASE,
 #endif
@@ -647,6 +738,10 @@ pass_item_label2:
 			hero2->inventory[pos2].quantity = stackable_quant;
 			drop_item(hero1, pos1, stackable_quant);
 			/* Original-Bug: hero2->num_filled_inv_slots is not incremented for the new stack */
+#if FIX_0220
+			/* Fix 220: neuer Stapel beim Empfaenger belegt einen Platz */
+			hero2->num_filled_inv_slots++;
+#endif
 
 		} else {
 			sprintf(g_dtp2,	get_ttx(779), hero2->alias); /* "%s HAT DAS ZUMUTBARE LIMIT AN GEWICHT BEREITS ERREICHT!" */
@@ -770,8 +865,9 @@ signed int get_max_light_time(void)
 	hero = get_hero(0);
 	for (i = 0; i <= 6; i++, hero++) {
 
-#ifdef M302de_ORIGINAL_BUGFIX
-		if (!hero->typus)
+#if FIX_0347
+		/* Fix 347: nur Lichtquellen der aktiven Gruppe zaehlen */
+		if (!hero->typus || (hero->group_id != gs_active_group_id))
 			continue;
 #endif
 
@@ -912,7 +1008,12 @@ signed int get_full_waterskin_inv_slot(const struct struct_hero *hero)
 	signed int i;
 
 	/* Original-BUG: should start from inventory pos 0 */
+#if FIX_0223
+	/* Fix 223: auch den Wasserschlauch in der Hand finden */
+	for (i = 0; i < NR_HERO_INVENTORY_SLOTS; i++) {
+#else
 	for (i = HERO_INVENTORY_SLOT_KNAPSACK_1; i < NR_HERO_INVENTORY_SLOTS; i++) {
+#endif
 
 		/* look for a non-empty waterskin */
 		if ((hero->inventory[i].item_id == ITEM_ID_WASSERSCHLAUCH) && !hero->inventory[i].flags.empty)

@@ -126,7 +126,12 @@ void do_tavern(void)
 			talk_tavern();
 			p_money_after = get_party_money();
 
+#if FIX_0343
+			/* Fix 343: nur eine Ausgabe anzeigen, keinen Gewinn */
+			if (p_money_before > p_money_after) {
+#else
 			if (p_money_before != p_money_after) {
+#endif
 
 				make_valuta_str(g_text_output_buf, p_money_before - p_money_after);
 				sprintf(g_dtp2, get_ttx(825), g_text_output_buf); /* "IHR HABT %s IN DER TAVERNE AUSGEGEBEN!" */
@@ -153,7 +158,9 @@ void do_tavern(void)
 
 				GUI_output(tavern->quality < 5 ? get_ttx(475) : (tavern->quality < 15 ? get_ttx(476) : get_ttx(477))); /* "EIN ERLESENES MENÜ MIT GUTEM..." / "ZWAR BEKOMMT IHR HIER NICHT G..." / "DAS BIER SCHMECKT ETWAS ABGES..." */
 
+#if !FIX_0336
 				timewarp(HOURS(1));
+#endif
 
 				for (i = 0; i <= 6; i++) {
 
@@ -185,6 +192,10 @@ void do_tavern(void)
 						}
 					}
 				}
+#if FIX_0336
+				/* Fix 336: erst essen, dann die Stunde vergehen lassen (sonst isst herokeeping() vorher Proviant) */
+				timewarp(HOURS(1));
+#endif
 
 
 				p_money_before = get_party_money();

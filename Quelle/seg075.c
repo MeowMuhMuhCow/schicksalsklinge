@@ -46,6 +46,9 @@
 #include "seg096.h"
 #include "seg097.h"
 #include "seg106.h"
+#if FIX_0084
+#include "seg113.h"
+#endif
 
 struct dng_gfxtab g_dng_gfxtab_wood[88] = {
 	 { { {      0,      0 }, {      8,      0 }, {      0,     -1 }, {      0,      0 } },     -1 },
@@ -773,7 +776,12 @@ void DNG_draw_image(signed int x, signed int y, signed int image_id)
 	 * instead of shrinking, so up to 2*|y| rows behind the image are copied (only cut off by the
 	 * clipping at row 135 below). */
 	if ((y < 0) && ((y + height2) > 0)) {
+#if FIX_0281
+		/* Fix 281: Anschnitt oben verkleinert die Hoehe */
+		height2 += y;
+#else
 		height2 -= y;
+#endif
 		src_ptr += __abs__(y) * nvf_width;
 		y = 0;
 	}
@@ -990,6 +998,10 @@ void DNG_lights(void)
 void DNG_timestep(const signed int forward)
 {
 	signed int viewdir;
+#if FIX_0084
+	signed int i;
+	struct struct_hero *hero;
+#endif
 
 	timewarp(MINUTES(1));
 
@@ -1007,9 +1019,28 @@ void DNG_timestep(const signed int forward)
 
 		gs_dungeon_id = DUNGEON_ID_NONE;
 
+#if FIX_0084
+		/* Fix 84: nur die Helden der Gruppe im Dungeon kommen um (wie beim verlorenen Kampf auf Reisen:
+		 * hero_disappear(), dann GRP_switch_to_next(2)); sind keine Helden mehr da, ist das Spiel aus */
+		gs_deathtrap = 0;
+
+		hero = get_hero(0);
+		for (i = 0; i <= 6; i++, hero++) {
+			if ((hero->typus != HERO_TYPE_NONE) && (hero->group_id == gs_active_group_id)) {
+				hero_disappear(hero, i, -2);
+			}
+		}
+
+		if (g_game_state == GAME_STATE_MAIN) {
+			/* eine andere Gruppe uebernimmt; ihre Position nicht mehr verschieben */
+			GRP_switch_to_next(2);
+			return;
+		}
+#else
 		/* exit game */
 		/* Original-Bug: What if there is another group not on the Totenschiff?? They should survive. */
 		g_game_state = GAME_STATE_DEAD;
+#endif
 	}
 
 	if (g_game_state == GAME_STATE_MAIN) {
@@ -1245,6 +1276,24 @@ void DNG01_pitfall(void)
 
 				nr_heroes--;
 
+#if FIX_0085
+				/* Fix 85: nur die handlungsfaehigen Helden der aktiven Gruppe aufzaehlen (wie count_heroes_available_in_group()) */
+				for (l_si = 0; (l_si <= 6) && nr_heroes; l_si++) {
+
+					hero1 = get_hero(l_si);
+
+					if ((l_si != strongest_hero_pos) && hero1->typus && (hero1->group_id == gs_active_group_id) &&
+						!hero1->flags.dead && !hero1->flags.petrified && !hero1->flags.unconscious && !hero1->flags.renegade)
+					{
+						strcat(g_dtp2, hero1->alias);
+
+						if (--nr_heroes) {
+
+							strcat(g_dtp2, (nr_heroes >= 2 ? g_dng01_str_comma : g_dng01_str_and));
+						}
+					}
+				}
+#else
 				l_si = 0;
 
 				/* list the names of the other climbers.
@@ -1265,6 +1314,7 @@ void DNG01_pitfall(void)
 					}
 
 				} while (nr_heroes);
+#endif
 
 				sprintf(g_text_output_buf, get_ttx(771), hero_auto->alias, /* "KLETTERN AN DEM SEIL IN DIE TIEFE, WÄHREND %s DAS SEIL HÄLT. ANSCHL..." */
 					GUI_get_personal_pronoun(hero_auto->sex, GRAMMAR_CASE_1ST),
@@ -1297,7 +1347,13 @@ signed int DNG_check_climb_tools(void)
 
 		/* TODO: potential Original-Bug: What if petrified / unconscious etc.? Compare to is_staff_lvl2_in_group where check_hero is called */
 		if ((hero->typus != HERO_TYPE_NONE) && (hero->group_id == gs_active_group_id) &&
-			!hero->flags.dead && (hero->typus == HERO_TYPE_MAGIER) && (hero->staff_level > 2))
+#if FIX_0086
+			/* Fix 86: nur ein handlungsfaehiger Magier hilft mit dem Stab */
+			check_hero(hero) &&
+#else
+			!hero->flags.dead &&
+#endif
+			(hero->typus == HERO_TYPE_MAGIER) && (hero->staff_level > 2))
 		{
 			return i + 1;
 		}

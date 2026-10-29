@@ -71,7 +71,12 @@ static signed int copy_ani_sequence(int8_t *dst, const signed int ani_num, const
 	if (ani_num < 0)
 		return 0;
 
+#if FIX_0294
+	/* Fix 294: gueltig sind 0..ani_max_num-1 */
+	if (ani_num >= ani_max_num)
+#else
 	if (ani_num > ani_max_num)
+#endif
 		return 0;
 
 	/* set p_datitem to the requested data entry */
@@ -370,9 +375,8 @@ signed int FIG_search_range_target(const signed int x, const signed int y, const
 				/* skip zeros */
 				if (target_object_id != 0) {
 
-#ifdef M302de_ORIGINAL_BUGFIX
-					/* Original-Bugfix: the next if assumes
-						that a negative target_object_id is a hero -> SEGFAULT*/
+#if FIX_0019
+					/* Fix 19: Fluchtfelder (negative Ids) sind kein Held (Bright-Eyes-Fix) */
 					if (target_object_id < 0) {
 						done = 1;
 					} else
@@ -404,7 +408,8 @@ signed int FIG_search_range_target(const signed int x, const signed int y, const
 					done = 1;
 				} else if (target_object_id != 0) {
 
-#ifdef M302de_ORIGINAL_BUGFIX
+#if FIX_0019
+					/* Fix 19: Fluchtfelder (negative Ids) sind kein Held (Bright-Eyes-Fix) */
 					if (target_object_id < 0) {
 						done = 1;
 					} else
@@ -512,6 +517,18 @@ signed int FIG_select_mspell(struct enemy_sheet* enemy, const signed int enemy_i
 	/* REMARK: if FIG_get_mspell_target_mode() returns 0 for every spell of the book (renegade enemy, book
 	 * without spells of mode 0 or 3, e.g. g_mon_spellbooks[8]), neither done nor bp changes:
 	 * endless loop. Original-Bug? */
+#if FIX_0022
+	/* Fix 22: ohne einen Zauber, den dieser Gegner auf seiner Seite einsetzen kann, gar nicht erst suchen
+	 * (uebergelaufener Priester mit Zauberbuch 8: sonst Endlosschleife) */
+	for (i = cnt = 0; i < available_spells; i++) {
+		if (FIG_get_mspell_target_mode(g_mon_spellbooks[enemy->spellbook_id][i], attack_foe) > 0) {
+			cnt++;
+		}
+	}
+	if (cnt == 0) {
+		return 0;
+	}
+#endif
 	done = 0;
 	while ((done == 0) && (enemy->bp > 0)) {
 

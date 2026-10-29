@@ -335,6 +335,10 @@ void tevent_113(void)
 		gs_town_loc_type = LOCTYPE_WILDCAMP;
 		do_location();
 		gs_town_loc_type = LOCTYPE_NONE;
+#if FIX_0170
+		/* Fix 170: Schlafbonus gilt nur fuer dieses Lager */
+		g_wildcamp_sleep_quality = 0;
+#endif
 
 		g_textbox_width = 9;
 		g_request_refresh = 2;
@@ -370,11 +374,12 @@ void tevent_114(void)
 			{
 				/* turn arround */
 
-#ifndef M302de_ORIGINAL_BUGFIX
+#if !FIX_0150
 				/* Original-Bug 53:
 				 * If the party was already traveling backward, the new direction should be forward. */
 				gs_journey_direction = done = JOURNEY_DIRECTION_CHANGE_TO_BACKWARD; // this is value 1
 #else
+				/* Fix 150: Umkehren kehrt die aktuelle Richtung um */
 				gs_journey_direction = (gs_journey_direction == JOURNEY_DIRECTION_FORWARD ? JOURNEY_DIRECTION_CHANGE_TO_BACKWARD : JOURNEY_DIRECTION_CHANGE_TO_FORWARD);
 				done = 1;
 #endif
@@ -433,7 +438,16 @@ void tevent_114(void)
 				/* TODO: ORIGINAL-BUG: this item could have been not taken => get_hero(-1) => SEGFAULT */
 				/* (unter DOS kein Absturz: get_hero(-1) zeigt vor das Heldenfeld, der Text bekommt einen
 				 *  Muellnamen; ausserdem kann ein Held gefunden werden, der das Rezept schon vorher hatte) */
+#if FIX_0171
+				/* Fix 171: hat niemand das Rezept, den ersten verfuegbaren Helden nennen statt get_hero(-1) */
+				if ((i = get_first_hero_with_item(ITEM_ID_REZEPT_FUER_STARKEN_HEILTRANK)) != -1) {
+					hero = get_hero(i);
+				} else {
+					hero = get_first_hero_available_in_group();
+				}
+#else
 				hero = get_hero(get_first_hero_with_item(ITEM_ID_REZEPT_FUER_STARKEN_HEILTRANK));
+#endif
 
 				sprintf(g_dtp2,	get_tx2(27), hero->alias); /* "IHR PLAUDERT NOCH EINE WEILE, FROH ÜBER DIESE UNERWARTETE GESELLSCH..." */
 				GUI_output(g_dtp2);
@@ -621,11 +635,12 @@ void tevent_123(void)
 		{
 			/* turn arround */
 
-#ifndef M302de_ORIGINAL_BUGFIX
+#if !FIX_0150
 			/* Original-Bug 53:
 			 * If the party was already traveling backward, the new direction should be forward. */
 			gs_journey_direction = done = JOURNEY_DIRECTION_CHANGE_TO_BACKWARD; // this is value 1
 #else
+			/* Fix 150: Umkehren kehrt die aktuelle Richtung um */
 			gs_journey_direction = (gs_journey_direction == JOURNEY_DIRECTION_FORWARD ? JOURNEY_DIRECTION_CHANGE_TO_BACKWARD : JOURNEY_DIRECTION_CHANGE_TO_FORWARD);
 			done = 1;
 #endif

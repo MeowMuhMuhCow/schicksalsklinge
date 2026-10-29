@@ -57,7 +57,12 @@ static signed int copy_ani_seq(int8_t *dst, const signed int ani_num, const sign
 	if (ani_num < 0)
 		return 0;
 
+#if FIX_0294
+	/* Fix 294: gueltig sind 0..ani_max_num-1 */
+	if (ani_num >= ani_max_num)
+#else
 	if (ani_num > ani_max_num)
+#endif
 		return 0;
 
 	/* set p_datitem to the first sequence */
@@ -111,7 +116,12 @@ static signed char get_seq_header(const signed int ani_num)
 		return 0;
 	}
 
+#if FIX_0294
+	/* Fix 294: gueltig sind 0..ani_max_num-1 */
+	if (ani_num >= ani_max_num) {
+#else
 	if (ani_num > ani_max_num) {
+#endif
 		return 0;
 	}
 

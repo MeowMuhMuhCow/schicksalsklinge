@@ -322,8 +322,16 @@ signed int use_magic(struct struct_hero *hero)
 						ae = hero->le - 8;
 					}
 
+#if FIX_0188
+					/* Fix 188: ohne umwandelbare LE (ae <= 0) keine LE abziehen */
+					if (ae > 0) {
+						sub_hero_le(hero, ae + 3);
+						add_hero_ae(hero, ae);
+					}
+#else
 					sub_hero_le(hero, ae + 3);
 					add_hero_ae(hero, ae);
+#endif
 				} else {
 					/* Failed, print only a message */
 					sprintf(g_dtp2, get_ttx(795), hero->alias); /* "LEIDER KANN SICH %s NICHT GENUG KONZENTRIEREN, UM DIE UMWANDLUNG ZU..." */
@@ -341,7 +349,12 @@ signed int use_magic(struct struct_hero *hero)
 				return 0;
 			}
 
+#if FIX_0189
+			/* Fix 189: ab dem 5. Stabzauber (Zuschlag 99) gibt es keine mehr */
+			if (hero->staff_level >= 4) {
+#else
 			if (hero->staff_level == 7) {
+#endif
 				/* Original-Bug: This never happens.
 				 * The highest possible staff spell is the 4th one, since the 5th staff spell has handicap 99.
 				 * The check should ask for '== 4' instead. */
@@ -361,11 +374,12 @@ signed int use_magic(struct struct_hero *hero)
 					if (test_attrib3(hero,
 							g_staffspell_descriptions[hero->staff_level].attrib1,
 							g_staffspell_descriptions[hero->staff_level].attrib2,
-#ifndef M302de_ORIGINAL_BUGFIX
+#if !FIX_0190
 						/* Original-Bug 17: the second attribute is tested twice, the third one is left out */
 						/* (berichtigt: vorher hiess es "first ... second"; uebergeben werden attrib1, attrib2, attrib2) */
 							g_staffspell_descriptions[hero->staff_level].attrib2,
 #else
+							/* Fix 190: dritte Eigenschaft statt der zweiten ein zweites Mal */
 							g_staffspell_descriptions[hero->staff_level].attrib3,
 #endif
 							g_staffspell_descriptions[hero->staff_level].handicap) > 0)
@@ -680,7 +694,12 @@ signed int test_spell_group(const signed int spell_id, const signed char handica
 			/* Check in group */
 			(hero_i->group_id == gs_active_group_id) &&
 			/* Check if dead */
+#if FIX_0086
+			/* Fix 86: nur handlungsfaehige Zauberkundige */
+			check_hero(hero_i))
+#else
 			!hero_i->flags.dead)
+#endif
 			/* Original-Bug: what if petrified, sleeping, unconcious etc. */
 		{
 
@@ -723,7 +742,7 @@ signed int use_spell(struct struct_hero* hero, const signed int selection_menu, 
 	struct spell_descr *spell_description;
 	void (*func)(void);
 	signed int tx_file_bak;
-#ifdef M302de_ORIGINAL_BUGFIX
+#if FIX_0191
 	/* Original-Bug 29: see below */
 	signed int x;
 	signed int y;
@@ -795,7 +814,8 @@ signed int use_spell(struct struct_hero* hero, const signed int selection_menu, 
 
 		if (retval) {
 
-#ifdef M302de_ORIGINAL_BUGFIX
+#if FIX_0191
+			/* Fix 191: Zuschlag der Tuer vor der Gruppe auch beim freien Foramen (Suche endet am Listenende -1) */
 			/* Original-Bug 29: door-specific spell handicap is not considered in a free Foramen spell (from the spellcast menu). */
 			if (spell_id == SP_FORAMEN_FORAMINOR && gs_dungeon_id != DUNGEON_ID_NONE && (g_dng_extra_action == DNG_MENU_MODE_OPEN_DOOR || g_dng_extra_action == DNG_MENU_MODE_UNLOCK_DOOR)) {
 				x = gs_x;
@@ -815,16 +835,12 @@ signed int use_spell(struct struct_hero* hero, const signed int selection_menu, 
 				if ((*(g_dng_map_ptr + MAP_POS(x,y)) & 0x02) == 0) {
 
 					/* flag 1 'unlocked' is not set -> door is locked  */
-					while (ptr_doors->pos != pos) {
-						/* ASSERT */
-						/*
-						if (ptr_doors->pos == -1) {
-						D1_INFO("In free call of Foramen spell: door not found. This should not happen.\n");
-						 */
-
+					while ((ptr_doors->pos != pos) && (ptr_doors->pos != -1)) {
 						ptr_doors++;
 					}
-					handicap += ptr_doors->foramen_handicap;
+					if (ptr_doors->pos == pos) {
+						handicap += ptr_doors->foramen_handicap;
+					}
 				}
 			}
 #endif

@@ -100,7 +100,12 @@ void poison_effect(void)
 				 * und nur bei time_counter == 0 wahr, also direkt nach der Heilung (die setzt
 				 * den Zaehler auf 0). Danach erst wieder, wenn der signed-char-Zaehler nach
 				 * 256 Takten umlaeuft. Gemeint war "!(time_counter % 12)" wie bei Goldleim. */
+#if FIX_0274
+				/* Fix 274: alle 12 Takte (Klammern um den Rest) */
+				if ((poison_ptr->log_1 != 0) && (!(poison_ptr->time_counter % 12) )) {
+#else
 				if ((poison_ptr->log_1 != 0) && (!poison_ptr->time_counter % 12 )) {
+#endif
 
 					sprintf(g_dtp2, get_ttx(573), hero->alias); /* "LANGSAM SCHAFFT ES %s WIEDER, KRAFT ZU SCHÖPFEN." */
 
@@ -111,7 +116,12 @@ void poison_effect(void)
 				}
 
 				/* every hour, regenerate 1 GE (gleicher Fehler wie bei KK) */
+#if FIX_0274
+				/* Fix 274: alle 12 Takte (Klammern um den Rest) */
+				if ((poison_ptr->log_2 != 0) && (!(poison_ptr->time_counter % 12) )) {
+#else
 				if ((poison_ptr->log_2 != 0) && (!poison_ptr->time_counter % 12 )) {
+#endif
 
 					sprintf(g_dtp2, get_ttx(578), hero->alias); /* "LANGSAM ERHOLT SICH DIE GEWANDTHEIT VON %s." */
 
@@ -408,7 +418,12 @@ void poison_effect(void)
 				} else {
 
 					/* every hour, regenerate one AE (gleicher Fehler wie bei Shurinknollengift) */
+#if FIX_0274
+					/* Fix 274: alle 12 Takte (Klammern um den Rest) */
+					if (!(poison_ptr->time_counter % 12)) {
+#else
 					if (!poison_ptr->time_counter % 12) {
+#endif
 
 						poison_ptr->log_1--;
 						hero->ae++;

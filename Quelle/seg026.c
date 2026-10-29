@@ -1071,6 +1071,10 @@ signed int save_game_state(void)
 		done = findfirst(g_text_output_buf, &blk, 0);
 		/* Original-Bug (latent): do-while ohne Pruefung von done; findet findfirst nichts,
 		 * wird einmal mit ungueltigem blk.ff_name gelesen. Praktisch gibt es immer CHR-Dateien. */
+#if FIX_0289
+		/* Fix 289: nur anhaengen, wenn findfirst() etwas gefunden hat */
+		if (done == 0)
+#endif
 		do {
 			/* create the CHR filename */
 			sprintf(g_text_output_buf, g_str_temp_fmt_ptr, blk.ff_name);

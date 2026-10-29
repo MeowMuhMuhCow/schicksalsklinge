@@ -284,7 +284,8 @@ void tevent_078(void)
 
 			TRV_load_textfile(-1);
 
-#ifdef M302de_ORIGINAL_BUGFIX
+#if FIX_0168
+			/* Fix 168: Kopfbild nach dem Lager neu laden */
 			/* if a campfight occurs, the picture needs to be reloaded */
 			load_in_head(57);
 #endif
@@ -306,7 +307,12 @@ void tevent_078(void)
 					/* Fehler im Original: answer ist hier 2 (erster Versuch) oder 1 (nach einem Fehlversuch),
 					 * nie 0; Text 82 ("... BIS IHR ENDLICH AUF DEN GEWUENSCHTEN WEG ZURUECKFINDET") erscheint
 					 * nie. Gemeint war vermutlich answer == 2. */
-					GUI_dialog_na(0, !answer ? get_tx2(82) : get_tx2(85)); /* "STUNDE UM STUNDE MARSCHIERT IHR, EURE AUGE..." / "ENDLICH ERREICHT IHR EINE STELLE, DIE IHR..." */
+#if FIX_0183
+					/* Fix 183: beim ersten Versuch (answer == 2) der Text fuer den schnellen Erfolg */
+					GUI_dialog_na(0, (answer == 2) ? get_tx2(82) : get_tx2(85));
+#else
+					GUI_dialog_na(0, !answer ? get_tx2(82) : get_tx2(85));
+#endif /* "STUNDE UM STUNDE MARSCHIERT IHR, EURE AUGE..." / "ENDLICH ERREICHT IHR EINE STELLE, DIE IHR..." */
 
 					found_path = 1;
 				} else {
@@ -327,7 +333,8 @@ void tevent_078(void)
 
 					answer = 1;
 				}
-#ifdef M302de_ORIGINAL_BUGFIX
+#if FIX_0168
+				/* Fix 168: Kopfbild nach dem Lager neu laden */
 				/* if a campfight occurs, the picture needs to be reloaded */
 				load_in_head(57);
 #endif
@@ -346,10 +353,11 @@ void tevent_078(void)
 				hero = get_hero(0);
 				for (tmp = 0; tmp <= 6; tmp++, hero++)
 				{
-#ifndef M302de_ORIGINAL_BUGFIX
+#if !FIX_0184
 					/* Original-Bug 16: all heroes die, even if they are not in the current group */
 					hero_disappear(hero, tmp, -1);
 #else
+					/* Fix 184: nur die Helden der verirrten Gruppe */
 					if ((hero->typus != HERO_TYPE_NONE) &&
 						(hero->group_id == gs_active_group_id))
 					{
@@ -514,11 +522,12 @@ void tevent_124(void)
 	if (answer == 2)
 	{
 
-#ifndef M302de_ORIGINAL_BUGFIX
+#if !FIX_0150
 		/* Original-Bug 53:
 		 * If the party was already traveling backward, the new direction should be forward. */
 		gs_journey_direction = JOURNEY_DIRECTION_CHANGE_TO_BACKWARD;
 #else
+		/* Fix 150: Umkehren kehrt die aktuelle Richtung um */
 		gs_journey_direction = (gs_journey_direction == JOURNEY_DIRECTION_FORWARD ? JOURNEY_DIRECTION_CHANGE_TO_BACKWARD : JOURNEY_DIRECTION_CHANGE_TO_FORWARD);
 #endif
 
@@ -537,7 +546,8 @@ void tevent_124(void)
 
 				/* Original-Bug: a talent test with a fatal result returns -99, not -1 */
 				/* (Folge im Original: der toedliche Sturz trifft, wer die Kletterprobe um genau 1 verfehlt) */
-#ifdef M302de_ORIGINAL_BUGFIX
+#if FIX_0185
+				/* Fix 185: toedlich ist nur der Patzer (-99) */
 				if (talent_ret == -99 && have_climb_tools == 0)
 #else
 				if (talent_ret == -1 && have_climb_tools == 0)

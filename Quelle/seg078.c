@@ -135,8 +135,8 @@ signed int DNG02_handler(void)
 				}
 			}
 
-#ifndef M302de_ORIGINAL_BUGFIX
-			// Original-Bug 65:
+#if !FIX_0098
+			/* Original-Bug 65: */
 			// verfallene Herberge: If the group leader becomes stuck in the sticky liquid on the floor,
 			// the "freed himself" message only appears after a prior failed attempt that reduced his LE to 10 or below.
 
@@ -153,6 +153,7 @@ signed int DNG02_handler(void)
 
 			}
 #else
+			/* Fix 98: die Befreiungsmeldung immer zeigen (Bright-Eyes-Fix zu Original-Bug 65) */
 			sprintf(g_dtp2, get_tx(11), hero->alias); /* "%s GELINGT ES, SICH LOSZUREISSEN!" */
 			GUI_output(g_dtp2);
 			// Group leader succeeds in freeing himself.
@@ -316,9 +317,16 @@ signed int DNG02_handler(void)
 		{
 			// Group heavy enough -> wall at (0,11,8) disappears
 
+#if FIX_0101
+			/* Fix 101: nur melden, wenn die Wand noch steht */
+			if (amap_ptr[MAP_POS(11,8)] != (DNG_TILE_CORRIDOR << 4)) {
+				GUI_output(get_tx(15)); /* "IHR HÖRT VON IRGENDWOHER EIN KNIRSCHEN." */
+			}
+#else
 			GUI_output(get_tx(15)); /* "IHR HÖRT VON IRGENDWOHER EIN KNIRSCHEN." */
 			// A crunching sound
 			// Original-Bug: this message also appears when the wall has already been removed.
+#endif
 
 			amap_ptr[MAP_POS(11,8)] = DNG_TILE_CORRIDOR << 4;
 		}
@@ -329,12 +337,18 @@ signed int DNG02_handler(void)
 		// Original-Bug: Groups teleporting away from (0,11,6) are not detected.
 		// (former comment said (0,11,8), but the weight plate is at (0,11,6))
 
+#if FIX_0102
+		/* Fix 102: Summe einmal vor der Schleife loeschen */
+		weight_sum = 0;
+#endif
 		for (i = 0; i < 6; i++)
 		{
 			/* Original-Bug: weight_sum is reset for every group, so the dummy value 5000 set below
 			 * for a group on (0,11,8) is lost unless that group is the last one (i == 5).
 			 * The reset belongs before the loop. */
+#if !FIX_0102
 			weight_sum = 0;
+#endif
 
 			if (gs_groups_x[i] == 11 && gs_groups_y[i] == 6 &&
 				gs_groups_dng_level[i] == gs_dungeon_level &&
@@ -548,11 +562,12 @@ signed int DNG02_handler(void)
 			(gs_viewdir == SOUTH) &&
 			(gs_dng02_secret_door_status_1 != DNG_SECRET_DOOR_STATUS_OPEN))
 	{
-#ifndef M302de_ORIGINAL_BUGFIX
+#if !FIX_0093
 		/* Original-Bug 66:
 		 * This should be the leader of the active group, who is not necessarily at hero_pos 0. */
 		hero = get_hero(0);
 #else
+		/* Fix 93: der erste handlungsfaehige Held (Bright-Eyes-Fix zu Original-Bug 66) */
 		hero = get_first_hero_available_in_group();
 #endif
 
@@ -592,11 +607,12 @@ signed int DNG02_handler(void)
 			(gs_viewdir == SOUTH) &&
 			(gs_dng02_secret_door_status_2 != DNG_SECRET_DOOR_STATUS_OPEN))
 	{
-#ifndef M302de_ORIGINAL_BUGFIX
+#if !FIX_0093
 		/* Original-Bug 66:
 		 * This should be the leader of the active group, who is not necessarily at hero_pos 0. */
 		hero = get_hero(0);
 #else
+		/* Fix 93: der erste handlungsfaehige Held (Bright-Eyes-Fix zu Original-Bug 66) */
 		hero = get_first_hero_available_in_group();
 #endif
 

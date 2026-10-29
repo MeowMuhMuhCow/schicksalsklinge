@@ -79,7 +79,12 @@ signed int DNG09_handler(void)
 	/* a hero is in the pit (DNG09_pitfall()): call for help.
 	 * Original-Bug: operator precedence. This is (gs_day_timer % 90) * 20, i.e. true at every full
 	 * minute (MINUTES(1) == 90), not gs_day_timer % MINUTES(20) as probably intended. */
+#if FIX_0113
+	/* Fix 113: alle 20 Minuten */
+	if (gs_dng09_pit_flag && !(gs_day_timer % MINUTES(20)))
+#else
 	if (gs_dng09_pit_flag && !(gs_day_timer % 90 * 20))
+#endif
 	{
 		GUI_output(get_tx(32)); /* "IN DER FERNE KÖNNT IHR JEMANDEN VERZWEIFELT UM HILFE RUFEN HÖREN..." */
 	}
@@ -246,6 +251,10 @@ signed int DNG09_handler(void)
 		GUI_output(get_tx(11)); /* "AUS DEM BODEN SCHIESSEN PLÖTZLICH DUTZENDE KLEINER ARMBRUSTBOLZEN E..." */
 
 		/* TODO: add missing gs_dng09_bolttrap4_flag--; */
+#if FIX_0114
+		/* Fix 114: wie die Fallen 1 bis 3 herunterzaehlen */
+		gs_dng09_bolttrap4_flag--;
+#endif
 
 		for (i = 0; i <= 6; i++, hero++)
 		{
@@ -362,7 +371,12 @@ signed int DNG09_handler(void)
 			add_hero_ap_all(60);
 
 			/* Original-Bug: god ids are 1..14, the loop changes entry 0 and skips Ifirn (see DNG09_statues()) */
+#if FIX_0070
+			/* Fix 70: Goetter 1..14 (Praios bis Ifirn) */
+			for (i = 1; i <= 14; i++) {
+#else
 			for (i = 0; i < 14; i++) {
+#endif
 				gs_gods_estimation[i] += 100L;
 			}
 

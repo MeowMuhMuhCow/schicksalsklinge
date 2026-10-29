@@ -62,7 +62,12 @@ void THO_hetmann(void)
 		answer = gs_min_map_parts <= map_parts ? 10 : 50;
 
 		/* Original-Bug? index 0 is no god (GOD_ID_PRAIOS = 1), so Ifirn (14) is left out. */
+#if FIX_0070
+		/* Fix 70: Goetter 1..14 (Praios bis Ifirn) */
+		for (i = 1; i <= 14; i++) {
+#else
 		for (i = 0; i < 14; i++) {
+#endif
 			gs_gods_estimation[i] += answer;
 		}
 

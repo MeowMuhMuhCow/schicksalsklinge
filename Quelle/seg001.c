@@ -241,6 +241,16 @@ static void CD_audio_track_start(signed int track_num)
 		/* Anzahl der abzuspielenden Sektoren = Laenge - 150 Frames (2 s, vermutlich die Pause vor dem naechsten Titel).
 		 * Original-Bug (harmlos): der Uebertrag der Subtraktion geht nicht ins High-Word (count_hi) ueber.
 		 * Spielt nur eine Rolle, wenn das Low-Word der Laenge < 150 ist. */
+#if FIX_0275
+		/* Fix 275: 32 Bit rechnen, der Uebertrag geht ins High-Word */
+		track_start -= 150;
+		req[5].count_lo = (uint16_t)track_start;
+		req[5].count_hi = (int32_t)(track_start >> 16);
+
+		CD_driver_request(&req[5]);
+
+		g_cd_audio_duration = ((uint32_t)track_start * 0x1234e) / 0x4b000;
+#else
 		req[5].count_lo = ((uint16_t)track_start) - 150;
 		req[5].count_hi = (int32_t)(track_start >> 16);
 
@@ -248,6 +258,7 @@ static void CD_audio_track_start(signed int track_num)
 
 		/* Spieldauer in Timer-Ticks: Frames * 18.2 / 75 (0x1234e / 0x4b000 = 0.24275) */
 		g_cd_audio_duration = (((uint32_t)track_start - 150) * 0x1234e) / 0x4b000;
+#endif
 		g_cd_audio_start_tod = CD_get_tod();
 	}
 }

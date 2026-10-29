@@ -494,14 +494,15 @@ void THO_ugdalf(void)
 
 		if (gs_quest_ugdalf == 1) {
 			add_party_money(2000L);
+#if FIX_0067
+			/* Fix 67: das Geld gibt es nur einmal (Bright-Eyes-Fix); der Zugang haengt weiter an !gs_dng14_ugdalf_done */
+			gs_quest_ugdalf = 2;
+#endif
 
 		/* Original-Bug:	Everytime the heroes enter the dungeon they get 20D.
 					Why this fix works is not seen that easy.
 					As long as gs_dng14_ugdalf_done is 0 this block is executed.
 		 */
-#ifdef M302de_ORIGINAL_BUGFIX
-			gs_quest_ugdalf = 2;
-#endif
 		}
 
 	} else if (gs_quest_ugdalf == 3) {
@@ -577,6 +578,35 @@ void academy_analues(void)
 	gs_in_academy = 0;
 }
 
+#if FIX_0339
+/* Fix 339: das Stueck, das academy_get_equal_item() angeboten hat: erstes heiles Stueck dieser Art,
+ * gesucht in derselben Reihenfolge (Platz 0..5 der aktiven Gruppe, lebend) */
+static signed int fix_academy_pay_slot(const signed int item_id, struct struct_hero **p_hero)
+{
+	signed int i;
+	signed int inv_slot;
+	struct struct_hero *hero = get_hero(0);
+
+	for (i = 0; i < 6; i++, hero++) {
+
+		if ((hero->typus != HERO_TYPE_NONE) && (hero->group_id == gs_active_group_id) && !hero->flags.dead)
+		{
+			for (inv_slot = 0; inv_slot < NR_HERO_INVENTORY_SLOTS; inv_slot++) {
+
+				if ((hero->inventory[inv_slot].item_id == item_id) && !hero->inventory[inv_slot].flags.broken) {
+					*p_hero = hero;
+					return inv_slot;
+				}
+			}
+		}
+	}
+
+	/* nicht gefunden: wie bisher */
+	*p_hero = get_hero(get_first_hero_with_item(item_id));
+	return inv_slot_of_item(*p_hero, item_id);
+}
+#endif
+
 /**
  * \brief   the academy (Schule der Hellsicht): remove a curse, analyse an artifact, no potions
  */
@@ -593,7 +623,12 @@ void THO_academy(void)
 	 * Original-Bug? 0 also means "nobody is cursed", so a cursed hero in slot 0 is not recognized
 	 * (text 67: "KEINER VON EUCH HAT EINEN FLUCH AUF SICH"). */
 	hero = get_hero(0);
+#if FIX_0068
+	/* Fix 68: -1 = niemand verflucht, damit auch Platz 0 erkannt wird */
+	for (i = 0, cursed_hero_pos = -1; i <= 6; i++, hero++) {
+#else
 	for (i = cursed_hero_pos = 0; i <= 6; i++, hero++) {
+#endif
 
 		if ((hero->typus != HERO_TYPE_NONE) && (hero->group_id == gs_active_group_id) && hero->flags.renegade)
 		{
@@ -611,7 +646,11 @@ void THO_academy(void)
 
 		/* remove curse */
 
+#if FIX_0068
+		if (cursed_hero_pos == -1) {
+#else
 		if (cursed_hero_pos == 0) {
+#endif
 
 			GUI_input(get_tx2(67), 0); /* "DER ADEPT FÜHRT EUCH IN EIN HINTERZIMMER.@<WARTET HIER.> NACH EINIG..." */
 
@@ -651,14 +690,25 @@ void THO_academy(void)
 
 					} else {
 
+#if FIX_0339
+						/* Fix 339: mit dem angebotenen (heilen) Stueck bezahlen, nicht mit dem ersten gleichen */
+						i = fix_academy_pay_slot(item_id, &hero);
+#else
 						hero = get_hero(get_first_hero_with_item(item_id));
 						i = inv_slot_of_item(hero, item_id);
+#endif
 
 						if (drop_item(hero, i, 1)) {
 
 							GUI_input(get_tx2(62), 0); /* "<GUT, DANN LASST UNS ZUR SACHE KOMMEN.>" */
 							/* Original-Bug? text 63 contains %s (the hero), but is shown without sprintf() */
-							GUI_input(get_tx2(63), 0); /* "NACH ETWA EINER HALBEN STUNDE BEMERKT %s, DASS ES IHM BEREITS DEUTL..." */
+#if FIX_0069
+							/* Fix 69: den Namen des verfluchten Helden einsetzen */
+							sprintf(g_dtp2, get_tx2(63), get_hero(cursed_hero_pos)->alias);
+							GUI_input(g_dtp2, 0);
+#else
+							GUI_input(get_tx2(63), 0);
+#endif /* "NACH ETWA EINER HALBEN STUNDE BEMERKT %s, DASS ES IHM BEREITS DEUTL..." */
 
 							gs_academy_daily_curse = 1;
 
@@ -675,7 +725,13 @@ void THO_academy(void)
 					p_money -= 2000;
 					set_party_money(p_money);
 
-					GUI_input(get_tx2(63), 0); /* "NACH ETWA EINER HALBEN STUNDE BEMERKT %s, DASS ES IHM BEREITS DEUTL..." */
+#if FIX_0069
+					/* Fix 69: den Namen des verfluchten Helden einsetzen */
+					sprintf(g_dtp2, get_tx2(63), get_hero(cursed_hero_pos)->alias);
+					GUI_input(g_dtp2, 0);
+#else
+					GUI_input(get_tx2(63), 0);
+#endif /* "NACH ETWA EINER HALBEN STUNDE BEMERKT %s, DASS ES IHM BEREITS DEUTL..." */
 
 					gs_academy_daily_curse = 1;
 
@@ -727,8 +783,13 @@ void THO_academy(void)
 
 					} else {
 
+#if FIX_0339
+						/* Fix 339: mit dem angebotenen (heilen) Stueck bezahlen, nicht mit dem ersten gleichen */
+						i = fix_academy_pay_slot(item_id, &hero);
+#else
 						hero = get_hero(get_first_hero_with_item(item_id));
 						i = inv_slot_of_item(hero, item_id);
+#endif
 
 						if (drop_item(hero, i, 1)) {
 

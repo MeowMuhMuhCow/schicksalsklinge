@@ -280,18 +280,32 @@ void FIG_do_hero_action(struct struct_hero* hero, const signed int hero_pos)
 					 * Probably, the intention was
 					 * target_hero_at_val = p_target_hero->at_talent_bonus[WEAPON_TYPE_WAFFENLOS] + p_target_hero->fight_atpa_mod - p_target_hero->rs_be / 2;
 					 */
+#if FIX_0031
+					/* Fix 31: Ruestungsbehinderung des Angegriffenen, nicht des Angreifers */
+					target_hero_at_val = p_target_hero->at_talent_bonus[WEAPON_TYPE_WAFFENLOS] + p_target_hero->fight_atpa_mod - p_target_hero->rs_be / 2;
+#else
 					target_hero_at_val = p_target_hero->at_talent_bonus[WEAPON_TYPE_WAFFENLOS] + p_target_hero->fight_atpa_mod - hero->rs_be / 2;
+#endif
 				} else {
 					/* Probably, the intention was
 					 * target_hero_at_val = p_target_hero->at_talent_bonus[p_target_hero->weapon_type] + p_target_hero->fight_atpa_mod - p_target_hero->rs_be / 2;
 					 */
+#if FIX_0031
+					/* Fix 31: Ruestungsbehinderung des Angegriffenen, nicht des Angreifers */
+					target_hero_at_val = p_target_hero->at_talent_bonus[p_target_hero->weapon_type] + p_target_hero->fight_atpa_mod - p_target_hero->rs_be / 2;
+#else
 					target_hero_at_val = p_target_hero->at_talent_bonus[p_target_hero->weapon_type] + p_target_hero->fight_atpa_mod - hero->rs_be / 2;
+#endif
 				}
 
 				/* Probably, the intention was
 				 * if (target_hero->rs_be & 1) ...
 				 */
+#if FIX_0031
+				if (p_target_hero->rs_be & 1) {
+#else
 				if (hero->rs_be & 1) {
+#endif
 					/* if rs_be is odd, subtract another point. Changes the rounding behavior of 'target_hero->rs_be / 2' above to "round up". */
 					target_hero_at_val--;
 				}
@@ -401,7 +415,12 @@ void FIG_do_hero_action(struct struct_hero* hero, const signed int hero_pos)
 						} else {
 							/* Original-Bug? weapon_at_mod is added to the PA value, weapon_pa_mod would be right
 							 * (compare FIG_do_enemy_action() in seg043.c and "WERTE PRUEFEN" in seg033.c) */
+#if FIX_0031
+							/* Fix 31: PA-Zuschlag der Waffe (wie in seg043 und WERTE PRUEFEN) */
+							target_pa_val = p_target_hero->pa_talent_bonus[p_target_hero->weapon_type] - p_target_hero->fight_atpa_mod - p_target_hero->rs_be / 2 + p_target_hero->weapon_pa_mod;
+#else
 							target_pa_val = p_target_hero->pa_talent_bonus[p_target_hero->weapon_type] - p_target_hero->fight_atpa_mod - p_target_hero->rs_be / 2 + p_target_hero->weapon_at_mod;
+#endif
 						}
 
 						if (p_target_hero->action_id == FIG_ACTION_GUARD) {
@@ -453,7 +472,12 @@ void FIG_do_hero_action(struct struct_hero* hero, const signed int hero_pos)
 
 						if ((critical_failure_roll_2d6 >= 3) && (critical_failure_roll_2d6 <= 8)) {
 
+#if FIX_0032
+							/* Fix 32: den Freischlag fuehrt der Angreifer aus, also ihn animieren */
+							g_fig_critical_fail_backfire_2 = 1;
+#else
 							g_fig_critical_fail_backfire_1 = 1;
+#endif
 							/* Maybe the intention was:
 							 * g_fig_critical_fail_backfire_2 = 1
 							 * See comment at the declaration of g_fig_critical_fail_backfire_2. */
@@ -551,7 +575,12 @@ void FIG_do_hero_action(struct struct_hero* hero, const signed int hero_pos)
 										FIG_add_msg(6, 0);
 
 									} else {
+#if FIX_0390
+										/* Fix 390: unzerbrechliche Waffe (bf -99) des Angegriffenen bleibt unzerbrechlich */
+										if ((target_is_hero != 0) && (p_weapon_target->bf != -99)) {
+#else
 										if (target_is_hero != 0) {
+#endif
 											p_weapon_target->bf++;
 										}
 
@@ -559,7 +588,12 @@ void FIG_do_hero_action(struct struct_hero* hero, const signed int hero_pos)
 									}
 								} else {
 
+#if FIX_0390
+									/* Fix 390: unzerbrechliche Waffe (bf -99) des Angegriffenen bleibt unzerbrechlich */
+									if ((target_is_hero != 0) && (p_weapon_target->bf != -99)) {
+#else
 									if (target_is_hero != 0) {
+#endif
 										p_weapon_target->bf++;
 									}
 
@@ -672,7 +706,7 @@ void FIG_do_hero_action(struct struct_hero* hero, const signed int hero_pos)
 
 			if (attacker_weapon_gfx_id != WEAPON_GFX_ID_NONE) {
 
-#ifndef M302de_ORIGINAL_BUGFIX
+#if !FIX_0034
 				/* Original-Bug 32: throwing weapon in a ranged attack is dropped before the damage logic is done.
 				 * As result, all throwing weapons (except throwing stars in a pile of at least 2 units) will be treated
 				 * as weaponless fighting for the damage calculation.
@@ -688,10 +722,8 @@ void FIG_do_hero_action(struct struct_hero* hero, const signed int hero_pos)
 
 					/* note that for ranged attacks, the talent test will be done in the following function call. */
 					damage = FIG_get_hero_weapon_attack_damage(hero, p_target_hero, 1);
-#ifdef M302de_ORIGINAL_BUGFIX
-					/* Original-Bug 32:
-					 * Fix: move the function call after the damage calculation.
-					 */
+#if FIX_0034
+					/* Fix 34: Wurfwaffe erst nach der Schadensberechnung ablegen (Bright-Eyes-Fix, Original-Bug 32) */
 					if (!range_attack_check_ammo(hero, 0)) {
 						return;
 					}
@@ -711,10 +743,8 @@ void FIG_do_hero_action(struct struct_hero* hero, const signed int hero_pos)
 
 					/* note that for ranged attacks, the talent test will be done in the following function call. */
 					damage = FIG_get_hero_weapon_attack_damage(hero, (struct struct_hero*)p_target_enemy, 0);
-#ifdef M302de_ORIGINAL_BUGFIX
-					/* Original-Bug 32:
-					 * Fix: move the function call after the damage calculation.
-					 */
+#if FIX_0034
+					/* Fix 34: Wurfwaffe erst nach der Schadensberechnung ablegen (Bright-Eyes-Fix, Original-Bug 32) */
 					if (!range_attack_check_ammo(hero, 0)) {
 						return;
 					}

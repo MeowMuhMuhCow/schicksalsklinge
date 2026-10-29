@@ -519,6 +519,10 @@ signed int DNG_step(void)
 	{
 		g_can_merge_group = can_merge_group();
 		g_lockpick_try_counter = 0;
+#if FIX_0087
+		/* Fix 87: den Ebenenwechsel nur einmal auswerten */
+		g_dng_level_changed = 0;
+#endif
 	}
 
 	gs_x_bak = gs_x;
@@ -578,15 +582,21 @@ signed int DNG_step(void)
 		/* Original-Bug: missing parentheses. The test for Hyggelik's ruin only covers the first
 		 * position, so on square (1,8,5) of every dungeon "merge groups" shows the mirror text
 		 * and sets gs_dng15_reached_hands instead of merging the groups. */
+#if FIX_0088
+		/* Fix 88: beide Felder nur in Hyggeliks Ruine */
+		if (gs_dungeon_id == DUNGEON_ID_HYGGELIKS_RUINE && (pos == DNG_POS(1,8,1) || pos == DNG_POS(1,8,5)))
+#else
 		if ((gs_dungeon_id == DUNGEON_ID_HYGGELIKS_RUINE && pos == DNG_POS(1,8,1)) || pos == DNG_POS(1,8,5))
+#endif
 		{
 			GUI_output(get_tx(33)); /* FINAL.DTX: "IHR KÖNNT EUCH DURCH DIE BEIDEN SPIEGEL DIE HÄNDE REICHEN..." */
 
 			gs_dng15_reached_hands = 1;
 		} else {
 			GRP_merge();
-#ifdef M302de_ORIGINAL_BUGFIX
-			/* Original-Bug 19: After merging groups in a dungeon, the icon "merge groups" is not grayed.
+#if FIX_0089
+			/* Fix 89: Symbol ausgrauen (Bright-Eyes-Fix zu Original-Bug 19)
+			 * Original-Bug 19: After merging groups in a dungeon, the icon "merge groups" is not grayed.
 			 * Compare to the corresponding code in town_step() in seg066.cpp, where the following line is present. */
 			g_can_merge_group = -1;
 #endif
@@ -655,6 +665,17 @@ signed int DNG_step(void)
 	{
 		/* Original-Bug: unlike the step forward, a semipermeable wall (DNG_TILE_SEMIPERMEABLE_WALL)
 		 * is not checked here, so it can always be passed walking backwards (vermutlich). */
+#if FIX_0090
+		/* Fix 90: rueckwaerts gilt das Richtungsflag der Gegenrichtung (wie vorwaerts) */
+		if ((dng_tile = div16(g_steptarget_back)) == DNG_TILE_SEMIPERMEABLE_WALL)
+		{
+			if (g_steptarget_back & (1 << REVERSE_VIEWDIR(gs_viewdir)) & 0x0f)
+			{
+				DNG_timestep(-1);
+			}
+
+		} else
+#endif
 		if ((dng_tile = div16(g_steptarget_back)) != DNG_TILE_WALL &&
 				dng_tile != DNG_TILE_CLOSED_DOOR &&
 				dng_tile != DNG_TILE_REMOVABLE_WALL &&
@@ -1011,12 +1032,27 @@ void DNG_waterbarrel(uint8_t *unit_ptr)
 								units_needed = 2;
 							}
 
+#if FIX_0091
+							/* Fix 91: erst nachsehen, was im Fass ist: aus einem leeren Fass nichts fuellen,
+							 * mit der letzten Einheit wird ein leerer Schlauch nur halb voll */
+							if ((units_needed != 0) && (*unit_ptr > 0))
+							{
+								hero_refilled = 1;
+
+								if (*unit_ptr < units_needed) {
+									hero->inventory[inv_slot].flags.empty = 0;
+									hero->inventory[inv_slot].flags.half_empty = 1;
+								} else {
+									hero->inventory[inv_slot].flags.half_empty = hero->inventory[inv_slot].flags.empty = 0;
+								}
+#else
 							if (units_needed != 0)
 							{
 								hero_refilled = 1;
 
 								/* refill waterskin */
 								hero->inventory[inv_slot].flags.half_empty = hero->inventory[inv_slot].flags.empty = 0;
+#endif
 
 								/* Original-Bug: the skin is refilled before checking the barrel. With
 								 * *unit_ptr == 0 (or 1 for an empty skin) every further skin is still filled

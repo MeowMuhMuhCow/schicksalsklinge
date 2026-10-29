@@ -59,6 +59,14 @@ int random_schick(const signed int val)
 	retval = (retval + g_random_schick_seed2) ^ g_random_schick_seed;
 	retval = _rotl(retval, 3);
 
+#if FIX_0284
+	/* Fix 284: ohne Vorzeichen rechnen (__abs__(-32768) bleibt negativ); Startwert wie bisher */
+	retval = __abs__(retval);
+	g_random_schick_seed = retval + 1;
+
+	return (unsigned int)retval % (unsigned int)val + 1;
+}
+#else
 	/* update rand_seed */
 	g_random_schick_seed = __abs__(retval) + 1;
 
@@ -66,6 +74,7 @@ int random_schick(const signed int val)
 
 	return ++retval;
 }
+#endif
 
 /**
  * \brief   rolls a dice: n*Wm+x

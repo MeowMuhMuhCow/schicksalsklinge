@@ -37,6 +37,10 @@
 #include "seg097.h"
 #include "seg103.h"
 #include "seg105.h"
+#if FIX_0351
+#include "seg049.h"
+#include "seg113.h"
+#endif
 
 struct struct_chest g_dng03_specialchests[14] = {
 	{ DNG_POS(0,5,3),	0, NULL,			NULL,			DNG03_chest00_loot, 15, 0, 0 },
@@ -102,7 +106,13 @@ signed int DNG03_handler(void)
 			hero = get_hero(0);
 			for (i = 0; i <= 6; i++, hero++)
 			{
-				if ((hero->typus >= HERO_TYPE_HEXE) && hero->ae != 0) {
+	#if FIX_0105
+			/* Fix 105: nur lebende Helden der aktiven Gruppe */
+			if ((hero->group_id != gs_active_group_id) || hero->flags.dead) {
+				/* nicht betroffen */
+			} else
+#endif
+			if ((hero->typus >= HERO_TYPE_HEXE) && hero->ae != 0) {
 
 					sub_ae_splash(hero, random_schick(6));
 
@@ -126,6 +136,12 @@ signed int DNG03_handler(void)
 		hero = get_hero(0);
 		for (i = 0; i <= 6; i++, hero++)
 		{
+#if FIX_0105
+			/* Fix 105: nur lebende Helden der aktiven Gruppe */
+			if ((hero->group_id != gs_active_group_id) || hero->flags.dead) {
+				/* nicht betroffen */
+			} else
+#endif
 			if ((hero->typus >= HERO_TYPE_HEXE) && hero->ae != 0) {
 
 				sub_ae_splash(hero, random_schick(6));
@@ -185,7 +201,13 @@ signed int DNG03_handler(void)
 			hero = get_hero(0);
 			for (i = 0; i <= 6; i++, hero++)
 			{
-				if ((hero->typus >= HERO_TYPE_HEXE) && hero->ae != 0) {
+	#if FIX_0105
+			/* Fix 105: nur lebende Helden der aktiven Gruppe */
+			if ((hero->group_id != gs_active_group_id) || hero->flags.dead) {
+				/* nicht betroffen */
+			} else
+#endif
+			if ((hero->typus >= HERO_TYPE_HEXE) && hero->ae != 0) {
 
 					sub_ae_splash(hero, random_schick(6));
 
@@ -199,7 +221,12 @@ signed int DNG03_handler(void)
 		}
 
 	} else if (target_pos == DNG_POS(0,9,11) && (gs_viewdir == WEST) &&
+#if FIX_0106
+			/* Fix 106: Betreten ODER Drehen (wie beim Hebel (1,3,11)) */
+			(target_pos != gs_dng_pos_bak || gs_viewdir != gs_viewdir_bak))
+#else
 			target_pos != gs_dng_pos_bak && gs_viewdir != gs_viewdir_bak)
+#endif
 	{
 		/* LEVER: switches the spear pit trap of chest 11 at (1,9,11) (gs_dng03_lever_chest11, initially 1 = armed).
 		 * Original-Bug: "&&" instead of "||" (compare the lever at (1,3,11)). The group must enter
@@ -395,6 +422,12 @@ signed int DNG03_handler(void)
 		hero = get_hero(0);
 		for (i = 0; i <= 6; i++, hero++)
 		{
+#if FIX_0105
+			/* Fix 105: nur lebende Helden der aktiven Gruppe */
+			if ((hero->group_id != gs_active_group_id) || hero->flags.dead) {
+				/* nicht betroffen */
+			} else
+#endif
 			if ((hero->typus >= HERO_TYPE_HEXE) && hero->ae) {
 
 				sub_ae_splash(hero, random_schick(6));
@@ -635,7 +668,22 @@ void DNG03_chest11_loot(struct struct_chest* chest)
 			/* end of game */
 			GUI_output(get_tx(26)); /* "SÄMTLICHE MITGLIEDER DER GRUPPE STÜRZTEN IN DIE GRUBE UND WERDEN GE..." */
 
+#if FIX_0351
+			/* Fix 351: nur diese Gruppe ist verloren; gibt es noch andere Helden, geht das Spiel mit ihnen weiter
+			 * (wie beim verlorenen Kampf auf Reisen: hero_disappear(), dann GRP_switch_to_next(2)) */
+			hero = get_hero(0);
+			for (i = 0; i <= 6; i++, hero++) {
+				if ((hero->typus != HERO_TYPE_NONE) && (hero->group_id == gs_active_group_id)) {
+					hero_disappear(hero, i, -2);
+				}
+			}
+
+			if (g_game_state == GAME_STATE_MAIN) {
+				GRP_switch_to_next(2);
+			}
+#else
 			g_game_state = GAME_STATE_DEAD;
+#endif
 		} else {
 			timewarp(HOURS(1));
 

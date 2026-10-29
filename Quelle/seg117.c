@@ -254,7 +254,12 @@ void hunt_karen(void)
 					}
 				}
 
+#if FIX_0375
+				/* Fix 375: mindestens die Haelfte (aufgerundet), ein Einzelheld muss treffen */
+				if (((count_heroes_in_group() + 1) / 2) <= passed) {
+#else
 				if ((count_heroes_in_group() / 2) <= passed) {
+#endif
 					/* over the half of the group passed MISSLE WEAPON+0 */
 					/* (genauer: mindestens die Haelfte, abgerundet) */
 
@@ -341,7 +346,12 @@ void hunt_wildboar(void)
 					}
 				}
 
+#if FIX_0375
+				/* Fix 375: mindestens die Haelfte (aufgerundet), ein Einzelheld muss treffen */
+				if (((count_heroes_in_group() + 1) / 2) <= passed) {
+#else
 				if ((count_heroes_in_group() / 2) <= passed) {
+#endif
 					/* over the half of the group passed MISSLE WEAPON+0 */
 
 					GUI_output(get_tx2(17)); /* "EINES DER TIERE WIRD GETROFFEN, ZUCKT AUF UND BRICHT ZUSAMMEN." */
@@ -400,7 +410,12 @@ void hunt_cavebear(void)
 				/* AT of the current weapon - (RS-BE / 2) <= 1W20 */
 				/* Fehler im Original: Vergleiche verkehrt herum (wie im Krakenmolch-Kampf): die 5 AP gibt
 				 * es bei misslungener Attacke (W20 >= AT), den Schaden bei GELUNGENER Parade (W20 < PA). */
+#if FIX_0177
+				/* Fix 177: Attacke gelingt bei W20 <= AT */
+				if (random_schick(20) <= (hero->at_talent_bonus[hero->weapon_type] - (hero->rs_be / 2)))
+#else
 				if ((hero->at_talent_bonus[hero->weapon_type] - (hero->rs_be / 2)) <= random_schick(20))
+#endif
 				{
 #if !defined(__BORLANDC__)
 					D1_INFO("%-16s erhaelt 5 AP fuer eine gelungene Attacke.\n", hero->alias);
@@ -409,7 +424,12 @@ void hunt_cavebear(void)
 				}
 
 				/* PA of the current weapon - (RS-BE / 2) <= 1W20 */
+#if FIX_0177
+				/* Fix 177: Schaden bei misslungener Parade (W20 > PA) */
+				if (random_schick(20) > (hero->pa_talent_bonus[hero->weapon_type] - hero->rs_be / 2))
+#else
 				if ((hero->pa_talent_bonus[hero->weapon_type] - hero->rs_be / 2) > random_schick(20))
+#endif
 				{
 #if !defined(__BORLANDC__)
 					D1_INFO("%-16s erhaelt 3 AP fuer eine misslungene Parade.\n", hero->alias);
@@ -434,6 +454,9 @@ void hunt_viper(void)
 	struct struct_hero *hero_i;
 	signed int min_result; /* bleibt immer 0 (Original-Bug, siehe unten) */
 	signed int i;
+#if FIX_0178
+	signed int fix_result;
+#endif
 
 	/* load snake picture */
 	pause_traveling(30);
@@ -451,12 +474,22 @@ void hunt_viper(void)
 		/* Original-Bug: something was forgotten */
 		/* min_result wird nie veraendert: "if (min_result)" ist immer falsch, die Kvillotter beisst
 		 * nie. Vermutlich sollte min_result das kleinste Ergebnis aufnehmen (vgl. tevent_063). */
+#if FIX_0178
+		/* Fix 178: das schlechteste misslungene Ergebnis merken, sein Held wird gebissen */
+		if ((hero_i->typus != HERO_TYPE_NONE) && (hero_i->group_id == gs_active_group_id) &&
+			(!hero_i->flags.dead) && ((fix_result = test_attrib(hero_i, ATTRIB_GE, 0)) < min_result))
+		{
+			min_result = fix_result;
+			choosen_hero = i;
+		}
+#else
 		if ((hero_i->typus != HERO_TYPE_NONE) && (hero_i->group_id == gs_active_group_id) &&
 			(!hero_i->flags.dead) && (test_attrib(hero_i, ATTRIB_GE, 0) < min_result))
 		{
 			/* remember the hero */
 			choosen_hero = i;
 		}
+#endif
 	}
 
 	if (min_result) {
@@ -494,8 +527,8 @@ void octopus_attack(void)
 	signed int tmp;
 	char overboard[7];
 	struct struct_hero *hero;
-#ifdef M302de_ORIGINAL_BUGFIX
-	/* Original-Bug 22: see below */
+#if FIX_0180
+	/* Fix 180: Kampf endet, wenn kein Held mehr kaempft (sonst Endlosschleife) */
 	char any_hero_active;
 #endif
 
@@ -507,21 +540,25 @@ void octopus_attack(void)
 	GUI_output(get_tx2(29)); /* "IHR ERGREIFT EURE WAFFEN UND HACKT WILD AUF DIE TENTAKEL EIN!" */
 
 	do {
-#ifdef M302de_ORIGINAL_BUGFIX
-		/* Original-Bug 22: see below */
+#if FIX_0180
 		any_hero_active = 0;
 #endif
 		hero = get_hero(0);
 		for (i = 0; i <= 6; i++, hero++) {
 
+#if FIX_0086
+			/* Fix 86: versteinerte, bewusstlose usw. Helden kaempfen nicht mit */
+			if ((hero->typus != HERO_TYPE_NONE) && (hero->group_id == gs_active_group_id) &&
+				check_hero(hero) && !overboard[i])
+#else
 			if ((hero->typus != HERO_TYPE_NONE) && (hero->group_id == gs_active_group_id) &&
 				!hero->flags.dead && !overboard[i])
+#endif
 			{
-#ifdef M302de_ORIGINAL_BUGFIX
-				/* Original-Bug 22: see below */
+#if FIX_0180
 				any_hero_active = 1;
 #endif
-#ifndef M302de_ORIGINAL_BUGFIX
+#if !FIX_0179
 				/* Original-Bug 21:
 				 * Apparently, the outcome of the following GE-attrib-test is misinterpreted.
 				 * For GE <= 17, its always 5% strangling attack, 5% grabbing attack, 90% hero attacks octopus.
@@ -531,6 +568,7 @@ void octopus_attack(void)
 				 * The intended behavior probably was: critical failure: grabbing attack; normal failure: strangling attack; success: hero attacks octopus. */
 				if (!(tmp = test_attrib(hero, ATTRIB_GE, 0)))
 #else
+				/* Fix 179: misslungene GE-Probe = Wuergen, Patzer (-99) = Packen */
 				tmp = test_attrib(hero, ATTRIB_GE, 0);
 				if (tmp <= 0 && tmp != -99)
 #endif
@@ -544,7 +582,7 @@ void octopus_attack(void)
 					GUI_output(g_dtp2);
 				}
 
-#ifndef M302de_ORIGINAL_BUGFIX
+#if !FIX_0179
 				/* Original-Bug 21: see above */
 				else if (tmp == -1)
 #else
@@ -570,27 +608,25 @@ void octopus_attack(void)
 
 					/* Original-Bug: The following is the wrong way round, should be ">= random_schick(20)" (found by siebenstreich 2021-08-12 https://www.crystals-dsa-foren.de/showthread.php?tid=4589&pid=167430#pid167430) */
 					/* Further dubiosity: Only the bare HERO_AT value of weapon type of the equipped weapon is taken into account. HERO_AT_MOD (modifier of the current weapon) and HERO_RS_BE are ignored. */
+#if FIX_0177
+					/* Fix 177: Treffer bei W20 <= AT */
+					if (random_schick(20) <= hero->at_talent_bonus[hero->weapon_type]) {
+#else
 					if (hero->at_talent_bonus[hero->weapon_type] <= random_schick(20)) {
+#endif
 						hits++;
 					}
 				}
 			}
 		}
 	}
-#ifndef M302de_ORIGINAL_BUGFIX
+#if !FIX_0180
 	/* Original-Bug 22: infinite loop if all heroes are overboard/dead */
 	while (hits <= 5);
 #else
+	/* (anders als Bright-Eyes verschwinden die Helden dabei nicht: ueber Bord Gerissene bleiben wie im
+	 *  Original in der Gruppe) */
 	while ((hits <= 5) && any_hero_active);
-	if (!any_hero_active) {
-		/* octopus has won. all heroes disappear in the open sea. */
-		hero = get_hero(0);
-		for (i = 0; i <= 6; i++, hero++) {
-			if ((hero->typus != HERO_TYPE_NONE) && (hero->group_id == gs_active_group_id)) {
-				hero_disappear(hero, i, -2);
-			}
-		}
-	}
 #endif
 
 	sub_group_le(3);
@@ -674,11 +710,22 @@ void pirates_attack(void)
 	g_max_enemies = random_interval(3, 8);
 	g_fig_discard = 1;
 
+#if FIX_0327
+	/* Fix 327 (teilweise): nach verlorenem oder per VERLASSEN/LADEN beendetem Kampf kein Ausruestungsbildschirm */
+	if (do_fight(FIGHT_ID_S001) < 2) {
+		g_basepos_x = g_basepos_y = 0;
+
+		status_menu(get_hero_pos(get_first_hero_available_in_group()));
+	} else {
+		g_basepos_x = g_basepos_y = 0;
+	}
+#else
 	do_fight(FIGHT_ID_S001);
 
 	g_basepos_x = g_basepos_y = 0;
 
 	status_menu(get_hero_pos(get_first_hero_available_in_group()));
+#endif
 
 	resume_traveling();
 }
@@ -744,7 +791,12 @@ void journey_random_encounter(signed int tmp)
 	 * ausser bei Landschaft 7 (siehe g_trv_route_landscape_type_table). */
 	for (random_encounter_id = 0; random_encounter_id < 14; random_encounter_id++) {
 
+#if FIX_0181
+		/* Fix 181: aufsteigende Schwellen: W100 <= Wert */
+		if ((roll_d100 <= g_trv_journey_random_encounter_stats[random_encounter_id][tmp]) && g_trv_journey_random_encounter_stats[random_encounter_id][tmp]) {
+#else
 		if ((g_trv_journey_random_encounter_stats[random_encounter_id][tmp] <= roll_d100) && g_trv_journey_random_encounter_stats[random_encounter_id][tmp]) {
+#endif
 
 			gs_show_travel_map = g_wallclock_update = 0;
 			g_travel_event_active = 1;
@@ -915,7 +967,12 @@ void TLK_way_to_ruin(const signed int state)
 
 		/* Original-Bug: hero != RUIN_HERO */
 		/* (hero ist in diesem Aufruf nicht gesetzt - die KK kommt aus einem uninitialisierten Zeiger) */
+#if FIX_0182
+		/* Fix 182: KK des betroffenen Helden */
+		hero_disease_test(gs_ruin_hero, DISEASE_ID_DUMPFSCHAEDEL, 25 - (gs_ruin_hero->attrib[ATTRIB_KK].current + gs_ruin_hero->attrib[ATTRIB_KK].mod));
+#else
 		hero_disease_test(gs_ruin_hero, DISEASE_ID_DUMPFSCHAEDEL, 25 - (hero->attrib[ATTRIB_KK].current + hero->attrib[ATTRIB_KK].mod));
+#endif
 
 		lose_random_item(gs_ruin_hero, 10, get_ttx(506)); /* "OH VERDAMMT, %s HAT %s VERLOREN!" */
 

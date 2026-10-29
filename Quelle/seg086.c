@@ -230,6 +230,10 @@ signed int DNG11_handler(void)
 
 			/* Original-Bug: with a wrong lever position the "&&" skips the assignment of test_result,
 			 * which is then read uninitialized below (same for the other two secret doors). */
+#if FIX_0119
+			/* Fix 119: bei falscher Hebelstellung kein Zufallswert */
+			test_result = 0;
+#endif
 			sprintf(g_text_output_buf,
 				(char*)((gs_dng11_lever_flag == 2 || gs_dng11_lever_flag == 3) && (test_result = test_talent(hero, TA_SCHLOESSER, 5)) > 0 ? get_tx(27) : get_tx(28)), /* "@NACH KURZER ZEIT GELINGT ES %s SOGAR, SIE..." / "@LEIDER GELINGT ES %s ALLERDINGS NICHT, SI..." */
 				GUI_get_personal_pronoun(hero->sex, GRAMMAR_CASE_3RD));
@@ -260,6 +264,10 @@ signed int DNG11_handler(void)
 
 			sprintf(g_dtp2, get_tx(26), hero->alias); /* "BEI GENAUEM HINSEHEN, ENTDECKT %s EINE GEHEIMTÜRE IN DER WAND." */
 
+#if FIX_0119
+			/* Fix 119: bei falscher Hebelstellung kein Zufallswert */
+			test_result = 0;
+#endif
 			sprintf(g_text_output_buf,
 				(char*)((gs_dng11_lever_flag == 1 || gs_dng11_lever_flag == 3) && (test_result = test_talent(hero, TA_SCHLOESSER, 3)) > 0 ? get_tx(27) : get_tx(28)), /* "@NACH KURZER ZEIT GELINGT ES %s SOGAR, SIE..." / "@LEIDER GELINGT ES %s ALLERDINGS NICHT, SI..." */
 				GUI_get_personal_pronoun(hero->sex, GRAMMAR_CASE_3RD));
@@ -291,6 +299,10 @@ signed int DNG11_handler(void)
 
 			sprintf(g_dtp2,	get_tx(26), hero->alias); /* "BEI GENAUEM HINSEHEN, ENTDECKT %s EINE GEHEIMTÜRE IN DER WAND." */
 
+#if FIX_0119
+			/* Fix 119: bei falscher Hebelstellung kein Zufallswert */
+			test_result = 0;
+#endif
 			sprintf(g_text_output_buf,
 				(char*)((gs_dng11_lever_flag == 5 || gs_dng11_lever_flag == 3) && (test_result = test_talent(hero, TA_SCHLOESSER, 5)) > 0 ? get_tx(27) : get_tx(28)), /* "@NACH KURZER ZEIT GELINGT ES %s SOGAR, SIE..." / "@LEIDER GELINGT ES %s ALLERDINGS NICHT, SI..." */
 				GUI_get_personal_pronoun(hero->sex, GRAMMAR_CASE_3RD));

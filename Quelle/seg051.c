@@ -178,10 +178,18 @@ void do_wildcamp(void)
 						/* Original-Bug: not checked answer for following options */
 						/* With answer == -1 (ESC) g_wildcamp_herbstatus[-1] == g_wildcamp_guards[2] (still -1)
 						 * is read, so the message below appears. The selection cannot be cancelled anyway. */
+#if FIX_0129
+						/* Fix 129: answer != -1 vor allen drei Abfragen */
+						if ((answer != -1) &&
+							(g_wildcamp_magicstatus[answer] != 0 ||
+							g_wildcamp_herbstatus[answer] != 0 ||
+							g_wildcamp_replstatus[answer] != 0))
+#else
 						if ((answer != -1 &&
 							g_wildcamp_magicstatus[answer] != 0) ||
 							g_wildcamp_herbstatus[answer] != 0 ||
 							g_wildcamp_replstatus[answer] != 0)
+#endif
 						{
 							GUI_output(get_ttx(331)); /* "DU KANNST DOCH AUCH KEINE ZWEI DINGE GLEICHZEITIG MACHEN!" */
 							answer = -1;
@@ -314,6 +322,12 @@ void do_wildcamp(void)
 				sleep_hours = gs_day_timer < HOURS(8) ? 8 - sleep_hours : 24 - sleep_hours + 8;
 
 				watch_hours = sleep_hours / 3;
+#if FIX_0130
+				/* Fix 130: mindestens 1 Stunde je Wache, sonst wechselt die Wache nie */
+				if (watch_hours == 0) {
+					watch_hours = 1;
+				}
+#endif
 				watch_hours_left = watch_hours;
 				watch = 0;
 				incident_preset = 0;
@@ -380,12 +394,18 @@ void do_wildcamp(void)
 
 				} else if (!incident_preset) {
 
+#if !FIX_0313
 					gs_camp_incident = -1;
+#endif
 					g_fig_initiative = 1;
 					g_fig_discard = 1;
 
 					/* pick a random campfight out of 4 possibilities */
 					do_fight(g_campfights[random_schick(4) - 1]);
+#if FIX_0313
+					/* Fix 313: erst nach dem Kampf loeschen, FIG_init_heroes() weckt die Wache */
+					gs_camp_incident = -1;
+#endif
 
 					if (gs_travel_detour != 99 && g_game_state == GAME_STATE_MAIN) {
 
@@ -411,7 +431,12 @@ void do_wildcamp(void)
 
 				done = 1;
 			}
+#if FIX_0367
+		/* Fix 367: Weiterreisen nur ueber das sichtbare 7. Symbol (guter Lagerplatz) */
+		} else if ((g_action_id == ACTION_ID_ICON_7) && g_good_camp_place) {
+#else
 		} else if (g_action_id == ACTION_ID_ICON_7) {
+#endif
 			done = 1;
 		}
 	}
@@ -450,7 +475,12 @@ signed int gather_herbs(struct struct_hero *hero, const signed int hours, const 
 	for (unique_herbs_count = herb_index = 0; herb_index < 12; herb_index++, ptr++) {
 
 		/* check if this is a special place for collecting the considered herb.. */
+#if FIX_0161
+		/* Fix 161: Kraeuternummern ueber 127 (int8_t) richtig vergleichen */
+		if (ptr->item_id == (uint8_t)g_gather_herbs_special) {
+#else
 		if (ptr->item_id == g_gather_herbs_special) {
+#endif
 
 			/* dirty code follows. The original herbs table is modified. */
 			ptr->chance_max += 10; // 10% higher chance to find the herb
@@ -467,7 +497,11 @@ signed int gather_herbs(struct struct_hero *hero, const signed int hours, const 
 			}
 		}
 
+#if FIX_0161
+		if (ptr->item_id == (uint8_t)g_gather_herbs_special) {
+#else
 		if (ptr->item_id == g_gather_herbs_special) {
+#endif
 
 			/* The herbs table is reverted to original state. */
 			ptr->chance_max -= 10;

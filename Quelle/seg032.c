@@ -537,6 +537,14 @@ void FIG_do_round(void)
 				 * no hero -> endless loop. Probably possible if the only hero able to act has kept
 				 * action_id == FIG_ACTION_FLEE (failed flight): he is not counted at the start of the
 				 * round, but FIG_fight_continues() still sees him (vermutlich, not tested). */
+#if FIX_0007
+				/* Fix 7: erst auf 0 Heldenphasen pruefen und den Zug an die Gegner geben (wie im Gegnerzweig) */
+				if (nr_hero_act_phases_left_in_round == 0) {
+
+					is_enemies_turn = 1;
+
+				} else
+#endif
 				if (nr_hero_act_phases_left_in_round <= nr_enemy_action_phases_left_in_round) {
 
 					nr_action_phases_left_in_turn = 1;
@@ -768,7 +776,9 @@ void FIG_do_round(void)
 								}
 							}
 						}
-#ifdef M302de_ORIGINAL_BUGFIX
+#if FIX_0008
+						/* Fix 8: Schwanzteil eines durch eigenen Patzer getoeteten Doppelgegners vom Schachbrett nehmen
+						 * (Bright-Eyes-Fix, Original-Bug 3) */
 						/* Original-Bug 3:
 						 * Tails of dead/disappeared two-squared enemies must be removed separately.
 						 * Otherwise, those tails are an obstacle for movement (by another bug) or can be used
@@ -797,7 +807,7 @@ void FIG_do_round(void)
 
 								p_fighter = FIG_get_fighter(g_fig_double_size_fighter_id_table[p_fighter->double_size]);
 								/* p_fighter now points the fighter assigned to the tail part of the enemy */
-								// assert((p_fighter->cbx == x) && (p_fighter->cby == y))
+								/* assert((p_fighter->cbx == x) && (p_fighter->cby == y)) */
 
 								/* restore the object_id stored at fighter.object_id (meaning that the tail part is standing on it) to the chessboard. */
 								FIG_set_cb_object(p_fighter->cby, p_fighter->cbx, p_fighter->object_id);
@@ -969,6 +979,9 @@ signed int do_fight(const signed int fight_id)
 	signed int direction_bak;
 	signed int tw_bak;
 	signed int escape_positions[6];
+#if FIX_0009
+	signed int max_enemies_bak = 0;
+#endif
 
 	if ((gs_group_member_counts[gs_active_group_id] == 1) && (get_hero(0)->invisible != 0))
 	{
@@ -1012,6 +1025,10 @@ signed int do_fight(const signed int fight_id)
 
 		/* reduce number of enemies to MAX_ENEMIES */
 		memset(&g_current_fight->enemies[g_max_enemies], 0, sizeof(struct fight_enemy) * (20 - g_max_enemies));
+#if FIX_0009
+		/* Fix 9: Kuerzung merken, die Abfrage nach dem Sieg braucht sie */
+		max_enemies_bak = g_max_enemies;
+#endif
 		g_max_enemies = 0;
 	}
 
@@ -1153,6 +1170,10 @@ signed int do_fight(const signed int fight_id)
 				hero->blind_timer = 0;				/* unset blindness (set counter to 0) */
 				hero->ecliptifactus_timer = 0;			/* unset 'Ecliptifactus' (set counter to 0) */
 				hero->action_id = FIG_ACTION_MOVE;
+#if FIX_0405
+				/* Fix 405: Angriffsart (aggressiv/vorsichtig) nicht in den naechsten Kampf mitnehmen */
+				hero->fight_atpa_mod = 0;
+#endif
 			}
 		}
 
@@ -1207,10 +1228,25 @@ signed int do_fight(const signed int fight_id)
 
 			FIG_split_ap();
 
+#if FIX_0312
+			/* Fix 312: gefesselte Gegner eines gewonnenen Kampfes gelten als besiegt (sonst schreibt
+			 * write_fight_lst() sie zurueck und sie kaempfen beim naechsten Betreten erneut) */
+			for (i = 0; i < 20; i++) {
+				if (g_enemy_sheets[i].flags.tied) {
+					g_enemy_sheets[i].flags.dead = 1;
+				}
+			}
+#endif
+
 			/* REMARK: this condition is never true: g_max_enemies has already been reset to 0
 			 * after shortening the enemy list above, and nothing sets it during the fight.
 			 * Original-Bug? The enemies of a shortened fight are never marked as dead here. */
+#if FIX_0009
+			/* Fix 9: gemerkte Kuerzung pruefen (g_max_enemies ist hier schon 0) */
+			if ((max_enemies_bak != 0) && !g_fig_discard) {
+#else
 			if ((g_max_enemies != 0) && !g_fig_discard) {
+#endif
 
 				for (i = 0; i < 20; i++) {
 					g_enemy_sheets[i].flags.dead = 1;
@@ -1346,6 +1382,13 @@ signed int do_fight(const signed int fight_id)
 	if (!gs_show_travel_map) {
 		prepare_area(gs_dungeon_id != DUNGEON_ID_NONE ? 0 : 1);
 	}
+
+#if FIX_0410
+	/* Fix 410: im Dungeon nach jedem Kampf wieder die Dungeonmusik (bisher nur in DNG_fight()) */
+	if (gs_dungeon_id != DUNGEON_ID_NONE) {
+		set_audio_track(ARCHIVE_FILE_DUNGEON_XMI);
+	}
+#endif
 
 	load_wallclock_nvf();
 	call_mouse();

@@ -65,6 +65,12 @@ void tevent_080(void)
 		{
 			gs_tevent080_tatzelwurm = 1;
 
+#if FIX_0163
+			/* Fix 163: ohne Jaeger (hero == NULL) den ersten verfuegbaren Helden nennen */
+			if (hero == NULL) {
+				hero = get_first_hero_available_in_group();
+			}
+#endif
 			sprintf(g_dtp2, get_tx2(87), hero->alias); /* "WÄHREND DER JAGD SIND %s EINIGE SELTSAME SPUREN AUFGEFALLEN: UNGEWÖ..." */
 
 			do {
@@ -320,7 +326,8 @@ void tevent_098(void)
 			GUI_output(get_tx2(33)); /* "DER BACH IST BITTERKALT UND MEHR ALS EINMAL NEHMT IHR EIN UNFREIWIL..." */
 
 			/* Original-Bug: hero not initialized */
-#ifdef M302de_ORIGINAL_BUGFIX
+#if FIX_0164
+			/* Fix 164: Held ist hier nicht gesetzt - den ersten verfuegbaren nehmen */
 			/* Original-Bugfix: take the leader of the group */
 			hero = get_first_hero_available_in_group();
 #endif
@@ -370,7 +377,12 @@ void tevent_098(void)
 				/* Fehler im Original: i ist hier noch die Zahl der Antworten (3), nicht hero_pos.
 				 * hero_disappear() schreibt so die CHR-Datei von Platz 3 statt die des Springers
 				 * (dessen temple_id geht verloren); ein springender NSC wird nicht als NSC behandelt. */
+#if FIX_0165
+				/* Fix 165: Position des Springers uebergeben */
+				hero_disappear(hero, hero_pos, 33);
+#else
 				hero_disappear(hero, i, 33);
+#endif
 
 				do {
 					answer = GUI_radio(get_tx2(37), 3, get_tx2(28),	get_tx2(29), get_tx2(30)); /* "WIE WEITER NACH DIESEM UNGLÜCK?" / "DIE KLAMM ÜBERSPRINGEN?" / "HINABSTEIGEN UND DURCH DEN BA..." / "AN EINEM SEIL HINÜBERHANGELN?" */
@@ -402,6 +414,10 @@ void hero_disappear(struct struct_hero *hero, const signed int pos, const signed
 	if (!gs_total_hero_counter) {
 		g_game_state = GAME_STATE_DEAD;
 	}
+#if FIX_0080
+	/* Fix 80: die Spielschleife prueft die Gruppen (der NSC allein zaehlt dort nicht) */
+	g_check_party = 1;
+#endif
 
 	/* decrement group counter */
 	gs_group_member_counts[gs_active_group_id]--;
@@ -419,10 +435,17 @@ void hero_disappear(struct struct_hero *hero, const signed int pos, const signed
 		 * naechsten NSC ueberschrieben (bei Erwo: ARCHIVE_FILE_FINGER_NVF) und der Timer des naechsten
 		 * NSC auf -1 gesetzt (bei Erwo: gs_npc_timers[7] = gs_tlk_tav_firstinfo); der verschwundene NSC
 		 * selbst bleibt in seiner Taverne anwerbbar. */
+#if FIX_0264
+		/* Fix 264: Datei und Timer des NSC selbst (npc_id 1..6, wie add_npc()/remove_npc()) */
+		save_npc(ARCHIVE_FILE_NPCS + get_hero(6)->npc_id - 1);
+
+		gs_npc_timers[get_hero(6)->npc_id] = -1;
+#else
 		save_npc(ARCHIVE_FILE_NPCS + get_hero(6)->npc_id);
 
 		/* reset NPC timer */
 		gs_npc_timers[get_hero(6)->npc_id + 1] = -1;
+#endif
 	} else {
 		/* Regular Hero */
 		write_chr_temp(pos);
@@ -464,7 +487,8 @@ void tevent_099(void)
 
 			if (!do_fight(FIGHT_ID_F099)) {
 				gs_tevent099_flag = 1;
-#ifdef M302de_ORIGINAL_BUGFIX
+#if FIX_0166
+			/* Fix 166: "VERSUCHEN ZU FLIEHEN?" fuehrt zur Kriegskunst-Probe (else gehoert zur Antwort) */
 			}
 #endif
 		} else {
@@ -477,7 +501,7 @@ void tevent_099(void)
 					gs_tevent099_flag = 1;
 				}
 			}
-#ifndef M302de_ORIGINAL_BUGFIX
+#if !FIX_0166
 			}
 #endif
 		}
@@ -509,7 +533,8 @@ void tevent_101(void)
 			if (!do_fight(FIGHT_ID_F101)) {
 
 				gs_tevent101_flag = 1;
-#ifdef M302de_ORIGINAL_BUGFIX
+#if FIX_0166
+			/* Fix 166: "VERSUCHEN ZU FLIEHEN?" fuehrt zur Kriegskunst-Probe (else gehoert zur Antwort) */
 			}
 #endif
 		} else {
@@ -522,7 +547,7 @@ void tevent_101(void)
 					gs_tevent101_flag = 1;
 				}
 			}
-#ifndef M302de_ORIGINAL_BUGFIX
+#if !FIX_0166
 			}
 #endif
 		}
@@ -547,7 +572,8 @@ void tevent_103(void)
 	struct struct_hero *hero;
 
 	/* Original-Bug: save the address instead the return value of a function as a hero */
-#ifdef M302de_ORIGINAL_BUGFIX
+#if FIX_0167
+	/* Fix 167: Funktion aufrufen statt ihre Adresse als Helden zu nehmen */
 	hero = get_first_hero_available_in_group();
 #else
 	hero = (struct struct_hero*)(get_first_hero_available_in_group);
@@ -679,7 +705,8 @@ void tevent_104(void)
 				gs_town_loc_type = LOCTYPE_NONE;
 
 				TRV_load_textfile(-1);
-#ifdef M302de_ORIGINAL_BUGFIX
+#if FIX_0168
+				/* Fix 168: Kopfbild nach dem Lager neu laden */
 				/* Original-Bug: The dialog picture is lost when a campfight occurs. */
 				load_in_head(57);
 #endif
@@ -687,11 +714,12 @@ void tevent_104(void)
 			} else {
 				/* turn around */
 
-#ifndef M302de_ORIGINAL_BUGFIX
+#if !FIX_0150
 				/* Original-Bug 53:
 				 * If the party was already traveling backward, the new direction should be forward. */
 				gs_journey_direction = done = JOURNEY_DIRECTION_CHANGE_TO_BACKWARD; // this is value 1
 #else
+				/* Fix 150: Umkehren kehrt die aktuelle Richtung um */
 				gs_journey_direction = (gs_journey_direction == JOURNEY_DIRECTION_FORWARD ? JOURNEY_DIRECTION_CHANGE_TO_BACKWARD : JOURNEY_DIRECTION_CHANGE_TO_FORWARD);
 				done = 1;
 #endif

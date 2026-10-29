@@ -174,7 +174,12 @@ void door_frame(const signed int no, signed int x, signed int y, const signed in
 	if ((y < 0) && ((y + height) > 0)) {
 		/* Original-Bug: muesste height += y heissen (wie oben width += x); so wird die Hoehe groesser.
 		 * Wirkt nicht, alle Aufrufer (seg075) uebergeben y >= 0. */
+#if FIX_0281
+		/* Fix 281: Anschnitt oben verkleinert die Hoehe */
+		height += y;
+#else
 		height -= y;
+#endif
 		p1 += __abs__(y) * src_width;
 		y = 0;
 	}

@@ -351,18 +351,37 @@ void tevent_025(void)
 	}
 }
 
+#if FIX_0156
+/* Fix 156: fuehrendes "DES " des Flussnamens weglassen, der Furttext hat schon "AM UFER DES %s" */
+static char* fix_skip_des(char *p)
+{
+	if ((p[0] == 'D') && (p[1] == 'E') && (p[2] == 'S') && (p[3] == ' ')) {
+		p += 4;
+	}
+	return p;
+}
+#endif
+
 /* Vilnheim <-> Bodon: Furt durch den Bodir */
 void tevent_026(void)
 {
 	/* Fehler im Original: Text 72 ist "DES BODIR", der Furttext hat schon "AM UFER DES %s"
 	 * -> "IHR STEHT AM UFER DES DES BODIR." (ebenso tevent_027 mit "DES HJALDORVAL") */
+#if FIX_0156
+	TRV_cross_a_ford(fix_skip_des(get_tx2(72)), 60, 0);
+#else
 	TRV_cross_a_ford(get_tx2(72), 60, 0); /* "DES BODIR" */
+#endif
 }
 
 /* Vilnheim <-> Phexcaer: Furt durch den Hjaldorval ("DES DES HJALDORVAL", siehe tevent_026) */
 void tevent_027(void)
 {
+#if FIX_0156
+	TRV_cross_a_ford(fix_skip_des(get_tx2(73)), 30, 0);
+#else
 	TRV_cross_a_ford(get_tx2(73), 30, 0); /* "DES HJALDORVAL" */
+#endif
 }
 
 void tevent_028(void)
@@ -392,6 +411,10 @@ void tevent_029(void)
 	 * tote Helden koennen Dumpfschaedel bekommen, leere Plaetze werden ebenfalls "angesteckt". */
 	for (hero_pos = 0; hero_pos <= 6; hero_pos++, hero++)
 	{
+#if FIX_0105
+		/* Fix 105: nur lebende Helden der aktiven Gruppe */
+		if ((hero->typus != HERO_TYPE_NONE) && (hero->group_id == gs_active_group_id) && !hero->flags.dead)
+#endif
 		hero_disease_test(hero, DISEASE_ID_DUMPFSCHAEDEL, 20 - (hero->attrib[ATTRIB_KK].current + hero->attrib[ATTRIB_KK].mod));
 	}
 

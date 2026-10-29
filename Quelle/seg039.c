@@ -479,7 +479,21 @@ void FIG_init_heroes(void)
 			}
 
 			/* heroes sleep until they appear */
+#if FIX_0313
+			/* Fix 313: beim Lagerueberfall ist die eingeteilte Wache wach (gs_camp_incident = Nummer der Wache,
+			 * do_wildcamp()/do_area_camp() loeschen den Wert jetzt erst nach dem Kampf) */
+			if (g_current_fight->heroes[i].round_appear &&
+				!((gs_camp_incident >= 0) && (gs_camp_incident <= 2) &&
+				((((g_current_fight_id == FIGHT_ID_CAMPFIGHT1) || (g_current_fight_id == FIGHT_ID_CAMPFIGHT2) ||
+					(g_current_fight_id == FIGHT_ID_CAMPFIGHT3) || (g_current_fight_id == FIGHT_ID_CAMPFIGHT4)) &&
+					(g_wildcamp_guards[gs_camp_incident] == i)) ||
+				(((g_current_fight_id == FIGHT_ID_DCAMPFIGHT1) || (g_current_fight_id == FIGHT_ID_DCAMPFIGHT2) ||
+					(g_current_fight_id == FIGHT_ID_DCAMPFIGHT3) || (g_current_fight_id == FIGHT_ID_DCAMPFIGHT4)) &&
+					(g_area_camp_guards[gs_camp_incident] == i)))))
+			{
+#else
 			if (g_current_fight->heroes[i].round_appear) {
+#endif
 
 				if (!hero->flags.dead) {
 					hero->flags.asleep = 1;

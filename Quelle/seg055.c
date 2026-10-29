@@ -201,7 +201,13 @@ void do_merchant(void)
 	D1_INFO("\tAuswahl: %2d [0, 18] (je kleiner der Wert, desto groesser die Auswahl)\n", sortiment);
 #endif
 
-	if ((gs_day_timer < HOURS(8) || gs_day_timer > HOURS(19)) && gs_town_loc_type != LOCTYPE_MARKET)
+	if ((gs_day_timer < HOURS(8) || gs_day_timer > HOURS(19)) && gs_town_loc_type != LOCTYPE_MARKET
+#if FIX_0332
+		/* Fix 332: Strassenhaendler und Treborn Kolberg haben keine Ladenzeiten */
+		&& (gs_town_typeindex != MERCHANT_TYPEINDEX_STREET_MERCHANT)
+		&& (gs_town_typeindex != MERCHANT_TYPEINDEX_TREBORN_KOLBERG)
+#endif
+		)
 	{
 		/* shop closed */
 
@@ -341,6 +347,10 @@ void do_merchant(void)
 
 			/* debt logic for merchants.
 			 * gs_bank_deposit is counted in silver: -1000 = 100 D debts, +500 = 50 D = 5000 H paid */
+#if FIX_0066
+			/* Fix 66 (teilweise): im Zeughaus wird mit dem Budget des Hetmanns eingekauft, keine Schuldenabfrage */
+			if (gs_town_typeindex != MERCHANT_TYPEINDEX_THORWAL_ZEUGHAUS) {
+#endif
 
 			if ((gs_bank_deposit <= -1000) && !gs_debt_days) {
 
@@ -376,6 +386,9 @@ void do_merchant(void)
 					done = 1;
 				}
 			}
+#if FIX_0066
+			}
+#endif
 		}
 
 		if (g_mouse_rightclick_event || g_action_id == KEY_SCAN_CODE_PAGE_UP) {
@@ -461,7 +474,11 @@ void TLK_khandel(const signed int state)
 	} else if (state == 8) {
 		g_dialog_next_state = (random_schick(20) <= 3 ? 9 : -1);
 	} else if (state == 11) {
+#if !FIX_0053
+		/* Fix 53 (teilweise): der "besonders gute Preis" darf den Verkauf nicht verschlechtern
+		 * (g_price_modificator = 3 gaebe in sell_screen() nur 75 %) */
 		g_price_modificator = 3;
+#endif
 	} else if (state == 12) {
 		/* test CH+4 */
 		g_dialog_next_state = (test_attrib(get_first_hero_available_in_group(), ATTRIB_CH, 4) > 0 ? 13 : 10);
@@ -496,7 +513,10 @@ void TLK_whandel(const signed int state)
 		if (test_talent(get_first_hero_available_in_group(), TA_FEILSCHEN, 0) > 0) {
 
 			g_dialog_next_state = 23;
+#if !FIX_0053
+			/* Fix 53 (teilweise): gelungenes Feilschen verschlechtert den Verkauf nicht mehr */
 			g_price_modificator = 3;
+#endif
 		} else {
 			g_dialog_next_state = 24;
 		}

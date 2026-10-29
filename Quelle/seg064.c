@@ -88,13 +88,14 @@ signed int prepare_passages(void)
 			gs_harbor_options[prepared].ship_timer = 0;
 			gs_harbor_options[prepared].ship_type = ent->ship_type;
 
-#ifndef M302de_ORIGINAL_BUGFIX
+#if !FIX_0135
 			/* Original-Bug 23:
 			 * In the function get_ship_name(..), the ship names are created randomly every time the party checks the available ships at a harbor.
 			 * In this way, the names of the ships can (and usually do) change when repeatedly checking the available ships. */
 			gs_harbor_options[prepared].ship_name_ptr = get_ship_name(ent->ship_type, prepared);
 #else
-			/* As a fix, we derive the name from the PASSAGE_PRICE_MOD entry of the SEA_ROUTE, which is created
+			/* Fix 135: Schiffsname fest aus dem Preisaufschlag der Passage (Bright-Eyes-Fix)
+			 * As a fix, we derive the name from the PASSAGE_PRICE_MOD entry of the SEA_ROUTE, which is created
 			 * randomly once the new passage of the route is set up, and is kept fixed over the lifetime of the passage.
 			 *
 			 * In this way, it may however happen that two ships of the same name are located in a harbor
@@ -119,7 +120,7 @@ signed int prepare_passages(void)
 				gs_harbor_options[prepared].ship_timer = 1;
 				gs_harbor_options[prepared].ship_type = ent->ship_type;
 
-#ifndef M302de_ORIGINAL_BUGFIX
+#if !FIX_0135
 				/* Original-Bug 23:
 				 * see above */
 				gs_harbor_options[prepared].ship_name_ptr = get_ship_name(ent->ship_type, prepared);
@@ -156,8 +157,13 @@ char* print_passage_price(signed int price, const struct sea_route *route)
 		/* Original-Bug? di is a 16 bit unsigned int and overflows above 65535, e.g. a Karracke
 		 * (35 H per 10 km) on Prem-Hjalsingor (210 km) with price_mod >= 90, a Luxuspassage
 		 * (45 H) on routes of 115 km or more. The passage then costs only a fraction. */
+#if FIX_0136
+		/* Fix 136: mit der Entfernung in 32 Bit multiplizieren */
+		price = (signed int)ROUNDED_DIVISION((int32_t)di * route->distance, 100L);
+#else
 		di = di * route->distance;
 		price = ROUNDED_DIVISION(di,100);
+#endif
 
 		/* generate a price string "%d^HELLER" */
 		sprintf(g_text_output_buf, g_sea_travel_str_heller, price);
@@ -178,12 +184,21 @@ char* print_passage_price(signed int price, const struct sea_route *route)
  * \param   base_speed   base speed of the ship [unit: km per day]
  * \return               the traveling time in hours
  */
+#if FIX_0137
+signed int get_passage_travel_hours(const signed int distance, const signed int base_speed_in)
+#else
 signed int get_passage_travel_hours(const signed int distance, signed int base_speed)
+#endif
 {
 	int32_t tmp;
+#if FIX_0137
+	signed int base_speed;
+#endif
 
 	/* convert base_speed to unit [100m per hour] */
+#if !FIX_0137
 	base_speed = ROUNDED_DIVISION(base_speed * 10, 24);
+#endif
 	/* lowest possible value: (40 * 10 + 11) / 24 = 17 (for Fischerboot) */
 	/* highest possible value: (150 * 10 + 11) / 24 = 62 (for Schnellsegler) */
 
@@ -196,7 +211,20 @@ signed int get_passage_travel_hours(const signed int distance, signed int base_s
 	 * and sea_travel() then divides by gs_travel_speed = 0. */
 	/* adjust speed to between 80.5% (when WEATHER1 = WEATHER2 = 1) and 247% (when WEATHER1 = 6 and WEATHER2 = 7). */
 	/* unit: [100m per hour] */
+#if FIX_0137
+	/* Fix 137: Grundtempo ohne Vorzeichen (150 statt -106), Produkt in 32 Bit, Ergebnis 1..127
+	 * (gs_sea_travel_passage_speed1 ist ein signed char im Spielstand; Tempo 0 teilte in sea_travel() durch 0) */
+	base_speed = ROUNDED_DIVISION((unsigned char)base_speed_in * 10, 24);
+	tmp = ROUNDED_DIVISION((int32_t)base_speed * (gs_weather2 + 6) * (gs_weather1 * 15 + 100), 1000L);
+	if (tmp < 1) {
+		tmp = 1;
+	} else if (tmp > 127) {
+		tmp = 127;
+	}
+	gs_sea_travel_passage_speed2 = (int16_t)tmp;
+#else
 	gs_sea_travel_passage_speed2 = ROUNDED_DIVISION(base_speed * (gs_weather2 + 6) * (gs_weather1 * 15 + 100), 1000L);
+#endif
 		/* possible values for gs_sea_travel_passage_speed2:
 		 * ## high seas routes ##
 		 * Schnellsegler (base_speed 150): {* 50, 56, 57, 63, 64^^2, 69, 71, 72, 73, 76, 78, 79, 81^^2, 82, 86, 87, 89^^2, 90, 93, 94, 97, 98, 99^^2, 105, 106, 108^^2, 109, 117, 118, 119^^2, 129, 130^^2, 141^^2, 153 *}
@@ -208,7 +236,7 @@ signed int get_passage_travel_hours(const signed int distance, signed int base_s
 		 * Kutter (base_speed 60): {* 20, 23^^2, 25, 26^^2, 28, 29^^3, 31, 32^^3, 33^^2, 34, 35, 36^^3, 37, 38, 39^^2, 40^^2, 42, 43^^2, 44^^2, 47^^2, 48^^2, 52^^3, 57^^2, 62 *}
 		 * Fischerboot (base_speed 40): {* 14, 15, 16, 17, 18^^2, 19, 20^^3, 21, 22^^4, 23^^2, 24^^3, 25^^2, 26, 27^^4, 29^^2, 30^^3, 32^^2, 33^^2, 35, 36^^2, 39^^2, 42 *} */
 
-#ifndef M302de_ORIGINAL_BUGFIX
+#if !FIX_0138
 	/* Original-Bug 35:
 	 * In the predicted traveling times of sea passages, only very specific values show up.
 	 * For example, the predicted number of hours for Prem-Hjalsingor will be one of 14, 15, 16, 17, 19, 21, 23, 26, 30, 35, 42, 52, 70, 105, 210.
@@ -233,8 +261,12 @@ signed int get_passage_travel_hours(const signed int distance, signed int base_s
 
 	tmp = distance / tmp; /* now 'tmp' is the number of traveling hours */
 #else
-	/* first multiply, then divide for higher precision */
-	tmp = ROUNDED_DIVISION(10 * distance, gs_sea_travel_passage_speed2);
+	/* Fix 138: erst multiplizieren, dann teilen (Bright-Eyes-Fix); Tempo 0 abfangen */
+	if (gs_sea_travel_passage_speed2 <= 0) {
+		tmp = 10 * distance;
+	} else {
+		tmp = ROUNDED_DIVISION(10L * distance, gs_sea_travel_passage_speed2);
+	}
 #endif
 
 	return tmp;

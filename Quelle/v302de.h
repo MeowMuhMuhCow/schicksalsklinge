@@ -13,6 +13,9 @@
 #include <stdlib.h>
 #include <string.h>
 
+/* Fehlerbehebungen per Schalter (FIX_BUGS, FIX_nnnn), siehe s_fix.h und Bauen/FIXES.md */
+#include "s_fix.h"
+
 /* Borlands Konvention fuer Interrupt-Handler: in C++ (...) , in C () */
 #ifdef __cplusplus
 #define __CPPARGS ...
@@ -273,8 +276,9 @@ static inline void dump_cb(void)
 
 #define get_hero(no) ((struct struct_hero*)(((unsigned char*)g_heroes) + sizeof(struct struct_hero) * (no)))
 
-#ifdef M302de_ORIGINAL_BUGFIX
-#define update_informer_cond(informer) (if (gs_informer_flags[informer] == 0) gs_informer_flags[informer] = 1)
+#if FIX_0076
+/* Fix 76: einen Informanten nur von 0 (unbekannt) auf 1 (bekannt) setzen, nicht von 2 (erledigt) zurueck */
+#define update_informer_cond(informer) (gs_informer_flags[informer] == 0 ? (gs_informer_flags[informer] = 1) : 0)
 #else
 #define update_informer_cond(informer) (gs_informer_flags[informer] = 1)
 #endif
