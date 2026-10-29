@@ -20,9 +20,11 @@ Documentation is in German.*
 
 ## Schnellstart: Bugfix-Fassung spielen, ohne Compiler
 
+**Alle Änderungen als übersichtliche Liste: [BUGFIXES.md](BUGFIXES.md).** Das fertige Paket zum Herunterladen gibt es unter **Releases** (rechts).
+
 Für alle, die nur spielen wollen. Nötig sind Windows und Schicksalsklinge von GOG, sonst nichts: kein Python, kein Compiler.
 
-1. Oben rechts **Code → Download ZIP**, irgendwohin entpacken.
+1. Rechts unter **Releases** das Paket `…_Bugfix_1.0.zip` herunterladen (oder oben **Code → Download ZIP**) und irgendwohin entpacken.
 2. **`PATCHEN.bat`** doppelklicken. Es findet den GOG-Spielordner (oder fragt danach), prüft per Prüfsumme, ob die
    eigene EXE genau die passende ist, und erzeugt daraus `Build\BLADEM_FIX_WICHTIG.EXE` und `Build\BLADEM_FIX_ALLES.EXE`.
    **Die Original-EXE wird nicht verändert**, das Spiel bleibt wie es ist.
