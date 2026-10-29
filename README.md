@@ -1,5 +1,16 @@
 # Die Schicksalsklinge – Quelltext im Attic-Stil
 
+## 248 Fehler behoben – 34 Jahre nach Release
+
+**Inoffizielle Bugfix-Fassung · spielbar ohne Compiler · das Original bleibt unangetastet · [gleich loslegen](#schnellstart-bugfix-fassung-spielen-ohne-compiler)**
+
+> **Zum ersten Mal seit 1992:** Auf Landreisen trifft man **Höhlenbären und Kvillottern** und kann **Karene,
+> Wildschweine, Auerochsen und Nashörner jagen**. Attic hatte das alles eingebaut, aber ein verkehrt herum
+> geschriebener Vergleich machte es unerreichbar. Dazu: keine Spielhänger mehr bei Priester, Drache und Einbruch,
+> keine 168.000 Dukaten mehr per ESC, und die Kvillotter beißt endlich. → [alle 248 Änderungen](BUGFIXES.md)
+
+**Zusammen mit [Sternenschweif](https://github.com/MeowMuhMuhCow/sternenschweif): 473 Bugfixes für DSA 1 und DSA 2.**
+
 **Das Schwarze Auge 1: Die Schicksalsklinge** (Attic, 1992), deutsche CD-Fassung 3.02, als lesbarer C-Quelltext.
 Borland C++ 3.1 baut daraus eine `BLADEM.EXE`, die **Byte für Byte dem Original gleicht**
 (MD5 `4ce035f95ead01a8b2553b4487544e5d`), **ohne Nachbearbeitung**.
@@ -10,13 +21,6 @@ Borland C++ 3.1 baut daraus eine `BLADEM.EXE`, die **Byte für Byte dem Original
 Bright-Eyes project, reworked to plain C like the original. Rebuilds a byte-identical executable with Borland C++ 3.1. Includes an unofficial, untested
 bug-fix build (~240 original bugs fixed, savegame compatible) behind compile-time switches.
 Documentation is in German.*
-
-> **Neu: Bugfix-Fassung.** Rund 240 Fehler aus dem Original sind per Schalter behoben, darunter 23 von 25
-> kritischen. Und zum ersten Mal seit 1992 trifft man auf Landreisen **Höhlenbären und Kvillottern** und kann
-> **Karene, Wildschweine, Auerochsen und Nashörner jagen**: Attic hatte diese Begegnungen eingebaut, aber ein verkehrt
-> herum geschriebener Vergleich machte sie unerreichbar. Auch Krakenmolch und Piraten auf See funktionieren jetzt richtig.
-> Spielstände bleiben kompatibel. Im Spiel noch ungetestet, **Tester willkommen**, siehe
-> [Bugfix-Fassung](#bugfix-fassung-die-schicksalsklinge-ohne-die-fehler-von-1992).
 
 ## Schnellstart: Bugfix-Fassung spielen, ohne Compiler
 

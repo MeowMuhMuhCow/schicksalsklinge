@@ -2,6 +2,8 @@
 
 **Version 1.0 vom 29.10.2026** · inoffiziell · zur deutschen GOG-Fassung 3.02 · **im Spiel noch ungetestet, Tester willkommen**
 
+## 248 Fehler behoben
+
 ## So geht's
 
 Nötig: Windows und **„Realms of Arkania 1 - Blade of Destiny Classic“ von GOG** (deutsche Fassung). Kein Python, kein Compiler.
