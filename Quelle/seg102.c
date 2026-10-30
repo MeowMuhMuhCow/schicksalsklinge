@@ -625,6 +625,33 @@ void mspell_eisenrost(void)
 	}
 }
 
+#if FIX_0192 || FIX_0213
+/* Fix 192/213: Schutz eines Helden gegen feindliche Fulminictus/Ignifaxius.
+ * Feuerbann: halbiert den Feuerschaden (Loesungsbuch, so auch in Sternenschweif); Gardianum: der Schild der Gruppe faengt Schaden ab, bis er verbraucht ist. */
+static signed int fix_hero_spell_protect(signed int damage, const signed int fire)
+{
+	if (g_spelluser_e->target_object_id < 10) {
+#if FIX_0213
+		if (fire && get_hero(g_spelluser_e->target_object_id - 1)->fireban) {
+			damage /= 2;
+		}
+#endif
+#if FIX_0192
+		if (gs_gardianum_used_ae > 0) {
+			if (gs_gardianum_used_ae >= damage) {
+				gs_gardianum_used_ae -= damage;
+				damage = 0;
+			} else {
+				damage -= gs_gardianum_used_ae;
+				gs_gardianum_used_ae = 0;
+			}
+		}
+#endif
+	}
+	return damage;
+}
+#endif
+
 void mspell_fulminictus(void)
 {
 	signed int damage;
@@ -641,7 +668,12 @@ void mspell_fulminictus(void)
 	}
 
 	/* do the damage */
+#if !FIX_0192
 	MON_do_spell_damage(damage);
+#else
+	/* Fix 192: der Gardianum-Schild faengt ab, die AE zahlt der Gegner trotzdem */
+	MON_do_spell_damage(fix_hero_spell_protect(damage, 0));
+#endif
 
 	/* set the cost */
 	g_mspell_ae_cost = damage;
@@ -667,11 +699,23 @@ void mspell_ignifaxius(void)
 		damage = g_spelluser_e->ae;
 	}
 
+#if !(FIX_0192 || FIX_0213)
 	/* do the damage */
 	MON_do_spell_damage(damage);
 
 	/* calc RS malus */
 	rs_malus = damage / 10;
+#else
+	/* Fix 192/213: Feuerbann oder Gardianum schuetzen; ganz abgewehrt -> keine Nebenwirkungen, AE zahlt der Gegner trotzdem */
+	g_mspell_ae_cost = damage;
+	rs_malus = fix_hero_spell_protect(damage, 1);
+	if ((rs_malus == 0) && (damage > 0)) {
+		*g_dtp2 = '\0';
+		return;
+	}
+	MON_do_spell_damage(rs_malus);
+	rs_malus = rs_malus / 10;
+#endif
 
 	if (g_spelluser_e->target_object_id < 10) {
 		/* target is a hero */

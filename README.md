@@ -1,15 +1,17 @@
 # Die Schicksalsklinge – Quelltext im Attic-Stil
 
-## 248 Fehler behoben – 34 Jahre nach Release
+## 252 Fehler behoben – 34 Jahre nach Release
 
 **Inoffizielle Bugfix-Fassung · spielbar ohne Compiler · das Original bleibt unangetastet · [gleich loslegen](#schnellstart-bugfix-fassung-spielen-ohne-compiler)**
+
+**Neu in Version 1.1:** Zauber so, wie das Lösungsbuch sie beschreibt: **Visibili macht die ganze Gruppe unsichtbar** (alle unsichtbar = kein Kampf), **Gardianum** fängt feindliche Kampfzauber ab, **Feuerbann** halbiert feindliches Feuer, **Große Gier** vertreibt Gegner. Details in [BUGFIXES.md](BUGFIXES.md).
 
 > **Zum ersten Mal seit 1992:** Auf Landreisen trifft man **Höhlenbären und Kvillottern** und kann **Karene,
 > Wildschweine, Auerochsen und Nashörner jagen**. Attic hatte das alles eingebaut, aber ein verkehrt herum
 > geschriebener Vergleich machte es unerreichbar. Dazu: keine Spielhänger mehr bei Priester, Drache und Einbruch,
 > keine 168.000 Dukaten mehr per ESC, und die Kvillotter beißt endlich. → [alle 248 Änderungen](BUGFIXES.md)
 
-**Zusammen mit [Sternenschweif](https://github.com/MeowMuhMuhCow/sternenschweif): 473 Bugfixes für DSA 1 und DSA 2.**
+**Zusammen mit [Sternenschweif](https://github.com/MeowMuhMuhCow/sternenschweif): 479 Bugfixes für DSA 1 und DSA 2.**
 
 **Das Schwarze Auge 1: Die Schicksalsklinge** (Attic, 1992), deutsche CD-Fassung 3.02, als lesbarer C-Quelltext.
 Borland C++ 3.1 baut daraus eine `BLADEM.EXE`, die **Byte für Byte dem Original gleicht**
@@ -28,7 +30,7 @@ Documentation is in German.*
 
 Für alle, die nur spielen wollen. Nötig sind Windows und Schicksalsklinge von GOG, sonst nichts: kein Python, kein Compiler.
 
-1. Rechts unter **Releases** das Paket `…_Bugfix_1.0.zip` herunterladen (oder oben **Code → Download ZIP**) und irgendwohin entpacken.
+1. Rechts unter **Releases** das Paket `…_Bugfix_1.1.zip` herunterladen (oder oben **Code → Download ZIP**) und irgendwohin entpacken.
 2. **`PATCHEN.bat`** doppelklicken. Es findet den GOG-Spielordner (oder fragt danach), prüft per Prüfsumme, ob die
    eigene EXE genau die passende ist, und erzeugt daraus `Build\BLADEM_FIX_WICHTIG.EXE` und `Build\BLADEM_FIX_ALLES.EXE`.
    **Die Original-EXE wird nicht verändert**, das Spiel bleibt wie es ist.

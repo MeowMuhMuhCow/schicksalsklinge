@@ -16,8 +16,8 @@ Quelle der Tabelle: `Werkzeuge/fix_schalter.tsv`, erzeugt von `Werkzeuge/mkfix.p
 
 | Stufe | ja | teilweise | nein | kein Fehler |
 |---|---|---|---|---|
-| wichtig (kritisch + mittel) | 120 | 5 | 47 | - |
-| alles (zusaetzlich egal) | 118 | 5 | 86 | - |
+| wichtig (kritisch + mittel) | 124 | 5 | 44 | - |
+| alles (zusaetzlich egal) | 118 | 5 | 85 | - |
 | - (laut Raster kein Fehler) | - | - | - | 36 |
 
 Nr. 51 ist dieselbe Stelle wie Nr. 50 (`FIX_0051` folgt `FIX_0050`). In den residenten Modulen (seg001..seg007) darf kein Segment laenger werden; in seg002 entfallen dafuer mit den Behebungen nie aufgerufene Funktionen (Schalter `FIX_PLATZ_SEG002`, aus den Schaltern des Moduls abgeleitet).
@@ -211,13 +211,13 @@ Nr. 51 ist dieselbe Stelle wie Nr. 50 (`FIX_0051` folgt `FIX_0050`). In den resi
 | 183 | Waldweg: Erfolgstext beim ersten Versuch unerreichbar | egal | nein | alles | ja | beim ersten Versuch (answer == 2) der Text fuer den schnellen Erfolg | SEG118.C |
 | 184 | Verirrt im Wald: alle sieben Heldenplätze sterben | kritisch | nein | wichtig | ja | nur die Helden der verirrten Gruppe | SEG118.C |
 | 185 | Kletterpartie: tödlicher Sturz bei knapp verfehlter Probe statt beim Patzer | mittel | nein | wichtig | ja | toedlich ist nur der Patzer (-99) | SEG118.C |
-| 186 | Visibili verhindert den Kampf nur bei einem Einzelhelden | egal | nein | alles | nein | Absicht unklar (Spielbalance): ob eine ganze Gruppe mit Visibili an jedem Kampf vorbeischleichen soll, ist nicht belegbar |  |
+| 186 | Visibili wirkt nur auf den Zaubernden, der Kampf entfällt nur bei einem Einzelhelden | mittel | nein | wichtig | ja | der Kampf faellt aus, wenn alle lebenden Helden der Gruppe unsichtbar sind; wie im Loesungsbuch: die ganze Gruppe wird unsichtbar, die Kosten (Spielrunden x 5 AE) zahlt der Zaubernde einmal (belegt durch das Loesungsbuch (S. 17 ff.: "macht die Gruppe unsichtbar", Kosten Spielrunden x 5 AE): alle lebenden Helden der Gruppe werden unsichtbar, der Kampf entfaellt, wenn alle unsichtbar sind (Version 1.1)) | SEG032.C SEG101.C |
 | 187 | Transversalis-Kreuz darf eine Zeile unter die Karte | egal | nein | alles | ja | das Kreuz bleibt auf der Karte (Zeilen 0..15) | SEG074.C |
 | 188 | Meditation bei LE 6 oder 7 kostet LE und bringt keine AE | egal | nein | alles | ja | ohne umwandelbare LE (ae <= 0) keine LE abziehen | SEG098.C |
 | 189 | Stabzauber: Abfrage „keine Stabzauber mehr“ auf Stufe 7 statt 4 | mittel | nein | wichtig | ja | ab dem 5. Stabzauber (Zuschlag 99) gibt es keine mehr | SEG098.C |
 | 190 | Stabzauber-Probe prüft die zweite Eigenschaft doppelt | mittel | nein | wichtig | ja | dritte Eigenschaft statt der zweiten ein zweites Mal | SEG098.C |
 | 191 | Foramen aus dem Zaubermenü ignoriert den Türzuschlag | mittel | ja | wichtig | ja | Zuschlag der Tuer vor der Gruppe auch beim freien Foramen (Suche endet am Listenende -1) | SEG098.C |
-| 192 | Gardianum kostet AE und schützt nicht | mittel | nein | wichtig | nein | der Schutzschirm ist nicht umgesetzt; eine Wirkung waere neue Spielmechanik ohne belegte Absicht (wie viel AE welchen Zauber abwehren) |  |
+| 192 | Gardianum kostet AE und schützt nicht | mittel | nein | wichtig | ja | der Gardianum-Schild gilt fuer einen Kampf; Staerke des Schildes = Stufe des Zaubernden + eingesetzte AE (Loesungsbuch); ausgewertet in seg102; der Gardianum-Schild faengt ab, die AE zahlt der Gegner trotzdem (belegt durch das Loesungsbuch (Schild gegen feindliche Fulminictus/Ignifaxius, Staerke Stufe + AE, 1 Kampf oder bis verbraucht): Schild faengt Schaden ab, wird zu Kampfbeginn geleert (Version 1.1)) | SEG032.C SEG099.C SEG102.C |
 | 193 | Spieltext „AUF %S RUHT …“ mit großem S | egal | nein | alles | ja | %S im geladenen Text zu %s machen | SEG099.C |
 | 194 | „IST DOCH GARNICHT TOT“ ohne Subjekt | egal | nein | alles | nein | Spieltext (SPELLTXT.LTX) ohne %s; ein %s laesst sich nicht ohne Textaenderung einfuegen |  |
 | 195 | Skelettarius: Leiche darunter verschwindet aus der Auswahl | egal | nein | alles | ja | object_id des Ziels sichern (darunterliegende Leiche bleibt waehlbar) | SEG099.C |
@@ -238,7 +238,7 @@ Nr. 51 ist dieselbe Stelle wie Nr. 50 (`FIX_0051` folgt `FIX_0050`). In den resi
 | 210 | Brenne entzündet immer die erste Fackel oder Laterne | egal | nein | alles | ja | den benutzten Inventarplatz anzuenden, nicht die erste Fackel/Laterne | SEG101.C |
 | 211 | g_ignite_mode wird nach dem Anzünden nicht zurückgesetzt | mittel | nein | wichtig | ja | Anzuendmodus zuruecksetzen, sonst findet "Brenne toter Stoff" danach nur noch diese Art | SEG107.C |
 | 212 | Tollwut: Sanftmut ohne Prüfung des Zauberwerts | mittel | nein | wichtig | teilweise | Zauberwert pruefen (die Meldung "beherrscht den Zauber nicht" braeuchte einen neuen Text); Magier mit 4. Stabzauber zahlen 2 AE weniger (sub_ae_splash) - Zauberwert und Stabrabatt geprueft; die fehlende Meldung braeuchte einen neuen Text | SEG120.C |
-| 213 | Feuerbann wird gesetzt, aber nirgends ausgewertet | mittel | nein | wichtig | nein | Wirkung fehlt ganz; Umsetzung waere neue Spielmechanik (welcher Feuerschaden wie stark) |  |
+| 213 | Feuerbann wird gesetzt, aber nirgends ausgewertet | mittel | nein | wichtig | ja | Dauer Stufe in Stunden (Loesungsbuch); die Wirkung wertet seg102 aus (belegt durch das Loesungsbuch ("halbiert evtl. auftretenden Feuerschaden", Dauer Stufe in Stunden) und Sternenschweif (feindlicher Ignifaxius halbiert bei Feuerbann): Schaden durch feindlichen Ignifaxius halbiert, Dauer Stufe in Stunden (Version 1.1)) | SEG101.C SEG102.C |
 | 214 | Magisches Bastardschwert ist als „benutzbar“ markiert | kritisch | nein | wichtig | teilweise | Gegenstaende mit Nummer ausserhalb der Benutzen-Tabelle (magisches - Absturz verhindert (Meldung nicht benutzbar); das usable-Bit in ITEMS.DAT bleibt | SEG107.C |
 | 215 | Magischer Brotbeutel wirkt wie der magische Beutel | egal | nein | alles | nein | Datenfehler in ITEMS.DAT, ohne regulaeren Fundort folgenlos |  |
 | 216 | Truhenliste: 20 Byte je Name zu kurz | egal | nein | alles | ja | 30 Byte je Name wie in loot_simple_chest() | SEG092.C |
@@ -407,7 +407,7 @@ Nr. 51 ist dieselbe Stelle wie Nr. 50 (`FIX_0051` folgt `FIX_0050`). In den resi
 | 379 | Axxeleratus: zweite Aktion wiederholt den Angriff ohne Zielwahl | mittel | nein | wichtig | nein | Absicht unklar (Spielbalance): Axxeleratus gibt eine zweite Aktion; ob sie neue BP und eine neue Wahl bekommen sollte, ist nicht belegbar - ein neues Menue mit neuen BP waere eine Regelaenderung |  |
 | 380 | Böser Blick setzt dauerhaft zwei Attacken | mittel | nein | wichtig | nein | unklar, ob die zwei Attacken gewollt sind; zuruecksetzen ginge nur an allen Stellen, die renegade loeschen, und der Ausgangswert ist im Gegnerblatt nicht gespeichert |  |
 | 381 | Böser Blick auf Leichen möglich | egal | nein | alles | nein | folgenlos (tote Gegner kaempfen nicht); welche Meldung/Kosten richtig waeren, ist offen |  |
-| 382 | Große Gier ist nicht umgesetzt | mittel | nein | wichtig | nein | Zauber nicht umgesetzt; Umsetzung waere neue Spielmechanik |  |
+| 382 | Große Gier ist nicht umgesetzt | mittel | nein | wichtig | ja | der Gegner verlaesst den Kampfplatz (Loesungsbuch), wie beim Horriphobus ueber die Flucht; Kosten 8 AE aus der Zaubertabelle. (belegt durch das Loesungsbuch ("Gegner verlaesst den Kampfplatz", 8 AE): Gegner flieht wie beim Horriphobus, ohne eigene Meldung (Version 1.1)) | SEG099.C |
 | 383 | Transversalis auf der Landreise kostet AE ohne Wirkung | mittel | nein | wichtig | nein | unsicher: nicht geprueft, ob gs_town_id auf der Reise noch die Abreisestadt haelt |  |
 | 384 | Herberge: Regenerationssperre nach Magie hängt am Heldenplatz | egal | ja | alles | nein | ein Merker am Helden braeuchte ein Feld in der Heldenstruktur (Spielstand); die Sperre selbst ist gewollt |  |
 | 385 | Curian zaubert im Kampf nur im Computerkampf mit Magie | mittel | nein | wichtig | ja | ein NSC (Curian) zaubert auch im normalen Kampf, nicht nur im Computerkampf mit Magie | SEG036.C |

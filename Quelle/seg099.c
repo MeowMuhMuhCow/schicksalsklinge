@@ -192,7 +192,12 @@ void spell_gardianum(void)
 			/* TODO: this adds the AE to a variable no one reads */
 			/* (geprueft: gs_gardianum_used_ae wird nirgends gelesen, der Schild wirkt also nicht) */
 
+#if !FIX_0192
 			gs_gardianum_used_ae += answer;
+#else
+			/* Fix 192: Staerke des Schildes = Stufe des Zaubernden + eingesetzte AE (Loesungsbuch); ausgewertet in seg102 */
+			gs_gardianum_used_ae += answer + get_spelluser()->level;
+#endif
 			/* set AE costs */
 			g_spell_special_aecost = answer;
 			/* prepare the message */
@@ -411,10 +416,23 @@ void spell_boeser_blick(void)
 
 void spell_grosse_gier(void)
 {
+#if !FIX_0382
 #if !defined(__BORLANDC__)
 	D1_INFO("Zauberspruch \"Grosse Gier\" ist nicht implementiert\n");
 #endif
 	g_spell_special_aecost = -2;
+#else
+	/* Fix 382: der Gegner verlaesst den Kampfplatz (Loesungsbuch), wie beim Horriphobus ueber die Flucht; Kosten 8 AE aus der Zaubertabelle.
+	 * Tiere sind nicht gierig (so auch in Sternenschweif): Zauber misslingt */
+	g_spelltarget_e = &g_enemy_sheets[get_spelluser()->target_object_id - 10];
+	if (g_spelltarget_e->is_animal) {
+		g_spell_special_aecost = -2;
+		return;
+	}
+	g_spelltarget_e->flags.scared = 1;
+	g_spelltarget_e->flags.renegade = 0;
+	*g_dtp2 = '\0';
+#endif
 }
 
 void spell_grosse_ver(void)

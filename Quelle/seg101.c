@@ -162,7 +162,12 @@ void spell_feuerbann(void)
 		mod_slot = get_free_mod_slot();
 
 		/* Duration = Level * 5 min (berichtigt, vorher "12 min"; MINUTES(5)) */
+#if !FIX_0213
 		set_mod_slot(mod_slot, get_spelluser()->level * MINUTES(5), (uint8_t*)&get_spelluser()->fireban, 1, hero_pos);
+#else
+		/* Fix 213: Dauer Stufe in Stunden (Loesungsbuch); die Wirkung wertet seg102 aus */
+		set_mod_slot(mod_slot, get_spelluser()->level * HOURS(1), (uint8_t*)&get_spelluser()->fireban, 1, hero_pos);
+#endif
 
 		/* prepare message */
 		sprintf(g_dtp2,	get_tx(102), get_spelluser()->alias); /* "%s NIMMT DURCH MAGISCHES FEUER KEINEN SCHADEN MEHR!" */
@@ -520,6 +525,9 @@ void spell_visibili(void)
 	signed int mod_slot;
 	signed int hero_pos;
 	signed int rounds;
+#if FIX_0186
+	struct struct_hero *hero;
+#endif
 
 	/* ask the user how many rounds he wants to be invisible */
 	sprintf(g_dtp2, get_tx(105), get_spelluser()->alias); /* "WIE LANGE (SPIELRUNDEN) SOLL %s UNSICHTBAR WERDEN?" */
@@ -540,9 +548,20 @@ void spell_visibili(void)
 	if (rounds * 5 <= get_spelluser()->ae) {
 
 		g_spell_special_aecost = rounds * 5;
+#if !FIX_0186
 		hero_pos = get_hero_pos(get_spelluser());
 		mod_slot = get_free_mod_slot();
 		set_mod_slot(mod_slot, (int32_t)rounds * MINUTES(5), (uint8_t*)&get_spelluser()->invisible, 1, hero_pos);
+#else
+		/* Fix 186: wie im Loesungsbuch: die ganze Gruppe wird unsichtbar, die Kosten (Spielrunden x 5 AE) zahlt der Zaubernde einmal */
+		hero = get_hero(0);
+		for (hero_pos = 0; hero_pos <= 6; hero_pos++, hero++) {
+			if ((hero->typus != HERO_TYPE_NONE) && (hero->group_id == gs_active_group_id) && !(hero->flags.dead)) {
+				mod_slot = get_free_mod_slot();
+				set_mod_slot(mod_slot, (int32_t)rounds * MINUTES(5), (uint8_t*)&hero->invisible, 1, (signed char)hero_pos);
+			}
+		}
+#endif
 
 		sprintf(g_dtp2,	get_tx(106), get_spelluser()->alias, GUI_get_personal_pronoun(get_spelluser()->sex, GRAMMAR_CASE_1ST)); /* "%s WIRD UNSICHTBAR, D.H. %s UMGEHT ALLE MÖGLICHEN KÄMPFE!" */
 	} else {

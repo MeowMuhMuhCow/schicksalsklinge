@@ -45,14 +45,14 @@ nr	umgesetzt	grund (bei teilweise/nein; bei ja optional)
 173	nein	unsicher, ob Absicht
 175	nein	Tabelle im Datensegment; welche Landschaft fuer Typ 7 gemeint war, ist nicht belegt (mit Fix 181 liest Typ 7 weiter die verschobene Spalte)
 180	ja	anders als Bright-Eyes: die Schleife endet nur, ueber Bord Gerissene bleiben wie im Original in der Gruppe
-186	nein	Absicht unklar (Spielbalance): ob eine ganze Gruppe mit Visibili an jedem Kampf vorbeischleichen soll, ist nicht belegbar
-192	nein	der Schutzschirm ist nicht umgesetzt; eine Wirkung waere neue Spielmechanik ohne belegte Absicht (wie viel AE welchen Zauber abwehren)
+186	ja	belegt durch das Loesungsbuch (S. 17 ff.: "macht die Gruppe unsichtbar", Kosten Spielrunden x 5 AE): alle lebenden Helden der Gruppe werden unsichtbar, der Kampf entfaellt, wenn alle unsichtbar sind (Version 1.1)
+192	ja	belegt durch das Loesungsbuch (Schild gegen feindliche Fulminictus/Ignifaxius, Staerke Stufe + AE, 1 Kampf oder bis verbraucht): Schild faengt Schaden ab, wird zu Kampfbeginn geleert (Version 1.1)
 194	nein	Spieltext (SPELLTXT.LTX) ohne %s; ein %s laesst sich nicht ohne Textaenderung einfuegen
 198	nein	Balancefrage: ob 7 AE auch fuer weniger fehlende LE (oder bei voller LE) gelten sollen, ist nicht belegt
 204	nein	Breite/Hoehe und das Zuruecksetzen bei Kampfende braeuchten neuen Speicher im Datensegment bzw. Zugriff auf eine statische Variable aus einem anderen Modul
 209	nein	unsicher, im Spiel nicht nachgeprueft; Behandlung des Schwanzteils waere ein groesserer Eingriff in die Kampfliste
 212	teilweise	Zauberwert und Stabrabatt geprueft; die fehlende Meldung braeuchte einen neuen Text
-213	nein	Wirkung fehlt ganz; Umsetzung waere neue Spielmechanik (welcher Feuerschaden wie stark)
+213	ja	belegt durch das Loesungsbuch ("halbiert evtl. auftretenden Feuerschaden", Dauer Stufe in Stunden) und Sternenschweif (feindlicher Ignifaxius halbiert bei Feuerbann): Schaden durch feindlichen Ignifaxius halbiert, Dauer Stufe in Stunden (Version 1.1)
 214	teilweise	Absturz verhindert (Meldung nicht benutzbar); das usable-Bit in ITEMS.DAT bleibt
 215	nein	Datenfehler in ITEMS.DAT, ohne regulaeren Fundort folgenlos
 218	nein	fehlende Gegenstandswirkungen waeren neue Spielmechanik; Texte stehen in den Spieldaten
@@ -126,7 +126,7 @@ nr	umgesetzt	grund (bei teilweise/nein; bei ja optional)
 379	nein	Absicht unklar (Spielbalance): Axxeleratus gibt eine zweite Aktion; ob sie neue BP und eine neue Wahl bekommen sollte, ist nicht belegbar - ein neues Menue mit neuen BP waere eine Regelaenderung
 380	nein	unklar, ob die zwei Attacken gewollt sind; zuruecksetzen ginge nur an allen Stellen, die renegade loeschen, und der Ausgangswert ist im Gegnerblatt nicht gespeichert
 381	nein	folgenlos (tote Gegner kaempfen nicht); welche Meldung/Kosten richtig waeren, ist offen
-382	nein	Zauber nicht umgesetzt; Umsetzung waere neue Spielmechanik
+382	ja	belegt durch das Loesungsbuch ("Gegner verlaesst den Kampfplatz", 8 AE): Gegner flieht wie beim Horriphobus, ohne eigene Meldung (Version 1.1)
 383	nein	unsicher: nicht geprueft, ob gs_town_id auf der Reise noch die Abreisestadt haelt
 384	nein	ein Merker am Helden braeuchte ein Feld in der Heldenstruktur (Spielstand); die Sperre selbst ist gewollt
 386	nein	braucht neue Eintraege und Texte (Spieldaten/Datensegment)

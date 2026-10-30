@@ -983,12 +983,38 @@ signed int do_fight(const signed int fight_id)
 	signed int max_enemies_bak = 0;
 #endif
 
+#if !FIX_0186
 	if ((gs_group_member_counts[gs_active_group_id] == 1) && (get_hero(0)->invisible != 0))
 	{
 		/* group consists of a single hero with an active Visibili spell */
 		/* TODO: potential Original-Bug: what about groups with >= 2 heroes where all have an active Visibili? */
 		return 3;
 	}
+#else
+	/* Fix 186: der Kampf faellt aus, wenn alle lebenden Helden der Gruppe unsichtbar sind */
+	{
+		struct struct_hero *vis_hero = get_hero(0);
+		signed int vis_i;
+		signed int vis_seen = 0;
+		signed int vis_all = 1;
+
+		for (vis_i = 0; vis_i <= 6; vis_i++, vis_hero++) {
+			if ((vis_hero->typus != HERO_TYPE_NONE) && (vis_hero->group_id == gs_active_group_id) && !(vis_hero->flags.dead)) {
+				vis_seen = 1;
+				if (vis_hero->invisible == 0) {
+					vis_all = 0;
+				}
+			}
+		}
+		if (vis_seen && vis_all) {
+			return 3;
+		}
+	}
+#endif
+#if FIX_0192
+	/* Fix 192: der Gardianum-Schild gilt fuer einen Kampf */
+	gs_gardianum_used_ae = 0;
+#endif
 
 	if (gs_dng15_took_cursed_money) {
 		return 0;

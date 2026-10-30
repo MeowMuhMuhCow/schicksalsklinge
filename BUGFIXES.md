@@ -1,8 +1,6 @@
 # Die Schicksalsklinge – Bugfix-Fassung: Änderungsliste
 
-**Version 1.0 vom 29.10.2026** · inoffiziell · zur deutschen GOG-Fassung 3.02 · **im Spiel noch ungetestet, Tester willkommen**
-
-## 248 Fehler behoben
+**Version 1.1 vom 30.10.2026** · inoffiziell · zur deutschen GOG-Fassung 3.02 · **im Spiel noch ungetestet, Tester willkommen**
 
 ## So geht's
 
@@ -14,12 +12,21 @@ Nötig: Windows und **„Realms of Arkania 1 - Blade of Destiny Classic“ von G
 | 2 | **`PATCHEN.bat`** doppelklicken. Es findet den GOG-Ordner (oder fragt), prüft die eigene `SCHICKM.EXE` per Prüfsumme und baut daraus die Bugfix-EXEs. **Das Original wird nicht verändert** |
 | 3 | **`BLADEM_FIX_WICHTIG_STARTEN.bat`** doppelklicken und spielen. Wer wirklich alles behoben haben will: `BLADEM_FIX_ALLES_STARTEN.bat` |
 
-**Funktionieren meine Spielstände weiter?** Ja. Die Bugfix-Fassung ändert das Speicherformat nicht, kein Feld, keine Größe. Eure alten Spielstände aus dem GOG-Ordner erscheinen beim Laden automatisch und lassen sich weiterspielen. Was ihr mit der Bugfix-Fassung neu speichert, landet in einem eigenen Ordner unter `Build\`. Eure Original-Spielstände werden dabei nie überschrieben. Und weil das Format gleich bleibt, kann man jederzeit zurück zum Original.
+Die Spielstände der Bugfix-Fassung liegen in eigenen Ordnern unter `Build\`. Alte Spielstände lassen sich dorthin kopieren und weiterspielen, das Format ist unverändert. Die echten Spielstände im GOG-Ordner bleiben unberührt.
 
 | Fassung | behebt |
 |---|---|
 | **WICHTIG** (empfohlen) | kritische und mittlere Fehler: Abstürze, Hänger, verlorene Ausrüstung, falsche Preise, Fehler, die man im Spiel merkt |
 | **ALLES** | zusätzlich viele kleine Fehler ohne große Spielwirkung |
+
+## Neu in Version 1.1
+
+Abgleich mit der Zauberliste im Lösungsbuch zur Schicksalsklinge. Zauber, die dort beschrieben sind, im Spiel aber nichts oder zu wenig tun:
+
+- **Visibili macht die ganze Gruppe unsichtbar**, wie im Lösungsbuch („macht die Gruppe unsichtbar“, Kosten Spielrunden × 5 AE, einmal). Sind alle Helden unsichtbar, fällt der Kampf aus. Bisher nur der Zaubernde, und nur ein Einzelheld entging dem Kampf (Wunsch aus dem Crystals-Forum) – Nr. 186 (WICHTIG)
+- **Gardianum schützt jetzt.** Der Schild (Stufe + eingesetzte AE) fängt feindliche Fulminictus und Ignifaxius ab, bis er verbraucht ist, und gilt einen Kampf. Bisher kostete er nur AE – Nr. 192 (WICHTIG)
+- **Feuerbann wirkt jetzt.** Er halbiert den Schaden feindlicher Ignifaxius und hält Stufe × 1 Stunde, wie im Lösungsbuch und wie in Sternenschweif. Bisher tat er gar nichts – Nr. 213 (WICHTIG)
+- **Große Gier ist eingebaut.** Der Gegner verlässt den Kampfplatz (8 AE), Tiere sind nicht gierig. Bisher misslang der Zauber immer – Nr. 382 (WICHTIG)
 
 ## Was ist neu
 
@@ -36,9 +43,9 @@ Nötig: Windows und **„Realms of Arkania 1 - Blade of Destiny Classic“ von G
 
 | | ganz behoben | teilweise | Summe |
 |---|---:|---:|---:|
-| WICHTIG (steckt auch in ALLES) | 120 | 5 | 125 |
+| WICHTIG (steckt auch in ALLES) | 124 | 5 | 129 |
 | nur in ALLES | 118 | 5 | 123 |
-| **ALLES gesamt** | **238** | **10** | **248** |
+| **ALLES gesamt** | **242** | **10** | **252** |
 
 Davon 34 **Exploits** (Fehler, die dem Spieler nützen, z. B. Geld oder Werte aus dem Nichts). Sie sind standardmäßig mit behoben. Wer sie behalten will, baut selbst mit `FIX_EXPLOITS 0` (siehe README).
 
@@ -262,19 +269,23 @@ Davon 34 **Exploits** (Fehler, die dem Spieler nützen, z. B. Geld oder Werte au
 | 312 | **Gefesselte Gegner bleiben in der Kampfliste und kämpfen beim nächsten Betreten erneut** 💰 – Ein mit Band und Fessel gefesselter Gegner greift beim nächsten Betreten wieder an. AP gibt es jedes Mal, Beute nur einmal. | A |
 | 327 | **Piratenangriff: Ergebnis von do_fight() wird nicht ausgewertet** *(teilweise)* 💰 – Flucht aus dem Seekampf bleibt folgenlos. Nach „Verlassen/Laden“ erscheint trotzdem der Ausrüstungsbildschirm. | A |
 
-### Magie (22)
+### Magie (26)
 
 | Nr | Was behoben ist | Stufe |
 |---:|---|:---:|
+| 186 | **Visibili wirkt nur auf den Zaubernden, der Kampf entfällt nur bei einem Einzelhelden** – Sind alle Helden einer Gruppe mit Visibili unsichtbar, kommt es trotzdem zum Kampf. | W |
 | 189 | **Stabzauber: Abfrage „keine Stabzauber mehr“ auf Stufe 7 statt 4** – Nach dem 4. Stabzauber versucht der Magier immer weiter, den 5. zu wirken: die Probe misslingt stets, jeder Versuch kostet halbe AE und 2 Stunden. | W |
 | 190 | **Stabzauber-Probe prüft die zweite Eigenschaft doppelt** – Die Probe für den Stabzauber benutzt die falsche Eigenschaft. | W |
 | 191 | **Foramen aus dem Zaubermenü ignoriert den Türzuschlag** 💰 – Wird Foramen frei aus dem Zaubermenü gesprochen, ist die Probe für jede Tür gleich leicht. | W |
+| 192 | **Gardianum kostet AE und schützt nicht** – Der Schutzschirm Gardianum meldet „SCHUTZSCHIRM AKTIV“, wehrt aber nichts ab. | W |
 | 196 | **Skelettarius belegt bei jedem Wirken 1288 Byte neu im Kampfobjektpuffer** – Wird Skelettarius in einem Kampf oft gewirkt, läuft der Grafikpuffer über, das Spiel kann abstürzen. | W |
 | 197 | **Foramen aus dem Zaubermenü wirkt nur nach geöffnetem Türmenü** – Foramen frei gesprochen öffnet eine Tür nur, wenn vorher das Türmenü (Einschlagen, Knacken, Zauber) offen war. | W |
 | 199 | **Hexenspeichel: AE-Prüfung greift nie** 💰 – Mit Hexenspeichel kann eine Hexe mehr heilen, als ihre AE erlauben. | W |
 | 207 | **Armatrutz: ein RS-Punkt mehr, als AE vorhanden** 💰 – Armatrutz bietet eine Stufe mehr an, als die AE bezahlen können, bei Gegnern ebenso. | W |
 | 211 | **g_ignite_mode wird nach dem Anzünden nicht zurückgesetzt** – Nach dem Anzünden einer Fackel kann „Brenne toter Stoff“ keine Laterne mehr entzünden (und umgekehrt). | W |
 | 212 | **Tollwut: Sanftmut ohne Prüfung des Zauberwerts** *(teilweise)* – Jeder Zauberkundige kann den Tollwütigen mit Sanftmut beruhigen, auch wenn er den Zauber nicht kann. Magier mit 4. Stabzauber brauchen trotzdem 15 statt 13 AE, eine Meldung „beherrscht den Zauber nicht“ fehlt. | W |
+| 213 | **Feuerbann wird gesetzt, aber nirgends ausgewertet** – Der Zauber Feuerbann kostet AE und hat keine Wirkung. | W |
+| 382 | **Große Gier ist nicht umgesetzt** – Große Gier misslingt immer und kostet die halben AE. | W |
 | 385 | **Curian zaubert im Kampf nur im Computerkampf mit Magie** – Der NSC zaubert im normalen Kampf nie. | W |
 | 187 | **Transversalis-Kreuz darf eine Zeile unter die Karte** – Das Zielkreuz kann unter die Karte wandern. | A |
 | 188 | **Meditation bei LE 6 oder 7 kostet LE und bringt keine AE** – Ein Magier mit 6 oder 7 LE verliert beim Meditieren noch LE bis 5, ohne AE zu bekommen. | A |
@@ -336,7 +347,7 @@ Davon 34 **Exploits** (Fehler, die dem Spieler nützen, z. B. Geld oder Werte au
 
 ## Bewusst nicht geändert
 
-133 gemeldete Fehler bleiben, wie sie sind. Die Gründe: Die Absicht von Attic ist unklar (Spielbalance), die Behebung würde Spielstände oder Spieldaten verändern, sie hätte keine Wirkung, oder sie wäre eine neue Spielmechanik statt einer Fehlerbehebung. Jeder einzelne Grund steht in [Bauen/FIXES.md](Bauen/FIXES.md).
+129 gemeldete Fehler bleiben, wie sie sind. Die Gründe: Die Absicht von Attic ist unklar (Spielbalance), die Behebung würde Spielstände oder Spieldaten verändern, sie hätte keine Wirkung, oder sie wäre eine neue Spielmechanik statt einer Fehlerbehebung. Jeder einzelne Grund steht in [Bauen/FIXES.md](Bauen/FIXES.md).
 
 ## Etwas gefunden?
 

@@ -197,13 +197,13 @@
  * FIX_0183   alles    egal      -       ja         Waldweg: Erfolgstext beim ersten Versuch unerreichbar
  * FIX_0184   wichtig  kritisch  -       ja         Verirrt im Wald: alle sieben Heldenplaetze sterben
  * FIX_0185   wichtig  mittel    -       ja         Kletterpartie: toedlicher Sturz bei knapp verfehlter Probe statt beim Patzer
- * FIX_0186   alles    egal      -       nein       Visibili verhindert den Kampf nur bei einem Einzelhelden
+ * FIX_0186   wichtig  mittel    -       ja         Visibili wirkt nur auf den Zaubernden, der Kampf entfaellt nur bei einem Einzelhelden
  * FIX_0187   alles    egal      -       ja         Transversalis-Kreuz darf eine Zeile unter die Karte
  * FIX_0188   alles    egal      -       ja         Meditation bei LE 6 oder 7 kostet LE und bringt keine AE
  * FIX_0189   wichtig  mittel    -       ja         Stabzauber: Abfrage "keine Stabzauber mehr" auf Stufe 7 statt 4
  * FIX_0190   wichtig  mittel    -       ja         Stabzauber-Probe prueft die zweite Eigenschaft doppelt
  * FIX_0191   wichtig  mittel    ja      ja         Foramen aus dem Zaubermenue ignoriert den Tuerzuschlag
- * FIX_0192   wichtig  mittel    -       nein       Gardianum kostet AE und schuetzt nicht
+ * FIX_0192   wichtig  mittel    -       ja         Gardianum kostet AE und schuetzt nicht
  * FIX_0193   alles    egal      -       ja         Spieltext "AUF %S RUHT ..." mit grossem S
  * FIX_0194   alles    egal      -       nein       "IST DOCH GARNICHT TOT" ohne Subjekt
  * FIX_0195   alles    egal      -       ja         Skelettarius: Leiche darunter verschwindet aus der Auswahl
@@ -224,7 +224,7 @@
  * FIX_0210   alles    egal      -       ja         Brenne entzuendet immer die erste Fackel oder Laterne
  * FIX_0211   wichtig  mittel    -       ja         g_ignite_mode wird nach dem Anzuenden nicht zurueckgesetzt
  * FIX_0212   wichtig  mittel    -       teilweise  Tollwut: Sanftmut ohne Pruefung des Zauberwerts
- * FIX_0213   wichtig  mittel    -       nein       Feuerbann wird gesetzt, aber nirgends ausgewertet
+ * FIX_0213   wichtig  mittel    -       ja         Feuerbann wird gesetzt, aber nirgends ausgewertet
  * FIX_0214   wichtig  kritisch  -       teilweise  Magisches Bastardschwert ist als "benutzbar" markiert
  * FIX_0215   alles    egal      -       nein       Magischer Brotbeutel wirkt wie der magische Beutel
  * FIX_0216   alles    egal      -       ja         Truhenliste: 20 Byte je Name zu kurz
@@ -393,7 +393,7 @@
  * FIX_0379   wichtig  mittel    -       nein       Axxeleratus: zweite Aktion wiederholt den Angriff ohne Zielwahl
  * FIX_0380   wichtig  mittel    -       nein       Boeser Blick setzt dauerhaft zwei Attacken
  * FIX_0381   alles    egal      -       nein       Boeser Blick auf Leichen moeglich
- * FIX_0382   wichtig  mittel    -       nein       Grosse Gier ist nicht umgesetzt
+ * FIX_0382   wichtig  mittel    -       ja         Grosse Gier ist nicht umgesetzt
  * FIX_0383   wichtig  mittel    -       nein       Transversalis auf der Landreise kostet AE ohne Wirkung
  * FIX_0384   alles    egal      ja      nein       Herberge: Regenerationssperre nach Magie haengt am Heldenplatz
  * FIX_0385   wichtig  mittel    -       ja         Curian zaubert im Kampf nur im Computerkampf mit Magie
@@ -979,7 +979,7 @@
 #define FIX_0185 FIX_STUFE_W
 #endif
 #ifndef FIX_0186
-#define FIX_0186 FIX_STUFE_A
+#define FIX_0186 FIX_STUFE_W
 #endif
 #ifndef FIX_0187
 #define FIX_0187 FIX_STUFE_A
