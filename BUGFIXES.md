@@ -1,6 +1,6 @@
 # Die Schicksalsklinge – Bugfix-Fassung: Änderungsliste
 
-**Version 1.2 vom 30.10.2026** · inoffiziell · zur deutschen GOG-Fassung 3.02 · **im Spiel noch ungetestet, Tester willkommen**
+**Version 1.2.1 vom 31.10.2026** · inoffiziell · zur deutschen GOG-Fassung 3.02 · **im Spiel noch ungetestet, Tester willkommen**
 
 ## So geht's
 
@@ -12,6 +12,8 @@ Nötig: Windows und **„Realms of Arkania 1 - Blade of Destiny Classic“ von G
 | 2 | **`PATCHEN.bat`** doppelklicken. Es findet den GOG-Ordner (oder fragt), prüft die eigene `SCHICKM.EXE` per Prüfsumme und baut daraus die Bugfix-EXEs, dazu aus der eigenen `SCHICK.DAT` die korrigierten Spieldaten. **Das Original wird nicht verändert** |
 | 3 | **`BLADEM_FIX_WICHTIG_STARTEN.bat`** doppelklicken und spielen. Wer wirklich alles behoben haben will: `BLADEM_FIX_ALLES_STARTEN.bat` |
 
+**Linux:** `bash Linux/patchen.sh`, dann `bash Linux/starten.sh wichtig` (oder `alles`). Nötig sind Python 3 und DOSBox (Staging, klassisch oder DOSBox-X), Anleitung in `Linux/LIESMICH.md`. Die Bugfix-EXEs sind Byte für Byte dieselben wie unter Windows.
+
 Die Spielstände der Bugfix-Fassung liegen in eigenen Ordnern unter `Build\`. Alte Spielstände lassen sich dorthin kopieren und weiterspielen, das Format ist unverändert. Die echten Spielstände im GOG-Ordner bleiben unberührt.
 
 | Fassung | behebt |
@@ -19,9 +21,16 @@ Die Spielstände der Bugfix-Fassung liegen in eigenen Ordnern unter `Build\`. Al
 | **WICHTIG** (empfohlen) | kritische und mittlere Fehler: Abstürze, Hänger, verlorene Ausrüstung, falsche Preise, Fehler, die man im Spiel merkt |
 | **ALLES** | zusätzlich viele kleine Fehler ohne große Spielwirkung |
 
+## Neu in Version 1.2.1
+
+Keine neuen Fehlerbehebungen, die Bugfix-EXEs und die Spieldaten sind Byte für Byte dieselben wie in Version 1.2. Neu ist die Unterstützung für Linux:
+
+- **Linux-Skripte** im Ordner `Linux/`: `patchen.sh` erzeugt die Bugfix-Fassungen aus der eigenen GOG-Fassung (gleiche Prüfsummen wie unter Windows), `starten.sh wichtig|alles` startet sie in DOSBox. Dazu `Patch/patchen.py` als Gegenstück zu `patchen.ps1`
+- Lizenzangabe im README richtiggestellt (GPL v2 wie Bright-Eyes) und das Bright-Eyes-Repository von Henne direkt verlinkt
+
 ## Neu in Version 1.2
 
-Abgleich mit dem Osterpatch von **NRS** aus dem Crystals-DSA-Forum (2016): Wir haben seine rund 190 Änderungen am Maschinencode einzeln nachvollzogen und alles, was dort sauber belegt ist und bei uns noch fehlte, im Quelltext nachgebaut, ohne seine wenigen eigenen Fehler. Danke, NRS!
+Abgleich mit dem Patch von **NRS** aus dem Crystals-DSA-Forum (begonnen Ostern 2016, letzter Stand vom 26.04.2021): Wir haben seine rund 190 Änderungen am Maschinencode einzeln nachvollzogen und alles, was dort sauber belegt ist und bei uns noch fehlte, im Quelltext nachgebaut, ohne seine wenigen eigenen Fehler. Danke, NRS!
 
 **Nicht übernommen** haben wir: seine Komfortänderungen (Textfenster nur mit ENTER, kein Warten nach Mausklick, Truhen- und Schlossgeräusche), Kolberg in Clanegh und die Lagerkämpfe im Dungeon (hängen an geänderten Stadtplänen und Kampflisten), den Oberorken-Einsturz, die Todesfalle des Totenschiffs und die Doppelgegner (nur im ständig geladenen Programmteil lösbar, der nicht wachsen darf) sowie die wenigen Stellen, an denen sein Patch selbst einen Fehler einbaut (Blaue Keuche, Herbergs-Merker, Eisenrost, Transversalis). Alles andere aus seinem Patch steckt in 1.2.
 

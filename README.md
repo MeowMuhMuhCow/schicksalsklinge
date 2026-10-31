@@ -4,7 +4,9 @@
 
 **Inoffizielle Bugfix-Fassung · spielbar ohne Compiler · das Original bleibt unangetastet · [gleich loslegen](#schnellstart-bugfix-fassung-spielen-ohne-compiler)**
 
-**Neu in Version 1.2:** Abgleich mit dem Osterpatch von **NRS** (2016): 29 weitere Fehler behoben, u. a. Manrek-Schatzkammertür, Totenschiff-Falltüren, Daspota-Tür und -Schatz, Oberorken-Wasserfalle, Gurthag, Treborn Kolberg, dazu korrigierte Spieldaten (Magieresistenzen, fehlende Texte, Rechtschreibung). Details in [BUGFIXES.md](BUGFIXES.md).
+**Neu in Version 1.2.1:** läuft jetzt auch unter **Linux** (`bash Linux/patchen.sh`, `bash Linux/starten.sh wichtig`), die Bugfix-EXEs sind dieselben wie in 1.2.
+
+**Neu in Version 1.2:** Abgleich mit dem Patch von **NRS** (Stand 26.04.2021): 29 weitere Fehler behoben, u. a. Manrek-Schatzkammertür, Totenschiff-Falltüren, Daspota-Tür und -Schatz, Oberorken-Wasserfalle, Gurthag, Treborn Kolberg, dazu korrigierte Spieldaten (Magieresistenzen, fehlende Texte, Rechtschreibung). Details in [BUGFIXES.md](BUGFIXES.md).
 
 **Neu in Version 1.1:** Zauber so, wie das Lösungsbuch sie beschreibt: **Visibili macht die ganze Gruppe unsichtbar** (alle unsichtbar = kein Kampf), **Gardianum** fängt feindliche Kampfzauber ab, **Feuerbann** halbiert feindliches Feuer, **Große Gier** vertreibt Gegner. Details in [BUGFIXES.md](BUGFIXES.md).
 
@@ -30,14 +32,16 @@ Documentation is in German.*
 
 **Alle Änderungen als übersichtliche Liste: [BUGFIXES.md](BUGFIXES.md).** Das fertige Paket zum Herunterladen gibt es unter **Releases** (rechts).
 
-Für alle, die nur spielen wollen. Nötig sind Windows und Schicksalsklinge von GOG, sonst nichts: kein Python, kein Compiler.
+Für alle, die nur spielen wollen. Nötig sind Windows und Schicksalsklinge von GOG, sonst nichts: kein Python, kein Compiler. (Linux: siehe unten.)
 
-1. Rechts unter **Releases** das Paket `…_Bugfix_1.2.zip` herunterladen (oder oben **Code → Download ZIP**) und irgendwohin entpacken.
+1. Rechts unter **Releases** das Paket `…_Bugfix_1.2.1.zip` herunterladen (oder oben **Code → Download ZIP**) und irgendwohin entpacken.
 2. **`PATCHEN.bat`** doppelklicken. Es findet den GOG-Spielordner (oder fragt danach), prüft per Prüfsumme, ob die
    eigene EXE genau die passende ist, und erzeugt daraus `Build\BLADEM_FIX_WICHTIG.EXE` und `Build\BLADEM_FIX_ALLES.EXE`.
    **Die Original-EXE wird nicht verändert**, das Spiel bleibt wie es ist.
 3. **`BLADEM_FIX_WICHTIG_STARTEN.bat`** (wichtige Fehler) oder **`BLADEM_FIX_ALLES_STARTEN.bat`** (alle) doppelklicken.
    Das Spiel startet mit den GOG-Daten. Die Spielstände landen in eigenen Ordnern unter `Build\`, die echten bleiben unberührt.
+
+**Linux:** genauso mit `bash Linux/patchen.sh` und `bash Linux/starten.sh wichtig` (bzw. `alles`). Nötig sind Python 3 und DOSBox, Anleitung: [Linux/LIESMICH.md](Linux/LIESMICH.md).
 
 **Funktionieren meine Spielstände weiter?** Ja. Die Bugfix-Fassung ändert das Speicherformat nicht, kein Feld, keine
 Größe. Eure alten Spielstände aus dem GOG-Ordner erscheinen beim Laden automatisch und lassen sich weiterspielen.
@@ -54,8 +58,8 @@ Spielen durch Maschinencode gearbeitet haben. **Ohne sie gäbe es das hier nicht
 
 | | |
 |---|---|
-| **Henne** | Er hat im Projekt **Bright-Eyes** die eigentliche Herkulesarbeit geleistet: Die Schicksalsklinge Funktion für Funktion aus dem Maschinencode in binäräquivalenten Code zurückgewonnen, dazu die Werkzeuge und den Weg, den historischen Borland-Compiler in DOSBox anzusteuern. Über viele Jahre, größtenteils allein, mit einem Stundenaufwand, der sich kaum ermessen lässt. Er hat den Rohdiamanten ausgegraben. |
-| **siebenstreich** | hat Bright-Eyes weitergeführt, den C-Code geschliffen und das Projekt am Leben gehalten (github.com/siebenstreich/BrightEyes), und hat unsere Fragen geduldig und offen beantwortet. |
+| **Henne** | Er hat im Projekt **[Bright-Eyes](https://github.com/Henne/Bright-Eyes)** die eigentliche Herkulesarbeit geleistet: Die Schicksalsklinge Funktion für Funktion aus dem Maschinencode in binäräquivalenten Code zurückgewonnen, dazu die Werkzeuge und den Weg, den historischen Borland-Compiler in DOSBox anzusteuern. Über viele Jahre, größtenteils allein, mit einem Stundenaufwand, der sich kaum ermessen lässt. Er hat den Rohdiamanten ausgegraben. |
+| **siebenstreich** | hat Bright-Eyes weitergeführt, den C-Code geschliffen und das Projekt am Leben gehalten ([github.com/siebenstreich/BrightEyes](https://github.com/siebenstreich/BrightEyes)), und hat unsere Fragen geduldig und offen beantwortet. |
 | **cmfrydos** | entschlüsselt mit dem **Riva HD Viewer** die Datenformate der Nordlandtrilogie (Dungeons, Ereigniszonen, Dialoge, Kampfsystem) und teilt seine Ergebnisse offen im Forum und im Wiki. |
 | **Das Crystals-DSA-Forum** | Seit 2006 sammeln die Spielerinnen und Spieler dort Fehler, Beobachtungen und Rätsel der Nordlandtrilogie, im Thread „Bugs in Sternenschweif“, in den Truhenpatch-Threads, in Tipps-Sammlungen und in der Technischen Werkstatt. Viele Einträge unserer Fehlerlisten gehen auf ihre Meldungen zurück und sind dort zuerst beschrieben worden. Danke an alle, die dort über die Jahre geschrieben, gemessen und nachgespielt haben, und an die Forenbetreiber, die das alles erhalten. |
 | **NRS** | hat 2016 im Crystals-Forum einen Sammelpatch für die Schicksalsklinge veröffentlicht, direkt im Maschinencode, rund 190 Änderungen ohne Quelltext. Seine Lösungen haben uns gezeigt, wie viele Stellen gemeint waren, und seine Datenkorrekturen stecken in der Bugfix-Fassung 1.2. |
@@ -67,8 +71,8 @@ Fehler in diesem Repository sind unsere eigenen. Alles, was gut daran ist, beruh
 ## Grundlage: Bright-Eyes
 
 Die eigentliche Pionierarbeit, das Spiel aus dem Maschinencode in binäräquivalenten Code zurückzugewinnen, hat
-**Henne** über viele Jahre im Projekt Bright-Eyes geleistet; **siebenstreich** hat es weitergeführt
-(github.com/siebenstreich/BrightEyes). Dieser Stand baut darauf auf.
+**Henne** über viele Jahre im Projekt [Bright-Eyes](https://github.com/Henne/Bright-Eyes) geleistet; **siebenstreich** hat es weitergeführt
+([github.com/siebenstreich/BrightEyes](https://github.com/siebenstreich/BrightEyes)). Dieser Stand baut darauf auf.
 
 | Neu gegenüber Bright-Eyes | |
 |---|---|
@@ -123,7 +127,7 @@ Fortsetzung: Sternenschweif (DSA 2) im selben Stil, vollständig rekonstruiert.
 
 ## Lizenz und Rechte
 
-GPL v3 wie Bright-Eyes ([LICENSE](LICENSE)). Rechte am Spiel bei den Rechteinhabern, kein Originalprogramm, keine
+GPL v2 wie Bright-Eyes ([LICENSE](LICENSE)). Rechte am Spiel bei den Rechteinhabern, kein Originalprogramm, keine
 Spieldaten, kein Compiler im Repository: [RECHTE.md](RECHTE.md).
 
 MooMoo mit Claude, Oktober 2026.
