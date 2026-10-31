@@ -86,7 +86,7 @@ Die eigentliche Pionierarbeit, das Spiel aus dem Maschinencode in binäräquival
 | Beschriftung | sieben Prüfwellen, 117 Umbenennungen, Spieltexte als Kommentar an 3.406 Textstellen |
 | Fehler im Original | 417 Einträge, davon 381 echte Fehler und 47 Exploits ([Fehlerliste](Analyse/Fehler/Spieler/Fehlerliste_Schicksalsklinge.pdf)) |
 | 16 Fehler in Bright-Eyes | falsche Aufrufziele, Vorzeichen, Absturz in `pass_item` – korrigiert |
-| Bau-Paket für Windows | `Bauen\BAUEN.bat`, Standard-DOSBox aus der GOG-Installation |
+| Bau-Paket | Windows: `Bauen\BAUEN.bat` mit der DOSBox aus der GOG-Installation, Linux: `python3 Bauen/bauen.py` mit DOSBox Staging, 0.74 oder DOSBox-X |
 
 ## Bugfix-Fassung: die Schicksalsklinge ohne die Fehler von 1992
 
@@ -100,15 +100,15 @@ sich per Schalter beheben.
 | Neu erreichbar | Fix 181: Auf Landreisen sind erstmals Höhlenbär, Kvillotter und die Jagden (Karene, Wildschwein, Auerochse, Nashorn) erreichbar, im Original kam praktisch nur ein einziger Wildtierkampf vor (abschaltbar mit `-DFIX_0181=0`). Dazu behoben: Bär und Krakenmolch würfeln AT/PA verkehrt, die Kvillotter beißt nie, Krakenmolch-Endlosschleife (177–180) |
 | Exploits | standardmäßig mit behoben (z. B. KK +5 durch Umlegen am Körper). Wer sie behalten will: `FIX_EXPLOITS 0` |
 | Spielstände | **kompatibel**, das Speicherformat ist unverändert |
-| Bauen | `Bauen\BAUEN.bat wichtig` oder `Bauen\BAUEN.bat alles` → `Build\BLADEM_FIX_WICHTIG.EXE` bzw. `BLADEM_FIX_ALLES.EXE` |
+| Bauen | `Bauen\BAUEN.bat wichtig` oder `Bauen\BAUEN.bat alles` (Linux: `python3 Bauen/bauen.py wichtig`) → `Build\BLADEM_FIX_WICHTIG.EXE` bzw. `BLADEM_FIX_ALLES.EXE` |
 | Spielen | `BLADEM_FIX_WICHTIG_STARTEN.bat` bzw. `BLADEM_FIX_ALLES_STARTEN.bat` (eigene Spielstand-Ordner) |
 | Stand | statisch vollständig geprüft, in DOSBox gestartet, **im Spiel ungetestet. Tester willkommen** – Prüfliste in [Analyse/Bericht_Fehler_Patches.md](Analyse/Bericht_Fehler_Patches.md) |
 
 Welcher Fehler wie behoben ist und was bewusst nicht geändert wurde: [Bauen/FIXES.md](Bauen/FIXES.md).
 
-## Bauen (Windows)
+## Bauen (Windows und Linux)
 
-Ausführlich in [START_HIER.md](START_HIER.md):
+Ausführlich in [START_HIER.md](START_HIER.md) und [Bauen/BAUEN.md](Bauen/BAUEN.md):
 
 1. Python 3 installieren.
 2. Borland C++ 3.1 besorgen (z. B. https://archive.org/details/bcpp31) und nach `Compiler\` kopieren.
@@ -116,13 +116,17 @@ Ausführlich in [START_HIER.md](START_HIER.md):
 4. `Bauen\BAUEN.bat` → „BYTEGLEICH mit dem Original“ (unter einer Minute).
 5. `BLADEM_STARTEN.bat` startet das Spiel mit der gebauten EXE und den GOG-Daten.
 
+**Linux:** Python 3 und DOSBox (Staging, 0.74 oder DOSBox-X) installieren, Schritte 2 und 3 wie oben, dann
+`python3 Bauen/bauen.py` (bzw. `wichtig` / `alles`) und `bash Linux/starten.sh quelltext`. Mit DOSBox Staging geht beim
+Bauen kurz ein Fenster auf. Einzelheiten im Abschnitt „Linux“ von [Bauen/BAUEN.md](Bauen/BAUEN.md).
+
 ## Aufbau
 
 | Ordner | Inhalt |
 |---|---|
 | `Quelle/` | 106 Module in C, Assembler, Miles-Klangbibliothek (`AIL/`), Header, Projekt der Entwicklungsumgebung |
 | `Analyse/` | Fehlerliste, Namensliste, Kopierschutz-Bericht, Quelltextkarte, Beschriftungsprüfung, Spieltexte |
-| `Bauen/` | Bau-Paket für Windows |
+| `Bauen/` | Bau-Paket für Windows und Linux (`bauen.py`, unter Windows über `BAUEN.bat`) |
 | `Werkzeuge/` | Werkzeuge der Bearbeitung |
 | `Referenz/` | der unveränderte Bright-Eyes-Stand |
 

@@ -17,6 +17,25 @@ DOSBox ist schon da, nämlich das aus der GOG-Schicksalsklinge (`Realms of Arkan
 **Ohne Installation:** das „Windows embeddable package (64-bit)“ von python.org nach `Bauen\python\` entpacken, sodass
 `Bauen\python\python.exe` existiert. BAUEN.bat nimmt es dann von selbst.
 
+### Linux
+
+Nötig sind Python 3 und eine DOSBox: DOSBox Staging (empfohlen), die klassische DOSBox 0.74 oder DOSBox-X, auch als
+Flatpak (`io.github.dosbox-staging`). Gesucht wird in dieser Reihenfolge: `dosbox-staging`, `dosbox`, `dosbox-x`,
+Flatpak, wie beim Spielstart in `Linux/starten.sh`.
+
+```bash
+sudo dnf install python3 dosbox              # Fedora (das Paket dosbox ist dort DOSBox Staging)
+sudo apt install python3 dosbox              # Debian/Ubuntu (klassische DOSBox 0.74)
+
+python3 Bauen/bauen.py                       # Build/BLADEM.EXE
+python3 Bauen/bauen.py wichtig               # zusätzlich Build/BLADEM_FIX_WICHTIG.EXE
+python3 Bauen/bauen.py alles                 # zusätzlich Build/BLADEM_FIX_ALLES.EXE
+```
+
+`python` gibt es unter Debian/Ubuntu nicht, dort immer `python3`. Mit DOSBox Staging oder DOSBox-X geht während des
+Baus kurz ein DOSBox-Fenster auf: beide brauchen eine Bildausgabe und laufen nicht unsichtbar. Die klassische DOSBox
+0.74 baut ohne Fenster. Die gebaute EXE startet `bash Linux/starten.sh quelltext`, die Fix-EXEs `bash Linux/starten.sh wichtig`.
+
 ## Bauen
 
 Doppelklick auf **`BAUEN.bat`**. Dauer etwa eine halbe bis zwei Minuten, vier Schritte `[1/4] … [4/4]`.
@@ -25,7 +44,8 @@ Doppelklick auf **`BAUEN.bat`**. Dauer etwa eine halbe bis zwei Minuten, vier Sc
 |---|---|
 | gebaute EXE | `Build\BLADEM.EXE` (dazu `BLADEM.MAP`) |
 | Protokoll | `Build\bau.log` |
-| Arbeitsordner (wird bei jedem Bau geleert) | `%TEMP%\schicksalsklinge_bau` |
+| Meldungen von DOSBox (für die Fehlersuche) | `Build\dosbox.log` |
+| Arbeitsordner (wird bei jedem Bau geleert) | Windows: `%TEMP%\schicksalsklinge_bau`, Linux: `Build/_bau` (bei Umlauten im Pfad `~/.cache/schicksalsklinge_bau`, nicht in `/tmp`, damit es auch mit einer DOSBox aus Flatpak geht) |
 
 ## Fix-Fassungen (Fehlerbehebungen)
 
@@ -72,10 +92,12 @@ Wer eine Datei in `Quelle\` ändert, baut mit seiner Änderung. Die EXE ist dann
 | `BYTEGLEICH mit dem Original` | alles richtig |
 | `ABWEICHUNG vom Original: erste Differenz bei Byte …` | gebaut, aber nicht gleich (Quelle geändert?) |
 | `Uebersetzungsfehler` | ein Modul übersetzt nicht, die Zeilen stehen im Protokoll |
+| `DOSBox ist beim Lauf ... abgestuerzt` | DOSBox ist nicht richtig gestartet, die Meldungen stehen in `Build\dosbox.log`. Ohne Fenster abgestürzt? Dann versucht der Bau es von selbst noch einmal mit Fenster |
+| `Keine einzige OBJ-Datei` | der Compiler ist in DOSBox nicht gelaufen, siehe `Build\dosbox.log`, mit `--sichtbar` sieht man das Fenster |
 | `Fix-Modus: ... passt nicht in sein residentes Segment` | eine Behebung macht ein residentes Modul länger – so nicht baubar |
 | `Fix-Modus: fixcheck meldet Fehler` | die Fix-EXE wäre mit dem Original nicht verträglich, sie wird nicht ausgegeben |
 | `Borland C++ 3.1 nicht gefunden` | `Compiler\BIN\BCC.EXE` fehlt |
-| `DOSBox nicht gefunden` | GOG-Pfad anders: DOSBox-Ordner nach `Bauen\DOSBox\` kopieren oder `--dosbox PFAD` |
+| `DOSBox nicht gefunden` | Windows: GOG-Pfad anders, DOSBox-Ordner nach `Bauen\DOSBox\` kopieren oder `--dosbox PFAD`. Linux: DOSBox installieren (siehe oben) oder `--dosbox PFAD` |
 | `Python 3 wurde nicht gefunden` | Schritt 1 oben fehlt |
 
 ## Optionen
@@ -86,7 +108,7 @@ Wer eine Datei in `Quelle\` ändert, baut mit seiner Änderung. Die EXE ist dann
 |---|---|
 | `wichtig` / `alles` | zusätzlich die Fix-EXE bauen (siehe oben) |
 | `--exploits-lassen`, `--fixflags "..."` | nur mit `wichtig`/`alles`, siehe oben |
-| `--sichtbar` | DOSBox-Fenster zeigen |
+| `--sichtbar` | DOSBox-Fenster zeigen (bei DOSBox Staging und DOSBox-X immer) |
 | `--dosbox PFAD` | andere DOSBox |
 | `--compiler ORDNER` | Compiler woanders |
 | `--baudir ORDNER` | anderer Arbeitsordner |

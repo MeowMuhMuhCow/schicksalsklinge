@@ -10,6 +10,8 @@
 # ueberschreiben dort nichts ausser der EXE und den korrigierten Spieldaten.
 # Eigene DOSBox:  DOSBOX=/pfad/zu/dosbox bash Linux/starten.sh wichtig
 # Ohne die DOSBox-Einstellungen von GOG:  OHNE_GOGCONF=1 bash Linux/starten.sh wichtig
+# Eigenes CD-Abbild (z. B. dsa1.cue aus der NLT-Sammlung):  CD=~/Spiele/NLT_Images/dsa1.cue bash Linux/starten.sh wichtig
+#   (bei Sternenschweif mehrere Teile mit Leerzeichen getrennt in Anfuehrungszeichen)
 . "$(dirname "${BASH_SOURCE[0]}")/gemeinsam.sh"
 
 case "${1:-}" in
@@ -53,14 +55,26 @@ if [ -n "$P" ]; then
 fi
 [ "$LOG" = 1 ] && : > "$C/PROBEN.CSV"
 
-# CD-Abbild von GOG (CD-Audio bzw. CD-Pruefung)
+# CD-Abbild: eigenes ueber CD=..., sonst das von GOG im Spielordner (CD-Audio bzw. CD-Pruefung).
+# "-t cdrom" verstehen DOSBox 0.74, DOSBox Staging und DOSBox-X.
 CDZEILE=""
 CDTEILE=()
-for t in $CDBILD; do
-	f="$(datei_in "$SPIEL" "$t")"
-	[ -n "$f" ] && CDTEILE+=("\"$f\"")
-done
-[ -n "$CDBILD" ] && [ "${#CDTEILE[@]}" -eq "$(echo $CDBILD | wc -w)" ] && CDZEILE="imgmount D ${CDTEILE[*]} -t iso"
+if [ -n "${CD:-}" ]; then
+	if [ -f "${CD/#\~/$HOME}" ]; then TEILE=("$CD"); else read -r -a TEILE <<< "$CD"; fi
+	for f in "${TEILE[@]}"; do
+		f="${f/#\~/$HOME}"
+		[ -f "$f" ] || { echo "CD-Abbild nicht gefunden: $f"; exit 1; }
+		CDTEILE+=("\"$(cd "$(dirname "$f")" && pwd)/$(basename "$f")\"")
+	done
+	CDZEILE="imgmount D ${CDTEILE[*]} -t cdrom"
+	echo "CD-Abbild: $CD"
+else
+	for t in $CDBILD; do
+		f="$(datei_in "$SPIEL" "$t")"
+		[ -n "$f" ] && CDTEILE+=("\"$f\"")
+	done
+	[ -n "$CDBILD" ] && [ "${#CDTEILE[@]}" -eq "$(echo $CDBILD | wc -w)" ] && CDZEILE="imgmount D ${CDTEILE[*]} -t cdrom"
+fi
 
 CONF="$E/dosbox_linux.conf"
 {

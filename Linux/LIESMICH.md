@@ -33,8 +33,20 @@ auch: `SPIEL=~/Spiele/Schicksalsklinge bash Linux/patchen.sh`.
 | Laufwerke in DOSBox | C: = die Kopie, D: = CD-Abbild von GOG (`game.inst`, für die CD-Musik), E: = die Fix-EXE als `BLADEM.EXE` |
 | Einstellungen | `dosbox_realms1.conf` aus dem Spielordner (Grafik, Sound) wird mitgeladen, falls vorhanden. Ohne: `OHNE_GOGCONF=1 bash Linux/starten.sh wichtig` |
 | andere DOSBox | `DOSBOX=/pfad/zu/dosbox bash Linux/starten.sh wichtig` |
+| eigenes CD-Abbild | z. B. aus der alten NLT-Sammlung: `CD=~/Spiele/NLT_Images/dsa1.cue bash Linux/starten.sh wichtig` (sonst wird `game.inst` aus dem GOG-Ordner genommen) |
 
-Selbst bauen (bytegleich aus dem Quelltext) braucht Borland C++ 3.1 in DOSBox, siehe `Bauen/BAUEN.md`. Die gebaute
-EXE startet `bash Linux/starten.sh quelltext`.
+## Selbst bauen
+
+Bytegleich aus dem Quelltext, mit Borland C++ 3.1 in DOSBox (Compiler nach `Compiler/`, die eigene `SCHICKM.EXE`
+nach `Original/`):
+
+```bash
+sudo dnf install python3 dosbox              # bzw. sudo apt install python3 dosbox
+python3 Bauen/bauen.py                       # Build/BLADEM.EXE, am Ende „BYTEGLEICH mit dem Original“
+python3 Bauen/bauen.py wichtig               # zusätzlich Build/BLADEM_FIX_WICHTIG.EXE (alles: _ALLES)
+bash Linux/starten.sh quelltext              # die selbst gebaute EXE starten
+```
+
+Mit DOSBox Staging geht beim Bauen kurz ein Fenster auf, das ist normal. Mehr in `Bauen/BAUEN.md` (Abschnitt Linux).
 
 Alle Behebungen sind im Spiel noch ungetestet. Rückmeldungen sind willkommen.
