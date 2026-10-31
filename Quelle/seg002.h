@@ -94,6 +94,9 @@ void add_hero_le(struct struct_hero*, const signed int);
 void add_group_le(const signed int);
 signed int test_attrib(const struct struct_hero*, const signed int, const signed int);
 signed int test_attrib3(const struct struct_hero*, const signed int, const signed int, const signed int, signed char);
+#if FIX_PROBENLOG
+void fix_probenlog(const signed int, const char*, const signed int, const signed int*);
+#endif
 signed int get_random_hero(void);
 int32_t get_party_money(void);
 void set_party_money(int32_t);

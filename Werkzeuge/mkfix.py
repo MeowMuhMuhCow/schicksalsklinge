@@ -119,7 +119,10 @@ def main():
           '#ifndef FIX_EXPLOITS', '#if FIX_BUGS > 0', '#define FIX_EXPLOITS 1', '#else', '#define FIX_EXPLOITS 0', '#endif', '#endif',
           '', '/* Vorgaben je Stufe (X = Exploit: nur mit FIX_EXPLOITS) */',
           '#define FIX_STUFE_W  (FIX_BUGS >= 1)', '#define FIX_STUFE_A  (FIX_BUGS >= 2)',
-          '#define FIX_STUFE_WX (FIX_BUGS >= 1 && FIX_EXPLOITS)', '#define FIX_STUFE_AX (FIX_BUGS >= 2 && FIX_EXPLOITS)', '']
+          '#define FIX_STUFE_WX (FIX_BUGS >= 1 && FIX_EXPLOITS)', '#define FIX_STUFE_AX (FIX_BUGS >= 2 && FIX_EXPLOITS)', '',
+          '/* Zusatzfunktion, keine Fehlerbehebung: Probenlog. Jede Probe wird als Zahlenzeile an PROBEN.CSV im Spielordner',
+          ' * angehaengt, aber nur, wenn diese Datei schon da ist (Datei anlegen = Log an). Spiel und Spielstand bleiben gleich. */',
+          '#ifndef FIX_PROBENLOG', '#define FIX_PROBENLOG FIX_STUFE_W', '#endif', '']
     A = ['; s_fix.inc - Fehlerbehebungen per Schalter fuer TASM (erzeugt von Werkzeuge/mkfix.py, siehe s_fix.h)',
          'ifndef FIX_BUGS', 'FIX_BUGS = 0', 'endif', 'ifndef FIX_EXPLOITS', 'if FIX_BUGS gt 0', 'FIX_EXPLOITS = 1', 'else',
          'FIX_EXPLOITS = 0', 'endif', 'endif']
@@ -142,9 +145,10 @@ def main():
         m = re.match(r'(SEG0\d\d)\.C$', b)
         if not m or ('FIX_PLATZ_' + m.group(1)) not in open(p, encoding='latin1').read(): continue
         nrs = sorted(n for n, s in used.items() if b in s)
+        zus = ['FIX_PROBENLOG'] if 'FIX_PROBENLOG' in open(p, encoding='latin1').read() else []
         L += ['', f'/* {m.group(1)} ist resident: ohne Platz fuer die Behebungen entfallen dort nie aufgerufene Funktionen */',
               f'#ifndef FIX_PLATZ_{m.group(1)}',
-              f'#define FIX_PLATZ_{m.group(1)} (' + ' || '.join('FIX_%04d' % n for n in nrs) + ')', '#endif']
+              f'#define FIX_PLATZ_{m.group(1)} (' + ' || '.join(['FIX_%04d' % n for n in nrs] + zus) + ')', '#endif']
     L += ['', '#endif', '']
     open(os.path.join(P, 'Quelle', 's_fix.h'), 'w', newline='\n').write('\n'.join(L))
     open(os.path.join(P, 'Quelle', 's_fix.inc'), 'w', newline='\r\n').write('\n'.join(A) + '\n')

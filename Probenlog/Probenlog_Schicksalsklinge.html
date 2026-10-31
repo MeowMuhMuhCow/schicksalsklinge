@@ -1,0 +1,158 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Probenlog Schicksalsklinge</title>
+<style>
+:root{--bg:#f6f3ec;--fg:#1f1d1a;--mut:#6b655c;--card:#fffdf8;--line:#e2dccf;--acc:#7a3b1d;--ok:#2f7a3a;--bad:#a8322b;--pz:#7b3fa0;--chip:#efe8da}
+@media (prefers-color-scheme:dark){:root{--bg:#191714;--fg:#ece6da;--mut:#a59d8f;--card:#22201c;--line:#38342d;--acc:#e0a070;--ok:#6fc27a;--bad:#ef7a70;--pz:#c59be0;--chip:#2c2924}}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--fg);font:15px/1.45 system-ui,Segoe UI,Roboto,sans-serif}
+header{padding:20px 16px 8px;max-width:1100px;margin:auto}h1{margin:0;font-size:22px;color:var(--acc)}header p{margin:4px 0 0;color:var(--mut)}
+main{max-width:1100px;margin:auto;padding:8px 16px 40px}
+.drop{border:2px dashed var(--line);border-radius:12px;padding:18px;text-align:center;background:var(--card)}
+.drop.ueber{border-color:var(--acc)}button,label.knopf{background:var(--acc);color:var(--bg);border:0;border-radius:8px;padding:8px 14px;font:inherit;cursor:pointer;display:inline-block;margin:4px}
+button.leise{background:var(--chip);color:var(--fg)}input[type=file]{display:none}
+.reihe{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin:14px 0}
+select,input[type=search]{font:inherit;padding:6px 8px;border:1px solid var(--line);border-radius:8px;background:var(--card);color:var(--fg)}
+.karten{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:12px;margin:14px 0}
+.karte{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:12px}.karte h3{margin:0 0 6px;font-size:15px}
+.zahl{font-size:26px;font-weight:600}.mut{color:var(--mut);font-size:13px}
+.balken{height:6px;background:var(--chip);border-radius:3px;overflow:hidden;margin:3px 0 8px}.balken i{display:block;height:100%;background:var(--ok)}
+table{width:100%;border-collapse:collapse;background:var(--card);border:1px solid var(--line);border-radius:12px;overflow:hidden}
+th,td{text-align:left;padding:6px 8px;border-bottom:1px solid var(--line);vertical-align:top}th{font-size:13px;color:var(--mut);font-weight:600}
+td.w{font-variant-numeric:tabular-nums;white-space:nowrap}.ok{color:var(--ok)}.bad{color:var(--bad)}.pz{color:var(--pz);font-weight:600}
+.tabwrap{overflow-x:auto}.leer{color:var(--mut);padding:24px;text-align:center}
+.stat td,.stat th{padding:4px 6px}details{margin:10px 0}summary{cursor:pointer;color:var(--acc);font-weight:600}
+@media (max-width:640px){td.zeit,th.zeit{display:none}}
+</style>
+</head>
+<body>
+<header>
+<h1>Probenlog · Schicksalsklinge</h1>
+<p>Jede Probe des Spiels mit allen Würfeln. Die Datei <b>PROBEN.CSV</b> legt die Startdatei <i>…_MIT_PROBENLOG</i> an, sie liegt im Spielstand-Ordner unter <code>Build</code>. Alles bleibt auf deinem Rechner.</p>
+</header>
+<main>
+<div class="drop" id="drop">
+<div>PROBEN.CSV hierher ziehen oder</div>
+<label class="knopf">Datei wählen<input type="file" id="datei" accept=".csv,.CSV,text/plain"></label>
+<button id="live" class="leise" title="Nur Chrome/Edge: Datei einmal wählen, danach aktualisiert sich die Seite jede Sekunde">Live mitlesen</button>
+<div class="mut" id="status">Noch keine Datei geladen.</div>
+</div>
+<div id="inhalt" hidden>
+<div class="reihe">
+<select id="f_held"><option value="">alle Helden</option></select>
+<select id="f_art"><option value="">alle Proben</option><option value="eig">Eigenschaftsproben</option><option value="tal">Talentproben</option><option value="zau">Zauber</option><option value="kampf">Kampf (AT/PA)</option></select>
+<input type="search" id="f_text" placeholder="Suchen, z. B. Schlösser">
+</div>
+<div class="karten" id="karten"></div>
+<details open><summary>Talente und Zauber</summary><div class="tabwrap"><table class="stat" id="t_namen"></table></div></details>
+<h2 style="font-size:17px;margin:18px 0 8px">Alle Proben <span class="mut" id="anzahl"></span></h2>
+<div class="tabwrap"><table id="t_proben"><thead><tr><th class="zeit">Zeit</th><th>Wer</th><th>Probe</th><th>Würfe</th><th>Ergebnis</th></tr></thead><tbody></tbody></table></div>
+</div>
+</main>
+<script>
+const D = {"EIG": ["MU", "KL", "CH", "FF", "GE", "IN", "KK", "AG", "HA", "RA", "GG", "TA", "NG", "JZ"], "TALENT": ["Waffenlos", "Hiebwaffen", "Stichwaffen", "Schwerter", "Äxte", "Speere", "Zweihänder", "Schusswaffen", "Wurfwaffen", "Akrobatik", "Klettern", "Körperbeherrschung", "Reiten", "Schleichen", "Schwimmen", "Selbstbeherrschung", "Tanzen", "Verstecken", "Zechen", "Bekehren", "Betören", "Feilschen", "Gassenwissen", "Lügen", "Menschenkenntnis", "Schätzen", "Fährtensuchen", "Fesseln", "Orientierung", "Pflanzenkunde", "Tierkunde", "Wildnisleben", "Alchimie", "Alte Sprachen", "Geographie", "Geschichte", "Götter/Kulte", "Kriegskunst", "Lesen", "Magiekunde", "Sprachen", "Abrichten", "Fahrzeuge", "Falschspiel", "Heilen Gift", "Heilen Krankheiten", "Heilen Wunden", "Musizieren", "Schlösser", "Taschendiebstahl", "Gefahrensinn", "Sinnesschärfe"], "ZAUBER": ["-", "Beherrschung brechen", "Destructibo", "Gardianum", "Illusionen zerstören", "Verwandlung beenden", "Band und Fessel", "Bannbaladin", "Böser Blick", "Große Gier", "Große Verwirrung", "Herr der Tiere", "Horriphobus", "Magischer Raub", "Respondami", "Sanftmut", "Somnigravis", "Zwingtanz", "Furor Blut", "Geister bannen", "Geister rufen", "Heptagon", "Krähenruf", "Skelettarius", "Elementare", "Nihilatio", "Solidirid", "Axxeleratus", "Foramen", "Motoricus", "Spurlos", "Transversalis", "Über Eis", "Balsam", "Hexenspeichel", "Klarum Purum", "Ruhe Körper", "Tiere heilen", "Adleraug", "Analüs", "Eigenschaften", "Exposami", "Odem Arcanum", "Penetrizzel", "Sensibar", "Chamaelioni", "Duplicatus", "Harmlos", "Hexenknoten", "Blitz", "Ecliptifactus", "Eisenrost", "Fulminictus", "Ignifaxius", "Plumbumbarum", "Radau", "Saft, Kraft, Monstermacht", "Scharfes Auge", "Hexenblick", "Nekropathia", "Adler, Wolf", "Arcano", "Armatrutz", "CH steigern", "Feuerbann", "FF steigern", "GE steigern", "IN steigern", "KK steigern", "KL steigern", "MU steigern", "Mutabili", "Paralü", "Salander", "See und Fluss", "Visibili", "Abvenenum", "Aeolitus", "Brenne", "Claudibus", "Dunkelheit", "Erstarre", "Flim Flam", "Schmelze", "Silentium", "Sturmgebrüll"], "GEGNER": ["", "Oger", "Ork", "Goblin", "Heshthot", "Säbelzahntiger", "Skelett", "Waldschrat", "Mumie", "Harpyie", "Waldspinne", "Großer Schröter", "Pirat", "Steuermann", "Kapitän", "Streuner", "Zombie", "Heshthot", "Druide", "Druide", "Thorwaler", "Thorwaler", "Thorwaler", "Thorwaler", "Goblin", "Goblin", "Ork", "Ork", "Pirat", "Pirat", "Streuner", "Streuner", "Streuner", "Skelett", "Folterknecht", "Grimwolf", "Grimwolf", "Höhlenspinne", "Höhlenspinne", "Höhlenspinne", "Krieger", "Stadtgardist", "Stadtgardist", "Stadtgardist", "Kriegsveteran", "Mumie", "Magier", "Magier", "Zauberer", "Zauberer", "Zwerg", "Lindwurm", "Höhlendrache", "Kultist", "Kultist", "Kultist", "Kultist", "Priester", "Priester", "Hohepriester", "Estorik", "Piratenboss", "Pirat", "Magier", "Zwergenveteran", "Räuber", "Räuber", "Räuber", "Räuber", "Räuber", "Gorah", "Steppenhund", "Orkchampion", "Pirat", "Stadtgardist", "Waldlöwe", "Spinnendämon", "Heshthot"], "MONAT": ["", "Praios", "Rondra", "Efferd", "Travia", "Boron", "Hesinde", "Firun", "Tsa", "Phex", "Peraine", "Ingerimm", "Rahja", "Namenlose Tage"]};
+const nm = (l, i) => (i >= 0 && i < l.length) ? l[i] : 'Nr. ' + i;
+const gegner = i => (i > 0 && i < D.GEGNER.length) ? D.GEGNER[i] : 'Gegner Nr. ' + i;
+const zus = z => z > 0 ? 'erschwert um ' + z : (z < 0 ? 'erleichtert um ' + (-z) : '');
+function lies(text) {
+  const out = []; let vor = null;
+  for (const roh of text.split(/\r?\n/)) {
+    const f = roh.trim().split(';'); if (f.length < 6 || !/^-?\d+$/.test(f[0])) continue;
+    const [art, tag, mon, jahr, minute] = f.slice(0, 5).map(Number); const name = f[5];
+    const w = f.slice(6).filter(x => x !== '').map(Number);
+    const zeit = `${tag}. ${nm(D.MONAT, mon)} ${jahr} Hal, ${String(Math.floor(minute / 60)).padStart(2, '0')}:${String(minute % 60).padStart(2, '0')}`;
+    let r = null;
+    if (art === 1 && w.length >= 5) {
+      const e = nm(D.EIG, w[0]);
+      r = {zeit, held: name, typ: 'eig', titel: e + '-Probe', zusatz: zus(w[2]), wuerfe: `${w[3]} gegen ${e} ${w[1]}`,
+           ok: w[4] > 0, pz: w[4] === -99, erg: w[4] === -99 ? 'Patzer (20)' : (w[4] > 0 ? `gelungen, ${w[4] - 1} übrig` : 'misslungen')};
+    } else if (art === 3 && w.length >= 11) {
+      const eig = [0, 1, 2].map(i => nm(D.EIG, w[i])).join('/') + ' (' + w.slice(3, 6).join('/') + ')';
+      const wu = w.slice(7, 10).filter(x => x).join(', '), res = w[10];
+      r = {zeit, held: name, typ: 'eig', titel: 'Probe auf ' + eig, zusatz: zus(w[6]), wuerfe: wu,
+           ok: res > 0, pz: res === -99, erg: res === -99 ? 'Patzer (zweimal 20)' : (res > 0 ? `gelungen, ${res - 1} übrig` : `misslungen, ${1 - res} zu wenig`)};
+      if (vor && vor.held === name) { r.typ = vor.typ; r.titel = vor.titel; r.zusatz = vor.zusatz + (vor.zusatz ? ', ' : '') + 'auf ' + eig + (w[6] ? ' gesamt ' + zus(w[6]) : ''); r.name2 = vor.name2; }
+      vor = null;
+    } else if (art === 4 && w.length >= 6) {
+      const ta = nm(D.TALENT, w[0]);
+      if (w[3]) { vor = null; const x = w[5];
+        r = {zeit, held: name, typ: 'tal', titel: ta, name2: ta, zusatz: zus(w[2]), wuerfe: `${w[4]} gegen Zielwert ${w[1]}`,
+             ok: x > 0, pz: x === -1, erg: x === -1 ? 'Patzer (20)' : (x === 99 ? 'Glückswurf (1)' : (x > 0 ? `getroffen, ${x - 1} übrig` : 'daneben'))};
+      } else { vor = {held: name, typ: 'tal', titel: `${ta} (TaW ${w[1]})`, name2: ta, zusatz: zus(w[2])}; continue; }
+    } else if (art === 5 && w.length >= 3) {
+      const sp = nm(D.ZAUBER, w[0]); vor = {held: name, typ: 'zau', titel: `${sp} (ZfW ${w[1]})`, name2: sp, zusatz: zus(w[2])}; continue;
+    } else if ((art === 6 || art === 7) && w.length >= 4) {
+      vor = null; const [wert, wurf, mon, rtg] = w; const ok = wurf <= wert && wurf !== 20; const kurz = art === 6 ? 'AT' : 'PA';
+      let wer, held = '', heldOk = null;
+      if (art === 6) {
+        if (rtg === 0) { wer = `${name} attackiert ${mon < 0 ? 'einen Helden' : gegner(mon)}`; held = name; heldOk = ok; }
+        else if (rtg === 1) { wer = `${gegner(mon)} attackiert ${name}`; heldOk = !ok; }
+        else wer = `${gegner(mon)} attackiert einen anderen Gegner`;
+      } else {
+        if (rtg === 0) { wer = mon < 0 ? `${name} pariert` : `${gegner(mon)} pariert gegen ${name}`; heldOk = !ok; }
+        else if (rtg === 1) { wer = `${name} pariert gegen ${gegner(mon)}`; held = name; heldOk = ok; }
+        else wer = `Ein Gegner pariert gegen ${gegner(mon)}`;
+      }
+      r = {zeit, held: held || name, wer, typ: 'kampf', kampf: art === 6 ? 'AT' : 'PA', eigen: !!held, titel: wer, zusatz: '', wuerfe: `${wurf} gegen ${kurz} ${wert}`,
+           ok: heldOk, pz: wurf === 20, erg: (art === 6 ? (ok ? 'trifft' : 'verfehlt') : (ok ? 'pariert' : 'pariert nicht')) + (wurf === 20 ? ' (20: Patzer möglich)' : '')};
+    } else continue;
+    out.push(r);
+  }
+  return out;
+}
+let alle = [];
+const $ = id => document.getElementById(id);
+function proz(a, b) { return b ? Math.round(100 * a / b) + ' %' : '–'; }
+function zeige() {
+  const fh = $('f_held').value, fa = $('f_art').value, ft = $('f_text').value.toLowerCase();
+  const l = alle.filter(r => (!fh || r.held === fh) && (!fa || r.typ === fa) && (!ft || (r.titel + ' ' + r.zusatz + ' ' + r.held).toLowerCase().includes(ft)));
+  const tb = $('t_proben').querySelector('tbody'); tb.innerHTML = '';
+  for (const r of l.slice().reverse()) {
+    const tr = document.createElement('tr');
+    const kl = r.pz ? 'pz' : (r.ok === true ? 'ok' : (r.ok === false ? 'bad' : ''));
+    tr.innerHTML = `<td class="zeit mut">${r.zeit}</td><td>${r.typ === 'kampf' ? '' : esc(r.held)}</td><td>${esc(r.titel)}${r.zusatz ? ' <span class="mut">' + esc(r.zusatz) + '</span>' : ''}</td><td class="w">${esc(r.wuerfe)}</td><td class="${kl}">${esc(r.erg)}</td>`;
+    tb.appendChild(tr);
+  }
+  $('anzahl').textContent = `(${l.length}, neueste oben)`;
+  // Karten je Held
+  const held = {};
+  for (const r of l) { if (r.typ === 'kampf' && !r.eigen) continue; const h = held[r.held] = held[r.held] || {n: 0, ok: 0, pz: 0, at: 0, atok: 0, pa: 0, paok: 0};
+    if (r.typ === 'kampf') { if (r.kampf === 'AT') { h.at++; if (r.ok) h.atok++; } else { h.pa++; if (r.ok) h.paok++; } }
+    else { h.n++; if (r.ok) h.ok++; if (r.pz) h.pz++; } }
+  $('karten').innerHTML = Object.keys(held).sort().map(k => { const h = held[k]; const p = h.n ? Math.round(100 * h.ok / h.n) : 0;
+    return `<div class="karte"><h3>${esc(k)}</h3><div class="zahl">${proz(h.ok, h.n)}</div><div class="mut">${h.ok} von ${h.n} Proben gelungen${h.pz ? ', ' + h.pz + ' Patzer' : ''}</div><div class="balken"><i style="width:${p}%"></i></div>`
+      + (h.at || h.pa ? `<div class="mut">Attacke ${proz(h.atok, h.at)} (${h.atok}/${h.at}) · Parade ${proz(h.paok, h.pa)} (${h.paok}/${h.pa})</div>` : '') + '</div>'; }).join('') || '<div class="leer">Keine Proben für diese Auswahl.</div>';
+  // Talente und Zauber
+  const nmz = {};
+  for (const r of l) { if (!r.name2) continue; const k = r.name2; const s = nmz[k] = nmz[k] || {n: 0, ok: 0, pz: 0, typ: r.typ}; s.n++; if (r.ok) s.ok++; if (r.pz) s.pz++; }
+  const keys = Object.keys(nmz).sort((a, b) => nmz[b].n - nmz[a].n);
+  $('t_namen').innerHTML = keys.length ? '<tr><th>Talent / Zauber</th><th>Proben</th><th>gelungen</th><th>Patzer</th></tr>' + keys.map(k => `<tr><td>${esc(k)} <span class="mut">${nmz[k].typ === 'zau' ? 'Zauber' : 'Talent'}</span></td><td>${nmz[k].n}</td><td>${proz(nmz[k].ok, nmz[k].n)}</td><td>${nmz[k].pz || ''}</td></tr>`).join('') : '<tr><td class="leer">Noch keine Talent- oder Zauberproben.</td></tr>';
+}
+function esc(s) { return String(s).replace(/[&<>]/g, c => ({'&': '&amp;', '<': '&lt;', '>': '&gt;'}[c])); }
+function laden(text, quelle) {
+  alle = lies(text);
+  const sel = $('f_held'), alt = sel.value; const helden = [...new Set(alle.filter(r => r.typ !== 'kampf' || r.eigen).map(r => r.held))].sort();
+  sel.innerHTML = '<option value="">alle Helden</option>' + helden.map(h => `<option${h === alt ? ' selected' : ''}>${esc(h)}</option>`).join('');
+  $('inhalt').hidden = false; $('status').textContent = `${quelle}: ${alle.length} Proben.`; zeige();
+}
+const dec = b => new TextDecoder('latin1').decode(b);
+$('datei').onchange = async e => { const f = e.target.files[0]; if (f) laden(dec(await f.arrayBuffer()), f.name); };
+const dz = $('drop');
+dz.ondragover = e => { e.preventDefault(); dz.classList.add('ueber'); };
+dz.ondragleave = () => dz.classList.remove('ueber');
+dz.ondrop = async e => { e.preventDefault(); dz.classList.remove('ueber'); const f = e.dataTransfer.files[0]; if (f) laden(dec(await f.arrayBuffer()), f.name); };
+let liveTimer = null, liveLen = -1;
+$('live').onclick = async () => {
+  if (!window.showOpenFilePicker) { $('status').textContent = 'Live mitlesen geht nur in Chrome oder Edge. Sonst einfach die Datei neu hineinziehen.'; return; }
+  try { const [h] = await showOpenFilePicker({types: [{description: 'Probenlog', accept: {'text/csv': ['.csv', '.CSV']}}]});
+    clearInterval(liveTimer); liveLen = -1;
+    const tick = async () => { const f = await h.getFile(); if (f.size !== liveLen) { liveLen = f.size; laden(dec(await f.arrayBuffer()), f.name + ' (live)'); } };
+    await tick(); liveTimer = setInterval(tick, 1000);
+  } catch (e) {}
+};
+['f_held', 'f_art'].forEach(i => $(i).onchange = zeige); $('f_text').oninput = zeige;
+</script>
+</body>
+</html>

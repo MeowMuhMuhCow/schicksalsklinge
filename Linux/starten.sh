@@ -3,6 +3,8 @@
 #   bash Linux/starten.sh wichtig     Bugfix-Fassung: kritische + mittlere Fehler behoben (nach patchen.sh)
 #   bash Linux/starten.sh alles       Bugfix-Fassung: alle behebbaren Fehler (nach patchen.sh)
 #   bash Linux/starten.sh quelltext   die selbst gebaute, bytegleiche EXE (nach dem Bauen)
+#   bash Linux/starten.sh wichtig log dazu das Probenlog: jede Probe erscheint live in diesem Terminal
+#                                     (gespeichert in Build/Linux_C_<Fassung>/PROBEN.CSV, alte Logs in Build/Probenlogs)
 # Der Spielordner wird nicht angefasst: Beim ersten Start wird er nach Build/Linux_C_<Fassung> kopiert
 # (ohne CD-Abbild und DOSBox), dort landen auch die Spielstaende dieser Fassung. Spaetere Starts
 # ueberschreiben dort nichts ausser der EXE und den korrigierten Spieldaten.
@@ -14,8 +16,11 @@ case "${1:-}" in
 	wichtig)   QUELLE="$BUILD/${EXE}_FIX_WICHTIG.EXE"; FASSUNG="Fix_Wichtig"; MITDATEN=1 ;;
 	alles)     QUELLE="$BUILD/${EXE}_FIX_ALLES.EXE";   FASSUNG="Fix_Alles";   MITDATEN=1 ;;
 	quelltext) QUELLE="$BUILD/${EXE}.EXE";             FASSUNG="Quelltext";   MITDATEN=0 ;;
-	*) echo "Aufruf: bash Linux/starten.sh wichtig | alles | quelltext"; exit 1 ;;
+	*) echo "Aufruf: bash Linux/starten.sh wichtig | alles | quelltext  [log]"; exit 1 ;;
 esac
+LOG=0
+[ "${2:-}" = "log" ] && LOG=1
+if [ "$LOG" = 1 ] && [ -z "$PROBENLOG" ]; then echo "Das Probenlog gibt es fuer $SPIELNAME noch nicht."; LOG=0; fi
 if [ ! -f "$QUELLE" ]; then
 	echo "$QUELLE fehlt."
 	[ "$FASSUNG" = "Quelltext" ] && echo "Erst bauen (Bauen/BAUEN.md)." || echo "Erst patchen:  bash Linux/patchen.sh"
@@ -40,6 +45,13 @@ if [ "$MITDATEN" = 1 ] && [ -n "$DATEN" ] && [ -f "$BUILD/$DATEN" ]; then
 	ZIEL="$(datei_in "$C" "$DATEN")"
 	cp -f "$BUILD/$DATEN" "${ZIEL:-$C/$DATEN}"
 fi
+
+# Probenlog: das Spiel schreibt nur, wenn PROBEN.CSV da ist. Ein altes Log wandert nach Build/Probenlogs.
+P="$(datei_in "$C" PROBEN.CSV)"
+if [ -n "$P" ]; then
+	if [ -s "$P" ]; then mkdir -p "$BUILD/Probenlogs"; mv -f "$P" "$BUILD/Probenlogs/PROBEN_${FASSUNG}_$(date +%Y-%m-%d_%H-%M-%S).CSV"; else rm -f "$P"; fi
+fi
+[ "$LOG" = 1 ] && : > "$C/PROBEN.CSV"
 
 # CD-Abbild von GOG (CD-Audio bzw. CD-Pruefung)
 CDZEILE=""
@@ -74,4 +86,14 @@ GOGC="$(datei_in "$SPIEL" "$GOGCONF")"
 [ -n "$GOGC" ] && [ -z "${OHNE_GOGCONF:-}" ] && ARGS+=(-conf "$GOGC")
 ARGS+=(-conf "$CONF")
 echo "Starte $SPIELNAME ($FASSUNG) mit ${DOSBOX_CMD[*]} ..."
-exec "${DOSBOX_CMD[@]}" "${ARGS[@]}"
+if [ "$LOG" = 1 ]; then
+	"${DOSBOX_CMD[@]}" "${ARGS[@]}" >/dev/null 2>&1 &
+	DPID=$!
+	python3 "$REPO/Probenlog/probenlog.py" --live "$C/PROBEN.CSV" &
+	VPID=$!
+	wait $DPID
+	kill $VPID 2>/dev/null
+	echo; echo "Spiel beendet. Das Log liegt in $C/PROBEN.CSV (ansehen: Probenlog/Probenlog_$SPIELNAME.html)."
+else
+	exec "${DOSBOX_CMD[@]}" "${ARGS[@]}"
+fi

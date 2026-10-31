@@ -248,6 +248,19 @@ void FIG_do_enemy_action(struct enemy_sheet* p_enemy, const signed int enemy_id)
 			}
 
 			at_roll_d20 = random_schick(20);
+#if FIX_PROBENLOG
+			/* Probenlog: Zeile Art 6 (Attacke eines Gegners): AT-Wert, W20, Gegnertyp des Angreifers,
+			 * 1 = gegen den genannten Helden, 2 = gegen einen anderen Gegner */
+			{
+				signed int w[4];
+
+				w[0] = attacker_at_val;
+				w[1] = at_roll_d20;
+				w[2] = p_enemy->monster_id;
+				w[3] = target_is_hero ? 1 : 2;
+				fix_probenlog(6, target_is_hero ? hero->alias : (char*)0, 4, w);
+			}
+#endif
 
 			if ((at_roll_d20 == 20) && (random_schick(20) > attacker_at_val - 9)) {
 				/* critical attack failure */
@@ -336,6 +349,19 @@ void FIG_do_enemy_action(struct enemy_sheet* p_enemy, const signed int enemy_id)
 					{
 
 						pa_roll_d20 = random_schick(20);
+#if FIX_PROBENLOG
+						/* Probenlog: Zeile Art 7 (Parade gegen den Gegner-Angriff): PA-Wert, W20, Gegnertyp des Angreifers,
+						 * 1 = der genannte Held pariert, 2 = ein Gegner pariert */
+						{
+							signed int w[4];
+
+							w[0] = target_pa_val;
+							w[1] = pa_roll_d20;
+							w[2] = p_enemy->monster_id;
+							w[3] = target_is_hero ? 1 : 2;
+							fix_probenlog(7, target_is_hero ? hero->alias : (char*)0, 4, w);
+						}
+#endif
 
 						if ((pa_roll_d20 == 20) && (random_schick(20) > target_pa_val - 7)) {
 							/* critical parry failure */

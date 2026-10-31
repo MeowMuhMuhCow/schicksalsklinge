@@ -216,6 +216,22 @@ signed int test_talent(const struct struct_hero* hero, const signed int talent_i
 
 			e_talentval -= handicap;
 
+#if FIX_PROBENLOG
+			/* Probenlog: dieselbe Fernkampfprobe, dazu eine Zeile Art 4:
+			 * Talent, Zielwert, Zuschlag, 1 (Fernkampf), W20, Ergebnis */
+			{
+				signed int w[6];
+
+				w[0] = talent_id;
+				w[1] = e_talentval;
+				w[2] = handicap;
+				w[3] = 1;
+				w[4] = randval = random_schick(20);
+				w[5] = (randval == 20) ? -1 : ((randval == 1) ? 99 : ((randval <= e_talentval) ? (e_talentval - randval + 1) : 0));
+				fix_probenlog(4, hero->alias, 6, w);
+				return w[5];
+			}
+#else
 			randval = random_schick(20);
 
 			/* Unlucky */
@@ -245,6 +261,7 @@ signed int test_talent(const struct struct_hero* hero, const signed int talent_i
 			D1_INFO(" (%d) -> nicht bestanden\n", randval);
 #endif
 			return 0;
+#endif
 		}
 
 		/* automatically get hero with best senses in beginner mode */
@@ -258,6 +275,19 @@ signed int test_talent(const struct struct_hero* hero, const signed int talent_i
 #endif
 		}
 
+#if FIX_PROBENLOG
+		/* Probenlog: Zeile Art 4 vor der Dreifachprobe (die Wuerfe und das Ergebnis stehen in der folgenden Zeile Art 3):
+		 * Talent, Talentwert, Zuschlag, 0 (Dreifachprobe folgt), 0, 0 */
+		{
+			signed int w[6];
+
+			w[0] = talent_id;
+			w[1] = hero->talents[talent_id];
+			w[2] = handicap;
+			w[3] = w[4] = w[5] = 0;
+			fix_probenlog(4, hero->alias, 6, w);
+		}
+#endif
 		/* do the test */
 		handicap -= hero->talents[talent_id];
 

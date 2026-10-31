@@ -458,6 +458,12 @@
 #define FIX_STUFE_WX (FIX_BUGS >= 1 && FIX_EXPLOITS)
 #define FIX_STUFE_AX (FIX_BUGS >= 2 && FIX_EXPLOITS)
 
+/* Zusatzfunktion, keine Fehlerbehebung: Probenlog. Jede Probe wird als Zahlenzeile an PROBEN.CSV im Spielordner
+ * angehaengt, aber nur, wenn diese Datei schon da ist (Datei anlegen = Log an). Spiel und Spielstand bleiben gleich. */
+#ifndef FIX_PROBENLOG
+#define FIX_PROBENLOG FIX_STUFE_W
+#endif
+
 #ifndef FIX_0001
 #define FIX_0001 FIX_STUFE_W
 #endif
@@ -1628,7 +1634,7 @@
 
 /* SEG002 ist resident: ohne Platz fuer die Behebungen entfallen dort nie aufgerufene Funktionen */
 #ifndef FIX_PLATZ_SEG002
-#define FIX_PLATZ_SEG002 (FIX_0039 || FIX_0079 || FIX_0080 || FIX_0127 || FIX_0128 || FIX_0229 || FIX_0230 || FIX_0231 || FIX_0233 || FIX_0234 || FIX_0235 || FIX_0280 || FIX_0403 || FIX_0407)
+#define FIX_PLATZ_SEG002 (FIX_0039 || FIX_0079 || FIX_0080 || FIX_0127 || FIX_0128 || FIX_0229 || FIX_0230 || FIX_0231 || FIX_0233 || FIX_0234 || FIX_0235 || FIX_0280 || FIX_0403 || FIX_0407 || FIX_PROBENLOG)
 #endif
 
 #endif

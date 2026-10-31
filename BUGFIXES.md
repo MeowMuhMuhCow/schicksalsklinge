@@ -1,6 +1,6 @@
 # Die Schicksalsklinge – Bugfix-Fassung: Änderungsliste
 
-**Version 1.2.1 vom 31.10.2026** · inoffiziell · zur deutschen GOG-Fassung 3.02 · **im Spiel noch ungetestet, Tester willkommen**
+**Version 1.3 vom 31.10.2026** · inoffiziell · zur deutschen GOG-Fassung 3.02 · **im Spiel noch ungetestet, Tester willkommen**
 
 ## So geht's
 
@@ -20,6 +20,16 @@ Die Spielstände der Bugfix-Fassung liegen in eigenen Ordnern unter `Build\`. Al
 |---|---|
 | **WICHTIG** (empfohlen) | kritische und mittlere Fehler: Abstürze, Hänger, verlorene Ausrüstung, falsche Preise, Fehler, die man im Spiel merkt |
 | **ALLES** | zusätzlich viele kleine Fehler ohne große Spielwirkung |
+
+## Neu in Version 1.3: Probenlog
+
+Auf vielfachen Wunsch aus dem Crystals-DSA-Forum: **Jetzt sieht man, was das Spiel würfelt.** Jede Probe erscheint live in einem zweiten Fenster neben dem Spiel und wird mitgeschrieben, auch die versteckten Proben, die man sonst nie mitbekommt. Gestartet wird das mit `BLADEM_FIX_WICHTIG_MIT_PROBENLOG_STARTEN.bat` (Linux: `bash Linux/starten.sh wichtig log`). Ohne diese Startdatei läuft alles wie bisher. Beschreibung: `Probenlog/LIESMICH.md`.
+
+- **Eigenschaftsproben** (MU, KL, KK …) mit Wert, Zuschlag, W20 und Ergebnis
+- **Talent- und Zauberproben** mit Talent bzw. Zauber, Talentwert, Zuschlag, den drei Eigenschaften und **jedem der drei W20**, dazu die Restpunkte
+- **Fernkampf** und **jede Attacke und Parade** im Kampf, von Helden und Gegnern
+- **`Probenlog/Probenlog_Schicksalsklinge.html`** zeigt eine Sitzung hinterher als Tabelle mit Erfolgsquote je Held, Talent und Zauber (in Chrome/Edge auch live)
+- Die Proben laufen exakt gleich ab (gleich viele Würfe in derselben Reihenfolge), das Spielstandformat ist unverändert. Im Emulator mit einer Zauberprobe im echten Spiel getestet, der Rest ist im Spiel noch ungetestet
 
 ## Neu in Version 1.2.1
 

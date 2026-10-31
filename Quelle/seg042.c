@@ -349,6 +349,18 @@ void FIG_do_hero_action(struct struct_hero* hero, const signed int hero_pos)
 			}
 
 			at_roll_d20 = random_schick(20);
+#if FIX_PROBENLOG
+			/* Probenlog: Zeile Art 6 (Attacke): AT-Wert, W20, Gegnertyp des Ziels (-1 = Held), 0 = Held greift an */
+			{
+				signed int w[4];
+
+				w[0] = atpa;
+				w[1] = at_roll_d20;
+				w[2] = target_is_hero ? -1 : p_target_enemy->monster_id;
+				w[3] = 0;
+				fix_probenlog(6, hero->alias, 4, w);
+			}
+#endif
 
 			if ((at_roll_d20 == 20) && (random_schick(20) > atpa - 9)) {
 				/* critical attack failure */
@@ -480,6 +492,18 @@ void FIG_do_hero_action(struct struct_hero* hero, const signed int hero_pos)
 					}
 
 					pa_roll_d20 = random_schick(20);
+#if FIX_PROBENLOG
+					/* Probenlog: Zeile Art 7 (Parade gegen den Helden-Angriff): PA-Wert, W20, Gegnertyp des Ziels (-1 = Held), 0 */
+					{
+						signed int w[4];
+
+						w[0] = target_pa_val;
+						w[1] = pa_roll_d20;
+						w[2] = target_is_hero ? -1 : p_target_enemy->monster_id;
+						w[3] = 0;
+						fix_probenlog(7, target_is_hero ? p_target_hero->alias : hero->alias, 4, w);
+					}
+#endif
 
 					if ((pa_roll_d20 == 20) && (random_schick(20) > target_pa_val - 7)) {
 						/* critical defense failure */

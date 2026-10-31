@@ -29,6 +29,17 @@ if not exist "%RUN%" mkdir "%RUN%"
 copy /y "%FIXEXE%" "%RUN%\BLADEM.EXE" >nul
 rem --- korrigierte Spieldaten (von PATCHEN.bat) ueber die Overlay-Ablage einblenden
 if exist "%BUILD%\SCHICK.DAT" copy /y "%BUILD%\SCHICK.DAT" "%SAVES%\SCHICK.DAT" >nul
+rem --- Probenlog (Zusatzfunktion): an mit BLADEM_FIX_WICHTIG_MIT_PROBENLOG_STARTEN.bat, sonst aus.
+rem     Das Spiel schreibt nur, wenn PROBEN.CSV da ist. Ein altes Log wandert nach Build\Probenlogs.
+if exist "%SAVES%\PROBEN.CSV" for %%A in ("%SAVES%\PROBEN.CSV") do if %%~zA==0 del "%SAVES%\PROBEN.CSV"
+if exist "%SAVES%\PROBEN.CSV" (
+  if not exist "%BUILD%\Probenlogs" mkdir "%BUILD%\Probenlogs"
+  for /f %%t in ('powershell -NoProfile -Command "Get-Date -Format yyyy-MM-dd_HH-mm-ss"') do move /y "%SAVES%\PROBEN.CSV" "%BUILD%\Probenlogs\PROBEN_Fix_Wichtig_%%t.CSV" >nul
+)
+if "%PROBENLOG%"=="1" (
+  type nul > "%SAVES%\PROBEN.CSV"
+  start "Probenlog" powershell -NoProfile -ExecutionPolicy Bypass -File "%HIER%Probenlog\probenlog_fenster.ps1" -Datei "%SAVES%\PROBEN.CSV"
+)
 
 rem --- DOSBox-Startbefehle in eine kleine Zusatz-Konfiguration schreiben
 rem     C: = Spielordner (nur lesen), Aenderungen gehen nach Testspielstaende_Fix_Wichtig

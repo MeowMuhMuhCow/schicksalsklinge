@@ -663,6 +663,18 @@ signed int test_spell(struct struct_hero *hero, const signed int spell_id, signe
 		D1_INFO("%s Zauberprobe %s %+d (TaW %d)", hero->alias, names_spell[spell_id], handicap, hero->spells[spell_id]);
 #endif
 
+#if FIX_PROBENLOG
+		/* Probenlog: Zeile Art 5 vor der Dreifachprobe (Wuerfe und Ergebnis in der folgenden Zeile Art 3):
+		 * Zauber, Zauberfertigkeit, Zuschlag (mit Magieresistenz des Ziels) */
+		{
+			signed int w[3];
+
+			w[0] = spell_id;
+			w[1] = hero->spells[spell_id];
+			w[2] = handicap;
+			fix_probenlog(5, hero->alias, 3, w);
+		}
+#endif
 		handicap -= hero->spells[spell_id];
 
 		retval = test_attrib3(hero, spell_desc->attrib1, spell_desc->attrib2, spell_desc->attrib3, handicap);

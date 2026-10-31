@@ -1,3 +1,64 @@
+diff --git a/src/cpu/cpu.cpp b/src/cpu/cpu.cpp
+index dbae803a..c2147e6f 100644
+--- a/src/cpu/cpu.cpp
++++ b/src/cpu/cpu.cpp
+@@ -1,3 +1,5 @@
++#include <stdlib.h>
++#include <stdio.h>
+ /*
+  *  Copyright (C) 2002-2010  The DOSBox Team
+  *
+@@ -545,6 +547,11 @@ void CPU_Exception(Bitu which,Bitu error ) {
+ 
+ Bit8u lastint;
+ void CPU_Interrupt(Bitu num,Bitu type,Bitu oldeip) {
++	if (num==0 && getenv("BE_TRACEIP")) {
++		extern Bit16u BE_psp(void);
++		Bit16u base = BE_psp() + 0x10;
++		fprintf(stderr,"[DIV0] bei %04X:%04X  rel %04X:%04X\n",(unsigned)SegValue(cs),(unsigned)oldeip,(unsigned)(Bit16u)(SegValue(cs)-base),(unsigned)oldeip);
++	}
+ 	lastint=num;
+ 	FillFlags();
+ #if C_DEBUG
+@@ -996,7 +1003,17 @@ void CPU_IRET(bool use32,Bitu oldeip) {
+ }
+ 
+ 
++
++static void BE_farcheck(const char *what, Bitu sel, Bitu off, Bitu oldeip) {
++	static int on = -1; if (on < 0) on = getenv("BE_TRACEIP") ? 1 : 0;
++	if (!on || cpu.pmode) return;
++	extern Bit16u BE_psp(void);
++	Bit16u base = BE_psp() + 0x10;
++	if (SegValue(cs) >= base && sel < base)
++		fprintf(stderr,"[FAR] %s von %04X:%04X (rel %04X:%04X) nach %04X:%04X\n", what, (unsigned)SegValue(cs),(unsigned)oldeip,(unsigned)(Bit16u)(SegValue(cs)-base),(unsigned)oldeip,(unsigned)sel,(unsigned)off);
++}
+ void CPU_JMP(bool use32,Bitu selector,Bitu offset,Bitu oldeip) {
++	BE_farcheck("JMP",selector,offset,oldeip);
+ 	if (!cpu.pmode || (reg_flags & FLAG_VM)) {
+ 		if (!use32) {
+ 			reg_eip=offset&0xffff;
+@@ -1064,6 +1081,7 @@ CODE_jmp:
+ 
+ 
+ void CPU_CALL(bool use32,Bitu selector,Bitu offset,Bitu oldeip) {
++	BE_farcheck("CALL",selector,offset,oldeip);
+ 
+ /*
+ 	if custom_callf() returns true we set the IP to the next instruction
+@@ -1319,6 +1337,10 @@ call_code:
+ 
+ 
+ void CPU_RET(bool use32,Bitu bytes,Bitu oldeip) {
++	if (!cpu.pmode && !use32) {
++		Bit16u rip = real_readw(SegValue(ss), reg_sp), rcs = real_readw(SegValue(ss), (Bit16u)(reg_sp+2));
++		BE_farcheck("RETF", rcs, rip, oldeip);
++	}
+ 	if (!cpu.pmode || (reg_flags & FLAG_VM)) {
+ 		Bitu new_ip,new_cs;
+ 		if (!use32) {
+diff --git a/src/custom/custom.cpp b/src/custom/custom.cpp
+index e6c2ebb6..ce508be3 100644
 --- a/src/custom/custom.cpp
 +++ b/src/custom/custom.cpp
 @@ -3,6 +3,7 @@
@@ -8,7 +69,7 @@
  
  #include "setup.h"
  #include "regs.h"
-@@ -30,6 +31,7 @@
+@@ -30,6 +31,7 @@ Bit32s DB_get_conv_mem()
  
  void custom_init_prog(char *name, Bit16u relocate, Bit16u init_cs, Bit16u init_ip)
  {
@@ -16,6 +77,114 @@
  /*
  	int check;
  
+diff --git a/src/dos/dos.cpp b/src/dos/dos.cpp
+index 35eb73e9..240c8bd3 100644
+--- a/src/dos/dos.cpp
++++ b/src/dos/dos.cpp
+@@ -79,6 +79,7 @@ static inline void overhead() {
+ 
+ #define DOSNAMEBUF 256
+ static Bitu DOS_21Handler(void) {
++	if (getenv("BE_INT21LOG")) fprintf(stderr,"[I21] AH=%02X AL=%02X BX=%04X CX=%04X DX=%04X DS=%04X ES=%04X\n",reg_ah,reg_al,reg_bx,reg_cx,reg_dx,SegValue(ds),SegValue(es));
+ 	if (((reg_ah != 0x50) && (reg_ah != 0x51) && (reg_ah != 0x62) && (reg_ah != 0x64)) && (reg_ah<0x6c)) {
+ 		DOS_PSP psp(dos.psp());
+ 		psp.SetStack(RealMake(SegValue(ss),reg_sp-18));
+@@ -354,13 +355,15 @@ static Bitu DOS_21Handler(void) {
+ 	case 0x1a:		/* Set Disk Transfer Area Address */
+ 		dos.dta(RealMakeSeg(ds,reg_dx));
+ 		break;
+-	case 0x25:		/* Set Interrupt Vector */
++	case 0x25:
++		if (getenv("BE_FILELOG") && (reg_al==8||reg_al==0x1c)) fprintf(stderr,"[VEC] SET %02X -> %04X:%04X\n",reg_al,SegValue(ds),reg_dx);		/* Set Interrupt Vector */
+ 		RealSetVec(reg_al,RealMakeSeg(ds,reg_dx));
+ 		break;
+ 	case 0x26:		/* Create new PSP */
+ 		DOS_NewPSP(reg_dx,DOS_PSP(dos.psp()).GetSize());
+ 		break;
+ 	case 0x2a:		/* Get System Date */
++		if (getenv("BE_DATE")) { int y,m,d; if (sscanf(getenv("BE_DATE"),"%d-%d-%d",&y,&m,&d)==3) { reg_cx=y; reg_dh=m; reg_dl=d; reg_al=0; break; } }
+ 		{
+ 			int a = (14 - dos.date.month)/12;
+ 			int y = dos.date.year - a;
+@@ -465,7 +468,8 @@ static Bitu DOS_21Handler(void) {
+ 		SegSet16(es,DOS_SDA_SEG);
+ 		reg_bx=DOS_SDA_OFS + 0x01;
+ 		break;
+-	case 0x35:		/* Get interrupt vector */
++	case 0x35:
++		if (getenv("BE_FILELOG") && (reg_al==8||reg_al==0x1c)) fprintf(stderr,"[VEC] GET %02X = %04X:%04X\n",reg_al,real_readw(0,reg_al*4+2),real_readw(0,reg_al*4));		/* Get interrupt vector */
+ 		reg_bx=real_readw(0,((Bit16u)reg_al)*4);
+ 		SegSet16(es,real_readw(0,((Bit16u)reg_al)*4+2));
+ 		break;
+@@ -571,7 +575,8 @@ static Bitu DOS_21Handler(void) {
+ 			CALLBACK_SCF(true);
+ 		}
+ 		break;
+-	case 0x3f:		/* READ Read from file or device */
++	case 0x3f:
++		if (getenv("BE_FILELOG")) fprintf(stderr,"[DOS] READ h=%d n=%d nach %04X:%04X (linear %05X)\n",reg_bx,reg_cx,SegValue(ds),reg_dx,SegValue(ds)*16+reg_dx);		/* READ Read from file or device */
+ 		{ 
+ 			Bit16u toread=reg_cx;
+ 			dos.echo=true;
+diff --git a/src/dos/dos_execute.cpp b/src/dos/dos_execute.cpp
+index 52b13079..6290884c 100644
+--- a/src/dos/dos_execute.cpp
++++ b/src/dos/dos_execute.cpp
+@@ -1,3 +1,5 @@
++#include <stdlib.h>
++#include <stdio.h>
+ /*
+  *  Copyright (C) 2002-2010  The DOSBox Team
+  *
+@@ -101,6 +103,7 @@ void DOS_UpdatePSPName(void) {
+ }
+ 
+ void DOS_Terminate(Bit16u pspseg,bool tsr,Bit8u exitcode) {
++	if (getenv("BE_FILELOG")) fprintf(stderr,"[DOS] TERMINATE code=%d CS:IP=%04X:%04X\n",exitcode,SegValue(cs),reg_ip);
+ 
+ 	custom_exit_prog(exitcode);
+ 
+@@ -503,3 +506,5 @@ bool DOS_Execute(char * name,PhysPt block_pt,Bit8u flags) {
+ 	}
+ 	return false;
+ }
++
++Bit16u BE_psp(void) { return dos.psp(); }
+diff --git a/src/dos/dos_files.cpp b/src/dos/dos_files.cpp
+index c720fd9a..f2fbcb48 100644
+--- a/src/dos/dos_files.cpp
++++ b/src/dos/dos_files.cpp
+@@ -296,6 +296,7 @@ bool DOS_Rename(char const * const oldname,char const * const newname) {
+ }
+ 
+ bool DOS_FindFirst(char * search,Bit16u attr,bool fcb_findfirst) {
++	if (getenv("BE_FILELOG")) fprintf(stderr,"[DOS] FIND %s\n",search);
+ 	DOS_DTA dta(dos.dta());
+ 	Bit8u drive;char fullsearch[DOS_PATHLENGTH];
+ 	char dir[DOS_PATHLENGTH];char pattern[DOS_PATHLENGTH];
+@@ -374,6 +375,12 @@ bool DOS_ReadFile(Bit16u entry,Bit8u * data,Bit16u * amount) {
+ }
+ 
+ bool DOS_WriteFile(Bit16u entry,Bit8u * data,Bit16u * amount) {
++	if (getenv("BE_FILELOG") && entry<=2) {
++		Bit16u rip = real_readw(SegValue(ss), reg_sp), rcs = real_readw(SegValue(ss), reg_sp+2);
++		fprintf(stderr,"[DOS] WRITE h=%d n=%d von %04X:%04X rel %04X:%04X: ",entry,*amount,rcs,rip,(Bit16u)(rcs-dos.psp()-0x10),rip);
++		for (Bit16u i=0;i<*amount && i<80;i++) { Bit8u c=data[i]; if (c>=32&&c<127) fputc(c,stderr); else fprintf(stderr,"\\x%02x",c); }
++		fputc('\n',stderr);
++	}
+ 	Bit32u handle=RealHandle(entry);
+ 	if (handle>=DOS_FILES) {
+ 		DOS_SetError(DOSERR_INVALID_HANDLE);
+@@ -506,6 +513,7 @@ bool DOS_CreateFile(char const * name,Bit16u attributes,Bit16u * entry) {
+ }
+ 
+ bool DOS_OpenFile(char const * name,Bit8u flags,Bit16u * entry) {
++	if (getenv("BE_FILELOG")) fprintf(stderr,"[DOS] OPEN %s\n",name);
+ 	/* First check for devices */
+ 	if (flags>2) LOG(LOG_FILES,LOG_ERROR)("Special file open command %X file %s",flags,name);
+ 	else LOG(LOG_FILES,LOG_NORMAL)("file open command %X file %s",flags,name);
+diff --git a/src/gui/sdlmain.cpp b/src/gui/sdlmain.cpp
+index 59e2ec26..65a528d1 100644
 --- a/src/gui/sdlmain.cpp
 +++ b/src/gui/sdlmain.cpp
 @@ -1,3 +1,5 @@
@@ -34,7 +203,7 @@
  #include "cpu.h"
  #include "cross.h"
  #include "control.h"
-@@ -1315,7 +1320,117 @@
+@@ -1315,7 +1320,151 @@ void GFX_LosingFocus(void) {
  #define SDL_XORG_FIX 0
  #endif
  
@@ -43,7 +212,8 @@
 +   Text wird getippt; {ENTER} {ESC} {TAB} {F1}..{F10} {UP} {DOWN} {LEFT} {RIGHT}
 +   {INS} {DEL} {HOME} {END} {PGUP} {PGDN} {SPACE} {BKSP} {ALT+x} {CTRL+x}
 +   {SHIFT+x} {WAIT n} (ms) {SHOT} (Bildschirmfoto). Zeilenumbrueche zaehlen nicht. */
-+struct BE_KEv { int key; bool down; int delay; int shot; };
++struct BE_KEv { int key; bool down; int delay; int shot; int mx; int my; };
++void Mouse_CursorSet(float x,float y); void Mouse_CursorMoved(float xrel,float yrel,float x,float y,bool emulate); void Mouse_ButtonPressed(Bit8u button); void Mouse_ButtonReleased(Bit8u button);
 +static std::vector<BE_KEv> be_ks;
 +static size_t be_ki = 0; static int be_kinit = 0; static Uint32 be_knext = 0;
 +static KBD_KEYS be_chr(char c, bool &sh) {
@@ -62,11 +232,45 @@
 +	}
 +	return KBD_NONE;
 +}
-+static void be_push(int k, bool d, int delay, int shot) { BE_KEv e; e.key = k; e.down = d; e.delay = delay; e.shot = shot; be_ks.push_back(e); }
++static void be_push(int k, bool d, int delay, int shot) { BE_KEv e; e.key = k; e.down = d; e.delay = delay; e.shot = shot; e.mx = e.my = 0; be_ks.push_back(e); }
++/* Maus: {MOVE x y} setzt den Zeiger (Koordinaten des Maustreibers), {CLICK}, {DCLICK} linke Taste, {RCLICK} rechte */
++static void be_mpush(int k, int x, int y, int delay) { BE_KEv e; e.key = k; e.down = false; e.delay = delay; e.shot = 0; e.mx = x; e.my = y; be_ks.push_back(e); }
 +static void be_tap(KBD_KEYS k, KBD_KEYS mod) {
 +	if (mod != KBD_NONE) be_push(mod, true, 30, 0);
 +	be_push(k, true, 40, 0); be_push(k, false, 40, 0);
 +	if (mod != KBD_NONE) be_push(mod, false, 60, 0);
++}
++/* Werkbank: {INPUT datei} haelt das Skript an, bis <datei> existiert, liest sie als weiteres Skript ein und loescht sie
++ * (so laesst sich ein laufendes Spiel von aussen weitersteuern) */
++static std::string be_wait_file;
++static void be_parse(const std::string &t) {
++	static const char *nn[] = {"ENTER","ESC","TAB","SPACE","BKSP","UP","DOWN","LEFT","RIGHT","INS","DEL","HOME","END","PGUP","PGDN","F1","F2","F3","F4","F5","F6","F7","F8","F9","F10",0};
++	static const KBD_KEYS nk[] = {KBD_enter,KBD_esc,KBD_tab,KBD_space,KBD_backspace,KBD_up,KBD_down,KBD_left,KBD_right,KBD_insert,KBD_delete,KBD_home,KBD_end,KBD_pageup,KBD_pagedown,KBD_f1,KBD_f2,KBD_f3,KBD_f4,KBD_f5,KBD_f6,KBD_f7,KBD_f8,KBD_f9,KBD_f10};
++	for (size_t i = 0; i < t.size(); i++) {
++		char c = t[i];
++		if (c == '\r' || c == '\n') continue;
++		if (c == '{') {
++			size_t e = t.find('}', i); std::string tok = t.substr(i + 1, e - i - 1); i = e;
++			if (tok.compare(0, 5, "WAIT ") == 0) { be_push(KBD_NONE, false, atoi(tok.c_str() + 5), 0); continue; }
++			if (tok == "SHOT") { be_push(KBD_NONE, false, 50, 1); continue; }
++			if (tok.compare(0, 6, "INPUT ") == 0) { BE_KEv ev; ev.key = -9; ev.down = false; ev.delay = 0; ev.shot = 0; ev.mx = ev.my = 0; be_ks.push_back(ev); be_wait_file = tok.substr(6); continue; }
++			if (tok.compare(0, 5, "MOVE ") == 0) { int x = 0, y = 0; sscanf(tok.c_str() + 5, "%d %d", &x, &y); be_mpush(-2, x, y, 80); continue; }
++			if (tok == "CLICK") { be_mpush(-3, 0, 0, 80); be_mpush(-4, 0, 0, 120); continue; }
++			if (tok == "RCLICK") { be_mpush(-5, 0, 0, 80); be_mpush(-6, 0, 0, 120); continue; }
++			if (tok == "DCLICK") { be_mpush(-3, 0, 0, 60); be_mpush(-4, 0, 0, 60); be_mpush(-3, 0, 0, 60); be_mpush(-4, 0, 0, 120); continue; }
++			KBD_KEYS mod = KBD_NONE; std::string key = tok;
++			if (tok.compare(0, 4, "ALT+") == 0) { mod = KBD_leftalt; key = tok.substr(4); }
++			else if (tok.compare(0, 5, "CTRL+") == 0) { mod = KBD_leftctrl; key = tok.substr(5); }
++			else if (tok.compare(0, 6, "SHIFT+") == 0) { mod = KBD_leftshift; key = tok.substr(6); }
++			KBD_KEYS k = KBD_NONE;
++			for (int j = 0; nn[j]; j++) if (key == nn[j]) k = nk[j];
++			if (k == KBD_NONE && key.size() == 1) { bool sh; k = be_chr((char)tolower(key[0]), sh); }
++			if (k != KBD_NONE) be_tap(k, mod); else fprintf(stderr, "[KEYSCRIPT] unbekannt: %s\n", tok.c_str());
++			continue;
++		}
++		bool sh; KBD_KEYS k = be_chr(c, sh);
++		if (k != KBD_NONE) be_tap(k, sh ? KBD_leftshift : KBD_NONE);
++	}
 +}
 +static void BE_KeyScriptStep(void) {
 +	if (!be_kinit) {
@@ -75,34 +279,33 @@
 +		if (!fn) return;
 +		FILE *f = fopen(fn, "rb");
 +		std::string t; if (f) { int c; while ((c = fgetc(f)) != EOF) t += (char)c; fclose(f); }
-+		static const char *nn[] = {"ENTER","ESC","TAB","SPACE","BKSP","UP","DOWN","LEFT","RIGHT","INS","DEL","HOME","END","PGUP","PGDN","F1","F2","F3","F4","F5","F6","F7","F8","F9","F10",0};
-+		static const KBD_KEYS nk[] = {KBD_enter,KBD_esc,KBD_tab,KBD_space,KBD_backspace,KBD_up,KBD_down,KBD_left,KBD_right,KBD_insert,KBD_delete,KBD_home,KBD_end,KBD_pageup,KBD_pagedown,KBD_f1,KBD_f2,KBD_f3,KBD_f4,KBD_f5,KBD_f6,KBD_f7,KBD_f8,KBD_f9,KBD_f10};
-+		for (size_t i = 0; i < t.size(); i++) {
-+			char c = t[i];
-+			if (c == '\r' || c == '\n') continue;
-+			if (c == '{') {
-+				size_t e = t.find('}', i); std::string tok = t.substr(i + 1, e - i - 1); i = e;
-+				if (tok.compare(0, 5, "WAIT ") == 0) { be_push(KBD_NONE, false, atoi(tok.c_str() + 5), 0); continue; }
-+				if (tok == "SHOT") { be_push(KBD_NONE, false, 50, 1); continue; }
-+				KBD_KEYS mod = KBD_NONE; std::string key = tok;
-+				if (tok.compare(0, 4, "ALT+") == 0) { mod = KBD_leftalt; key = tok.substr(4); }
-+				else if (tok.compare(0, 5, "CTRL+") == 0) { mod = KBD_leftctrl; key = tok.substr(5); }
-+				else if (tok.compare(0, 6, "SHIFT+") == 0) { mod = KBD_leftshift; key = tok.substr(6); }
-+				KBD_KEYS k = KBD_NONE;
-+				for (int j = 0; nn[j]; j++) if (key == nn[j]) k = nk[j];
-+				if (k == KBD_NONE && key.size() == 1) { bool sh; k = be_chr((char)tolower(key[0]), sh); }
-+				if (k != KBD_NONE) be_tap(k, mod); else fprintf(stderr, "[KEYSCRIPT] unbekannt: %s\n", tok.c_str());
-+				continue;
-+			}
-+			bool sh; KBD_KEYS k = be_chr(c, sh);
-+			if (k != KBD_NONE) be_tap(k, sh ? KBD_leftshift : KBD_NONE);
-+		}
++		be_parse(t);
 +		be_knext = SDL_GetTicks() + 3000;
 +		fprintf(stderr, "[KEYSCRIPT] %u Ereignisse\n", (unsigned)be_ks.size());
 +	}
 +	while (be_ki < be_ks.size() && SDL_GetTicks() >= be_knext) {
-+		BE_KEv &e = be_ks[be_ki++];
++		BE_KEv &e = be_ks[be_ki];
++		if (e.key == -9) {
++			/* {INPUT}: warten, bis die Datei da ist; ihr Inhalt wird nach diesem Eintrag eingefuegt */
++			FILE *f = fopen(be_wait_file.c_str(), "rb");
++			if (!f) break;
++			std::string t; int c; while ((c = fgetc(f)) != EOF) t += (char)c; fclose(f);
++			remove(be_wait_file.c_str());
++			std::vector<BE_KEv> rest(be_ks.begin() + be_ki + 1, be_ks.end());
++			be_ks.resize(be_ki + 1);
++			be_parse(t);
++			be_ks.insert(be_ks.end(), rest.begin(), rest.end());
++			fprintf(stderr, "[KEYSCRIPT] INPUT eingelesen (%u Ereignisse)\n", (unsigned)be_ks.size());
++			be_ki++;
++			continue;
++		}
++		be_ki++;
 +		if (e.shot) { extern void BE_ScreenShotNow(void); BE_ScreenShotNow(); fprintf(stderr, "[SHOT]\n"); }
++		else if (e.key == -2) { Mouse_CursorSet((float)e.mx, (float)e.my); Mouse_CursorMoved(0.0f, 0.0f, 0.0f, 0.0f, true); }
++		else if (e.key == -3) Mouse_ButtonPressed(0);
++		else if (e.key == -4) Mouse_ButtonReleased(0);
++		else if (e.key == -5) Mouse_ButtonPressed(1);
++		else if (e.key == -6) Mouse_ButtonReleased(1);
 +		else if (e.key != KBD_NONE) KEYBOARD_AddKey((KBD_KEYS)e.key, e.down);
 +		be_knext = SDL_GetTicks() + e.delay;
 +		if (be_ki == be_ks.size()) fprintf(stderr, "[KEYSCRIPT] fertig\n");
@@ -152,166 +355,11 @@
  	SDL_Event event;
  #if defined (REDUCE_JOYSTICK_POLLING)
  	static int poll_delay=0;
---- a/src/dos/dos.cpp
-+++ b/src/dos/dos.cpp
-@@ -79,6 +79,7 @@
- 
- #define DOSNAMEBUF 256
- static Bitu DOS_21Handler(void) {
-+	if (getenv("BE_INT21LOG")) fprintf(stderr,"[I21] AH=%02X AL=%02X BX=%04X CX=%04X DX=%04X DS=%04X ES=%04X\n",reg_ah,reg_al,reg_bx,reg_cx,reg_dx,SegValue(ds),SegValue(es));
- 	if (((reg_ah != 0x50) && (reg_ah != 0x51) && (reg_ah != 0x62) && (reg_ah != 0x64)) && (reg_ah<0x6c)) {
- 		DOS_PSP psp(dos.psp());
- 		psp.SetStack(RealMake(SegValue(ss),reg_sp-18));
-@@ -354,13 +355,15 @@
- 	case 0x1a:		/* Set Disk Transfer Area Address */
- 		dos.dta(RealMakeSeg(ds,reg_dx));
- 		break;
--	case 0x25:		/* Set Interrupt Vector */
-+	case 0x25:
-+		if (getenv("BE_FILELOG") && (reg_al==8||reg_al==0x1c)) fprintf(stderr,"[VEC] SET %02X -> %04X:%04X\n",reg_al,SegValue(ds),reg_dx);		/* Set Interrupt Vector */
- 		RealSetVec(reg_al,RealMakeSeg(ds,reg_dx));
- 		break;
- 	case 0x26:		/* Create new PSP */
- 		DOS_NewPSP(reg_dx,DOS_PSP(dos.psp()).GetSize());
- 		break;
- 	case 0x2a:		/* Get System Date */
-+		if (getenv("BE_DATE")) { int y,m,d; if (sscanf(getenv("BE_DATE"),"%d-%d-%d",&y,&m,&d)==3) { reg_cx=y; reg_dh=m; reg_dl=d; reg_al=0; break; } }
- 		{
- 			int a = (14 - dos.date.month)/12;
- 			int y = dos.date.year - a;
-@@ -465,7 +468,8 @@
- 		SegSet16(es,DOS_SDA_SEG);
- 		reg_bx=DOS_SDA_OFS + 0x01;
- 		break;
--	case 0x35:		/* Get interrupt vector */
-+	case 0x35:
-+		if (getenv("BE_FILELOG") && (reg_al==8||reg_al==0x1c)) fprintf(stderr,"[VEC] GET %02X = %04X:%04X\n",reg_al,real_readw(0,reg_al*4+2),real_readw(0,reg_al*4));		/* Get interrupt vector */
- 		reg_bx=real_readw(0,((Bit16u)reg_al)*4);
- 		SegSet16(es,real_readw(0,((Bit16u)reg_al)*4+2));
- 		break;
-@@ -571,7 +575,8 @@
- 			CALLBACK_SCF(true);
- 		}
- 		break;
--	case 0x3f:		/* READ Read from file or device */
-+	case 0x3f:
-+		if (getenv("BE_FILELOG")) fprintf(stderr,"[DOS] READ h=%d n=%d nach %04X:%04X (linear %05X)\n",reg_bx,reg_cx,SegValue(ds),reg_dx,SegValue(ds)*16+reg_dx);		/* READ Read from file or device */
- 		{ 
- 			Bit16u toread=reg_cx;
- 			dos.echo=true;
---- a/src/dos/dos_files.cpp
-+++ b/src/dos/dos_files.cpp
-@@ -296,6 +296,7 @@
- }
- 
- bool DOS_FindFirst(char * search,Bit16u attr,bool fcb_findfirst) {
-+	if (getenv("BE_FILELOG")) fprintf(stderr,"[DOS] FIND %s\n",search);
- 	DOS_DTA dta(dos.dta());
- 	Bit8u drive;char fullsearch[DOS_PATHLENGTH];
- 	char dir[DOS_PATHLENGTH];char pattern[DOS_PATHLENGTH];
-@@ -374,6 +375,12 @@
- }
- 
- bool DOS_WriteFile(Bit16u entry,Bit8u * data,Bit16u * amount) {
-+	if (getenv("BE_FILELOG") && entry<=2) {
-+		Bit16u rip = real_readw(SegValue(ss), reg_sp), rcs = real_readw(SegValue(ss), reg_sp+2);
-+		fprintf(stderr,"[DOS] WRITE h=%d n=%d von %04X:%04X rel %04X:%04X: ",entry,*amount,rcs,rip,(Bit16u)(rcs-dos.psp()-0x10),rip);
-+		for (Bit16u i=0;i<*amount && i<80;i++) { Bit8u c=data[i]; if (c>=32&&c<127) fputc(c,stderr); else fprintf(stderr,"\\x%02x",c); }
-+		fputc('\n',stderr);
-+	}
- 	Bit32u handle=RealHandle(entry);
- 	if (handle>=DOS_FILES) {
- 		DOS_SetError(DOSERR_INVALID_HANDLE);
-@@ -506,6 +513,7 @@
- }
- 
- bool DOS_OpenFile(char const * name,Bit8u flags,Bit16u * entry) {
-+	if (getenv("BE_FILELOG")) fprintf(stderr,"[DOS] OPEN %s\n",name);
- 	/* First check for devices */
- 	if (flags>2) LOG(LOG_FILES,LOG_ERROR)("Special file open command %X file %s",flags,name);
- 	else LOG(LOG_FILES,LOG_NORMAL)("file open command %X file %s",flags,name);
---- a/src/dos/dos_execute.cpp
-+++ b/src/dos/dos_execute.cpp
-@@ -1,3 +1,5 @@
-+#include <stdlib.h>
-+#include <stdio.h>
- /*
-  *  Copyright (C) 2002-2010  The DOSBox Team
-  *
-@@ -101,6 +103,7 @@
- }
- 
- void DOS_Terminate(Bit16u pspseg,bool tsr,Bit8u exitcode) {
-+	if (getenv("BE_FILELOG")) fprintf(stderr,"[DOS] TERMINATE code=%d CS:IP=%04X:%04X\n",exitcode,SegValue(cs),reg_ip);
- 
- 	custom_exit_prog(exitcode);
- 
-@@ -503,3 +506,5 @@
- 	}
- 	return false;
- }
-+
-+Bit16u BE_psp(void) { return dos.psp(); }
---- a/src/cpu/cpu.cpp
-+++ b/src/cpu/cpu.cpp
-@@ -1,3 +1,5 @@
-+#include <stdlib.h>
-+#include <stdio.h>
- /*
-  *  Copyright (C) 2002-2010  The DOSBox Team
-  *
-@@ -545,6 +547,11 @@
- 
- Bit8u lastint;
- void CPU_Interrupt(Bitu num,Bitu type,Bitu oldeip) {
-+	if (num==0 && getenv("BE_TRACEIP")) {
-+		extern Bit16u BE_psp(void);
-+		Bit16u base = BE_psp() + 0x10;
-+		fprintf(stderr,"[DIV0] bei %04X:%04X  rel %04X:%04X\n",(unsigned)SegValue(cs),(unsigned)oldeip,(unsigned)(Bit16u)(SegValue(cs)-base),(unsigned)oldeip);
-+	}
- 	lastint=num;
- 	FillFlags();
- #if C_DEBUG
-@@ -996,7 +1003,17 @@
- }
- 
- 
-+
-+static void BE_farcheck(const char *what, Bitu sel, Bitu off, Bitu oldeip) {
-+	static int on = -1; if (on < 0) on = getenv("BE_TRACEIP") ? 1 : 0;
-+	if (!on || cpu.pmode) return;
-+	extern Bit16u BE_psp(void);
-+	Bit16u base = BE_psp() + 0x10;
-+	if (SegValue(cs) >= base && sel < base)
-+		fprintf(stderr,"[FAR] %s von %04X:%04X (rel %04X:%04X) nach %04X:%04X\n", what, (unsigned)SegValue(cs),(unsigned)oldeip,(unsigned)(Bit16u)(SegValue(cs)-base),(unsigned)oldeip,(unsigned)sel,(unsigned)off);
-+}
- void CPU_JMP(bool use32,Bitu selector,Bitu offset,Bitu oldeip) {
-+	BE_farcheck("JMP",selector,offset,oldeip);
- 	if (!cpu.pmode || (reg_flags & FLAG_VM)) {
- 		if (!use32) {
- 			reg_eip=offset&0xffff;
-@@ -1064,6 +1081,7 @@
- 
- 
- void CPU_CALL(bool use32,Bitu selector,Bitu offset,Bitu oldeip) {
-+	BE_farcheck("CALL",selector,offset,oldeip);
- 
- /*
- 	if custom_callf() returns true we set the IP to the next instruction
-@@ -1319,6 +1337,10 @@
- 
- 
- void CPU_RET(bool use32,Bitu bytes,Bitu oldeip) {
-+	if (!cpu.pmode && !use32) {
-+		Bit16u rip = real_readw(SegValue(ss), reg_sp), rcs = real_readw(SegValue(ss), (Bit16u)(reg_sp+2));
-+		BE_farcheck("RETF", rcs, rip, oldeip);
-+	}
- 	if (!cpu.pmode || (reg_flags & FLAG_VM)) {
- 		Bitu new_ip,new_cs;
- 		if (!use32) {
+diff --git a/src/hardware/hardware.cpp b/src/hardware/hardware.cpp
+index 42570b2b..111496ae 100644
 --- a/src/hardware/hardware.cpp
 +++ b/src/hardware/hardware.cpp
-@@ -570,6 +570,7 @@
+@@ -570,6 +570,7 @@ skip_video:
  
  
  #if (C_SSHOT)
@@ -319,7 +367,7 @@
  static void CAPTURE_ScreenShotEvent(bool pressed) {
  	if (!pressed)
  		return;
-@@ -771,3 +772,5 @@
+@@ -771,3 +772,5 @@ void HARDWARE_Init(Section * sec) {
  	test = new HARDWARE(sec);
  	sec->AddDestroyFunction(&HARDWARE_Destroy,true);
  }

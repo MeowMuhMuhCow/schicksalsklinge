@@ -5057,6 +5057,53 @@ static signed int compare_name(const char *name)
 #endif
 #endif
 
+#if FIX_PROBENLOG
+/* Probenlog (Zusatzfunktion, keine Fehlerbehebung): haengt eine Zeile an PROBEN.CSV an, aber nur, wenn die Datei
+ * schon da ist (anlegen = Log an, loeschen = aus). Kein neuer Text im Datensegment: der Dateiname entsteht Zeichen
+ * fuer Zeichen, geschrieben werden nur Zahlen und der Heldenname.
+ * Zeile: Art;Tag;Monat;Jahr;Minute des Tages;Name;Wert1;...;WertN
+ * Art 1 Eigenschaftsprobe, 3 Dreifachprobe, 4 Talentprobe, 5 Zauberprobe, 6 Attacke, 7 Parade (Bedeutung der Werte:
+ * Probenlog.html bzw. Probenlog-Fenster) */
+static char *fix_probenlog_zahl(char *p, const signed int v)
+{
+	itoa(v, p, 10);
+	p += strlen(p);
+	*p++ = ';';
+	return p;
+}
+
+void fix_probenlog(const signed int art, const char *name, const signed int n, const signed int *w)
+{
+	char z[160];
+	char *p;
+	signed int i;
+	signed int fd;
+
+	z[0] = 'P'; z[1] = 'R'; z[2] = 'O'; z[3] = 'B'; z[4] = 'E'; z[5] = 'N';
+	z[6] = '.'; z[7] = 'C'; z[8] = 'S'; z[9] = 'V'; z[10] = '\0';
+	if ((fd = open(z, O_BINARY | O_WRONLY)) == -1) {
+		return;
+	}
+	p = fix_probenlog_zahl(z, art);
+	p = fix_probenlog_zahl(p, gs_day_of_month);
+	p = fix_probenlog_zahl(p, gs_month);
+	p = fix_probenlog_zahl(p, gs_year);
+	p = fix_probenlog_zahl(p, (signed int)(gs_day_timer / MINUTES(1)));
+	for (i = 0; name && (i < 16) && name[i]; i++) {
+		*p++ = name[i];
+	}
+	*p++ = ';';
+	for (i = 0; i < n; i++) {
+		p = fix_probenlog_zahl(p, w[i]);
+	}
+	p[-1] = '\r';
+	*p++ = '\n';
+	lseek(fd, 0L, SEEK_END);
+	write(fd, z, p - z);
+	close(fd);
+}
+#endif
+
 /**
  * \brief   make an attribute test
  *
@@ -5067,6 +5114,19 @@ static signed int compare_name(const char *name)
  */
 signed int test_attrib(const struct struct_hero* hero, const signed int attrib_id, const signed int handicap)
 {
+#if FIX_PROBENLOG
+	/* Probenlog: dieselbe Probe (gleich viele Wuerfe, gleiches Ergebnis), dazu eine Zeile Art 1:
+	 * Eigenschaft, Eigenschaftswert, Zuschlag, W20, Ergebnis */
+	signed int w[5];
+
+	w[3] = random_schick(20);
+	w[0] = attrib_id;
+	w[1] = hero->attrib[attrib_id].current + hero->attrib[attrib_id].mod;
+	w[2] = handicap;
+	w[4] = (w[3] == 20) ? -99 : (w[1] - (w[3] + handicap) + 1);
+	fix_probenlog(1, hero->alias, 5, w);
+	return w[4];
+#else
 	signed int randval = random_schick(20);
 	signed int att_val;
 
@@ -5091,6 +5151,7 @@ signed int test_attrib(const struct struct_hero* hero, const signed int attrib_i
 #endif
 
 	return att_val - randval + 1;
+#endif
 }
 
 /**
@@ -5123,6 +5184,28 @@ signed int test_attrib3(const struct struct_hero* hero, const signed int attrib_
 	 * Ordinary success leads to return value 1, or, in the case of a negative handicap (in other words, a positive bonus),
 	 * the number of remaining bonus points, increased by 1.  */
 
+#if FIX_PROBENLOG
+	/* Probenlog: dieselbe Probe (gleich viele Wuerfe in gleicher Reihenfolge, gleiches Ergebnis), dazu eine Zeile Art 3:
+	 * drei Eigenschaften, ihre drei Werte, Zuschlag, drei W20 (0 = nicht mehr gewuerfelt), Ergebnis */
+	signed int w[11];
+	signed int i;
+	signed int nr_rolls_20 = 0;
+
+	w[0] = attrib_id_1; w[1] = attrib_id_2; w[2] = attrib_id_3;
+	w[3] = hero->attrib[attrib_id_1].current + hero->attrib[attrib_id_1].mod;
+	w[4] = hero->attrib[attrib_id_2].current + hero->attrib[attrib_id_2].mod;
+	w[5] = hero->attrib[attrib_id_3].current + hero->attrib[attrib_id_3].mod;
+	w[6] = handicap;
+	w[7] = w[8] = w[9] = 0;
+	for (i = 0; i < 3; i++) {
+		if (((w[7 + i] = random_schick(20)) == 20) && (++nr_rolls_20 == 2)) {
+			break;
+		}
+	}
+	w[10] = (nr_rolls_20 == 2) ? -99 : (w[3] + w[4] + w[5] - (w[7] + w[8] + w[9] + handicap) + 1);
+	fix_probenlog(3, hero->alias, 11, w);
+	return w[10];
+#else
 	signed int i;
 	signed int rolls_sum;
 	signed int tmp;
@@ -5164,6 +5247,7 @@ signed int test_attrib3(const struct struct_hero* hero, const signed int attrib_
 	D1_INFO(" -> %s mit %d\n", (tmp - rolls_sum + 1) > 0 ? "bestanden" : "nicht bestanden", (tmp - rolls_sum + 1));
 #endif
 	return tmp - rolls_sum + 1; // in a nutshell: sum of the 3 attributes - 3*D20 - handicap + 1
+#endif
 
 #else
 	/* Here, the original DSA2/3 talent test logic is implemented.
