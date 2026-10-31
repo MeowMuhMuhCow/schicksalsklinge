@@ -25,9 +25,15 @@ call "%HIER%SPIELPFAD_SUCHEN.cmd"
 if not defined SPIEL goto keinspiel
 set "GOG=%SPIEL%"
 if not exist "%SAVES%" mkdir "%SAVES%"
+rem --- Spielordner in den Spielstand-Ordner spiegeln: nur fehlende Dateien, vorhandene (Spielstaende,
+rem     korrigierte Spieldaten) bleiben. Die DOSBox 0.74 von GOG kennt keine Overlay-Laufwerke, deshalb ist
+rem     dieser Ordner das ganze Laufwerk C:. Alte Spielstaende des Originals (Windows-VirtualStore) kommen mit.
+robocopy "%GOG%" "%SAVES%" /E /XC /XN /XO /R:1 /W:1 /XD DOSBOX MUSIC __support "Video Codec" Documentation /XF game.gog game.inst *.pdf *.zip *.lnk *.ico *.dll *.ini *.info unins000.* goggame* >nul
+set "VSTORE=%LOCALAPPDATA%\VirtualStore%GOG:~2%"
+if exist "%VSTORE%" robocopy "%VSTORE%" "%SAVES%" /E /XC /XN /XO /R:1 /W:1 >nul
 if not exist "%RUN%" mkdir "%RUN%"
 copy /y "%FIXEXE%" "%RUN%\BLADEM.EXE" >nul
-rem --- korrigierte Spieldaten (von PATCHEN.bat) ueber die Overlay-Ablage einblenden
+rem --- korrigierte Spieldaten (von PATCHEN.bat) in den Spielstand-Ordner legen
 if exist "%BUILD%\SCHICK.DAT" copy /y "%BUILD%\SCHICK.DAT" "%SAVES%\SCHICK.DAT" >nul
 rem --- Probenlog (Zusatzfunktion): an mit BLADEM_FIX_WICHTIG_MIT_PROBENLOG_STARTEN.bat, sonst aus.
 rem     Das Spiel schreibt nur, wenn PROBEN.CSV da ist. Ein altes Log wandert nach Build\Probenlogs.
@@ -42,15 +48,14 @@ if "%PROBENLOG%"=="1" (
 )
 
 rem --- DOSBox-Startbefehle in eine kleine Zusatz-Konfiguration schreiben
-rem     C: = Spielordner (nur lesen), Aenderungen gehen nach Testspielstaende_Fix_Wichtig
+rem     C: = Spielstand-Ordner (Kopie des Spielordners, dort landen auch die Spielstaende)
 rem     D: = CD-Abbild von GOG (CD-Audio)
 rem     E: = Build\Fix_Wichtig (die Fix-EXE als BLADEM.EXE)
 > "%CONF%" echo [sdl]
 >>"%CONF%" echo fullscreen=false
 >>"%CONF%" echo [autoexec]
 >>"%CONF%" echo @echo off
->>"%CONF%" echo mount C "%GOG%"
->>"%CONF%" echo mount C "%SAVES%" -t overlay
+>>"%CONF%" echo mount C "%SAVES%"
 if exist "%GOG%\game.inst" >>"%CONF%" echo imgmount D "%GOG%\game.inst" -t iso
 >>"%CONF%" echo mount E "%RUN%"
 >>"%CONF%" echo C:
