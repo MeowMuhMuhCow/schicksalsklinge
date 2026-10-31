@@ -15,3 +15,5 @@ __pycache__/
 *.pyc
 Linux/starten.conf
 HIMMEL_AUS.txt
+HIMMEL_AN.txt
+SPEICHERN_OHNE_AP.txt

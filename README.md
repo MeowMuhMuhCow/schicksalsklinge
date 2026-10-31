@@ -4,7 +4,7 @@
 
 **Inoffizielle Bugfix-Fassung · spielbar ohne Compiler · das Original bleibt unangetastet · [gleich loslegen](#schnellstart-bugfix-fassung-spielen-ohne-compiler)**
 
-**Neu in Version 1.4: lebendiger Stadthimmel.** Ziehende Wolken nach dem Tageswind des Spiels, Sonne, Mond und Sterne, rundum in jeder Blickrichtung. Eine Zusatzfunktion, standardmäßig an, aus mit `HIMMEL_AUS.bat`, wieder an mit `HIMMEL_AN.bat` (Linux: `HIMMEL=0`). Details in [BUGFIXES.md](BUGFIXES.md).
+**Neu in Version 1.4a: zwei Zusatzfunktionen zum Einschalten**, beide standardmäßig aus: der **lebendige Stadthimmel** (ziehende Wolken nach dem Tageswind des Spiels, Sonne, Mond und Sterne, rundum in jeder Blickrichtung) mit `HIMMEL_AN.bat`, und **Speichern ohne AP-Verlust** außerhalb von Tempeln mit `SPEICHERN_OHNE_AP_AN.bat` (Linux: `HIMMEL=1`, `SPEICHERN_OHNE_AP=1`). Ausschalten mit den `..._AUS.bat`. Details in [BUGFIXES.md](BUGFIXES.md).
 
 **Neu in Version 1.3: Probenlog.** Jede Probe, die das Spiel würfelt (Eigenschaften, Talente, Zauber, Attacke und Parade), erscheint live in einem Fenster neben dem Spiel, mit jedem einzelnen Würfel. Starten mit `BLADEM_FIX_WICHTIG_MIT_PROBENLOG_STARTEN.bat` (Linux: `bash Linux/starten.sh wichtig log`), hinterher ansehen mit `Probenlog/Probenlog_Schicksalsklinge.html`. Beschreibung: [Probenlog/LIESMICH.md](Probenlog/LIESMICH.md).
 

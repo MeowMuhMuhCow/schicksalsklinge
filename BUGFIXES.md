@@ -1,6 +1,6 @@
 # Die Schicksalsklinge – Bugfix-Fassung: Änderungsliste
 
-**Version 1.4 vom 31.10.2026** · inoffiziell · zur deutschen GOG-Fassung 3.02 · **im Spiel noch ungetestet, Tester willkommen**
+**Version 1.4a vom 31.10.2026** · inoffiziell · zur deutschen GOG-Fassung 3.02 · **im Spiel noch ungetestet, Tester willkommen**
 
 ## So geht's
 
@@ -21,9 +21,16 @@ Die Spielstände der Bugfix-Fassung liegen in eigenen Ordnern unter `Build\`. Al
 | **WICHTIG** (empfohlen) | kritische und mittlere Fehler: Abstürze, Hänger, verlorene Ausrüstung, falsche Preise, Fehler, die man im Spiel merkt |
 | **ALLES** | zusätzlich viele kleine Fehler ohne große Spielwirkung |
 
+## Neu in Version 1.4a: Speichern ohne AP-Verlust (Schalter), Himmel standardmäßig aus
+
+Zwei Zusatzfunktionen, beide **standardmäßig aus**, damit niemand aus Versehen etwas anderes spielt als das Original mit Fehlerbehebungen:
+
+- **Speichern ohne AP-Verlust:** Außerhalb eines Tempels kostet Speichern im Original jeden Helden 1 Abenteuerpunkt. Mit `SPEICHERN_OHNE_AP_AN.bat` entfällt das, samt dem Hinweis im Speicherfenster (Linux: `SPEICHERN_OHNE_AP=1`). Das ist eine Regeländerung, kein Fehler: Attic wollte damit häufiges Speichern bremsen. Die Idee stammt vom optionalen Extra-Patch NOAPLOSS von NRS ([Crystals-Forum, 2016](https://www.crystals-dsa-foren.de/showthread.php?tid=5191&pid=148668#pid148668)), hier zusammen mit Fehlerbehebungen und Probenlog. Zurück mit `SPEICHERN_OHNE_AP_AUS.bat`
+- **Lebendiger Stadthimmel** (aus 1.4): jetzt standardmäßig aus, einschalten mit `HIMMEL_AN.bat` (Linux: `HIMMEL=1`)
+
 ## Neu in Version 1.4: lebendiger Stadthimmel
 
-Eine Zusatzfunktion, keine Fehlerbehebung: **Der Himmel über den Städten lebt.** Statt des festen Wolkenbilds gibt es einen Rundum-Himmel mit ziehenden Wolken, Sonne, Mond und Sternen. Standardmäßig an, aus mit `HIMMEL_AUS.bat`, wieder an mit `HIMMEL_AN.bat` (Linux: `HIMMEL=0`). Die Standard-EXE bleibt bytegleich, Spielstände bleiben kompatibel.
+Eine Zusatzfunktion, keine Fehlerbehebung: **Der Himmel über den Städten lebt.** Statt des festen Wolkenbilds gibt es einen Rundum-Himmel mit ziehenden Wolken, Sonne, Mond und Sternen. Einschalten mit `HIMMEL_AN.bat`, ausschalten mit `HIMMEL_AUS.bat` (Linux: `HIMMEL=1`). Seit 1.4a standardmäßig aus. Die Standard-EXE bleibt bytegleich, Spielstände bleiben kompatibel.
 
 - **Rundum:** Jede Blickrichtung hat ihren eigenen Ausschnitt, nach einer vollen Drehung schließen die Wolken nahtlos an
 - **Wolken nach dem Tageswind des Spiels:** Die Schicksalsklinge würfelt jeden Tag einen Wind aus, der bisher nur die Schiffe schneller oder langsamer machte. Jetzt bestimmt er auch, wie viele Wolken ziehen und wie schnell. An Sturmtagen sind sie grau

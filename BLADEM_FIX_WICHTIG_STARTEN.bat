@@ -47,10 +47,14 @@ if "%PROBENLOG%"=="1" (
   start "Probenlog" powershell -NoProfile -ExecutionPolicy Bypass -File "%HIER%Probenlog\probenlog_fenster.ps1" -Datei "%SAVES%\PROBEN.CSV"
 )
 
-rem --- Lebendiger Stadthimmel (Zusatzfunktion, Vorgabe an): HIMMEL_AUS.bat legt HIMMEL_AUS.txt
-rem     neben die Startdateien, HIMMEL_AN.bat loescht sie. Das Spiel zeigt den Original-Himmel, wenn HIMMEL.AUS im Spielstand-Ordner liegt.
-if exist "%HIER%HIMMEL_AUS.txt" type nul > "%SAVES%\HIMMEL.AUS"
-if not exist "%HIER%HIMMEL_AUS.txt" if exist "%SAVES%\HIMMEL.AUS" del "%SAVES%\HIMMEL.AUS"
+rem --- Zusatzfunktionen (Vorgabe: beide aus), die Schalter liegen neben den Startdateien:
+rem     HIMMEL_AN.bat / HIMMEL_AUS.bat                   lebendiger Stadthimmel  -> HIMMEL.AN im Spielstand-Ordner
+rem     SPEICHERN_OHNE_AP_AN.bat / _AUS.bat              Speichern ohne AP-Verlust -> APFREI.AN im Spielstand-Ordner
+if exist "%SAVES%\HIMMEL.AUS" del "%SAVES%\HIMMEL.AUS"
+if exist "%HIER%HIMMEL_AN.txt" type nul > "%SAVES%\HIMMEL.AN"
+if not exist "%HIER%HIMMEL_AN.txt" if exist "%SAVES%\HIMMEL.AN" del "%SAVES%\HIMMEL.AN"
+if exist "%HIER%SPEICHERN_OHNE_AP.txt" type nul > "%SAVES%\APFREI.AN"
+if not exist "%HIER%SPEICHERN_OHNE_AP.txt" if exist "%SAVES%\APFREI.AN" del "%SAVES%\APFREI.AN"
 
 rem --- DOSBox-Startbefehle in eine kleine Zusatz-Konfiguration schreiben
 rem     C: = Spielstand-Ordner (Kopie des Spielordners, dort landen auch die Spielstaende)

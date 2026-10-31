@@ -124,8 +124,11 @@ def main():
           ' * angehaengt, aber nur, wenn diese Datei schon da ist (Datei anlegen = Log an). Spiel und Spielstand bleiben gleich. */',
           '#ifndef FIX_PROBENLOG', '#define FIX_PROBENLOG FIX_STUFE_W', '#endif', '',
           '/* Zusatzfunktion, keine Fehlerbehebung: lebendiger Stadthimmel. Statt des festen Himmelsbilds ein erzeugter Himmel',
-          ' * mit ziehenden Wolken und Sternen bei Nacht, Farben aus der Himmelspalette (Tageszeit wie im Original). */',
-          '#ifndef FIX_HIMMEL', '#define FIX_HIMMEL FIX_STUFE_W', '#endif', '']
+          ' * mit ziehenden Wolken und Sternen bei Nacht, Farben aus der Himmelspalette (Tageszeit wie im Original). Opt-in ueber HIMMEL.AN. */',
+          '#ifndef FIX_HIMMEL', '#define FIX_HIMMEL FIX_STUFE_W', '#endif', '',
+          '/* Zusatzfunktion, keine Fehlerbehebung (Opt-in): Speichern ausserhalb eines Tempels ohne AP-Verlust, nur wenn APFREI.AN',
+          ' * im Spielordner liegt (wie der optionale Extra-Patch NOAPLOSS von NRS, 2016). */',
+          '#ifndef FIX_SPEICHERN', '#define FIX_SPEICHERN FIX_STUFE_W', '#endif', '']
     A = ['; s_fix.inc - Fehlerbehebungen per Schalter fuer TASM (erzeugt von Werkzeuge/mkfix.py, siehe s_fix.h)',
          'ifndef FIX_BUGS', 'FIX_BUGS = 0', 'endif', 'ifndef FIX_EXPLOITS', 'if FIX_BUGS gt 0', 'FIX_EXPLOITS = 1', 'else',
          'FIX_EXPLOITS = 0', 'endif', 'endif']

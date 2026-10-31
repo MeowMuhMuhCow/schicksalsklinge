@@ -751,15 +751,16 @@ void TLK_eremit(const signed int state)
 }
 
 #if FIX_HIMMEL
-/* Abschalter: liegt HIMMEL.AUS im Spielordner, gibt es den Original-Himmel. Geprueft beim Betreten einer Stadt, Merker im
- * sonst ungenutzten g_always_zero2 (1 = aus). Dateiname Zeichen fuer Zeichen, kein neuer Text im Datensegment. */
+/* Einschalter (ab 1.4a Opt-in): nur wenn HIMMEL.AN im Spielordner liegt, gibt es den lebendigen Himmel, sonst den
+ * Original-Himmel. Geprueft beim Betreten einer Stadt, Merker im sonst ungenutzten g_always_zero2 (1 = an).
+ * Dateiname Zeichen fuer Zeichen, kein neuer Text im Datensegment. */
 static void himmel_schalter(void)
 {
 	char name[12];
 	signed int fd;
 
 	name[0] = 'H'; name[1] = 'I'; name[2] = 'M'; name[3] = 'M'; name[4] = 'E'; name[5] = 'L';
-	name[6] = '.'; name[7] = 'A'; name[8] = 'U'; name[9] = 'S'; name[10] = '\0';
+	name[6] = '.'; name[7] = 'A'; name[8] = 'N'; name[9] = '\0';
 	g_always_zero2 = 0;
 	if ((fd = open(name, O_BINARY | O_RDONLY)) != -1) {
 		close(fd);
@@ -1021,7 +1022,7 @@ static void refresh_floor_and_sky(void)
 
 	process_nvf_extraction(&nvf);
 #if FIX_HIMMEL
-	if (!g_always_zero2) {
+	if (g_always_zero2) {
 		himmel_malen((uint8_t*)g_renderbuf_ptr, height, 208, 0);
 	}
 #endif
@@ -1047,7 +1048,7 @@ void town_update_view(void)
 	town_set_visual_square_tex();
 
 #if FIX_HIMMEL
-	/* g_always_zero1 merkt sich, fuer welchen Zeitabschnitt der Himmel gezeichnet ist, g_always_zero2 den Abschalter
+	/* g_always_zero1 merkt sich, fuer welchen Zeitabschnitt der Himmel gezeichnet ist, g_always_zero2 den Einschalter
 	 * (beide sonst ungenutzt) */
 	g_always_zero1 = (signed int)(g_timer_tick_counter / 36);
 #else
@@ -1624,7 +1625,7 @@ signed int town_step(void)
 	}
 #if FIX_HIMMEL
 	/* lebendiger Himmel: alle 36 Ticks neu zeichnen, wenn die Strassenansicht frei zu sehen ist */
-	else if (!g_always_zero2 && (g_always_zero1 != (signed int)(g_timer_tick_counter / 36)) && !gs_town_loc_type && !gs_show_travel_map &&
+	else if (g_always_zero2 && (g_always_zero1 != (signed int)(g_timer_tick_counter / 36)) && !gs_town_loc_type && !gs_show_travel_map &&
 		!g_event_ani_busy && !g_special_screen && (g_pp20_index == ARCHIVE_FILE_PLAYM_UK))
 	{
 		himmel_auffrischen();

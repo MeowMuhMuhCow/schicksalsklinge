@@ -844,6 +844,25 @@ signed int load_game_state(void)
 #endif
 }
 
+#if FIX_SPEICHERN
+/* Zusatzfunktion FIX_SPEICHERN (Opt-in): liegt APFREI.AN im Spielordner, kostet Speichern ausserhalb eines Tempels
+ * keine AP mehr, und der Hinweis darauf entfaellt (wie der optionale Extra-Patch NOAPLOSS von NRS, 2016).
+ * Die Startdateien legen die Datei an (SPEICHERN_OHNE_AP_AN.bat) oder entfernen sie. Dateiname Zeichen fuer Zeichen. */
+static signed int speichern_ohne_ap(void)
+{
+	char name[12];
+	signed int fd;
+
+	name[0] = 'A'; name[1] = 'P'; name[2] = 'F'; name[3] = 'R'; name[4] = 'E'; name[5] = 'I';
+	name[6] = '.'; name[7] = 'A'; name[8] = 'N'; name[9] = '\0';
+	if ((fd = open(name, O_BINARY | O_RDONLY)) != -1) {
+		close(fd);
+		return 1;
+	}
+	return 0;
+}
+#endif
+
 /**
  * \brief   writes a game state file
  *
@@ -865,6 +884,9 @@ signed int save_game_state(void)
 	signed int flag;
 	uint32_t len;
 	struct ffblk blk;
+#if FIX_SPEICHERN
+	signed int ohne_ap = speichern_ohne_ap();
+#endif
 
 	tw_bak = g_textbox_width;
 	g_textbox_width = 5;
@@ -880,7 +902,11 @@ signed int save_game_state(void)
 #ifndef M302de_FEATURE_MOD
 		/* Feature mod 4: In the original game, when creating a savegame while not being in a temple, the AP of all heroes is decreased by 1. This feature mod stops the AP decrease.
 		 * Here, the warning message "Dabei verliert jeder Held in der Gruppe einen Abenteuerpunkt" is displayed. */
+#if FIX_SPEICHERN
+		if ((gs_town_loc_type != LOCTYPE_TEMPLE) && (g_game_state != GAME_STATE_VICTORY) && !ohne_ap) {
+#else
 		if ((gs_town_loc_type != LOCTYPE_TEMPLE) && (g_game_state != GAME_STATE_VICTORY)) {
+#endif
 
 			/* create savegame not in a temple */
 
@@ -960,7 +986,11 @@ signed int save_game_state(void)
 #ifndef M302de_FEATURE_MOD
 				/* Feature mod 4: In the original game, when creating a savegame while not being in a temple, the AP of all heroes is decrease by 1. This feature mod stops the AP decrease.
 				 * Here, the actual decrease is executed */
+#if FIX_SPEICHERN
+				if ((g_game_state != GAME_STATE_VICTORY) && (gs_town_loc_type != LOCTYPE_TEMPLE) && (get_hero(tw_bak)->ap > 0) && !ohne_ap)
+#else
 				if ((g_game_state != GAME_STATE_VICTORY) && (gs_town_loc_type != LOCTYPE_TEMPLE) && (get_hero(tw_bak)->ap > 0))
+#endif
 				{
 					add_hero_ap(get_hero(tw_bak), -1L);
 				}

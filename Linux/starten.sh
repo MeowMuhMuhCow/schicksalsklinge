@@ -16,7 +16,8 @@
 #   VOLLBILD=1          Vollbild
 #   INTRO=0             Intro ueberspringen
 #   CYCLES=3000         Tempo (DOSBox-Zyklen)
-#   HIMMEL=0            Schicksalsklinge: Original-Himmel statt des lebendigen Himmels (ab 1.4)
+#   HIMMEL=1            Schicksalsklinge: lebendiger Stadthimmel an (ab 1.4, Vorgabe aus)
+#   SPEICHERN_OHNE_AP=1 Schicksalsklinge: Speichern ausserhalb von Tempeln kostet keine AP (ab 1.4a, Vorgabe aus)
 #   DOSBOX=pfad         andere DOSBox
 #   OHNE_GOGCONF=1      ohne die DOSBox-Einstellungen von GOG (dosbox_realms*.conf)
 . "$(dirname "${BASH_SOURCE[0]}")/gemeinsam.sh"
@@ -86,10 +87,15 @@ if [ -n "$P" ]; then
 fi
 [ "$LOG" = 1 ] && : > "$C/PROBEN.CSV"
 
-# Lebendiger Stadthimmel (nur Schicksalsklinge, ab 1.4, Vorgabe an): HIMMEL=0 legt HIMMEL.AUS an, sonst wird sie entfernt
+# Zusatzfunktionen der Schicksalsklinge (Vorgabe aus): HIMMEL=1 legt HIMMEL.AN an (lebendiger Stadthimmel, ab 1.4),
+# SPEICHERN_OHNE_AP=1 legt APFREI.AN an (Speichern ohne AP-Verlust, ab 1.4a); sonst werden die Dateien entfernt
 if [ "$EXE" = BLADEM ]; then
-	H="$(datei_in "$C" HIMMEL.AUS)"
-	if [ "${HIMMEL:-1}" = 0 ]; then [ -z "$H" ] && : > "$C/HIMMEL.AUS"; else [ -n "$H" ] && rm -f "$H"; fi
+	H="$(datei_in "$C" HIMMEL.AUS)"; [ -n "$H" ] && rm -f "$H"
+	for paar in "HIMMEL HIMMEL.AN" "SPEICHERN_OHNE_AP APFREI.AN"; do
+		read -r var datei <<< "$paar"
+		H="$(datei_in "$C" "$datei")"
+		if [ "${!var:-0}" = 1 ]; then [ -z "$H" ] && : > "$C/$datei"; else [ -n "$H" ] && rm -f "$H"; fi
+	done
 fi
 
 # CD-Abbild: eigenes ueber CD=..., sonst das von GOG im Spielordner (CD-Audio bzw. CD-Pruefung).
