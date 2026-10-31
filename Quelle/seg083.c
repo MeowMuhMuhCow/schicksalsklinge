@@ -358,11 +358,17 @@ signed int DNG08_handler(void)
 			}
 		}
 
+#if !FIX_0106
 	} else if (target_pos == DNG_POS(0,5,8) && target_pos != gs_dng_pos_bak &&
 			/* Original-Bug: "&&" instead of "||" (compare the secret doors in seg078). The group must
 			 * enter the square and turn west in the same step, which normal movement never does, so the
 			 * secret door at (4,8) can practically not be found (vermutlich, not tested). */
 			gs_viewdir != gs_viewdir_bak &&
+#else
+	} else if (target_pos == DNG_POS(0,5,8) &&
+			/* Fix 106: Betreten ODER Drehen (wie bei den Geheimtueren in seg078) */
+			(target_pos != gs_dng_pos_bak || gs_viewdir != gs_viewdir_bak) &&
+#endif
 			gs_viewdir == WEST &&
 			gs_dng08_secret_door_status != DNG_SECRET_DOOR_STATUS_OPEN)
 	{

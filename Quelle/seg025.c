@@ -330,7 +330,12 @@ void show_treasure_map(void)
 		}
 	}
 
+#if !FIX_0418
 	if (count == 0) {
+#else
+	/* Fix 418: Hjores Kartenteil 9 zaehlt bei der Pruefung mit, ob ueberhaupt ein Teil da ist (gezeichnet wird es ja auch) */
+	if ((count == 0) && !gs_treasure_maps[9]) {
+#endif
 		/* no treasure map parts found */
 		GUI_output(get_ttx(609)); /* "DU HAST DOCH NOCH GAR KEINE KARTENTEILE GEFUNDEN!" */
 	} else {

@@ -568,6 +568,24 @@ void mspell_blitz(void)
 	}
 }
 
+#if FIX_0390
+/* Fix 390: unzerbrechliche Waffen (Zauberstab, Hexenbesen, magische Orknase, magisches Kurzschwert, Grimring) zerbrechen
+ * nicht durch Eisenrost, ein falscher Bruchfaktor (Curians Stab: bf 5) wird dabei auf -99 berichtigt */
+static signed int fix_unbreakable_weapon(struct inventory *p)
+{
+	signed int item_id = p->item_id;
+
+	if ((item_id == ITEM_ID_ZAUBERSTAB) || (item_id == ITEM_ID_HEXENBESEN) || (item_id == ITEM_ID_ORKNASE__MAGIC) ||
+		(item_id == ITEM_ID_KURZSCHWERT__MAGIC) || (item_id == ITEM_ID_DAS_SCHWERT_GRIMRING))
+	{
+		p->bf = -99;
+		return 1;
+	}
+
+	return 0;
+}
+#endif
+
 void mspell_eisenrost(void)
 {
 	signed int item_id;
@@ -587,7 +605,13 @@ void mspell_eisenrost(void)
 
 		} else if (!get_spelltarget()->inventory[HERO_INVENTORY_SLOT_RIGHT_HAND].flags.broken) {
 
+#if !FIX_0390
 			if (get_spelltarget()->inventory[HERO_INVENTORY_SLOT_RIGHT_HAND].bf > 0) {
+#else
+			/* Fix 390: unzerbrechliche Waffen zerbrechen nicht (bf > 0 bleibt Bedingung) */
+			if ((get_spelltarget()->inventory[HERO_INVENTORY_SLOT_RIGHT_HAND].bf > 0) &&
+				!fix_unbreakable_weapon(&get_spelltarget()->inventory[HERO_INVENTORY_SLOT_RIGHT_HAND])) {
+#endif
 
 				get_spelltarget()->inventory[HERO_INVENTORY_SLOT_RIGHT_HAND].flags.broken = 1;
 

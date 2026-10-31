@@ -1,3 +1,6 @@
 Bugfix-Patch fuer die Schicksalsklinge (GOG, deutsche SCHICKM.EXE 3.02, MD5 4ce035f95ead01a8b2553b4487544e5d).
-Anwenden: PATCHEN.bat im Hauptordner. Erzeugt Build\BLADEM_FIX_WICHTIG.EXE und _ALLES.EXE.
+Anwenden: PATCHEN.bat im Hauptordner. Erzeugt Build\BLADEM_FIX_WICHTIG.EXE und _ALLES.EXE,
+dazu aus der eigenen SCHICK.DAT (MD5 e401cdc4b2ca777f526074cddf391c29) die korrigierten Spieldaten Build\SCHICK.DAT
+(Datenkorrekturen aus dem Osterpatch von NRS, 2016). Die Startdateien blenden sie ueber die Spielstand-Ablage ein.
 Die Patches enthalten nur die geaenderten Bytes. Format NDP1, erzeugt mit Werkzeuge/mkpatch.py.
+Das Original wird nie veraendert.

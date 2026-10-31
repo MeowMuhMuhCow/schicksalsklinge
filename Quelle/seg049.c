@@ -471,6 +471,13 @@ void GRP_switch_to_next(const signed int mode)
 		gs_dungeon_id_bak = gs_groups_dungeon_id_bak[group_id];
 		gs_dungeon_level_bak = gs_groups_dng_level_bak[group_id];
 
+#if FIX_0346
+		/* Fix 346: Ereignisfeld-Merker auf das Feld der neuen Gruppe setzen, sonst loest ihr Feld erneut aus (Osterpatch NRS 2016) */
+		if (gs_dungeon_id) {
+			gs_dng_pos_bak = DNG_POS(gs_dungeon_level, gs_x, gs_y);
+		}
+#endif
+
 		GRP_sort_heroes();
 
 		for (group_id = 0; group_id <= 6; group_id++) {

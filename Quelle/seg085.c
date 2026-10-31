@@ -97,6 +97,10 @@ signed int DNG10_handler(void)
 
 			if (GUI_bool((!(gs_dng10_lever_found & 2) ? get_tx(6) : get_tx(41)))) /* "EIN STEIN IN DER WAND SCHEINT LOSE ZU SEIN..." / "HIER IST EIN LOCH IN DER WAND, WO IHR VORH..." */
 			{
+#if FIX_0435
+				/* Fix 435: der Stein ist schon mit dieser Antwort entfernt; beim naechsten Besuch kommt Text 41 ("...WO IHR VORHIN DEN STEIN ENTFERNT HABT"), auch ohne den Hebel zu betaetigen */
+				gs_dng10_lever_found |= 2;
+#endif
 				if (GUI_bool(get_tx(7))) { /* "DAHINTER BEFINDET SICH EIN KLEINER HEBEL.@WOLLT IHR IHN BETÄTIGEN?" */
 
 					gs_dng10_lever_found |= 2;
@@ -182,6 +186,7 @@ signed int DNG10_handler(void)
 	} else if (target_pos == DNG_POS(0,1,8) && target_pos != gs_dng_pos_bak)
 	{
 		/* TRAP: a floorplate */
+#if !FIX_0116
 		if (gs_dng10_floorplate_found || test_talent(hero, TA_SINNESSCHAERFE, 5) > 0)
 		{
 			gs_dng10_floorplate_found = 1;
@@ -205,6 +210,41 @@ signed int DNG10_handler(void)
 				GUI_output(g_dtp2);
 			}
 		}
+#else
+		/* Fix 116: gs_dng10_floorplate_found als Bits (0x01 entdeckt, 0x02 entschaerft; alter Wert 1 = entdeckt).
+		 * Die Bolzen loesen aus, wenn die Platte nicht entdeckt, das Entschaerfen abgelehnt oder misslungen ist;
+		 * ein gelungenes Entschaerfen wird gemerkt. */
+		if (!(gs_dng10_floorplate_found & 0x02))
+		{
+			if ((gs_dng10_floorplate_found & 0x01) || test_talent(hero, TA_SINNESSCHAERFE, 5) > 0)
+			{
+				gs_dng10_floorplate_found |= 0x01;
+
+				if (GUI_bool(get_tx(13)) && test_talent(hero, TA_SCHLOESSER, 7) > 0) /* "VOR EUCH AUF DEM BODEN SCHEINT EINE TRITTPLATTE ZU SEIN. SIE IST FA..." */
+				{
+					gs_dng10_floorplate_found |= 0x02;
+				}
+			}
+
+			if (!(gs_dng10_floorplate_found & 0x02))
+			{
+				if (gs_dng10_floorplate_loads)
+				{
+					sprintf(g_dtp2,	get_tx(14), hero->alias); /* "%s WIRD VON DREI ARMBRUSTBOLZEN GETROFFEN!" */
+
+					gs_dng10_floorplate_loads--;
+
+					sub_hero_le(hero, dice_roll(3, 6, 0));
+
+					GUI_output(g_dtp2);
+
+				} else if (gs_dng10_floorplate_found & 0x01) {
+					/* leere Falle: nur melden, wenn die Platte bekannt ist */
+					GUI_output(get_tx(15)); /* "NICHTS PASSIERT." */
+				}
+			}
+		}
+#endif
 
 	} else if (target_pos == DNG_POS(0,1,12) && target_pos != gs_dng_pos_bak)
 	{
@@ -299,10 +339,23 @@ signed int DNG10_handler(void)
 		{
 			gs_dng10_mummy_lever ^= 1;
 
+#if !FIX_0218
 			sprintf(g_dtp2, get_tx(26), hero->alias); /* "%s HAT SICH AN DEM HEBEL DIE HÄNDE VERBRANNT, OBWOHL DIESER KEINE W..." */
 			GUI_output(g_dtp2);
 
 			sub_hero_le(hero, 2);
+#else
+			/* Fix 218: der gruene Ring (Schutz vor magischem Feuer) bewahrt vor den verbrannten Haenden */
+			if (get_first_hero_with_item(ITEM_ID_RING__GREEN) != -1)
+			{
+				GUI_output(get_tx(15)); /* "NICHTS PASSIERT." */
+			} else {
+				sprintf(g_dtp2, get_tx(26), hero->alias); /* "%s HAT SICH AN DEM HEBEL DIE HAENDE VERBRANNT, OBWOHL DIESER KEINE W..." */
+				GUI_output(g_dtp2);
+
+				sub_hero_le(hero, 2);
+			}
+#endif
 		}
 
 	} else if ((target_pos == DNG_POS(1,10,3) || target_pos == DNG_POS(1,7,3)) && target_pos != gs_dng_pos_bak && gs_dng10_mummy_lever)
@@ -378,7 +431,12 @@ signed int DNG10_handler(void)
 					/* 2x HEALING POTION, MAGIC POTION, THROWING DAGGER and ...*/
 					give_new_item_to_group(ITEM_ID_HEILTRANK, 1, 2);
 					give_new_item_to_group(ITEM_ID_ZAUBERTRANK, 1, 1);
+#if !FIX_0361
 					give_new_item_to_group(ITEM_ID_WURFDOLCH__MAGIC, 1, 1);
+#else
+					/* Fix 361: den magischen Wurfdolch gibt es nur noch als Lohn des Drachen fuer den Platinschluessel,
+					 * nicht schon beim Pluendern des Horts (F129.DTX 35 nennt im Datenpatch 1.2 keinen Dolch mehr) */
+#endif
 
 					/* 200 Ducats */
 					p_money = get_party_money();

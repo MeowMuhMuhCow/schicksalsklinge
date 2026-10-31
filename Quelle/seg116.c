@@ -760,7 +760,13 @@ void TLK_old_woman(const signed int state)
 	} else if (state == 38) {
 		timewarp(HOURS(1));
 	} else if (state == 41) {
+#if !FIX_0076
 		gs_tevent093_flag = gs_tevent091_flag = gs_informer_flags[INFORMER_ID_ISLEIF] = gs_isleif_jandas_regards = 1;
+#else
+		/* Fix 76: Isleif nur von unbekannt (0) auf bekannt (1) setzen, "erledigt" (2) bleibt erhalten */
+		gs_tevent093_flag = gs_tevent091_flag = gs_isleif_jandas_regards = 1;
+		if (!gs_informer_flags[INFORMER_ID_ISLEIF]) gs_informer_flags[INFORMER_ID_ISLEIF] = 1;
+#endif
 	}
 }
 
@@ -769,6 +775,10 @@ void tevent_136(void)
 {
 	if (gs_met_unicorn_flag && gs_got_main_quest && gs_unicorn_get_map && !gs_unicorn_timer_hours) {
 
+#if FIX_0414
+		/* Fix 414: Heldenzeiger aus der gespeicherten Heldenposition neu setzen, der Speicherzeiger im Spielstand gilt nach dem Laden nicht mehr */
+		gs_unicorn_hero_ptr = (uint8_t*)get_hero(gs_unicorn_hero_pos);
+#endif
 		do_talk(12, 1);
 		gs_met_unicorn_flag = 1;
 		gs_unicorn_get_map = 0;

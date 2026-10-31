@@ -287,7 +287,12 @@ signed int DNG14_handler(void)
 
 		GUI_output(get_tx(16)); /* "HIER BEWAHREN DIE RÄUBER OFFENSICHTLICH IHR PLÜNDERGUT AUF. KISTEN..." */
 
+#if !FIX_0355
 		if (!gs_dng14_booty_flag) {
+#else
+		/* Fix 355: das Beutelager bleibt pluenderbar (der Rest liegt in gs_dng14_chest_barrel im Spielstand) */
+		{
+#endif
 
 			loot_multi_chest(gs_dng14_chest_barrel, get_tx(17)); /* "NACHDEM IHR EUCH ETWAS UMGESCHAUT HABT, ENTDECKT IHR SCHLIESSLICH D..." */
 

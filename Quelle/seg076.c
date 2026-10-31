@@ -156,13 +156,37 @@ void DNG_door(const signed int action)
 					{
 						GUI_output(get_tx(18)); /* FINAL.DTX: "IHR STEHT VOR EINER TÜR, AN DIE MIT SCHWEREN KRAMPEN..." */
 
+#if !(FIX_0432 || FIX_0354)
 					} else if (!(gs_dungeon_id == DUNGEON_ID_PIRATENHOEHLE && pos == DNG_POS(0,12,8) && gs_dng11_lever_flag != 4) &&
 							!(gs_dungeon_id == DUNGEON_ID_DASPOTASCHATZ && pos == DNG_POS(0,11,1) && gs_dng06_pitdoor_flag) &&
 							!(gs_dungeon_id == DUNGEON_ID_ZWERGENFESTE && gs_dng12_watertrap_water_runs))
+#else
+					/* Fix 432: die Schatzkammertuer der Manrek-Piratenhoehle steht laut F131.DDT auf (0,12,7), nicht auf (0,12,8): Sperre bis Hebelstellung 4 und Eisenschluessel wirken erst damit */
+					/* Fix 354: die Daspota-Tuer (0,11,1) ist nur gesperrt, solange die Falltuer per Stein gesichert ist (Bit 0 von gs_dng06_pitdoor_flag) */
+					} else if (!(gs_dungeon_id == DUNGEON_ID_PIRATENHOEHLE &&
+#if FIX_0432
+							pos == DNG_POS(0,12,7) &&
+#else
+							pos == DNG_POS(0,12,8) &&
+#endif
+							gs_dng11_lever_flag != 4) &&
+							!(gs_dungeon_id == DUNGEON_ID_DASPOTASCHATZ && pos == DNG_POS(0,11,1) &&
+#if FIX_0354
+							(gs_dng06_pitdoor_flag & 0x01)) &&
+#else
+							gs_dng06_pitdoor_flag) &&
+#endif
+							!(gs_dungeon_id == DUNGEON_ID_ZWERGENFESTE && gs_dng12_watertrap_water_runs))
+#endif
 					{
 						/* for this door works an IRON KEY [first type] */
 						/* BEWARE: there are two types of IRON KEYs in the game */
+#if !FIX_0432
 						if (gs_dungeon_id == DUNGEON_ID_PIRATENHOEHLE && pos == DNG_POS(0,12,8) && get_first_hero_with_item(ITEM_ID_EISENSCHLUESSEL__1) != -1)
+#else
+						/* Fix 432: Eisenschluessel fuer die Tuer auf (0,12,7) */
+						if (gs_dungeon_id == DUNGEON_ID_PIRATENHOEHLE && pos == DNG_POS(0,12,7) && get_first_hero_with_item(ITEM_ID_EISENSCHLUESSEL__1) != -1)
+#endif
 						{
 							*(g_dng_map_ptr + MAP_POS(x, y)) |= 0x02;
 							/* effect: ......1. i.e. door is unlocked */
@@ -220,6 +244,11 @@ void DNG_door(const signed int action)
 							g_steptarget_front = *(g_dng_map_ptr + MAP_POS(x,y));
 							g_dng_extra_action = DNG_MENU_MODE_OPEN_DOOR;
 						}
+#if FIX_0354
+					} else {
+						/* Fix 354: eine gesperrte Tuer meldet sich (Text 837 aus dem Datenpatch 1.2) */
+						print_msg_with_first_hero(get_ttx(837)); /* "LEIDER FEHLGESCHLAGEN! DIE TUER SCHEINT DURCH ETWAS ANDERES ALS NUR DAS SCHLOSS BLOCKIERT ZU SEIN." */
+#endif
 					}
 				} else {
 					/* smash door */

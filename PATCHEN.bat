@@ -13,7 +13,11 @@ call "%~dp0SPIELPFAD_SUCHEN.cmd"
 if not defined SPIEL goto keinspiel
 echo Spielordner: %SPIEL%
 echo.
-powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0Patch\patchen.ps1" -Spiel "%SPIEL%" -Name SCHICKM.EXE -Ziel "%~dp0Build"
+powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0Patch\patchen.ps1" -Spiel "%SPIEL%" -Name SCHICKM.EXE -Ziel "%~dp0Build" -Muster "BLADEM_FIX_*.ndp"
+if errorlevel 1 goto fehler
+echo.
+echo Spieldaten (SCHICK.DAT) mit den Korrekturen aus dem Osterpatch von NRS:
+powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0Patch\patchen.ps1" -Spiel "%SPIEL%" -Name SCHICK.DAT -Ziel "%~dp0Build" -Muster "SCHICK.DAT.ndp"
 if errorlevel 1 goto fehler
 echo.
 echo Jetzt spielen: BLADEM_FIX_WICHTIG_STARTEN.bat (kritische + mittlere Fehler behoben)

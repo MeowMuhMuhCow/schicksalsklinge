@@ -639,7 +639,15 @@ void tevent_064(void)
 			GUI_output(get_tx2(70)); /* "IHR FINDET NICHTS WEITER VON INTERESSE UND BESCHLIESST EUREN WEG FO..." */
 
 			/* zurueck nach Orvil zu Umbrik (Text 66) */
+#if !FIX_0369
 			gs_journey_direction = (gs_journey_direction == JOURNEY_DIRECTION_FORWARD ? JOURNEY_DIRECTION_CHANGE_TO_BACKWARD : JOURNEY_DIRECTION_CHANGE_TO_FORWARD);
+#else
+			/* Fix 369: nur umkehren, wenn die Gruppe nicht schon Richtung Orvil reist (Richtung Orvil = Ziel Orvil vorwaerts
+			 * oder anderes Ziel rueckwaerts); die Umkehr laeuft ueber CHANGE_TO_..., auch nach einer Umkehr unterwegs */
+			if ((gs_journey_destination_town_id == TOWN_ID_ORVIL) != (gs_journey_direction == JOURNEY_DIRECTION_FORWARD)) {
+				gs_journey_direction = (gs_journey_direction == JOURNEY_DIRECTION_FORWARD ? JOURNEY_DIRECTION_CHANGE_TO_BACKWARD : JOURNEY_DIRECTION_CHANGE_TO_FORWARD);
+			}
+#endif
 		}
 
 	} else if (gs_tevent064_flag != 0) {

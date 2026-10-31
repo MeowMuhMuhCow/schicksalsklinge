@@ -128,7 +128,12 @@ void THO_hetmann(void)
 
 			GUI_dialogbox((unsigned char*)g_dtp2, get_tx2(85), get_tx2(14), 0); /* "HETMANN TRONDE" / "<SOBALD WIE MÖGLICH! PACKT EURE SACHEN, RÜ..." */
 
+#if !FIX_0076
 			gs_informer_flags[INFORMER_ID_ISLEIF] = 1;
+#else
+			/* Fix 76: Isleif nur von 0 auf 1 setzen; wer ihn vor dem Auftrag schon besucht hat (2), behaelt "erledigt" */
+			if (!gs_informer_flags[INFORMER_ID_ISLEIF]) gs_informer_flags[INFORMER_ID_ISLEIF] = 1;
+#endif
 			gs_subvention++;
 			gs_got_main_quest = 1;
 			gs_quested_months = 0;
@@ -137,7 +142,12 @@ void THO_hetmann(void)
 
 			GUI_dialogbox((unsigned char*)g_dtp2, get_tx2(85), get_tx2(15), 0); /* "HETMANN TRONDE" / "<ICH KANN EUCH EINE VOLLMACHT ERTEILEN, DA..." */
 
+#if !FIX_0076
 			gs_informer_flags[INFORMER_ID_ISLEIF] = 1;
+#else
+			/* Fix 76: wie oben, "erledigt" (2) nicht zuruecksetzen */
+			if (!gs_informer_flags[INFORMER_ID_ISLEIF]) gs_informer_flags[INFORMER_ID_ISLEIF] = 1;
+#endif
 			gs_got_main_quest = 1;
 			gs_quested_months = 0;
 			gs_got_letter_het = 1;

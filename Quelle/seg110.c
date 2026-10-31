@@ -403,7 +403,14 @@ void tevent_029(void)
 
 	load_in_head(51);
 
+#if !FIX_0371
 	GUI_dialog_na(0, get_tx2(74)); /* "HIER ENDET DIE EIGENTLICHE STRASSE. IHR BEFINDET EUCH NUN IM ORKLAN..." */
+#else
+	/* Fix 371: Strassenende/Orkland-Text 74 nur auf dem Weg nach Phexcaer (Ziel Phexcaer vorwaerts oder anderes Ziel nach Umkehr) */
+	if ((gs_journey_destination_town_id == TOWN_ID_PHEXCAER) == (gs_journey_direction == JOURNEY_DIRECTION_FORWARD)) {
+		GUI_dialog_na(0, get_tx2(74)); /* "HIER ENDET DIE EIGENTLICHE STRASSE. IHR BEFINDET EUCH NUN IM ORKLAN..." */
+	}
+#endif
 	GUI_dialog_na(0, get_tx2(75)); /* "VOR EUCH LIEGT EIN GROSSES SCHILFGEBIET, DAS DIE EHEMALIGE STRASSE..." */
 
 	hero = get_hero(0);

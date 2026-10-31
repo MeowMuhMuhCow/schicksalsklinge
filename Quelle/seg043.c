@@ -45,6 +45,19 @@ static struct viewdir_offsets8s g_fig_viewdir_inverse_offsets3 = { { { -1, 0 }, 
  * \param   p_enemy   pointer to the enemy sheet
  * \param   enemy_id  id of the enemy
  */
+#if FIX_0390
+/* Fix 390: unzerbrechliche Gegenstaende (wie in seg042) auch bei der Parade gegen Gegner auf bf -99 setzen (Curians Stab) */
+static void fix_set_unbreakable_pa(struct inventory *item)
+{
+	if ((item->item_id == ITEM_ID_ZAUBERSTAB) || (item->item_id == ITEM_ID_HEXENBESEN) ||
+		(item->item_id == ITEM_ID_ORKNASE__MAGIC) || (item->item_id == ITEM_ID_KURZSCHWERT__MAGIC) ||
+		(item->item_id == ITEM_ID_DAS_SCHWERT_GRIMRING))
+	{
+		item->bf = -99;
+	}
+}
+#endif
+
 void FIG_do_enemy_action(struct enemy_sheet* p_enemy, const signed int enemy_id)
 {
 	signed int damage;
@@ -423,6 +436,12 @@ void FIG_do_enemy_action(struct enemy_sheet* p_enemy, const signed int enemy_id)
 
 								FIG_add_msg(5, 0);
 
+#if FIX_0390
+								/* Fix 390: vor der Bruchpruefung der Parade */
+								if (target_is_hero != 0) {
+									fix_set_unbreakable_pa(p_weapon_target_hero);
+								}
+#endif
 								if ((pa_roll_d20 == at_roll_d20) && (target_is_hero != 0) && (p_weapon_target_hero->bf != -99)) {
 									/* if both random values agree and hero got attacked and his weapon is not unbreakable */
 									/* now if 1W12 + BF is >= 16, weapon is broken. Otherwise, BF is increased by 1. */

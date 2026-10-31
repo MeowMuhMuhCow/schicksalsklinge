@@ -356,7 +356,12 @@ signed int DNG03_handler(void)
 		i = get_first_hero_with_item(ITEM_ID_KRISTALL) != -1 ? 0 : 1;
 
 		do {
+#if !FIX_0353
 			j = GUI_radio(get_tx(14), 2, get_tx(15), !i ? get_tx(16) : get_tx(29)); /* "IHR STEHT VOR EINEM ALTAR, DE..." / "DEN ALTER ZERSCHLAGEN?" / "KRISTALLE AUF DEN ALTAR LEGEN?" / "SPÄTER NOCHMAL KOMMEN." */
+#else
+			/* Fix 353: mit Kristallen gibt es zusaetzlich "SPAETER NOCHMAL KOMMEN." (Text 29); Antwort 3 beendet ohne Wirkung */
+			j = !i ? GUI_radio(get_tx(14), 3, get_tx(15), get_tx(16), get_tx(29)) : GUI_radio(get_tx(14), 2, get_tx(15), get_tx(29));
+#endif
 
 		} while (j == -1);
 
@@ -684,6 +689,11 @@ void DNG03_chest11_loot(struct struct_chest* chest)
 #else
 			g_game_state = GAME_STATE_DEAD;
 #endif
+#if FIX_0434
+		} else if (test_failed_num == 0) {
+			/* Fix 434: ist niemand gestuerzt, muss auch niemand eine Stunde lang aus der Grube klettern */
+			GUI_output(get_tx(25)); /* "NICHTS PASSIERT. DIE TRUHE SCHEINT SICH NICHT OEFFNEN ZU LASSEN." */
+#endif
 		} else {
 			timewarp(HOURS(1));
 
@@ -703,4 +713,10 @@ void DNG03_chest12_trap(void)
 
 		chest_poisoned2();
 	}
+#if FIX_0352
+	else {
+		/* Fix 352: leere Giftdorn-Truhe meldet sich wie eine verschlossene Truhe (TEXT.LTX 519) */
+		chest_closed();
+	}
+#endif
 }

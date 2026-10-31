@@ -21,15 +21,15 @@ nr	umgesetzt	grund (bei teilweise/nein; bei ja optional)
 66	teilweise	im Zeughaus keine Schuldenabfrage mehr (das Budget des Hetmanns zahlt keine Stoerrebrandt-Schulden); dass der Rest des Budgets auf ganze Dukaten abgerundet wird, bleibt (gs_arsenal_money steht in Dukaten im Spielstand)
 73	nein	wie viele Stunden "einige" sein sollen, ist nicht belegbar
 74	nein	unsicher: ob die Geweihte nach der Beleidigung fuer immer verschwinden und der Tempel geschlossen bleiben soll, ist nicht belegbar
-92	nein	Designluecke (unsicher): ob der verwandelte Magierstab auch am Spalt helfen soll, ist nicht belegbar
+92	ja	Beleg: Osterpatch NRS 2016 (Version 1.2)
 99	nein	die Druckplatten muessten bei jedem Teleport und Gruppenwechsel in mehreren Dungeons neu ausgewertet werden - ein Umbau der Handler, kein eindeutiger Einzelfix
 100	nein	Neuauswertung aller Gruppen auf den Platten waere ein Umbau der Plattenlogik; der eindeutige Teil (Summe in der Schleife) ist Nr. 102
 104	nein	ob der Kampf schon stattfand, steht nur in der Kampfliste; welcher Kampf zur Szene gehoert, ist im Handler nicht verknuepft
 112	nein	ob der Inhalt der Raetseltruhe immer ganz genommen wird, ist offen; der Merker wuerde uebrig gebliebene Gegenstaende sperren
-116	nein	unsicher, als Absicht lesbar (Text 13 fragt nur nach dem Entschaerfen); ein Ausloesen bei unentdeckter Platte waere eine neue Falle
+116	ja	Beleg: Osterpatch NRS 2016 (Version 1.2)
 120	nein	unsicher, nicht gemessen; die zuletzt ausgewertete Zeitmarke zu merken braucht eine neue Variable (Datensegment)
 123	nein	der Zaehler muesste in den Spielstand (neues Feld)
-124	nein	unsicher: die Texte fehlen in der Spieldatei OBER.DTX; welcher vorhandene Text passt, ist nicht belegbar
+124	ja	Beleg: Osterpatch NRS 2016 (Version 1.2)
 131	nein	die Entfernung steht als Byte in der Tabelle g_sea_routes (Datensegment, Spielstand)
 134	nein	Auslegung (unsicher): ob Efferds Schutz auch vor Piraten schuetzen soll, ist nicht belegbar
 139	nein	die Hafenliste steht im Datensegment (Tabelle g_harbors_linked_sea_routes_10)
@@ -55,7 +55,7 @@ nr	umgesetzt	grund (bei teilweise/nein; bei ja optional)
 213	ja	belegt durch das Loesungsbuch ("halbiert evtl. auftretenden Feuerschaden", Dauer Stufe in Stunden) und Sternenschweif (feindlicher Ignifaxius halbiert bei Feuerbann): Schaden durch feindlichen Ignifaxius halbiert, Dauer Stufe in Stunden (Version 1.1)
 214	teilweise	Absturz verhindert (Meldung nicht benutzbar); das usable-Bit in ITEMS.DAT bleibt
 215	nein	Datenfehler in ITEMS.DAT, ohne regulaeren Fundort folgenlos
-218	nein	fehlende Gegenstandswirkungen waeren neue Spielmechanik; Texte stehen in den Spieldaten
+218	teilweise	Beleg: Osterpatch NRS 2016 (DNG10_handler, Abfrage ITEM_ID_RING__GREEN). Nur der Ring-Teil; die übrigen Gegenstände von Nr. 218 (seg099) liegen nicht in G3. Wie im Original weiter mit hero->alias (NRS übergibt hero). (Version 1.2)
 220	ja	Zaehler an den drei Stellen richtig gefuehrt, Stapel beim Zusammenlegen auf 99 begrenzt; in alten Spielstaenden bereits verschobene Zaehler bleiben
 226	teilweise	kein alter Text mehr; eine eigene Meldung braeuchte einen neuen Text
 232	nein	Gift alle 5 Minuten auch waehrend Rast und Reise auszuwerten hiesse bei langer Rast dutzende Meldungsfenster und meist den Tod (Shurinknollengift endet nicht von selbst); ob das so gewollt ist, ist offen - im Zweifel nicht
@@ -92,45 +92,45 @@ nr	umgesetzt	grund (bei teilweise/nein; bei ja optional)
 327	teilweise	nach verlorenem oder abgebrochenem Kampf kein Ausruestungsbildschirm; welche Folgen eine Flucht haben soll, ist offen
 331	nein	Neuberechnen beim Laden aenderte das Angebot gegenueber dem Original auch ohne Ausnutzen; welcher Stand gelten soll, ist offen
 333	nein	Tabelle der Geruechte im Datensegment, Datenfehler
-334	nein	Absicht unklar: der Merker steuert nur den Gespraechsbeginn mit dem Wirt; Zimmer und Essen zu verweigern waere eine neue Regel ohne eigenen Text
+334	ja	Beleg: Osterpatch NRS 2016; der Rauswurf gilt fuer den naechsten Besuch und wird danach geloescht (alte Spielstaende mit Merkern aus Fehler 425 sperren so keine Herberge fuer immer) (Version 1.2)
 335	nein	unsicher: ob Wein/Schnaps eine Zechenprobe haben sollen, ist nicht belegt (Balance)
-337	nein	kann gewollt sein (unsicher): Gurthag spricht nach dem Kellerausgang nicht mehr mit der Gruppe
-338	nein	fuer Treborns Laden gibt es keinen eigenen Ortstext; ein Sonderfall braucht einen neuen Text
+337	ja	Beleg: Osterpatch NRS 2016 (Version 1.2)
+338	ja	Beleg: Osterpatch NRS 2016 (Version 1.2)
 340	nein	Datenfehler in der Tabelle g_informer_tab (Datensegment)
-341	teilweise	die Olvir/Treborn-Begegnung wiederholt sich nicht mehr auf derselben Reise; dass Algrids Hinweis (Treborn = bekannt) sein erstes Treffen verhindert, bleibt - getrennte Merker braeuchten ein neues Feld im Spielstand
+341	ja	Beleg: Osterpatch NRS 2016 (Version 1.2)
 342	nein	der Satz steht fest im Dialog (Spieldaten)
 345	nein	der Kampf startet beim ersten Drehen oder Menue; ihn schon beim Ankommen auszuloesen braucht einen eigenen Merker (Datensegment) fuer alle Wege (Treppe, Falltuer, Teleporter)
-346	nein	die Vergleichsposition gs_dng_pos_bak je Gruppe zu fuehren braucht neue Felder im Spielstand
+346	ja	Beleg: Osterpatch NRS 2016 (Version 1.2)
 348	nein	unsicher; Kaempfe je Dungeon waeren neue Daten
 349	nein	welche Dungeon-Feldtypen begehbar sind, ist ohne Pruefung an den Plaenen (Totenschiff) nicht sicher; eine falsche Sperre wuerde Teleporte verhindern
 350	nein	die Todesfalle (gs_deathtrap) ist ein einziger Wert im Spielstand; sie je Gruppe zu fuehren aendert das Spielstandformat
-352	nein	fuer die leere Giftdorn-Truhe gibt es keinen eigenen Text
-353	nein	den Altarzustand zu merken braucht ein neues Feld im Spielstand
-354	nein	Absicht unklar: ob der gesicherte Stein die Tuer (0,11,1) sperren soll, ist nicht belegbar; eine Meldung braucht einen neuen Text
-355	nein	der Rest muesste als Truhe gespeichert werden - neue Daten im Spielstand
+352	ja	Beleg: Osterpatch NRS 2016 (Version 1.2)
+353	teilweise	Beleg: Osterpatch NRS 2016 (DNG03_handler, dreifache Auswahl; Text 29 war im Original nur ohne Kristalle erreichbar). Nicht umgesetzt: Wiederholung von Text und Kampf beim nächsten Kristall (Altarzustand bräuchte einen neuen Merker); NRS' g_fig_discard = 1 vor dem Kampf ist in der Absicht unklar und bleibt weg. (Version 1.2)
+354	ja	Beleg: Osterpatch NRS 2016 (Version 1.2)
+355	ja	Beleg: Osterpatch NRS 2016 (Version 1.2)
 356	nein	Absicht unklar (unsicher): feste Grenze von fuenf Seilen
-357	nein	Raumgrenzen und Zeitpruefung der Falle sind Daten- und Designfragen; die richtige Ausdehnung ist nicht belegbar
-358	nein	unsicher: wie die Tueren wieder verschlossen werden, ist nicht gefunden; Absicht nicht belegbar
+357	ja	Beleg: Osterpatch NRS 2016 (Version 1.2)
+358	teilweise	Beleg: Osterpatch NRS 2016 (DNG12_handler, Abfrage 0x3fa6). Nach Abschalten der Falle bleiben die Türen offen; solange die Falle aktiv ist, bleibt das wiederholte Knacken möglich. gs_dng12_watertrap_active statt water_runs, weil (1,3,10) ohne Fix 357 nicht zum Raum zählt (dort wäre water_runs immer 0); mit Fix 357 gleichwertig. (Version 1.2)
 359	nein	die Felder einzeln zu merken braucht neue Merker im Spielstand
 360	nein	einmal je Lager braeuchte einen Merker je Strohlager (Spielstand)
-361	nein	Absicht unklar: ob Hort und Auftragsbelohnung sich ausschliessen sollen, ist nicht belegbar
-362	nein	der Merker ist ein Byte im Spielstand ohne Gruppenbezug; die Fluchwirkung je Gruppe zu fuehren aendert das Spielstandformat, und die gemeinte Wirkung des Fluchs ist unklar
+361	teilweise	Beleg: Osterpatch NRS 2016 (DNG10_handler, Wurfdolch entfernt; F129.DTX 35 „EINIGE TRÄNKE UND 200 DUKATEN“). Ohne die F129.DTX des Datenpatches nennt Text 35 noch den Dolch. Das Gold gibt es weiter doppelt (wie bei NRS; eine Kopplung der Merker wäre Auslegung). (Version 1.2)
+362	ja	Beleg: Osterpatch NRS 2016 (Version 1.2)
 365	nein	braucht je Gruppe gesicherte Werte, also eine Aenderung des Spielstands
 366	nein	welcher feste Ausgangsort gemeint war, ist nicht belegbar
-368	nein	eigene Hinweis-Merker braeuchten neue Felder im Spielstand
-369	nein	welche Fahrtrichtung zu Umbrik zurueckfuehrt, ist aus dem Code nicht sicher abzuleiten
+368	ja	Beleg: Osterpatch NRS 2016 (Version 1.2)
+369	ja	Beleg: Osterpatch NRS 2016 (Version 1.2)
 370	nein	unklar, was nach einer Flucht der Helden gelten soll (Gorah lebt ja noch)
-371	nein	welche Fahrtrichtung die Strecke als vorwaerts fuehrt, ist aus dem Code nicht sicher abzuleiten; im Zweifel nicht
+371	ja	Beleg: Osterpatch NRS 2016 (Version 1.2)
 373	nein	unsicher, kann Absicht sein
 374	nein	do_wildcamp() setzt die Status selbst zurueck; sie zu uebernehmen braeuchte einen neuen Zustand (Datensegment) oder Eingriff in seg051
 379	nein	Absicht unklar (Spielbalance): Axxeleratus gibt eine zweite Aktion; ob sie neue BP und eine neue Wahl bekommen sollte, ist nicht belegbar - ein neues Menue mit neuen BP waere eine Regelaenderung
 380	nein	unklar, ob die zwei Attacken gewollt sind; zuruecksetzen ginge nur an allen Stellen, die renegade loeschen, und der Ausgangswert ist im Gegnerblatt nicht gespeichert
 381	nein	folgenlos (tote Gegner kaempfen nicht); welche Meldung/Kosten richtig waeren, ist offen
 382	ja	belegt durch das Loesungsbuch ("Gegner verlaesst den Kampfplatz", 8 AE): Gegner flieht wie beim Horriphobus, ohne eigene Meldung (Version 1.1)
-383	nein	unsicher: nicht geprueft, ob gs_town_id auf der Reise noch die Abreisestadt haelt
+383	ja	Beleg: Osterpatch NRS 2016 (Version 1.2)
 384	nein	ein Merker am Helden braeuchte ein Feld in der Heldenstruktur (Spielstand); die Sperre selbst ist gewollt
-386	nein	braucht neue Eintraege und Texte (Spieldaten/Datensegment)
-390	teilweise	Paraden Held gegen Held pruefen jetzt bf -99; Curians Stab mit bf 5 steht in CURIAN.NPC (Spieldaten) und bleibt
+386	teilweise	Beleg: Osterpatch NRS 2016 (SEG099 spell_analues, gleiche Loesung). Die Liste selbst (28 Eintraege, Grimring ohne eigenen Text) bleibt, eine Ergaenzung braeuchte neue Daten und Texte. Abbruch der Auswahl ist ueber Fix 200 abgesichert. (Version 1.2)
+390	teilweise	Beleg: Osterpatch NRS 2016 (SEG100/SEG102 ueber neue SEG002-Hilfsfunktion mit derselben Liste 133/140/159/160/181). NRS-Fehler (bf <= 0 bricht bei Helden-Eisenrost) nicht uebernommen, keine neuen Daten. Offen: der Bruch bei Paraden (seg042/SEG002, nicht G4 bzw. resident) kennt die Liste nicht - Curians Stab (bf 5) bleibt dort zerbrechlich, bis ihn Eisenrost einmal berichtigt hat. (Version 1.2)
 391	nein	Datenfehler (Sperrliste im Datensegment)
 392	nein	unsicher; Waffentabelle im Datensegment
 393	nein	es gibt keinen Munitionsgegenstand (Id 999 passt nicht in ein Byte); Bright-Eyes macht die Schleuder als Feature-Mod ohne Munition benutzbar - eine Designentscheidung, keine Fehlerbehebung
@@ -143,6 +143,17 @@ nr	umgesetzt	grund (bei teilweise/nein; bei ja optional)
 411	nein	aendert die Dateinamen von Spielstaenden mit Umlaut im Namen; was das Original dabei schreibt, haengt von Bytes vor der ctype-Tabelle ab - vorhandene Spielstaende koennten nicht mehr gefunden werden
 412	nein	die Formatstrings des Tagebuchs (Datensegment) verlangen Tag und Monatsnamen; eine eigene Zeile fuer die Namenlosen Tage braucht einen neuen Text
 413	nein	keine Fehlfunktion des Spiels, haengt vom Rechner bzw. den DOSBox-Zyklen ab
-414	nein	unsicher; das Spielstandfeld haelt einen Zeiger - ein anderer Inhalt im selben Feld vertruege sich nicht mit vorhandenen Spielstaenden
+414	teilweise	Beleg: Osterpatch NRS 2016 (SEG116, setzt dort nur den Segmentteil des Zeigers auf das Segment von g_heroes); die Position statt des Segments ist robuster. Nach dem Laden behoben; tauschen Helden zwischen den Begegnungen die Plaetze, trifft es wie im Original den neuen Platzinhaber (dafuer waere ein neues Feld noetig). (Version 1.2)
 415	nein	es gibt keine eigene Reisemusik; welches Stueck gemeint war, ist nicht belegbar
 416	nein	folgenlos: do_fight() prueft selbst, ob der Kampf erledigt ist
+418	ja	Beleg: Osterpatch NRS 2016 (Version 1.2)
+425	ja	Beleg: Osterpatch NRS 2016 (Version 1.2)
+426	ja	Beleg: Osterpatch NRS 2016 (Version 1.2)
+76	ja	Beleg: Osterpatch NRS 2016 (Version 1.2)
+432	ja	Beleg: Osterpatch NRS 2016 (Version 1.2)
+433	ja	Beleg: Osterpatch NRS 2016 (Version 1.2)
+434	ja	Beleg: Osterpatch NRS 2016 (Version 1.2)
+86	ja	Beleg: Osterpatch NRS 2016 (Version 1.2)
+106	ja	Beleg: Osterpatch NRS 2016 (Version 1.2)
+435	ja	Beleg: Osterpatch NRS 2016 (Version 1.2)
+436	nein	Puffergrenze; braucht eine andere Aufteilung der Textpuffer (Speicherplan)

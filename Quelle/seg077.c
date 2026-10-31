@@ -54,6 +54,7 @@ struct struct_chest g_dng01_specialchests[9] = {
 }; // ds:0x9314
 const char g_dng01_str_marbo[6] = "MARBO"; // ds:0x93d1
 
+
 /**
  * \brief   dungeon handler of the death ship
  */
@@ -70,6 +71,7 @@ signed int DNG01_handler(void)
 	{
 		DNG_pitfall_add_pit(6);
 
+#if !FIX_0433
 	} else if (target_pos == DNG_POS(1,3,9))
 	{
 		gs_x--;
@@ -79,6 +81,18 @@ signed int DNG01_handler(void)
 	{
 		gs_y++;
 		DNG_pitfall_add_pit(6);
+#else
+	} else if (target_pos == DNG_POS(1,2,9))
+	{
+		/* Fix 433: die Falltueren loesen auf dem Feld aus, auf dem die Grube entsteht ((1,2,9) und (1,14,5)),
+		 * ohne die Gruppe vorher ein Feld weiter (bei (1,14,5) in die Wand) zu schieben; Koordinaten wie
+		 * im Osterpatch von NRS, passend zur SHIP.DNG des Datenpatches 1.2 */
+		DNG_pitfall_add_pit(6);
+
+	} else if (target_pos == DNG_POS(1,14,5))
+	{
+		DNG_pitfall_add_pit(6);
+#endif
 
 	} else if (target_pos == DNG_POS(2,7,6) || target_pos == DNG_POS(2,7,9))
 	{
@@ -198,7 +212,12 @@ signed int DNG01_handler(void)
 		{
 			/* check if a ROPE LADDER or a ROPE is available */
 			/* Original-Bug: Why not check for a mage with staffspell level >= 3? */
+#if !FIX_0092
 			if (get_first_hero_with_item(ITEM_ID_SEIL) != -1 || get_first_hero_with_item(ITEM_ID_STRICKLEITER) != -1)
+#else
+			/* Fix 92: Seil, Strickleiter oder ein Magier mit Stabzauber ab Stufe 3 (Seil des Adepten), wie an den Gruben */
+			if (DNG_check_climb_tools() != -1)
+#endif
 			{
 				/* Original-Bug: better get_first_hero_available_in_group() */
 #if FIX_0093

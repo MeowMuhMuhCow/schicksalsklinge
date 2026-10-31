@@ -161,6 +161,7 @@ signed int DNG06_handler(void)
 			sub_hero_le(hero_second, random_schick(6));
 		}
 
+#if !FIX_0354
 	} else if (target_pos == DNG_POS(0,9,7) && target_pos != gs_dng_pos_bak && !gs_dng06_pitdoor_flag)
 	{
 		/* trapdoor: only noticed with a successful Gefahrensinn test; a second successful test finds
@@ -219,6 +220,70 @@ signed int DNG06_handler(void)
 				DNG_pitfall_add_pit(6);
 			}
 		}
+#else
+	} else if (target_pos == DNG_POS(0,9,7) && target_pos != gs_dng_pos_bak)
+	{
+		/* Fix 354: gs_dng06_pitdoor_flag als Bits: 0x01 Falltuer gesichert, 0x02 Falltuer entdeckt, 0x04 Stein entdeckt.
+		 * Alte Spielstaende (0 oder 1) passen: 1 = gesichert gilt zugleich als entdeckt. Das Feld bleibt aktiv,
+		 * Entdeckungen werden gemerkt und der Stein schaltet die Sicherung um; so wird auch die Tuer (0,11,1)
+		 * wieder frei (DNG_door prueft nur Bit 0). Gesichert: Grube im Kartenfeld weg, entsichert: Grube sichtbar. */
+		if (!(gs_dng06_pitdoor_flag & 0x03))
+		{
+			hero = get_hero(0);
+			for (i = 0; i <= 6; i++, hero++)
+			{
+				if ((hero->typus != HERO_TYPE_NONE) && (hero->group_id == gs_active_group_id) &&
+					check_hero(hero) && (test_talent(hero, TA_GEFAHRENSINN, 5) > 0))
+				{
+					gs_dng06_pitdoor_flag |= 0x02;
+					break;
+				}
+			}
+		}
+
+		l3 = 0; /* 1 = Stein umgelegt */
+
+		if ((gs_dng06_pitdoor_flag & 0x03) && GUI_bool(get_tx(7))) /* "VOR EUCH SCHEINT DER BODEN EINIGE ZU REGELMAESSIGE RITZENAUFZUWEISEN..." */
+		{
+			GUI_output(get_tx(8)); /* "OFFENSICHTLICH IST VOR EUCH AUF DEM BODEN EINE FALLTUER." */
+
+			if (!(gs_dng06_pitdoor_flag & 0x05))
+			{
+				hero = get_hero(0);
+				for (i = 0; i <= 6; i++, hero++)
+				{
+					if ((hero->typus != HERO_TYPE_NONE) &&
+						(hero->group_id == gs_active_group_id) &&
+						check_hero(hero) &&
+						(test_talent(hero, TA_GEFAHRENSINN, 5) > 0))
+					{
+						gs_dng06_pitdoor_flag |= 0x04;
+						break;
+					}
+				}
+			}
+
+			if ((gs_dng06_pitdoor_flag & 0x05) && GUI_bool(get_tx(9))) /* "AN DER WAND HINTER EUCH ENTDECKT IHR JETZT AUCH EINEN LOSEN STEIN,H..." */
+			{
+				gs_dng06_pitdoor_flag = (gs_dng06_pitdoor_flag | 0x06) ^ 0x01;
+
+				GUI_output(get_tx(10)); /* "IHR HOERT EIN LEISES, SCHABENDES GERAEUSCH AN DER FALLTUER." */
+
+				amap_ptr[MAP_POS(9,7)] &= 0x0f;
+				if (!(gs_dng06_pitdoor_flag & 0x01))
+				{
+					amap_ptr[MAP_POS(9,7)] |= (DNG_TILE_PIT << 4);
+				}
+
+				l3 = 1;
+			}
+		}
+
+		if (!l3 && !(gs_dng06_pitdoor_flag & 0x01))
+		{
+			DNG_pitfall_add_pit(6);
+		}
+#endif
 
 	} else if (target_pos == DNG_POS(0,8,7) && target_pos != gs_dng_pos_bak && gs_dng06_goldkey_flag != 2)
 	{
@@ -303,7 +368,12 @@ signed int DNG06_handler(void)
 			{
 				if ((hero->typus != HERO_TYPE_NONE) &&
 					(hero->group_id == gs_active_group_id) &&
+#if FIX_0086
+					/* Fix 86: nur handlungsfaehige Helden springen (bewusstlose, versteinerte usw. werden getragen) */
+					check_hero(hero) &&
+#else
 					!hero->flags.dead &&
+#endif
 					(test_talent(hero, TA_KOERPERBEHERRSCHUNG, hero->rs_bonus) <= 0))
 				{
 					sprintf(g_dtp2,	get_tx(20), hero->alias, /* "%s IST ZU KURZ GESPRUNGEN. DABEI HAT DER BODEN NACHGEGEBEN UND %s I..." */
@@ -446,6 +516,7 @@ signed int DNG06_handler(void)
 			sub_hero_le(hero, 2);
 		}
 
+#if !FIX_0355
 	} else if (target_pos == DNG_POS(1,6,11) && target_pos != gs_dng_pos_bak && !gs_dng06_dasptreas_found)
 	{
 		/* treasure of Daspota found */
@@ -461,6 +532,26 @@ signed int DNG06_handler(void)
 		gs_dng06_dasptreas_found = 1;
 
 		add_hero_ap_all(30);
+#else
+	} else if (target_pos == DNG_POS(1,6,11) && target_pos != gs_dng_pos_bak)
+	{
+		/* Fix 355: der Daspota-Schatz bleibt pluenderbar; Text, 500 Dukaten und AP nur beim ersten Fund
+		 * (der Rest liegt in gs_dng06_chest_dasptreas, das im Spielstand steht) */
+		if (!gs_dng06_dasptreas_found)
+		{
+			GUI_output(get_tx(36)); /* "IHR HABT ENDLICH DEN BERUEHMTEN DASPOTA SCHATZ GEFUNDEN. EIN GANZERH..." */
+
+			p_money = get_party_money();
+			p_money += 50000L;
+			set_party_money(p_money);
+
+			gs_dng06_dasptreas_found = 1;
+
+			add_hero_ap_all(30);
+		}
+
+		loot_multi_chest(gs_dng06_chest_dasptreas, get_tx(37)); /* "DER DASPOTA SCHATZ" */
+#endif
 
 	} else if (target_pos == DNG_POS(1,8,14) && target_pos != gs_dng_pos_bak)
 	{

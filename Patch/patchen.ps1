@@ -4,7 +4,8 @@
 param(
     [Parameter(Mandatory=$true)][string]$Spiel,   # Spielordner (GOG)
     [Parameter(Mandatory=$true)][string]$Name,    # Name der Original-EXE, z. B. SCHWEIF.EXE
-    [Parameter(Mandatory=$true)][string]$Ziel     # Ausgabeordner (Build)
+    [Parameter(Mandatory=$true)][string]$Ziel,    # Ausgabeordner (Build)
+    [string]$Muster = '*.ndp'                       # welche Patches (z. B. BLADEM_FIX_*.ndp oder SCHICK.DAT.ndp)
 )
 $ErrorActionPreference = 'Stop'
 $md5 = [System.Security.Cryptography.MD5]::Create()
@@ -18,8 +19,8 @@ function Lies-Patch([string]$pfad) {
         return ,$ms.ToArray()
     } finally { $fs.Dispose() }
 }
-$patches = Get-ChildItem -Path $PSScriptRoot -Filter '*.ndp' | Sort-Object Name
-if (-not $patches) { throw "Keine *.ndp-Dateien neben patchen.ps1 gefunden." }
+$patches = Get-ChildItem -Path $PSScriptRoot -Filter $Muster | Sort-Object Name
+if (-not $patches) { throw "Keine Patches ($Muster) neben patchen.ps1 gefunden." }
 
 # Quelle: erwartete Groesse und MD5 aus dem ersten Patch
 $p0 = Lies-Patch $patches[0].FullName
@@ -71,11 +72,13 @@ foreach ($pf in $patches) {
         } else { throw "$($pf.Name): unbekannter Befehl $t" }
     }
     $h = Hex ($md5.ComputeHash($dst))
-    $aus = Join-Path $Ziel ([System.IO.Path]::GetFileNameWithoutExtension($pf.Name) + '.EXE')
+    $basis = [System.IO.Path]::GetFileNameWithoutExtension($pf.Name)
+    if ($basis -notmatch '\.') { $basis += '.EXE' }      # BLADEM_FIX_WICHTIG.ndp -> .EXE, SCHICK.DAT.ndp -> SCHICK.DAT
+    $aus = Join-Path $Ziel $basis
     if ($d -ne $dstLen -or $h -ne $dstMd5) { throw "$($pf.Name): Ergebnis stimmt nicht (MD5 $h statt $dstMd5)." }
     [System.IO.File]::WriteAllBytes($aus, $dst)
     Write-Host "Erzeugt:  $aus"
     Write-Host "          MD5 $h - geprueft."
 }
 Write-Host ""
-Write-Host "Fertig. Die Original-EXE wurde nicht veraendert." -ForegroundColor Green
+Write-Host "Fertig. Das Original ($Name) wurde nicht veraendert." -ForegroundColor Green

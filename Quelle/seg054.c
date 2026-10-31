@@ -389,6 +389,19 @@ void do_inn(void)
 	}
 #endif
 
+#if FIX_0334
+	/* Fix 334: hat der Wirt die Gruppe hinausgeworfen, spricht er sie an (Dialog im Rauswurf-Zustand) und sie muss gehen
+	 * (ohne copy_palette(): die Herberge wurde nicht gezeichnet, Osterpatch NRS) */
+	if ((done == 0) && gs_inn_kicked_flags[gs_town_typeindex]) {
+		talk_inn();
+		/* der Rauswurf gilt fuer diesen einen Besuch (wie in der Taverne); so sperren auch alte Spielstaende, in die
+		 * der Fehler 425 Merker geschrieben hat, eine Herberge nicht fuer immer */
+		gs_inn_kicked_flags[gs_town_typeindex] = 0;
+		leave_location();
+		return;
+	}
+#endif
+
 	if (done == 0) {
 
 		redraw_locline = g_request_refresh = 1;
@@ -451,6 +464,12 @@ void do_inn(void)
 
 			talk_inn();
 			g_request_refresh = 1;
+#if FIX_0334
+			/* Fix 334: wirft der Wirt im Gespraech hinaus, verlaesst die Gruppe die Herberge */
+			if (gs_inn_kicked_flags[gs_town_typeindex]) {
+				done = 1;
+			}
+#endif
 
 		} else if (g_action_id == ACTION_ID_ICON_2) { /* order food */
 

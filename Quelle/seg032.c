@@ -1016,9 +1016,17 @@ signed int do_fight(const signed int fight_id)
 	gs_gardianum_used_ae = 0;
 #endif
 
+#if !FIX_0362
 	if (gs_dng15_took_cursed_money) {
 		return 0;
 	}
+#else
+	/* Fix 362: der Fluch der Goldmuenzen wirkt nur in Hyggeliks Ruine; dort faellt der Kampf aus (3 wie bei Visibili:
+	 * kein Sieg, keine AP) statt als gewonnen zu gelten, ausserhalb wird normal gekaempft (Osterpatch NRS 2016) */
+	if (gs_dng15_took_cursed_money && (gs_dungeon_id == DUNGEON_ID_HYGGELIKS_RUINE)) {
+		return 3;
+	}
+#endif
 
 	if (!count_fight_enemies(fight_id)) {
 		return 1;

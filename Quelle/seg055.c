@@ -326,7 +326,13 @@ void do_merchant(void)
 
 			set_audio_track(ARCHIVE_FILE_TERMS_XMI);
 
+#if !FIX_0338
 			GUI_print_loc_line(gs_town_loc_type == LOCTYPE_MARKET ? get_ttx(679) : (gs_town_typeindex == MERCHANT_TYPEINDEX_STREET_MERCHANT ?  get_ttx(46) : get_tx(gs_town_locdata))); /* "EIN STAND AUF DEM MARKTPLATZ" / "STRASSENHÄNDLER" */
+#else
+			/* Fix 338: auch Treborn Kolbergs Laden (unterwegs) heisst "STRASSENHAENDLER", nicht wie ein Ort der Stadt-LTX */
+			GUI_print_loc_line(gs_town_loc_type == LOCTYPE_MARKET ? get_ttx(679) :
+				((gs_town_typeindex == MERCHANT_TYPEINDEX_STREET_MERCHANT || gs_town_typeindex == MERCHANT_TYPEINDEX_TREBORN_KOLBERG) ? get_ttx(46) : get_tx(gs_town_locdata)));
+#endif
 			// typeindex MERCHANT_TYPEINDEX_STREET_MERCHANT == 93 is the street merchant from random city event 6.
 
 			g_request_refresh = refresh = 0;
@@ -415,11 +421,20 @@ void do_merchant(void)
 
 		} else if (g_action_id == ACTION_ID_ICON_3) {
 
+#if FIX_0338
+			/* Fix 338: bei Treborn Kolberg fuehrt "Reden" zurueck in sein Gespraech, kein Haendlerdialog im laufenden Dialog */
+			if (gs_town_typeindex == MERCHANT_TYPEINDEX_TREBORN_KOLBERG) {
+				done = 1;
+			} else {
+#endif
 			talk_merchant();
 
 			if (gs_merchant_kicked_flags[gs_town_typeindex]) {
 				done = 1;
 			}
+#if FIX_0338
+			}
+#endif
 		}
 	}
 

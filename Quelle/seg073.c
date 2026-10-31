@@ -373,7 +373,12 @@ signed int get_tavern_gossip(void)
 		if (randval == 1)
 			gs_tevent072_flag = 1;	/* Restplaces */
 		else if (randval == 2)
+#if !FIX_0368
 			gs_tevent075_flag = 1;
+#else
+			/* Fix 368: das Geruecht ueber das Raeuberlager setzt nicht den Erledigt-Merker von Reiseereignis 75 (Osterpatch NRS) */
+			;
+#endif
 		else if (randval == 3)
 			gs_tevent091_flag = 1;
 		else if (randval == 4)
@@ -384,7 +389,12 @@ signed int get_tavern_gossip(void)
 	/* Orkanger */
 	case (TOWN_ID_ORKANGER - 1): {
 		if (randval == 1)
+#if !FIX_0368
 			gs_tevent075_flag = 1;	/* Restplaces */
+#else
+			/* Fix 368: Reiseereignis 75 bleibt moeglich (Osterpatch NRS) */
+			;
+#endif
 		else if (randval == 2)
 			gs_tevent079_flag = 1;
 
@@ -413,7 +423,12 @@ signed int get_tavern_gossip(void)
 	/* Ala */
 	case (TOWN_ID_ALA - 1): {
 		if (randval == 1)
+#if !FIX_0368
 			gs_tevent066_track_flag = 1;	/* Restplaces */
+#else
+			/* Fix 368: Hinweis auf den Nahrungsplatz setzt den Rastplatz-Merker, nicht den Erledigt-Merker der Spur (Kampf F066) */
+			gs_tevent066_flag = 1;
+#endif
 		else if (randval == 2) {
 			gs_tevent069_flag = gs_tevent070_flag = gs_tevent070_herb_flag = 1;
 		}
@@ -427,7 +442,12 @@ signed int get_tavern_gossip(void)
 			gs_tevent058_flag = gs_teventu03_flag = 1;
 		}
 		else if (randval == 2)
+#if !FIX_0368
 			gs_tevent066_track_flag = 1;
+#else
+			/* Fix 368: Rastplatz-Merker statt Erledigt-Merker der Spur (Osterpatch NRS) */
+			gs_tevent066_flag = 1;
+#endif
 		else if (randval == 3) {
 			/* Restplaces */
 			gs_teventu10_flag = gs_teventu11_flag = 1;

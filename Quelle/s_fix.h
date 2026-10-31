@@ -103,7 +103,7 @@
  * FIX_0089   alles    egal      -       ja         Symbol "Gruppen vereinen" bleibt nach dem Vereinen aktiv
  * FIX_0090   wichtig  mittel    ja      ja         Rueckwaertsschritt prueft halbdurchlaessige Waende nicht
  * FIX_0091   wichtig  mittel    ja      ja         Leeres Wasserfass fuellt trotzdem alle Schlaeuche
- * FIX_0092   wichtig  mittel    -       nein       Totenschiff-Spalt: nur Seil oder Strickleiter, kein Magierstab
+ * FIX_0092   wichtig  mittel    -       ja         Totenschiff-Spalt: nur Seil oder Strickleiter, kein Magierstab
  * FIX_0093   alles    egal      -       ja         Proben und Wirkungen mit get_hero(0) statt dem ersten handlungsfaehigen Helden
  * FIX_0094   wichtig  mittel    -       ja         Totenschiff: Deckenloch und Grube mit Zeilenbreite 32 statt 16 gesetzt
  * FIX_0095   alles    egal      -       ja         Totenschiff: Meldung vom sinkenden Schiff kommt nie
@@ -127,7 +127,7 @@
  * FIX_0113   alles    egal      -       ja         Hilferuf aus der Grube jede Minute statt alle 20 Minuten
  * FIX_0114   wichtig  mittel    -       ja         Armbrustfalle 4 zaehlt nicht herunter
  * FIX_0115   alles    egal      -       ja         Loser Stein: Zustand "entfernt" wird ueberschrieben
- * FIX_0116   alles    egal      -       nein       Trittplatte wirkt nur beim Entschaerfen
+ * FIX_0116   alles    egal      -       ja         Trittplatte wirkt nur beim Entschaerfen
  * FIX_0117   wichtig  kritisch  ja      ja         Opferschale: ESC und grosse Eingaben (16-Bit-Ueberlauf) schenken Geld
  * (118)      -        egal      -       kein Fehler "possibly a bug: position (8,12) might be (8,11)"
  * FIX_0119   wichtig  mittel    -       ja         Geheimtueren: test_result bei falscher Hebelstellung uninitialisiert
@@ -135,7 +135,7 @@
  * FIX_0121   wichtig  mittel    -       ja         Verschuetteter Gang (Zustand 3) blockiert nicht
  * FIX_0122   wichtig  mittel    -       ja         Mit Werkzeug dauert das Freiraeumen laenger als ohne
  * FIX_0123   alles    egal      -       nein       Zaehler der Grubenversuche steht nicht im Spielstand
- * FIX_0124   wichtig  mittel    -       nein       Texte 31 und 32 fehlen in der deutschen OBER.DTX
+ * FIX_0124   wichtig  mittel    -       ja         Texte 31 und 32 fehlen in der deutschen OBER.DTX
  * (125)      -        egal      -       kein Fehler Deckeneinsturz (schwer): mit Werkzeug 18 statt 12 Stunden?
  * FIX_0126   wichtig  mittel    ja      ja         Opfer fuer Efferd und Ingerimm zaehlen auch ohne Wegwerfen
  * FIX_0127   wichtig  mittel    -       ja         Nur die erste Seeroute (Thorwal-Prem) wird zurueckgesetzt
@@ -229,7 +229,7 @@
  * FIX_0215   alles    egal      -       nein       Magischer Brotbeutel wirkt wie der magische Beutel
  * FIX_0216   alles    egal      -       ja         Truhenliste: 20 Byte je Name zu kurz
  * FIX_0217   alles    egal      -       ja         Mengenabfrage laesst sich nicht abbrechen
- * FIX_0218   wichtig  mittel    -       nein       Analues verspricht Wirkungen magischer Gegenstaende, die es nicht gibt
+ * FIX_0218   wichtig  mittel    -       teilweise  Analues verspricht Wirkungen magischer Gegenstaende, die es nicht gibt
  * (219)      -        egal      -       kein Fehler Kraftguertel aktualisiert abhaengige Werte nicht
  * FIX_0220   wichtig  mittel    -       ja         Zaehler der belegten Inventarplaetze driftet
  * FIX_0221   wichtig  kritisch  -       ja         Zufaelliger Gegenstandsverlust: Endlosschleife ohne ablegbaren Gegenstand
@@ -345,44 +345,44 @@
  * FIX_0331   alles    egal      ja      nein       Markt- und Hafenangebot stehen nicht im Spielstand
  * FIX_0332   alles    egal      -       ja         Oeffnungszeit 8-19 Uhr gilt auch fuer Strassenhaendler und Treborn Kolberg
  * FIX_0333   alles    egal      -       nein       Tavernengeruechte in Serske: Lesen hinter dem Dateiende
- * FIX_0334   alles    egal      -       nein       Beleidigter Wirt wirft nicht hinaus
+ * FIX_0334   alles    egal      -       ja         Beleidigter Wirt wirft nicht hinaus
  * FIX_0335   alles    egal      -       nein       Wein und Schnaps ohne Zechenprobe
  * FIX_0336   alles    egal      -       ja         Essen in der Taverne verbraucht zusaetzlich Proviant
- * FIX_0337   wichtig  mittel    -       nein       Schmied Gurthag nach dem Kellerausgang dauerhaft unbenutzbar
- * FIX_0338   alles    egal      -       nein       Treborn Kolbergs Laden: Ortszeile leer oder fremd
+ * FIX_0337   wichtig  mittel    -       ja         Schmied Gurthag nach dem Kellerausgang dauerhaft unbenutzbar
+ * FIX_0338   alles    egal      -       ja         Treborn Kolbergs Laden: Ortszeile leer oder fremd
  * FIX_0339   wichtig  mittel    ja      ja         Akademie: Bezahlung mit erstem gleichen Stueck, auch kaputt
  * FIX_0340   alles    egal      -       nein       Informant Tiomar mit Manrin statt Brendhil eingetragen
- * FIX_0341   wichtig  mittel    -       teilweise  Treborn Kolberg erscheint nach Algrids Hinweis nie, Olvir/Treborn wiederholt sich
+ * FIX_0341   wichtig  mittel    -       ja         Treborn Kolberg erscheint nach Algrids Hinweis nie, Olvir/Treborn wiederholt sich
  * FIX_0342   alles    egal      -       nein       Jurge Torfinsson: "nur Thorwaler" auch bei reinen Thorwalern
  * FIX_0343   alles    egal      -       ja         Taverne: Gewinn wird als unsinnige Ausgabe angezeigt
  * (344)      -        egal      -       kein Fehler Akrobatik und Falschspiel je nach Ort verschieden
  * FIX_0345   wichtig  mittel    -       nein       Kampf auf Spezialfeldern startet erst nach Drehen oder Menue
- * FIX_0346   wichtig  mittel    -       nein       Ereignisfelder loesen nach Gruppenwechsel erneut aus
+ * FIX_0346   wichtig  mittel    -       ja         Ereignisfelder loesen nach Gruppenwechsel erneut aus
  * FIX_0347   alles    egal      -       ja         Dungeonlicht: Lichtquellen anderer Gruppen zaehlen mit
  * FIX_0348   wichtig  mittel    -       nein       Lager in Dungeons: immer einer von vier allgemeinen Lagerkaempfen
  * FIX_0349   wichtig  mittel    ja      nein       Transversalis im Dungeon auf Felder ausserhalb des Plans
  * FIX_0350   wichtig  mittel    ja      nein       Verlaesst eine Teilgruppe das Totenschiff, sinkt es fuer die uebrigen nicht mehr
  * FIX_0351   wichtig  mittel    -       ja         Speerfallgrube (Spinnenhoehle): Spielende auch fuer Gruppen draussen
- * FIX_0352   alles    egal      -       nein       Giftdorn-Truhe nach sechs Ladungen ohne Text
- * FIX_0353   alles    egal      -       nein       Spinnenaltar: Auswahl ohne "spaeter", Text und Kampf wiederholen sich
- * FIX_0354   wichtig  mittel    -       nein       Gesperrte Tueren ohne Meldung, Daspota-Falltuer sperrt eine Tuer fuer immer
- * FIX_0355   wichtig  mittel    -       nein       Schatzlager nur beim ersten Betreten pluenderbar (Daspota-Schatz, Zwingfeste)
+ * FIX_0352   alles    egal      -       ja         Giftdorn-Truhe nach sechs Ladungen ohne Text
+ * FIX_0353   alles    egal      -       teilweise  Spinnenaltar: Auswahl ohne "spaeter", Text und Kampf wiederholen sich
+ * FIX_0354   wichtig  mittel    -       ja         Gesperrte Tueren ohne Meldung, Daspota-Falltuer sperrt eine Tuer fuer immer
+ * FIX_0355   wichtig  mittel    -       ja         Schatzlager nur beim ersten Betreten pluenderbar (Daspota-Schatz, Zwingfeste)
  * FIX_0356   alles    egal      -       nein       Zwingfeste: Anseilen erst ab fuenf Seilen, kein Seil verbraucht
- * FIX_0357   wichtig  mittel    -       nein       Oberorken-Wasserfalle: Raum zu klein, Ertrinken nur an 5-Minuten-Marken
- * FIX_0358   alles    egal      ja      nein       Oberorken-Wasserraum: Tueren beliebig oft knacken (je 1 AP)
+ * FIX_0357   wichtig  mittel    -       ja         Oberorken-Wasserfalle: Raum zu klein, Ertrinken nur an 5-Minuten-Marken
+ * FIX_0358   alles    egal      ja      teilweise  Oberorken-Wasserraum: Tueren beliebig oft knacken (je 1 AP)
  * FIX_0359   wichtig  mittel    ja      nein       Prem-Mine: AP fuer Deckenfelder beliebig oft
  * FIX_0360   alles    egal      -       nein       Orkhoehle: jedes Durchsuchen der Strohlager kostet CH -2
- * FIX_0361   alles    egal      ja      nein       Runin: Drachenhort und Platinschluessel-Auftrag unabhaengig
- * FIX_0362   wichtig  kritisch  ja      nein       Fluch der Goldmuenzen (Burgruine): jeder Kampf gilt sofort als gewonnen
+ * FIX_0361   alles    egal      ja      teilweise  Runin: Drachenhort und Platinschluessel-Auftrag unabhaengig
+ * FIX_0362   wichtig  kritisch  ja      ja         Fluch der Goldmuenzen (Burgruine): jeder Kampf gilt sofort als gewonnen
  * (363)      -        egal      -       kein Fehler Spinnenhoehle: Teleport ueberspringt Feldereignisse
  * (364)      -        egal      -       kein Fehler Saeuregruben treffen nur die ersten beiden Helden
  * FIX_0365   wichtig  mittel    -       nein       Reiseziel nicht getrennt je Teilgruppe
  * FIX_0366   wichtig  mittel    ja      nein       Orkhoehle: Ausgang setzt die Gruppe direkt aufs Reiseziel
  * FIX_0367   wichtig  mittel    ja      ja         Weiterreisen ohne Nachtlager ueber unsichtbares Symbol
- * FIX_0368   wichtig  mittel    -       nein       Tavernenhinweis schaltet Reiseereignisse 66 und 75 ab
- * FIX_0369   alles    egal      -       nein       Nach Gorah dreht sich die Reiserichtung immer um
+ * FIX_0368   wichtig  mittel    -       ja         Tavernenhinweis schaltet Reiseereignisse 66 und 75 ab
+ * FIX_0369   alles    egal      -       ja         Nach Gorah dreht sich die Reiserichtung immer um
  * FIX_0370   wichtig  mittel    -       nein       Gorahs Haus nach Flucht der Helden unzugaenglich
- * FIX_0371   alles    egal      -       nein       Grenz- und Strassentexte ohne Richtungspruefung
+ * FIX_0371   alles    egal      -       ja         Grenz- und Strassentexte ohne Richtungspruefung
  * FIX_0372   wichtig  mittel    ja      ja         Seereise: jeder Umweg-Wert fuehrt ins Totenschiff
  * FIX_0373   alles    egal      -       nein       Floss ohne Werkzeug baubar
  * FIX_0374   alles    egal      ja      nein       Berghuette: Jagd zweimal moeglich
@@ -394,10 +394,10 @@
  * FIX_0380   wichtig  mittel    -       nein       Boeser Blick setzt dauerhaft zwei Attacken
  * FIX_0381   alles    egal      -       nein       Boeser Blick auf Leichen moeglich
  * FIX_0382   wichtig  mittel    -       ja         Grosse Gier ist nicht umgesetzt
- * FIX_0383   wichtig  mittel    -       nein       Transversalis auf der Landreise kostet AE ohne Wirkung
+ * FIX_0383   wichtig  mittel    -       ja         Transversalis auf der Landreise kostet AE ohne Wirkung
  * FIX_0384   alles    egal      ja      nein       Herberge: Regenerationssperre nach Magie haengt am Heldenplatz
  * FIX_0385   wichtig  mittel    -       ja         Curian zaubert im Kampf nur im Computerkampf mit Magie
- * FIX_0386   alles    egal      -       nein       Analues erkennt nur 28 Gegenstaende, Grimring nicht
+ * FIX_0386   alles    egal      -       teilweise  Analues erkennt nur 28 Gegenstaende, Grimring nicht
  * (387)      -        egal      -       kein Fehler Horriphobus: verschreckter Gegner gilt nicht als besiegt
  * (388)      -        egal      -       kein Fehler Zauberproben als Summenprobe (Boeser Blick gelingt oft)
  * (389)      -        egal      -       kein Fehler Kampfzauber ausserhalb des Kampfes waehlbar
@@ -425,10 +425,18 @@
  * FIX_0411   alles    egal      -       nein       Umlaute im Spielstandnamen ergeben "Diskette voll"
  * FIX_0412   alles    egal      -       nein       Namenlose Tage im Tagebuch als -5. bis -1. Swafnir
  * FIX_0413   alles    egal      -       nein       Zeitvorspulen ohne Bremse
- * FIX_0414   wichtig  mittel    -       nein       Einhorn: Held als Zeiger im Spielstand
+ * FIX_0414   wichtig  mittel    -       teilweise  Einhorn: Held als Zeiger im Spielstand
  * FIX_0415   alles    egal      -       nein       Schiffsreise mit Haendlermusik
  * FIX_0416   alles    egal      -       nein       Zufallswurf vor der Erledigt-Pruefung
  * (417)      -        egal      -       kein Fehler Textfenster schliessen bei jeder Taste
+ * FIX_0418   alles    egal      -       ja         Schatzkarte: wer nur Hjores Kartenteil 9 hat, bekommt "keine Kartenteile gefunden"
+ * FIX_0425   alles    egal      -       ja         Tavernenschlaegerei schreibt ueber gs_town_outlawed_flags hinaus in die Rauswurf-Merker der Herbergen
+ * FIX_0426   wichtig  mittel    -       ja         Spiel laden im Tempel: leave_location() laeuft ueber den geladenen Spielstand
+ * FIX_0432   wichtig  mittel    ja      ja         Manrek-Schatzkammertuer: Sperre und Eisenschluessel auf falschem Feld (0,12,8) statt (0,12,7)
+ * FIX_0433   wichtig  mittel    -       ja         Totenschiff-Falltueren loesen neben der Grube aus und schieben die Gruppe (bei (1,14,5) in die Wand)
+ * FIX_0434   alles    egal      -       ja         Speerfallgrube der Spinnenhoehle: eine Stunde Herausklettern auch, wenn niemand gestuerzt ist
+ * FIX_0435   alles    egal      -       ja         Runin: loser Stein vor dem Hebel (0,8,1) gilt erst nach Betaetigen des Hebels als entfernt
+ * FIX_0436   alles    egal      -       nein       STRASSE.LTX ist groesser als der 10000-Byte-Textpuffer
  */
 #ifndef S_FIX_H
 #define S_FIX_H
@@ -1592,6 +1600,30 @@
 #endif
 #ifndef FIX_0416
 #define FIX_0416 FIX_STUFE_A
+#endif
+#ifndef FIX_0418
+#define FIX_0418 FIX_STUFE_A
+#endif
+#ifndef FIX_0425
+#define FIX_0425 FIX_STUFE_A
+#endif
+#ifndef FIX_0426
+#define FIX_0426 FIX_STUFE_W
+#endif
+#ifndef FIX_0432
+#define FIX_0432 FIX_STUFE_WX
+#endif
+#ifndef FIX_0433
+#define FIX_0433 FIX_STUFE_W
+#endif
+#ifndef FIX_0434
+#define FIX_0434 FIX_STUFE_A
+#endif
+#ifndef FIX_0435
+#define FIX_0435 FIX_STUFE_A
+#endif
+#ifndef FIX_0436
+#define FIX_0436 FIX_STUFE_A
 #endif
 
 /* SEG002 ist resident: ohne Platz fuer die Behebungen entfallen dort nie aufgerufene Funktionen */

@@ -27,6 +27,8 @@ set "GOG=%SPIEL%"
 if not exist "%SAVES%" mkdir "%SAVES%"
 if not exist "%RUN%" mkdir "%RUN%"
 copy /y "%FIXEXE%" "%RUN%\BLADEM.EXE" >nul
+rem --- korrigierte Spieldaten (von PATCHEN.bat) ueber die Overlay-Ablage einblenden
+if exist "%BUILD%\SCHICK.DAT" copy /y "%BUILD%\SCHICK.DAT" "%SAVES%\SCHICK.DAT" >nul
 
 rem --- DOSBox-Startbefehle in eine kleine Zusatz-Konfiguration schreiben
 rem     C: = Spielordner (nur lesen), Aenderungen gehen nach Testspielstaende_Fix_Wichtig

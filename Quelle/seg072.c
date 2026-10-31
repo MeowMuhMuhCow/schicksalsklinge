@@ -33,6 +33,10 @@
 #include "seg103.h"
 #include "seg105.h"
 #include "seg113.h"
+#if FIX_0338
+#include "seg026.h"
+#include "seg028.h"
+#endif
 
 signed char g_tmap_double1 = 0; // ds:0x7c9a, 1 = unicorn brought a piece you already have
 signed char g_tmap_double2 = 0; // ds:0x7c9b, 1 = you got a piece you already have from the unicorn
@@ -615,10 +619,23 @@ void INF_treborn_unicorn(const signed int informer, const signed int state)
 		enough_money = money >= 6000 ? 1 : 0;
 
 		if (!state) {
+#if !FIX_0341
 			g_dialog_next_state = (gs_informer_flags[INFORMER_ID_TREBORN] != 0 ? -1 : 1);
+#else
+			/* Fix 341: Treborn erscheint, solange er nicht getroffen ist (Merker < 2); "bekannt" (1, von Algrid) sperrt nicht mehr.
+			 * Alte Spielstaende fuehren "getroffen" noch als 1: hat die Gruppe sein Kartenstueck oder seinen Termin schon,
+			 * gilt er als getroffen (kein zweites erstes Treffen mit doppelten AP) */
+			g_dialog_next_state = ((gs_informer_flags[INFORMER_ID_TREBORN] >= 2) ||
+				((gs_informer_flags[INFORMER_ID_TREBORN] == 1) && (gs_treasure_maps[7] || gs_treborn_date)) ? -1 : 1);
+#endif
 		} else if (state == 1) {
 			/* mark TREBORN KOLBERG as met */
+#if !FIX_0341
 			if (!gs_informer_flags[INFORMER_ID_TREBORN]) gs_informer_flags[INFORMER_ID_TREBORN] = 1;
+#else
+			/* Fix 341: "getroffen" als 2 fuehren (Osterpatch NRS) */
+			gs_informer_flags[INFORMER_ID_TREBORN] = 2;
+#endif
 		} else if (state == 5) {
 			g_dialog_next_state = (enough_money ? 7 : 8);
 		} else if (state == 9) {
@@ -653,6 +670,11 @@ void INF_treborn_unicorn(const signed int informer, const signed int state)
 			/* visit the shop of Treborn Kolberg */
 			gs_town_typeindex = MERCHANT_TYPEINDEX_TREBORN_KOLBERG;
 			do_merchant();
+#if FIX_0338
+			/* Fix 338: der Laden ueberschreibt Text und Kopfbild des laufenden Gespraechs: INFO6.TLK (wie do_talk(11, 0)) und Treborns Kopf neu laden */
+			load_informer_tlk(ARCHIVE_FILE_DIALOGS_TLK + 11);
+			load_in_head(gs_dialog_partners[0].head_id);
+#endif
 		} else if (state == 21) {
 			gs_treborn_date = 1;
 		} else if (state == 23) {

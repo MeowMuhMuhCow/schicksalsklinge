@@ -501,7 +501,12 @@ void TLK_tavern(const signed int answer)
 		gs_tav_kicked_flags[gs_town_typeindex] = 1;
 
 		if (gs_tlk_tav_crowdedness == 3) {
+#if !(FIX_0425 || FIX_0334)
 			gs_town_outlawed_flags[gs_town_typeindex] = 1;
+#else
+			/* Fix 425: Merker je Stadt wie in TLK_inn; mit dem Tavernen-Index (bis 87) schrieb die Schlaegerei ueber das Feld (52 Byte) hinaus in die Rauswurf-Merker der Herbergen (mit Fix 334 noetig) */
+			gs_town_outlawed_flags[gs_town_id] = 1;
+#endif
 		}
 
 	} else if (old_state == 33) {
@@ -511,7 +516,12 @@ void TLK_tavern(const signed int answer)
 		gs_tav_kicked_flags[gs_town_typeindex] = 1;
 
 		if (gs_tlk_tav_crowdedness == 3) {
+#if !(FIX_0425 || FIX_0334)
 			gs_town_outlawed_flags[gs_town_typeindex] = 1;
+#else
+			/* Fix 425: wie oben (Zustand 33) */
+			gs_town_outlawed_flags[gs_town_id] = 1;
+#endif
 		}
 
 	} else if (old_state == 34) {

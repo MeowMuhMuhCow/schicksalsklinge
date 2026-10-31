@@ -189,6 +189,14 @@ void do_temple(void)
 					game_state = load_game_state();
 				} while (game_state == -1);
 
+#if FIX_0426
+				/* Fix 426: liegt der geladene Stand nicht in einem Tempel, sofort zurueck: keine Tempel-Ortszeile und kein leave_location() ueber den geladenen Stand (dreht sonst die Blickrichtung, setzt die Position zurueck) */
+				if (gs_town_loc_type != LOCTYPE_TEMPLE) {
+					g_intemple = g_intemple2 = 1;
+					return;
+				}
+#endif
+
 				/* location string */
 				sprintf(g_dtp2,	get_ttx(235), get_ttx(g_temple_god + 21), get_ttx(gs_town_id + 235)); /* "%s-TEMPEL IN %s" / TEXT.LTX 22..35: Gott/Monat / TEXT.LTX 236..287: Ortsname */
 				GUI_print_loc_line(g_dtp2);

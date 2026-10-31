@@ -59,6 +59,19 @@ signed int g_fig_critical_fail_backfire_2;	// ds:0xe3ac
 	 */
 
 
+#if FIX_0390
+/* Fix 390: Zauberstab, Hexenbesen, magische Orknase, magisches Kurzschwert und Grimring sind unzerbrechlich (bf -99),
+ * auch wenn die Daten (Curians Stab bf 5) oder der alte Fehler (bf++ bei -99) anderes sagen (Osterpatch NRS 2016) */
+static void fix_set_unbreakable(struct inventory *item)
+{
+	if ((item->item_id == ITEM_ID_ZAUBERSTAB) || (item->item_id == ITEM_ID_HEXENBESEN) ||
+		(item->item_id == ITEM_ID_ORKNASE__MAGIC) || (item->item_id == ITEM_ID_KURZSCHWERT__MAGIC) ||
+		(item->item_id == ITEM_ID_DAS_SCHWERT_GRIMRING))
+	{
+		item->bf = -99;
+	}
+}
+#endif
 
 /**
  * \brief   executes the fight action of hero
@@ -247,6 +260,13 @@ void FIG_do_hero_action(struct struct_hero* hero, const signed int hero_pos)
 				target_weapon_gfx_id = FIG_weapon_gfx_id_melee(p_target_hero);
 			}
 
+#if FIX_0390
+			/* Fix 390: unzerbrechliche Gegenstaende vor den Bruchpruefungen auf bf -99 setzen (Curians Stab) */
+			fix_set_unbreakable(p_weapon_attacker);
+			if (target_is_hero != 0) {
+				fix_set_unbreakable(p_weapon_target);
+			}
+#endif
 			if (attacker_weapon_gfx_id == WEAPON_GFX_ID_NONE) {
 				/* no valid weapon == bare hands */
 				atpa = hero->at_talent_bonus[WEAPON_TYPE_WAFFENLOS] + hero->fight_atpa_mod - hero->rs_be / 2;

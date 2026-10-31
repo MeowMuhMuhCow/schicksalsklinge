@@ -1,8 +1,10 @@
 # Die Schicksalsklinge – Quelltext im Attic-Stil
 
-## 252 Fehler behoben – 34 Jahre nach Release
+## 281 Fehler behoben – 34 Jahre nach Release
 
 **Inoffizielle Bugfix-Fassung · spielbar ohne Compiler · das Original bleibt unangetastet · [gleich loslegen](#schnellstart-bugfix-fassung-spielen-ohne-compiler)**
+
+**Neu in Version 1.2:** Abgleich mit dem Osterpatch von **NRS** (2016): 29 weitere Fehler behoben, u. a. Manrek-Schatzkammertür, Totenschiff-Falltüren, Daspota-Tür und -Schatz, Oberorken-Wasserfalle, Gurthag, Treborn Kolberg, dazu korrigierte Spieldaten (Magieresistenzen, fehlende Texte, Rechtschreibung). Details in [BUGFIXES.md](BUGFIXES.md).
 
 **Neu in Version 1.1:** Zauber so, wie das Lösungsbuch sie beschreibt: **Visibili macht die ganze Gruppe unsichtbar** (alle unsichtbar = kein Kampf), **Gardianum** fängt feindliche Kampfzauber ab, **Feuerbann** halbiert feindliches Feuer, **Große Gier** vertreibt Gegner. Details in [BUGFIXES.md](BUGFIXES.md).
 
@@ -11,7 +13,7 @@
 > geschriebener Vergleich machte es unerreichbar. Dazu: keine Spielhänger mehr bei Priester, Drache und Einbruch,
 > keine 168.000 Dukaten mehr per ESC, und die Kvillotter beißt endlich. → [alle 248 Änderungen](BUGFIXES.md)
 
-**Zusammen mit [Sternenschweif](https://github.com/MeowMuhMuhCow/sternenschweif): 479 Bugfixes für DSA 1 und DSA 2.**
+**Zusammen mit [Sternenschweif](https://github.com/MeowMuhMuhCow/sternenschweif): 508 Bugfixes für DSA 1 und DSA 2.**
 
 **Das Schwarze Auge 1: Die Schicksalsklinge** (Attic, 1992), deutsche CD-Fassung 3.02, als lesbarer C-Quelltext.
 Borland C++ 3.1 baut daraus eine `BLADEM.EXE`, die **Byte für Byte dem Original gleicht**
@@ -30,7 +32,7 @@ Documentation is in German.*
 
 Für alle, die nur spielen wollen. Nötig sind Windows und Schicksalsklinge von GOG, sonst nichts: kein Python, kein Compiler.
 
-1. Rechts unter **Releases** das Paket `…_Bugfix_1.1.zip` herunterladen (oder oben **Code → Download ZIP**) und irgendwohin entpacken.
+1. Rechts unter **Releases** das Paket `…_Bugfix_1.2.zip` herunterladen (oder oben **Code → Download ZIP**) und irgendwohin entpacken.
 2. **`PATCHEN.bat`** doppelklicken. Es findet den GOG-Spielordner (oder fragt danach), prüft per Prüfsumme, ob die
    eigene EXE genau die passende ist, und erzeugt daraus `Build\BLADEM_FIX_WICHTIG.EXE` und `Build\BLADEM_FIX_ALLES.EXE`.
    **Die Original-EXE wird nicht verändert**, das Spiel bleibt wie es ist.
@@ -56,6 +58,7 @@ Spielen durch Maschinencode gearbeitet haben. **Ohne sie gäbe es das hier nicht
 | **siebenstreich** | hat Bright-Eyes weitergeführt, den C-Code geschliffen und das Projekt am Leben gehalten (github.com/siebenstreich/BrightEyes), und hat unsere Fragen geduldig und offen beantwortet. |
 | **cmfrydos** | entschlüsselt mit dem **Riva HD Viewer** die Datenformate der Nordlandtrilogie (Dungeons, Ereigniszonen, Dialoge, Kampfsystem) und teilt seine Ergebnisse offen im Forum und im Wiki. |
 | **Das Crystals-DSA-Forum** | Seit 2006 sammeln die Spielerinnen und Spieler dort Fehler, Beobachtungen und Rätsel der Nordlandtrilogie, im Thread „Bugs in Sternenschweif“, in den Truhenpatch-Threads, in Tipps-Sammlungen und in der Technischen Werkstatt. Viele Einträge unserer Fehlerlisten gehen auf ihre Meldungen zurück und sind dort zuerst beschrieben worden. Danke an alle, die dort über die Jahre geschrieben, gemessen und nachgespielt haben, und an die Forenbetreiber, die das alles erhalten. |
+| **NRS** | hat 2016 im Crystals-Forum einen Sammelpatch für die Schicksalsklinge veröffentlicht, direkt im Maschinencode, rund 190 Änderungen ohne Quelltext. Seine Lösungen haben uns gezeigt, wie viele Stellen gemeint waren, und seine Datenkorrekturen stecken in der Bugfix-Fassung 1.2. |
 | **Alle Beteiligten an Bright-Eyes, am BrightEyes-Wiki und an den Reverse-Engineering-Projekten der Nordlandtrilogie** | für Karten, Datenformate, Dokumentation und den langen Atem. |
 | **Attic Entertainment Software** | für diese Spiele. 30 Jahre später lohnt es sich immer noch, jeden Winkel davon zu verstehen. |
 

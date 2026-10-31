@@ -103,6 +103,7 @@ signed int DNG12_handler(void)
 		}
 	} else {
 
+#if !FIX_0357
 		if ((	target_pos == DNG_POS(1,1,7) || target_pos == DNG_POS(1,2,7) || target_pos == DNG_POS(1,3,7) ||
 			target_pos == DNG_POS(1,4,7) || target_pos == DNG_POS(1,5,7) || target_pos == DNG_POS(1,6,7) ||
 			target_pos == DNG_POS(1,1,8) || target_pos == DNG_POS(1,2,8) || target_pos == DNG_POS(1,3,8) ||
@@ -110,10 +111,26 @@ signed int DNG12_handler(void)
 			target_pos == DNG_POS(1,1,9) || target_pos == DNG_POS(1,2,9) || target_pos == DNG_POS(1,3,9) ||
 			target_pos == DNG_POS(1,4,9) || target_pos == DNG_POS(1,5,9) || target_pos == DNG_POS(1,6,9) )
 			&& gs_dng12_watertrap_active)
+#else
+		/* Fix 357: der Raum der Wasserfalle umfasst auch das Eingangsfeld (1,3,10), auf dem die Tuer (3,11) hinter der Gruppe zufaellt */
+		if (gs_dungeon_level == 1 &&
+			((gs_x >= 1 && gs_x <= 6 && gs_y >= 7 && gs_y <= 9) || (gs_x == 3 && gs_y == 10)) &&
+			gs_dng12_watertrap_active)
+#endif
 		{
 			/* water trap room, activate */
 			gs_dng12_watertrap_water_runs = 1;
 
+#if FIX_0357
+			/* Fix 357: steht der Zaehler auf 0, bei jedem Durchlauf auswerten (Meldung und Ertrinken), solange noch
+			 * Helden der Gruppe handeln koennen, nicht nur beim Wechsel der 5-Minuten-Stufe (g_dng12_watertrap_bak
+			 * liegt nicht im Spielstand, nach dem Laden kam die Stufe 0 sonst nie) */
+			if ((gs_dng12_watertrap_timer == MINUTES(0)) && count_heroes_available_in_group())
+			{
+				g_dng12_watertrap_bak = -1;
+			}
+
+#endif
 			/* new message every 5 minutes (gs_dng12_watertrap_timer counts down in seg002) */
 		if (gs_dng12_watertrap_timer / MINUTES(5) != g_dng12_watertrap_bak)
 			{
@@ -133,7 +150,12 @@ signed int DNG12_handler(void)
 							(hero->group_id == gs_active_group_id) &&
 							!hero->flags.dead)
 						{
+#if !FIX_0357
 							hero_disappear(hero, i, -1);
+#else
+							/* Fix 357: die Helden ertrinken (Leiche und Ausruestung bleiben), statt geloescht zu werden */
+							sub_hero_le(hero, 5000);
+#endif
 						}
 					}
 
@@ -287,6 +309,10 @@ signed int DNG12_handler(void)
 #endif
 		/* the door of the water trap room closes behind the group */
 
+#if FIX_0358
+		/* Fix 358: die Tuer faellt nur zu, solange die Wasserfalle aktiv ist (danach kein Wiederverschliessen und kein erneutes Knacken) */
+		if (gs_dng12_watertrap_active)
+#endif
 #if !defined(__BORLANDC__)
 		if (div16((uint16_t)ptr[MAP_POS(3,11)]) == DNG_TILE_OPEN_DOOR)
 #else
@@ -303,6 +329,10 @@ signed int DNG12_handler(void)
 		D1_INFO("In Wasserfalle gefangen\n");
 #endif
 
+#if FIX_0358
+		/* Fix 358: auch die Tuer (3,6) faellt nur bei aktiver Wasserfalle zu */
+		if (gs_dng12_watertrap_active)
+#endif
 #if !defined(__BORLANDC__)
 		if (div16((uint16_t)ptr[MAP_POS(3,6)]) == 2)
 #else
@@ -376,9 +406,17 @@ signed int DNG12_handler(void)
 				} else {
 					/* from the third try on: text 31 (former comment: "the hero falls again into the pit") */
 #ifndef M302de_FEATURE_MOD
+#if !FIX_0124
 					sprintf(g_dtp2,	get_tx(31), hero->alias, /* Text 31 fehlt in der dt. OBER.DTX (nur 0..30) */
 						GUI_get_personal_pronoun(hero->sex, GRAMMAR_CASE_1ST), GUI_get_personal_pronoun(hero->sex, GRAMMAR_CASE_4TH),
 						GUI_get_personal_pronoun(hero->sex, GRAMMAR_CASE_1ST), GUI_get_personal_pronoun(hero->sex, GRAMMAR_CASE_4TH));
+#else
+					/* Fix 124: Text 31 aus dem Datenpatch 1.2 ("%s ... HAT %s SICH ... KONNTET %s ... MEINT %s, ALS %s WIEDER HOCHKOMMT"):
+					 * Name, ER, IHN, ER, ER - das letzte Pronomen im 1. statt im 4. Fall. Text 32 kommt ebenfalls aus dem Datenpatch. */
+					sprintf(g_dtp2,	get_tx(31), hero->alias,
+						GUI_get_personal_pronoun(hero->sex, GRAMMAR_CASE_1ST), GUI_get_personal_pronoun(hero->sex, GRAMMAR_CASE_4TH),
+						GUI_get_personal_pronoun(hero->sex, GRAMMAR_CASE_1ST), GUI_get_personal_pronoun(hero->sex, GRAMMAR_CASE_1ST));
+#endif
 #else
 					/* Feature Mod 7: The following is a translation of a text block in OBER.DTX
 					 * of the English version, which has not been present in the German one.

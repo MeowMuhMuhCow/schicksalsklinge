@@ -890,6 +890,13 @@ void spell_spurlos(void)
 
 void spell_transversalis(void)
 {
+#if FIX_0383
+	/* Fix 383: auf der Reise (Lager unterwegs) steht gs_town_id noch auf der Abreisestadt -> Meldung wie ausserhalb, keine AE */
+	if (g_traveling) {
+		g_spell_special_aecost = 0;
+		strcpy(g_dtp2, get_tx(18)); /* "DIESER SPRUCH IST NUR IN EINEM DUNGEON ODER EINER STADT MÖGLICH!" */
+	} else
+#endif
 	if (!gs_dungeon_id && !gs_town_id) {
 		/* cannot be used outside of a dungeon or a town */
 
@@ -1162,6 +1169,12 @@ char* spell_analues(void)
 #endif
 
 	strcpy(g_text_output_buf, get_tx(52)); /* "<ICH KANN NICHTS BESONDERES ERKENNEN!>" */
+#if FIX_0386
+	/* Fix 386 (teilweise): magischer Gegenstand ohne Eintrag in g_analues_items -> Text 55 ("kann nicht sagen, was fuer ein Zauber") statt "nichts Besonderes" */
+	if (item_id && get_spelluser()->inventory[inv_slot].flags.magic) {
+		strcpy(g_text_output_buf, get_tx(55)); /* "<TUT MIR LEID, ICH KANN NICHT SAGEN, WAS FÜR EIN ZAUBER HIER ANGEWE..." */
+	}
+#endif
 
 	if (item_id) {
 

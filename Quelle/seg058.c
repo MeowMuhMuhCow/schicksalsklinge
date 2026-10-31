@@ -574,9 +574,15 @@ void do_smith(void)
 		return;
 	}
 
+#if !FIX_0337
 	if (gs_smith_kicked_flags[gs_town_typeindex] ||
 		gs_smith_flogged_flags[gs_town_typeindex] ||
 		(gs_town_typeindex == 1 && gs_dng14_cellarexit_flag)) {
+#else
+	/* Fix 337: Gurthag bleibt nach dem Kellerausgang nutzbar; beim Reden kommt weiter sein Kellerausgang-Dialog (Osterpatch NRS) */
+	if (gs_smith_kicked_flags[gs_town_typeindex] ||
+		gs_smith_flogged_flags[gs_town_typeindex]) {
+#endif
 
 		talk_smith();
 		leave_location();
