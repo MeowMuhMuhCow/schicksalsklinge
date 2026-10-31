@@ -464,6 +464,12 @@
 #define FIX_PROBENLOG FIX_STUFE_W
 #endif
 
+/* Zusatzfunktion, keine Fehlerbehebung: lebendiger Stadthimmel. Statt des festen Himmelsbilds ein erzeugter Himmel
+ * mit ziehenden Wolken und Sternen bei Nacht, Farben aus der Himmelspalette (Tageszeit wie im Original). */
+#ifndef FIX_HIMMEL
+#define FIX_HIMMEL FIX_STUFE_W
+#endif
+
 #ifndef FIX_0001
 #define FIX_0001 FIX_STUFE_W
 #endif

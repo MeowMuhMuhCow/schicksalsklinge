@@ -1,6 +1,6 @@
 # Die Schicksalsklinge – Bugfix-Fassung: Änderungsliste
 
-**Version 1.3 vom 31.10.2026** · inoffiziell · zur deutschen GOG-Fassung 3.02 · **im Spiel noch ungetestet, Tester willkommen**
+**Version 1.4 vom 31.10.2026** · inoffiziell · zur deutschen GOG-Fassung 3.02 · **im Spiel noch ungetestet, Tester willkommen**
 
 ## So geht's
 
@@ -20,6 +20,16 @@ Die Spielstände der Bugfix-Fassung liegen in eigenen Ordnern unter `Build\`. Al
 |---|---|
 | **WICHTIG** (empfohlen) | kritische und mittlere Fehler: Abstürze, Hänger, verlorene Ausrüstung, falsche Preise, Fehler, die man im Spiel merkt |
 | **ALLES** | zusätzlich viele kleine Fehler ohne große Spielwirkung |
+
+## Neu in Version 1.4: lebendiger Stadthimmel
+
+Eine Zusatzfunktion, keine Fehlerbehebung: **Der Himmel über den Städten lebt.** Statt des festen Wolkenbilds gibt es einen Rundum-Himmel mit ziehenden Wolken, Sonne, Mond und Sternen. Standardmäßig an, aus mit `HIMMEL_AUS.bat`, wieder an mit `HIMMEL_AN.bat` (Linux: `HIMMEL=0`). Die Standard-EXE bleibt bytegleich, Spielstände bleiben kompatibel.
+
+- **Rundum:** Jede Blickrichtung hat ihren eigenen Ausschnitt, nach einer vollen Drehung schließen die Wolken nahtlos an
+- **Wolken nach dem Tageswind des Spiels:** Die Schicksalsklinge würfelt jeden Tag einen Wind aus, der bisher nur die Schiffe schneller oder langsamer machte. Jetzt bestimmt er auch, wie viele Wolken ziehen und wie schnell. An Sturmtagen sind sie grau
+- **Sonne** von 7 bis 20 Uhr, **Mond** von 21 bis 5 Uhr, beide wandern von Osten nach Westen. Nachts **Sterne**. Wolken schieben sich davor, Häuser verdecken sie
+- Alle Farben stammen aus der Himmelspalette des Spiels, Morgen- und Abendblende wie im Original. Die Wolken ziehen nach der echten Zeit, nicht pro Schritt
+- Nebenbei: Der Mauszeiger flackert beim Laufen und Drehen in der Stadt weniger
 
 ## Neu in Version 1.3: Probenlog
 

@@ -13,7 +13,7 @@ if [ -f "$LINUX/starten.conf" ]; then
 	while IFS= read -r z || [ -n "$z" ]; do
 		z="${z%%#*}"; z="${z%"${z##*[![:space:]]}"}"
 		case "$z" in
-			SPIEL=*|CD=*|ABLAGE=*|SPEICHERN=*|VOLLBILD=*|INTRO=*|CYCLES=*|DOSBOX=*|OHNE_GOGCONF=*)
+			SPIEL=*|CD=*|ABLAGE=*|SPEICHERN=*|VOLLBILD=*|INTRO=*|CYCLES=*|HIMMEL=*|DOSBOX=*|OHNE_GOGCONF=*)
 				k="${z%%=*}"; v="${z#*=}"; v="${v#\"}"; v="${v%\"}"; v="${v/#\~/$HOME}"
 				[ -z "${!k+x}" ] && printf -v "$k" '%s' "$v" ;;
 		esac

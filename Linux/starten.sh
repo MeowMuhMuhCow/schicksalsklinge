@@ -16,6 +16,7 @@
 #   VOLLBILD=1          Vollbild
 #   INTRO=0             Intro ueberspringen
 #   CYCLES=3000         Tempo (DOSBox-Zyklen)
+#   HIMMEL=0            Schicksalsklinge: Original-Himmel statt des lebendigen Himmels (ab 1.4)
 #   DOSBOX=pfad         andere DOSBox
 #   OHNE_GOGCONF=1      ohne die DOSBox-Einstellungen von GOG (dosbox_realms*.conf)
 . "$(dirname "${BASH_SOURCE[0]}")/gemeinsam.sh"
@@ -84,6 +85,12 @@ if [ -n "$P" ]; then
 	if [ -s "$P" ]; then mkdir -p "$LOGARCHIV"; mv -f "$P" "$LOGARCHIV/PROBEN_${FASSUNG}_$(date +%Y-%m-%d_%H-%M-%S).CSV"; else rm -f "$P"; fi
 fi
 [ "$LOG" = 1 ] && : > "$C/PROBEN.CSV"
+
+# Lebendiger Stadthimmel (nur Schicksalsklinge, ab 1.4, Vorgabe an): HIMMEL=0 legt HIMMEL.AUS an, sonst wird sie entfernt
+if [ "$EXE" = BLADEM ]; then
+	H="$(datei_in "$C" HIMMEL.AUS)"
+	if [ "${HIMMEL:-1}" = 0 ]; then [ -z "$H" ] && : > "$C/HIMMEL.AUS"; else [ -n "$H" ] && rm -f "$H"; fi
+fi
 
 # CD-Abbild: eigenes ueber CD=..., sonst das von GOG im Spielordner (CD-Audio bzw. CD-Pruefung).
 # "-t cdrom" verstehen DOSBox 0.74, DOSBox Staging und DOSBox-X.

@@ -122,7 +122,10 @@ def main():
           '#define FIX_STUFE_WX (FIX_BUGS >= 1 && FIX_EXPLOITS)', '#define FIX_STUFE_AX (FIX_BUGS >= 2 && FIX_EXPLOITS)', '',
           '/* Zusatzfunktion, keine Fehlerbehebung: Probenlog. Jede Probe wird als Zahlenzeile an PROBEN.CSV im Spielordner',
           ' * angehaengt, aber nur, wenn diese Datei schon da ist (Datei anlegen = Log an). Spiel und Spielstand bleiben gleich. */',
-          '#ifndef FIX_PROBENLOG', '#define FIX_PROBENLOG FIX_STUFE_W', '#endif', '']
+          '#ifndef FIX_PROBENLOG', '#define FIX_PROBENLOG FIX_STUFE_W', '#endif', '',
+          '/* Zusatzfunktion, keine Fehlerbehebung: lebendiger Stadthimmel. Statt des festen Himmelsbilds ein erzeugter Himmel',
+          ' * mit ziehenden Wolken und Sternen bei Nacht, Farben aus der Himmelspalette (Tageszeit wie im Original). */',
+          '#ifndef FIX_HIMMEL', '#define FIX_HIMMEL FIX_STUFE_W', '#endif', '']
     A = ['; s_fix.inc - Fehlerbehebungen per Schalter fuer TASM (erzeugt von Werkzeuge/mkfix.py, siehe s_fix.h)',
          'ifndef FIX_BUGS', 'FIX_BUGS = 0', 'endif', 'ifndef FIX_EXPLOITS', 'if FIX_BUGS gt 0', 'FIX_EXPLOITS = 1', 'else',
          'FIX_EXPLOITS = 0', 'endif', 'endif']

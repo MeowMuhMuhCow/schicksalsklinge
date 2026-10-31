@@ -57,6 +57,7 @@ Was beim Aufruf angegeben wird, hat Vorrang vor der Datei.
 | `VOLLBILD=1` | Vollbild |
 | `INTRO=0` | Intro überspringen |
 | `CYCLES=3000` | Tempo in DOSBox-Zyklen (bei Staging als `cpu_cycles`) |
+| `HIMMEL=0` | Original-Himmel statt des lebendigen Stadthimmels (ab 1.4, Vorgabe: lebendiger Himmel an) |
 | `SPIEL=ordner` | Spielordner (sonst gesucht bzw. aus `Linux/SPIELPFAD.txt`) |
 | `CD=pfad` | eigenes CD-Abbild (siehe oben) |
 | `DOSBOX=pfad` | andere DOSBox |

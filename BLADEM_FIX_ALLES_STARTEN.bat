@@ -47,6 +47,11 @@ if "%PROBENLOG%"=="1" (
   start "Probenlog" powershell -NoProfile -ExecutionPolicy Bypass -File "%HIER%Probenlog\probenlog_fenster.ps1" -Datei "%SAVES%\PROBEN.CSV"
 )
 
+rem --- Lebendiger Stadthimmel (Zusatzfunktion, Vorgabe an): HIMMEL_AUS.bat legt HIMMEL_AUS.txt
+rem     neben die Startdateien, HIMMEL_AN.bat loescht sie. Das Spiel zeigt den Original-Himmel, wenn HIMMEL.AUS im Spielstand-Ordner liegt.
+if exist "%HIER%HIMMEL_AUS.txt" type nul > "%SAVES%\HIMMEL.AUS"
+if not exist "%HIER%HIMMEL_AUS.txt" if exist "%SAVES%\HIMMEL.AUS" del "%SAVES%\HIMMEL.AUS"
+
 rem --- DOSBox-Startbefehle in eine kleine Zusatz-Konfiguration schreiben
 rem     C: = Spielstand-Ordner (Kopie des Spielordners, dort landen auch die Spielstaende)
 rem     D: = CD-Abbild von GOG (CD-Audio)

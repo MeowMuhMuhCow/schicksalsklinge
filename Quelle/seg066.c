@@ -25,6 +25,10 @@
 #include <string.h>
 
 #include "v302de.h"
+#if FIX_HIMMEL
+#include <io.h>
+#include <fcntl.h>
+#endif
 #include "common.h"
 
 #include "seg002.h"
@@ -746,6 +750,24 @@ void TLK_eremit(const signed int state)
 	}
 }
 
+#if FIX_HIMMEL
+/* Abschalter: liegt HIMMEL.AUS im Spielordner, gibt es den Original-Himmel. Geprueft beim Betreten einer Stadt, Merker im
+ * sonst ungenutzten g_always_zero2 (1 = aus). Dateiname Zeichen fuer Zeichen, kein neuer Text im Datensegment. */
+static void himmel_schalter(void)
+{
+	char name[12];
+	signed int fd;
+
+	name[0] = 'H'; name[1] = 'I'; name[2] = 'M'; name[3] = 'M'; name[4] = 'E'; name[5] = 'L';
+	name[6] = '.'; name[7] = 'A'; name[8] = 'U'; name[9] = 'S'; name[10] = '\0';
+	g_always_zero2 = 0;
+	if ((fd = open(name, O_BINARY | O_RDONLY)) != -1) {
+		close(fd);
+		g_always_zero2 = 1;
+	}
+}
+#endif
+
 /**
  * \brief   one step of the town loop: prepare the town if needed, then town_step()
  */
@@ -753,6 +775,9 @@ void do_town(void)
 {
 	if ((g_town_loaded_town_id != gs_town_id) || (g_area_prepared != AREA_TYPE_TOWN))
 	{
+#if FIX_HIMMEL
+		himmel_schalter();
+#endif
 		prepare_area(1);
 
 		set_audio_track(ARCHIVE_FILE_THORWAL_XMI);
@@ -769,6 +794,218 @@ void do_town(void)
 	town_step();
 }
 
+#if FIX_HIMMEL
+/* Zusatzfunktion FIX_HIMMEL: lebendiger Stadthimmel. Statt des festen Bilds aus TDIVERSE.NVF wird der Himmel erzeugt:
+ * Verlauf (oben dunkler) aus den Himmelsfarben 0xa5..0xae, Wolken aus zwei Lagen Rauschen (0xbc..0xbf, Rand 0xa5),
+ * nachts Sterne. Die Tageszeit-Farben kommen wie im Original von der Himmelspalette (Morgen- und Abendblende).
+ * Der Himmel ist ein Rundbild aus 4 x 208 = 832 Punkten (das Rauschen wiederholt sich nach 832 Punkten), die
+ * Blickrichtung waehlt den Ausschnitt, die Sterne stehen fest. Die Wolken ziehen mit der echten Zeit (Timer-Zaehler
+ * g_timer_tick_counter, nicht die Spieluhr, die bei jedem Schritt 2 Minuten vorspringt), schneller bei starkem Tageswind,
+ * die kleinen anderthalbmal so schnell. town_step() zeichnet alle 36 Ticks neu. Tag/Nacht, Sonne, Mond und Sterne
+ * richten sich nach der Spielzeit, Wolkenmenge und Sturmwolken nach dem Tageswind (gs_weather1/2).
+ * Keine neuen Daten: Rauschen per Rechenformel, Merker fuer das Neuzeichnen ist das bisher ungenutzte g_always_zero1. */
+static unsigned int himmel_hash(const unsigned int x, const unsigned int y)
+{
+	unsigned int h = x * 0x9e3bU + y * 0x6f4dU;
+
+	h ^= h >> 7;
+	h *= 0x2c9bU;
+	h ^= h >> 9;
+	return h & 0xff;
+}
+
+/* weicher Uebergang 0..256 fuer f = 0..l */
+static unsigned int himmel_glatt(const signed int f, const signed int l)
+{
+	return (unsigned int)(((long)f * f * (3 * l - 2 * f) * 256L) / ((long)l * l * l));
+}
+
+/* eine Lage Rauschen fuer Zeile y addieren (Wert 0..255, um sh nach links geschoben): Zellen 2^cwlog breit und ch hoch,
+ * waagerecht nach 832 Punkten wiederholt (off = 0..831). Senkrecht weicher Uebergang, waagerecht linear und nur mit
+ * Additionen (7 Bit Nachkomma), damit das Neuzeichnen auch bei wenig DOSBox-Zyklen schnell bleibt. */
+static void himmel_lage(signed int *n, const signed int off, const signed int y, const signed int cwlog,
+		const signed int ch, const signed int seed, const signed int sh)
+{
+	signed int nz = 832 >> cwlog;
+	signed int cw = 1 << cwlog;
+	signed int cy = y / ch;
+	signed int cx = off >> cwlog;
+	signed int fx = off & (cw - 1);
+	signed int cx1;
+	signed int a;
+	signed int b;
+	signed int d = 0;
+	signed int v = 0;
+	signed int x;
+	unsigned int fy;
+
+	fy = himmel_glatt(y % ch, ch);
+
+	for (x = 0; x < 208; x++) {
+		if (x == 0 || fx == 0) {
+			cx1 = (cx + 1 == nz) ? 0 : cx + 1;
+			a = (signed int)((himmel_hash(cx, cy + seed) * (256 - fy) + himmel_hash(cx, cy + 1 + seed) * fy) >> 8);
+			b = (signed int)((himmel_hash(cx1, cy + seed) * (256 - fy) + himmel_hash(cx1, cy + 1 + seed) * fy) >> 8);
+			d = ((b - a) << 7) >> cwlog;
+			v = (a << 7) + d * fx;
+		}
+		n[x] += (v >> 7) << sh;
+		v += d;
+		if (++fx == cw) {
+			fx = 0;
+			if (++cx == nz) cx = 0;
+		}
+	}
+}
+
+/* Abstand^2 eines Himmelspunkts (Rundbild-x sx, Zeile y) zur Scheibe bei (sx0, y0), Punkte sind 1,2-mal so hoch wie breit */
+static signed int himmel_kreis(const signed int sx, const signed int y, const signed int sx0, const signed int y0)
+{
+	signed int dx = sx - sx0;
+	signed int dy = y - y0;
+
+	if (dx > 416) dx -= 832;
+	if (dx < -416) dx += 832;
+	return dx * dx + (dy * dy * 36) / 25;
+}
+
+/* Tageswind: gs_weather1 (W6) und gs_weather2 (W7) wuerfelt das Spiel um Mitternacht fuer die Schiffsgeschwindigkeit
+ * (seg064: 80,5 % .. 247 %). Daraus Wolkenmenge, Wolkentempo und Sturmwolken; Sonne und Mond wandern mit der Uhrzeit
+ * durch das Rundbild (aufgehend im Osten, x = 312, untergehend im Westen, x = 728).
+ * dst/stride: Ziel (Bildpuffer mit 208 oder Bildschirm mit 320 Punkten je Zeile). nur_himmel: nur Punkte ueberschreiben,
+ * die gerade Himmel zeigen (Himmelsfarben 0xa1..0xbf und die festen Farben 0x2f/0x38/0x3f); Haeuser, Rahmen und
+ * Mauszeiger haben andere Farben und bleiben stehen. */
+static void himmel_malen(uint8_t *dst, const signed int height, const signed int stride, const signed int nur_himmel)
+{
+	signed int n[208];
+	signed int x;
+	signed int y;
+	signed int l;
+	signed int c;
+	signed int r;
+	signed int zeile;
+	signed int night;
+	signed int off;
+	signed int off2;
+	signed int dir;
+	signed int sx;
+	signed int k;
+	signed int lim;
+	signed int storm;
+	signed int sun;
+	signed int moon;
+	signed int nah;
+	signed int sx0 = 0;
+	signed int y0 = 0;
+	signed int xs = 0;
+	signed int w1;
+	signed int w2;
+	int32_t f;
+	int32_t e;
+	uint8_t col;
+	uint8_t col0;
+	uint8_t alt;
+
+	w1 = gs_weather1; if (w1 < 1) w1 = 1; if (w1 > 6) w1 = 6;
+	w2 = gs_weather2; if (w2 < 1) w2 = 1; if (w2 > 7) w2 = 7;
+	k = ((w2 + 6) * (w1 * 15 + 100) - 805) / 111;		/* 0 (Flaute) .. 15 (Sturm) */
+	lim = 560 - k * 12;
+	storm = (k >= 10);
+
+	dir = (gs_viewdir & 3) * 208;
+	off = (signed int)((g_timer_tick_counter * (8 + k) / 270) % 832);
+	off2 = (signed int)((g_timer_tick_counter * (8 + k) / 180) % 832);
+	night = (gs_day_timer < HOURS(5)) || (gs_day_timer >= HOURS(21));
+	sun = (gs_day_timer >= HOURS(7)) && (gs_day_timer < HOURS(20));
+	moon = night;
+
+	if (sun) {
+		f = gs_day_timer - HOURS(7);
+		sx0 = 312 + (signed int)(f * 416L / HOURS(13));
+		e = f * (HOURS(13) - f) / ((HOURS(13) / 32) * (HOURS(13) / 32));	/* 0..256, ohne 32-Bit-Ueberlauf */
+		y0 = (height - 8) - (signed int)((e * (height - 22)) / 256);
+	} else if (moon) {
+		f = (gs_day_timer >= HOURS(21)) ? gs_day_timer - HOURS(21) : gs_day_timer + HOURS(3);
+		sx0 = 312 + (signed int)(f * 416L / HOURS(8));
+		e = f * (HOURS(8) - f) / ((HOURS(8) / 32) * (HOURS(8) / 32));
+		y0 = (height - 8) - (signed int)((e * (height - 22)) / 256);
+	}
+	/* Bildschirm-x der Scheibe in dieser Blickrichtung */
+	xs = sx0 - dir;
+	if (xs > 416) xs -= 832;
+	if (xs < -416) xs += 832;
+
+	for (y = 0; y < height; y++) {
+
+		for (x = 0; x < 208; x++) {
+			n[x] = 0;
+		}
+		himmel_lage(n, (dir + off) % 832, y, 6, 22, 0, 1);
+		himmel_lage(n, (dir + off2) % 832, y, 4, 7, 37, 0);
+
+		l = (y * 19) / height;
+		col0 = 0xae - (l >> 1);
+		zeile = (y * 30) / height - lim;
+		nah = (sun || moon) && (y >= y0 - 9) && (y <= y0 + 9);
+		sx = dir;
+
+		for (x = 0; x < 208; x++) {
+
+			col = col0;
+			if ((l & 1) && ((x ^ y) & 1)) {
+				col--;
+			}
+
+			c = n[x] + zeile;
+
+			if (c < 0) {
+				if (night && (y < height - 16) && !((sx ^ (y * 5)) & 15) && (himmel_hash(sx * 7 + 3, y * 13 + 5) < 16)
+					&& (himmel_hash(y, sx) < 200))
+				{
+					/* Weiss 0x3f / Grau 0x2f: feste Farben unter 0xc8 (ab 0xc8 haelt do_pic_copy(1) Punkte fuer
+					 * Oberflaeche und ueberschreibt sie nie wieder) */
+					col = ((((signed int)(g_timer_tick_counter >> 4)) + sx) & 3) ? 0x3f : 0x2f;
+				}
+			} else if (c < 10) {
+				if (!night) col = storm ? 0xbc : 0xa5;
+			} else if (c < 25) {
+				col = storm ? 0xa5 : 0xbc;
+			} else if (c < 45) {
+				col = storm ? 0xa7 : 0xbd;
+			} else if (c < 70) {
+				col = storm ? 0xa9 : 0xbe;
+			} else {
+				col = storm ? 0xab : 0xbf;
+			}
+
+			if (nah && (c < 10) && (x - xs >= -10) && (x - xs <= 10)) {
+				r = himmel_kreis(sx, y, sx0, y0);
+				if (sun) {
+					/* Gelb 0x38 (243,227,0): feste Farbe unter 0xc8, am Tag wie in der Nacht gleich */
+					if (r <= 16) col = 0x38;
+					else if (r <= 30) col = ((x ^ y) & 1) ? 0x38 : 0xbe;
+					else if ((r <= 56) && (c < 0) && ((x ^ y) & 1)) col = 0xbd;
+				} else if ((r <= 6) && (c < 0)) {
+					col = 0x3f;
+				}
+			}
+
+			if (nur_himmel) {
+				alt = *dst;
+				if ((alt >= 0xa1 && alt <= 0xbf) || alt == 0x2f || alt == 0x38 || alt == 0x3f) {
+					*dst = col;
+				}
+			} else {
+				*dst = col;
+			}
+			dst++;
+			if (++sx == 832) sx = 0;
+		}
+		dst += stride - 208;
+	}
+}
+#endif
+
 static void refresh_floor_and_sky(void)
 {
 	signed int width;
@@ -783,6 +1020,11 @@ static void refresh_floor_and_sky(void)
 	nvf.height = &height;
 
 	process_nvf_extraction(&nvf);
+#if FIX_HIMMEL
+	if (!g_always_zero2) {
+		himmel_malen((uint8_t*)g_renderbuf_ptr, height, 208, 0);
+	}
+#endif
 
 	nvf.dst = ((uint8_t*)g_renderbuf_ptr) + 208 * height;
 	nvf.src = g_town_tex[0];
@@ -804,13 +1046,30 @@ void town_update_view(void)
 	town_set_visual_square_vals();
 	town_set_visual_square_tex();
 
+#if FIX_HIMMEL
+	/* g_always_zero1 merkt sich, fuer welchen Zeitabschnitt der Himmel gezeichnet ist, g_always_zero2 den Abschalter
+	 * (beide sonst ungenutzt) */
+	g_always_zero1 = (signed int)(g_timer_tick_counter / 36);
+#else
 	/* TODO: these are write only variables */
 	g_always_zero2 = g_always_zero1 = 0;
+#endif
 
 	town_water_and_grass();
 	town_building_textures();
 	town_fade_and_colors();
 }
+
+#if FIX_HIMMEL
+/* Neuzeichnen nur fuer die ziehenden Wolken (aus town_step): kein neues Zusammensetzen der Ansicht, der Himmel wird direkt
+ * auf dem Bildschirm aufgefrischt, nur an Punkten, die gerade Himmel zeigen (67 Zeilen wie das Himmelsbild in TDIVERSE.NVF).
+ * Der Mauszeiger (Farbe 0xff) bleibt stehen und muss nicht ausgeblendet werden. */
+static void himmel_auffrischen(void)
+{
+	g_always_zero1 = (signed int)(g_timer_tick_counter / 36);
+	himmel_malen(g_vga_memstart + 320 * g_ani_posy + g_ani_posx, 67, 320, 1);
+}
+#endif
 
 signed int get_town_tile_type(const unsigned char);
 
@@ -1363,6 +1622,14 @@ signed int town_step(void)
 	{
 		town_direction_change();
 	}
+#if FIX_HIMMEL
+	/* lebendiger Himmel: alle 36 Ticks neu zeichnen, wenn die Strassenansicht frei zu sehen ist */
+	else if (!g_always_zero2 && (g_always_zero1 != (signed int)(g_timer_tick_counter / 36)) && !gs_town_loc_type && !gs_show_travel_map &&
+		!g_event_ani_busy && !g_special_screen && (g_pp20_index == ARCHIVE_FILE_PLAYM_UK))
+	{
+		himmel_auffrischen();
+	}
+#endif
 
 	if ((gs_x != gs_x_bak) || (gs_y != gs_y_bak))
 	{
@@ -1600,12 +1867,25 @@ void town_fade_and_colors(void)
 
 	g_special_screen = 0;
 
+#if FIX_HIMMEL
+	/* weniger Flackern des Mauszeigers bei Schritten und Drehungen: erst auf den Bildstrahl warten, dann ausblenden,
+	 * und nur, wenn der Zeiger ueber der Ansicht steht */
+	wait_for_vsync();
+	i = (g_mouse_posx >= g_ani_posx - 16) && (g_mouse_posx <= g_ani_posx + 207 + 16) &&
+		(g_mouse_posy >= g_ani_posy - 16) && (g_mouse_posy <= g_ani_posy + 134 + 16);
+	if (i) call_mouse_bg();
+
+	do_pic_copy(1);
+
+	if (i) call_mouse();
+#else
 	call_mouse_bg();
 	wait_for_vsync();
 
 	do_pic_copy(1);
 
 	call_mouse();
+#endif
 
 	if (g_fading_state != 0) {
 
