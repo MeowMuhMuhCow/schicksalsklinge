@@ -23,6 +23,8 @@ Die Spielstände der Bugfix-Fassung liegen in eigenen Ordnern unter `Build\`. Al
 
 Abgleich mit dem Osterpatch von **NRS** aus dem Crystals-DSA-Forum (2016): Wir haben seine rund 190 Änderungen am Maschinencode einzeln nachvollzogen und alles, was dort sauber belegt ist und bei uns noch fehlte, im Quelltext nachgebaut, ohne seine wenigen eigenen Fehler. Danke, NRS!
 
+**Nicht übernommen** haben wir: seine Komfortänderungen (Textfenster nur mit ENTER, kein Warten nach Mausklick, Truhen- und Schlossgeräusche), Kolberg in Clanegh und die Lagerkämpfe im Dungeon (hängen an geänderten Stadtplänen und Kampflisten), den Oberorken-Einsturz, die Todesfalle des Totenschiffs und die Doppelgegner (nur im ständig geladenen Programmteil lösbar, der nicht wachsen darf) sowie die wenigen Stellen, an denen sein Patch selbst einen Fehler einbaut (Blaue Keuche, Herbergs-Merker, Eisenrost, Transversalis). Alles andere aus seinem Patch steckt in 1.2.
+
 - **Spieldaten (neu):** Magieresistenz von 13 Gegnertypen auf vernünftige Werte (Nr. 3, MONSTER.DAT), fehlende Texte am Naturgemälde in Oberorken (Nr. 124) und in den Serske-Tavernen (Nr. 333), Totenkopfgürtel gilt als magisch, der Klang FX18 ist wieder hörbar (kaputte Endmarke im Inhaltsverzeichnis von SCHICK.DAT), Landefeld der Totenschiff-Falltür, dazu viele Rechtschreibfehler. Aus dem Osterpatch von NRS übernommen. `PATCHEN.bat` erzeugt dafür eine eigene `SCHICK.DAT` unter `Build\`, das Original bleibt unberührt
 - Manrek-Piratenhöhle: Die Schatzkammertür öffnet sich erst nach dem Hebelrätsel oder mit dem Eisenschlüssel. Der Code prüfte das Nachbarfeld (Exploit) – Nr. 432 (WICHTIG)
 - Totenschiff: Die Falltüren schieben die Gruppe vor dem Sturz nicht mehr ein Feld weiter, einmal sogar in die Wand – Nr. 433 (WICHTIG)
