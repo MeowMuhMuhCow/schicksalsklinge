@@ -13,3 +13,4 @@ Build/*
 SPIELPFAD.txt
 __pycache__/
 *.pyc
+Linux/starten.conf

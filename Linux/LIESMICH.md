@@ -29,11 +29,37 @@ auch: `SPIEL=~/Spiele/Schicksalsklinge bash Linux/patchen.sh`.
 
 | | |
 |---|---|
-| Spielordner | wird nicht angefasst. Beim ersten Start kopiert `starten.sh` ihn (ohne CD-Abbild und DOSBox) nach `Build/Linux_C_<Fassung>`. Dort liegen auch die Spielstände dieser Fassung. Spätere Starts überschreiben dort nichts außer der EXE und den korrigierten Spieldaten (SCHICK.DAT) |
+| Spielordner | wird nicht angefasst. Beim ersten Start kopiert `starten.sh` ihn (ohne CD-Abbild und DOSBox) in den Ablageordner der Fassung, Standard `Build/Linux_C_<Fassung>`. Dort liegen auch die Spielstände dieser Fassung. Spätere Starts überschreiben dort nichts außer den korrigierten Spieldaten (SCHICK.DAT) |
 | Laufwerke in DOSBox | C: = die Kopie, D: = CD-Abbild von GOG (`game.inst`, für die CD-Musik), E: = die Fix-EXE als `BLADEM.EXE` |
 | Einstellungen | `dosbox_realms1.conf` aus dem Spielordner (Grafik, Sound) wird mitgeladen, falls vorhanden. Ohne: `OHNE_GOGCONF=1 bash Linux/starten.sh wichtig` |
 | andere DOSBox | `DOSBOX=/pfad/zu/dosbox bash Linux/starten.sh wichtig` |
 | eigenes CD-Abbild | z. B. aus der alten NLT-Sammlung: `CD=~/Spiele/NLT_Images/dsa1.cue bash Linux/starten.sh wichtig` (sonst wird `game.inst` aus dem GOG-Ordner genommen) |
+
+## Einstellungen
+
+Alle als Umgebungsvariable beim Aufruf, z. B. `VOLLBILD=1 INTRO=0 bash Linux/starten.sh wichtig`, oder dauerhaft in
+einer Datei **`Linux/starten.conf`** (wird nicht ins Repo übernommen), eine Einstellung pro Zeile:
+
+```
+ABLAGE=~/Spiele/Schicksalsklinge_Spielstaende
+CD=~/Spiele/NLT_Images/dsa1.cue
+VOLLBILD=1
+INTRO=0
+```
+
+Was beim Aufruf angegeben wird, hat Vorrang vor der Datei.
+
+| Einstellung | Wirkung |
+|---|---|
+| `ABLAGE=ordner` | Spielstände und Probenlogs liegen in `<ordner>/<Fassung>` statt in `Build/` im Clone. So überleben sie ein Löschen und neues Klonen des Repos |
+| `SPEICHERN=overlay` | nur DOSBox Staging oder DOSBox-X: kein Kopieren, der Spielordner ist C:, alles Geschriebene (Spielstände, korrigierte Spieldaten, Probenlog) landet als Overlay in der Ablage. Mit der klassischen DOSBox 0.74 wird weiter kopiert (die kann keine Overlays) |
+| `VOLLBILD=1` | Vollbild |
+| `INTRO=0` | Intro überspringen |
+| `CYCLES=3000` | Tempo in DOSBox-Zyklen (bei Staging als `cpu_cycles`) |
+| `SPIEL=ordner` | Spielordner (sonst gesucht bzw. aus `Linux/SPIELPFAD.txt`) |
+| `CD=pfad` | eigenes CD-Abbild (siehe oben) |
+| `DOSBOX=pfad` | andere DOSBox |
+| `OHNE_GOGCONF=1` | ohne die DOSBox-Einstellungen von GOG |
 
 ## Selbst bauen
 

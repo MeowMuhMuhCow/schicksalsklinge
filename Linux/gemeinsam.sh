@@ -7,6 +7,19 @@ BUILD="$REPO/Build"
 . "$LINUX/spiel.conf"
 MERK="$LINUX/SPIELPFAD.txt"
 
+# Eigene Einstellungen aus Linux/starten.conf (Zeilen SCHLUESSEL=wert, siehe Linux/LIESMICH.md).
+# Was beim Aufruf als Umgebungsvariable angegeben ist, hat Vorrang. Die Datei wird nicht ausgefuehrt, nur gelesen.
+if [ -f "$LINUX/starten.conf" ]; then
+	while IFS= read -r z || [ -n "$z" ]; do
+		z="${z%%#*}"; z="${z%"${z##*[![:space:]]}"}"
+		case "$z" in
+			SPIEL=*|CD=*|ABLAGE=*|SPEICHERN=*|VOLLBILD=*|INTRO=*|CYCLES=*|DOSBOX=*|OHNE_GOGCONF=*)
+				k="${z%%=*}"; v="${z#*=}"; v="${v#\"}"; v="${v%\"}"; v="${v/#\~/$HOME}"
+				[ -z "${!k+x}" ] && printf -v "$k" '%s' "$v" ;;
+		esac
+	done < "$LINUX/starten.conf"
+fi
+
 # Ordner mit der Original-EXE unterhalb von $1 (Gross-/Kleinschreibung egal), sonst nichts
 _spiel_in() {
 	[ -d "$1" ] || return 1
