@@ -1,6 +1,6 @@
 # Die Schicksalsklinge – Bugfix-Fassung: Änderungsliste
 
-**Version 1.4a vom 31.10.2026** · inoffiziell · zur deutschen GOG-Fassung 3.02 · **im Spiel noch ungetestet, Tester willkommen**
+**Version 1.4b vom 01.11.2026** · inoffiziell · zur deutschen GOG-Fassung 3.02 · **im Spiel noch ungetestet, Tester willkommen**
 
 ## So geht's
 
@@ -20,6 +20,12 @@ Die Spielstände der Bugfix-Fassung liegen in eigenen Ordnern unter `Build\`. Al
 |---|---|
 | **WICHTIG** (empfohlen) | kritische und mittlere Fehler: Abstürze, Hänger, verlorene Ausrüstung, falsche Preise, Fehler, die man im Spiel merkt |
 | **ALLES** | zusätzlich viele kleine Fehler ohne große Spielwirkung |
+
+## Neu in Version 1.4b: Startdateien repariert
+
+Keine Änderung am Spiel, die EXEs sind dieselben wie in 1.4a. Behoben ist ein Fehler in den Windows-Startdateien seit 1.3 (danke an Andrean im Crystals-Forum für die Meldung):
+
+- **Bugfix-Paket im Spielordner entpackt → DOSBox startete nicht.** Die Startdateien kopieren den Spielordner in den Spielstand-Ordner. Lag das Bugfix-Paket selbst im Spielordner, kopierte es sich dabei immer tiefer in sich hinein (tausende Dateien), und DOSBox kam nie dran. Jetzt werden nur die Dateien direkt im Spielordner kopiert, dazu der Ordner `TEMP`. Wer betroffen war: die Ordner `Build\Testspielstaende…` löschen (falls noch keine eigenen Spielstände darin liegen) und 1.4b neu entpacken. Unter Linux ist dasselbe für einen Clone im Spielordner abgesichert
 
 ## Neu in Version 1.4a: Speichern ohne AP-Verlust (Schalter), Himmel standardmäßig aus
 

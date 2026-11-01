@@ -21,9 +21,15 @@ if not exist "%SAVES%" mkdir "%SAVES%"
 rem --- Spielordner in den Spielstand-Ordner spiegeln: nur fehlende Dateien, vorhandene (Spielstaende,
 rem     korrigierte Spieldaten) bleiben. Die DOSBox 0.74 von GOG kennt keine Overlay-Laufwerke, deshalb ist
 rem     dieser Ordner das ganze Laufwerk C:. Alte Spielstaende des Originals (Windows-VirtualStore) kommen mit.
-robocopy "%GOG%" "%SAVES%" /E /XC /XN /XO /R:1 /W:1 /XD DOSBOX MUSIC __support "Video Codec" Documentation /XF game.gog game.inst *.pdf *.zip *.lnk *.ico *.dll *.ini *.info unins000.* goggame* >nul
+rem     Nur die Dateien direkt im Spielordner, keine Unterordner: so kann ein Bugfix-Ordner, der im
+rem     Spielordner liegt, nicht in sich selbst kopiert werden.
+robocopy "%GOG%" "%SAVES%" /XC /XN /XO /R:1 /W:1 /XF game.gog game.inst *.pdf *.zip *.lnk *.ico *.dll *.ini *.info unins000.* goggame* >nul
 set "VSTORE=%LOCALAPPDATA%\VirtualStore%GOG:~2%"
-if exist "%VSTORE%" robocopy "%VSTORE%" "%SAVES%" /E /XC /XN /XO /R:1 /W:1 >nul
+if exist "%VSTORE%" robocopy "%VSTORE%" "%SAVES%" /XC /XN /XO /R:1 /W:1 >nul
+rem     Einzige Ausnahme: TEMP (dort liegen die Start-Helden, das Spiel legt den Ordner nicht selbst an)
+if not exist "%SAVES%\TEMP" mkdir "%SAVES%\TEMP"
+if exist "%GOG%\TEMP" robocopy "%GOG%\TEMP" "%SAVES%\TEMP" /XC /XN /XO /R:1 /W:1 >nul
+if exist "%VSTORE%\TEMP" robocopy "%VSTORE%\TEMP" "%SAVES%\TEMP" /XC /XN /XO /R:1 /W:1 >nul
 
 rem --- DOSBox-Startbefehle in eine kleine Zusatz-Konfiguration schreiben
 rem     C: = Spielstand-Ordner (Kopie des Spielordners, dort landen auch die Spielstaende)

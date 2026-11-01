@@ -64,8 +64,15 @@ if [ "${SPEICHERN:-}" = "overlay" ]; then
 fi
 if [ "$OVERLAY" = 0 ]; then
 	# Spielordner in die Ablage kopieren, ohne vorhandene Dateien zu ueberschreiben (Spielstaende bleiben erhalten)
+	# liegt der Clone (oder die Ablage) im Spielordner, darf er nicht in sich selbst kopiert werden
+	AUSN=()
+	for d in "$REPO" "${ABLAGE:-}"; do
+		[ -n "$d" ] || continue
+		d="$(cd "$d" 2>/dev/null && pwd)" || continue
+		case "$d/" in "$SPIEL"/*) AUSN+=("--exclude=./${d#"$SPIEL"/}") ;; esac
+	done
 	( cd "$SPIEL" && tar cf - --exclude=./DOSBOX --exclude=./dosbox --exclude=./DOSBox --exclude=./MUSIC --exclude=./music \
-		--exclude='*.gog' --exclude='*.GOG' --exclude='*.inst' --exclude='*.ins' --exclude='*.INS' --exclude='*.ogg' . ) \
+		--exclude='*.gog' --exclude='*.GOG' --exclude='*.inst' --exclude='*.ins' --exclude='*.INS' --exclude='*.ogg' "${AUSN[@]}" . ) \
 		| ( cd "$C" && tar xf - --skip-old-files ) || { echo "Kopieren des Spielordners fehlgeschlagen."; exit 1; }
 	chmod -R u+w "$C"   # GOG-Dateien koennen schreibgeschuetzt sein, das Spiel schreibt aber Spielstaende
 fi
