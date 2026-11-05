@@ -65,12 +65,29 @@ function Zeile([string]$roh) {
             else { $wer = "Ein Gegner pariert gegen $(Gegner $mon)" }
         }
         $t = "${wer}: W20 = $wurf gegen $kurz $wert → $erf"
+    } elseif ($art -eq 8 -and $w.Count -ge 5) {
+        $script:vor = $null; $typ = $w[0]; $nr = $w[1]; $alt = $w[2]; $farbe = 'Cyan'
+        if ($typ -eq 1 -or $typ -eq 2) {
+            if ($typ -eq 1) { $was = "$(Nm $TALENT $nr) (TaW $alt)" } else { $was = "$(Nm $ZAUBER $nr) (ZfW $alt)" }
+            $ber = if ($alt -ge 11) { '3–18' } else { '2–12' }
+            $t = "${name}: Stufenanstieg, ${was}: Steigerungswurf $($w[3]) ($ber), muss über $alt liegen"
+            if ($w[4]) { $t += " → gelungen, jetzt $($alt + 1)"; $farbe = 'Green' } else { $t += ' → misslungen'; $farbe = 'Red' }
+        } elseif ($typ -eq 3) { $t = "${name}: Stufenanstieg, $(Nm $EIG $nr) +1 ($alt → $($alt + 1))" }
+        elseif ($typ -eq 4 -and $w.Count -ge 7) {
+            $e = Nm $EIG $nr
+            $t = "${name}: Stufenanstieg, $e senken ($e $alt): W20 = $($w[3]), $($w[4]), $($w[5]), einer muss höchstens $alt sein"
+            if ($w[6]) { $t += " → gelungen, jetzt $($alt - 1)"; $farbe = 'Green' } else { $t += ' → misslungen'; $farbe = 'Red' }
+        } elseif ($typ -eq 5) {
+            if ($w[4] -gt $w[3]) { $t = "${name}: Stufenanstieg, W6 = $($w[3]) + 2 → $($w[4]) Punkte für LE und AE (LE vorher $alt)" }
+            else { $t = "${name}: Stufenanstieg, W6 = $($w[3]) → LE $alt → $($alt + $w[4])" }
+        } elseif ($typ -eq 6) { $t = "${name}: Stufenanstieg, 10 Zaubersteigerungen gegen AE getauscht: Wurf $($w[3]) (3–8) → AE $alt → $($alt + $w[4])" }
+        else { $t = "${name}: Stufenanstieg (Typ $typ)" }
     } else { $t = "${name}: unbekannte Zeile (Art $art)" }
     if ($t) { return @("$zeit | $t", $farbe) }
     return $null
 }
 Write-Host "Probenlog $Spiel - jede Probe erscheint hier, sobald im Spiel gewuerfelt wird."
-Write-Host "Gruen = gelungen fuer die Helden, Rot = misslungen, Violett = Patzer. Fenster schliessen beendet nur das Log."
+Write-Host "Gruen = gelungen fuer die Helden, Rot = misslungen, Violett = Patzer, Tuerkis = Stufenanstieg. Fenster schliessen beendet nur das Log."
 Write-Host ''
 try { $enc = [System.Text.Encoding]::GetEncoding(437) } catch { $enc = [System.Text.Encoding]::GetEncoding(28591) }
 while (-not (Test-Path -LiteralPath $Datei)) { Start-Sleep -Milliseconds 500 }

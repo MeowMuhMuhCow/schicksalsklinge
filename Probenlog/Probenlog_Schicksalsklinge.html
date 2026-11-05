@@ -42,7 +42,7 @@ td.w{font-variant-numeric:tabular-nums;white-space:nowrap}.ok{color:var(--ok)}.b
 <div id="inhalt" hidden>
 <div class="reihe">
 <select id="f_held"><option value="">alle Helden</option></select>
-<select id="f_art"><option value="">alle Proben</option><option value="eig">Eigenschaftsproben</option><option value="tal">Talentproben</option><option value="zau">Zauber</option><option value="kampf">Kampf (AT/PA)</option></select>
+<select id="f_art"><option value="">alle Proben</option><option value="eig">Eigenschaftsproben</option><option value="tal">Talentproben</option><option value="zau">Zauber</option><option value="kampf">Kampf (AT/PA)</option><option value="stg">Stufenanstieg</option></select>
 <input type="search" id="f_text" placeholder="Suchen, z. B. Schlösser">
 </div>
 <div class="karten" id="karten"></div>
@@ -97,6 +97,17 @@ function lies(text) {
       }
       r = {zeit, held: held || name, wer, typ: 'kampf', kampf: art === 6 ? 'AT' : 'PA', eigen: !!held, titel: wer, zusatz: '', wuerfe: `${wurf} gegen ${kurz} ${wert}`,
            ok: heldOk, pz: wurf === 20, erg: (art === 6 ? (ok ? 'trifft' : 'verfehlt') : (ok ? 'pariert' : 'pariert nicht')) + (wurf === 20 ? ' (20: Patzer möglich)' : '')};
+    } else if (art === 8 && w.length >= 5) {
+      vor = null; const [typ, nr, alt] = w; let titel, wu = '', ok = null, erg = '';
+      if (typ === 1 || typ === 2) { titel = (typ === 1 ? `${nm(D.TALENT, nr)} (TaW ${alt})` : `${nm(D.ZAUBER, nr)} (ZfW ${alt})`);
+        wu = `${w[3]} (${alt >= 11 ? '3–18' : '2–12'}) gegen ${alt}`; ok = !!w[4]; erg = w[4] ? `gelungen, jetzt ${alt + 1}` : 'misslungen'; }
+      else if (typ === 3) { titel = `${nm(D.EIG, nr)} +1`; erg = `${alt} → ${alt + 1}`; }
+      else if (typ === 4 && w.length >= 7) { const e = nm(D.EIG, nr); titel = `${e} senken (${e} ${alt})`; wu = `W20: ${w[3]}, ${w[4]}, ${w[5]} (einer ≤ ${alt})`;
+        ok = !!w[6]; erg = w[6] ? `gelungen, jetzt ${alt - 1}` : 'misslungen'; }
+      else if (typ === 5) { titel = 'LE-Wurf'; wu = w[4] > w[3] ? `W6 = ${w[3]} + 2` : `W6 = ${w[3]}`; erg = w[4] > w[3] ? `${w[4]} Punkte für LE und AE` : `LE ${alt} → ${alt + w[4]}`; }
+      else if (typ === 6) { titel = '10 Zaubersteigerungen gegen AE'; wu = `${w[3]} (3–8)`; erg = `AE ${alt} → ${alt + w[4]}`; }
+      else titel = 'Typ ' + typ;
+      r = {zeit, held: name, typ: 'stg', titel, zusatz: typ === 1 || typ === 2 ? 'Steigerung beim Stufenanstieg' : 'Stufenanstieg', wuerfe: wu, ok, pz: false, erg};
     } else continue;
     out.push(r);
   }
@@ -118,7 +129,7 @@ function zeige() {
   $('anzahl').textContent = `(${l.length}, neueste oben)`;
   // Karten je Held
   const held = {};
-  for (const r of l) { if (r.typ === 'kampf' && !r.eigen) continue; const h = held[r.held] = held[r.held] || {n: 0, ok: 0, pz: 0, at: 0, atok: 0, pa: 0, paok: 0};
+  for (const r of l) { if ((r.typ === 'kampf' && !r.eigen) || r.typ === 'stg') continue; const h = held[r.held] = held[r.held] || {n: 0, ok: 0, pz: 0, at: 0, atok: 0, pa: 0, paok: 0};
     if (r.typ === 'kampf') { if (r.kampf === 'AT') { h.at++; if (r.ok) h.atok++; } else { h.pa++; if (r.ok) h.paok++; } }
     else { h.n++; if (r.ok) h.ok++; if (r.pz) h.pz++; } }
   $('karten').innerHTML = Object.keys(held).sort().map(k => { const h = held[k]; const p = h.n ? Math.round(100 * h.ok / h.n) : 0;

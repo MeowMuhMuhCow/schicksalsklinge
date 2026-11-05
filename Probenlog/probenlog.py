@@ -59,6 +59,28 @@ def ergebnis3(r):
     return f'gelungen, {r - 1} Punkte übrig' if r > 0 else f'misslungen, {1 - r} Punkte zu wenig'
 
 
+def stufe(name, w):
+    """Art 8: Wurf beim Stufenanstieg (Typ, Nr., alter Wert, Wurf, Ergebnis)"""
+    typ, nr, alt = w[0], w[1], w[2]
+    if typ in (1, 2):
+        was = f'{nm(TALENT, nr)} (TaW {alt})' if typ == 1 else f'{nm(ZAUBER, nr)} (ZfW {alt})'
+        t = f'{name}: Stufenanstieg, {was}: Steigerungswurf {w[3]} ({"3–18" if alt >= 11 else "2–12"}), muss über {alt} liegen'
+        return t + (f' → gelungen, jetzt {alt + 1}' if w[4] else ' → misslungen')
+    if typ == 3:
+        return f'{name}: Stufenanstieg, {nm(EIG, nr)} +1 ({alt} → {alt + 1})'
+    if typ == 4 and len(w) >= 7:
+        e = nm(EIG, nr)
+        t = f'{name}: Stufenanstieg, {e} senken ({e} {alt}): W20 = {w[3]}, {w[4]}, {w[5]}, einer muss höchstens {alt} sein'
+        return t + (f' → gelungen, jetzt {alt - 1}' if w[6] else ' → misslungen')
+    if typ == 5:
+        if w[4] > w[3]:
+            return f'{name}: Stufenanstieg, W6 = {w[3]} + 2 → {w[4]} Punkte für LE und AE (LE vorher {alt})'
+        return f'{name}: Stufenanstieg, W6 = {w[3]} → LE {alt} → {alt + w[4]}'
+    if typ == 6:
+        return f'{name}: Stufenanstieg, 10 Zaubersteigerungen gegen AE getauscht: Wurf {w[3]} (3–8) → AE {alt} → {alt + w[4]}'
+    return f'{name}: Stufenanstieg (Typ {typ})'
+
+
 class Leser:
     """macht aus Zahlenzeilen Klartext; eine Talent- oder Zauberzeile (Art 4/5) kuendigt die folgende Dreifachprobe an"""
     def __init__(self):
@@ -124,6 +146,9 @@ class Leser:
                 elif rtg == 1: wer = f'{name} pariert gegen {gegner(mon)}'
                 else: wer = f'Ein Gegner pariert gegen {gegner(mon)}'
             return f'{wer}: {probe}'
+        if art == 8 and len(w) >= 5:
+            self.vorspann = None
+            return stufe(name, w)
         return f'{name}: unbekannte Zeile (Art {art})'
 
 

@@ -1,6 +1,6 @@
 # Die Schicksalsklinge – Bugfix-Fassung: Änderungsliste
 
-**Version 1.4b vom 01.11.2026** · inoffiziell · zur deutschen GOG-Fassung 3.02 · **im Spiel noch ungetestet, Tester willkommen**
+**Version 1.5 vom 05.11.2026** · inoffiziell · zur deutschen GOG-Fassung 3.02 · **im Spiel noch ungetestet, Tester willkommen**
 
 ## So geht's
 
@@ -20,6 +20,15 @@ Die Spielstände der Bugfix-Fassung liegen in eigenen Ordnern unter `Build\`. Al
 |---|---|
 | **WICHTIG** (empfohlen) | kritische und mittlere Fehler: Abstürze, Hänger, verlorene Ausrüstung, falsche Preise, Fehler, die man im Spiel merkt |
 | **ALLES** | zusätzlich viele kleine Fehler ohne große Spielwirkung |
+
+## Neu in Version 1.5: Probenlog zeigt den Stufenanstieg
+
+Auf Wunsch von Andrean im Crystals-Forum: **Das Probenlog zeigt jetzt auch alle Würfe beim Stufenanstieg.** Die Würfe selbst laufen genau wie bisher, mit denselben Zufallszahlen in derselben Reihenfolge. Spielstände bleiben kompatibel, die Standard-EXE bleibt bytegleich.
+
+- **Talente und Zauber:** jeder Steigerungsversuch mit altem Wert, Wurf und Ergebnis, im Anfängermodus (das Spiel steigert selbst) wie im Fortgeschrittenenmodus. Gut zu sehen: Das Spiel würfelt dafür eine gleichverteilte Zahl von 2 bis 12 (ab Wert 11: 3 bis 18), nicht 2W6 bzw. 3W6
+- **Eigenschaften:** die gesteigerte positive Eigenschaft und beim Senken der negativen Eigenschaft alle drei W20
+- **LE und AE:** der LE-Wurf (bei Zauberkundigen W6 + 2 Punkte für LE und AE) und beim Magier der Tausch von 10 Zaubersteigerungen gegen AE
+- Probenlog-Fenster, Linux-Anzeige und HTML-Seite kennen die neuen Zeilen, die HTML-Seite hat dafür den Filter „Stufenanstieg“
 
 ## Neu in Version 1.4b: Startdateien repariert
 

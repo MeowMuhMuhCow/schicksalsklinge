@@ -5062,7 +5062,8 @@ static signed int compare_name(const char *name)
  * schon da ist (anlegen = Log an, loeschen = aus). Kein neuer Text im Datensegment: der Dateiname entsteht Zeichen
  * fuer Zeichen, geschrieben werden nur Zahlen und der Heldenname.
  * Zeile: Art;Tag;Monat;Jahr;Minute des Tages;Name;Wert1;...;WertN
- * Art 1 Eigenschaftsprobe, 3 Dreifachprobe, 4 Talentprobe, 5 Zauberprobe, 6 Attacke, 7 Parade (Bedeutung der Werte:
+ * Art 1 Eigenschaftsprobe, 3 Dreifachprobe, 4 Talentprobe, 5 Zauberprobe, 6 Attacke, 7 Parade, 8 Stufenanstieg
+ * (seg050; Bedeutung der Werte:
  * Probenlog.html bzw. Probenlog-Fenster) */
 static char *fix_probenlog_zahl(char *p, const signed int v)
 {

@@ -28,6 +28,10 @@ Die Datei liegt im Spielstand-Ordner der Fassung (`Build\Testspielstaende_Fix_Wi
 | Fernkampf (Schuss- und Wurfwaffen) | Zielwert, W20, Treffer oder daneben |
 | Zauberprobe | Zauber, Zauberfertigkeit, Zuschlag (mit Magieresistenz des Ziels), drei W20, Ergebnis |
 | Kampf | jede Attacke und Parade, von Helden und Gegnern, mit W20 und AT- bzw. PA-Wert |
+| Stufenanstieg (ab 1.5) | jeder Steigerungswurf für Talente und Zauber (alter Wert, Wurf, gelungen oder nicht), die gesteigerte positive Eigenschaft, die drei W20 beim Senken der negativen Eigenschaft, der LE-Wurf (bei Zauberkundigen die Punkte für LE und AE) und beim Magier der AE-Tausch. Im Anfängermodus, wo das Spiel selbst steigert, sieht man so erstmals, was passiert |
+
+Steigerungswurf: Das Spiel würfelt hier nicht 2W6 bzw. 3W6, sondern eine gleichverteilte Zahl von 2 bis 12 (Talentwert unter 11)
+bzw. 3 bis 18 (ab 11). Gelungen ist die Steigerung, wenn der Wurf über dem bisherigen Wert liegt.
 
 Gut zu wissen: Die Schicksalsklinge würfelt Talent- und Zauberproben nicht nach der Tischregel (jeder Wurf gegen seine
 Eigenschaft). Sie zählt die drei W20 samt Zuschlag zusammen und vergleicht die Summe mit der Summe der drei
@@ -44,4 +48,5 @@ Standard-EXE bleibt bytegleich mit dem Original.
 Zeilenformat: `Art;Tag;Monat;Jahr;Minute des Tages;Name;Werte…` mit Art 1 Eigenschaftsprobe
 (Eigenschaft, Wert, Zuschlag, W20, Ergebnis), 3 Dreifachprobe (3 Eigenschaften, 3 Werte, Zuschlag, 3 W20, Ergebnis),
 4 Talent (Talent, Talentwert bzw. Zielwert, Zuschlag, Fernkampf ja/nein, W20, Ergebnis), 5 Zauber (Zauber, ZfW,
-Zuschlag), 6 Attacke und 7 Parade (Wert, W20, Gegnertyp, Richtung).
+Zuschlag), 6 Attacke und 7 Parade (Wert, W20, Gegnertyp, Richtung), 8 Stufenanstieg (Typ, Nr., alter Wert, Wurf, Ergebnis; Typ 1
+Talent, 2 Zauber, 3 positive Eigenschaft +1, 4 negative Eigenschaft senken mit drei W20, 5 LE-Wurf, 6 AE-Tausch).

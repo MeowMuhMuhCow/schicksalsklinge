@@ -122,6 +122,21 @@ struct inc_states *g_inc_spells_counter;	// ds:0xe3b2
 struct inc_states *g_inc_talents_counter;	// ds:0xe3b6
 unsigned char *g_talents_buffer;		// ds:0xe3ba
 
+#if FIX_PROBENLOG
+/* Probenlog: Wuerfe beim Stufenanstieg (Art 8). Werte: Typ, Nr., alter Wert, Wurf, Ergebnis.
+ * Typ 1 Talent steigern, 2 Zauber steigern (Ergebnis 1 = gelungen), 3 positive Eigenschaft +1 (kein Wurf),
+ * 4 negative Eigenschaft senken (3 W20, siehe level_up), 5 LE-Wurf (Ergebnis = Punkte), 6 Magier tauscht
+ * 10 Zaubersteigerungen gegen AE (Ergebnis = AE) */
+static void fix_stufenlog(const struct struct_hero *hero, const signed int typ, const signed int nr,
+			const signed int alt, const signed int wurf, const signed int erg)
+{
+	signed int w[5];
+
+	w[0] = typ; w[1] = nr; w[2] = alt; w[3] = wurf; w[4] = erg;
+	fix_probenlog(8, hero->alias, 5, w);
+}
+#endif
+
 
 /**
  * \brief   tries to increase a spell in advanced mode
@@ -210,6 +225,9 @@ void inc_spell_advanced(struct struct_hero *hero, const signed int spell_id)
 		}
 #endif
 
+#if FIX_PROBENLOG
+		fix_stufenlog(hero, 2, spell_id, hero->spells[spell_id], randval, hero->spells[spell_id] < randval);
+#endif
 		if (hero->spells[spell_id] < randval) {
 
 			/* success */
@@ -277,6 +295,9 @@ void inc_talent_advanced(struct struct_hero *hero, const signed int talent_id)
 		}
 #endif
 
+#if FIX_PROBENLOG
+		fix_stufenlog(hero, 1, talent_id, hero->talents[talent_id], randval, hero->talents[talent_id] < randval);
+#endif
 		if (hero->talents[talent_id] < randval) {
 
 			/* success */
@@ -376,6 +397,9 @@ void inc_talent_novice(struct struct_hero *hero, const signed int talent_id)
 			}
 #endif
 
+#if FIX_PROBENLOG
+			fix_stufenlog(hero, 1, talent_id, hero->talents[talent_id], randval, hero->talents[talent_id] < randval);
+#endif
 			/* check if increase success */
 			if (hero->talents[talent_id] < randval) {
 
@@ -454,6 +478,9 @@ void inc_spell_novice(struct struct_hero *hero, const signed int spell_id)
 			}
 #endif
 
+#if FIX_PROBENLOG
+			fix_stufenlog(hero, 2, spell_id, hero->spells[spell_id], randval, hero->spells[spell_id] < randval);
+#endif
 			/* check if increase success */
 			if (hero->spells[spell_id] < randval) {
 
@@ -493,6 +520,9 @@ void level_up(const signed int hero_pos)
 	signed int text_file_index_bak;
 #if FIX_0250
 	signed int mr_bonus;
+#endif
+#if FIX_PROBENLOG
+	signed int plog[7];
 #endif
 
 	hero = get_hero(hero_pos);
@@ -589,6 +619,9 @@ void level_up(const signed int hero_pos)
 
 		} while (l_si == -2);
 
+#if FIX_PROBENLOG
+		fix_stufenlog(hero, 3, l_si, hero->attrib[l_si].normal, 0, 1);
+#endif
 		hero->attrib[l_si].normal++;
 		hero->attrib[l_si].current++;
 
@@ -640,11 +673,20 @@ void level_up(const signed int hero_pos)
 
 		for (i = 0; i < 3; i++) {
 
+#if FIX_PROBENLOG
+			/* Probenlog: die drei W20 merken (Typ 4: Nr., Wert, W20, W20, W20, Ergebnis) */
+			if ((plog[3 + i] = random_schick(20)) <= hero->attrib[l_si + 7].normal) {
+#else
 			if (random_schick(20) <= hero->attrib[l_si + 7].normal) {
+#endif
 
 				lowered = 1;
 			}
 		}
+#if FIX_PROBENLOG
+		plog[0] = 4; plog[1] = l_si + 7; plog[2] = hero->attrib[l_si + 7].normal; plog[6] = lowered;
+		fix_probenlog(8, hero->alias, 7, plog);
+#endif
 
 		if (lowered != 0) {
 
@@ -735,6 +777,9 @@ void level_up(const signed int hero_pos)
 
 	/* roll how many LE points the hero may get */
 	i = random_schick(6);
+#if FIX_PROBENLOG
+	fix_stufenlog(hero, 5, 0, hero->le_max, i, (hero->typus >= HERO_TYPE_HEXE) ? i + 2 : i);
+#endif
 
 	if (hero->typus >= HERO_TYPE_HEXE) {
 		/* a magic user */
@@ -777,6 +822,9 @@ void level_up(const signed int hero_pos)
 				/* trade 10 spell increases into 3..8 AE (uniform, like 1W6+2) */
 				hero->saved_spell_increases += -10;
 				i = random_interval(3, 8);
+#if FIX_PROBENLOG
+				fix_stufenlog(hero, 6, 0, hero->ae_max, i, i);
+#endif
 				hero->ae_max += i;
 				hero->ae += i;
 			}
