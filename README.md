@@ -1,8 +1,10 @@
 # Die Schicksalsklinge – Quelltext im Attic-Stil
 
-## 281 Fehler behoben – 34 Jahre nach Release
+## 282 Fehler behoben – 34 Jahre nach Release
 
 **Inoffizielle Bugfix-Fassung · spielbar ohne Compiler · das Original bleibt unangetastet · [gleich loslegen](#schnellstart-bugfix-fassung-spielen-ohne-compiler)**
+
+**Neu in Version 1.5a:** Nach dem Umschalten auf eine Gruppe, die in einer Herberge steht (etwa einen brauenden Helden), zeigt die Statuszeile wieder die richtige Herberge, und es gelten deren Preise (Nr. 437, gemeldet von siebenstreich). Außerdem steht in der [Änderungsliste](BUGFIXES.md) jetzt bei jedem Eintrag, ob der Fehler schon im Projekt Bright-Eyes vermerkt war und ob auch die Behebung von dort stammt.
 
 **Neu in Version 1.5: Das Probenlog zeigt jetzt auch den Stufenanstieg**, also jeden Steigerungswurf für Talente und Zauber, die Eigenschaften, den LE-Wurf und beim Magier den AE-Tausch (Wunsch von Andrean im Crystals-Forum). Gerade im Anfängermodus, wo das Spiel selbst steigert, sieht man so erstmals, was passiert.
 
@@ -19,7 +21,7 @@
 > **Zum ersten Mal seit 1992:** Auf Landreisen trifft man **Höhlenbären und Kvillottern** und kann **Karene,
 > Wildschweine, Auerochsen und Nashörner jagen**. Attic hatte das alles eingebaut, aber ein verkehrt herum
 > geschriebener Vergleich machte es unerreichbar. Dazu: keine Spielhänger mehr bei Priester, Drache und Einbruch,
-> keine 168.000 Dukaten mehr per ESC, und die Kvillotter beißt endlich. → [alle 248 Änderungen](BUGFIXES.md)
+> keine 168.000 Dukaten mehr per ESC, und die Kvillotter beißt endlich. → [alle 282 Änderungen](BUGFIXES.md)
 
 **Zusammen mit [Sternenschweif](https://github.com/MeowMuhMuhCow/sternenschweif): 508 Bugfixes für DSA 1 und DSA 2.**
 

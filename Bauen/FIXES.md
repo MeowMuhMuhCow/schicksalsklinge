@@ -16,7 +16,7 @@ Quelle der Tabelle: `Werkzeuge/fix_schalter.tsv`, erzeugt von `Werkzeuge/mkfix.p
 
 | Stufe | ja | teilweise | nein | kein Fehler |
 |---|---|---|---|---|
-| wichtig (kritisch + mittel) | 138 | 6 | 32 | - |
+| wichtig (kritisch + mittel) | 139 | 6 | 32 | - |
 | alles (zusaetzlich egal) | 128 | 9 | 76 | - |
 | - (laut Raster kein Fehler) | - | - | - | 36 |
 
@@ -451,3 +451,4 @@ Nr. 51 ist dieselbe Stelle wie Nr. 50 (`FIX_0051` folgt `FIX_0050`). In den resi
 | 434 | Speerfallgrube der Spinnenhöhle: eine Stunde Herausklettern auch, wenn niemand gestürzt ist | egal | nein | alles | ja | ist niemand gestuerzt, muss auch niemand eine Stunde lang aus der Grube klettern (Beleg: Osterpatch NRS 2016 (Version 1.2)) | SEG079.C |
 | 435 | Runin: loser Stein vor dem Hebel (0,8,1) gilt erst nach Betätigen des Hebels als entfernt | egal | nein | alles | ja | der Stein ist schon mit dieser Antwort entfernt; beim naechsten Besuch kommt Text 41 ("...WO IHR VORHIN DEN STEIN ENTFERNT HABT"), auch ohne den Hebel zu betaetigen (Beleg: Osterpatch NRS 2016 (Version 1.2)) | SEG085.C |
 | 436 | STRASSE.LTX ist größer als der 10000-Byte-Textpuffer | egal | nein | alles | nein | Puffergrenze; braucht eine andere Aufteilung der Textpuffer (Speicherplan) |  |
+| 437 | Gruppenwechsel in eine Gruppe, die schon in einem Ort steht: Statuszeile und Herberge der alten Gruppe | mittel | nein | wichtig | ja | Ort der neuen Gruppe wie beim Betreten (enter_location) aus dem Ortsverzeichnis ihrer Stadt (gemeldet von siebenstreich im Crystals-Forum (05.11.2026)) | SEG049.C |

@@ -31,6 +31,9 @@
 #include "seg008.h"
 #include "seg028.h"
 #include "seg029.h"
+#if FIX_0437
+#include "seg026.h"
+#endif
 #include "seg047.h"
 #include "seg049.h"
 #include "seg096.h"
@@ -475,6 +478,34 @@ void GRP_switch_to_next(const signed int mode)
 		/* Fix 346: Ereignisfeld-Merker auf das Feld der neuen Gruppe setzen, sonst loest ihr Feld erneut aus (Osterpatch NRS 2016) */
 		if (gs_dungeon_id) {
 			gs_dng_pos_bak = DNG_POS(gs_dungeon_level, gs_x, gs_y);
+		}
+#endif
+
+		/* Original-Bug 437: gs_town_typeindex (welches Haus) und gs_town_locdata (Text der Statuszeile) werden nicht
+		 * pro Gruppe gemerkt. Steht die neue Gruppe schon in einem Ort (z. B. ein brauender Held in der Herberge),
+		 * bleiben beide Werte von der alten Gruppe stehen, und war diese in einer anderen Stadt, ist auch deren
+		 * LTX-Datei noch geladen: in der Statuszeile steht der Name einer anderen Herberge, eine leere Zeile oder
+		 * fremder Text, und es gelten Preise und Merker der falschen Herberge (gemeldet von siebenstreich). */
+#if FIX_0437
+		/* Fix 437: Ort der neuen Gruppe wie beim Betreten (enter_location) aus dem Ortsverzeichnis ihrer Stadt
+		 * bestimmen, vorher Ortsverzeichnis und Texte dieser Stadt laden (wie prepare_town_area) */
+		if ((gs_town_loc_type != LOCTYPE_NONE) && (gs_town_id != TOWN_ID_NONE) && !gs_dungeon_id) {
+
+			struct location *loc;
+
+			if (g_town_loaded_town_id != gs_town_id) {
+				load_area_description(1);
+			}
+
+			load_tx(gs_town_id + ARCHIVE_FILE_CITY_LTX);
+
+			for (loc = &g_locations_tab[0]; loc->pos != -1; loc++) {
+				if (loc->pos == 256 * gs_x + gs_y) {
+					gs_town_typeindex = loc->typeindex;
+					gs_town_locdata = loc->locdata;
+					break;
+				}
+			}
 		}
 #endif
 

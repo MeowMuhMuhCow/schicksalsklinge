@@ -437,6 +437,7 @@
  * FIX_0434   alles    egal      -       ja         Speerfallgrube der Spinnenhoehle: eine Stunde Herausklettern auch, wenn niemand gestuerzt ist
  * FIX_0435   alles    egal      -       ja         Runin: loser Stein vor dem Hebel (0,8,1) gilt erst nach Betaetigen des Hebels als entfernt
  * FIX_0436   alles    egal      -       nein       STRASSE.LTX ist groesser als der 10000-Byte-Textpuffer
+ * FIX_0437   wichtig  mittel    -       ja         Gruppenwechsel in eine Gruppe, die schon in einem Ort steht: Statuszeile und Herberge der alten Gruppe
  */
 #ifndef S_FIX_H
 #define S_FIX_H
@@ -1642,6 +1643,9 @@
 #endif
 #ifndef FIX_0436
 #define FIX_0436 FIX_STUFE_A
+#endif
+#ifndef FIX_0437
+#define FIX_0437 FIX_STUFE_W
 #endif
 
 /* SEG002 ist resident: ohne Platz fuer die Behebungen entfallen dort nie aufgerufene Funktionen */
