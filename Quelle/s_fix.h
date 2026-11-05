@@ -438,6 +438,8 @@
  * FIX_0435   alles    egal      -       ja         Runin: loser Stein vor dem Hebel (0,8,1) gilt erst nach Betaetigen des Hebels als entfernt
  * FIX_0436   alles    egal      -       nein       STRASSE.LTX ist groesser als der 10000-Byte-Textpuffer
  * FIX_0437   wichtig  mittel    -       ja         Gruppenwechsel in eine Gruppe, die schon in einem Ort steht: Statuszeile und Herberge der alten Gruppe
+ * FIX_0438   alles    egal      -       ja         Hauswaende auf der linken Strassenseite zeigen die Fassade verkehrt herum
+ * FIX_0439   alles    egal      -       ja         Tempel zeigen von der Seite eine Fachwerkwand statt ihrer Front
  */
 #ifndef S_FIX_H
 #define S_FIX_H
@@ -1646,6 +1648,12 @@
 #endif
 #ifndef FIX_0437
 #define FIX_0437 FIX_STUFE_W
+#endif
+#ifndef FIX_0438
+#define FIX_0438 FIX_STUFE_A
+#endif
+#ifndef FIX_0439
+#define FIX_0439 FIX_STUFE_A
 #endif
 
 /* SEG002 ist resident: ohne Platz fuer die Behebungen entfallen dort nie aufgerufene Funktionen */

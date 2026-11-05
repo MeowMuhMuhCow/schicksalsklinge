@@ -158,3 +158,5 @@ nr	umgesetzt	grund (bei teilweise/nein; bei ja optional)
 435	ja	Beleg: Osterpatch NRS 2016 (Version 1.2)
 436	nein	Puffergrenze; braucht eine andere Aufteilung der Textpuffer (Speicherplan)
 437	ja	gemeldet von siebenstreich im Crystals-Forum (05.11.2026)
+438	ja	entdeckt von MiauKuh (05.11.2026); Grafik nicht neu, Spalten der vorhandenen Bilder umgeordnet
+439	ja	entdeckt von MiauKuh (05.11.2026); Seitenansicht aus der vorhandenen Tempelfront erzeugt

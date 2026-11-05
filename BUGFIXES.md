@@ -1,6 +1,6 @@
 # Die Schicksalsklinge – Bugfix-Fassung: Änderungsliste
 
-**Version 1.5a vom 05.11.2026** · inoffiziell · zur deutschen GOG-Fassung 3.02 · **im Spiel noch ungetestet, Tester willkommen**
+**Version 1.5c vom 05.11.2026** · inoffiziell · zur deutschen GOG-Fassung 3.02 · **im Spiel noch ungetestet, Tester willkommen**
 
 ## So geht's
 
@@ -20,6 +20,14 @@ Die Spielstände der Bugfix-Fassung liegen in eigenen Ordnern unter `Build\`. Al
 |---|---|
 | **WICHTIG** (empfohlen) | kritische und mittlere Fehler: Abstürze, Hänger, verlorene Ausrüstung, falsche Preise, Fehler, die man im Spiel merkt |
 | **ALLES** | zusätzlich viele kleine Fehler ohne große Spielwirkung |
+
+## Neu in Version 1.5c: Tempel auch von der Seite als Tempel
+
+- **Tempel zeigten von der Seite eine Fachwerkwand** (entdeckt von MiauKuh): Im Vorbeigehen sah die Eingangsseite eines Tempels aus wie ein Fachwerkhaus, erst davor erschienen Torbogen und Schild. Attic hat für Tempel nur die Frontansicht gezeichnet. Jetzt entsteht die Seitenansicht aus genau dieser Front, in Perspektive und in der richtigen Reihenfolge. Die übrigen Tempelseiten bleiben Fachwerk wie bisher, auch von vorn. Im Emulator am Tempel von Thorwal geprüft – Nr. 439 (ALLES)
+
+## Neu in Version 1.5b: Hauswände links richtig herum
+
+- **Hauswände auf der linken Straßenseite zeigten die Fassade verkehrt herum** (entdeckt von MiauKuh): Im Vorbeigehen sah man links etwa Fenster, Schornstein, Bootsrumpf, vor dem Haus aber Bootsrumpf, Schornstein, Fenster. Attic hat die entfernteren Seitenwände nur einmal gezeichnet, passend für die rechte Straßenseite. Jetzt werden sie für die linke Seite spaltenweise umgedreht und an die Perspektive angepasst, mit Attics eigenen Pixeln, ohne neue Grafik. Im Emulator in Thorwal geprüft – Nr. 438 (ALLES)
 
 ## Neu in Version 1.5a: Herberge nach dem Gruppenwechsel, Bright-Eyes-Herkunft in der Liste
 
@@ -142,8 +150,8 @@ Abgleich mit der Zauberliste im Lösungsbuch zur Schicksalsklinge. Zauber, die d
 | | ganz behoben | teilweise | Summe |
 |---|---:|---:|---:|
 | WICHTIG (steckt auch in ALLES) | 139 | 6 | 145 |
-| nur in ALLES | 128 | 9 | 137 |
-| **ALLES gesamt** | **267** | **15** | **282** |
+| nur in ALLES | 130 | 9 | 139 |
+| **ALLES gesamt** | **269** | **15** | **284** |
 
 **124** dieser Fehler standen schon im Projekt [Bright-Eyes](https://github.com/Henne/Bright-Eyes) (meist als „Original-Bug N“ im Quelltext), bei **32** stammt auch die Behebung von dort. Die Liste nennt das bei jedem Eintrag, mit der Bright-Eyes-Nummer, soweit es eine gibt.
 
@@ -265,7 +273,7 @@ Davon 38 **Exploits** (Fehler, die dem Spieler nützen, z. B. Geld oder Werte au
 | 371 | **Grenz- und Straßentexte ohne Richtungsprüfung** – „Orkland betreten“ und „hier endet die Straße“ auch auf dem Rückweg. | A |
 | 375 | **Jagd: Einzelheld schafft immer den Blattschuss** 💰 – Ein einzelner Held erlegt nach gelungenem Schleichen immer die volle Beute. | A |
 
-### Städte & Orte (44)
+### Städte & Orte (46)
 
 | Nr | Was behoben ist | Stufe |
 |---:|---|:---:|
@@ -313,6 +321,8 @@ Davon 38 **Exploits** (Fehler, die dem Spieler nützen, z. B. Geld oder Werte au
 | 338 | **Treborn Kolbergs Laden: Ortszeile leer oder fremd** – Leere Namensleiste, Zeichensalat. | A |
 | 343 | **Taverne: Gewinn wird als unsinnige Ausgabe angezeigt** – Nach Beorn erscheint eine Ausgabe von z. B. 20000. | A |
 | 425 | **Tavernenschlägerei schreibt über gs_town_outlawed_flags hinaus in die Rauswurf-Merker der Herbergen** – TLK_tavern Zustand 32/33 (Schlägerei bei crowdedness 3) setzt gs_town_outlawed_flags[gs_town_id] wie TLK_inn statt [gs_town_typeindex]. | A |
+| 438 | **Hauswände auf der linken Straßenseite zeigen die Fassade verkehrt herum** – Steht ein Haus links, zeigt die Seitenansicht z. B. Fenster, Schornstein, Bootsrumpf; stellt man sich davor, ist es Bootsrumpf, Schornstein, Fenster. Auf der rechten Straßenseite stimmt es. Entdeckt von MiauKuh. | A |
+| 439 | **Tempel zeigen von der Seite eine Fachwerkwand statt ihrer Front** – Im Vorbeigehen sieht die Eingangsseite eines Tempels aus wie ein Fachwerkhaus; erst wenn man sich davor stellt, erscheinen Torbogen und Schild. Entdeckt von MiauKuh. | A |
 
 ### Helden & Werte (40)
 

@@ -1387,6 +1387,9 @@ void town_building_textures(void)
 	signed int x;
 	signed int y;
 	signed int tex_set;
+#if FIX_0439
+	signed int tex_mark;
+#endif
 	signed char c1;
 	signed char bi;
 	unsigned char c2;
@@ -1457,17 +1460,35 @@ void town_building_textures(void)
 							tex_set = 188;
 						}
 
+#if FIX_0439
+						tex_mark = tex_set;
+#endif
 						if (g_entrance_angle == 1 && !(nvf_no & 0x8000) &&
 							bi >= TOWN_TILE_TEMPLE && bi <= TOWN_TILE_HOUSE_4)
 						{
 							nvf_no -= 10;
+#if FIX_0439
+							/* Fix 439: Eingangsseite eines Tempels von der Seite: aus der Tempelfront erzeugen */
+							if (bi == TOWN_TILE_TEMPLE) {
+								tex_mark = 252;
+							}
+#endif
 
 						} else if (g_entrance_angle == 3 && (nvf_no & 0x8000))
 						{
 							nvf_no = ((uint16_t)(nvf_no & 0x7fff) - 10) | 0x8000;
+#if FIX_0439
+							if (bi == TOWN_TILE_TEMPLE) {
+								tex_mark = 252;
+							}
+#endif
 						}
 
+#if FIX_0439
+						load_town_texture(x + ptr[3], y + ptr[4], nvf_no, tex_mark);
+#else
 						load_town_texture(x + ptr[3], y + ptr[4], nvf_no, tex_set);
+#endif
 					}
 
 					if ((nvf_no = ptr[8]) != -1) {
@@ -1478,6 +1499,120 @@ void town_building_textures(void)
 		}
 	}
 }
+
+#if FIX_0438
+/* Fix 438: eine Spalte einer Hauswand (Farbe 128 = durchsichtig) holen und ihren sichtbaren Bereich bestimmen */
+static void fix_spalte(const uint8_t *p, const signed int w, const signed int h, const signed int x,
+			uint8_t *c, signed int *t, signed int *b)
+{
+	signed int y;
+
+	*t = -1;
+	*b = -1;
+	for (y = 0; y < h; y++) {
+		c[y] = p[y * w + x];
+		if (c[y] != 128) {
+			if (*t == -1) {
+				*t = y;
+			}
+			*b = y;
+		}
+	}
+}
+
+/* Fix 438: Spalte x neu fuellen: der sichtbare Bereich [t, b] bekommt den Inhalt der Quellspalte c ([ct, cb])
+ * hoch- bzw. heruntergerechnet */
+static void fix_spalte_setzen(uint8_t *p, const signed int w, const signed int h, const signed int x,
+			const signed int t, const signed int b, const uint8_t *c, const signed int ct, const signed int cb)
+{
+	signed int y;
+
+	for (y = 0; y < h; y++) {
+		if ((t == -1) || (ct == -1) || (y < t) || (y > b)) {
+			p[y * w + x] = 128;
+		} else if (b == t) {
+			p[y * w + x] = c[ct];
+		} else {
+			p[y * w + x] = c[ct + ((y - t) * (cb - ct) + (b - t) / 2) / (b - t)];
+		}
+	}
+}
+
+/* Fix 438: Seitenwand in richtiger Reihenfolge. Attic hat jede Seitenwand nur einmal gezeichnet, und zwar mit
+ * Blickrichtung fuer die rechte Strassenseite; fuer die linke wird dasselbe Bild verwendet. Dort steht die Fassade
+ * dadurch verkehrt herum (vor dem Haus: Fenster, Schornstein, Bootsrumpf; im Vorbeigehen links: Bootsrumpf,
+ * Schornstein, Fenster). Abhilfe: die Spalten tauschen und jede auf die Hoehe des Trapezes an ihrer neuen Stelle
+ * bringen. Die Wand behaelt ihre Perspektive (nah gross, fern klein), der Inhalt laeuft in der richtigen Richtung. */
+static void fix_seite_umkehren(uint8_t *p, const signed int w, const signed int h)
+{
+	signed int d;
+	signed int ta, ba, tb, bb;
+	uint8_t a[136];
+	uint8_t b[136];
+
+	if (h > 136) {
+		return;
+	}
+	for (d = 0; d < w / 2; d++) {
+		fix_spalte(p, w, h, d, a, &ta, &ba);
+		fix_spalte(p, w, h, w - 1 - d, b, &tb, &bb);
+		fix_spalte_setzen(p, w, h, d, ta, ba, b, tb, bb);
+		fix_spalte_setzen(p, w, h, w - 1 - d, tb, bb, a, ta, ba);
+	}
+}
+#endif
+
+#if FIX_0439
+/* Fix 439: Seitenansicht der Tempelfront. Attic hat fuer Tempel nur die Frontansicht gezeichnet (TDIVERSE.NVF Bild 5,
+ * Torbogen und Schild); von der Seite zeigte das Spiel stattdessen die Fachwerkwand von Haustyp 3. Jetzt wird die
+ * Seitenwand aus der Tempelfront erzeugt: die Umrisse (Trapez) liefert die Fachwerkwand, die Pixel kommen spaltenweise
+ * aus der Tempelfront. Links nach rechts laeuft die Fassade wie vor dem Tempel. Bild 4 und 8 sind die Wand direkt
+ * neben der Gruppe, sie zeigen nur eine Haelfte der Fassade (links die hintere, rechts gespiegelt die vordere). */
+static void fix_tempelseite(uint8_t *p, const signed int w, const signed int h, const signed int nvf_no,
+				const signed int direction)
+{
+	struct nvf_extract_desc nvf;
+	signed int fw, fh;
+	signed int x, y, fx, fy, t, b, ft, fb;
+	uint8_t *q;
+
+	q = g_renderbuf_ptr + 36000;
+	nvf.dst = q;
+	nvf.src = g_town_tex[1];
+	nvf.image_num = 5;
+	nvf.compression_type = 3;
+	nvf.width = &fw;
+	nvf.height = &fh;
+	process_nvf_extraction(&nvf);
+
+	if ((w < 2) || (fw < 2)) {
+		return;
+	}
+	for (x = 0; x < w; x++) {
+		if ((nvf_no % 10 == 4) || (nvf_no % 10 == 8)) {
+			fx = (direction ? 0 : fw / 2) + x * (fw / 2) / (w - 1);
+		} else {
+			fx = x * (fw - 1) / (w - 1);
+		}
+		if (fx > fw - 1) {
+			fx = fw - 1;
+		}
+		/* Umriss der Fachwerkwand in dieser Spalte und Hoehe der Tempelfront in der Quellspalte */
+		for (t = 0; (t < h) && (p[t * w + x] == 128); t++);
+		for (b = h - 1; (b >= 0) && (p[b * w + x] == 128); b--);
+		for (ft = 0; (ft < fh) && (q[ft * fw + fx] == 128); ft++);
+		for (fb = fh - 1; (fb >= 0) && (q[fb * fw + fx] == 128); fb--);
+		for (y = 0; y < h; y++) {
+			if ((t > b) || (ft > fb) || (y < t) || (y > b)) {
+				p[y * w + x] = 128;
+			} else {
+				fy = (b == t) ? ft : ft + ((y - t) * (fb - ft) + (b - t) / 2) / (b - t);
+				p[y * w + x] = q[fy * fw + fx];
+			}
+		}
+	}
+}
+#endif
 
 /**
  * \brief   extract a town texture and copy it into the street view (208 x 135)
@@ -1497,6 +1632,15 @@ void load_town_texture(signed int x, signed int y, signed int nvf_no, signed int
 	uint8_t *src;
 	uint8_t *dst;
 	struct nvf_extract_desc nvf;
+#if FIX_0439
+	signed int tempel = 0;
+
+	/* Fix 439: 252 = Seitenwand an der Eingangsseite eines Tempels (Umriss aus Haustyp 3, siehe fix_tempelseite) */
+	if (tex_set == 252) {
+		tempel = 1;
+		tex_set = 188;
+	}
+#endif
 
 	direction = (nvf_no & 0x8000 ? 1: 0);
 	nvf_no &= 0x3fff;
@@ -1521,6 +1665,22 @@ void load_town_texture(signed int x, signed int y, signed int nvf_no, signed int
 	nvf.width = &width;
 	nvf.height = &height;
 	process_nvf_extraction(&nvf);
+
+	/* Original-Bug 438: die Seitenwaende der Haeuser (Bilder 4..9 und 14..19) stehen auf der linken Strassenseite
+	 * verkehrt herum (siehe fix_seite_umkehren). Gemeldet von MiauKuh (Crystals-Forum). */
+#if FIX_0439
+	if (tempel) {
+		fix_tempelseite(src, width, height, nvf_no, direction);
+	} else
+#endif
+#if FIX_0438
+	/* betroffen sind die weiter entfernten Seitenwaende 5, 6, 7 und 9 (bzw. 15, 16, 17, 19); 4 und 8 (die Wand
+	 * direkt neben der Gruppe) hat Attic richtig herum gezeichnet */
+	if (!direction && (tex_set >= 2) && (tex_set <= 5) &&
+		((nvf_no % 10 == 5) || (nvf_no % 10 == 6) || (nvf_no % 10 == 7) || (nvf_no % 10 == 9))) {
+		fix_seite_umkehren(src, width, height);
+	}
+#endif
 
 	copy_width = width;
 	copy_height = height;

@@ -1,8 +1,12 @@
 # Die Schicksalsklinge – Quelltext im Attic-Stil
 
-## 282 Fehler behoben – 34 Jahre nach Release
+## 284 Fehler behoben – 34 Jahre nach Release
 
 **Inoffizielle Bugfix-Fassung · spielbar ohne Compiler · das Original bleibt unangetastet · [gleich loslegen](#schnellstart-bugfix-fassung-spielen-ohne-compiler)**
+
+**Neu in Version 1.5c:** Tempel sehen jetzt auch von der Seite aus wie Tempel, mit Torbogen und Schild, statt wie ein Fachwerkhaus (Nr. 439).
+
+**Neu in Version 1.5b:** Die Hauswände auf der linken Straßenseite zeigen die Fassade jetzt richtig herum (Nr. 438). Bisher standen dort zum Beispiel Fenster, Schornstein, Bootsrumpf, vor dem Haus aber Bootsrumpf, Schornstein, Fenster.
 
 **Neu in Version 1.5a:** Nach dem Umschalten auf eine Gruppe, die in einer Herberge steht (etwa einen brauenden Helden), zeigt die Statuszeile wieder die richtige Herberge, und es gelten deren Preise (Nr. 437, gemeldet von siebenstreich). Außerdem steht in der [Änderungsliste](BUGFIXES.md) jetzt bei jedem Eintrag, ob der Fehler schon im Projekt Bright-Eyes vermerkt war und ob auch die Behebung von dort stammt.
 
@@ -21,7 +25,7 @@
 > **Zum ersten Mal seit 1992:** Auf Landreisen trifft man **Höhlenbären und Kvillottern** und kann **Karene,
 > Wildschweine, Auerochsen und Nashörner jagen**. Attic hatte das alles eingebaut, aber ein verkehrt herum
 > geschriebener Vergleich machte es unerreichbar. Dazu: keine Spielhänger mehr bei Priester, Drache und Einbruch,
-> keine 168.000 Dukaten mehr per ESC, und die Kvillotter beißt endlich. → [alle 282 Änderungen](BUGFIXES.md)
+> keine 168.000 Dukaten mehr per ESC, und die Kvillotter beißt endlich. → [alle 284 Änderungen](BUGFIXES.md)
 
 **Zusammen mit [Sternenschweif](https://github.com/MeowMuhMuhCow/sternenschweif): 508 Bugfixes für DSA 1 und DSA 2.**
 
