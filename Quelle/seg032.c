@@ -1057,6 +1057,27 @@ signed int do_fight(const signed int fight_id)
 
 	if (g_max_enemies > 0) {
 
+#if FIX_PROBENLOG
+		/* Probenlog (Art 9, Typ 1): gewuerfelte Gegnerzahl. Werte: Typ, Kampf, gewuerfelte Obergrenze,
+		 * Gegner in der Kampfliste, davon tatsaechlich im Kampf */
+		{
+			signed int w[5];
+			signed int k;
+
+			w[0] = 1;
+			w[1] = fight_id;
+			w[2] = g_max_enemies;
+			for (w[3] = w[4] = 0, k = 0; k < 20; k++) {
+				if (g_current_fight->enemies[k].monster_id) {
+					w[3]++;
+					if (k < g_max_enemies) {
+						w[4]++;
+					}
+				}
+			}
+			fix_probenlog(9, NULL, 5, w);
+		}
+#endif
 		/* reduce number of enemies to MAX_ENEMIES */
 		memset(&g_current_fight->enemies[g_max_enemies], 0, sizeof(struct fight_enemy) * (20 - g_max_enemies));
 #if FIX_0009

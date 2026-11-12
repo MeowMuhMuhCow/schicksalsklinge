@@ -4,6 +4,8 @@
 
 **Inoffizielle Bugfix-Fassung · spielbar ohne Compiler · das Original bleibt unangetastet · [gleich loslegen](#schnellstart-bugfix-fassung-spielen-ohne-compiler)**
 
+**Neu in Version 1.5d:** Das Probenlog zeigt jetzt auch die gewürfelte Gegnerzahl (z. B. WILD8), den Überfallwurf im Nachtlager und die Begegnungs- und Kampfwürfe auf Reisen (Wunsch von Andrean). Und in der [Änderungsliste](BUGFIXES.md) steht bei jeder Behebung „So prüfst du es“: wo man sie im Spiel sieht und was vorher anders war.
+
 **Neu in Version 1.5c:** Tempel sehen jetzt auch von der Seite aus wie Tempel, mit Torbogen und Schild, statt wie ein Fachwerkhaus (Nr. 439).
 
 **Neu in Version 1.5b:** Die Hauswände auf der linken Straßenseite zeigen die Fassade jetzt richtig herum (Nr. 438). Bisher standen dort zum Beispiel Fenster, Schornstein, Bootsrumpf, vor dem Haus aber Bootsrumpf, Schornstein, Fenster.

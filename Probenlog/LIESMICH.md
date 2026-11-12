@@ -29,6 +29,7 @@ Die Datei liegt im Spielstand-Ordner der Fassung (`Build\Testspielstaende_Fix_Wi
 | Zauberprobe | Zauber, Zauberfertigkeit, Zuschlag (mit Magieresistenz des Ziels), drei W20, Ergebnis |
 | Kampf | jede Attacke und Parade, von Helden und Gegnern, mit W20 und AT- bzw. PA-Wert |
 | Stufenanstieg (ab 1.5) | jeder Steigerungswurf für Talente und Zauber (alter Wert, Wurf, gelungen oder nicht), die gesteigerte positive Eigenschaft, die drei W20 beim Senken der negativen Eigenschaft, der LE-Wurf (bei Zauberkundigen die Punkte für LE und AE) und beim Magier der AE-Tausch. Im Anfängermodus, wo das Spiel selbst steigert, sieht man so erstmals, was passiert |
+| Ereignisse (ab 1.5d) | die gewürfelte Gegnerzahl bei Kämpfen mit zufälliger Gegnerzahl (z. B. WILD8), der Überfallwurf im Nachtlager und beim Lagern im Dungeon (mit Schwelle, Wache, Travias Segen und in welcher Wache der Überfall kommt) und auf Reisen für jeden Tag der Wurf auf Zufallsbegegnung und auf Kampf |
 
 Steigerungswurf: Das Spiel würfelt hier nicht 2W6 bzw. 3W6, sondern eine gleichverteilte Zahl von 2 bis 12 (Talentwert unter 11)
 bzw. 3 bis 18 (ab 11). Gelungen ist die Steigerung, wenn der Wurf über dem bisherigen Wert liegt.
@@ -49,4 +50,6 @@ Zeilenformat: `Art;Tag;Monat;Jahr;Minute des Tages;Name;Werte…` mit Art 1 Eige
 (Eigenschaft, Wert, Zuschlag, W20, Ergebnis), 3 Dreifachprobe (3 Eigenschaften, 3 Werte, Zuschlag, 3 W20, Ergebnis),
 4 Talent (Talent, Talentwert bzw. Zielwert, Zuschlag, Fernkampf ja/nein, W20, Ergebnis), 5 Zauber (Zauber, ZfW,
 Zuschlag), 6 Attacke und 7 Parade (Wert, W20, Gegnertyp, Richtung), 8 Stufenanstieg (Typ, Nr., alter Wert, Wurf, Ergebnis; Typ 1
-Talent, 2 Zauber, 3 positive Eigenschaft +1, 4 negative Eigenschaft senken mit drei W20, 5 LE-Wurf, 6 AE-Tausch).
+Talent, 2 Zauber, 3 positive Eigenschaft +1, 4 negative Eigenschaft senken mit drei W20, 5 LE-Wurf, 6 AE-Tausch) und 9 Ereignis ohne Heldennamen: Typ 1 Gegnerzahl (Kampf, gewürfelte Obergrenze, Gegner in der
+Kampfliste, davon im Kampf), 2 Nachtlager (W100, Schwelle, Travias Segen, Wache des Überfalls oder −1), 3 Lager im
+Dungeon (W100, Schwelle, Stunden, Wache oder −1), 4 Reisebegegnung und 5 Reisekampf (W100, Schwelle, ja/nein).

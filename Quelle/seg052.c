@@ -210,9 +210,25 @@ void do_area_camp(void)
 						/* without guards: (4*hours - 1) % chance for an incident */
 						/* For a 1 hour rest with guards this will be 0% chance! */
 						/* TODO: maybe change it to random_schick(100) - 1 to fix that */
+#if FIX_PROBENLOG
+						/* Probenlog (Art 9, Typ 3): Ueberfall beim Lagern im Dungeon. Werte: Typ, W100, Schwelle,
+						 * Stunden, Wache des Ueberfalls (-1 = keiner). Gleiche Wuerfe wie im Original. */
+						signed int w[5];
+
+						w[0] = 3;
+						w[2] = (g_area_camp_guards[0] == -1 ? 4 * hours : hours);
+						w[1] = random_schick(100);
+						w[3] = hours;
+						w[4] = -1;
+						if (w[2] > w[1]) {
+							w[4] = gs_camp_incident = random_schick(3) - 1;
+						}
+						fix_probenlog(9, NULL, 5, w);
+#else
 						if ((g_area_camp_guards[0] == -1 ? 4 * hours : hours) > random_schick(100)) {
 							gs_camp_incident = random_schick(3) - 1;
 						}
+#endif
 					}
 
 					hours_slept = 0;

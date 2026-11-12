@@ -359,6 +359,33 @@ void trv_do_journey(const signed int land_route_id, const signed int reverse)
 		gs_journey_olvir_treborn_flag = 0;
 	}
 
+#if FIX_PROBENLOG
+	/* Probenlog (Art 9, Typ 4 und 5): Zufallsbegegnung und Kampf auf der Reise fuer den ersten Tag. Werte: Typ, W100,
+	 * Schwelle (bis einschliesslich), Ergebnis. Gleiche Wuerfe in gleicher Reihenfolge wie im Original. */
+	{
+		signed int w[4];
+
+		w[0] = 4;
+		w[1] = random_schick(100);
+		w[2] = gs_travel_route_ptr->encounters;
+		w[3] = gs_journey_random_encounter_flag = (w[1] <= w[2] ? 1 : 0);
+		if (w[3])
+		{
+			gs_journey_random_encounter_position = random_schick(gs_travel_distance_per_18_hours); /* unit: [10m] */
+		}
+		fix_probenlog(9, NULL, 4, w);
+
+		w[0] = 5;
+		w[1] = random_schick(100);
+		w[2] = gs_travel_route_ptr->fights / 3;
+		w[3] = gs_journey_fight_flag = (w[1] <= w[2] ? 1 : 0);
+		if (w[3])
+		{
+			gs_journey_fight_position = random_schick(gs_travel_distance_per_18_hours); /* unit: [10m] */
+		}
+		fix_probenlog(9, NULL, 4, w);
+	}
+#else
 	if ((gs_journey_random_encounter_flag = random_schick(100) <= gs_travel_route_ptr->encounters ? 1 : 0))
 	{
 		gs_journey_random_encounter_position = random_schick(gs_travel_distance_per_18_hours); /* unit: [10m] */
@@ -368,6 +395,7 @@ void trv_do_journey(const signed int land_route_id, const signed int reverse)
 	{
 		gs_journey_fight_position = random_schick(gs_travel_distance_per_18_hours); /* unit: [10m] */
 	}
+#endif
 
 	gs_travel_distance_per_18_hours = 0;
 	/* random section ends */
@@ -608,6 +636,32 @@ void trv_do_journey(const signed int land_route_id, const signed int reverse)
 				/* figure out encounters etc. for next day */
 				gs_travel_distance_per_18_hours = ((gs_travel_speed + (gs_travel_route_ptr->speed_mod * gs_travel_speed / 10)) * 18);
 
+#if FIX_PROBENLOG
+				/* Probenlog (Art 9, Typ 4 und 5): Zufallsbegegnung und Kampf auf der Reise fuer den naechsten Tag */
+				{
+					signed int w[4];
+
+					w[0] = 4;
+					w[1] = random_schick(100);
+					w[2] = gs_travel_route_ptr->encounters;
+					w[3] = gs_journey_random_encounter_flag = (w[1] <= w[2] ? 1 : 0);
+					if (w[3])
+					{
+						gs_journey_random_encounter_position = random_schick(gs_travel_distance_per_18_hours);
+					}
+					fix_probenlog(9, NULL, 4, w);
+
+					w[0] = 5;
+					w[1] = random_schick(100);
+					w[2] = gs_travel_route_ptr->fights / 3;
+					w[3] = gs_journey_fight_flag = (w[1] <= w[2] ? 1 : 0);
+					if (w[3])
+					{
+						gs_journey_fight_position = random_schick(gs_travel_distance_per_18_hours);
+					}
+					fix_probenlog(9, NULL, 4, w);
+				}
+#else
 				if ((gs_journey_random_encounter_flag = (random_schick(100) <= gs_travel_route_ptr->encounters ? 1 : 0)))
 				{
 					gs_journey_random_encounter_position = random_schick(gs_travel_distance_per_18_hours);
@@ -617,6 +671,7 @@ void trv_do_journey(const signed int land_route_id, const signed int reverse)
 				{
 					gs_journey_fight_position = random_schick(gs_travel_distance_per_18_hours);
 				}
+#endif
 
 				if (gs_quested_months > 3)
 				{

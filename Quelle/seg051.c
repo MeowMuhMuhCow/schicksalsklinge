@@ -334,10 +334,27 @@ void do_wildcamp(void)
 
 				if (gs_camp_incident == -1) {
 
+#if FIX_PROBENLOG
+					/* Probenlog (Art 9, Typ 2): Ueberfall im Nachtlager. Werte: Typ, W100, Schwelle (Ueberfall bei
+					 * W100 darunter), Travia-Segen, Wache des Ueberfalls (0..2, -1 = keiner). Gleiche Wuerfe wie unten. */
+					signed int w[5];
+
+					w[0] = 2;
+					w[2] = (g_wildcamp_guards[0] == -1 ? 60 : 10);
+					w[1] = random_schick(100);
+					w[3] = (gs_ingame_timers[INGAME_TIMER_TRAVIA_SAFE_REST] ? 1 : 0);
+					w[4] = -1;
+					if ((w[2] > w[1]) && !w[3])
+					{
+						w[4] = gs_camp_incident = random_schick(3) - 1; /* the watch (0..2) of the incident */
+					}
+					fix_probenlog(9, NULL, 5, w);
+#else
 					if (((g_wildcamp_guards[0] == -1 ? 60 : 10) > random_schick(100)) && !gs_ingame_timers[INGAME_TIMER_TRAVIA_SAFE_REST]) /* 59 % without guards, 9 % with guards */
 					{
 						gs_camp_incident = random_schick(3) - 1; /* the watch (0..2) of the incident */
 					}
+#endif
 				} else {
 					incident_preset = 1;
 				}
