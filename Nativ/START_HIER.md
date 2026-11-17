@@ -73,7 +73,10 @@ SPIELPFAD="/pfad/zu/Schicksalsklinge" ./start_schicksalsklinge.sh
 | `--music=gm` | **General MIDI (MPU-401)** | Setzt die XMIDI-Sequenzen (`*.XMI` aus `SCHICK.DAT`) in Echtzeit für den Windows-MIDI-Synthesizer (*Microsoft GS Wavetable Synth*) um. |
 | `--music=opl` | **AdLib / OPL2 (DOSBox DBOPL)** | Exakte OPL2-Hardware-Emulation (DOSBox 0.74 `DBOPL`, 44100 Hz) mit den 79 Original-FM-Instrumenten aus `SAMPLE.AD` und dem 9-Stimmen-AIL-2.0-Algorithmus. |
 
-### Sondertasten im Spiel
+### Vorspann (Original-Intro) & Sondertasten im Spiel
+- **Original-Intro (`INTRO_E.OVL` + `INTRODAT.DIR`/`.VOL`/`.SND`)**: Startet wie im Original (`SCHICK.BAT`: `intro` → `schickm`) automatisch vor dem Hauptmenü mit `MUSIC/Track02.OGG` (Logos, Titel, Credits) und `MUSIC/Track03.OGG` (synchronisierte 10 Erzählszenen).
+  - **Abbrechen**: Jederzeit per **`ESC`**, **`Leertaste`** oder **Mausklick** direkt ins Startmenü überspringbar.
+  - **Abschalten per Schalter**: `--kein-intro` (oder `--no-intro` bzw. Umgebungsvariable `DSA_INTRO=0`).
 - **`F10`**: Musiktreiber im laufenden Spiel live umschalten (`CD-Audio` → `General MIDI` → `AdLib/OPL2`)
 - **`F11` / `F12`**: Gesamtlautstärke (Musik & `.VOC`-Soundeffekte) leiser / lauter stellen
 - **`Alt+Enter`**: Vollbild / Fenstermodus umschalten

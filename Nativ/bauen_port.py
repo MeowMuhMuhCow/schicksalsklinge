@@ -147,6 +147,13 @@ def build_stufe(fix_bugs: int, exe_name: str, extra_defines: list[str], copy_to_
             f"-c platform/dsa_platform_sdl2.cpp -o {obj_dir.name}/dsa_platform_sdl2.o",
             obj_dir / "dsa_platform_sdl2.o",
         ),
+        (
+            "dsa_intro.cpp",
+            WIN_BUILD_DIR / "platform/dsa_intro.cpp",
+            f"g++.exe -m32 -O2 -Iplatform "
+            f"-c platform/dsa_intro.cpp -o {obj_dir.name}/dsa_intro.o",
+            obj_dir / "dsa_intro.o",
+        ),
     ]
     for pname, psrc, pcmd, pobj in plat_defs:
         if pobj.exists() and pobj.stat().st_mtime >= psrc.stat().st_mtime:
@@ -163,6 +170,7 @@ def build_stufe(fix_bugs: int, exe_name: str, extra_defines: list[str], copy_to_
         f"{obj_dir.name}/stb_vorbis.o",
         f"{obj_dir.name}/dbopl.o",
         f"{obj_dir.name}/dsa_platform_sdl2.o",
+        f"{obj_dir.name}/dsa_intro.o",
         f"{obj_dir.name}/sdl2_win32_provider.o",
     ]
     rsp_file.write_text("\n".join(rsp_items) + "\n", encoding="utf-8")

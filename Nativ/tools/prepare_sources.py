@@ -1434,7 +1434,8 @@ signed int bioskey(const signed int cmd)
         """#if !defined(__BORLANDC__)
 extern int ngen_run(int init_level, int called_from_game);
 extern int ngen_run_intro(void);
-static int g_run_intro = 0;
+static int g_run_intro = 1;
+static int g_intro_explicit = 0;
 
 static void schick_format_crash_state(char *buf, int buf_size)
 {
@@ -1478,8 +1479,13 @@ int main(int argc, char** argv)
 			g_skip_copy_protection = (env_cp[0] == '0') ? 1 : 0;
 		}
 		const char *env_intro = getenv("DSA_INTRO");
-		if (env_intro && env_intro[0] == '1') {
-			g_run_intro = 1;
+		if (env_intro && env_intro[0]) {
+			if (env_intro[0] == '0') {
+				g_run_intro = 0;
+			} else if (env_intro[0] == '1') {
+				g_run_intro = 1;
+				g_intro_explicit = 1;
+			}
 		}
 		for (int arg_i = 1; arg_i < argc; ++arg_i) {
 			if (strcmp(argv[arg_i], "--copy-protection") == 0) {
@@ -1488,6 +1494,10 @@ int main(int argc, char** argv)
 				g_skip_copy_protection = 1;
 			} else if (strcmp(argv[arg_i], "--intro") == 0) {
 				g_run_intro = 1;
+				g_intro_explicit = 1;
+			} else if (strcmp(argv[arg_i], "--kein-intro") == 0 || strcmp(argv[arg_i], "--no-intro") == 0) {
+				g_run_intro = 0;
+				g_intro_explicit = 0;
 			} else if (strcmp(argv[arg_i], "--coverage") == 0) {
 				g_dsa_coverage_enabled = 1;
 			} else if (strcmp(argv[arg_i], "--fast-replay") == 0) {
@@ -1513,6 +1523,9 @@ int main(int argc, char** argv)
 				dsa_platform_set_record_file(argv[++arg_i]);
 			} else if (strcmp(argv[arg_i], "--replay") == 0 && arg_i + 1 < argc) {
 				dsa_platform_set_replay_file(argv[++arg_i]);
+				if (!g_intro_explicit) {
+					g_run_intro = 0;
+				}
 			} else if (strcmp(argv[arg_i], "--gamedir") == 0 && arg_i + 1 < argc) {
 				dsa_platform_set_game_dir(argv[++arg_i]);
 			} else if (argv[arg_i][0] != '-') {
@@ -1557,8 +1570,12 @@ int main(int argc, char** argv)
 		g_game_mode = GAME_MODE_UNSPECIFIED;""",
         """#if !defined(__BORLANDC__)
 		if (g_run_intro) {
+			uint8_t pal_white[3] = { 0x3f, 0x3f, 0x3f };
 			call_mouse_bg();
-			ngen_run_intro();
+			if (!dsa_run_original_intro()) {
+				ngen_run_intro();
+			}
+			set_color(pal_white, 0xff);
 			refresh_colors();
 			dsa_platform_set_mouse_range_x(0, 319);
 			dsa_platform_set_mouse_range_y(0, 199);

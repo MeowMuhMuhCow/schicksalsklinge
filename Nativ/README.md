@@ -55,8 +55,9 @@ SPIELPFAD="/path/to/BladeOfDestinyGerman" ./start_schicksalsklinge.sh
 
 ---
 
-## 4. Audio Modes & Hotkeys
+## 4. Intro, Audio Modes & Hotkeys
 
+- **Original Intro (`INTRO_E.OVL` + `INTRODAT.*`)**: Runs automatically at startup with `MUSIC/Track02.OGG` and `MUSIC/Track03.OGG` (synchronized via the original `INT 80h` table from `INTRO.EXE`). Press **`ESC`**, **`Space`**, or **click the mouse** to skip at any time, or pass `--kein-intro` / `--no-intro` (`DSA_INTRO=0`) to disable it.
 - `--music=cd` *(Default)*: Plays the 14 CD-Audio Ogg Vorbis tracks (`MUSIC/Track02.OGG` .. `Track15.OGG`) identically to the GOG release (`DSA1_CD.BAT`) and `MobileEyes` (`g_use_cdaudio_flag = 1`). Automatically falls back to General MIDI if `MUSIC/` is absent.
 - `--music=gm`: Real-time XMIDI-to-General-MIDI playback via Windows Multimedia MIDI (`midiOut` / *Microsoft GS Wavetable Synth*).
 - `--music=opl`: Cycle-accurate OPL2/AdLib FM synthesis via DOSBox 0.74 `DBOPL` using the 79 original timbres from `SAMPLE.AD`.

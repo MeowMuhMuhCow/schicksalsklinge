@@ -105,6 +105,7 @@ void dsa_platform_set_replay_file(const char *path);
 void dsa_platform_set_fast_replay(int enabled);
 int  dsa_platform_is_fast_replay(void);
 void dsa_platform_save_screenshot_bmp(const char *path);
+int  dsa_run_original_intro(void);
 
 static inline void dsa_trace_enter(int func_id, const char *seg_and_func) {
     g_dsa_last_func = seg_and_func;

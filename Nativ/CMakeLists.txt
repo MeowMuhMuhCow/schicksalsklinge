@@ -44,6 +44,7 @@ add_executable(SCHICK_PORT
     ${SCHICK_GAME_SOURCES}
     "${CMAKE_CURRENT_SOURCE_DIR}/platform/vgalib.c"
     "${CMAKE_CURRENT_SOURCE_DIR}/platform/dsa_platform_sdl2.cpp"
+    "${CMAKE_CURRENT_SOURCE_DIR}/platform/dsa_intro.cpp"
     "${CMAKE_CURRENT_SOURCE_DIR}/third_party/SDL2/sdl2_win32_provider.c"
     "${CMAKE_CURRENT_SOURCE_DIR}/third_party/stb_vorbis/stb_vorbis.c"
     "${CMAKE_CURRENT_SOURCE_DIR}/third_party/dbopl/dbopl.cpp"

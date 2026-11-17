@@ -21,14 +21,18 @@ Entertainment Software.
    - Verwendung: Rekonstruierter C-Quellcode der Segmente seg001..seg122 sowie
                  der Heldenerschaffung (ngen) und die Fehlerkorrekturen (s_fix.h).
 
-2. MobileEyes (CD-Audio-Umsetzung & Portierungs-Referenz)
+2. MobileEyes (CD-Audio-Umsetzung, Intro-Interpreter & Portierungs-Referenz)
    - Projekt:    https://github.com/Kerygma83/mobile-eyes
    - Autor:      Gero Ohrner (Kerygma83)
    - Lizenz:     GNU General Public License v3.0 (GPLv3)
-   - Verwendung: Umsetzung der CD-Audio-Steuerung (seg001.c / seg002.c,
-                 g_use_cdaudio_flag = 1, Track-Zuordnung Track02..Track15 fuer
-                 Intro, Heldenerschaffung und Hauptspiel) sowie Portierungs-
-                 Referenz fuer nicht-Borland-Plattformen.
+   - Verwendung: (a) Umsetzung der CD-Audio-Steuerung (seg001.c / seg002.c,
+                     g_use_cdaudio_flag = 1, Track-Zuordnung Track02..Track15 fuer
+                     Intro, Heldenerschaffung und Hauptspiel);
+                 (b) Vorlage fuer den eingebetteten 8086-Intro-Interpreter
+                     (platform/dsa_intro.cpp nach werkzeuge/intro.js, Commit b5e8cc39,
+                     ergaenzt um die exakte INT-80h-CD-Synchronisationstabelle aus
+                     INTRO.EXE fuer INTRO_E.OVL);
+                 (c) Portierungs-Referenz fuer nicht-Borland-Plattformen.
 
 3. PowerPacker-2.0-Entpacker (decomp_pp20 in seg008.c)
    - Ursprung:   ppdepack / amigadepacker
