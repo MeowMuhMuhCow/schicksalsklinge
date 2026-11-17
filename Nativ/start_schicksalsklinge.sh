@@ -5,6 +5,12 @@
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+PROBENLOG="${PROBENLOG:-0}"
+
+if [[ $# -ge 1 && ( "$1" == "--probenlog" || "$1" == "log" ) ]]; then
+    PROBENLOG=1
+    shift
+fi
 
 # 1. SPIELPFAD aus erstem Parameter oder Umgebungsvariable uebernehmen
 if [[ $# -ge 1 && -f "$1/SCHICK.DAT" ]]; then
@@ -56,5 +62,44 @@ if [[ -z "$PORT_BIN" ]]; then
     PORT_BIN="$SCRIPT_DIR/build/SCHICK_PORT"
 fi
 
+# 4. Pruefen, ob Spielordner beschreibbar ist; sonst nach Spielstaende/ neben der EXE umleiten
+SAVEDIR="$SPIELPFAD"
+if [[ "${DSA_FORCE_READONLY_GAMEDIR:-0}" == "1" ]] || ! touch "$SPIELPFAD/.schick_wtest_$$" 2>/dev/null; then
+    SAVEDIR="$(dirname "$PORT_BIN")/Spielstaende"
+    export DSA_SAVE_DIR="$SAVEDIR"
+    mkdir -p "$SAVEDIR/TEMP"
+    echo "[HINWEIS] Der Spielordner '$SPIELPFAD' ist nicht beschreibbar."
+    echo "          Spielstaende und PROBEN.CSV werden nach '$SAVEDIR' umgeleitet."
+else
+    rm -f "$SPIELPFAD/.schick_wtest_$$"
+fi
+
+# 5. Probenlog: altes PROBEN.CSV mit Datum nach Probenlogs/ verschieben
+if [[ -f "$SAVEDIR/PROBEN.CSV" ]]; then
+    if [[ ! -s "$SAVEDIR/PROBEN.CSV" ]]; then
+        rm -f "$SAVEDIR/PROBEN.CSV"
+    else
+        mkdir -p "$SCRIPT_DIR/Probenlogs"
+        TS="$(date +%Y-%m-%d_%H-%M-%S)"
+        mv -f "$SAVEDIR/PROBEN.CSV" "$SCRIPT_DIR/Probenlogs/PROBEN_Fix_Alles_${TS}.CSV"
+    fi
+fi
+
+LOG_PID=""
+cleanup_log() {
+    if [[ -n "$LOG_PID" ]]; then
+        kill "$LOG_PID" 2>/dev/null || true
+    fi
+}
+trap cleanup_log EXIT
+
+if [[ "$PROBENLOG" == "1" ]]; then
+    : > "$SAVEDIR/PROBEN.CSV"
+    if [[ -f "$SCRIPT_DIR/Probenlog/probenlog.py" && "${DSA_NO_PROBENLOG_WINDOW:-0}" != "1" ]]; then
+        python3 "$SCRIPT_DIR/Probenlog/probenlog.py" "$SAVEDIR/PROBEN.CSV" &
+        LOG_PID="$!"
+    fi
+fi
+
 echo "Starte Schicksalsklinge mit Spieldaten aus: $SPIELPFAD"
-exec "$PORT_BIN" "$SPIELPFAD" "$@"
+"$PORT_BIN" "$SPIELPFAD" "$@"

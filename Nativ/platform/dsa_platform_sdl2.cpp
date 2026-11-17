@@ -6,6 +6,7 @@
 #include "dsa_platform.h"
 #include <SDL2/SDL.h>
 #include <ctype.h>
+#include <dirent.h>
 #include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -19,6 +20,7 @@
 #define MKDIR(p) _mkdir(p)
 #define ACCESS(p, m) _access(p, m)
 #define STRNICMP _strnicmp
+#define STRICMP _stricmp
 #else
 #include <strings.h>
 #include <sys/stat.h>
@@ -26,6 +28,7 @@
 #define MKDIR(p) mkdir(p, 0755)
 #define ACCESS(p, m) access(p, m)
 #define STRNICMP strncasecmp
+#define STRICMP strcasecmp
 #endif
 
 #include "dbopl.h"
@@ -390,6 +393,134 @@ static void keyq_push(unsigned short bios_key) {
  * ========================================================================= */
 
 static char g_game_dir[512] = "";
+static char g_save_dir[512] = "";
+static char g_explicit_save_dir[512] = "";
+static int  g_save_dir_redirected = 0;
+static int  g_save_dir_reported = 0;
+
+static int is_dir_writable(const char *dir) {
+    const char *force_ro = getenv("DSA_FORCE_READONLY_GAMEDIR");
+    if (force_ro && force_ro[0] == '1') {
+        return 0;
+    }
+    if (!dir || !dir[0]) return 0;
+    char test_path[600];
+#ifdef _WIN32
+    snprintf(test_path, sizeof(test_path), "%s\\.schick_write_test_%lu.tmp", dir, (unsigned long)GetCurrentProcessId());
+    HANDLE h = CreateFileA(test_path, GENERIC_WRITE, FILE_SHARE_READ | FILE_SHARE_WRITE, NULL,
+                           CREATE_ALWAYS, FILE_ATTRIBUTE_TEMPORARY | FILE_FLAG_DELETE_ON_CLOSE, NULL);
+    if (h == INVALID_HANDLE_VALUE) {
+        return 0;
+    }
+    CloseHandle(h);
+    DeleteFileA(test_path);
+    return 1;
+#else
+    snprintf(test_path, sizeof(test_path), "%s/.schick_write_test_%d.tmp", dir, (int)getpid());
+    FILE *fp = fopen(test_path, "wb");
+    if (!fp) return 0;
+    fclose(fp);
+    unlink(test_path);
+    return 1;
+#endif
+}
+
+static void copy_file_if_missing(const char *src_path, const char *dst_path) {
+    if (ACCESS(dst_path, 0) == 0) return;
+    FILE *in_fp = fopen(src_path, "rb");
+    if (!in_fp) return;
+    FILE *out_fp = fopen(dst_path, "wb");
+    if (!out_fp) {
+        fclose(in_fp);
+        return;
+    }
+    unsigned char buf[4096];
+    size_t n;
+    while ((n = fread(buf, 1, sizeof(buf), in_fp)) > 0) {
+        fwrite(buf, 1, n, out_fp);
+    }
+    fclose(out_fp);
+    fclose(in_fp);
+}
+
+static void seed_save_dir_from_dir(const char *src_dir, const char *dst_dir) {
+    if (!src_dir || !src_dir[0] || !dst_dir || !dst_dir[0]) return;
+    if (STRICMP(src_dir, dst_dir) == 0) return;
+    DIR *d = opendir(src_dir);
+    if (!d) return;
+    struct dirent *ent;
+    while ((ent = readdir(d)) != NULL) {
+        const char *nm = ent->d_name;
+        size_t len = strlen(nm);
+        int copy_it = 0;
+        if (STRICMP(nm, "GAMES.NAM") == 0 || STRICMP(nm, "HIMMEL.AN") == 0 || STRICMP(nm, "APFREI.AN") == 0) {
+            copy_it = 1;
+        } else if (len > 4 && (STRICMP(nm + len - 4, ".GAM") == 0 || STRICMP(nm + len - 4, ".CHR") == 0)) {
+            copy_it = 1;
+        }
+        if (copy_it) {
+            char sp[600], dp[600];
+#ifdef _WIN32
+            snprintf(sp, sizeof(sp), "%s\\%s", src_dir, nm);
+            snprintf(dp, sizeof(dp), "%s\\%s", dst_dir, nm);
+#else
+            snprintf(sp, sizeof(sp), "%s/%s", src_dir, nm);
+            snprintf(dp, sizeof(dp), "%s/%s", dst_dir, nm);
+#endif
+            copy_file_if_missing(sp, dp);
+        }
+    }
+    closedir(d);
+}
+
+static void setup_save_dir(void) {
+    init_exe_dir_once();
+    const char *env_sd = getenv("DSA_SAVE_DIR");
+    const char *chosen_sd = NULL;
+    if (g_explicit_save_dir[0]) {
+        chosen_sd = g_explicit_save_dir;
+    } else if (env_sd && env_sd[0]) {
+        chosen_sd = env_sd;
+    }
+
+    if (chosen_sd && chosen_sd[0]) {
+        strncpy(g_save_dir, chosen_sd, sizeof(g_save_dir) - 1);
+        g_save_dir[sizeof(g_save_dir) - 1] = '\0';
+        g_save_dir_redirected = (STRICMP(g_save_dir, g_game_dir) != 0 || !is_dir_writable(g_game_dir)) ? 1 : 0;
+    } else if (is_dir_writable(g_game_dir)) {
+        strncpy(g_save_dir, g_game_dir, sizeof(g_save_dir) - 1);
+        g_save_dir[sizeof(g_save_dir) - 1] = '\0';
+        g_save_dir_redirected = 0;
+    } else {
+#ifdef _WIN32
+        snprintf(g_save_dir, sizeof(g_save_dir), "%s\\Spielstaende", g_exe_dir);
+#else
+        snprintf(g_save_dir, sizeof(g_save_dir), "%s/Spielstaende", g_exe_dir);
+#endif
+        g_save_dir_redirected = 1;
+    }
+
+    if (g_save_dir[0]) {
+        char sub[600];
+        MKDIR(g_save_dir);
+#ifdef _WIN32
+        snprintf(sub, sizeof(sub), "%s\\TEMP", g_save_dir);
+#else
+        snprintf(sub, sizeof(sub), "%s/TEMP", g_save_dir);
+#endif
+        MKDIR(sub);
+    }
+
+    if (g_save_dir_redirected) {
+        seed_save_dir_from_dir(g_game_dir, g_save_dir);
+        if (!g_save_dir_reported) {
+            fprintf(stderr, "[HINWEIS] Spielordner \"%s\" ist nicht beschreibbar -> Spielstaende und PROBEN.CSV werden nach \"%s\" umgeleitet.\n",
+                    g_game_dir, g_save_dir);
+            fflush(stderr);
+            g_save_dir_reported = 1;
+        }
+    }
+}
 
 static void trim_crlf(char *s) {
     size_t n = strlen(s);
@@ -472,20 +603,38 @@ static void discover_game_dir(const char *explicit_dir) {
 
 void dsa_platform_set_game_dir(const char *path) {
     discover_game_dir(path);
-    if (g_game_dir[0]) {
-        char sub[600];
-#ifdef _WIN32
-        snprintf(sub, sizeof(sub), "%s\\TEMP", g_game_dir);
-#else
-        snprintf(sub, sizeof(sub), "%s/TEMP", g_game_dir);
-#endif
-        MKDIR(sub);
-    }
+    setup_save_dir();
 }
 
 const char *dsa_platform_get_game_dir(void) {
     if (!g_game_dir[0]) dsa_platform_set_game_dir(NULL);
     return g_game_dir;
+}
+
+void dsa_platform_set_save_dir(const char *path) {
+    if (path && path[0]) {
+        strncpy(g_explicit_save_dir, path, sizeof(g_explicit_save_dir) - 1);
+        g_explicit_save_dir[sizeof(g_explicit_save_dir) - 1] = '\0';
+    } else {
+        g_explicit_save_dir[0] = '\0';
+    }
+    if (g_game_dir[0]) {
+        setup_save_dir();
+    }
+}
+
+const char *dsa_platform_get_save_dir(void) {
+    if (!g_save_dir[0]) dsa_platform_set_game_dir(NULL);
+    return g_save_dir;
+}
+
+int dsa_platform_is_save_dir_redirected(void) {
+    if (!g_save_dir[0]) dsa_platform_set_game_dir(NULL);
+    return g_save_dir_redirected;
+}
+
+int dsa_platform_is_replay_active(void) {
+    return g_replay_active ? 1 : 0;
 }
 
 const char *dsa_platform_resolve_path(const char *dos_path, char *out_buf, size_t out_size) {

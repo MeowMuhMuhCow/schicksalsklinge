@@ -787,12 +787,15 @@ void prepare_dirs(void)
 #else
 	{
 		const char *game_dir = dsa_platform_get_game_dir();
+		const char *save_dir = dsa_platform_get_save_dir();
 		DIR *dir;
 		struct dirent *ent;
 		char path[260];
 
-		/* Falls SCHICK.DAT nicht im aktuellen Arbeitsverzeichnis liegt, in den Spielordner wechseln */
-		if (access("SCHICK.DAT", 0) != 0 && game_dir && game_dir[0]) {
+		/* In den Spielstand-/Arbeitsordner wechseln (Spielordner oder Spielstaende\ neben der EXE) */
+		if (save_dir && save_dir[0]) {
+			chdir(save_dir);
+		} else if (access("SCHICK.DAT", 0) != 0 && game_dir && game_dir[0]) {
 			chdir(game_dir);
 		}
 

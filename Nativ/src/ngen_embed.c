@@ -3124,9 +3124,9 @@ static signed short open_datfile(const signed short index)
 
 #if defined(__BORLANDC__) || defined(_WIN32)
 	/* 0x8001 = O_BINARY | O_RDONLY */
-	handle = open(g_str_dsagen_dat, O_BINARY | O_RDONLY);
+	{ char dsagen_buf[512]; const char *dsagen_p = (access(g_str_dsagen_dat, 0) == 0) ? g_str_dsagen_dat : dsa_platform_resolve_path(g_str_dsagen_dat, dsagen_buf, sizeof(dsagen_buf)); handle = open(dsagen_p, O_BINARY | O_RDONLY); }
 #else
-	handle = open(g_str_dsagen_dat, O_RDONLY);
+	{ char dsagen_buf[512]; const char *dsagen_p = (access(g_str_dsagen_dat, 0) == 0) ? g_str_dsagen_dat : dsa_platform_resolve_path(g_str_dsagen_dat, dsagen_buf, sizeof(dsagen_buf)); handle = open(dsagen_p, O_RDONLY); }
 #endif
 
 	/* failed to open DSAGEN.DAT */
@@ -3216,9 +3216,9 @@ static int detect_datfile(void)
 
 #if defined(__BORLANDC__) || defined(_WIN32)
 	/* 0x8001 = O_BINARY | O_RDONLY */
-	handle = open(g_str_dsagen_dat, O_BINARY | O_RDONLY);
+	{ char dsagen_buf[512]; const char *dsagen_p = (access(g_str_dsagen_dat, 0) == 0) ? g_str_dsagen_dat : dsa_platform_resolve_path(g_str_dsagen_dat, dsagen_buf, sizeof(dsagen_buf)); handle = open(dsagen_p, O_BINARY | O_RDONLY); }
 #else
-	handle = open(g_str_dsagen_dat, O_RDONLY);
+	{ char dsagen_buf[512]; const char *dsagen_p = (access(g_str_dsagen_dat, 0) == 0) ? g_str_dsagen_dat : dsa_platform_resolve_path(g_str_dsagen_dat, dsagen_buf, sizeof(dsagen_buf)); handle = open(dsagen_p, O_RDONLY); }
 #endif
 	if (handle == -1) {
 		fprintf(stderr, "ERROR: DSAGEN.DAT not found\n");

@@ -43,17 +43,22 @@ cmake --build build -j4
 
 ## 3. Spiel starten (`SPIELPFAD`)
 
-### Unter Windows (`start_schicksalsklinge.bat`)
-1. Entweder die Umgebungsvariable `SPIELPFAD` auf das Verzeichnis mit `SCHICK.DAT` setzen:
-   ```bat
-   set "SPIELPFAD=C:\GOG Games\Realms of Arkania - Blade of Destiny German"
-   start_schicksalsklinge.bat
-   ```
-2. Oder den Pfad direkt als ersten Parameter übergeben:
+### Unter Windows (`Schicksalsklinge_starten_*.bat` / `start_schicksalsklinge.bat`)
+1. Einfach eine der mitgelieferten Start-Dateien doppelklicken:
+   - `Schicksalsklinge_starten_ALLE_FIXES.bat` — alle Fehlerbehebungen
+   - `Schicksalsklinge_starten_ALLE_FIXES_MIT_PROBENLOG.bat` — alle Fehlerbehebungen + Live-Probenlog-Fenster (`Probenlog\probenlog_fenster.ps1`)
+   - `Schicksalsklinge_starten_WICHTIGE_FIXES.bat` — nur die wichtigen Fehlerbehebungen
+   - `Schicksalsklinge_starten_WICHTIGE_FIXES_MIT_PROBENLOG.bat` — wichtige Fehlerbehebungen + Live-Probenlog-Fenster
+   - `Schicksalsklinge_starten_ORIGINAL.bat` — 100 % Originalverhalten
+2. Alternativ `SPIELPFAD` setzen oder den Spielordner direkt als ersten Parameter übergeben:
    ```bat
    start_schicksalsklinge.bat "C:\GOG Games\Realms of Arkania - Blade of Destiny German"
    ```
-   *(Ohne Angabe sucht `start_schicksalsklinge.bat` automatisch im aktuellen Ordner sowie in den typischen GOG-Installationspfaden.)*
+   *(Ohne Angabe sucht das Startskript automatisch im aktuellen Ordner sowie in den typischen GOG-Installationspfaden. Ist der Spielordner schreibgeschützt, werden Spielstände und `PROBEN.CSV` automatisch in einen Ordner `Spielstaende\` neben der EXE umgeleitet und das beim Start einmal gemeldet.)*
+
+### Probenlog (`Probenlog\`)
+- Beim Start über `*_MIT_PROBENLOG.bat` wird `PROBEN.CSV` im Spielordner (bzw. bei Schreibschutz in `Spielstaende\PROBEN.CSV`) angelegt (ein vorhandenes altes Log wandert vorher mit Datum im Namen nach `Probenlogs\`) und neben dem Spiel öffnet sich das Live-Fenster (`Probenlog\probenlog_fenster.ps1`).
+- Zum nachträglichen Auswerten liegt [`Probenlog/Probenlog_Schicksalsklinge.html`](Probenlog/Probenlog_Schicksalsklinge.html) samt Anleitung [`Probenlog/LIESMICH.md`](Probenlog/LIESMICH.md) bei.
 
 ### Unter Linux (`start_schicksalsklinge.sh`)
 ```bash

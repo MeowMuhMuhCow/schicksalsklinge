@@ -764,7 +764,16 @@ signed int load_game_state(void)
 		strcat(g_text_output_buf, g_savegame_suffix);
 
 		/* open the game state file */
+#if defined(__BORLANDC__)
 		if ((handle_sg = open(g_text_output_buf, O_BINARY | O_RDONLY)) == -1)
+#else
+		handle_sg = open_file_ci(g_text_output_buf, O_BINARY | O_RDONLY);
+		if (handle_sg == -1) {
+			char gam_resolved[512];
+			handle_sg = _open(dsa_platform_resolve_path(g_text_output_buf, gam_resolved, sizeof(gam_resolved)), O_BINARY | O_RDONLY);
+		}
+		if (handle_sg == -1)
+#endif
 		{
 			GUI_output(get_ttx(635)); /* "SPIELSTAND NICHT VERFÜGBAR!" */
 			retval = -1;

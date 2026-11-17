@@ -1528,14 +1528,21 @@ int main(int argc, char** argv)
 				}
 			} else if (strcmp(argv[arg_i], "--gamedir") == 0 && arg_i + 1 < argc) {
 				dsa_platform_set_game_dir(argv[++arg_i]);
+			} else if (strcmp(argv[arg_i], "--savedir") == 0 && arg_i + 1 < argc) {
+				dsa_platform_set_save_dir(argv[++arg_i]);
 			} else if (argv[arg_i][0] != '-') {
 				dsa_platform_set_game_dir(argv[arg_i]);
 			}
 		}
-		if (access("SCHICK.DAT", 0) != 0) {
-			const char *gd = dsa_platform_get_game_dir();
-			if (gd && gd[0]) {
-				chdir(gd);
+		{
+			const char *sd = dsa_platform_get_save_dir();
+			if (sd && sd[0]) {
+				chdir(sd);
+			} else if (access("SCHICK.DAT", 0) != 0) {
+				const char *gd = dsa_platform_get_game_dir();
+				if (gd && gd[0]) {
+					chdir(gd);
+				}
 			}
 		}
 		MKDIR_PORT_S2("TEMP");
@@ -1545,6 +1552,70 @@ int main(int argc, char** argv)
 
 	g_playmask_us = 1;""",
         "seg002.c:main_args",
+    )
+
+    s2_txt = replace_once(
+        s2_txt,
+        """	/* open SCHICK.DAT */
+#if defined(__BORLANDC__) || defined(_WIN32)
+	if ( (handle = open(g_fname_schick_dat, O_BINARY | O_RDONLY)) != -1) {
+#else
+	if ( (handle = open(g_fname_schick_dat, O_RDONLY)) != -1) {
+#endif""",
+        """	/* open SCHICK.DAT */
+#if defined(__BORLANDC__)
+	if ( (handle = open(g_fname_schick_dat, O_BINARY | O_RDONLY)) != -1) {
+#else
+	char schick_dat_buf[512];
+	const char *schick_dat_path = (access(g_fname_schick_dat, 0) == 0)
+		? g_fname_schick_dat
+		: dsa_platform_resolve_path(g_fname_schick_dat, schick_dat_buf, sizeof(schick_dat_buf));
+	if ( (handle = open(schick_dat_path, O_BINARY | O_RDONLY)) != -1) {
+#endif""",
+        "seg002.c:open_and_seek_dat_resolve",
+    )
+
+    s2_txt = replace_once(
+        s2_txt,
+        """#if defined(__BORLANDC__) || defined(_WIN32)
+	if ( (handle = open(g_fnames_v302de[index], O_BINARY | O_RDWR)) == -1) {
+#else
+	if ( (handle = open(g_fnames_v302de[index], O_RDWR)) == -1) {
+#endif""",
+        """#if defined(__BORLANDC__)
+	if ( (handle = open(g_fnames_v302de[index], O_BINARY | O_RDWR)) == -1) {
+#else
+	handle = open(g_fnames_v302de[index], O_BINARY | O_RDWR);
+	if (handle == -1) {
+		handle = open(g_fnames_v302de[index], O_BINARY | O_RDONLY);
+	}
+	if (handle == -1) {
+		char reg_buf[512];
+		const char *reg_path = dsa_platform_resolve_path(g_fnames_v302de[index], reg_buf, sizeof(reg_buf));
+		handle = open(reg_path, O_BINARY | O_RDONLY);
+	}
+	if (handle == -1) {
+#endif""",
+        "seg002.c:load_regular_file_resolve",
+    )
+
+    s2_txt = replace_once(
+        s2_txt,
+        """#if defined(__BORLANDC__) || defined(_WIN32)
+	if ( (handle1 = open(src_file, O_BINARY | O_RDONLY)) != -1) {
+#else
+	if ( (handle1 = open(src_file, O_RDONLY)) != -1) {
+#endif""",
+        """#if defined(__BORLANDC__)
+	if ( (handle1 = open(src_file, O_BINARY | O_RDONLY)) != -1) {
+#else
+	char src_buf[512];
+	const char *src_path = (access(src_file, 0) == 0)
+		? src_file
+		: dsa_platform_resolve_path(src_file, src_buf, sizeof(src_buf));
+	if ( (handle1 = open(src_path, O_BINARY | O_RDONLY)) != -1) {
+#endif""",
+        "seg002.c:copy_file_to_temp_resolve",
     )
 
     s2_txt = replace_once(
@@ -1581,6 +1652,19 @@ int main(int argc, char** argv)
 			dsa_platform_set_mouse_range_y(0, 199);
 			call_mouse();
 			flush_keyboard_queue();
+		}
+		if (dsa_platform_is_save_dir_redirected()) {
+			const char *show_gui = getenv("DSA_SHOW_REDIRECT_GUI");
+			if (!dsa_platform_is_replay_active() || (show_gui && show_gui[0] == '1')) {
+				uint8_t pal_white_r[3] = { 0x3f, 0x3f, 0x3f };
+				signed int tw_bak_redir = g_textbox_width;
+				set_color(pal_white_r, 0xff);
+				refresh_colors();
+				g_textbox_width = 5;
+				strcpy((char*)g_dtp2, "DER SPIELORDNER IST SCHREIBGESCH\x9aTZT.@SPIELST\x8eNDE UND PROBEN.CSV WERDEN IM ORDNER <SPIELSTAENDE> NEBEN DER EXE GESPEICHERT.");
+				GUI_output(g_dtp2);
+				g_textbox_width = tw_bak_redir;
+			}
 		}
 #endif
 		/* select game mode */
@@ -2207,6 +2291,23 @@ static signed int open_file_ci(const char *fname, int flags)
 #endif
 	char name[20];""",
         "seg026.c:load_ffblk",
+    )
+    s26_txt = replace_once(
+        s26_txt,
+        """		/* open the game state file */
+		if ((handle_sg = open(g_text_output_buf, O_BINARY | O_RDONLY)) == -1)""",
+        """		/* open the game state file */
+#if defined(__BORLANDC__)
+		if ((handle_sg = open(g_text_output_buf, O_BINARY | O_RDONLY)) == -1)
+#else
+		handle_sg = open_file_ci(g_text_output_buf, O_BINARY | O_RDONLY);
+		if (handle_sg == -1) {
+			char gam_resolved[512];
+			handle_sg = _open(dsa_platform_resolve_path(g_text_output_buf, gam_resolved, sizeof(gam_resolved)), O_BINARY | O_RDONLY);
+		}
+		if (handle_sg == -1)
+#endif""",
+        "seg026.c:load_gam_resolve",
     )
     s26_txt = replace_once(
         s26_txt,
@@ -3149,12 +3250,15 @@ const uint8_t g_palette_fight2[32][3] = {
 #else
 	{
 		const char *game_dir = dsa_platform_get_game_dir();
+		const char *save_dir = dsa_platform_get_save_dir();
 		DIR *dir;
 		struct dirent *ent;
 		char path[260];
 
-		/* Falls SCHICK.DAT nicht im aktuellen Arbeitsverzeichnis liegt, in den Spielordner wechseln */
-		if (access("SCHICK.DAT", 0) != 0 && game_dir && game_dir[0]) {
+		/* In den Spielstand-/Arbeitsordner wechseln (Spielordner oder Spielstaende\\ neben der EXE) */
+		if (save_dir && save_dir[0]) {
+			chdir(save_dir);
+		} else if (access("SCHICK.DAT", 0) != 0 && game_dir && game_dir[0]) {
 			chdir(game_dir);
 		}
 
@@ -3988,6 +4092,15 @@ static void start_music_orig(const signed short track)
         """			snprintf(path, sizeof(path), "TEMP/%s", filename);
 			handle = open(path, O_BINARY | O_TRUNC | O_CREAT | O_WRONLY, 0666);""",
         "ngen:save_chr_temp_path",
+    )
+
+    txt = txt.replace(
+        "handle = open(g_str_dsagen_dat, O_BINARY | O_RDONLY);",
+        "{ char dsagen_buf[512]; const char *dsagen_p = (access(g_str_dsagen_dat, 0) == 0) ? g_str_dsagen_dat : dsa_platform_resolve_path(g_str_dsagen_dat, dsagen_buf, sizeof(dsagen_buf)); handle = open(dsagen_p, O_BINARY | O_RDONLY); }",
+    )
+    txt = txt.replace(
+        "handle = open(g_str_dsagen_dat, O_RDONLY);",
+        "{ char dsagen_buf[512]; const char *dsagen_p = (access(g_str_dsagen_dat, 0) == 0) ? g_str_dsagen_dat : dsa_platform_resolve_path(g_str_dsagen_dat, dsagen_buf, sizeof(dsagen_buf)); handle = open(dsagen_p, O_RDONLY); }",
     )
 
     txt = replace_once(

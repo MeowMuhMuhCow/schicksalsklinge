@@ -65,6 +65,10 @@ void     dsa_platform_delay_ms(uint32_t ms);
 /* Dateipfad-Aufloesung relativ zum konfigurierbaren Spielordner */
 void        dsa_platform_set_game_dir(const char *path);
 const char *dsa_platform_get_game_dir(void);
+void        dsa_platform_set_save_dir(const char *path);
+const char *dsa_platform_get_save_dir(void);
+int         dsa_platform_is_save_dir_redirected(void);
+int         dsa_platform_is_replay_active(void);
 const char *dsa_platform_resolve_path(const char *dos_path, char *out_buf, size_t out_size);
 
 /* Audio: CD-Audio (MUSIC/Track02..15.OGG wie MobileEyes/GOG) + General MIDI + DOSBox OPL2 & VOC-Effekte */
