@@ -1,0 +1,2378 @@
+/*
+ * dsa_platform_sdl2.cpp - SDL2-Plattformschicht fuer die Nordlandtrilogie
+ *   (DSA 1 Schicksalsklinge, DSA 2 Sternenschweif, DSA 3 Schatten ueber Riva)
+ */
+
+#include "dsa_platform.h"
+#include <SDL2/SDL.h>
+#include <ctype.h>
+#include <math.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
+#ifdef _WIN32
+#include <windows.h>
+#include <mmsystem.h>
+#include <direct.h>
+#include <io.h>
+#define MKDIR(p) _mkdir(p)
+#define ACCESS(p, m) _access(p, m)
+#define STRNICMP _strnicmp
+#else
+#include <strings.h>
+#include <sys/stat.h>
+#include <unistd.h>
+#define MKDIR(p) mkdir(p, 0755)
+#define ACCESS(p, m) access(p, m)
+#define STRNICMP strncasecmp
+#endif
+
+#include "dbopl.h"
+
+static void dsa_save_bmp(const char *path);
+static void keyq_push(unsigned short bios_key);
+
+/* =========================================================================
+ * 0. Werkzeuge W1 (Absturz-Logger), W2 (Stub-Waechter), W3 (Abdeckung), W4 (Record/Replay)
+ * ========================================================================= */
+
+const char *g_dsa_last_func = "start";
+int         g_dsa_coverage_enabled = 0;
+
+static char g_exe_dir[512] = "";
+static void (*g_crash_state_cb)(char *buf, int buf_size) = NULL;
+
+#define MAX_STUB_NAMES 256
+static const char *g_logged_stubs[MAX_STUB_NAMES];
+static int         g_logged_stubs_count = 0;
+
+#define MAX_TRACE_FUNCS 2048
+static unsigned char g_func_hit_table[MAX_TRACE_FUNCS];
+static FILE         *g_coverage_fp = NULL;
+
+struct ReplayEvent {
+    char     type; /* 'M'=Mouse, 'K'=Key, 'S'=Screenshot, 'Q'=Quit */
+    uint32_t step;
+    int      x, y, moved, left_ev, right_ev;
+    uint16_t key;
+    char     arg[260];
+};
+
+#define MAX_REPLAY_EVENTS 8192
+static ReplayEvent g_replay_events[MAX_REPLAY_EVENTS];
+static int         g_replay_count  = 0;
+static int         g_replay_idx    = 0;
+static int         g_replay_active = 0;
+static int         g_fast_replay   = 0;
+static uint32_t    g_poll_step     = 0;
+static FILE       *g_record_fp     = NULL;
+
+static void init_exe_dir_once(void) {
+    if (g_exe_dir[0]) return;
+#ifdef _WIN32
+    char mod_path[512] = "";
+    DWORD len = GetModuleFileNameA(NULL, mod_path, sizeof(mod_path) - 1);
+    if (len > 0) {
+        mod_path[len] = '\0';
+        char *last_sep = strrchr(mod_path, '\\');
+        if (!last_sep) last_sep = strrchr(mod_path, '/');
+        if (last_sep) {
+            *last_sep = '\0';
+            strncpy(g_exe_dir, mod_path, sizeof(g_exe_dir) - 1);
+            return;
+        }
+    }
+#endif
+    strcpy(g_exe_dir, ".");
+}
+
+static void build_tool_log_path(const char *filename, char *out_buf, size_t out_size) {
+    init_exe_dir_once();
+#ifdef _WIN32
+    snprintf(out_buf, out_size, "%s\\%s", g_exe_dir, filename);
+#else
+    snprintf(out_buf, out_size, "%s/%s", g_exe_dir, filename);
+#endif
+}
+
+#ifdef _WIN32
+static LONG WINAPI dsa_crash_vectored_handler(EXCEPTION_POINTERS *ep) {
+    static int in_crash = 0;
+    if (!ep || !ep->ExceptionRecord || (ep->ExceptionRecord->ExceptionCode < 0xC0000000UL)) {
+        return EXCEPTION_CONTINUE_SEARCH;
+    }
+    if (in_crash) {
+        ExitProcess(98);
+    }
+    in_crash = 1;
+
+    char log_path[512];
+    build_tool_log_path("absturz.log", log_path, sizeof(log_path));
+    HANDLE h = CreateFileA(log_path, GENERIC_WRITE, FILE_SHARE_READ, NULL,
+                           CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
+    if (h != INVALID_HANDLE_VALUE) {
+        char msg[2048];
+        int n = snprintf(msg, sizeof(msg),
+            "=== ABSTURZ-BERICHT (W1) ===\n"
+            "Ausnahme:        0x%08lX\n"
+            "Adresse:         0x%p\n"
+            "Letzte_Funktion: %s\n"
+            "Poll_Schritt:    %u\n",
+            (unsigned long)ep->ExceptionRecord->ExceptionCode,
+            ep->ExceptionRecord->ExceptionAddress,
+            g_dsa_last_func ? g_dsa_last_func : "unbekannt",
+            (unsigned int)g_poll_step
+        );
+        if (n > 0) {
+            DWORD written = 0;
+            WriteFile(h, msg, (DWORD)n, &written, NULL);
+        }
+        if (g_crash_state_cb) {
+            char state_buf[2048] = "";
+            g_crash_state_cb(state_buf, sizeof(state_buf));
+            if (state_buf[0]) {
+                DWORD written = 0;
+                WriteFile(h, state_buf, (DWORD)strlen(state_buf), &written, NULL);
+            }
+        }
+        CloseHandle(h);
+    }
+    ExitProcess(99);
+    return EXCEPTION_EXECUTE_HANDLER;
+}
+#endif
+
+void dsa_platform_register_crash_state_cb(void (*cb)(char *buf, int buf_size)) {
+    g_crash_state_cb = cb;
+}
+
+void dsa_platform_log_stub(const char *func_name) {
+    if (!func_name) return;
+    for (int i = 0; i < g_logged_stubs_count; ++i) {
+        if (strcmp(g_logged_stubs[i], func_name) == 0) return;
+    }
+    if (g_logged_stubs_count < MAX_STUB_NAMES) {
+        g_logged_stubs[g_logged_stubs_count++] = func_name;
+    }
+    char path[512];
+    build_tool_log_path("stubs.log", path, sizeof(path));
+    FILE *fp = fopen(path, "a");
+    if (fp) {
+        fprintf(fp, "STUB %s\n", func_name);
+        fclose(fp);
+    }
+}
+
+void dsa_platform_trace_func_hit(int func_id, const char *seg_and_func) {
+    if (func_id < 0 || func_id >= MAX_TRACE_FUNCS) return;
+    if (g_func_hit_table[func_id]) return;
+    g_func_hit_table[func_id] = 1;
+    if (!g_coverage_fp) {
+        char path[512];
+        build_tool_log_path("abdeckung.tsv", path, sizeof(path));
+        g_coverage_fp = fopen(path, "a");
+    }
+    if (g_coverage_fp && seg_and_func) {
+        const char *colon = strchr(seg_and_func, ':');
+        if (colon) {
+            fprintf(g_coverage_fp, "%.*s\t%s\n", (int)(colon - seg_and_func), seg_and_func, colon + 1);
+        } else {
+            fprintf(g_coverage_fp, "misc\t%s\n", seg_and_func);
+        }
+        fflush(g_coverage_fp);
+    }
+}
+
+void dsa_platform_set_record_file(const char *path) {
+    if (g_record_fp) { fclose(g_record_fp); g_record_fp = NULL; }
+    if (path && path[0]) {
+        g_record_fp = fopen(path, "w");
+        if (g_record_fp) {
+            fprintf(g_record_fp, "# DSA Schicksalsklinge Eingabe-Aufzeichnung (W4)\n");
+            fflush(g_record_fp);
+        }
+    }
+}
+
+void dsa_platform_set_replay_file(const char *path) {
+    g_replay_count = 0;
+    g_replay_idx = 0;
+    g_replay_active = 0;
+    if (!path || !path[0]) return;
+    FILE *fp = fopen(path, "r");
+    if (!fp) return;
+    char line[512];
+    uint32_t last_step = 0;
+    while (fgets(line, sizeof(line), fp) && g_replay_count < MAX_REPLAY_EVENTS) {
+        if (line[0] == '#' || line[0] == '\n' || line[0] == '\r' || line[0] == '\0') continue;
+        ReplayEvent &ev = g_replay_events[g_replay_count];
+        memset(&ev, 0, sizeof(ev));
+        char step_tok[32] = "";
+        if (line[0] == 'M') {
+            if (sscanf(line, "M %31s %d %d %d %d %d", step_tok, &ev.x, &ev.y, &ev.moved, &ev.left_ev, &ev.right_ev) == 6) {
+                uint32_t step = (step_tok[0] == '+')
+                    ? (last_step + (uint32_t)strtoul(step_tok + 1, NULL, 10))
+                    : (uint32_t)strtoul(step_tok, NULL, 10);
+                last_step = step;
+                ev.type = 'M';
+                ev.step = step;
+                g_replay_count++;
+            }
+        } else if (line[0] == 'K') {
+            unsigned int khex = 0;
+            if (sscanf(line, "K %31s %x", step_tok, &khex) == 2) {
+                uint32_t step = (step_tok[0] == '+')
+                    ? (last_step + (uint32_t)strtoul(step_tok + 1, NULL, 10))
+                    : (uint32_t)strtoul(step_tok, NULL, 10);
+                last_step = step;
+                ev.type = 'K';
+                ev.step = step;
+                ev.key  = (uint16_t)khex;
+                g_replay_count++;
+            }
+        } else if (line[0] == 'S') {
+            if (sscanf(line, "S %31s %259s", step_tok, ev.arg) == 2) {
+                uint32_t step = (step_tok[0] == '+')
+                    ? (last_step + (uint32_t)strtoul(step_tok + 1, NULL, 10))
+                    : (uint32_t)strtoul(step_tok, NULL, 10);
+                last_step = step;
+                ev.type = 'S';
+                ev.step = step;
+                g_replay_count++;
+            }
+        } else if (line[0] == 'Q') {
+            if (sscanf(line, "Q %31s", step_tok) == 1) {
+                uint32_t step = (step_tok[0] == '+')
+                    ? (last_step + (uint32_t)strtoul(step_tok + 1, NULL, 10))
+                    : (uint32_t)strtoul(step_tok, NULL, 10);
+                last_step = step;
+                ev.type = 'Q';
+                ev.step = step;
+                g_replay_count++;
+            }
+        }
+    }
+    fclose(fp);
+    if (g_replay_count > 0) {
+        g_replay_active = 1;
+    }
+}
+
+void dsa_platform_set_fast_replay(int enabled) {
+    g_fast_replay = enabled ? 1 : 0;
+}
+
+int dsa_platform_is_fast_replay(void) {
+    return g_fast_replay;
+}
+
+void dsa_platform_save_screenshot_bmp(const char *path) {
+    dsa_save_bmp(path);
+}
+
+/* =========================================================================
+ * 1. 8-Bit-Framebuffer & 256-Farben-VGA-Palette
+ * ========================================================================= */
+
+/* 64 KB Sicherheits-Padding vor und nach dem 640x480-VRAM-Puffer */
+static unsigned char g_vram_padded_storage[65536 + DSA_VRAM_SIZE + 65536];
+#define g_vram (&g_vram_padded_storage[65536])
+
+static uint32_t      g_argb_buffer[DSA_VRAM_SIZE];
+static unsigned char g_pal_rgb6[256][3];
+static uint32_t      g_pal_argb32[256];
+
+static SDL_Window   *g_window   = NULL;
+static SDL_Renderer *g_renderer = NULL;
+static SDL_Texture  *g_texture  = NULL;
+static SDL_AudioDeviceID g_audio_dev = 0;
+
+static void dsa_audio_init(void);
+static void dsa_audio_shutdown(void);
+
+static int      g_initialized     = 0;
+static int      g_dos_mode        = 0x13;
+static int      g_width           = 320;
+static int      g_height          = 200;
+static int      g_scale           = 3;
+static uint32_t g_last_present_ms = 0;
+static uint32_t g_virtual_ticks_ms = 100;
+
+/* =========================================================================
+ * 2. Maus- und Tastaturzustand
+ * ========================================================================= */
+
+static int           g_mouse_x            = 160;
+static int           g_mouse_y            = 100;
+static int           g_mouse_min_x        = 0;
+static int           g_mouse_max_x        = 319;
+static int           g_mouse_min_y        = 0;
+static int           g_mouse_max_y        = 199;
+static int           g_mouse_buttons      = 0;
+static int           g_mouse_latched_down = 0;
+static int           g_mouse_pending_up   = 0;
+static int           g_mouse_moved_ev     = 0;
+static int           g_mouse_left_ev      = 0;
+static int           g_mouse_right_ev     = 0;
+
+#define KEY_QUEUE_CAP 128
+static unsigned short g_key_queue[KEY_QUEUE_CAP];
+static int            g_key_head = 0;
+static int            g_key_tail = 0;
+static unsigned short g_shift_status = 0;
+static unsigned char  g_scancode_down[128];
+
+/* Konvertiert Windows-1252 / ISO-8859-1 Umlaute nach CP437 */
+static unsigned char win1252_to_cp437(unsigned char c) {
+    switch (c) {
+    case 0xE4: case 0xC4: return 0x84; /* ä / Ä -> 0x84 (wird in GUI_enter_string zu 0x8E) */
+    case 0xF6: case 0xD6: return 0x94; /* ö / Ö -> 0x94 (wird in GUI_enter_string zu 0x99) */
+    case 0xFC: case 0xDC: return 0x81; /* ü / Ü -> 0x81 (wird in GUI_enter_string zu 0x9A) */
+    case 0xDF:            return 0xE1; /* ß */
+    default:              return c;
+    }
+}
+
+/* USB-HID SDL_Scancode -> IBM PC XT/AT Set-1 Scancode (fuer externe SDL2.dll) */
+static unsigned char sdl_scancode_to_dos(int sdl_sc, int sym, int mod, unsigned char *out_ascii) {
+    static const unsigned char hid_to_xt[128] = {
+        0x00, 0x00, 0x00, 0x00, 0x1E, 0x30, 0x2E, 0x20, /* 0..7: A, B, C, D */
+        0x12, 0x21, 0x22, 0x23, 0x17, 0x24, 0x25, 0x26, /* 8..15: E..L */
+        0x32, 0x31, 0x18, 0x19, 0x10, 0x13, 0x1F, 0x14, /* 16..23: M..T */
+        0x16, 0x2F, 0x11, 0x2D, 0x15, 0x2C, 0x02, 0x03, /* 24..31: U..Z, 1, 2 */
+        0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x0A, 0x0B, /* 32..39: 3..9, 0 */
+        0x1C, 0x01, 0x0E, 0x0F, 0x39, 0x0C, 0x0D, 0x1A, /* 40..47: Enter, Esc, BS, Tab, Space, -, =, [ */
+        0x1B, 0x2B, 0x2B, 0x27, 0x28, 0x29, 0x33, 0x34, /* 48..55: ], \, #, ;, ', `, ,, . */
+        0x35, 0x3A, 0x3B, 0x3C, 0x3D, 0x3E, 0x3F, 0x40, /* 56..63: /, Caps, F1..F6 */
+        0x41, 0x42, 0x43, 0x44, 0x57, 0x58, 0x37, 0x46, /* 64..71: F7..F12, PrtSc, ScrLk */
+        0x00, 0x52, 0x47, 0x49, 0x53, 0x4F, 0x51, 0x4D, /* 72..79: Pause, Ins, Home, PgUp, Del, End, PgDn, Right */
+        0x4B, 0x50, 0x48, 0x45, 0x35, 0x37, 0x4A, 0x4E, /* 80..87: Left, Down, Up, NumLk, KP/, KP*, KP-, KP+ */
+        0x1C, 0x4F, 0x50, 0x51, 0x4B, 0x4C, 0x4D, 0x47, /* 88..95: KPEnter, KP1..KP7 */
+        0x48, 0x49, 0x52, 0x53                          /* 96..99: KP8, KP9, KP0, KP. */
+    };
+    unsigned char xt = 0;
+    unsigned char asc = 0;
+    if (sdl_sc >= 0 && sdl_sc < 100) {
+        xt = hid_to_xt[sdl_sc];
+    }
+    if ((mod & KMOD_CTRL) && xt >= 0x3B && xt <= 0x44) {
+        xt = (unsigned char)(xt + 0x23); /* Ctrl+F1..F10 -> 0x5E..0x67 */
+    }
+    if ((mod & KMOD_CTRL) && sym >= 'a' && sym <= 'z') {
+        asc = (unsigned char)(sym - 'a' + 1);
+    } else if ((mod & KMOD_CTRL) && sym >= 'A' && sym <= 'Z') {
+        asc = (unsigned char)(sym - 'A' + 1);
+    } else if (sym >= 32 && sym <= 126) {
+        asc = (unsigned char)sym;
+        if ((mod & KMOD_SHIFT) && asc >= 'a' && asc <= 'z') {
+            asc = (unsigned char)(asc - 'a' + 'A');
+        }
+    } else if (sym == 13 || sym == 27 || sym == 8 || sym == 9) {
+        asc = (unsigned char)sym;
+    } else if (sym >= 0xC0 && sym <= 0xFF) {
+        asc = win1252_to_cp437((unsigned char)sym);
+    }
+    if (out_ascii) *out_ascii = asc;
+    return xt;
+}
+
+static void keyq_push(unsigned short bios_key) {
+    int next = (g_key_tail + 1) % KEY_QUEUE_CAP;
+    if (next != g_key_head) {
+        g_key_queue[g_key_tail] = bios_key;
+        g_key_tail = next;
+    }
+}
+
+/* =========================================================================
+ * 3. Spielverzeichnis & Dateipfad-Aufloesung
+ * ========================================================================= */
+
+static char g_game_dir[512] = "";
+
+static void trim_crlf(char *s) {
+    size_t n = strlen(s);
+    while (n > 0 && (s[n - 1] == '\r' || s[n - 1] == '\n' || s[n - 1] == ' ' || s[n - 1] == '\t')) {
+        s[--n] = '\0';
+    }
+}
+
+static void discover_game_dir(const char *explicit_dir) {
+    const char *env_dir;
+    FILE *fp;
+    char line[512];
+    const char *candidates[] = {
+        "schick_port.ini",
+        "SPIELPFAD.txt",
+        "..\\SPIELPFAD.txt",
+        "../SPIELPFAD.txt",
+        "..\\..\\SPIELPFAD.txt",
+        "../../SPIELPFAD.txt",
+        NULL
+    };
+    const char *gog_defaults[] = {
+        "C:\\Program Files (x86)\\GOG Galaxy\\Games\\Realms of Arkania",
+        "C:\\Program Files\\GOG Galaxy\\Games\\Realms of Arkania",
+        "C:\\GOG Games\\Realms of Arkania",
+        "D:\\GOG Games\\Realms of Arkania",
+        NULL
+    };
+    int i;
+
+    if (explicit_dir && explicit_dir[0]) {
+        strncpy(g_game_dir, explicit_dir, sizeof(g_game_dir) - 1);
+        g_game_dir[sizeof(g_game_dir) - 1] = '\0';
+        return;
+    }
+
+    env_dir = getenv("DSA_GAME_DIR");
+    if (!env_dir || !env_dir[0]) env_dir = getenv("DSA_GAMEDIR");
+    if (env_dir && env_dir[0]) {
+        strncpy(g_game_dir, env_dir, sizeof(g_game_dir) - 1);
+        g_game_dir[sizeof(g_game_dir) - 1] = '\0';
+        return;
+    }
+
+    if (ACCESS("SCHICK.DAT", 0) == 0) {
+        strcpy(g_game_dir, ".");
+        return;
+    }
+
+    for (i = 0; candidates[i]; ++i) {
+        fp = fopen(candidates[i], "r");
+        if (fp) {
+            while (fgets(line, sizeof(line), fp)) {
+                trim_crlf(line);
+                if (line[0] == '\0' || line[0] == '#' || line[0] == ';') continue;
+                if (strncmp(line, "gamedir=", 8) == 0) {
+                    strncpy(g_game_dir, line + 8, sizeof(g_game_dir) - 1);
+                    fclose(fp);
+                    return;
+                }
+                strncpy(g_game_dir, line, sizeof(g_game_dir) - 1);
+                fclose(fp);
+                return;
+            }
+            fclose(fp);
+        }
+    }
+
+    for (i = 0; gog_defaults[i]; ++i) {
+        char test_dat[600];
+        snprintf(test_dat, sizeof(test_dat), "%s\\SCHICK.DAT", gog_defaults[i]);
+        if (ACCESS(test_dat, 0) == 0) {
+            strcpy(g_game_dir, gog_defaults[i]);
+            return;
+        }
+    }
+
+    strcpy(g_game_dir, ".");
+}
+
+void dsa_platform_set_game_dir(const char *path) {
+    discover_game_dir(path);
+    if (g_game_dir[0]) {
+        char sub[600];
+#ifdef _WIN32
+        snprintf(sub, sizeof(sub), "%s\\TEMP", g_game_dir);
+#else
+        snprintf(sub, sizeof(sub), "%s/TEMP", g_game_dir);
+#endif
+        MKDIR(sub);
+    }
+}
+
+const char *dsa_platform_get_game_dir(void) {
+    if (!g_game_dir[0]) dsa_platform_set_game_dir(NULL);
+    return g_game_dir;
+}
+
+const char *dsa_platform_resolve_path(const char *dos_path, char *out_buf, size_t out_size) {
+    const char *p = dos_path;
+    char rel[512];
+    size_t i = 0;
+
+    if (!dos_path || !out_buf || out_size == 0) return dos_path;
+    if (!g_game_dir[0]) dsa_platform_set_game_dir(NULL);
+
+    if (isalpha((unsigned char)p[0]) && p[1] == ':') {
+        size_t gd_len = strlen(g_game_dir);
+        if (gd_len > 0 && STRNICMP(p, g_game_dir, gd_len) == 0) {
+            p += gd_len;
+        } else {
+            p += 2;
+        }
+        while (*p == '\\' || *p == '/') ++p;
+    }
+
+    while (1) {
+        if (p[0] == '.' && (p[1] == '\\' || p[1] == '/')) {
+            p += 2;
+        } else if (*p == '\\' || *p == '/') {
+            ++p;
+        } else {
+            break;
+        }
+    }
+
+    for (i = 0; p[i] && i < sizeof(rel) - 1; ++i) {
+#ifdef _WIN32
+        rel[i] = (p[i] == '/') ? '\\' : p[i];
+#else
+        rel[i] = (p[i] == '\\') ? '/' : p[i];
+#endif
+    }
+    rel[i] = '\0';
+
+    if (rel[0] == '\0') {
+        strncpy(out_buf, g_game_dir, out_size - 1);
+        out_buf[out_size - 1] = '\0';
+        return out_buf;
+    }
+
+#ifdef _WIN32
+    snprintf(out_buf, out_size, "%s\\%s", g_game_dir, rel);
+#else
+    snprintf(out_buf, out_size, "%s/%s", g_game_dir, rel);
+#endif
+    return out_buf;
+}
+
+/* =========================================================================
+ * 4. Initialisierung, Moduswechsel, Palette und Frame-Praesentation
+ * ========================================================================= */
+
+static void rebuild_palette_argb(int idx) {
+    unsigned int r6 = g_pal_rgb6[idx][0] & 0x3F;
+    unsigned int g6 = g_pal_rgb6[idx][1] & 0x3F;
+    unsigned int b6 = g_pal_rgb6[idx][2] & 0x3F;
+    unsigned int r8 = (r6 << 2) | (r6 >> 4);
+    unsigned int g8 = (g6 << 2) | (g6 >> 4);
+    unsigned int b8 = (b6 << 2) | (b6 >> 4);
+    g_pal_argb32[idx] = 0xFF000000u | (r8 << 16) | (g8 << 8) | b8;
+}
+
+#ifdef _WIN32
+static DWORD WINAPI dsa_watchdog_thread_proc(LPVOID param) {
+    DWORD timeout_ms = (DWORD)(uintptr_t)param;
+    Sleep(timeout_ms);
+    if (g_coverage_fp) { fflush(g_coverage_fp); }
+    if (g_record_fp)   { fflush(g_record_fp); }
+    TerminateProcess(GetCurrentProcess(), 124);
+    return 0;
+}
+#endif
+
+int dsa_platform_init(const char *window_title, int width, int height, const char *game_dir) {
+    int i;
+    init_exe_dir_once();
+#ifdef _WIN32
+    static int crash_handler_installed = 0;
+    if (!crash_handler_installed) {
+        FreeConsole();
+        AddVectoredExceptionHandler(1, dsa_crash_vectored_handler);
+        const char *wd_env = getenv("DSA_WATCHDOG_MS");
+        DWORD wd_ms = (wd_env && wd_env[0]) ? (DWORD)atoi(wd_env) : (g_replay_active ? 25000u : 0u);
+        if (wd_ms > 0) {
+            HANDLE hThread = CreateThread(NULL, 0, dsa_watchdog_thread_proc, (LPVOID)(uintptr_t)wd_ms, 0, NULL);
+            if (hThread) CloseHandle(hThread);
+        }
+        crash_handler_installed = 1;
+    }
+#endif
+    {
+        const char *cov = getenv("DSA_ABDECKUNG");
+        if (cov && cov[0] == '1') {
+            g_dsa_coverage_enabled = 1;
+        }
+    }
+    if (game_dir && game_dir[0]) {
+        dsa_platform_set_game_dir(game_dir);
+    } else if (!g_game_dir[0]) {
+        dsa_platform_set_game_dir(NULL);
+    }
+
+    if (g_initialized) return 0;
+
+    if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO | SDL_INIT_TIMER | SDL_INIT_EVENTS) != 0) {
+        return -1;
+    }
+
+    if (width <= 0)  width  = 320;
+    if (height <= 0) height = 200;
+    g_width  = width;
+    g_height = height;
+
+    /* Fenster in 960x600 (3x fuer 320x200) anlegen, frei skalierbar */
+    g_window = SDL_CreateWindow(
+        window_title ? window_title : "DSA 1: Die Schicksalsklinge (Windows Port - MooMoo)",
+        SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED,
+        g_width * g_scale, g_height * g_scale,
+        SDL_WINDOW_SHOWN | SDL_WINDOW_RESIZABLE
+    );
+    g_renderer = SDL_CreateRenderer(g_window, -1, SDL_RENDERER_ACCELERATED);
+    SDL_RenderSetLogicalSize(g_renderer, g_width, g_height);
+    g_texture = SDL_CreateTexture(
+        g_renderer, SDL_PIXELFORMAT_ARGB8888, SDL_TEXTUREACCESS_STREAMING, g_width, g_height
+    );
+
+    /* System-Mauszeiger im Spielfenster ausblenden, da Schicksalsklinge seinen eigenen Software-Cursor zeichnet */
+    SDL_ShowCursor(0);
+
+    for (i = 0; i < 256; ++i) {
+        g_pal_rgb6[i][0] = 0;
+        g_pal_rgb6[i][1] = 0;
+        g_pal_rgb6[i][2] = 0;
+        rebuild_palette_argb(i);
+    }
+
+    dsa_audio_init();
+
+    g_initialized = 1;
+    return 0;
+}
+
+void dsa_platform_shutdown(void) {
+    if (g_record_fp)   { fclose(g_record_fp);   g_record_fp   = NULL; }
+    if (g_coverage_fp) { fclose(g_coverage_fp); g_coverage_fp = NULL; }
+    if (!g_initialized) return;
+    dsa_audio_shutdown();
+    if (g_texture)  { SDL_DestroyTexture(g_texture);   g_texture  = NULL; }
+    if (g_renderer) { SDL_DestroyRenderer(g_renderer); g_renderer = NULL; }
+    if (g_window)   { SDL_DestroyWindow(g_window);     g_window   = NULL; }
+    SDL_Quit();
+    g_initialized = 0;
+}
+
+int dsa_platform_get_scale(void) {
+    return g_scale;
+}
+
+void dsa_platform_cycle_scale(void) {
+    g_scale = (g_scale < 6) ? (g_scale + 1) : 1;
+    if (g_window) {
+        SDL_SetWindowSize(g_window, g_width * g_scale, g_height * g_scale);
+    }
+}
+
+void dsa_platform_set_mode(int dos_mode, int width, int height) {
+    if (!g_initialized) {
+        dsa_platform_init(NULL, width > 0 ? width : 320, height > 0 ? height : 200, NULL);
+    }
+    g_dos_mode = dos_mode;
+    if (width <= 0 || height <= 0) {
+        if (dos_mode == 0x100)      { width = 640; height = 400; }
+        else if (dos_mode == 0x101) { width = 640; height = 480; }
+        else                        { width = 320; height = 200; }
+    }
+    if (width > DSA_MAX_VRAM_WIDTH)   width  = DSA_MAX_VRAM_WIDTH;
+    if (height > DSA_MAX_VRAM_HEIGHT) height = DSA_MAX_VRAM_HEIGHT;
+
+    if (width != g_width || height != g_height || !g_texture) {
+        g_width  = width;
+        g_height = height;
+        if (g_texture) SDL_DestroyTexture(g_texture);
+        SDL_RenderSetLogicalSize(g_renderer, g_width, g_height);
+        g_texture = SDL_CreateTexture(
+            g_renderer, SDL_PIXELFORMAT_ARGB8888, SDL_TEXTUREACCESS_STREAMING, g_width, g_height
+        );
+    }
+    g_mouse_max_x = g_width - 1;
+    g_mouse_max_y = g_height - 1;
+    dsa_platform_present();
+}
+
+int dsa_platform_get_width(void)  { return g_width; }
+int dsa_platform_get_height(void) { return g_height; }
+
+unsigned char *dsa_platform_get_vram(void) {
+    return g_vram;
+}
+
+static void poll_sdl_events_internal(void) {
+    SDL_Event ev;
+    if (!g_initialized) return;
+
+    while (SDL_PollEvent(&ev)) {
+        switch (ev.type) {
+        case SDL_QUIT:
+            dsa_platform_shutdown();
+            exit(0);
+            break;
+
+        case SDL_MOUSEMOTION:
+            g_mouse_x = ev.motion.x;
+            g_mouse_y = ev.motion.y;
+            if (g_mouse_x < g_mouse_min_x) g_mouse_x = g_mouse_min_x;
+            if (g_mouse_x > g_mouse_max_x) g_mouse_x = g_mouse_max_x;
+            if (g_mouse_y < g_mouse_min_y) g_mouse_y = g_mouse_min_y;
+            if (g_mouse_y > g_mouse_max_y) g_mouse_y = g_mouse_max_y;
+            g_mouse_moved_ev = 1;
+            break;
+
+        case SDL_MOUSEBUTTONDOWN:
+        case SDL_MOUSEBUTTONUP: {
+            int bit = 0;
+            if (ev.button.button == SDL_BUTTON_LEFT)        bit = 1;
+            else if (ev.button.button == SDL_BUTTON_RIGHT)  bit = 2;
+            else if (ev.button.button == SDL_BUTTON_MIDDLE) bit = 4;
+
+            g_mouse_x = ev.button.x;
+            g_mouse_y = ev.button.y;
+            if (g_mouse_x < g_mouse_min_x) g_mouse_x = g_mouse_min_x;
+            if (g_mouse_x > g_mouse_max_x) g_mouse_x = g_mouse_max_x;
+            if (g_mouse_y < g_mouse_min_y) g_mouse_y = g_mouse_min_y;
+            if (g_mouse_y > g_mouse_max_y) g_mouse_y = g_mouse_max_y;
+
+            if (ev.type == SDL_MOUSEBUTTONDOWN) {
+                g_mouse_buttons |= bit;
+                g_mouse_latched_down |= bit;
+                g_mouse_pending_up &= ~bit;
+                if (bit == 1) g_mouse_left_ev = 1;
+                if (bit == 2) g_mouse_right_ev = 1;
+            } else {
+                if (g_mouse_latched_down & bit) {
+                    g_mouse_pending_up |= bit;
+                } else {
+                    g_mouse_buttons &= ~bit;
+                }
+            }
+            break;
+        }
+
+        case SDL_KEYDOWN:
+        case SDL_KEYUP: {
+            int down = (ev.type == SDL_KEYDOWN);
+            unsigned char dos_sc = 0;
+            unsigned char ascii = 0;
+            Uint16 mod = ev.key.keysym.mod;
+
+            g_shift_status = 0;
+            if (mod & KMOD_RSHIFT) g_shift_status |= 0x01;
+            if (mod & KMOD_LSHIFT) g_shift_status |= 0x02;
+            if (mod & KMOD_CTRL)   g_shift_status |= 0x04;
+            if (mod & KMOD_ALT)    g_shift_status |= 0x08;
+
+            if (ev.key.keysym.scancode < 0) {
+                dos_sc = (unsigned char)((-ev.key.keysym.scancode) & 0x7F);
+                ascii  = win1252_to_cp437((unsigned char)(ev.key.keysym.unused & 0xFF));
+            } else {
+                dos_sc = sdl_scancode_to_dos(ev.key.keysym.scancode, ev.key.keysym.sym, mod, &ascii);
+            }
+
+            /* Strg + F3 / F4 -> BIOS-Scancodes 0x60 / 0x61 */
+            if (mod & KMOD_CTRL) {
+                if (dos_sc == 0x3D) { dos_sc = 0x60; ascii = 0; }
+                if (dos_sc == 0x3E) { dos_sc = 0x61; ascii = 0; }
+            }
+
+            if (dos_sc < 128) {
+                g_scancode_down[dos_sc] = down ? 1 : 0;
+            }
+            if (down && dos_sc == 0x0F && !(mod & (KMOD_CTRL | KMOD_ALT))) {
+                /* Tab: Fenstergroesse durchschalten */
+                dsa_platform_cycle_scale();
+                break;
+            }
+            if (down && !(mod & (KMOD_CTRL | KMOD_ALT))) {
+                if (dos_sc == 0x44) { /* F10: Musikquelle umschalten (CD-Audio <-> General MIDI <-> AdLib OPL2) */
+                    int cur_mode = dsa_platform_get_music_mode();
+                    dsa_platform_set_music_mode((cur_mode + 1) % 3);
+                    break;
+                } else if (dos_sc == 0x57) { /* F11: Lautstaerke leiser */
+                    int mv = dsa_platform_get_music_volume() - 12;
+                    int sv = dsa_platform_get_sfx_volume() - 12;
+                    dsa_platform_set_music_volume(mv < 0 ? 0 : mv);
+                    dsa_platform_set_sfx_volume(sv < 0 ? 0 : sv);
+                    break;
+                } else if (dos_sc == 0x58) { /* F12: Lautstaerke lauter */
+                    int mv = dsa_platform_get_music_volume() + 12;
+                    int sv = dsa_platform_get_sfx_volume() + 12;
+                    dsa_platform_set_music_volume(mv > 127 ? 127 : mv);
+                    dsa_platform_set_sfx_volume(sv > 127 ? 127 : sv);
+                    break;
+                }
+            }
+            if (down && dos_sc != 0 && dos_sc != 0x2A && dos_sc != 0x36 && dos_sc != 0x1D && dos_sc != 0x38) {
+                keyq_push(((unsigned short)dos_sc << 8) | (unsigned short)ascii);
+            }
+            break;
+        }
+        }
+    }
+}
+
+void dsa_platform_poll_events_only(void) {
+    poll_sdl_events_internal();
+}
+
+static void dsa_save_bmp(const char *path) {
+    FILE *fp = fopen(path, "wb");
+    if (!fp) return;
+    int w = g_width, h = g_height;
+    uint32_t row_bytes = (uint32_t)(w * 3);
+    uint32_t img_size = row_bytes * (uint32_t)h;
+    uint32_t file_size = 54 + img_size;
+    unsigned char hdr[54];
+    memset(hdr, 0, sizeof(hdr));
+    hdr[0] = 'B'; hdr[1] = 'M';
+    *(uint32_t *)(hdr + 2)  = file_size;
+    *(uint32_t *)(hdr + 10) = 54;
+    *(uint32_t *)(hdr + 14) = 40;
+    *(int32_t  *)(hdr + 18) = w;
+    *(int32_t  *)(hdr + 22) = -h; /* top-down */
+    *(uint16_t *)(hdr + 26) = 1;
+    *(uint16_t *)(hdr + 28) = 24;
+    *(uint32_t *)(hdr + 34) = img_size;
+    fwrite(hdr, 1, 54, fp);
+    for (int y = 0; y < h; ++y) {
+        for (int x = 0; x < w; ++x) {
+            uint32_t c = g_argb_buffer[y * w + x];
+            unsigned char bgr[3] = {
+                (unsigned char)(c & 0xFF),
+                (unsigned char)((c >> 8) & 0xFF),
+                (unsigned char)((c >> 16) & 0xFF)
+            };
+            fwrite(bgr, 1, 3, fp);
+        }
+    }
+    fclose(fp);
+}
+
+void dsa_platform_present(void) {
+    static int autotest_checked = 0;
+    static int autotest_enabled = 0;
+    static int autotest_stage = 0;
+    int total, i;
+    if (!g_initialized) {
+        dsa_platform_init(NULL, g_width, g_height, NULL);
+    }
+    if (!autotest_checked) {
+        const char *at = getenv("SCHICK_PORT_AUTOTEST");
+        autotest_enabled = (at && at[0] == '1') ? 1 : 0;
+        autotest_checked = 1;
+    }
+    poll_sdl_events_internal();
+
+    if (g_fast_replay && !autotest_enabled && (SDL_GetTicks() - g_last_present_ms < 33)) {
+        return;
+    }
+
+    total = g_width * g_height;
+    for (i = 0; i < total; ++i) {
+        g_argb_buffer[i] = g_pal_argb32[g_vram[i]];
+    }
+    SDL_UpdateTexture(g_texture, NULL, g_argb_buffer, g_width * (int)sizeof(uint32_t));
+    SDL_RenderClear(g_renderer);
+    SDL_RenderCopy(g_renderer, g_texture, NULL, NULL);
+    SDL_RenderPresent(g_renderer);
+    g_last_present_ms = SDL_GetTicks();
+
+    if (autotest_enabled) {
+        uint32_t now = g_last_present_ms;
+        if (autotest_stage == 0 && now >= 400) {
+            /* 1. Startmenue ("WAEHLEN SIE DEN SCHWIERIGKEITSGRAD: ANFAENGER / FORTGESCHRITTENE") */
+            dsa_save_bmp("C:\\Windows\\Temp\\schick_port_build\\shot1_menu.bmp");
+            /* Bewege Mauszeiger auf "FORTGESCHRITTENE" (Option 2, y = 114) */
+            g_mouse_x = 175;
+            g_mouse_y = 114;
+            g_mouse_moved_ev = 1;
+            autotest_stage = 1;
+        } else if (autotest_stage == 1 && now >= 900) {
+            /* 2. Mauszeiger und Radio-Button stehen jetzt auf "FORTGESCHRITTENE" */
+            dsa_save_bmp("C:\\Windows\\Temp\\schick_port_build\\shot2_moved.bmp");
+            /* Linksklick auf "FORTGESCHRITTENE" */
+            g_mouse_left_ev = 1;
+            autotest_stage = 2;
+        } else if (autotest_stage == 2 && now >= 1600) {
+            /* 3. Dialog "WAS SOLL GESTARTET WERDEN? HAUPTPROGRAMM / GENERIERUNG" -> Klick auf HAUPTPROGRAMM */
+            dsa_save_bmp("C:\\Windows\\Temp\\schick_port_build\\shot3_clicked.bmp");
+            g_mouse_left_ev = 1;
+            autotest_stage = 3;
+        } else if (autotest_stage == 3 && now >= 2300) {
+            /* 4. Spielstand-Auswahl -> Rechtsklick/ESC, um neues Spiel im Travia-Tempel zu starten */
+            dsa_save_bmp("C:\\Windows\\Temp\\schick_port_build\\shot3b_load.bmp");
+            g_mouse_right_ev = 1;
+            autotest_stage = 4;
+        } else if (autotest_stage == 4 && now >= 3000) {
+            /* 5. Travia-Tempel-Menue ("TRAVIA-TEMPEL IN THORWAL") */
+            dsa_save_bmp("C:\\Windows\\Temp\\schick_port_build\\shot4_temple.bmp");
+            /* Klick auf Icon 4 ("Spiel laden", x=250, y=92) */
+            g_mouse_x = 250;
+            g_mouse_y = 92;
+            g_mouse_moved_ev = 1;
+            g_mouse_left_ev = 1;
+            autotest_stage = 5;
+        } else if (autotest_stage == 5 && now >= 3700) {
+            /* 6. Spielstand "START" (START___.GAM) laden -> Klick auf Option 1 */
+            g_mouse_left_ev = 1;
+            autotest_stage = 6;
+        } else if (autotest_stage == 6 && now >= 4600) {
+            /* 7. Spielstand START___.GAM geladen (6 Helden im Travia-Tempel) -> Klick auf Icon 9 ("Tempel verlassen", x=304, y=120) */
+            dsa_save_bmp("C:\\Windows\\Temp\\schick_port_build\\shot5_party_loaded.bmp");
+            g_mouse_x = 304;
+            g_mouse_y = 120;
+            g_mouse_moved_ev = 1;
+            g_mouse_left_ev = 1;
+            autotest_stage = 7;
+        } else if (autotest_stage == 7 && now >= 6200) {
+            /* 8. 3D-Stadtansicht Thorwal mit 6 Helden und FIX_HIMMEL */
+            dsa_save_bmp("C:\\Windows\\Temp\\schick_port_build\\shot6_thorwal3d.bmp");
+            autotest_stage = 8;
+            dsa_platform_shutdown();
+            exit(0);
+        }
+    }
+}
+
+void dsa_platform_pump_and_present_if_due(void) {
+    uint32_t now;
+    if (!g_initialized) {
+        dsa_platform_init(NULL, g_width, g_height, NULL);
+    }
+    poll_sdl_events_internal();
+    now = SDL_GetTicks();
+    if (now - g_last_present_ms >= 16) {
+        dsa_platform_present();
+    }
+}
+
+void dsa_platform_wait_vsync(void) {
+    dsa_platform_present();
+    SDL_Delay(14);
+}
+
+void dsa_platform_set_palette_entry(int index, unsigned char r6, unsigned char g6, unsigned char b6) {
+    if (index < 0 || index >= 256) return;
+    g_pal_rgb6[index][0] = r6 & 0x3F;
+    g_pal_rgb6[index][1] = g6 & 0x3F;
+    g_pal_rgb6[index][2] = b6 & 0x3F;
+    rebuild_palette_argb(index);
+}
+
+void dsa_platform_set_palette_range(int first, int count, const unsigned char *rgb6_triplets) {
+    int i;
+    if (!rgb6_triplets) return;
+    for (i = 0; i < count; ++i) {
+        int idx = first + i;
+        if (idx >= 0 && idx < 256) {
+            g_pal_rgb6[idx][0] = rgb6_triplets[i * 3 + 0] & 0x3F;
+            g_pal_rgb6[idx][1] = rgb6_triplets[i * 3 + 1] & 0x3F;
+            g_pal_rgb6[idx][2] = rgb6_triplets[i * 3 + 2] & 0x3F;
+            rebuild_palette_argb(idx);
+        }
+    }
+}
+
+void dsa_platform_get_palette_entry(int index, unsigned char *r6, unsigned char *g6, unsigned char *b6) {
+    if (index < 0 || index >= 256) return;
+    if (r6) *r6 = g_pal_rgb6[index][0];
+    if (g6) *g6 = g_pal_rgb6[index][1];
+    if (b6) *b6 = g_pal_rgb6[index][2];
+}
+
+void dsa_platform_get_palette_range(int first, int count, unsigned char *rgb6_triplets) {
+    int i;
+    if (!rgb6_triplets) return;
+    for (i = 0; i < count; ++i) {
+        int idx = first + i;
+        if (idx >= 0 && idx < 256) {
+            rgb6_triplets[i * 3 + 0] = g_pal_rgb6[idx][0];
+            rgb6_triplets[i * 3 + 1] = g_pal_rgb6[idx][1];
+            rgb6_triplets[i * 3 + 2] = g_pal_rgb6[idx][2];
+        }
+    }
+}
+
+void dsa_platform_get_mouse(int *x, int *y, int *buttons) {
+    dsa_platform_pump_and_present_if_due();
+    if (x) *x = g_mouse_x;
+    if (y) *y = g_mouse_y;
+    if (buttons) *buttons = g_mouse_buttons;
+
+    if (g_mouse_latched_down) {
+        g_mouse_latched_down = 0;
+        if (g_mouse_pending_up) {
+            g_mouse_buttons &= ~g_mouse_pending_up;
+            g_mouse_pending_up = 0;
+        }
+    }
+}
+
+void dsa_platform_poll_mouse_events(int *x, int *y, int *moved, int *left_click, int *right_click) {
+    poll_sdl_events_internal();
+    g_poll_step++;
+    g_virtual_ticks_ms += 1;
+
+    if (g_replay_active) {
+        while (g_replay_idx < g_replay_count && g_replay_events[g_replay_idx].step <= g_poll_step) {
+            const ReplayEvent &ev = g_replay_events[g_replay_idx++];
+            if (ev.type == 'M') {
+                g_mouse_x = ev.x;
+                g_mouse_y = ev.y;
+                if (ev.moved)    g_mouse_moved_ev = 1;
+                if (ev.left_ev)  g_mouse_left_ev  = 1;
+                if (ev.right_ev) g_mouse_right_ev = 1;
+            } else if (ev.type == 'K') {
+                if (ev.key == 0x5700) {
+                    int mv = dsa_platform_get_music_volume() - 12;
+                    int sv = dsa_platform_get_sfx_volume() - 12;
+                    dsa_platform_set_music_volume(mv < 0 ? 0 : mv);
+                    dsa_platform_set_sfx_volume(sv < 0 ? 0 : sv);
+                } else if (ev.key == 0x5800) {
+                    int mv = dsa_platform_get_music_volume() + 12;
+                    int sv = dsa_platform_get_sfx_volume() + 12;
+                    dsa_platform_set_music_volume(mv > 127 ? 127 : mv);
+                    dsa_platform_set_sfx_volume(sv > 127 ? 127 : sv);
+                } else {
+                    keyq_push(ev.key);
+                }
+            } else if (ev.type == 'S') {
+                int total = g_width * g_height;
+                for (int i = 0; i < total; ++i) {
+                    g_argb_buffer[i] = g_pal_argb32[g_vram[i]];
+                }
+                dsa_save_bmp(ev.arg);
+            } else if (ev.type == 'Q') {
+                dsa_platform_shutdown();
+                exit(0);
+            }
+        }
+    }
+
+    if (g_mouse_x < g_mouse_min_x) g_mouse_x = g_mouse_min_x;
+    if (g_mouse_x > g_mouse_max_x) g_mouse_x = g_mouse_max_x;
+    if (g_mouse_y < g_mouse_min_y) g_mouse_y = g_mouse_min_y;
+    if (g_mouse_y > g_mouse_max_y) g_mouse_y = g_mouse_max_y;
+
+    int mv = g_mouse_moved_ev;
+    int lc = g_mouse_left_ev;
+    int rc = g_mouse_right_ev;
+
+    if (g_record_fp && (mv || lc || rc)) {
+        fprintf(g_record_fp, "M %u %d %d %d %d %d\n", (unsigned int)g_poll_step, g_mouse_x, g_mouse_y, mv, lc, rc);
+        fflush(g_record_fp);
+    }
+
+    if (x) *x = g_mouse_x;
+    if (y) *y = g_mouse_y;
+    if (moved)       { *moved       = mv; g_mouse_moved_ev = 0; }
+    if (left_click)  { *left_click  = lc; g_mouse_left_ev  = 0; }
+    if (right_click) { *right_click = rc; g_mouse_right_ev = 0; }
+}
+
+void dsa_platform_set_mouse_pos(int x, int y) {
+    g_mouse_x = x;
+    g_mouse_y = y;
+    if (g_window) {
+        SDL_WarpMouseInWindow(g_window, x, y);
+    }
+}
+
+void dsa_platform_set_mouse_range_x(int min_x, int max_x) {
+    g_mouse_min_x = (min_x < max_x) ? min_x : max_x;
+    g_mouse_max_x = (min_x < max_x) ? max_x : min_x;
+}
+
+void dsa_platform_set_mouse_range_y(int min_y, int max_y) {
+    g_mouse_min_y = (min_y < max_y) ? min_y : max_y;
+    g_mouse_max_y = (min_y < max_y) ? max_y : min_y;
+}
+
+unsigned short dsa_platform_key_ready(void) {
+    poll_sdl_events_internal();
+    if (g_key_head == g_key_tail) return 0;
+    return g_key_queue[g_key_head];
+}
+
+unsigned short dsa_platform_key_read(void) {
+    unsigned short k;
+    while (g_key_head == g_key_tail) {
+        dsa_platform_present();
+        SDL_Delay(g_fast_replay ? 1 : 10);
+    }
+    k = g_key_queue[g_key_head];
+    g_key_head = (g_key_head + 1) % KEY_QUEUE_CAP;
+    if (g_record_fp) {
+        fprintf(g_record_fp, "K %u 0x%04X\n", (unsigned int)g_poll_step, (unsigned int)k);
+        fflush(g_record_fp);
+    }
+    return k;
+}
+
+unsigned short dsa_platform_key_shift_status(void) {
+    poll_sdl_events_internal();
+    return g_shift_status;
+}
+
+unsigned char dsa_platform_get_scancode_state(int dos_scancode) {
+    if (dos_scancode < 0 || dos_scancode >= 128) return 0;
+    return g_scancode_down[dos_scancode];
+}
+
+uint32_t dsa_platform_get_ticks_ms(void) {
+    if (!g_initialized) return 0;
+    if (g_replay_active || g_record_fp != NULL || g_fast_replay) {
+        return g_virtual_ticks_ms;
+    }
+    return SDL_GetTicks();
+}
+
+void dsa_platform_delay_ms(uint32_t ms) {
+    g_virtual_ticks_ms += ms;
+    if (g_fast_replay) {
+        dsa_platform_pump_and_present_if_due();
+        return;
+    }
+    uint32_t start = SDL_GetTicks();
+    while (SDL_GetTicks() - start < ms) {
+        dsa_platform_pump_and_present_if_due();
+        SDL_Delay(2);
+    }
+}
+
+/* =========================================================================
+ * 6. Audio:
+ *    - Modus 0 (Standard): General MIDI (XMIDI -> Windows midiOut "Microsoft GS Wavetable Synth")
+ *    - Modus 1 (Schalter --music=opl / F10): Exakter DOSBox-OPL2/OPL3-Emulator (DBOPL, GPL v2+)
+ *      mit AIL-2.0-AdLib-Treiberverhalten (9 Stimmen, SAMPLE.AD-Timbres, Percussion-Bank 127)
+ *    - Creative-Voice-File (.VOC) Digitaleffekt-Mischer ueber SDL2-Audio (44,1 kHz Stereo)
+ * ========================================================================= */
+
+#define DSA_AUDIO_FREQ 44100
+#define OPL_NUM_VOICES 9
+#define GM_MAX_NOTES   64
+
+struct AdlibTimbre {
+    uint8_t valid;
+    int8_t  transpose;
+    uint8_t mod_avekm;
+    uint8_t mod_ksl_tl;
+    uint8_t mod_ad;
+    uint8_t mod_sr;
+    uint8_t mod_ws;
+    uint8_t fb_c;
+    uint8_t car_avekm;
+    uint8_t car_ksl_tl;
+    uint8_t car_ad;
+    uint8_t car_sr;
+    uint8_t car_ws;
+};
+
+static AdlibTimbre g_adlib_patches[128];
+static AdlibTimbre g_adlib_drums[128];
+
+struct OplVoice {
+    int      active;
+    int      sustained;
+    uint8_t  channel;
+    uint8_t  note;
+    uint8_t  velocity;
+    uint32_t remain_ticks;
+    uint32_t age;
+    uint32_t release_age;
+    uint16_t fnum;
+    uint8_t  block;
+    uint8_t  car_ksl_tl;
+    uint8_t  mod_ksl_tl;
+    uint8_t  fb_c;
+};
+
+struct GmActiveNote {
+    int      active;
+    int      sustained;
+    uint8_t  channel;
+    uint8_t  note;
+    uint32_t remain_ticks;
+};
+
+struct XmiLoopEntry {
+    uint32_t start_pos;
+    int      count; /* 0 = endlos, 1..127 = verbleibende Durchlaeufe */
+};
+
+static DBOPL::Chip  g_opl_chip;
+static int          g_opl_initialized = 0;
+static OplVoice     g_opl_voices[OPL_NUM_VOICES];
+static GmActiveNote g_gm_notes[GM_MAX_NOTES];
+static XmiLoopEntry g_xmi_loops[4];
+static int          g_xmi_loop_depth = 0;
+static uint32_t     g_voice_age_counter = 1;
+
+extern "C" int stb_vorbis_decode_filename(const char *filename, int *channels, int *sample_rate, short **output);
+
+#ifdef _WIN32
+static HMIDIOUT     g_hmidi_out = NULL;
+#endif
+static int          g_music_mode = DSA_MUSIC_MODE_CD;
+
+/* CD-Audio-Spuren (MUSIC/Track02..15.OGG der GOG-Fassung, übernommen nach MobileEyes Commit 4638425f, GPL v3) */
+static int16_t     *g_cd_samples = NULL;
+static uint32_t     g_cd_frames  = 0;
+static uint32_t     g_cd_pos     = 0;
+static int          g_cd_active  = 0;
+static int          g_cd_paused  = 0;
+static int          g_cd_current_track = 0;
+
+static uint8_t      g_chan_prog[16];
+static uint8_t      g_chan_vol[16];
+static uint8_t      g_chan_expr[16];
+static uint8_t      g_chan_pan[16];
+static uint8_t      g_chan_sustain[16];
+static int16_t      g_chan_bend[16];
+
+static uint8_t     *g_xmi_evnt_buf = NULL;
+static uint32_t     g_xmi_evnt_len = 0;
+static uint32_t     g_xmi_pos      = 0;
+static int32_t      g_xmi_wait_ticks = 0;
+static int          g_xmi_loop     = 1;
+static int          g_xmi_active   = 0;
+static int          g_xmi_paused   = 0;
+static float        g_tick_sample_accum = 0.0f;
+
+/* Digitale VOC-Soundeffekte (resampelt auf 44100 Hz 16-Bit signed Mono) */
+static int16_t     *g_voc_samples = NULL;
+static uint32_t     g_voc_len     = 0;
+static uint32_t     g_voc_pos     = 0;
+static int          g_voc_active  = 0;
+
+static int          g_music_volume = 100; /* 0..127 */
+static int          g_sfx_volume   = 105; /* 0..127 */
+
+static uint32_t     g_stat_mixed_frames = 0;
+static uint32_t     g_stat_music_notes  = 0;
+static uint32_t     g_stat_voc_plays    = 0;
+static int          g_stat_peak_sample  = 0;
+
+static char         g_dump_wav_path[512] = "";
+static FILE        *g_dump_wav_fp = NULL;
+static uint32_t     g_dump_wav_bytes = 0;
+
+static const uint8_t g_opl_op1_off[OPL_NUM_VOICES] = {
+    0x00, 0x01, 0x02, 0x08, 0x09, 0x0A, 0x10, 0x11, 0x12
+};
+static const uint8_t g_opl_op2_off[OPL_NUM_VOICES] = {
+    0x03, 0x04, 0x05, 0x0B, 0x0C, 0x0D, 0x13, 0x14, 0x15
+};
+static const uint16_t g_opl_fnum_tab[12] = {
+    0x157, 0x16B, 0x181, 0x198, 0x1B0, 0x1CA,
+    0x1E5, 0x202, 0x220, 0x241, 0x263, 0x287
+};
+
+static void gm_send_short(uint8_t st, uint8_t d1, uint8_t d2) {
+#ifdef _WIN32
+    if (g_hmidi_out) {
+        DWORD msg = (DWORD)st | ((DWORD)d1 << 8) | ((DWORD)d2 << 16);
+        midiOutShortMsg(g_hmidi_out, msg);
+    }
+#else
+    (void)st; (void)d1; (void)d2;
+#endif
+}
+
+static void gm_update_channel_volume(uint8_t ch) {
+    int scaled = ((int)g_chan_vol[ch] * g_music_volume) / 127;
+    if (scaled < 0)   scaled = 0;
+    if (scaled > 127) scaled = 127;
+    gm_send_short((uint8_t)(0xB0 | (ch & 0x0F)), 7, (uint8_t)scaled);
+}
+
+static void gm_all_notes_off(void) {
+    for (int i = 0; i < GM_MAX_NOTES; ++i) {
+        if (g_gm_notes[i].active) {
+            gm_send_short((uint8_t)(0x80 | g_gm_notes[i].channel), g_gm_notes[i].note, 0);
+            g_gm_notes[i].active = 0;
+        }
+    }
+    for (int c = 0; c < 16; ++c) {
+        gm_send_short((uint8_t)(0xB0 | c), 64, 0);  /* Sustain Off */
+        gm_send_short((uint8_t)(0xB0 | c), 123, 0); /* All Notes Off */
+    }
+}
+
+static void opl_reset_chip(void) {
+    if (!g_opl_initialized) {
+        DBOPL::InitTables();
+        g_opl_chip.Setup(DSA_AUDIO_FREQ);
+        g_opl_initialized = 1;
+    }
+    for (int r = 0x20; r <= 0xF5; ++r) {
+        g_opl_chip.WriteReg((uint32_t)r, 0x00);
+    }
+    g_opl_chip.WriteReg(0x01, 0x20); /* Waveform Select Enable */
+    g_opl_chip.WriteReg(0x08, 0x40); /* Note-Sel */
+    g_opl_chip.WriteReg(0xBD, 0xC0); /* AM Depth + Vibrato Depth, Melodic Mode */
+    memset(g_opl_voices, 0, sizeof(g_opl_voices));
+}
+
+static void opl_all_notes_off(void) {
+    for (int v = 0; v < OPL_NUM_VOICES; ++v) {
+        g_opl_chip.WriteReg((uint32_t)(0xB0 + v), (uint8_t)(((g_opl_voices[v].block & 7) << 2) | ((g_opl_voices[v].fnum >> 8) & 3)));
+        g_opl_voices[v].active = 0;
+        g_opl_voices[v].sustained = 0;
+    }
+}
+
+static void opl_update_voice_volume(int v) {
+    const OplVoice &vc = g_opl_voices[v];
+    uint8_t ch = vc.channel & 0x0F;
+    int comp = ((int)vc.velocity * (int)g_chan_vol[ch] * (int)g_chan_expr[ch]) / (127 * 127);
+    comp = (comp * g_music_volume) / 127;
+    if (comp < 0)   comp = 0;
+    if (comp > 127) comp = 127;
+
+    int car_ksl = vc.car_ksl_tl & 0xC0;
+    int car_base_tl = vc.car_ksl_tl & 0x3F;
+    int car_vol = ((63 - car_base_tl) * comp) / 127;
+    int car_tl = 63 - car_vol;
+    if (car_tl < 0)  car_tl = 0;
+    if (car_tl > 63) car_tl = 63;
+    g_opl_chip.WriteReg((uint32_t)(0x40 + g_opl_op2_off[v]), (uint8_t)(car_ksl | car_tl));
+
+    if (vc.fb_c & 1) {
+        /* Additive Synthese: auch Operator 1 (Modulator) skaliert mit der Lautstaerke */
+        int mod_ksl = vc.mod_ksl_tl & 0xC0;
+        int mod_base_tl = vc.mod_ksl_tl & 0x3F;
+        int mod_vol = ((63 - mod_base_tl) * comp) / 127;
+        int mod_tl = 63 - mod_vol;
+        if (mod_tl < 0)  mod_tl = 0;
+        if (mod_tl > 63) mod_tl = 63;
+        g_opl_chip.WriteReg((uint32_t)(0x40 + g_opl_op1_off[v]), (uint8_t)(mod_ksl | mod_tl));
+    } else {
+        g_opl_chip.WriteReg((uint32_t)(0x40 + g_opl_op1_off[v]), vc.mod_ksl_tl);
+    }
+}
+
+static void opl_calc_fnum_block(int midi_note, int16_t pitch_bend, uint16_t *out_fnum, uint8_t *out_block) {
+    if (midi_note < 12)  midi_note = 12;
+    if (midi_note > 107) midi_note = 107;
+    int block = (midi_note / 12) - 1;
+    if (block < 0) block = 0;
+    if (block > 7) block = 7;
+    int fnum = (int)g_opl_fnum_tab[midi_note % 12];
+    if (pitch_bend != 0) {
+        float bend_semi = (float)pitch_bend / 4096.0f; /* +/- 2 Halbtone bei +/- 8192 */
+        fnum = (int)((float)fnum * powf(2.0f, bend_semi / 12.0f) + 0.5f);
+        while (fnum > 0x3FF && block < 7) { fnum >>= 1; block++; }
+        while (fnum < 0x157 && block > 0) { fnum <<= 1; block--; }
+        if (fnum < 0)     fnum = 0;
+        if (fnum > 0x3FF) fnum = 0x3FF;
+    }
+    *out_fnum  = (uint16_t)fnum;
+    *out_block = (uint8_t)block;
+}
+
+static void init_default_adlib_patches(void) {
+    for (int i = 0; i < 128; ++i) {
+        AdlibTimbre &t = g_adlib_patches[i];
+        t.valid      = 1;
+        t.transpose  = 0;
+        t.mod_avekm  = 0x01;
+        t.mod_ksl_tl = 0x4F;
+        t.mod_ad     = 0xF1;
+        t.mod_sr     = 0x53;
+        t.mod_ws     = 0x00;
+        t.fb_c       = 0x06;
+        t.car_avekm  = 0x11;
+        t.car_ksl_tl = 0x00;
+        t.car_ad     = 0xD2;
+        t.car_sr     = 0x74;
+        t.car_ws     = 0x00;
+    }
+}
+
+void dsa_platform_load_adlib_bank(const unsigned char *data, uint32_t len) {
+    if (!data || len < 16) return;
+    if (g_audio_dev) SDL_LockAudioDevice(g_audio_dev);
+    uint32_t pos = 0;
+    while (pos + 6 <= len) {
+        uint8_t patch = data[pos];
+        uint8_t bank  = data[pos + 1];
+        if (patch == 0xFF && bank == 0xFF) break;
+        uint32_t toff = (uint32_t)data[pos + 2]
+                      | ((uint32_t)data[pos + 3] << 8)
+                      | ((uint32_t)data[pos + 4] << 16)
+                      | ((uint32_t)data[pos + 5] << 24);
+        if (toff + 14 <= len) {
+            const uint8_t *td = data + toff + 2;
+            AdlibTimbre *dst = NULL;
+            if (bank == 0 && patch < 128) {
+                dst = &g_adlib_patches[patch];
+            } else if (bank == 127 && patch < 128) {
+                dst = &g_adlib_drums[patch];
+            }
+            if (dst) {
+                dst->valid      = 1;
+                dst->transpose  = (int8_t)td[0];
+                dst->mod_avekm  = td[1];
+                dst->mod_ksl_tl = td[2];
+                dst->mod_ad     = td[3];
+                dst->mod_sr     = td[4];
+                dst->mod_ws     = td[5];
+                dst->fb_c       = td[6];
+                dst->car_avekm  = td[7];
+                dst->car_ksl_tl = td[8];
+                dst->car_ad     = td[9];
+                dst->car_sr     = td[10];
+                dst->car_ws     = td[11];
+            }
+        }
+        pos += 6;
+    }
+    if (g_audio_dev) SDL_UnlockAudioDevice(g_audio_dev);
+}
+
+static void xmi_reset_channels(void) {
+    gm_all_notes_off();
+    opl_all_notes_off();
+    g_xmi_loop_depth = 0;
+    for (int c = 0; c < 16; ++c) {
+        g_chan_prog[c]    = 0;
+        g_chan_vol[c]     = 100;
+        g_chan_expr[c]    = 127;
+        g_chan_pan[c]     = 64;
+        g_chan_sustain[c] = 0;
+        g_chan_bend[c]    = 0;
+        if (g_music_mode == DSA_MUSIC_MODE_GM) {
+            gm_send_short((uint8_t)(0xB0 | c), 121, 0);
+            gm_update_channel_volume((uint8_t)c);
+            gm_send_short((uint8_t)(0xB0 | c), 10, 64);
+            gm_send_short((uint8_t)(0xB0 | c), 11, 127);
+            gm_send_short((uint8_t)(0xE0 | c), 0, 64);
+        }
+    }
+}
+
+static void xmi_note_off(uint8_t ch, uint8_t note) {
+    if (g_music_mode == DSA_MUSIC_MODE_GM) {
+        for (int i = 0; i < GM_MAX_NOTES; ++i) {
+            if (g_gm_notes[i].active && g_gm_notes[i].channel == ch && g_gm_notes[i].note == note) {
+                if (g_chan_sustain[ch] >= 64) {
+                    g_gm_notes[i].sustained = 1;
+                } else {
+                    gm_send_short((uint8_t)(0x80 | ch), note, 0);
+                    g_gm_notes[i].active = 0;
+                }
+            }
+        }
+    } else {
+        for (int v = 0; v < OPL_NUM_VOICES; ++v) {
+            if (g_opl_voices[v].active && g_opl_voices[v].channel == ch && g_opl_voices[v].note == note) {
+                if (g_chan_sustain[ch] >= 64) {
+                    g_opl_voices[v].sustained = 1;
+                } else {
+                    g_opl_chip.WriteReg((uint32_t)(0xB0 + v),
+                        (uint8_t)(((g_opl_voices[v].block & 7) << 2) | ((g_opl_voices[v].fnum >> 8) & 3)));
+                    g_opl_voices[v].active = 0;
+                    g_opl_voices[v].sustained = 0;
+                    g_opl_voices[v].release_age = 0;
+                }
+            }
+        }
+    }
+}
+
+static void xmi_trigger_note(uint8_t ch, uint8_t note, uint8_t vel, uint32_t dur_ticks) {
+    if (vel == 0) {
+        xmi_note_off(ch, note);
+        return;
+    }
+
+    g_stat_music_notes++;
+    uint32_t ticks = (dur_ticks > 0) ? dur_ticks : 1;
+
+    if (g_music_mode == DSA_MUSIC_MODE_GM) {
+        int slot = -1;
+        for (int i = 0; i < GM_MAX_NOTES; ++i) {
+            if (g_gm_notes[i].active && g_gm_notes[i].channel == ch && g_gm_notes[i].note == note) {
+                gm_send_short((uint8_t)(0x80 | ch), note, 0);
+                slot = i;
+                break;
+            }
+        }
+        if (slot == -1) {
+            for (int i = 0; i < GM_MAX_NOTES; ++i) {
+                if (!g_gm_notes[i].active) { slot = i; break; }
+            }
+            if (slot == -1) slot = 0;
+        }
+        g_gm_notes[slot].active       = 1;
+        g_gm_notes[slot].sustained    = 0;
+        g_gm_notes[slot].channel      = ch;
+        g_gm_notes[slot].note         = note;
+        g_gm_notes[slot].remain_ticks = ticks;
+        gm_send_short((uint8_t)(0x90 | ch), note, vel);
+        return;
+    }
+
+    /* Modus 1: Exakter DOSBox-OPL2-Synthesizer mit AIL-2.0-AdLib-Timbres aus SAMPLE.AD */
+    const AdlibTimbre *t = NULL;
+    int play_note = (int)note;
+    if (ch == 9) {
+        if (!g_adlib_drums[note & 0x7F].valid) return;
+        t = &g_adlib_drums[note & 0x7F];
+        play_note = (int)(uint8_t)t->transpose;
+    } else {
+        t = &g_adlib_patches[g_chan_prog[ch] & 0x7F];
+        play_note = (int)note + (int)t->transpose;
+    }
+
+    int v_idx = -1;
+    for (int v = 0; v < OPL_NUM_VOICES; ++v) {
+        if (g_opl_voices[v].active && g_opl_voices[v].channel == ch && g_opl_voices[v].note == note) {
+            v_idx = v;
+            break;
+        }
+    }
+    if (v_idx == -1) {
+        uint32_t best_rel = 0;
+        for (int v = 0; v < OPL_NUM_VOICES; ++v) {
+            if (!g_opl_voices[v].active) {
+                if (v_idx == -1 || g_opl_voices[v].release_age >= best_rel) {
+                    best_rel = g_opl_voices[v].release_age;
+                    v_idx = v;
+                }
+            }
+        }
+    }
+    if (v_idx == -1) {
+        /* Aelteste aktive Stimme uebernehmen (AIL Voice Stealing) */
+        uint32_t oldest_age = 0xFFFFFFFFu;
+        v_idx = 0;
+        for (int v = 0; v < OPL_NUM_VOICES; ++v) {
+            if (g_opl_voices[v].age < oldest_age) {
+                oldest_age = g_opl_voices[v].age;
+                v_idx = v;
+            }
+        }
+    }
+
+    OplVoice &vc = g_opl_voices[v_idx];
+    /* Key-Off vor Neuanschlag fuer sauberen Envelope-Neustart */
+    g_opl_chip.WriteReg((uint32_t)(0xB0 + v_idx), 0x00);
+
+    vc.active       = 1;
+    vc.sustained    = 0;
+    vc.channel      = ch;
+    vc.note         = note;
+    vc.velocity     = vel;
+    vc.remain_ticks = ticks;
+    vc.age          = g_voice_age_counter++;
+    vc.release_age  = 0;
+    vc.car_ksl_tl   = t->car_ksl_tl;
+    vc.mod_ksl_tl   = t->mod_ksl_tl;
+    vc.fb_c         = t->fb_c;
+
+    uint8_t op1 = g_opl_op1_off[v_idx];
+    uint8_t op2 = g_opl_op2_off[v_idx];
+    g_opl_chip.WriteReg((uint32_t)(0x20 + op1), t->mod_avekm);
+    g_opl_chip.WriteReg((uint32_t)(0x60 + op1), t->mod_ad);
+    g_opl_chip.WriteReg((uint32_t)(0x80 + op1), t->mod_sr);
+    g_opl_chip.WriteReg((uint32_t)(0xE0 + op1), t->mod_ws);
+    g_opl_chip.WriteReg((uint32_t)(0xC0 + v_idx), t->fb_c);
+    g_opl_chip.WriteReg((uint32_t)(0x20 + op2), t->car_avekm);
+    g_opl_chip.WriteReg((uint32_t)(0x60 + op2), t->car_ad);
+    g_opl_chip.WriteReg((uint32_t)(0x80 + op2), t->car_sr);
+    g_opl_chip.WriteReg((uint32_t)(0xE0 + op2), t->car_ws);
+    opl_update_voice_volume(v_idx);
+
+    opl_calc_fnum_block(play_note, (ch == 9) ? 0 : g_chan_bend[ch], &vc.fnum, &vc.block);
+    g_opl_chip.WriteReg((uint32_t)(0xA0 + v_idx), (uint8_t)(vc.fnum & 0xFF));
+    g_opl_chip.WriteReg((uint32_t)(0xB0 + v_idx), (uint8_t)(0x20 | ((vc.block & 7) << 2) | ((vc.fnum >> 8) & 3)));
+}
+
+static void xmi_step_tick(void) {
+    /* 1. Laufende Noten-Dauern (120 Hz) herunterzaehlen */
+    if (g_music_mode == DSA_MUSIC_MODE_GM) {
+        for (int i = 0; i < GM_MAX_NOTES; ++i) {
+            if (g_gm_notes[i].active && !g_gm_notes[i].sustained) {
+                if (g_gm_notes[i].remain_ticks > 0) {
+                    g_gm_notes[i].remain_ticks--;
+                    if (g_gm_notes[i].remain_ticks == 0) {
+                        uint8_t ch = g_gm_notes[i].channel;
+                        if (g_chan_sustain[ch] >= 64) {
+                            g_gm_notes[i].sustained = 1;
+                        } else {
+                            gm_send_short((uint8_t)(0x80 | ch), g_gm_notes[i].note, 0);
+                            g_gm_notes[i].active = 0;
+                        }
+                    }
+                }
+            }
+        }
+    } else {
+        for (int v = 0; v < OPL_NUM_VOICES; ++v) {
+            if (g_opl_voices[v].active) {
+                if (!g_opl_voices[v].sustained && g_opl_voices[v].remain_ticks > 0) {
+                    g_opl_voices[v].remain_ticks--;
+                    if (g_opl_voices[v].remain_ticks == 0) {
+                        uint8_t ch = g_opl_voices[v].channel;
+                        if (g_chan_sustain[ch] >= 64) {
+                            g_opl_voices[v].sustained = 1;
+                        } else {
+                            g_opl_chip.WriteReg((uint32_t)(0xB0 + v),
+                                (uint8_t)(((g_opl_voices[v].block & 7) << 2) | ((g_opl_voices[v].fnum >> 8) & 3)));
+                            g_opl_voices[v].active = 0;
+                            g_opl_voices[v].release_age = 0;
+                        }
+                    }
+                }
+            } else {
+                g_opl_voices[v].release_age++;
+            }
+        }
+    }
+
+    if (!g_xmi_active || g_xmi_paused || !g_xmi_evnt_buf || g_xmi_evnt_len == 0) return;
+
+    if (g_xmi_wait_ticks > 0) {
+        g_xmi_wait_ticks--;
+        if (g_xmi_wait_ticks > 0) return;
+    }
+
+    while (g_xmi_pos < g_xmi_evnt_len) {
+        uint8_t b = g_xmi_evnt_buf[g_xmi_pos];
+        if (b < 0x80) {
+            int32_t delay = 0;
+            while (g_xmi_pos < g_xmi_evnt_len && g_xmi_evnt_buf[g_xmi_pos] < 0x80) {
+                delay += g_xmi_evnt_buf[g_xmi_pos++];
+            }
+            if (delay > 0) {
+                g_xmi_wait_ticks = delay - 1;
+                return;
+            }
+            continue;
+        }
+        if (b == 0xFF) {
+            if (g_xmi_pos + 2 > g_xmi_evnt_len) { g_xmi_pos = g_xmi_evnt_len; break; }
+            uint8_t meta = g_xmi_evnt_buf[g_xmi_pos + 1];
+            g_xmi_pos += 2;
+            uint32_t v = 0;
+            while (g_xmi_pos < g_xmi_evnt_len && (g_xmi_evnt_buf[g_xmi_pos] & 0x80)) {
+                v = (v << 7) | (g_xmi_evnt_buf[g_xmi_pos++] & 0x7F);
+            }
+            if (g_xmi_pos < g_xmi_evnt_len) {
+                v = (v << 7) | g_xmi_evnt_buf[g_xmi_pos++];
+            }
+            g_xmi_pos += v;
+            if (meta == 0x2F) {
+                if (g_xmi_loop) {
+                    xmi_reset_channels();
+                    g_xmi_pos = 0;
+                    g_xmi_wait_ticks = 0;
+                    return;
+                } else {
+                    gm_all_notes_off();
+                    opl_all_notes_off();
+                    g_xmi_active = 0;
+                    return;
+                }
+            }
+        } else if (b == 0xF0 || b == 0xF7) {
+            g_xmi_pos++;
+            uint32_t v = 0;
+            while (g_xmi_pos < g_xmi_evnt_len && (g_xmi_evnt_buf[g_xmi_pos] & 0x80)) {
+                v = (v << 7) | (g_xmi_evnt_buf[g_xmi_pos++] & 0x7F);
+            }
+            if (g_xmi_pos < g_xmi_evnt_len) {
+                v = (v << 7) | g_xmi_evnt_buf[g_xmi_pos++];
+            }
+            g_xmi_pos += v;
+        } else {
+            uint8_t hi = b & 0xF0;
+            uint8_t ch = b & 0x0F;
+            if (hi == 0x90) {
+                if (g_xmi_pos + 3 > g_xmi_evnt_len) { g_xmi_pos = g_xmi_evnt_len; break; }
+                uint8_t note = g_xmi_evnt_buf[g_xmi_pos + 1];
+                uint8_t vel  = g_xmi_evnt_buf[g_xmi_pos + 2];
+                g_xmi_pos += 3;
+                uint32_t dur = 0;
+                while (g_xmi_pos < g_xmi_evnt_len && (g_xmi_evnt_buf[g_xmi_pos] & 0x80)) {
+                    dur = (dur << 7) | (g_xmi_evnt_buf[g_xmi_pos++] & 0x7F);
+                }
+                if (g_xmi_pos < g_xmi_evnt_len) {
+                    dur = (dur << 7) | g_xmi_evnt_buf[g_xmi_pos++];
+                }
+                xmi_trigger_note(ch, note, vel, dur);
+            } else if (hi == 0x80) {
+                if (g_xmi_pos + 3 > g_xmi_evnt_len) { g_xmi_pos = g_xmi_evnt_len; break; }
+                uint8_t note = g_xmi_evnt_buf[g_xmi_pos + 1];
+                g_xmi_pos += 3;
+                xmi_note_off(ch, note);
+            } else if (hi == 0xB0) {
+                if (g_xmi_pos + 3 > g_xmi_evnt_len) { g_xmi_pos = g_xmi_evnt_len; break; }
+                uint8_t cc  = g_xmi_evnt_buf[g_xmi_pos + 1];
+                uint8_t val = g_xmi_evnt_buf[g_xmi_pos + 2];
+                g_xmi_pos += 3;
+                if (cc == 116) {
+                    /* XMIDI FOR Loop Controller */
+                    if (g_xmi_loop_depth < 4) {
+                        g_xmi_loops[g_xmi_loop_depth].start_pos = g_xmi_pos;
+                        g_xmi_loops[g_xmi_loop_depth].count = (int)val;
+                        g_xmi_loop_depth++;
+                    }
+                } else if (cc == 117) {
+                    /* XMIDI NEXT/BREAK Loop Controller */
+                    if (val >= 64 && g_xmi_loop_depth > 0) {
+                        XmiLoopEntry &lp = g_xmi_loops[g_xmi_loop_depth - 1];
+                        if (lp.count == 0) {
+                            g_xmi_pos = lp.start_pos;
+                        } else if (lp.count > 1) {
+                            lp.count--;
+                            g_xmi_pos = lp.start_pos;
+                        } else {
+                            g_xmi_loop_depth--;
+                        }
+                    }
+                } else if (cc == 7) {
+                    g_chan_vol[ch] = val;
+                    if (g_music_mode == DSA_MUSIC_MODE_GM) {
+                        gm_update_channel_volume(ch);
+                    } else {
+                        for (int v = 0; v < OPL_NUM_VOICES; ++v) {
+                            if (g_opl_voices[v].active && g_opl_voices[v].channel == ch) opl_update_voice_volume(v);
+                        }
+                    }
+                } else if (cc == 10) {
+                    g_chan_pan[ch] = val;
+                    if (g_music_mode == DSA_MUSIC_MODE_GM) gm_send_short((uint8_t)(0xB0 | ch), 10, val);
+                } else if (cc == 11) {
+                    g_chan_expr[ch] = val;
+                    if (g_music_mode == DSA_MUSIC_MODE_GM) {
+                        gm_send_short((uint8_t)(0xB0 | ch), 11, val);
+                    } else {
+                        for (int v = 0; v < OPL_NUM_VOICES; ++v) {
+                            if (g_opl_voices[v].active && g_opl_voices[v].channel == ch) opl_update_voice_volume(v);
+                        }
+                    }
+                } else if (cc == 64) {
+                    g_chan_sustain[ch] = val;
+                    if (g_music_mode == DSA_MUSIC_MODE_GM) {
+                        gm_send_short((uint8_t)(0xB0 | ch), 64, val);
+                        if (val < 64) {
+                            for (int i = 0; i < GM_MAX_NOTES; ++i) {
+                                if (g_gm_notes[i].active && g_gm_notes[i].sustained && g_gm_notes[i].channel == ch) {
+                                    gm_send_short((uint8_t)(0x80 | ch), g_gm_notes[i].note, 0);
+                                    g_gm_notes[i].active = 0;
+                                    g_gm_notes[i].sustained = 0;
+                                }
+                            }
+                        }
+                    } else if (val < 64) {
+                        for (int v = 0; v < OPL_NUM_VOICES; ++v) {
+                            if (g_opl_voices[v].active && g_opl_voices[v].sustained && g_opl_voices[v].channel == ch) {
+                                g_opl_chip.WriteReg((uint32_t)(0xB0 + v),
+                                    (uint8_t)(((g_opl_voices[v].block & 7) << 2) | ((g_opl_voices[v].fnum >> 8) & 3)));
+                                g_opl_voices[v].active = 0;
+                                g_opl_voices[v].sustained = 0;
+                                g_opl_voices[v].release_age = 0;
+                            }
+                        }
+                    }
+                } else if (cc == 121) {
+                    g_chan_vol[ch]     = 100;
+                    g_chan_expr[ch]    = 127;
+                    g_chan_pan[ch]     = 64;
+                    g_chan_sustain[ch] = 0;
+                    g_chan_bend[ch]    = 0;
+                    if (g_music_mode == DSA_MUSIC_MODE_GM) {
+                        gm_send_short((uint8_t)(0xB0 | ch), 121, 0);
+                        gm_update_channel_volume(ch);
+                    }
+                } else if (cc == 120 || cc == 123) {
+                    if (g_music_mode == DSA_MUSIC_MODE_GM) {
+                        gm_send_short((uint8_t)(0xB0 | ch), cc, 0);
+                        for (int i = 0; i < GM_MAX_NOTES; ++i) {
+                            if (g_gm_notes[i].channel == ch) g_gm_notes[i].active = 0;
+                        }
+                    } else {
+                        for (int v = 0; v < OPL_NUM_VOICES; ++v) {
+                            if (g_opl_voices[v].active && g_opl_voices[v].channel == ch) {
+                                g_opl_chip.WriteReg((uint32_t)(0xB0 + v), 0);
+                                g_opl_voices[v].active = 0;
+                            }
+                        }
+                    }
+                } else if (cc < 110 && g_music_mode == DSA_MUSIC_MODE_GM) {
+                    gm_send_short((uint8_t)(0xB0 | ch), cc, val);
+                }
+            } else if (hi == 0xC0) {
+                if (g_xmi_pos + 2 > g_xmi_evnt_len) { g_xmi_pos = g_xmi_evnt_len; break; }
+                uint8_t prog = g_xmi_evnt_buf[g_xmi_pos + 1] & 0x7F;
+                g_xmi_pos += 2;
+                g_chan_prog[ch] = prog;
+                if (g_music_mode == DSA_MUSIC_MODE_GM) {
+                    gm_send_short((uint8_t)(0xC0 | ch), prog, 0);
+                }
+            } else if (hi == 0xD0) {
+                if (g_xmi_pos + 2 > g_xmi_evnt_len) { g_xmi_pos = g_xmi_evnt_len; break; }
+                uint8_t pr = g_xmi_evnt_buf[g_xmi_pos + 1] & 0x7F;
+                g_xmi_pos += 2;
+                if (g_music_mode == DSA_MUSIC_MODE_GM) {
+                    gm_send_short((uint8_t)(0xD0 | ch), pr, 0);
+                }
+            } else if (hi == 0xA0 || hi == 0xE0) {
+                if (g_xmi_pos + 3 > g_xmi_evnt_len) { g_xmi_pos = g_xmi_evnt_len; break; }
+                uint8_t d1 = g_xmi_evnt_buf[g_xmi_pos + 1] & 0x7F;
+                uint8_t d2 = g_xmi_evnt_buf[g_xmi_pos + 2] & 0x7F;
+                g_xmi_pos += 3;
+                if (hi == 0xE0) {
+                    g_chan_bend[ch] = (int16_t)(((int)d1 | ((int)d2 << 7)) - 8192);
+                    if (g_music_mode == DSA_MUSIC_MODE_GM) {
+                        gm_send_short((uint8_t)(0xE0 | ch), d1, d2);
+                    } else if (ch != 9) {
+                        for (int v = 0; v < OPL_NUM_VOICES; ++v) {
+                            if (g_opl_voices[v].active && g_opl_voices[v].channel == ch) {
+                                const AdlibTimbre *t = &g_adlib_patches[g_chan_prog[ch] & 0x7F];
+                                int play_note = (int)g_opl_voices[v].note + (int)t->transpose;
+                                opl_calc_fnum_block(play_note, g_chan_bend[ch], &g_opl_voices[v].fnum, &g_opl_voices[v].block);
+                                g_opl_chip.WriteReg((uint32_t)(0xA0 + v), (uint8_t)(g_opl_voices[v].fnum & 0xFF));
+                                g_opl_chip.WriteReg((uint32_t)(0xB0 + v), (uint8_t)(0x20 | ((g_opl_voices[v].block & 7) << 2) | ((g_opl_voices[v].fnum >> 8) & 3)));
+                            }
+                        }
+                    }
+                } else if (g_music_mode == DSA_MUSIC_MODE_GM) {
+                    gm_send_short((uint8_t)(0xA0 | ch), d1, d2);
+                }
+            } else {
+                g_xmi_pos++;
+            }
+        }
+    }
+    if (g_xmi_pos >= g_xmi_evnt_len && g_xmi_loop) {
+        g_xmi_pos = 0;
+    }
+}
+
+static void dsa_audio_mixer_callback(void *userdata, Uint8 *stream, int len) {
+    (void)userdata;
+    int16_t *out = (int16_t *)stream;
+    int frames = len / 4;
+    const float samples_per_tick = (float)DSA_AUDIO_FREQ / 120.0f; /* 367.5 Samples pro 120-Hz-XMIDI-Tick */
+    float sfx_gain = (float)g_sfx_volume / 127.0f;
+
+    int f = 0;
+    while (f < frames) {
+        if (g_tick_sample_accum >= samples_per_tick) {
+            g_tick_sample_accum -= samples_per_tick;
+            xmi_step_tick();
+        }
+        int rem_to_tick = (int)ceilf(samples_per_tick - g_tick_sample_accum);
+        if (rem_to_tick < 1) rem_to_tick = 1;
+        int chunk = frames - f;
+        if (chunk > rem_to_tick) chunk = rem_to_tick;
+        if (chunk > 512) chunk = 512;
+
+        Bit32s opl_buf[512];
+        int use_cd  = (g_music_mode == DSA_MUSIC_MODE_CD && g_cd_active && !g_cd_paused && g_cd_samples && g_cd_frames > 0 && g_music_volume > 0);
+        int use_opl = (g_music_mode == DSA_MUSIC_MODE_OPL && g_xmi_active && !g_xmi_paused && g_music_volume > 0);
+        if (use_opl) {
+            g_opl_chip.GenerateBlock2((Bitu)chunk, opl_buf);
+        }
+        float mus_gain = (float)g_music_volume / 127.0f;
+
+        for (int i = 0; i < chunk; ++i) {
+            int32_t il = 0;
+            int32_t ir = 0;
+            if (use_cd) {
+                int32_t cl = (int32_t)((float)g_cd_samples[g_cd_pos * 2 + 0] * mus_gain);
+                int32_t cr = (int32_t)((float)g_cd_samples[g_cd_pos * 2 + 1] * mus_gain);
+                il += cl;
+                ir += cr;
+                g_cd_pos++;
+                if (g_cd_pos >= g_cd_frames) {
+                    g_cd_pos = 0; /* Endlosschleife wie im Original / MobileEyes */
+                }
+            } else if (use_opl) {
+                int32_t s_opl = (opl_buf[i] * 5) / 2;
+                il += s_opl;
+                ir += s_opl;
+            }
+            if (g_voc_active && g_voc_samples && g_voc_pos < g_voc_len) {
+                int32_t s_voc = (int32_t)((float)g_voc_samples[g_voc_pos++] * sfx_gain);
+                il += s_voc;
+                ir += s_voc;
+                if (g_voc_pos >= g_voc_len) {
+                    g_voc_active = 0;
+                }
+            }
+            if (il >  32767) il =  32767;
+            if (il < -32768) il = -32768;
+            if (ir >  32767) ir =  32767;
+            if (ir < -32768) ir = -32768;
+            out[(f + i) * 2 + 0] = (int16_t)il;
+            out[(f + i) * 2 + 1] = (int16_t)ir;
+
+            int pk = abs(il) > abs(ir) ? abs(il) : abs(ir);
+            if (pk > g_stat_peak_sample) g_stat_peak_sample = pk;
+        }
+
+        g_tick_sample_accum += (float)chunk;
+        f += chunk;
+    }
+
+    if (g_dump_wav_fp && frames > 0) {
+        fwrite(out, 4, (size_t)frames, g_dump_wav_fp);
+        g_dump_wav_bytes += (uint32_t)(frames * 4);
+    }
+    g_stat_mixed_frames += (uint32_t)frames;
+}
+
+static void dsa_update_window_title_music(void) {
+    if (!g_window) return;
+    const char *mode_str = (g_music_mode == DSA_MUSIC_MODE_CD) ? "CD-Audio (GOG OGG / MobileEyes)"
+                         : (g_music_mode == DSA_MUSIC_MODE_GM) ? "General MIDI" : "AdLib OPL2 (DOSBox)";
+    char title[256];
+    snprintf(title, sizeof(title), "DSA: Die Schicksalsklinge [Musik: %s | F10=Synth, F11/F12=Lautst.]", mode_str);
+    SDL_SetWindowTitle(g_window, title);
+}
+
+int dsa_platform_play_cd_track(int track_no) {
+    if (track_no < 2 || track_no > 15) return 0;
+    if (g_cd_active && g_cd_current_track == track_no && g_cd_samples) {
+        g_cd_paused = 0;
+        return 1;
+    }
+
+    /* Suche MUSIC/TrackNN.OGG im Spielordner, aktuellen Ordner oder GOG-Standardpfad */
+    const char *base_dirs[4] = {
+        g_game_dir[0] ? g_game_dir : ".",
+        ".",
+        "..",
+        "C:\\Program Files (x86)\\GOG Galaxy\\Games\\Realms of Arkania"
+    };
+    const char *sub_patterns[4] = {
+        "MUSIC/Track%02d.OGG",
+        "Music/Track%02d.OGG",
+        "MUSIC/Track%02d.ogg",
+        "music/Track%02d.ogg"
+    };
+    char found_path[1024] = "";
+    for (int d = 0; d < 4 && !found_path[0]; ++d) {
+        for (int p = 0; p < 4; ++p) {
+            char rel[64];
+            char cand[1024];
+            snprintf(rel, sizeof(rel), sub_patterns[p], track_no);
+            snprintf(cand, sizeof(cand), "%s/%s", base_dirs[d], rel);
+            FILE *tf = fopen(cand, "rb");
+            if (tf) {
+                fclose(tf);
+                strncpy(found_path, cand, sizeof(found_path) - 1);
+                break;
+            }
+        }
+    }
+    if (!found_path[0]) return 0;
+
+    int ch = 0, sr = 0;
+    short *decoded = NULL;
+    int n_frames = stb_vorbis_decode_filename(found_path, &ch, &sr, &decoded);
+    if (n_frames <= 0 || !decoded || ch <= 0 || sr <= 0) {
+        if (decoded) free(decoded);
+        return 0;
+    }
+
+    uint32_t out_frames = (uint32_t)(((uint64_t)n_frames * DSA_AUDIO_FREQ) / (uint32_t)sr);
+    int16_t *stereo_pcm = (int16_t *)malloc(out_frames * 2 * sizeof(int16_t));
+    if (!stereo_pcm) {
+        free(decoded);
+        return 0;
+    }
+    if (sr == DSA_AUDIO_FREQ && ch == 2) {
+        memcpy(stereo_pcm, decoded, out_frames * 2 * sizeof(int16_t));
+    } else {
+        for (uint32_t i = 0; i < out_frames; ++i) {
+            uint32_t src_i = (uint32_t)(((uint64_t)i * (uint32_t)sr) / DSA_AUDIO_FREQ);
+            if (src_i >= (uint32_t)n_frames) src_i = (uint32_t)n_frames - 1;
+            int16_t l = decoded[src_i * ch + 0];
+            int16_t r = (ch > 1) ? decoded[src_i * ch + 1] : l;
+            stereo_pcm[i * 2 + 0] = l;
+            stereo_pcm[i * 2 + 1] = r;
+        }
+    }
+    free(decoded);
+
+    if (g_audio_dev) SDL_LockAudioDevice(g_audio_dev);
+    if (g_cd_samples) {
+        free(g_cd_samples);
+    }
+    g_cd_samples       = stereo_pcm;
+    g_cd_frames        = out_frames;
+    g_cd_pos           = 0;
+    g_cd_current_track = track_no;
+    g_cd_active        = 1;
+    g_cd_paused        = 0;
+    g_stat_music_notes++;
+    if (g_audio_dev) SDL_UnlockAudioDevice(g_audio_dev);
+    return 1;
+}
+
+void dsa_platform_pause_cd_audio(int pause_on) {
+    if (g_audio_dev) SDL_LockAudioDevice(g_audio_dev);
+    g_cd_paused = pause_on ? 1 : 0;
+    if (g_audio_dev) SDL_UnlockAudioDevice(g_audio_dev);
+}
+
+void dsa_platform_stop_cd_audio(void) {
+    if (g_audio_dev) SDL_LockAudioDevice(g_audio_dev);
+    g_cd_active = 0;
+    g_cd_pos    = 0;
+    if (g_audio_dev) SDL_UnlockAudioDevice(g_audio_dev);
+}
+
+void dsa_platform_set_music_mode(int mode) {
+    int new_mode = (mode == DSA_MUSIC_MODE_OPL) ? DSA_MUSIC_MODE_OPL
+                 : (mode == DSA_MUSIC_MODE_GM)  ? DSA_MUSIC_MODE_GM
+                 : DSA_MUSIC_MODE_CD;
+    if (!g_opl_initialized) {
+        g_music_mode = new_mode;
+        return;
+    }
+#ifdef _WIN32
+    if (new_mode == DSA_MUSIC_MODE_GM && !g_hmidi_out) {
+        if (midiOutOpen(&g_hmidi_out, MIDI_MAPPER, 0, 0, CALLBACK_NULL) != MMSYSERR_NOERROR) {
+            g_hmidi_out = NULL;
+            new_mode = DSA_MUSIC_MODE_OPL;
+        }
+    }
+#else
+    if (new_mode == DSA_MUSIC_MODE_GM) new_mode = DSA_MUSIC_MODE_OPL;
+#endif
+    if (g_audio_dev) SDL_LockAudioDevice(g_audio_dev);
+    if (new_mode != g_music_mode) {
+        gm_all_notes_off();
+        opl_all_notes_off();
+        g_music_mode = new_mode;
+        if (g_xmi_active) {
+            g_xmi_pos = 0;
+            g_xmi_wait_ticks = 0;
+            xmi_reset_channels();
+        }
+    }
+    if (g_audio_dev) SDL_UnlockAudioDevice(g_audio_dev);
+    dsa_update_window_title_music();
+}
+
+int dsa_platform_get_music_mode(void) {
+    return g_music_mode;
+}
+
+void dsa_platform_set_dump_wav(const char *path) {
+    if (path && path[0]) {
+        strncpy(g_dump_wav_path, path, sizeof(g_dump_wav_path) - 1);
+    }
+}
+
+static void dsa_audio_init(void) {
+    init_default_adlib_patches();
+    opl_reset_chip();
+
+    const char *env_vol = getenv("DSA_VOLUME");
+    if (env_vol && env_vol[0]) {
+        int v = atoi(env_vol);
+        if (v < 0) v = 0;
+        if (v > 100) v = 100;
+        g_music_volume = (v * 127) / 100;
+        g_sfx_volume   = (v * 127) / 100;
+    }
+
+    const char *env_mus = getenv("DSA_MUSIC");
+    if (env_mus && env_mus[0]) {
+        if (STRNICMP(env_mus, "opl", 3) == 0 || STRNICMP(env_mus, "adlib", 5) == 0 || STRNICMP(env_mus, "sb", 2) == 0) {
+            g_music_mode = DSA_MUSIC_MODE_OPL;
+        } else if (STRNICMP(env_mus, "gm", 2) == 0 || STRNICMP(env_mus, "midi", 4) == 0) {
+            g_music_mode = DSA_MUSIC_MODE_GM;
+        } else if (STRNICMP(env_mus, "cd", 2) == 0 || STRNICMP(env_mus, "ogg", 3) == 0) {
+            g_music_mode = DSA_MUSIC_MODE_CD;
+        }
+    }
+
+#ifdef _WIN32
+    if (g_music_mode == DSA_MUSIC_MODE_GM && !g_hmidi_out) {
+        if (midiOutOpen(&g_hmidi_out, MIDI_MAPPER, 0, 0, CALLBACK_NULL) != MMSYSERR_NOERROR) {
+            g_hmidi_out = NULL;
+            g_music_mode = DSA_MUSIC_MODE_OPL;
+        }
+    }
+#endif
+    xmi_reset_channels();
+
+    const char *env_wav = getenv("DSA_DUMP_WAV");
+    if (env_wav && env_wav[0] && !g_dump_wav_path[0]) {
+        strncpy(g_dump_wav_path, env_wav, sizeof(g_dump_wav_path) - 1);
+    }
+    if (g_dump_wav_path[0]) {
+        g_dump_wav_fp = fopen(g_dump_wav_path, "wb");
+        if (g_dump_wav_fp) {
+            uint8_t hdr[44];
+            memset(hdr, 0, sizeof(hdr));
+            fwrite(hdr, 1, 44, g_dump_wav_fp);
+            g_dump_wav_bytes = 0;
+        }
+    }
+
+    SDL_AudioSpec want, have;
+    memset(&want, 0, sizeof(want));
+    want.freq     = DSA_AUDIO_FREQ;
+    want.format   = AUDIO_S16LSB;
+    want.channels = 2;
+    want.samples  = 1024;
+    want.callback = dsa_audio_mixer_callback;
+    want.userdata = NULL;
+    g_audio_dev = SDL_OpenAudioDevice(NULL, 0, &want, &have, 0);
+    if (g_audio_dev != 0) {
+        SDL_PauseAudioDevice(g_audio_dev, 0);
+    }
+    dsa_update_window_title_music();
+}
+
+static void dsa_audio_shutdown(void) {
+    if (g_audio_dev != 0) {
+        SDL_CloseAudioDevice(g_audio_dev);
+        g_audio_dev = 0;
+    }
+    gm_all_notes_off();
+#ifdef _WIN32
+    if (g_hmidi_out) {
+        midiOutReset(g_hmidi_out);
+        midiOutClose(g_hmidi_out);
+        g_hmidi_out = NULL;
+    }
+#endif
+    if (g_dump_wav_fp) {
+        uint32_t total_len = g_dump_wav_bytes + 36;
+        uint32_t freq = DSA_AUDIO_FREQ;
+        uint32_t byte_rate = DSA_AUDIO_FREQ * 4;
+        uint16_t fmt = 1, ch = 2, block_align = 4, bits = 16;
+        fseek(g_dump_wav_fp, 0, SEEK_SET);
+        fwrite("RIFF", 1, 4, g_dump_wav_fp);
+        fwrite(&total_len, 4, 1, g_dump_wav_fp);
+        fwrite("WAVEfmt ", 1, 8, g_dump_wav_fp);
+        uint32_t fmt_len = 16;
+        fwrite(&fmt_len, 4, 1, g_dump_wav_fp);
+        fwrite(&fmt, 2, 1, g_dump_wav_fp);
+        fwrite(&ch, 2, 1, g_dump_wav_fp);
+        fwrite(&freq, 4, 1, g_dump_wav_fp);
+        fwrite(&byte_rate, 4, 1, g_dump_wav_fp);
+        fwrite(&block_align, 2, 1, g_dump_wav_fp);
+        fwrite(&bits, 2, 1, g_dump_wav_fp);
+        fwrite("data", 1, 4, g_dump_wav_fp);
+        fwrite(&g_dump_wav_bytes, 4, 1, g_dump_wav_fp);
+        fclose(g_dump_wav_fp);
+        g_dump_wav_fp = NULL;
+    }
+    const char *alog = getenv("DSA_AUDIO_LOG");
+    if ((alog && alog[0] == '1') || g_dump_wav_path[0]) {
+        const char *mstr = (g_music_mode == DSA_MUSIC_MODE_CD) ? "CD" : ((g_music_mode == DSA_MUSIC_MODE_GM) ? "GM" : "OPL");
+        fprintf(stderr, "[AUDIO] mode=%s mixed_frames=%u music_notes=%u voc_plays=%u peak_sample=%d\n",
+                mstr,
+                (unsigned int)g_stat_mixed_frames,
+                (unsigned int)g_stat_music_notes,
+                (unsigned int)g_stat_voc_plays,
+                g_stat_peak_sample);
+        fflush(stderr);
+    }
+    if (g_cd_samples)   { free(g_cd_samples);   g_cd_samples   = NULL; }
+    if (g_xmi_evnt_buf) { free(g_xmi_evnt_buf); g_xmi_evnt_buf = NULL; }
+    if (g_voc_samples)  { free(g_voc_samples);  g_voc_samples  = NULL; }
+}
+
+int dsa_platform_play_xmidi(const unsigned char *xmi_data, uint32_t xmi_len, int loop) {
+    if (!xmi_data || xmi_len < 32) return 0;
+    /* Suche EVNT-Chunk innerhalb des XMIDI-Puffers */
+    uint32_t evnt_off = 0;
+    uint32_t evnt_len = 0;
+    for (uint32_t i = 0; i + 8 <= xmi_len && i < 512; ++i) {
+        if (xmi_data[i] == 'E' && xmi_data[i+1] == 'V' && xmi_data[i+2] == 'N' && xmi_data[i+3] == 'T') {
+            evnt_len = ((uint32_t)xmi_data[i+4] << 24)
+                     | ((uint32_t)xmi_data[i+5] << 16)
+                     | ((uint32_t)xmi_data[i+6] << 8)
+                     |  (uint32_t)xmi_data[i+7];
+            evnt_off = i + 8;
+            break;
+        }
+    }
+    if (evnt_off == 0 || evnt_len == 0) return 0;
+    if (evnt_off + evnt_len > xmi_len) {
+        evnt_len = xmi_len - evnt_off;
+    }
+
+    if (g_audio_dev) SDL_LockAudioDevice(g_audio_dev);
+    if (g_xmi_evnt_buf) {
+        free(g_xmi_evnt_buf);
+        g_xmi_evnt_buf = NULL;
+    }
+    g_xmi_evnt_buf = (uint8_t *)malloc(evnt_len);
+    if (g_xmi_evnt_buf) {
+        memcpy(g_xmi_evnt_buf, xmi_data + evnt_off, evnt_len);
+        g_xmi_evnt_len   = evnt_len;
+        g_xmi_pos        = 0;
+        g_xmi_wait_ticks = 0;
+        g_xmi_loop       = loop ? 1 : 0;
+        g_xmi_active     = 1;
+        g_xmi_paused     = 0;
+        xmi_reset_channels();
+    }
+    if (g_audio_dev) SDL_UnlockAudioDevice(g_audio_dev);
+    return g_xmi_active;
+}
+
+void dsa_platform_stop_music(void) {
+    if (g_audio_dev) SDL_LockAudioDevice(g_audio_dev);
+    g_xmi_active = 0;
+    g_xmi_pos    = 0;
+    gm_all_notes_off();
+    opl_all_notes_off();
+    if (g_audio_dev) SDL_UnlockAudioDevice(g_audio_dev);
+}
+
+void dsa_platform_pause_music(int pause_on) {
+    if (g_audio_dev) SDL_LockAudioDevice(g_audio_dev);
+    g_xmi_paused = pause_on ? 1 : 0;
+    if (g_xmi_paused) {
+        gm_all_notes_off();
+        opl_all_notes_off();
+    }
+    if (g_audio_dev) SDL_UnlockAudioDevice(g_audio_dev);
+}
+
+void dsa_platform_set_music_volume(int vol_0_127) {
+    if (vol_0_127 < 0)   vol_0_127 = 0;
+    if (vol_0_127 > 127) vol_0_127 = 127;
+    if (g_audio_dev) SDL_LockAudioDevice(g_audio_dev);
+    g_music_volume = vol_0_127;
+    if (g_music_mode == DSA_MUSIC_MODE_GM) {
+        for (int c = 0; c < 16; ++c) {
+            gm_update_channel_volume((uint8_t)c);
+        }
+    } else {
+        for (int v = 0; v < OPL_NUM_VOICES; ++v) {
+            if (g_opl_voices[v].active) opl_update_voice_volume(v);
+        }
+    }
+    if (g_audio_dev) SDL_UnlockAudioDevice(g_audio_dev);
+}
+
+int dsa_platform_get_music_volume(void) {
+    return g_music_volume;
+}
+
+int dsa_platform_play_voc(const unsigned char *voc_data, uint32_t voc_len) {
+    if (!voc_data || voc_len < 32) return 0;
+    if (memcmp(voc_data, "Creative Voice File\x1a", 20) != 0) return 0;
+    uint16_t hdr_size = (uint16_t)voc_data[20] | ((uint16_t)voc_data[21] << 8);
+    if (hdr_size < 20 || hdr_size >= voc_len) return 0;
+
+    uint32_t pos = hdr_size;
+    uint32_t src_rate = 11025;
+    int      rate_from_type8 = 0;
+
+    /* Erste Runde: Gesamtzahl der 8-Bit-PCM-Samples bestimmen */
+    uint32_t raw_count = 0;
+    uint32_t scan_pos = pos;
+    while (scan_pos < voc_len) {
+        uint8_t bt = voc_data[scan_pos];
+        if (bt == 0 || scan_pos + 4 > voc_len) break;
+        uint32_t blen = (uint32_t)voc_data[scan_pos + 1]
+                      | ((uint32_t)voc_data[scan_pos + 2] << 8)
+                      | ((uint32_t)voc_data[scan_pos + 3] << 16);
+        if (scan_pos + 4 + blen > voc_len) {
+            blen = voc_len - (scan_pos + 4);
+        }
+        if (bt == 8 && blen >= 4) {
+            uint16_t tc = (uint16_t)voc_data[scan_pos + 4] | ((uint16_t)voc_data[scan_pos + 5] << 8);
+            if (tc < 65535) {
+                src_rate = 256000000u / (65536u - (uint32_t)tc);
+                rate_from_type8 = 1;
+            }
+        } else if (bt == 1 && blen > 2) {
+            if (!rate_from_type8) {
+                uint8_t sr_div = voc_data[scan_pos + 4];
+                if (sr_div < 255) src_rate = 1000000u / (256u - (uint32_t)sr_div);
+            }
+            raw_count += (blen - 2);
+        } else if (bt == 2) {
+            raw_count += blen;
+        }
+        scan_pos += 4 + blen;
+    }
+
+    if (raw_count == 0 || src_rate == 0) return 0;
+    uint8_t *raw_pcm = (uint8_t *)malloc(raw_count);
+    if (!raw_pcm) return 0;
+
+    uint32_t wpos = 0;
+    scan_pos = pos;
+    while (scan_pos < voc_len && wpos < raw_count) {
+        uint8_t bt = voc_data[scan_pos];
+        if (bt == 0 || scan_pos + 4 > voc_len) break;
+        uint32_t blen = (uint32_t)voc_data[scan_pos + 1]
+                      | ((uint32_t)voc_data[scan_pos + 2] << 8)
+                      | ((uint32_t)voc_data[scan_pos + 3] << 16);
+        if (scan_pos + 4 + blen > voc_len) blen = voc_len - (scan_pos + 4);
+        if (bt == 1 && blen > 2) {
+            uint32_t n = blen - 2;
+            memcpy(raw_pcm + wpos, voc_data + scan_pos + 6, n);
+            wpos += n;
+        } else if (bt == 2 && blen > 0) {
+            memcpy(raw_pcm + wpos, voc_data + scan_pos + 4, blen);
+            wpos += blen;
+        }
+        scan_pos += 4 + blen;
+    }
+
+    /* Resample von src_rate (z.B. 11025 Hz oder 44100 Hz) auf DSA_AUDIO_FREQ (44100 Hz) */
+    uint32_t out_count = (uint32_t)(((uint64_t)wpos * DSA_AUDIO_FREQ) / src_rate);
+    if (out_count == 0) { free(raw_pcm); return 0; }
+    int16_t *resampled = (int16_t *)malloc(out_count * sizeof(int16_t));
+    if (!resampled) { free(raw_pcm); return 0; }
+
+    for (uint32_t i = 0; i < out_count; ++i) {
+        uint32_t src_idx = (uint32_t)(((uint64_t)i * src_rate) / DSA_AUDIO_FREQ);
+        if (src_idx >= wpos) src_idx = wpos - 1;
+        int s = ((int)raw_pcm[src_idx] - 128) * 256;
+        resampled[i] = (int16_t)s;
+    }
+    free(raw_pcm);
+
+    if (g_audio_dev) SDL_LockAudioDevice(g_audio_dev);
+    if (g_voc_samples) {
+        free(g_voc_samples);
+    }
+    g_voc_samples = resampled;
+    g_voc_len     = out_count;
+    g_voc_pos     = 0;
+    g_voc_active  = 1;
+    g_stat_voc_plays++;
+    if (g_audio_dev) SDL_UnlockAudioDevice(g_audio_dev);
+    return 1;
+}
+
+void dsa_platform_stop_voc(void) {
+    if (g_audio_dev) SDL_LockAudioDevice(g_audio_dev);
+    g_voc_active = 0;
+    g_voc_pos    = 0;
+    if (g_audio_dev) SDL_UnlockAudioDevice(g_audio_dev);
+}
+
+int dsa_platform_is_voc_playing(void) {
+    return g_voc_active ? 1 : 0;
+}
+
+void dsa_platform_set_sfx_volume(int vol_0_127) {
+    if (vol_0_127 < 0)   vol_0_127 = 0;
+    if (vol_0_127 > 127) vol_0_127 = 127;
+    g_sfx_volume = vol_0_127;
+}
+
+int dsa_platform_get_sfx_volume(void) {
+    return g_sfx_volume;
+}
+
+void dsa_platform_get_audio_stats(uint32_t *out_mixed_frames, uint32_t *out_music_notes, uint32_t *out_voc_plays, int *out_peak_sample) {
+    if (out_mixed_frames) *out_mixed_frames = g_stat_mixed_frames;
+    if (out_music_notes)  *out_music_notes  = g_stat_music_notes;
+    if (out_voc_plays)    *out_voc_plays    = g_stat_voc_plays;
+    if (out_peak_sample)  *out_peak_sample  = g_stat_peak_sample;
+}
