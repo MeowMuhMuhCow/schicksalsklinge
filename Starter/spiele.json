@@ -1,0 +1,161 @@
+{
+  "version": 1,
+  "titel": "Nordlandtrilogie - Gemeinsamer Starter",
+  "spiele": [
+    {
+      "id": "schicksalsklinge",
+      "teil": 1,
+      "name": "Die Schicksalsklinge",
+      "untertitel": "Das Schwarze Auge - Teil 1 (1992)",
+      "status": "verfuegbar",
+      "status_wenn_exe_fehlt": "noch nicht verfuegbar",
+      "port_ordner": "../Port/build",
+      "port_ordner_alternativen": [
+        "../Port/release",
+        "../../Port/build",
+        "../../Port/release",
+        "schicksalsklinge",
+        "."
+      ],
+      "exe_stufen": {
+        "original": "SCHICK_PORT_ORIG.EXE",
+        "wichtig": "SCHICK_PORT_WICHTIG.EXE",
+        "alles": "SCHICK_PORT_ALLES.EXE",
+        "standard": "SCHICK_PORT.EXE"
+      },
+      "kennungsdatei": "SCHICK.DAT",
+      "pflichtdateien": [
+        "SCHICK.DAT",
+        "DSAGEN.DAT",
+        "SCHICKM.EXE"
+      ],
+      "gog_pfade": [
+        "C:\\Program Files (x86)\\GOG Galaxy\\Games\\Realms of Arkania",
+        "C:\\Program Files\\GOG Galaxy\\Games\\Realms of Arkania",
+        "C:\\GOG Games\\Realms of Arkania",
+        "D:\\GOG Games\\Realms of Arkania",
+        "C:\\GOG Games\\Realms of Arkania - Blade of Destiny",
+        "D:\\GOG Games\\Realms of Arkania - Blade of Destiny",
+        "C:\\GOG Games\\Realms of Arkania - Blade of Destiny German",
+        "C:\\Program Files (x86)\\GOG Galaxy\\Games\\Realms of Arkania - Blade of Destiny German"
+      ],
+      "fenster_optionen": [
+        "2",
+        "3",
+        "4",
+        "5",
+        "vollbild"
+      ],
+      "skalierung_optionen": [
+        "ganzzahlig",
+        "fuellend"
+      ],
+      "probenlog": true,
+      "probenlog_skript": "../Port/release/Probenlog/probenlog_fenster.ps1"
+    },
+    {
+      "id": "sternenschweif",
+      "teil": 2,
+      "name": "Sternenschweif",
+      "untertitel": "Das Schwarze Auge - Teil 2 (1994)",
+      "status": "noch_nicht_verfuegbar",
+      "status_wenn_exe_fehlt": "noch nicht verfuegbar",
+      "port_ordner": "../../Q 004 DSA Sternenschweif/Port/build",
+      "port_ordner_alternativen": [
+        "../../Q 004 DSA Sternenschweif/Port/release",
+        "../../../Q 004 DSA Sternenschweif/Port/build",
+        "../../../Q 004 DSA Sternenschweif/Port/release",
+        "../../Q 004 DSA Sternenschweif/build",
+        "../../../Q 004 DSA Sternenschweif/build",
+        "sternenschweif"
+      ],
+      "exe_stufen": {
+        "original": "SCHWEIF_PORT_ORIG.EXE",
+        "wichtig": "SCHWEIF_PORT_WICHTIG.EXE",
+        "alles": "SCHWEIF_PORT_ALLES.EXE",
+        "standard": "SCHWEIF_PORT.EXE"
+      },
+      "kennungsdatei": "SCHWEIF.EXE",
+      "pflichtdateien": [
+        "SCHWEIF.EXE",
+        "DATA\\STAR.DAT"
+      ],
+      "gog_pfade": [
+        "C:\\Program Files (x86)\\GOG Galaxy\\Games\\Realms of Arkania 2",
+        "C:\\Program Files\\GOG Galaxy\\Games\\Realms of Arkania 2",
+        "C:\\GOG Games\\Realms of Arkania 2",
+        "D:\\GOG Games\\Realms of Arkania 2",
+        "C:\\GOG Games\\Realms of Arkania - Star Trail",
+        "D:\\GOG Games\\Realms of Arkania - Star Trail"
+      ],
+      "fenster_optionen": [
+        "2",
+        "3",
+        "4",
+        "5",
+        "vollbild"
+      ],
+      "skalierung_optionen": [
+        "ganzzahlig",
+        "fuellend"
+      ],
+      "probenlog": true,
+      "probenlog_skript": "../../Q 004 DSA Sternenschweif/Probenlog/probenlog_fenster.ps1"
+    },
+    {
+      "id": "riva",
+      "teil": 3,
+      "name": "Schatten über Riva",
+      "untertitel": "Das Schwarze Auge - Teil 3 (1996)",
+      "status": "noch_nicht_verfuegbar",
+      "status_wenn_exe_fehlt": "noch nicht verfuegbar",
+      "port_ordner": "../../Q 006 DSA Schatten über Riva/Port/build",
+      "port_ordner_alternativen": [
+        "../../Q 006 DSA Schatten über Riva/Port/release",
+        "../../Q 006 DSA Schatten ueber Riva/Port/build",
+        "../../Q 006 DSA Schatten ueber Riva/Port/release",
+        "../../../Q 006 DSA Schatten über Riva/Port/build",
+        "../../../Q 006 DSA Schatten über Riva/Port/release",
+        "../../../Q 006 DSA Schatten ueber Riva/Port/build",
+        "../../../Q 006 DSA Schatten ueber Riva/Port/release",
+        "../../Q 006 DSA Schatten über Riva/build",
+        "../../Q 006 DSA Schatten ueber Riva/build",
+        "riva"
+      ],
+      "exe_stufen": {
+        "original": "RIVA_PORT_ORIG.EXE",
+        "wichtig": "RIVA_PORT_WICHTIG.EXE",
+        "alles": "RIVA_PORT_ALLES.EXE",
+        "standard": "RIVA_PORT.EXE"
+      },
+      "kennungsdatei": "RIVA.EXE",
+      "pflichtdateien": [
+        "RIVA.EXE",
+        "DATA\\RIVA.ALF"
+      ],
+      "gog_pfade": [
+        "C:\\Program Files (x86)\\GOG Galaxy\\Games\\Realms of Arkania 3",
+        "C:\\Program Files\\GOG Galaxy\\Games\\Realms of Arkania 3",
+        "C:\\GOG Games\\Realms of Arkania 3",
+        "D:\\GOG Games\\Realms of Arkania 3",
+        "C:\\Program Files (x86)\\GOG Galaxy\\Games\\Realms of Arkania - Shadows over Riva",
+        "C:\\Program Files\\GOG Galaxy\\Games\\Realms of Arkania - Shadows over Riva",
+        "C:\\GOG Games\\Realms of Arkania - Shadows over Riva",
+        "D:\\GOG Games\\Realms of Arkania - Shadows over Riva"
+      ],
+      "fenster_optionen": [
+        "2",
+        "3",
+        "4",
+        "5",
+        "vollbild"
+      ],
+      "skalierung_optionen": [
+        "ganzzahlig",
+        "fuellend"
+      ],
+      "probenlog": true,
+      "probenlog_skript": "../../Q 006 DSA Schatten über Riva/Probenlog/probenlog_fenster.ps1"
+    }
+  ]
+}

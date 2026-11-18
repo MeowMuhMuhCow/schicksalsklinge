@@ -1,0 +1,76 @@
+GNU GENERAL PUBLIC LICENSE
+Version 3, 29 June 2007
+
+Copyright (C) 2007 Free Software Foundation, Inc. <https://fsf.org/>
+Everyone is permitted to copy and distribute verbatim copies of this license
+document, but changing it is not allowed.
+
+===============================================================================
+HERKUNFTS- UND LIZENZHINWEISE (CREDITS & THIRD-PARTY LICENSES)
+===============================================================================
+
+Dieses Softwarepaket (Nativer Port von "Das Schwarze Auge: Die Schicksalsklinge"
+V3.02de) wird unter den Bedingungen der GNU General Public License Version 3
+(GPLv3) veröffentlicht. Es enthält KEINE Original-Spieldaten von Attic
+Entertainment Software.
+
+1. Bright-Eyes (Decompilierung & Rekonstruktion von SCHICKM.EXE V3.02de & NGEN)
+   - Projekt:    https://github.com/shihan42/Bright-Eyes
+   - Autoren:    shihan42 und Mitwirkende des Bright-Eyes-Projekts
+   - Lizenz:     GNU General Public License v3.0 (GPLv3)
+   - Verwendung: Rekonstruierter C-Quellcode der Segmente seg001..seg122 sowie
+                 der Heldenerschaffung (ngen) und die Fehlerkorrekturen (s_fix.h).
+
+2. MobileEyes (CD-Audio-Umsetzung, Intro-Interpreter & Portierungs-Referenz)
+   - Projekt:    https://github.com/Kerygma83/mobile-eyes
+   - Autor:      Gero Ohrner (Kerygma83)
+   - Lizenz:     GNU General Public License v3.0 (GPLv3)
+   - Verwendung: (a) Umsetzung der CD-Audio-Steuerung (seg001.c / seg002.c,
+                     g_use_cdaudio_flag = 1, Track-Zuordnung Track02..Track15 fuer
+                     Intro, Heldenerschaffung und Hauptspiel);
+                 (b) Vorlage fuer den eingebetteten 8086-Intro-Interpreter
+                     (platform/dsa_intro.cpp nach werkzeuge/intro.js, Commit b5e8cc39,
+                     ergaenzt um die exakte INT-80h-CD-Synchronisationstabelle aus
+                     INTRO.EXE fuer INTRO_E.OVL);
+                 (c) Portierungs-Referenz fuer nicht-Borland-Plattformen.
+
+3. PowerPacker-2.0-Entpacker (decomp_pp20 in seg008.c)
+   - Ursprung:   ppdepack / amigadepacker
+   - Autor:      Heikki Orsila <heikki.orsila@iki.fi>
+   - Lizenz:     GNU General Public License v2.0+ / LGPL (kompatibel mit GPLv3)
+
+4. DOSBox 0.74 OPL2/OPL3-Emulator (DBOPL in third_party/dbopl/)
+   - Projekt:    https://www.dosbox.com/
+   - Autoren:    The DOSBox Team (Sjoerd van der Berg / Hareiet u. a.)
+   - Lizenz:     GNU General Public License v2.0 or later (GPLv2+, kompatibel
+                 mit GPLv3 gemaess Abschnitt 14 GPLv2 / Abschnitt 7 GPLv3)
+   - Verwendung: Exakte Emulation des Yamaha YM3812 (OPL2) fuer den optionalen
+                 AdLib-/Sound-Blaster-Musikmodus (--music=opl).
+
+5. stb_vorbis (Ogg-Vorbis-Decoder in third_party/stb_vorbis/)
+   - Projekt:    https://github.com/nothings/stb
+   - Autor:      Sean Barrett
+   - Lizenz:     Public Domain (Unlicense) / MIT License
+   - Verwendung: Dekodierung der CD-Audio-Spuren MUSIC/Track02.OGG .. Track15.OGG.
+
+6. Simple DirectMedia Layer (SDL2)
+   - Projekt:    https://www.libsdl.org/
+   - Autoren:    Sam Lantinga und Mitwirkende
+   - Lizenz:     zlib License
+
+===============================================================================
+                    GNU GENERAL PUBLIC LICENSE
+                       Version 3, 29 June 2007
+
+  This program is free software: you can redistribute it and/or modify
+  it under the terms of the GNU General Public License as published by
+  the Free Software Foundation, either version 3 of the License, or
+  (at your option) any later version.
+
+  This program is distributed in the hope that it will be useful,
+  but WITHOUT ANY WARRANTY; without even the implied warranty of
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  GNU General Public License for more details.
+
+  You should have received a copy of the GNU General Public License
+  along with this program.  If not, see <https://www.gnu.org/licenses/>.
