@@ -13,6 +13,7 @@
 
 #define WIN32_LEAN_AND_MEAN
 #include <windows.h>
+#include <shellapi.h>
 #include <shlobj.h>
 #include <direct.h>
 #include <io.h>
@@ -1467,6 +1468,9 @@ static void render_screen_select_game(void) {
         const char *short_sub = (g.teil == 1) ? "(DSA Teil 1 – 1992)" : ((g.teil == 2) ? "(DSA Teil 2 – 1994)" : "(DSA Teil 3 – 1996)");
         draw_text(cx + 124 + title_w, cy + 22, short_sub, g.verfuegbar ? 0xFFA4B0C2u : 0xFF707888u, 0, true);
 
+        if (g.gamedir_valid) {
+            draw_button(cx + cw - 396, cy + 18, 150, 42, "DOS-Version", false, true, false, bg_hover);
+        }
         if (g.verfuegbar) {
             draw_button(cx + cw - 236, cy + 18, 216, 42, ">> Spiel starten", true, true, true, bg_hover);
         } else if (!g.has_any_exe) {
@@ -1610,6 +1614,7 @@ static void render_screen_settings(void) {
     draw_rect_border(18, 694, SCREEN_W - 36, 52, 0xFF687288u, 0xFF303644u);
 
     draw_button(30, 701, 264, 38, "< Zurück zur Übersicht", false, true, false, bg_hover);
+    draw_button(370, 699, 326, 42, ">> DOS-VERSION STARTEN [D]", false, g.gamedir_valid, false, bg_hover);
     draw_button(716, 699, 314, 42, ">> SPIEL STARTEN (Enter)", g_settings_row == 6, true, true, bg_hover);
 }
 
@@ -2485,6 +2490,166 @@ static int launch_selected_game(
     return (int)exit_code;
 }
 
+static int launch_dos_game(GameCatalogEntry &g) {
+    save_einstellungen_ini();
+
+    if (!g.gamedir_valid) {
+        const char *hl = getenv("STARTER_HEADLESS");
+        if (!hl || hl[0] != '1') {
+            std::string picked = browse_for_gamedir_dialog("Spielordner (mit DOSBOX) wählen:");
+            if (!picked.empty()) {
+                handle_dropped_folder(picked);
+            }
+        }
+    }
+    if (!g.gamedir_valid) {
+        g_modal_active   = true;
+        g_modal_is_ok    = false;
+        g_modal_is_crash = false;
+        g_modal_title    = "SPIELORDNER FEHLT";
+        g_modal_line1    = "Der Original-Spielordner für \"" + g.name + "\" fehlt.";
+        g_modal_line2    = "Erwartete Kennungsdatei: " + g.kennungsdatei;
+        g_modal_line3    = "Bitte GOG-Spielordner ins Fenster ziehen oder [Ordner wählen...] klicken.";
+        g_modal_line4.clear();
+        return -3;
+    }
+
+    std::string gamedir = full_win_path(g.resolved_gamedir);
+    const char *prefix = (g.teil == 1) ? "BLADEM" : ((g.teil == 2) ? "SCHWEIF" : "RIVA");
+    const char *orig_exe = (g.teil == 1) ? "SCHICKM.EXE" : ((g.teil == 2) ? "SCHWEIF.EXE" : "RIVA.EXE");
+
+    std::string bat_name;
+    std::string fix_exe_name;
+    if (g.chosen_stufe == STUFE_ORIG) {
+        bat_name = std::string(prefix) + "_STARTEN.bat";
+    } else if (g.chosen_stufe == STUFE_WICHTIG) {
+        bat_name = std::string(prefix) + (g.chosen_probenlog ? "_FIX_WICHTIG_MIT_PROBENLOG_STARTEN.bat" : "_FIX_WICHTIG_STARTEN.bat");
+        fix_exe_name = std::string(prefix) + "_FIX_WICHTIG.EXE";
+    } else {
+        bat_name = std::string(prefix) + (g.chosen_probenlog ? "_FIX_ALLES_MIT_PROBENLOG_STARTEN.bat" : "_FIX_ALLES_STARTEN.bat");
+        fix_exe_name = std::string(prefix) + "_FIX_ALLES.EXE";
+    }
+
+    std::vector<std::string> cands;
+    if (!g.resolved_port_dir.empty()) cands.push_back(g.resolved_port_dir);
+    cands.push_back(g_exe_dir);
+    cands.push_back(g_starter_dir);
+    cands.push_back(join_path(g_starter_dir, ".."));
+    if (!g.resolved_port_dir.empty()) {
+        cands.push_back(join_path(g.resolved_port_dir, ".."));
+        cands.push_back(join_path(g.resolved_port_dir, "..\\.."));
+    }
+    cands.push_back(gamedir);
+
+    std::string dos_dir;
+    std::string bat_path;
+    for (size_t i = 0; i < cands.size(); ++i) {
+        std::string p = join_path(cands[i], bat_name);
+        if (file_exists_win(p)) {
+            dos_dir = full_win_path(cands[i]);
+            bat_path = full_win_path(p);
+            break;
+        }
+    }
+
+    if (!bat_path.empty()) {
+        /* 1. SPIELPFAD.txt neben der .bat aktualisieren, damit SPIELPFAD_SUCHEN.cmd sofort den Ordner hat */
+        std::string sp_txt = join_path(dos_dir, "SPIELPFAD.txt");
+        FILE *fp = fopen(utf8_to_win1252(sp_txt).c_str(), "w");
+        if (fp) {
+            fprintf(fp, "%s\n", utf8_to_win1252(gamedir).c_str());
+            fclose(fp);
+        }
+
+        /* 2. Falls Fix-Stufe gewaehlt und Build\<FIX_EXE> noch nicht existiert: automatisch patchen.ps1 ausfuehren */
+        if (!fix_exe_name.empty()) {
+            std::string fix_exe_path = join_path(dos_dir, "Build\\" + fix_exe_name);
+            std::string patchen_ps1 = join_path(dos_dir, "Patch\\patchen.ps1");
+            if (!file_exists_win(fix_exe_path) && file_exists_win(patchen_ps1)) {
+                std::string build_dir = join_path(dos_dir, "Build");
+                _mkdir(utf8_to_win1252(build_dir).c_str());
+                char pcmd[2048];
+                if (g.teil == 1) {
+                    snprintf(pcmd, sizeof(pcmd),
+                             "powershell.exe -NoProfile -ExecutionPolicy Bypass -File \"%s\" -Spiel \"%s\" -Name %s -Ziel \"%s\" -Muster \"BLADEM_FIX_*.ndp\"",
+                             utf8_to_win1252(patchen_ps1).c_str(), utf8_to_win1252(gamedir).c_str(), orig_exe, utf8_to_win1252(build_dir).c_str());
+                } else {
+                    snprintf(pcmd, sizeof(pcmd),
+                             "powershell.exe -NoProfile -ExecutionPolicy Bypass -File \"%s\" -Spiel \"%s\" -Name %s -Ziel \"%s\"",
+                             utf8_to_win1252(patchen_ps1).c_str(), utf8_to_win1252(gamedir).c_str(), orig_exe, utf8_to_win1252(build_dir).c_str());
+                }
+                STARTUPINFOA psi;
+                PROCESS_INFORMATION ppi;
+                memset(&psi, 0, sizeof(psi));
+                memset(&ppi, 0, sizeof(ppi));
+                psi.cb = sizeof(psi);
+                if (CreateProcessA(NULL, pcmd, NULL, NULL, FALSE, CREATE_NO_WINDOW, NULL, utf8_to_win1252(dos_dir).c_str(), &psi, &ppi)) {
+                    WaitForSingleObject(ppi.hProcess, 15000);
+                    CloseHandle(ppi.hThread);
+                    CloseHandle(ppi.hProcess);
+                }
+                if (g.teil == 1) {
+                    snprintf(pcmd, sizeof(pcmd),
+                             "powershell.exe -NoProfile -ExecutionPolicy Bypass -File \"%s\" -Spiel \"%s\" -Name SCHICK.DAT -Ziel \"%s\" -Muster \"SCHICK.DAT.ndp\"",
+                             utf8_to_win1252(patchen_ps1).c_str(), utf8_to_win1252(gamedir).c_str(), utf8_to_win1252(build_dir).c_str());
+                    if (CreateProcessA(NULL, pcmd, NULL, NULL, FALSE, CREATE_NO_WINDOW, NULL, utf8_to_win1252(dos_dir).c_str(), &psi, &ppi)) {
+                        WaitForSingleObject(ppi.hProcess, 15000);
+                        CloseHandle(ppi.hThread);
+                        CloseHandle(ppi.hProcess);
+                    }
+                }
+            }
+        }
+
+        /* 3. DOS-Start-.bat ueber Windows-Shell starten */
+        HINSTANCE hinst = ShellExecuteA(
+            NULL,
+            "open",
+            utf8_to_win1252(bat_path).c_str(),
+            NULL,
+            utf8_to_win1252(dos_dir).c_str(),
+            SW_SHOWNORMAL
+        );
+        if ((INT_PTR)hinst > 32) {
+            g_status_msg = "DOS-Version gestartet: " + bat_name;
+            return 0;
+        }
+    }
+
+    /* Fallback: Direkt DOSBOX\DOSBox.exe im GOG-Spielordner starten */
+    std::string dosbox_exe = join_path(gamedir, "DOSBOX\\DOSBox.exe");
+    if (file_exists_win(dosbox_exe)) {
+        char conf1[64], conf2[64];
+        snprintf(conf1, sizeof(conf1), "..\\dosbox_realms%d.conf", g.teil);
+        snprintf(conf2, sizeof(conf2), "..\\dosbox_realms%d_single.conf", g.teil);
+        std::string db_dir = join_path(gamedir, "DOSBOX");
+        std::string cmd = "\"" + utf8_to_win1252(dosbox_exe) + "\" -conf \"" + conf1 + "\" -conf \"" + conf2 + "\" -noconsole";
+        std::vector<char> mcmd(cmd.begin(), cmd.end());
+        mcmd.push_back('\0');
+        STARTUPINFOA si;
+        PROCESS_INFORMATION pi;
+        memset(&si, 0, sizeof(si));
+        memset(&pi, 0, sizeof(pi));
+        si.cb = sizeof(si);
+        if (CreateProcessA(NULL, mcmd.data(), NULL, NULL, FALSE, 0, NULL, utf8_to_win1252(db_dir).c_str(), &si, &pi)) {
+            CloseHandle(pi.hThread);
+            CloseHandle(pi.hProcess);
+            g_status_msg = "DOSBox gestartet: " + g.name;
+            return 0;
+        }
+    }
+
+    g_modal_active   = true;
+    g_modal_is_ok    = false;
+    g_modal_is_crash = false;
+    g_modal_title    = "DOS-START NICHT MÖGLICH";
+    g_modal_line1    = "Weder " + bat_name + " noch DOSBOX\\DOSBox.exe wurden gefunden.";
+    g_modal_line2    = "Spielordner: " + gamedir;
+    g_modal_line3    = "Für die DOS-Version wird DOSBOX\\DOSBox.exe aus der GOG-Fassung benötigt.";
+    g_modal_line4.clear();
+    return -4;
+}
+
 /* =========================================================================
  * 12. Maus- und Tastatur-Ereignisbehandlung (komplett bedienbar)
  * ========================================================================= */
@@ -2599,6 +2764,11 @@ static void handle_mouse_click(int mx, int my, bool &running) {
                     g_settings_row = 0;
                     g_status_msg = g_games[i].name + " – Einstellungen anpassen und [>> SPIEL STARTEN] klicken.";
                     save_einstellungen_ini();
+                    return;
+                }
+                /* 6b. Knopf: [DOS-Version] auf der Karte */
+                if (g_games[i].gamedir_valid && point_in_rect(mx, my, cx + cw - 396, cy + 18, 150, 42)) {
+                    launch_dos_game(g_games[i]);
                     return;
                 }
                 /* 7. Knopf rechts oben: [>> Spiel starten] (bzw. [Ordner wählen...] falls noch nicht startbereit) */
@@ -2731,6 +2901,12 @@ static void handle_mouse_click(int mx, int my, bool &running) {
             return;
         }
 
+        /* Fusszeile: ">> DOS-VERSION STARTEN [D]" */
+        if (g.gamedir_valid && point_in_rect(mx, my, 370, 699, 326, 42)) {
+            launch_dos_game(g);
+            return;
+        }
+
         /* Fusszeile: ">> SPIEL STARTEN (Enter)" */
         if (point_in_rect(mx, my, 716, 699, 314, 42)) {
             g_settings_row = 6;
@@ -2804,6 +2980,10 @@ static void handle_keydown(const SDL_KeyboardEvent &kev, bool &running) {
             g_games[sel_idx].chosen_probenlog = !g_games[sel_idx].chosen_probenlog;
             g_status_msg = std::string("Probenlogger: ") + (g_games[sel_idx].chosen_probenlog ? "EINGESCHALTET (PROBEN.CSV + Live-Fenster)" : "AUSGESCHALTET");
             save_einstellungen_ini();
+            return;
+        }
+        if (ch == 'D') {
+            launch_dos_game(g_games[sel_idx]);
             return;
         }
         if (vk == '1' || vk == '2' || vk == '3') {
@@ -2901,6 +3081,10 @@ static void handle_keydown(const SDL_KeyboardEvent &kev, bool &running) {
             if (!picked.empty()) {
                 handle_dropped_folder(picked);
             }
+            return;
+        }
+        if (ch == 'D') {
+            launch_dos_game(g);
             return;
         }
 

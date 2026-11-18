@@ -106,6 +106,9 @@ def main() -> int:
     BUILD_OUT_DIR.mkdir(parents=True, exist_ok=True)
     out_exe = BUILD_OUT_DIR / "NORDLANDTRILOGIE.EXE"
     shutil.copy2(WIN_STAGE_DIR / "NORDLANDTRILOGIE.EXE", out_exe)
+    rel_dir = STARTER_DIR / "release"
+    if rel_dir.is_dir():
+        shutil.copy2(out_exe, rel_dir / "NORDLANDTRILOGIE.EXE")
     print(f"Erfolgreich gebaut: {out_exe} ({out_exe.stat().st_size:,} Bytes)")
     return 0
 
