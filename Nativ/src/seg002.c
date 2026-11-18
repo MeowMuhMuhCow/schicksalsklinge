@@ -1989,6 +1989,11 @@ static void mouse_cursor(void)
 static void mouse_motion(void)
 {
 	dsa_trace_enter(52, "seg002:mouse_motion");
+#if !defined(__BORLANDC__)
+	if (g_mouse_refresh_flag < 0) {
+		return;
+	}
+#endif
 	/* return if mouse was not moved and the cursor remains */
 	if (g_mouse_moved || (g_last_cursor != g_current_cursor)) {
 
@@ -2050,22 +2055,25 @@ static void sdl_poll_input(void)
 	dsa_platform_set_mouse_range_y(g_mouse_posy_min, g_mouse_posy_max);
 	dsa_platform_poll_mouse_events(&mx, &my, &moved, &left_click, &right_click);
 
+	if (left_click) {
+		g_mouse1_event2 = 1;
+		g_mouse_leftclick_event = 1;
+	}
+	if (right_click) {
+		g_mouse_rightclick_event = 1;
+	}
+
 	if (!g_mouse_locked) {
-		if (left_click) {
-			g_mouse1_event2 = 1;
-			g_mouse_leftclick_event = 1;
-		}
-		if (right_click) {
-			g_mouse_rightclick_event = 1;
-		}
-		if (moved) {
+		if (moved || left_click || right_click) {
 			g_mouse_posx = mx;
 			g_mouse_posy = my;
 			if (g_mouse_posx > g_mouse_posx_max) g_mouse_posx = g_mouse_posx_max;
 			if (g_mouse_posx < g_mouse_posx_min) g_mouse_posx = g_mouse_posx_min;
 			if (g_mouse_posy < g_mouse_posy_min) g_mouse_posy = g_mouse_posy_min;
 			if (g_mouse_posy > g_mouse_posy_max) g_mouse_posy = g_mouse_posy_max;
-			g_mouse_moved = 1;
+			if (moved) {
+				g_mouse_moved = 1;
+			}
 		}
 		/* Wie in mouse_isr() des DOS-Originals: Richtungspfeil-Cursor im 3D-Sichtfenster */
 		if (((gs_dungeon_id != DUNGEON_ID_NONE) || (gs_town_id != TOWN_ID_NONE)) &&
@@ -2079,8 +2087,6 @@ static void sdl_poll_input(void)
 		} else if (g_dialogbox_lock) {
 			g_current_cursor = &g_default_mouse_cursor;
 		}
-	} else if (right_click) {
-		g_mouse_rightclick_event = 1;
 	}
 }
 

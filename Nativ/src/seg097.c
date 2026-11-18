@@ -833,6 +833,10 @@ signed int GUI_menu_input(const signed int positions, const signed int h_lines, 
 			if (g_mouse_posy != mouse_y_last) {
 				mouse_y_last = g_mouse_posy;
 				g_menu_selected = ((mouse_y_last - opt_y0) >> 3) + 1;
+#if !defined(__BORLANDC__)
+				if (g_menu_selected < 1) g_menu_selected = 1;
+				if (g_menu_selected > positions) g_menu_selected = positions;
+#endif
 			}
 
 			if (g_gui_bool_flag) {

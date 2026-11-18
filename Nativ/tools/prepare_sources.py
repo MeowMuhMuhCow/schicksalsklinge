@@ -1185,6 +1185,11 @@ static void SND_set_volume(const uint16_t volume)
 
     sdl_input_block = """static void mouse_motion(void)
 {
+#if !defined(__BORLANDC__)
+	if (g_mouse_refresh_flag < 0) {
+		return;
+	}
+#endif
 	/* return if mouse was not moved and the cursor remains */
 	if (g_mouse_moved || (g_last_cursor != g_current_cursor)) {
 
@@ -1246,22 +1251,25 @@ static void sdl_poll_input(void)
 	dsa_platform_set_mouse_range_y(g_mouse_posy_min, g_mouse_posy_max);
 	dsa_platform_poll_mouse_events(&mx, &my, &moved, &left_click, &right_click);
 
+	if (left_click) {
+		g_mouse1_event2 = 1;
+		g_mouse_leftclick_event = 1;
+	}
+	if (right_click) {
+		g_mouse_rightclick_event = 1;
+	}
+
 	if (!g_mouse_locked) {
-		if (left_click) {
-			g_mouse1_event2 = 1;
-			g_mouse_leftclick_event = 1;
-		}
-		if (right_click) {
-			g_mouse_rightclick_event = 1;
-		}
-		if (moved) {
+		if (moved || left_click || right_click) {
 			g_mouse_posx = mx;
 			g_mouse_posy = my;
 			if (g_mouse_posx > g_mouse_posx_max) g_mouse_posx = g_mouse_posx_max;
 			if (g_mouse_posx < g_mouse_posx_min) g_mouse_posx = g_mouse_posx_min;
 			if (g_mouse_posy < g_mouse_posy_min) g_mouse_posy = g_mouse_posy_min;
 			if (g_mouse_posy > g_mouse_posy_max) g_mouse_posy = g_mouse_posy_max;
-			g_mouse_moved = 1;
+			if (moved) {
+				g_mouse_moved = 1;
+			}
 		}
 		/* Wie in mouse_isr() des DOS-Originals: Richtungspfeil-Cursor im 3D-Sichtfenster */
 		if (((gs_dungeon_id != DUNGEON_ID_NONE) || (gs_town_id != TOWN_ID_NONE)) &&
@@ -1275,8 +1283,6 @@ static void sdl_poll_input(void)
 		} else if (g_dialogbox_lock) {
 			g_current_cursor = &g_default_mouse_cursor;
 		}
-	} else if (right_click) {
-		g_mouse_rightclick_event = 1;
 	}
 }
 
@@ -3021,7 +3027,119 @@ static signed int open_file_ci(const char *fname, int flags)
 	}""",
         "seg066.c:town_fade_and_colors",
     )
+    s66_txt = replace_once(
+        s66_txt,
+        """	i = 0;
+#if FIX_0299
+	/* Fix 299: nicht hinter die Tabelle lesen (Ergebnis bleibt 12) */
+	while ((i < 12) && (g_mapval_to_town_tile[i] < val)) {
+#else
+	while (g_mapval_to_town_tile[i] < val) {
+#endif
+		i++;
+	}
+#if FIX_0299
+	/* wie das Original (dort stand hinter der Tabelle 0x01, 0xff): Ergebnis 12 */
+	if (i == 12) {
+		i = 13;
+	}
+#endif""",
+        """	i = 0;
+#if FIX_0299 || !defined(__BORLANDC__)
+	/* Fix 299 / nativ: nicht hinter die Tabelle lesen (Ergebnis bleibt 12) */
+	while ((i < 12) && (g_mapval_to_town_tile[i] < val)) {
+#else
+	while (g_mapval_to_town_tile[i] < val) {
+#endif
+		i++;
+	}
+#if FIX_0299 || !defined(__BORLANDC__)
+	/* wie das Original (dort stand hinter der Tabelle 0x01, 0xff): Ergebnis 12 */
+	if (i == 12) {
+		i = 13;
+	}
+#endif""",
+        "seg066.c:get_town_tile_type_bounds",
+    )
     s66_p.write_text(s66_txt, encoding="latin-1")
+
+    # seg049.c: GRP_move_hero bounds check (prevent UB & GCC VRP removing dst_pos < 0 clamp when !FIX_0298)
+    s49_p = SRC_DIR / "seg049.c"
+    s49_txt = s49_p.read_text(encoding="latin-1")
+    s49_txt = replace_once(
+        s49_txt,
+        """		g_mouse_locked = 1;
+		g_mouse_posy = 157;
+
+		g_mouse_posx = g_hero_pic_posx[src_pos];""",
+        """		g_mouse_locked = 1;
+		g_mouse_posy = 157;
+
+		g_mouse_posx = g_hero_pic_posx[src_pos];
+#if !defined(__BORLANDC__)
+		dsa_platform_set_mouse_pos(g_mouse_posx, g_mouse_posy);
+#endif""",
+        "seg049.c:GRP_move_hero_sync_mouse",
+    )
+    s49_txt = replace_once(
+        s49_txt,
+        """		dst_pos = 6;
+#if FIX_0298
+		/* Fix 298: nicht vor die Tabelle lesen (Ergebnis wie bisher, hoechstens 0) */
+		while ((--dst_pos > 0) && (g_hero_pic_posx[dst_pos] > g_mouse_posx))
+#else
+		while (g_hero_pic_posx[--dst_pos] > g_mouse_posx) /* for mouse x < 3 this reads before the table; dst_pos is clamped below */
+#endif
+		{
+			;
+		}
+
+		if (dst_pos < 0) {
+			dst_pos = 0;
+		}""",
+        """		dst_pos = 6;
+#if FIX_0298 || !defined(__BORLANDC__)
+		/* Fix 298 / nativ: nicht vor die Tabelle lesen (Ergebnis wie bisher, hoechstens 0) */
+		while ((--dst_pos > 0) && (g_hero_pic_posx[dst_pos] > g_mouse_posx))
+#else
+		while (g_hero_pic_posx[--dst_pos] > g_mouse_posx) /* for mouse x < 3 this reads before the table; dst_pos is clamped below */
+#endif
+		{
+			;
+		}
+
+		if (dst_pos < 0) {
+			dst_pos = 0;
+		}
+#if !defined(__BORLANDC__)
+		if (dst_pos > 5) {
+			dst_pos = 5;
+		}
+#endif""",
+        "seg049.c:GRP_move_hero_bounds",
+    )
+    s49_p.write_text(s49_txt, encoding="latin-1")
+
+    # seg097.c: GUI_menu_input clamp g_menu_selected to 1..positions
+    s97_p = SRC_DIR / "seg097.c"
+    s97_txt = s97_p.read_text(encoding="latin-1")
+    s97_txt = replace_once(
+        s97_txt,
+        """			if (g_mouse_posy != mouse_y_last) {
+				mouse_y_last = g_mouse_posy;
+				g_menu_selected = ((mouse_y_last - opt_y0) >> 3) + 1;
+			}""",
+        """			if (g_mouse_posy != mouse_y_last) {
+				mouse_y_last = g_mouse_posy;
+				g_menu_selected = ((mouse_y_last - opt_y0) >> 3) + 1;
+#if !defined(__BORLANDC__)
+				if (g_menu_selected < 1) g_menu_selected = 1;
+				if (g_menu_selected > positions) g_menu_selected = positions;
+#endif
+			}""",
+        "seg097.c:GUI_menu_input_clamp",
+    )
+    s97_p.write_text(s97_txt, encoding="latin-1")
 
     # seg074.c: g_palette_fight2 size 32 natively
     s74_p = SRC_DIR / "seg074.c"

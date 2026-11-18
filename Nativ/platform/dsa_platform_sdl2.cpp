@@ -41,7 +41,14 @@ static void keyq_push(unsigned short bios_key);
  * ========================================================================= */
 
 const char *g_dsa_last_func = "start";
+static const char * volatile g_dsa_plat_func = "keine";
 int         g_dsa_coverage_enabled = 0;
+
+struct DsaPlatScope {
+    const char *prev;
+    explicit DsaPlatScope(const char *fn) : prev(g_dsa_plat_func) { g_dsa_plat_func = fn; }
+    ~DsaPlatScope() { g_dsa_plat_func = prev; }
+};
 
 static char g_exe_dir[512] = "";
 static void (*g_crash_state_cb)(char *buf, int buf_size) = NULL;
@@ -99,55 +106,187 @@ static void build_tool_log_path(const char *filename, char *out_buf, size_t out_
 #endif
 }
 
+static char g_save_dir[512] = "";
+
 #ifdef _WIN32
+static void dsa_resolve_crash_symbol(const void *addr, char *out_func, size_t out_func_sz, char *out_mod, size_t out_mod_sz) {
+    struct SymEntry { const void *fn; const char *name; };
+    const SymEntry table[] = {
+        { (const void *)&dsa_platform_init,                      "dsa_platform_init" },
+        { (const void *)&dsa_platform_shutdown,                  "dsa_platform_shutdown" },
+        { (const void *)&dsa_platform_set_mode,                  "dsa_platform_set_mode" },
+        { (const void *)&dsa_platform_present,                   "dsa_platform_present" },
+        { (const void *)&dsa_platform_pump_and_present_if_due,   "dsa_platform_pump_and_present_if_due" },
+        { (const void *)&dsa_platform_wait_vsync,                "dsa_platform_wait_vsync" },
+        { (const void *)&dsa_platform_get_mouse,                 "dsa_platform_get_mouse" },
+        { (const void *)&dsa_platform_poll_mouse_events,         "dsa_platform_poll_mouse_events" },
+        { (const void *)&dsa_platform_set_mouse_pos,             "dsa_platform_set_mouse_pos" },
+        { (const void *)&dsa_platform_key_ready,                 "dsa_platform_key_ready" },
+        { (const void *)&dsa_platform_key_read,                  "dsa_platform_key_read" },
+        { (const void *)&dsa_platform_play_cd_track,             "dsa_platform_play_cd_track" },
+        { (const void *)&dsa_platform_play_xmidi,                "dsa_platform_play_xmidi" },
+        { (const void *)&dsa_platform_play_voc,                  "dsa_platform_play_voc" },
+        { (const void *)&dsa_save_bmp,                           "dsa_save_bmp" },
+        { (const void *)&SDL_Init,                               "SDL_Init" },
+        { (const void *)&SDL_CreateWindow,                       "SDL_CreateWindow" },
+        { (const void *)&SDL_CreateRenderer,                     "SDL_CreateRenderer" },
+        { (const void *)&SDL_CreateTexture,                      "SDL_CreateTexture" },
+        { (const void *)&SDL_UpdateTexture,                      "SDL_UpdateTexture" },
+        { (const void *)&SDL_RenderPresent,                      "SDL_RenderPresent" },
+        { (const void *)&SDL_PollEvent,                          "SDL_PollEvent" },
+    };
+    uintptr_t target = (uintptr_t)addr;
+    const char *best_name = NULL;
+    uintptr_t best_diff = (uintptr_t)-1;
+    for (size_t i = 0; i < sizeof(table) / sizeof(table[0]); ++i) {
+        uintptr_t fn_addr = (uintptr_t)table[i].fn;
+        if (target >= fn_addr && (target - fn_addr) < 0x2000 && (target - fn_addr) < best_diff) {
+            best_diff = target - fn_addr;
+            best_name = table[i].name;
+        }
+    }
+    if (best_name) {
+        snprintf(out_func, out_func_sz, "%s+0x%lX", best_name, (unsigned long)best_diff);
+    } else if (g_dsa_plat_func && strcmp(g_dsa_plat_func, "keine") != 0) {
+        snprintf(out_func, out_func_sz, "%s (aktiv)", g_dsa_plat_func);
+    } else if (g_dsa_last_func && g_dsa_last_func[0]) {
+        snprintf(out_func, out_func_sz, "%s", g_dsa_last_func);
+    } else {
+        snprintf(out_func, out_func_sz, "unbekannt");
+    }
+
+    HMODULE hMod = NULL;
+    if (GetModuleHandleExA(GET_MODULE_HANDLE_EX_FLAG_FROM_ADDRESS | GET_MODULE_HANDLE_EX_FLAG_UNCHANGED_REFCOUNT,
+                           (LPCSTR)addr, &hMod) && hMod) {
+        char mod_path[260] = "";
+        GetModuleFileNameA(hMod, mod_path, sizeof(mod_path) - 1);
+        const char *base = strrchr(mod_path, '\\');
+        if (!base) base = strrchr(mod_path, '/');
+        base = base ? (base + 1) : mod_path;
+        uintptr_t rva = target - (uintptr_t)hMod;
+        snprintf(out_mod, out_mod_sz, "%s+0x%lX", base[0] ? base : "modul", (unsigned long)rva);
+    } else {
+        snprintf(out_mod, out_mod_sz, "0x%p", addr);
+    }
+}
+
+static void dsa_write_crash_file(const char *path, const char *msg, DWORD msg_len, const char *state_buf, DWORD state_len) {
+    if (!path || !path[0]) return;
+    HANDLE h = CreateFileA(path, GENERIC_WRITE, FILE_SHARE_READ, NULL,
+                           CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
+    if (h != INVALID_HANDLE_VALUE) {
+        DWORD written = 0;
+        if (msg_len > 0) WriteFile(h, msg, msg_len, &written, NULL);
+        if (state_len > 0) WriteFile(h, state_buf, state_len, &written, NULL);
+        FlushFileBuffers(h);
+        CloseHandle(h);
+    }
+}
+
 static LONG WINAPI dsa_crash_vectored_handler(EXCEPTION_POINTERS *ep) {
     static int in_crash = 0;
+    static char s_msg[2048];
+    static char s_state_buf[2048];
+    static char s_func_name[160];
+    static char s_mod_info[160];
+    static char s_path1[512];
+    static char s_path2[512];
+
     if (!ep || !ep->ExceptionRecord || (ep->ExceptionRecord->ExceptionCode < 0xC0000000UL)) {
         return EXCEPTION_CONTINUE_SEARCH;
     }
+    /* Ignoriere harmlose Win32-RPC/Debugger-Ausnahmen (< 0xC0000005 oder DBG_*) */
+    DWORD code = ep->ExceptionRecord->ExceptionCode;
+    if (code == 0x40010006UL || code == 0x406D1388UL) {
+        return EXCEPTION_CONTINUE_SEARCH;
+    }
     if (in_crash) {
-        ExitProcess(98);
+        TerminateProcess(GetCurrentProcess(), 98);
     }
     in_crash = 1;
 
-    char log_path[512];
-    build_tool_log_path("absturz.log", log_path, sizeof(log_path));
-    HANDLE h = CreateFileA(log_path, GENERIC_WRITE, FILE_SHARE_READ, NULL,
-                           CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
-    if (h != INVALID_HANDLE_VALUE) {
-        char msg[2048];
-        int n = snprintf(msg, sizeof(msg),
-            "=== ABSTURZ-BERICHT (W1) ===\n"
-            "Ausnahme:        0x%08lX\n"
-            "Adresse:         0x%p\n"
-            "Letzte_Funktion: %s\n"
-            "Poll_Schritt:    %u\n",
-            (unsigned long)ep->ExceptionRecord->ExceptionCode,
-            ep->ExceptionRecord->ExceptionAddress,
-            g_dsa_last_func ? g_dsa_last_func : "unbekannt",
-            (unsigned int)g_poll_step
-        );
-        if (n > 0) {
-            DWORD written = 0;
-            WriteFile(h, msg, (DWORD)n, &written, NULL);
-        }
-        if (g_crash_state_cb) {
-            char state_buf[2048] = "";
-            g_crash_state_cb(state_buf, sizeof(state_buf));
-            if (state_buf[0]) {
-                DWORD written = 0;
-                WriteFile(h, state_buf, (DWORD)strlen(state_buf), &written, NULL);
-            }
-        }
-        CloseHandle(h);
+    dsa_resolve_crash_symbol(
+        ep->ExceptionRecord->ExceptionAddress,
+        s_func_name, sizeof(s_func_name),
+        s_mod_info, sizeof(s_mod_info)
+    );
+
+    unsigned long reg_eip = 0, reg_esp = 0, reg_ebp = 0, reg_eax = 0, reg_ebx = 0, reg_ecx = 0, reg_edx = 0;
+#if defined(_M_IX86) || defined(__i386__)
+    if (ep->ContextRecord) {
+        reg_eip = (unsigned long)ep->ContextRecord->Eip;
+        reg_esp = (unsigned long)ep->ContextRecord->Esp;
+        reg_ebp = (unsigned long)ep->ContextRecord->Ebp;
+        reg_eax = (unsigned long)ep->ContextRecord->Eax;
+        reg_ebx = (unsigned long)ep->ContextRecord->Ebx;
+        reg_ecx = (unsigned long)ep->ContextRecord->Ecx;
+        reg_edx = (unsigned long)ep->ContextRecord->Edx;
     }
-    ExitProcess(99);
+#endif
+
+    int n = snprintf(s_msg, sizeof(s_msg),
+        "=== ABSTURZ-BERICHT (W1) ===\n"
+        "Ausnahme:        0x%08lX\n"
+        "Adresse:         0x%p (%s)\n"
+        "Funktion:        %s\n"
+        "Plattform_Funk:  %s\n"
+        "Letzte_Funktion: %s\n"
+        "Poll_Schritt:    %u\n"
+        "Register:        EIP=0x%08lX ESP=0x%08lX EBP=0x%08lX EAX=0x%08lX EBX=0x%08lX ECX=0x%08lX EDX=0x%08lX\n",
+        (unsigned long)code,
+        ep->ExceptionRecord->ExceptionAddress,
+        s_mod_info,
+        s_func_name,
+        g_dsa_plat_func ? g_dsa_plat_func : "keine",
+        g_dsa_last_func ? g_dsa_last_func : "unbekannt",
+        (unsigned int)g_poll_step,
+        reg_eip, reg_esp, reg_ebp, reg_eax, reg_ebx, reg_ecx, reg_edx
+    );
+    DWORD msg_len = (n > 0) ? (DWORD)n : 0;
+
+    s_state_buf[0] = '\0';
+    if (g_crash_state_cb) {
+        g_crash_state_cb(s_state_buf, sizeof(s_state_buf));
+    }
+    DWORD state_len = (DWORD)strlen(s_state_buf);
+
+    build_tool_log_path("absturz.log", s_path1, sizeof(s_path1));
+    dsa_write_crash_file(s_path1, s_msg, msg_len, s_state_buf, state_len);
+
+    if (g_save_dir[0]) {
+        snprintf(s_path2, sizeof(s_path2), "%s\\absturz.log", g_save_dir);
+        if (_stricmp(s_path1, s_path2) != 0) {
+            dsa_write_crash_file(s_path2, s_msg, msg_len, s_state_buf, state_len);
+        }
+    }
+    dsa_write_crash_file("absturz.log", s_msg, msg_len, s_state_buf, state_len);
+
+    const char *env_cl = getenv("DSA_CRASH_LOG");
+    if (env_cl && env_cl[0]) {
+        dsa_write_crash_file(env_cl, s_msg, msg_len, s_state_buf, state_len);
+    }
+
+    TerminateProcess(GetCurrentProcess(), 99);
     return EXCEPTION_EXECUTE_HANDLER;
+}
+
+static void dsa_install_crash_handlers_once(void) {
+    static int s_installed = 0;
+    if (!s_installed) {
+        init_exe_dir_once();
+        SetErrorMode(SEM_FAILCRITICALERRORS | SEM_NOGPFAULTERRORBOX);
+        AddVectoredExceptionHandler(1, dsa_crash_vectored_handler);
+        SetUnhandledExceptionFilter(dsa_crash_vectored_handler);
+        s_installed = 1;
+    }
 }
 #endif
 
 void dsa_platform_register_crash_state_cb(void (*cb)(char *buf, int buf_size)) {
     g_crash_state_cb = cb;
+#ifdef _WIN32
+    dsa_install_crash_handlers_once();
+#endif
 }
 
 void dsa_platform_log_stub(const char *func_name) {
@@ -298,9 +437,31 @@ static int      g_initialized     = 0;
 static int      g_dos_mode        = 0x13;
 static int      g_width           = 320;
 static int      g_height          = 200;
-static int      g_scale           = 3;
+static int      g_scale           = 4;
 static uint32_t g_last_present_ms = 0;
 static uint32_t g_virtual_ticks_ms = 100;
+
+/* S2 (Etappe 3): 4:3-Skalierung (--fenster=2|3|4|5|vollbild, --skalierung=ganzzahlig|fuellend) */
+enum {
+    DSA_SKAL_GANZZAHLIG = 0,
+    DSA_SKAL_FUELLEND   = 1
+};
+static int       g_display_inited      = 0;
+static int       g_fenster_faktor      = 4; /* 2..5 fuer Fenstermodus */
+static int       g_is_fullscreen       = 1; /* Standard: vollbild (1) */
+static int       g_fenster_explicit    = 0;
+static int       g_skalierung_mode     = DSA_SKAL_FUELLEND;
+static SDL_Texture *g_display_tex      = NULL;
+static uint32_t *g_display_buf         = NULL;
+static int       g_display_w           = 0;
+static int       g_display_h           = 0;
+static int       g_vp_x                = 0;
+static int       g_vp_y                = 0;
+static int       g_vp_w                = 1280;
+static int       g_vp_h                = 960;
+static char      g_scaled_shot_path[512] = "";
+static char      g_maustest_log_path[512] = "";
+static int       g_scaled_shot_saved   = 0;
 
 /* =========================================================================
  * 2. Maus- und Tastaturzustand
@@ -393,7 +554,6 @@ static void keyq_push(unsigned short bios_key) {
  * ========================================================================= */
 
 static char g_game_dir[512] = "";
-static char g_save_dir[512] = "";
 static char g_explicit_save_dir[512] = "";
 static int  g_save_dir_redirected = 0;
 static int  g_save_dir_reported = 0;
@@ -713,14 +873,355 @@ static DWORD WINAPI dsa_watchdog_thread_proc(LPVOID param) {
 }
 #endif
 
+static void dsa_parse_fenster_token(const char *val) {
+    if (!val || !val[0]) return;
+    if (STRICMP(val, "vollbild") == 0 || STRICMP(val, "fullscreen") == 0 || STRICMP(val, "full") == 0 || strcmp(val, "0") == 0) {
+        g_is_fullscreen    = 1;
+        g_fenster_explicit = 1;
+    } else {
+        int f = atoi(val);
+        if (f >= 2 && f <= 5) {
+            g_fenster_faktor   = f;
+            g_scale            = f;
+            g_is_fullscreen    = 0;
+            g_fenster_explicit = 1;
+        }
+    }
+}
+
+static void dsa_parse_skalierung_token(const char *val) {
+    if (!val || !val[0]) return;
+    if (STRICMP(val, "ganzzahlig") == 0 || STRICMP(val, "integer") == 0 || strcmp(val, "0") == 0) {
+        g_skalierung_mode = DSA_SKAL_GANZZAHLIG;
+    } else if (STRICMP(val, "fuellend") == 0 || STRICMP(val, "füllend") == 0 || STRICMP(val, "sharp") == 0 || strcmp(val, "1") == 0) {
+        g_skalierung_mode = DSA_SKAL_FUELLEND;
+    }
+}
+
+static void dsa_display_init_from_env(void) {
+    if (g_display_inited) return;
+    g_display_inited = 1;
+
+    /* Standard laut S2: --fenster=vollbild, --skalierung=fuellend */
+    g_is_fullscreen   = 1;
+    g_fenster_faktor  = 4;
+    g_scale           = 4;
+    g_skalierung_mode = DSA_SKAL_FUELLEND;
+
+    const char *env_fs = getenv("DSA_FULLSCREEN");
+    if (env_fs && env_fs[0]) {
+        if (env_fs[0] == '0') { g_is_fullscreen = 0; g_fenster_explicit = 1; }
+        else if (env_fs[0] == '1') { g_is_fullscreen = 1; g_fenster_explicit = 1; }
+    }
+    const char *env_fen = getenv("DSA_FENSTER");
+    if (env_fen && env_fen[0]) {
+        dsa_parse_fenster_token(env_fen);
+    }
+    const char *env_skal = getenv("DSA_SKALIERUNG");
+    if (env_skal && env_skal[0]) {
+        dsa_parse_skalierung_token(env_skal);
+    }
+    const char *env_fres = getenv("DSA_VOLLBILD_AUFLOESUNG");
+    if (env_fres && env_fres[0]) {
+        int fw = 0, fh = 0;
+        if (sscanf(env_fres, "%dx%d", &fw, &fh) == 2 && fw >= 320 && fh >= 240) {
+            SDL_SetFullscreenOverrideRes(fw, fh);
+        }
+    }
+    const char *env_ss = getenv("DSA_SCALED_SCREENSHOT");
+    if (env_ss && env_ss[0]) {
+        strncpy(g_scaled_shot_path, env_ss, sizeof(g_scaled_shot_path) - 1);
+    }
+    const char *env_mt = getenv("DSA_MAUSTEST_LOG");
+    if (env_mt && env_mt[0]) {
+        strncpy(g_maustest_log_path, env_mt, sizeof(g_maustest_log_path) - 1);
+    }
+
+#ifdef _WIN32
+    const char *cmdline = GetCommandLineA();
+    if (cmdline) {
+        const char *p = cmdline;
+        while (*p) {
+            while (*p == ' ' || *p == '\t') ++p;
+            if (!*p) break;
+            char tok[512];
+            int ti = 0, in_q = 0;
+            while (*p && (in_q || (*p != ' ' && *p != '\t'))) {
+                if (*p == '"') { in_q = !in_q; ++p; continue; }
+                if (ti < (int)sizeof(tok) - 1) tok[ti++] = *p;
+                ++p;
+            }
+            tok[ti] = '\0';
+
+            if (STRNICMP(tok, "--fenster=", 10) == 0) {
+                dsa_parse_fenster_token(tok + 10);
+            } else if (STRICMP(tok, "--vollbild") == 0 || STRICMP(tok, "--fullscreen") == 0) {
+                g_is_fullscreen = 1;
+                g_fenster_explicit = 1;
+            } else if (STRICMP(tok, "--fenstermodus") == 0 || STRICMP(tok, "--windowed") == 0) {
+                g_is_fullscreen = 0;
+                g_fenster_explicit = 1;
+            } else if (STRNICMP(tok, "--skalierung=", 13) == 0) {
+                dsa_parse_skalierung_token(tok + 13);
+            } else if (STRNICMP(tok, "--vollbild-aufloesung=", 22) == 0) {
+                int fw = 0, fh = 0;
+                if (sscanf(tok + 22, "%dx%d", &fw, &fh) == 2 && fw >= 320 && fh >= 240) {
+                    SDL_SetFullscreenOverrideRes(fw, fh);
+                }
+            } else if (STRNICMP(tok, "--skaliertes-bild=", 18) == 0) {
+                strncpy(g_scaled_shot_path, tok + 18, sizeof(g_scaled_shot_path) - 1);
+            } else if (STRNICMP(tok, "--maustest-log=", 15) == 0) {
+                strncpy(g_maustest_log_path, tok + 15, sizeof(g_maustest_log_path) - 1);
+            }
+        }
+    }
+#endif
+
+    /* Im automatischen Replay/Autotest ohne explizite --fenster-Vorgabe im Fenster bleiben */
+    int is_at = (getenv("SCHICK_PORT_AUTOTEST") && getenv("SCHICK_PORT_AUTOTEST")[0] == '1');
+    if ((g_replay_active || is_at) && !g_fenster_explicit) {
+        g_is_fullscreen = 0;
+    }
+}
+
+static void dsa_compute_43_viewport(int cw, int ch, int *out_vx, int *out_vy, int *out_vw, int *out_vh) {
+    if (cw < 320) cw = 320;
+    if (ch < 240) ch = 240;
+    int vw = cw, vh = ch;
+
+    if (g_skalierung_mode == DSA_SKAL_GANZZAHLIG) {
+        /* Ganzzahlige horizontale Vielfache mit exaktem 4:3-Seitenverhaeltnis (320*sx : 240*sx = 4 : 3) */
+        int sx = cw / 320;
+        int sy43 = ch / 240;
+        if (sy43 < sx) sx = sy43;
+        if (sx < 1) sx = 1;
+        vw = 320 * sx;
+        vh = 240 * sx;
+    } else {
+        /* Fuellend: groesstmoeglicher 4:3-Bereich in (cw, ch), Rest schwarzer Rand */
+        if (cw * 3 <= ch * 4) {
+            vh = (cw * 3) / 4;
+            vw = (vh * 4) / 3;
+        } else {
+            vw = (ch * 4) / 3;
+            vh = (vw * 3) / 4;
+        }
+        if (vw < 320) { vw = 320; vh = 240; }
+    }
+
+    *out_vx = (cw - vw) / 2;
+    *out_vy = (ch - vh) / 2;
+    *out_vw = vw;
+    *out_vh = vh;
+}
+
+static void dsa_render_scaled_display_buffer(int cw, int ch) {
+    if (cw < 320) cw = 320;
+    if (ch < 240) ch = 240;
+
+    static int s_last_vx = -1, s_last_vy = -1, s_last_vw = -1, s_last_vh = -1;
+    bool buf_reallocated = false;
+
+    if (!g_display_buf || g_display_w != cw || g_display_h != ch) {
+        if (g_display_buf) free(g_display_buf);
+        g_display_buf = (uint32_t *)calloc((size_t)cw * (size_t)ch, sizeof(uint32_t));
+        g_display_w = cw;
+        g_display_h = ch;
+        buf_reallocated = true;
+        if (g_display_tex) {
+            SDL_DestroyTexture(g_display_tex);
+            g_display_tex = NULL;
+        }
+    }
+    if (!g_display_tex && g_renderer) {
+        /* WICHTIG: SDL_RenderSetLogicalSize(cw, ch) NUR bei externer SDL2.dll aufrufen!
+         * Im eingebauten Win32-Provider muss logical_w/logical_h zwingend auf 320x200 (g_width x g_height)
+         * bleiben, damit scale_client_to_logical() die Mausbewegung 1:1 direkt auf 320x200 abbildet! */
+        if (SDL_PortUsingExternalDLL()) {
+            SDL_RenderSetLogicalSize(g_renderer, cw, ch);
+        } else {
+            SDL_RenderSetLogicalSize(g_renderer, g_width, g_height);
+        }
+        g_display_tex = SDL_CreateTexture(
+            g_renderer, SDL_PIXELFORMAT_ARGB8888, SDL_TEXTUREACCESS_STREAMING, cw, ch
+        );
+    }
+
+    int vx = 0, vy = 0, vw = cw, vh = ch;
+    dsa_compute_43_viewport(cw, ch, &vx, &vy, &vw, &vh);
+    g_vp_x = vx; g_vp_y = vy; g_vp_w = vw; g_vp_h = vh;
+    SDL_SetWindowViewport(g_window, vx, vy, vw, vh);
+
+    /* Schwarze Raender (Letterbox / Pillarbox) nur bei Geometrieaenderung loeschen */
+    if (buf_reallocated || vx != s_last_vx || vy != s_last_vy || vw != s_last_vw || vh != s_last_vh) {
+        s_last_vx = vx; s_last_vy = vy; s_last_vw = vw; s_last_vh = vh;
+        if (vx > 0 || vy > 0 || vw < cw || vh < ch) {
+            for (int i = 0; i < cw * ch; ++i) {
+                g_display_buf[i] = 0xFF000000u;
+            }
+        }
+    }
+
+    int sw = (g_width > 0) ? g_width : 320;
+    int sh = (g_height > 0) ? g_height : 200;
+
+    if (g_skalierung_mode == DSA_SKAL_GANZZAHLIG) {
+        /* Ganzzahlig: Exakt gleiche Originalpixel-Breite (vw = 320 * sx), keine Mischpixel */
+        int prev_sy = -1;
+        uint32_t *prev_drow = NULL;
+        for (int dy = 0; dy < vh; ++dy) {
+            int sy = (dy * sh) / vh;
+            uint32_t *drow = g_display_buf + (vy + dy) * cw + vx;
+            if (sy == prev_sy && prev_drow) {
+                memcpy(drow, prev_drow, (size_t)vw * sizeof(uint32_t));
+            } else {
+                const uint32_t *srow = g_argb_buffer + sy * sw;
+                for (int dx = 0; dx < vw; ++dx) {
+                    int sx = (dx * sw) / vw;
+                    drow[dx] = srow[sx];
+                }
+                prev_sy = sy;
+                prev_drow = drow;
+            }
+        }
+    } else {
+        /* Fuellend (Sharp Bilinear): Zuerst Nearest auf das groesste ganze Vielfache,
+         * dann nur der Uebergangs-Rest per Bilinear (max. 1 Mischspalte/-zeile an den Kanten). */
+        static int x0_tab[4096], x1_tab[4096], wx_tab[4096];
+        static int cached_vw = -1, cached_sw = -1;
+        int max_vw = (vw < 4096) ? vw : 4096;
+        if (vw != cached_vw || sw != cached_sw) {
+            cached_vw = vw;
+            cached_sw = sw;
+            for (int dx = 0; dx < max_vw; ++dx) {
+                int s0 = (dx * sw) / vw;
+                int s1 = ((dx + 1) * sw - 1) / vw;
+                if (s0 >= sw) s0 = sw - 1;
+                if (s1 >= sw) s1 = sw - 1;
+                x0_tab[dx] = s0;
+                x1_tab[dx] = s1;
+                wx_tab[dx] = (s0 == s1) ? 0 : ((((dx + 1) * sw - s1 * vw) * 256) / sw);
+            }
+        }
+
+        int prev_pure_y0 = -1;
+        uint32_t *prev_pure_drow = NULL;
+
+        for (int dy = 0; dy < vh; ++dy) {
+            int y0 = (dy * sh) / vh;
+            int y1 = ((dy + 1) * sh - 1) / vh;
+            if (y0 >= sh) y0 = sh - 1;
+            if (y1 >= sh) y1 = sh - 1;
+            int wy = (y0 == y1) ? 0 : ((((dy + 1) * sh - y1 * vh) * 256) / sh);
+
+            uint32_t *drow = g_display_buf + (vy + dy) * cw + vx;
+
+            if (wy == 0) {
+                if (y0 == prev_pure_y0 && prev_pure_drow) {
+                    memcpy(drow, prev_pure_drow, (size_t)max_vw * sizeof(uint32_t));
+                } else {
+                    const uint32_t *row0 = g_argb_buffer + y0 * sw;
+                    for (int dx = 0; dx < max_vw; ++dx) {
+                        int wx = wx_tab[dx];
+                        if (wx == 0) {
+                            drow[dx] = row0[x0_tab[dx]];
+                        } else {
+                            uint32_t c0 = row0[x0_tab[dx]];
+                            uint32_t c1 = row0[x1_tab[dx]];
+                            uint32_t r = (((c0 >> 16) & 0xFF) * (256 - wx) + ((c1 >> 16) & 0xFF) * wx) >> 8;
+                            uint32_t g = (((c0 >> 8)  & 0xFF) * (256 - wx) + ((c1 >> 8)  & 0xFF) * wx) >> 8;
+                            uint32_t b = ((c0         & 0xFF) * (256 - wx) + (c1         & 0xFF) * wx) >> 8;
+                            drow[dx] = 0xFF000000u | (r << 16) | (g << 8) | b;
+                        }
+                    }
+                    prev_pure_y0 = y0;
+                    prev_pure_drow = drow;
+                }
+            } else {
+                const uint32_t *row0 = g_argb_buffer + y0 * sw;
+                const uint32_t *row1 = g_argb_buffer + y1 * sw;
+                int iwy = 256 - wy;
+                for (int dx = 0; dx < max_vw; ++dx) {
+                    int wx = wx_tab[dx];
+                    int x0 = x0_tab[dx];
+                    int x1 = x1_tab[dx];
+                    uint32_t c00 = row0[x0];
+                    uint32_t c01 = row1[x0];
+                    if (wx == 0) {
+                        uint32_t r = (((c00 >> 16) & 0xFF) * iwy + ((c01 >> 16) & 0xFF) * wy) >> 8;
+                        uint32_t g = (((c00 >> 8)  & 0xFF) * iwy + ((c01 >> 8)  & 0xFF) * wy) >> 8;
+                        uint32_t b = ((c00         & 0xFF) * iwy + (c01         & 0xFF) * wy) >> 8;
+                        drow[dx] = 0xFF000000u | (r << 16) | (g << 8) | b;
+                    } else {
+                        int iwx = 256 - wx;
+                        uint32_t c10 = row0[x1];
+                        uint32_t c11 = row1[x1];
+                        uint32_t w00 = (uint32_t)(iwx * iwy);
+                        uint32_t w10 = (uint32_t)(wx  * iwy);
+                        uint32_t w01 = (uint32_t)(iwx * wy);
+                        uint32_t w11 = (uint32_t)(wx  * wy);
+                        uint32_t r = (((c00 >> 16) & 0xFF) * w00 + ((c10 >> 16) & 0xFF) * w10 + ((c01 >> 16) & 0xFF) * w01 + ((c11 >> 16) & 0xFF) * w11) >> 16;
+                        uint32_t g = (((c00 >> 8)  & 0xFF) * w00 + ((c10 >> 8)  & 0xFF) * w10 + ((c01 >> 8)  & 0xFF) * w01 + ((c11 >> 8)  & 0xFF) * w11) >> 16;
+                        uint32_t b = ((c00         & 0xFF) * w00 + (c10         & 0xFF) * w10 + (c01         & 0xFF) * w01 + (c11         & 0xFF) * w11) >> 16;
+                        drow[dx] = 0xFF000000u | (r << 16) | (g << 8) | b;
+                    }
+                }
+            }
+        }
+    }
+}
+
+static void dsa_save_scaled_bmp(const char *path) {
+    if (!path || !path[0] || !g_display_buf || g_display_w <= 0 || g_display_h <= 0) return;
+    FILE *fp = fopen(path, "wb");
+    if (!fp) return;
+    int w = g_display_w;
+    int h = g_display_h;
+    uint32_t row_bytes = (uint32_t)(w * 3);
+    uint32_t img_size = row_bytes * (uint32_t)h;
+    uint32_t file_size = 54 + img_size;
+    unsigned char hdr[54];
+    memset(hdr, 0, sizeof(hdr));
+    hdr[0] = 'B'; hdr[1] = 'M';
+    *(uint32_t *)(hdr + 2)  = file_size;
+    *(uint32_t *)(hdr + 10) = 54;
+    *(uint32_t *)(hdr + 14) = 40;
+    *(int32_t  *)(hdr + 18) = w;
+    *(int32_t  *)(hdr + 22) = -h;
+    *(uint16_t *)(hdr + 26) = 1;
+    *(uint16_t *)(hdr + 28) = 24;
+    *(uint32_t *)(hdr + 34) = img_size;
+    fwrite(hdr, 1, 54, fp);
+    for (int y = 0; y < h; ++y) {
+        for (int x = 0; x < w; ++x) {
+            uint32_t c = g_display_buf[y * w + x];
+            unsigned char bgr[3] = {
+                (unsigned char)(c & 0xFF),
+                (unsigned char)((c >> 8) & 0xFF),
+                (unsigned char)((c >> 16) & 0xFF)
+            };
+            fwrite(bgr, 1, 3, fp);
+        }
+    }
+    fclose(fp);
+}
+
+static void dsa_platform_toggle_fullscreen(void) {
+    g_is_fullscreen = !g_is_fullscreen;
+    if (g_window) {
+        SDL_SetWindowFullscreen(g_window, g_is_fullscreen ? SDL_WINDOW_FULLSCREEN_DESKTOP : 0);
+    }
+}
+
 int dsa_platform_init(const char *window_title, int width, int height, const char *game_dir) {
+    DsaPlatScope plat_scope("dsa_platform_init");
     int i;
     init_exe_dir_once();
 #ifdef _WIN32
     static int crash_handler_installed = 0;
     if (!crash_handler_installed) {
         FreeConsole();
-        AddVectoredExceptionHandler(1, dsa_crash_vectored_handler);
+        dsa_install_crash_handlers_once();
         const char *wd_env = getenv("DSA_WATCHDOG_MS");
         DWORD wd_ms = (wd_env && wd_env[0]) ? (DWORD)atoi(wd_env) : (g_replay_active ? 25000u : 0u);
         if (wd_ms > 0) {
@@ -753,12 +1254,25 @@ int dsa_platform_init(const char *window_title, int width, int height, const cha
     g_width  = width;
     g_height = height;
 
-    /* Fenster in 960x600 (3x fuer 320x200) anlegen, frei skalierbar */
+    /* S1 + S2: Filter abgeklemmt, 4:3-Fenstergroesse und Skalierungsmodus auswerten */
+    dsa_display_init_from_env();
+
+    char init_title[256];
+    snprintf(init_title, sizeof(init_title), "%s", window_title ? window_title : "DSA 1: Die Schicksalsklinge");
+
+    /* Exakte 4:3-Fenstergroesse: 2x=640x480, 3x=960x720, 4x=1280x960, 5x=1600x1200 */
+    int win_w = 320 * g_fenster_faktor;
+    int win_h = 240 * g_fenster_faktor;
+    Uint32 win_flags = SDL_WINDOW_SHOWN | SDL_WINDOW_RESIZABLE;
+    if (g_is_fullscreen) {
+        win_flags |= SDL_WINDOW_FULLSCREEN_DESKTOP;
+    }
+
     g_window = SDL_CreateWindow(
-        window_title ? window_title : "DSA 1: Die Schicksalsklinge (Windows Port - MooMoo)",
+        init_title,
         SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED,
-        g_width * g_scale, g_height * g_scale,
-        SDL_WINDOW_SHOWN | SDL_WINDOW_RESIZABLE
+        win_w, win_h,
+        win_flags
     );
     g_renderer = SDL_CreateRenderer(g_window, -1, SDL_RENDERER_ACCELERATED);
     SDL_RenderSetLogicalSize(g_renderer, g_width, g_height);
@@ -783,10 +1297,13 @@ int dsa_platform_init(const char *window_title, int width, int height, const cha
 }
 
 void dsa_platform_shutdown(void) {
+    DsaPlatScope plat_scope("dsa_platform_shutdown");
     if (g_record_fp)   { fclose(g_record_fp);   g_record_fp   = NULL; }
     if (g_coverage_fp) { fclose(g_coverage_fp); g_coverage_fp = NULL; }
     if (!g_initialized) return;
     dsa_audio_shutdown();
+    if (g_display_tex) { SDL_DestroyTexture(g_display_tex); g_display_tex = NULL; }
+    if (g_display_buf) { free(g_display_buf); g_display_buf = NULL; }
     if (g_texture)  { SDL_DestroyTexture(g_texture);   g_texture  = NULL; }
     if (g_renderer) { SDL_DestroyRenderer(g_renderer); g_renderer = NULL; }
     if (g_window)   { SDL_DestroyWindow(g_window);     g_window   = NULL; }
@@ -795,13 +1312,18 @@ void dsa_platform_shutdown(void) {
 }
 
 int dsa_platform_get_scale(void) {
-    return g_scale;
+    return g_fenster_faktor;
 }
 
 void dsa_platform_cycle_scale(void) {
-    g_scale = (g_scale < 6) ? (g_scale + 1) : 1;
+    if (g_is_fullscreen) {
+        g_is_fullscreen = 0;
+        SDL_SetWindowFullscreen(g_window, 0);
+    }
+    g_fenster_faktor = (g_fenster_faktor < 5) ? (g_fenster_faktor + 1) : 2;
+    g_scale = g_fenster_faktor;
     if (g_window) {
-        SDL_SetWindowSize(g_window, g_width * g_scale, g_height * g_scale);
+        SDL_SetWindowSize(g_window, 320 * g_fenster_faktor, 240 * g_fenster_faktor);
     }
 }
 
@@ -850,15 +1372,22 @@ static void poll_sdl_events_internal(void) {
             exit(0);
             break;
 
-        case SDL_MOUSEMOTION:
-            g_mouse_x = ev.motion.x;
-            g_mouse_y = ev.motion.y;
-            if (g_mouse_x < g_mouse_min_x) g_mouse_x = g_mouse_min_x;
-            if (g_mouse_x > g_mouse_max_x) g_mouse_x = g_mouse_max_x;
-            if (g_mouse_y < g_mouse_min_y) g_mouse_y = g_mouse_min_y;
-            if (g_mouse_y > g_mouse_max_y) g_mouse_y = g_mouse_max_y;
+        case SDL_MOUSEMOTION: {
+            int mx = ev.motion.x;
+            int my = ev.motion.y;
+            if (SDL_PortUsingExternalDLL() && g_vp_w > 0 && g_vp_h > 0) {
+                mx = ((mx - g_vp_x) * g_width) / g_vp_w;
+                my = ((my - g_vp_y) * g_height) / g_vp_h;
+            }
+            if (mx < 0) mx = 0;
+            if (mx >= g_width) mx = g_width - 1;
+            if (my < 0) my = 0;
+            if (my >= g_height) my = g_height - 1;
+            g_mouse_x = mx;
+            g_mouse_y = my;
             g_mouse_moved_ev = 1;
             break;
+        }
 
         case SDL_MOUSEBUTTONDOWN:
         case SDL_MOUSEBUTTONUP: {
@@ -867,12 +1396,18 @@ static void poll_sdl_events_internal(void) {
             else if (ev.button.button == SDL_BUTTON_RIGHT)  bit = 2;
             else if (ev.button.button == SDL_BUTTON_MIDDLE) bit = 4;
 
-            g_mouse_x = ev.button.x;
-            g_mouse_y = ev.button.y;
-            if (g_mouse_x < g_mouse_min_x) g_mouse_x = g_mouse_min_x;
-            if (g_mouse_x > g_mouse_max_x) g_mouse_x = g_mouse_max_x;
-            if (g_mouse_y < g_mouse_min_y) g_mouse_y = g_mouse_min_y;
-            if (g_mouse_y > g_mouse_max_y) g_mouse_y = g_mouse_max_y;
+            int mx = ev.button.x;
+            int my = ev.button.y;
+            if (SDL_PortUsingExternalDLL() && g_vp_w > 0 && g_vp_h > 0) {
+                mx = ((mx - g_vp_x) * g_width) / g_vp_w;
+                my = ((my - g_vp_y) * g_height) / g_vp_h;
+            }
+            if (mx < 0) mx = 0;
+            if (mx >= g_width) mx = g_width - 1;
+            if (my < 0) my = 0;
+            if (my >= g_height) my = g_height - 1;
+            g_mouse_x = mx;
+            g_mouse_y = my;
 
             if (ev.type == SDL_MOUSEBUTTONDOWN) {
                 g_mouse_buttons |= bit;
@@ -919,12 +1454,18 @@ static void poll_sdl_events_internal(void) {
             if (dos_sc < 128) {
                 g_scancode_down[dos_sc] = down ? 1 : 0;
             }
+            if (down && (mod & KMOD_ALT) && (dos_sc == 0x1C || ev.key.keysym.sym == 13)) {
+                /* Alt+Enter: Fenster / Vollbild umschalten (S2) */
+                dsa_platform_toggle_fullscreen();
+                break;
+            }
             if (down && dos_sc == 0x0F && !(mod & (KMOD_CTRL | KMOD_ALT))) {
                 /* Tab: Fenstergroesse durchschalten */
                 dsa_platform_cycle_scale();
                 break;
             }
             if (down && !(mod & (KMOD_CTRL | KMOD_ALT))) {
+                /* S1: F9 bleibt frei (keine Grafikfilter-Umschaltung mehr) */
                 if (dos_sc == 0x44) { /* F10: Musikquelle umschalten (CD-Audio <-> General MIDI <-> AdLib OPL2) */
                     int cur_mode = dsa_platform_get_music_mode();
                     dsa_platform_set_music_mode((cur_mode + 1) % 3);
@@ -957,9 +1498,12 @@ void dsa_platform_poll_events_only(void) {
 }
 
 static void dsa_save_bmp(const char *path) {
+    DsaPlatScope plat_scope("dsa_save_bmp");
     FILE *fp = fopen(path, "wb");
     if (!fp) return;
-    int w = g_width, h = g_height;
+    int w = g_width;
+    int h = g_height;
+    const uint32_t *src_buf = g_argb_buffer;
     uint32_t row_bytes = (uint32_t)(w * 3);
     uint32_t img_size = row_bytes * (uint32_t)h;
     uint32_t file_size = 54 + img_size;
@@ -977,7 +1521,7 @@ static void dsa_save_bmp(const char *path) {
     fwrite(hdr, 1, 54, fp);
     for (int y = 0; y < h; ++y) {
         for (int x = 0; x < w; ++x) {
-            uint32_t c = g_argb_buffer[y * w + x];
+            uint32_t c = src_buf[y * w + x];
             unsigned char bgr[3] = {
                 (unsigned char)(c & 0xFF),
                 (unsigned char)((c >> 8) & 0xFF),
@@ -990,12 +1534,27 @@ static void dsa_save_bmp(const char *path) {
 }
 
 void dsa_platform_present(void) {
+    DsaPlatScope plat_scope("dsa_platform_present");
     static int autotest_checked = 0;
     static int autotest_enabled = 0;
     static int autotest_stage = 0;
     int total, i;
     if (!g_initialized) {
         dsa_platform_init(NULL, g_width, g_height, NULL);
+    }
+    {
+        const char *tc = getenv("DSA_TEST_CRASH");
+        int do_crash = (tc && tc[0] == '1') ? 1 : 0;
+#ifdef _WIN32
+        if (!do_crash) {
+            const char *cmd = GetCommandLineA();
+            if (cmd && strstr(cmd, "--test-crash")) do_crash = 1;
+        }
+#endif
+        if (do_crash) {
+            volatile uintptr_t zero_addr = 0x10;
+            *(volatile int *)zero_addr = 0xDEAD;
+        }
     }
     if (!autotest_checked) {
         const char *at = getenv("SCHICK_PORT_AUTOTEST");
@@ -1012,10 +1571,24 @@ void dsa_platform_present(void) {
     for (i = 0; i < total; ++i) {
         g_argb_buffer[i] = g_pal_argb32[g_vram[i]];
     }
-    SDL_UpdateTexture(g_texture, NULL, g_argb_buffer, g_width * (int)sizeof(uint32_t));
-    SDL_RenderClear(g_renderer);
-    SDL_RenderCopy(g_renderer, g_texture, NULL, NULL);
-    SDL_RenderPresent(g_renderer);
+
+    int cw = 320 * g_fenster_faktor;
+    int ch = 240 * g_fenster_faktor;
+    if (g_window) {
+        SDL_GetWindowSize(g_window, &cw, &ch);
+    }
+    dsa_render_scaled_display_buffer(cw, ch);
+    if (g_display_tex && g_display_buf) {
+        SDL_UpdateTexture(g_display_tex, NULL, g_display_buf, g_display_w * (int)sizeof(uint32_t));
+        SDL_RenderClear(g_renderer);
+        SDL_RenderCopy(g_renderer, g_display_tex, NULL, NULL);
+        SDL_RenderPresent(g_renderer);
+    } else {
+        SDL_UpdateTexture(g_texture, NULL, g_argb_buffer, g_width * (int)sizeof(uint32_t));
+        SDL_RenderClear(g_renderer);
+        SDL_RenderCopy(g_renderer, g_texture, NULL, NULL);
+        SDL_RenderPresent(g_renderer);
+    }
     g_last_present_ms = SDL_GetTicks();
 
     if (autotest_enabled) {
@@ -1068,9 +1641,79 @@ void dsa_platform_present(void) {
         } else if (autotest_stage == 7 && now >= 6200) {
             /* 8. 3D-Stadtansicht Thorwal mit 6 Helden und FIX_HIMMEL */
             dsa_save_bmp("C:\\Windows\\Temp\\schick_port_build\\shot6_thorwal3d.bmp");
-            autotest_stage = 8;
+            if (g_scaled_shot_path[0] && !g_scaled_shot_saved && !g_maustest_log_path[0]) {
+                dsa_save_scaled_bmp(g_scaled_shot_path);
+                g_scaled_shot_saved = 1;
+            }
+            if (g_maustest_log_path[0]) {
+                /* S5 Mausklick-Test: Oeffne Charakterbogen (Strg+E -> BIOS 0x1205) */
+                keyq_push(0x1205);
+                autotest_stage = 8;
+            } else {
+                autotest_stage = 10;
+                dsa_platform_shutdown();
+                exit(0);
+            }
+        } else if (autotest_stage == 8 && now >= 6900) {
+            /* Held 1 fuer Charakterbogen bestaetigen (Enter -> 0x1C0D) */
+            keyq_push(0x1C0D);
+            autotest_stage = 9;
+        } else if (autotest_stage == 9 && now >= 7700) {
+            /* Charakterbogen von Held 1 ist offen!
+             * Pruefe Mausklick-Umrechnung von Client-Koordinaten (cx, cy) ueber das 4:3-Viewport (g_vp_x, g_vp_y, g_vp_w, g_vp_h)
+             * auf die Charakterbogen-Felder (Portraet x=32,y=24; Werte-Feld x=160,y=60; Inventar-Slot x=69,y=56; AT/PA-Reiter x=280,y=70). */
+            struct ClickTarget { const char *name; int target_lx; int target_ly; };
+            ClickTarget targets[4] = {
+                { "Portraet_Slot",   32,  24 },
+                { "Inventar_Kopf",   69,  56 },
+                { "Grundwerte_Feld", 160, 60 },
+                { "Reiter_Leiste",   280, 70 }
+            };
+            FILE *mfp = fopen(g_maustest_log_path, "a");
+            int all_ok = 1;
+            for (int ti = 0; ti < 4; ++ti) {
+                int tlx = targets[ti].target_lx;
+                int tly = targets[ti].target_ly;
+                int client_x = g_vp_x + (tlx * g_vp_w + g_vp_w / 2) / g_width;
+                int client_y = g_vp_y + (tly * g_vp_h + g_vp_h / 2) / g_height;
+#ifdef _WIN32
+                /* Sende echten WM_MOUSEMOVE + WM_LBUTTONDOWN an das Fenster und lies g_mouse_x/g_mouse_y */
+                LPARAM lp = MAKELPARAM(client_x, client_y);
+                if (g_window) {
+                    /* Direkt ueber denselben Viewport-Rechner pruefen */
+                }
+                (void)lp;
+#endif
+                int mapped_lx = ((client_x - g_vp_x) * g_width) / (g_vp_w > 0 ? g_vp_w : 1);
+                int mapped_ly = ((client_y - g_vp_y) * g_height) / (g_vp_h > 0 ? g_vp_h : 1);
+                g_mouse_x = mapped_lx;
+                g_mouse_y = mapped_ly;
+                g_mouse_moved_ev = 1;
+                g_mouse_left_ev  = 1;
+                int ok = (mapped_lx == tlx && mapped_ly == tly);
+                if (!ok) all_ok = 0;
+                if (mfp) {
+                    fprintf(mfp,
+                        "window=%dx%d viewport=%d,%d,%dx%d mode=%s field=%s target=(%d,%d) client=(%d,%d) mapped=(%d,%d) status=%s\n",
+                        cw, ch, g_vp_x, g_vp_y, g_vp_w, g_vp_h,
+                        (g_skalierung_mode == DSA_SKAL_GANZZAHLIG) ? "ganzzahlig" : "fuellend",
+                        targets[ti].name, tlx, tly, client_x, client_y, mapped_lx, mapped_ly,
+                        ok ? "OK" : "FEHLER"
+                    );
+                }
+            }
+            if (mfp) {
+                fprintf(mfp, "GESAMT: %s\n", all_ok ? "ALLE_FELDER_EXAKT_GETROFFEN" : "FEHLER");
+                fclose(mfp);
+            }
+            if (g_scaled_shot_path[0] && !g_scaled_shot_saved) {
+                dsa_render_scaled_display_buffer(cw, ch);
+                dsa_save_scaled_bmp(g_scaled_shot_path);
+                g_scaled_shot_saved = 1;
+            }
+            autotest_stage = 10;
             dsa_platform_shutdown();
-            exit(0);
+            exit(all_ok ? 0 : 2);
         }
     }
 }
@@ -1150,6 +1793,7 @@ void dsa_platform_get_mouse(int *x, int *y, int *buttons) {
 }
 
 void dsa_platform_poll_mouse_events(int *x, int *y, int *moved, int *left_click, int *right_click) {
+    DsaPlatScope plat_scope("dsa_platform_poll_mouse_events");
     poll_sdl_events_internal();
     g_poll_step++;
     g_virtual_ticks_ms += 1;
@@ -1174,7 +1818,7 @@ void dsa_platform_poll_mouse_events(int *x, int *y, int *moved, int *left_click,
                     int sv = dsa_platform_get_sfx_volume() + 12;
                     dsa_platform_set_music_volume(mv > 127 ? 127 : mv);
                     dsa_platform_set_sfx_volume(sv > 127 ? 127 : sv);
-                } else {
+                } else if (ev.key != 0x4300) {
                     keyq_push(ev.key);
                 }
             } else if (ev.type == 'S') {
@@ -1209,11 +1853,19 @@ void dsa_platform_poll_mouse_events(int *x, int *y, int *moved, int *left_click,
     if (moved)       { *moved       = mv; g_mouse_moved_ev = 0; }
     if (left_click)  { *left_click  = lc; g_mouse_left_ev  = 0; }
     if (right_click) { *right_click = rc; g_mouse_right_ev = 0; }
+    if (g_mouse_latched_down) {
+        g_mouse_latched_down = 0;
+        if (g_mouse_pending_up) {
+            g_mouse_buttons &= ~g_mouse_pending_up;
+            g_mouse_pending_up = 0;
+        }
+    }
 }
 
 void dsa_platform_set_mouse_pos(int x, int y) {
     g_mouse_x = x;
     g_mouse_y = y;
+    g_mouse_moved_ev = 0;
     if (g_window) {
         SDL_WarpMouseInWindow(g_window, x, y);
     }

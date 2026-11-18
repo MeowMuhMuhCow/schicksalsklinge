@@ -635,6 +635,9 @@ void GRP_move_hero(const signed int src_pos)
 		g_mouse_posy = 157;
 
 		g_mouse_posx = g_hero_pic_posx[src_pos];
+#if !defined(__BORLANDC__)
+		dsa_platform_set_mouse_pos(g_mouse_posx, g_mouse_posy);
+#endif
 		g_pic_copy.x1 = g_mouse_posx;
 		g_pic_copy.y1 = g_mouse_posy;
 		g_pic_copy.x2 = g_mouse_posx + 31;
@@ -711,8 +714,8 @@ void GRP_move_hero(const signed int src_pos)
 		do_pic_copy(0);
 
 		dst_pos = 6;
-#if FIX_0298
-		/* Fix 298: nicht vor die Tabelle lesen (Ergebnis wie bisher, hoechstens 0) */
+#if FIX_0298 || !defined(__BORLANDC__)
+		/* Fix 298 / nativ: nicht vor die Tabelle lesen (Ergebnis wie bisher, hoechstens 0) */
 		while ((--dst_pos > 0) && (g_hero_pic_posx[dst_pos] > g_mouse_posx))
 #else
 		while (g_hero_pic_posx[--dst_pos] > g_mouse_posx) /* for mouse x < 3 this reads before the table; dst_pos is clamped below */
@@ -724,6 +727,11 @@ void GRP_move_hero(const signed int src_pos)
 		if (dst_pos < 0) {
 			dst_pos = 0;
 		}
+#if !defined(__BORLANDC__)
+		if (dst_pos > 5) {
+			dst_pos = 5;
+		}
+#endif
 
 		if ((src_pos != dst_pos) && (dst_pos != 6)) { /* dst_pos != 6 is always true here */
 

@@ -66,6 +66,7 @@ SPIELPFAD="/path/to/BladeOfDestinyGerman" ./start_schicksalsklinge.sh
 - `--music=cd` *(Default)*: Plays the 14 CD-Audio Ogg Vorbis tracks (`MUSIC/Track02.OGG` .. `Track15.OGG`) identically to the GOG release (`DSA1_CD.BAT`) and `MobileEyes` (`g_use_cdaudio_flag = 1`). Automatically falls back to General MIDI if `MUSIC/` is absent.
 - `--music=gm`: Real-time XMIDI-to-General-MIDI playback via Windows Multimedia MIDI (`midiOut` / *Microsoft GS Wavetable Synth*).
 - `--music=opl`: Cycle-accurate OPL2/AdLib FM synthesis via DOSBox 0.74 `DBOPL` using the 79 original timbres from `SAMPLE.AD`.
+- **`Alt+Enter`**: Toggle between windowed and fullscreen mode at any time (`--fenster=2|3|4|5|vollbild`, `--skalierung=ganzzahlig|fuellend`, always preserving the exact 4:3 CRT aspect ratio).
 - **`F10`**: Cycle music engines live during gameplay (`CD-Audio` → `General MIDI` → `AdLib/OPL2`).
 - **`F11` / `F12`**: Decrease / increase master volume.
 

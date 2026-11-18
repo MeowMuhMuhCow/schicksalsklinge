@@ -1288,15 +1288,15 @@ signed int get_town_tile_type(const unsigned char val)
 	signed int i;
 
 	i = 0;
-#if FIX_0299
-	/* Fix 299: nicht hinter die Tabelle lesen (Ergebnis bleibt 12) */
+#if FIX_0299 || !defined(__BORLANDC__)
+	/* Fix 299 / nativ: nicht hinter die Tabelle lesen (Ergebnis bleibt 12) */
 	while ((i < 12) && (g_mapval_to_town_tile[i] < val)) {
 #else
 	while (g_mapval_to_town_tile[i] < val) {
 #endif
 		i++;
 	}
-#if FIX_0299
+#if FIX_0299 || !defined(__BORLANDC__)
 	/* wie das Original (dort stand hinter der Tabelle 0x01, 0xff): Ergebnis 12 */
 	if (i == 12) {
 		i = 13;

@@ -66,6 +66,8 @@ target_compile_definitions(SCHICK_PORT PRIVATE
 target_compile_options(SCHICK_PORT PRIVATE
     -m32
     -O2
+    -fno-strict-overflow
+    -fno-aggressive-loop-optimizations
     -fpack-struct=1
     -fsigned-char
     -Wno-unused-result

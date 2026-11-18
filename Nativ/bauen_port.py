@@ -101,7 +101,7 @@ def build_stufe(fix_bugs: int, exe_name: str, extra_defines: list[str], copy_to_
         c_rsp = obj_dir / "dirty_c.rsp"
         c_rsp.write_text("\n".join(dirty_c) + "\n", encoding="utf-8")
         batch_cmd = (
-            f"gcc.exe -m32 -std=gnu99 -O2 -fpack-struct=1 -fsigned-char -w "
+            f"gcc.exe -m32 -std=gnu99 -O2 -fno-strict-overflow -fno-aggressive-loop-optimizations -fpack-struct=1 -fsigned-char -w "
             f"{def_str} -I../src -I../src/AIL -I../platform -I../third_party/SDL2/include "
             f"-c @dirty_c.rsp"
         )
@@ -189,10 +189,18 @@ def build_stufe(fix_bugs: int, exe_name: str, extra_defines: list[str], copy_to_
     shutil.copy2(WIN_BUILD_DIR / exe_name, out_exe)
     print(f"      Gebaut: {out_exe} ({out_exe.stat().st_size:,} Bytes)")
 
+    release_dirs = [PORT_DIR / "release", ROOT_DIR / "Starter" / "release"]
+    for rdir in release_dirs:
+        if rdir.exists():
+            shutil.copy2(out_exe, rdir / exe_name)
+
     if copy_to_default:
         shutil.copy2(WIN_BUILD_DIR / exe_name, WIN_BUILD_DIR / "SCHICK_PORT.EXE")
         default_exe = build_out_dir / "SCHICK_PORT.EXE"
         shutil.copy2(WIN_BUILD_DIR / exe_name, default_exe)
+        for rdir in release_dirs:
+            if rdir.exists():
+                shutil.copy2(default_exe, rdir / "SCHICK_PORT.EXE")
         print(f"      Standard-EXE: {default_exe} ({default_exe.stat().st_size:,} Bytes)")
 
     return out_exe
