@@ -58,8 +58,7 @@ static int  g_mouse_x = -1000;
 static int  g_mouse_y = -1000;
 
 static inline const char *L(const char *de, const char *en) {
-    (void)en;
-    return de;
+    return g_lang_en ? en : de;
 }
 
 static bool save_framebuffer_bmp(const std::string &bmp_path);
@@ -273,6 +272,13 @@ struct GameCatalogEntry {
     bool        gamedir_writable;
     bool        has_grafikpaket;
     std::string resolved_paket_dir;
+
+    /* T1 (Etappe 4): Zur Laufzeit aus dem Spielordner gelesenes Original-Titelbild (nur im RAM) */
+    bool                  has_title_image;
+    int                   title_w;
+    int                   title_h;
+    std::vector<uint32_t> title_pixels;
+    std::string           title_loaded_dir;
 };
 
 static std::vector<GameCatalogEntry> g_games;
@@ -424,6 +430,9 @@ static GameCatalogEntry make_default_entry(int teil) {
     e.gamedir_valid = false;
     e.gamedir_writable = false;
     e.has_grafikpaket = false;
+    e.has_title_image = false;
+    e.title_w = 0;
+    e.title_h = 0;
     return e;
 }
 
@@ -777,6 +786,931 @@ static bool dir_has_grafikpaket(const std::string &dir) {
     return false;
 }
 
+/* =========================================================================
+ * 6b. Original-Titelbilder zur Laufzeit aus dem Spielordner lesen (T1)
+ *     RECHTLICH ZWINGEND: Keine Bildbytes mitgeliefert oder zwischengespeichert!
+ * ========================================================================= */
+
+static inline uint16_t rd_u16_le(const uint8_t *p) {
+    return (uint16_t)p[0] | ((uint16_t)p[1] << 8);
+}
+
+static inline int16_t rd_i16_le(const uint8_t *p) {
+    return (int16_t)rd_u16_le(p);
+}
+
+static inline uint32_t rd_u32_le(const uint8_t *p) {
+    return (uint32_t)p[0] | ((uint32_t)p[1] << 8) | ((uint32_t)p[2] << 16) | ((uint32_t)p[3] << 24);
+}
+
+static inline uint32_t vga6_to_argb32(uint8_t r6, uint8_t g6, uint8_t b6) {
+    uint8_t r = (uint8_t)(((r6 & 0x3F) << 2) | ((r6 & 0x3F) >> 4));
+    uint8_t g = (uint8_t)(((g6 & 0x3F) << 2) | ((g6 & 0x3F) >> 4));
+    uint8_t b = (uint8_t)(((b6 & 0x3F) << 2) | ((b6 & 0x3F) >> 4));
+    return 0xFF000000u | ((uint32_t)r << 16) | ((uint32_t)g << 8) | (uint32_t)b;
+}
+
+static inline uint8_t rev_byte8(uint8_t v) {
+    v = (uint8_t)(((v & 0xF0u) >> 4) | ((v & 0x0Fu) << 4));
+    v = (uint8_t)(((v & 0xCCu) >> 2) | ((v & 0x33u) << 2));
+    v = (uint8_t)(((v & 0xAAu) >> 1) | ((v & 0x55u) << 1));
+    return v;
+}
+
+static inline uint16_t rev_word16(uint16_t v) {
+    return (uint16_t)(((uint16_t)rev_byte8((uint8_t)(v & 0xFFu)) << 8) |
+                      (uint16_t)rev_byte8((uint8_t)(v >> 8)));
+}
+
+static bool decomp_pp20_buf(const uint8_t *src, size_t plen, std::vector<uint8_t> &dest) {
+    if (!src || plen < 12) return false;
+    uint32_t unplen = ((uint32_t)src[plen - 4] << 16) | ((uint32_t)src[plen - 3] << 8) | (uint32_t)src[plen - 2];
+    if (unplen == 0 || unplen > 1024 * 1024) return false;
+    uint8_t skip = src[plen - 1];
+    uint8_t off_tuple[4] = { src[4], src[5], src[6], src[7] };
+    dest.assign(unplen, 0);
+
+    size_t buf_pos = plen - 4;
+    size_t out_pos = unplen;
+    uint32_t bb = 0;
+    int bl = 0;
+
+    while (bl < (int)skip && buf_pos > 8) {
+        --buf_pos;
+        bb |= (uint32_t)src[buf_pos] << bl;
+        bl += 8;
+    }
+    bb >>= skip;
+    bl -= (int)skip;
+
+    while (out_pos > 0) {
+        if (bl < 16 && buf_pos > 8) {
+            if (buf_pos >= 10) {
+                buf_pos -= 2;
+                bb |= (uint32_t)(src[buf_pos + 1] | ((uint32_t)src[buf_pos] << 8)) << bl;
+                bl += 16;
+            } else {
+                --buf_pos;
+                bb |= (uint32_t)src[buf_pos] << bl;
+                bl += 8;
+            }
+        }
+        uint32_t b1 = bb & 1u;
+        bb >>= 1;
+        bl -= 1;
+        if (b1 == 0) {
+            uint32_t todo = 1;
+            for (;;) {
+                if (bl < 2 && buf_pos > 8) {
+                    --buf_pos;
+                    bb |= (uint32_t)src[buf_pos] << bl;
+                    bl += 8;
+                }
+                uint32_t x = (uint32_t)(rev_word16((uint16_t)(bb & 3u)) >> 14);
+                bb >>= 2;
+                bl -= 2;
+                todo += x;
+                if (x != 3) break;
+            }
+            for (uint32_t k = 0; k < todo; ++k) {
+                if (bl < 8 && buf_pos > 8) {
+                    --buf_pos;
+                    bb |= (uint32_t)src[buf_pos] << bl;
+                    bl += 8;
+                }
+                if (out_pos == 0) break;
+                --out_pos;
+                dest[out_pos] = rev_byte8((uint8_t)(bb & 0xFFu));
+                bb >>= 8;
+                bl -= 8;
+            }
+            if (out_pos == 0) break;
+        }
+
+        if (bl < 2 && buf_pos > 8) {
+            --buf_pos;
+            bb |= (uint32_t)src[buf_pos] << bl;
+            bl += 8;
+        }
+        uint32_t x = (uint32_t)(rev_word16((uint16_t)(bb & 3u)) >> 14);
+        bb >>= 2;
+        bl -= 2;
+        int offbits = (int)off_tuple[x];
+        if (offbits <= 0 || offbits > 16) return false;
+        uint32_t todo = x + 2;
+        uint32_t offset = 0;
+        if (x == 3) {
+            if (bl < 1 && buf_pos > 8) {
+                --buf_pos;
+                bb |= (uint32_t)src[buf_pos] << bl;
+                bl += 8;
+            }
+            if ((bb & 1u) == 0) offbits = 7;
+            bb >>= 1;
+            bl -= 1;
+            while (bl < offbits && buf_pos > 8) {
+                --buf_pos;
+                bb |= (uint32_t)src[buf_pos] << bl;
+                bl += 8;
+            }
+            offset = (uint32_t)(rev_word16((uint16_t)(bb & ((1u << offbits) - 1u))) >> (16 - offbits));
+            bb >>= offbits;
+            bl -= offbits;
+            for (;;) {
+                if (bl < 3 && buf_pos > 8) {
+                    --buf_pos;
+                    bb |= (uint32_t)src[buf_pos] << bl;
+                    bl += 8;
+                }
+                uint32_t x2 = (uint32_t)(rev_word16((uint16_t)(bb & 7u)) >> 13);
+                bb >>= 3;
+                bl -= 3;
+                todo += x2;
+                if (x2 != 7) break;
+            }
+        } else {
+            while (bl < offbits && buf_pos > 8) {
+                --buf_pos;
+                bb |= (uint32_t)src[buf_pos] << bl;
+                bl += 8;
+            }
+            offset = (uint32_t)(rev_word16((uint16_t)(bb & ((1u << offbits) - 1u))) >> (16 - offbits));
+            bb >>= offbits;
+            bl -= offbits;
+        }
+
+        for (uint32_t k = 0; k < todo; ++k) {
+            if (out_pos == 0) break;
+            size_t src_idx = out_pos + offset;
+            uint8_t v = (src_idx < unplen) ? dest[src_idx] : 0;
+            --out_pos;
+            dest[out_pos] = v;
+        }
+    }
+    return true;
+}
+
+static void decomp_rle7f_buf(const uint8_t *src, size_t n, size_t total, std::vector<uint8_t> &out) {
+    out.clear();
+    out.reserve(total);
+    size_t pos = 0;
+    while (out.size() < total && pos < n) {
+        uint8_t b = src[pos++];
+        if (b == 0x7Fu && pos + 1 < n) {
+            uint8_t cnt = src[pos++];
+            uint8_t val = src[pos++];
+            size_t add = cnt;
+            if (out.size() + add > total) add = total - out.size();
+            out.insert(out.end(), add, val);
+        } else {
+            out.push_back(b);
+        }
+    }
+    if (out.size() < total) {
+        out.resize(total, 0);
+    }
+}
+
+static void decomp_packbits_buf(const uint8_t *src, size_t n, size_t total, std::vector<uint8_t> &out) {
+    out.clear();
+    out.reserve(total);
+    size_t pos = 0;
+    while (pos < n && out.size() < total) {
+        uint8_t c = src[pos++];
+        if (c & 0x80u) {
+            size_t rep = (257u - (size_t)c) & 0xFFu;
+            if (pos >= n) break;
+            uint8_t val = src[pos++];
+            if (out.size() + rep > total) rep = total - out.size();
+            out.insert(out.end(), rep, val);
+        } else {
+            size_t lit = (size_t)c + 1u;
+            if (pos + lit > n) lit = n - pos;
+            if (out.size() + lit > total) lit = total - out.size();
+            out.insert(out.end(), src + pos, src + pos + lit);
+            pos += lit;
+        }
+    }
+    if (out.size() < total) {
+        out.resize(total, 0);
+    }
+}
+
+/* Entpackt eine .ULI-Datei (INTRODAT.VOL aus Schicksalsklinge) in 8-Bit-Indizes + 256er ARGB-Palette */
+static bool decode_uli_indexed(
+    const uint8_t *data, size_t len,
+    int &out_w, int &out_h,
+    std::vector<uint8_t> &out_pix,
+    uint32_t out_pal[256]
+) {
+    if (!data || len < 38) return false;
+    if (memcmp(data, "(C) 1991 by Ulrich Walther", 26) != 0) return false;
+    int w = (int)rd_u16_le(data + 29) + 1;
+    int h = (int)rd_u16_le(data + 31) + 1;
+    if (w != 320 || h != 200) return false;
+
+    int b33 = (int)data[33];
+    int b34 = (int)data[34];
+    int first_col = b34 / 3;
+    int pal_colors = b33 - first_col;
+    if (first_col < 0 || first_col > 255 || pal_colors < 0 || first_col + pal_colors > 256) return false;
+
+    std::vector<uint8_t> unp;
+    unp.reserve(70000);
+    size_t pos = 36;
+    while (pos < len) {
+        uint8_t b = data[pos++];
+        if (b == 0) break;
+        if (b < 0x80u) {
+            if (pos >= len) break;
+            unp.insert(unp.end(), (size_t)b, data[pos++]);
+        } else {
+            size_t cnt = (size_t)(b & 0x7Fu);
+            if (pos + cnt > len) cnt = len - pos;
+            unp.insert(unp.end(), data + pos, data + pos + cnt);
+            pos += cnt;
+        }
+    }
+
+    size_t pal_bytes = (size_t)pal_colors * 3u;
+    if (unp.size() < pal_bytes) return false;
+
+    for (int i = 0; i < 256; ++i) out_pal[i] = 0xFF000000u;
+    out_pal[255] = 0xFFFFFFFFu;
+    for (int i = 0; i < pal_colors; ++i) {
+        out_pal[first_col + i] = vga6_to_argb32(
+            unp[(size_t)i * 3u + 0],
+            unp[(size_t)i * 3u + 1],
+            unp[(size_t)i * 3u + 2]
+        );
+    }
+
+    const uint8_t *pix_raw = unp.data() + pal_bytes;
+    size_t pix_len = unp.size() - pal_bytes;
+    out_pix.assign(64000, 0);
+
+    if (pix_len == 8000) {
+        size_t idx = 0;
+        for (size_t i = 0; i < 8000; ++i) {
+            uint8_t bv = pix_raw[i];
+            for (int s = 7; s >= 0; --s) {
+                out_pix[idx++] = ((bv >> s) & 1) ? (uint8_t)first_col : 0;
+            }
+        }
+    } else if (pix_len == 16000) {
+        size_t idx = 0;
+        for (size_t i = 0; i < 16000; ++i) {
+            uint8_t bv = pix_raw[i];
+            for (int s = 6; s >= 0; s -= 2) {
+                int v = (bv >> s) & 3;
+                out_pix[idx++] = v ? (uint8_t)(first_col - 1 + v) : 0;
+            }
+        }
+    } else if (pix_len == 32000) {
+        size_t idx = 0;
+        for (size_t i = 0; i < 32000; ++i) {
+            uint8_t bv = pix_raw[i];
+            int v1 = (bv >> 4) & 0x0F;
+            int v2 = bv & 0x0F;
+            out_pix[idx++] = v1 ? (uint8_t)(first_col - 1 + v1) : 0;
+            out_pix[idx++] = v2 ? (uint8_t)(first_col - 1 + v2) : 0;
+        }
+    } else if (pix_len >= 64000) {
+        memcpy(out_pix.data(), pix_raw, 64000);
+    } else {
+        return false;
+    }
+
+    out_w = 320;
+    out_h = 200;
+    return true;
+}
+
+/* Entpackt eine .AIF-Datei (DSA 2 STAR.DAT / DSA 3 RIVA.ALF & game.gog) */
+static bool decode_aif_indexed(
+    const uint8_t *data, size_t len,
+    int &out_w, int &out_h,
+    std::vector<uint8_t> &out_pix,
+    uint32_t out_pal[256]
+) {
+    if (!data || len < 30) return false;
+    if (data[0] != 'A' || data[1] != 'I' || data[2] != 'F') return false;
+    uint8_t pack   = data[4];
+    uint8_t no_pal = data[5];
+    int w          = (int)rd_i16_le(data + 6);
+    int h          = (int)rd_i16_le(data + 8);
+    int ncolors    = (int)rd_i16_le(data + 10);
+    int first_col  = (int)rd_i16_le(data + 12);
+    if (w <= 0 || w > 640 || h <= 0 || h > 480) return false;
+    if (first_col < 0 || first_col >= 256) first_col = 0;
+    if (ncolors < 0 || first_col + ncolors > 256) ncolors = 256 - first_col;
+
+    size_t pal_len = no_pal ? 0u : (size_t)ncolors * 3u;
+    if (30u + pal_len > len) return false;
+    const uint8_t *comp_data = data + 30;
+    size_t comp_len = len - 30u - pal_len;
+    const uint8_t *pal_raw = data + len - pal_len;
+
+    size_t total = (size_t)w * (size_t)h;
+    if (pack == 0) {
+        if (comp_len < total) return false;
+        out_pix.assign(comp_data, comp_data + total);
+    } else if (pack == 1) {
+        decomp_rle7f_buf(comp_data, comp_len, total, out_pix);
+    } else if (pack == 2) {
+        decomp_packbits_buf(comp_data, comp_len, total, out_pix);
+    } else if (pack == 3) {
+        if (!decomp_pp20_buf(comp_data, comp_len, out_pix) || out_pix.size() < total) return false;
+        out_pix.resize(total);
+    } else {
+        return false;
+    }
+
+    for (int i = 0; i < 256; ++i) out_pal[i] = 0xFF000000u;
+    out_pal[255] = 0xFFFFFFFFu;
+    if (!no_pal) {
+        for (int i = 0; i < ncolors; ++i) {
+            out_pal[first_col + i] = vga6_to_argb32(
+                pal_raw[(size_t)i * 3u + 0],
+                pal_raw[(size_t)i * 3u + 1],
+                pal_raw[(size_t)i * 3u + 2]
+            );
+        }
+    }
+    out_w = w;
+    out_h = h;
+    return true;
+}
+
+/* Entpackt ein einzelnes Frame aus einer .NVF-Datei (fuer GPHILT.NVF in Riva) */
+static bool decode_nvf_frame_indexed(
+    const uint8_t *data, size_t len, int target_frame,
+    int &out_w, int &out_h,
+    std::vector<uint8_t> &out_pix
+) {
+    if (!data || len < 7) return false;
+    uint8_t nvf_type = data[0] & 0x7Fu;
+    int pics = (int)rd_i16_le(data + 1);
+    if (pics <= 0 || pics > 500 || target_frame < 0 || target_frame >= pics || nvf_type > 5) return false;
+
+    if (nvf_type == 0) {
+        int w = (int)rd_i16_le(data + 3);
+        int h = (int)rd_i16_le(data + 5);
+        if (w <= 0 || w > 640 || h <= 0 || h > 480) return false;
+        size_t psize = (size_t)w * (size_t)h;
+        size_t offs = 7u + (size_t)target_frame * psize;
+        if (offs + psize > len) return false;
+        out_w = w; out_h = h;
+        out_pix.assign(data + offs, data + offs + psize);
+        return true;
+    } else if (nvf_type == 1) {
+        size_t hdr_end = 3u + (size_t)pics * 4u;
+        if (hdr_end > len) return false;
+        size_t offs = hdr_end;
+        for (int i = 0; i <= target_frame; ++i) {
+            int w = (int)rd_i16_le(data + 3 + i * 4);
+            int h = (int)rd_i16_le(data + 5 + i * 4);
+            if (w <= 0 || w > 640 || h <= 0 || h > 480) return false;
+            size_t psize = (size_t)w * (size_t)h;
+            if (offs + psize > len) return false;
+            if (i == target_frame) {
+                out_w = w; out_h = h;
+                out_pix.assign(data + offs, data + offs + psize);
+                return true;
+            }
+            offs += psize;
+        }
+    } else if (nvf_type == 2 || nvf_type == 4) {
+        int w = (int)rd_i16_le(data + 3);
+        int h = (int)rd_i16_le(data + 5);
+        if (w <= 0 || w > 640 || h <= 0 || h > 480) return false;
+        size_t hdr_end = 7u + (size_t)pics * 4u;
+        if (hdr_end > len) return false;
+        size_t offs = hdr_end;
+        for (int i = 0; i <= target_frame; ++i) {
+            uint32_t sz = rd_u32_le(data + 7 + i * 4);
+            if (offs + sz > len) return false;
+            if (i == target_frame) {
+                out_w = w; out_h = h;
+                if (nvf_type == 2) return decomp_pp20_buf(data + offs, sz, out_pix) && out_pix.size() >= (size_t)(w * h);
+                decomp_rle7f_buf(data + offs, sz, (size_t)(w * h), out_pix);
+                return true;
+            }
+            offs += sz;
+        }
+    } else if (nvf_type == 3 || nvf_type == 5) {
+        size_t hdr_end = 3u + (size_t)pics * 8u;
+        if (hdr_end > len) return false;
+        size_t offs = hdr_end;
+        for (int i = 0; i <= target_frame; ++i) {
+            int w = (int)rd_i16_le(data + 3 + i * 8);
+            int h = (int)rd_i16_le(data + 5 + i * 8);
+            uint32_t sz = rd_u32_le(data + 7 + i * 8);
+            if (w <= 0 || w > 640 || h <= 0 || h > 480 || offs + sz > len) return false;
+            if (i == target_frame) {
+                out_w = w; out_h = h;
+                if (nvf_type == 3) return decomp_pp20_buf(data + offs, sz, out_pix) && out_pix.size() >= (size_t)(w * h);
+                decomp_rle7f_buf(data + offs, sz, (size_t)(w * h), out_pix);
+                return true;
+            }
+            offs += sz;
+        }
+    }
+    return false;
+}
+
+/* Liest aus einem ISO-9660-CD-Abbild (gamea.gog / game.gog, 2352 oder 2048 Bytes/Sektor) einen Dateibereich */
+static bool read_iso_sectors(FILE *fp, bool raw2352, uint32_t lba, uint32_t offset, uint32_t length, std::vector<uint8_t> &out) {
+    out.resize(length);
+    uint32_t cur = offset;
+    uint32_t rem = length;
+    size_t written = 0;
+    while (rem > 0) {
+        uint32_t sec = lba + (cur >> 11);
+        uint32_t soff = cur & 0x7FFu;
+        uint32_t take = (2048u - soff < rem) ? (2048u - soff) : rem;
+        long file_off = raw2352 ? ((long)sec * 2352L + 24L + (long)soff) : ((long)sec * 2048L + (long)soff);
+        if (fseek(fp, file_off, SEEK_SET) != 0) return false;
+        if (fread(out.data() + written, 1, take, fp) != take) return false;
+        cur += take;
+        rem -= take;
+        written += take;
+    }
+    return true;
+}
+
+static bool find_file_in_gog_iso(
+    FILE *fp, const char *dir_name, const char *file_name,
+    bool &out_raw2352, uint32_t &out_lba, uint32_t &out_len
+) {
+    uint8_t pvd[2048];
+    bool raw2352 = true;
+    if (fseek(fp, 16L * 2352L + 24L, SEEK_SET) == 0 && fread(pvd, 1, 2048, fp) == 2048 && memcmp(pvd + 1, "CD001", 5) == 0) {
+        raw2352 = true;
+    } else if (fseek(fp, 16L * 2048L, SEEK_SET) == 0 && fread(pvd, 1, 2048, fp) == 2048 && memcmp(pvd + 1, "CD001", 5) == 0) {
+        raw2352 = false;
+    } else {
+        return false;
+    }
+    out_raw2352 = raw2352;
+    uint32_t root_lba = rd_u32_le(pvd + 158);
+    uint32_t root_len = rd_u32_le(pvd + 166);
+    if (root_len == 0 || root_len > 256 * 1024) return false;
+
+    std::vector<uint8_t> rdir;
+    if (!read_iso_sectors(fp, raw2352, root_lba, 0, root_len, rdir)) return false;
+
+    uint32_t target_dir_lba = root_lba;
+    uint32_t target_dir_len = root_len;
+    if (dir_name && dir_name[0]) {
+        bool found_dir = false;
+        size_t pos = 0;
+        while (pos < rdir.size()) {
+            uint8_t reclen = rdir[pos];
+            if (reclen == 0) { pos = ((pos >> 11) + 1) << 11; continue; }
+            if (pos + reclen > rdir.size() || reclen < 34) break;
+            uint32_t flba = rd_u32_le(&rdir[pos + 2]);
+            uint32_t flen = rd_u32_le(&rdir[pos + 10]);
+            uint8_t nlen = rdir[pos + 32];
+            if (pos + 33 + nlen <= pos + reclen) {
+                std::string nm((const char *)&rdir[pos + 33], nlen);
+                size_t sc = nm.find(';');
+                if (sc != std::string::npos) nm.resize(sc);
+                if (_stricmp(nm.c_str(), dir_name) == 0) {
+                    target_dir_lba = flba;
+                    target_dir_len = flen;
+                    found_dir = true;
+                    break;
+                }
+            }
+            pos += reclen;
+        }
+        if (!found_dir || target_dir_len == 0 || target_dir_len > 256 * 1024) return false;
+    }
+
+    std::vector<uint8_t> ddir;
+    if (!read_iso_sectors(fp, raw2352, target_dir_lba, 0, target_dir_len, ddir)) return false;
+    size_t pos = 0;
+    while (pos < ddir.size()) {
+        uint8_t reclen = ddir[pos];
+        if (reclen == 0) { pos = ((pos >> 11) + 1) << 11; continue; }
+        if (pos + reclen > ddir.size() || reclen < 34) break;
+        uint32_t flba = rd_u32_le(&ddir[pos + 2]);
+        uint32_t flen = rd_u32_le(&ddir[pos + 10]);
+        uint8_t nlen = ddir[pos + 32];
+        if (pos + 33 + nlen <= pos + reclen) {
+            std::string nm((const char *)&ddir[pos + 33], nlen);
+            size_t sc = nm.find(';');
+            if (sc != std::string::npos) nm.resize(sc);
+            if (_stricmp(nm.c_str(), file_name) == 0) {
+                out_lba = flba;
+                out_len = flen;
+                return true;
+            }
+        }
+        pos += reclen;
+    }
+    return false;
+}
+
+/* 1. Titelbild Teil 1 (Die Schicksalsklinge): DSAART.ULI aus INTRODAT.DIR / INTRODAT.VOL
+ *    Fallback: KARTE.DAT (Eintrag 5) aus SCHICK.DAT */
+static bool load_dsa1_title_image(const std::string &gamedir, std::vector<uint32_t> &out_argb) {
+    std::string dir_path = join_path(gamedir, "INTRODAT.DIR");
+    std::string vol_path = join_path(gamedir, "INTRODAT.VOL");
+    if (file_exists_win(dir_path) && file_exists_win(vol_path)) {
+        FILE *fdir = fopen(utf8_to_win1252(dir_path).c_str(), "rb");
+        FILE *fvol = fopen(utf8_to_win1252(vol_path).c_str(), "rb");
+        if (fdir && fvol) {
+            fseek(fdir, 0, SEEK_END);
+            long dsz = ftell(fdir);
+            fseek(fdir, 0, SEEK_SET);
+            if (dsz > 0 && dsz <= 65536) {
+                std::vector<uint8_t> dbuf((size_t)dsz);
+                fread(dbuf.data(), 1, (size_t)dsz, fdir);
+                uint32_t art_off = 0, art_sz = 0;
+                for (size_t i = 0; i + 32 <= dbuf.size(); i += 32) {
+                    uint8_t nlen = dbuf[i];
+                    if (nlen >= 1 && nlen <= 12) {
+                        std::string nm((const char *)&dbuf[i + 1], nlen);
+                        uint32_t off = rd_u32_le(&dbuf[i + 26]);
+                        uint16_t sz  = rd_u16_le(&dbuf[i + 30]);
+                        if (_stricmp(nm.c_str(), "DSAART.ULI") == 0) { art_off = off; art_sz = sz; break; }
+                    }
+                }
+                if (art_sz > 0 && art_sz <= 131072) {
+                    std::vector<uint8_t> abuf(art_sz);
+                    if (fseek(fvol, (long)art_off, SEEK_SET) == 0 && fread(abuf.data(), 1, art_sz, fvol) == art_sz) {
+                        int w1 = 0, h1 = 0;
+                        std::vector<uint8_t> pix1;
+                        uint32_t pal1[256];
+                        if (decode_uli_indexed(abuf.data(), abuf.size(), w1, h1, pix1, pal1)) {
+                            out_argb.resize(64000);
+                            for (size_t k = 0; k < 64000; ++k) {
+                                out_argb[k] = pal1[pix1[k]];
+                            }
+                            fclose(fdir);
+                            fclose(fvol);
+                            return true;
+                        }
+                    }
+                }
+            }
+        }
+        if (fdir) fclose(fdir);
+        if (fvol) fclose(fvol);
+    }
+
+    /* Fallback: SCHICK.DAT Eintrag #5 (KARTE.DAT, 320x200 + 32-Farben-Palette bei +64002) */
+    std::string schick_path = join_path(gamedir, "SCHICK.DAT");
+    if (file_exists_win(schick_path)) {
+        FILE *fp = fopen(utf8_to_win1252(schick_path).c_str(), "rb");
+        if (fp) {
+            uint8_t offs_buf[32];
+            if (fread(offs_buf, 1, 32, fp) == 32) {
+                uint32_t off5 = rd_u32_le(offs_buf + 5 * 4);
+                uint32_t off6 = rd_u32_le(offs_buf + 6 * 4);
+                if (off6 > off5 && (off6 - off5) >= 64098) {
+                    std::vector<uint8_t> kbuf(64098);
+                    if (fseek(fp, (long)off5, SEEK_SET) == 0 && fread(kbuf.data(), 1, 64098, fp) == 64098) {
+                        uint32_t pal[256];
+                        for (int i = 0; i < 256; ++i) pal[i] = 0xFF000000u;
+                        for (int i = 0; i < 32; ++i) {
+                            pal[i] = vga6_to_argb32(kbuf[64002 + i * 3], kbuf[64002 + i * 3 + 1], kbuf[64002 + i * 3 + 2]);
+                        }
+                        out_argb.resize(64000);
+                        for (size_t k = 0; k < 64000; ++k) {
+                            out_argb[k] = pal[kbuf[k] & 0x1Fu];
+                        }
+                        fclose(fp);
+                        return true;
+                    }
+                }
+            }
+            fclose(fp);
+        }
+    }
+    return false;
+}
+
+/* 2. Titelbild Teil 2 (Sternenschweif): ARTWORK.AIF (PIC_TITLE = 0x436) aus DATA\STAR.DAT bzw. gamea.gog
+ *    Fallback bei lokaler STAR.DAT ohne gamea.gog: LOWANGEN.AIF oder CREDITS.AIF */
+static bool read_stardat_aif_entry(const std::string &gamedir, const char *entry_name, std::vector<uint8_t> &out_raw) {
+    /* Zuerst in gamea.gog / game.gog schauen, falls das Eintrag-Flag in der lokalen STAR.DAT 0 ist */
+    std::string star_path = join_path(gamedir, "DATA\\STAR.DAT");
+    if (file_exists_win(star_path)) {
+        FILE *fp = fopen(utf8_to_win1252(star_path).c_str(), "rb");
+        if (fp) {
+            fseek(fp, 0, SEEK_END);
+            long fsz = ftell(fp);
+            fseek(fp, 0, SEEK_SET);
+            uint8_t cnt_buf[4];
+            if (fsz > 24842 && fread(cnt_buf, 1, 4, fp) == 4) {
+                uint32_t cnt = rd_u32_le(cnt_buf);
+                if (cnt > 1 && cnt <= 2000 && (long)(4 + (cnt - 1) * 20) <= fsz) {
+                    std::vector<uint8_t> hdr((cnt - 1) * 20);
+                    if (fread(hdr.data(), 1, hdr.size(), fp) == hdr.size()) {
+                        for (uint32_t i = 0; i + 1 < cnt - 1; ++i) {
+                            const uint8_t *rec = &hdr[i * 20];
+                            char nm[15];
+                            memcpy(nm, rec, 14);
+                            nm[14] = '\0';
+                            uint32_t off = rd_u32_le(rec + 14);
+                            uint16_t flg = rd_u16_le(rec + 18);
+                            if (_stricmp(nm, entry_name) == 0 && flg == 1) {
+                                /* Naechsten Eintrag mit flg==1 fuer das Ende finden */
+                                uint32_t next_off = (uint32_t)(fsz - 24842);
+                                for (uint32_t j = i + 1; j < cnt - 1; ++j) {
+                                    uint32_t o2 = rd_u32_le(&hdr[j * 20 + 14]);
+                                    uint16_t f2 = rd_u16_le(&hdr[j * 20 + 18]);
+                                    if (f2 == 1 && o2 > off) { next_off = o2; break; }
+                                }
+                                uint32_t sz = (next_off > off) ? (next_off - off) : 0;
+                                if (sz >= 30 && sz <= 512 * 1024 && (long)(24842u + off + sz) <= fsz) {
+                                    out_raw.resize(sz);
+                                    if (fseek(fp, (long)(24842u + off), SEEK_SET) == 0 &&
+                                        fread(out_raw.data(), 1, sz, fp) == sz) {
+                                        fclose(fp);
+                                        return true;
+                                    }
+                                }
+                                break;
+                            }
+                        }
+                    }
+                }
+            }
+            fclose(fp);
+        }
+    }
+
+    /* Falls in lokaler STAR.DAT flg==0 war: aus CD-Image gamea.gog / game.gog lesen */
+    const char *iso_names[2] = { "gamea.gog", "game.gog" };
+    for (int k = 0; k < 2; ++k) {
+        std::string iso_path = join_path(gamedir, iso_names[k]);
+        if (!file_exists_win(iso_path)) continue;
+        FILE *fp = fopen(utf8_to_win1252(iso_path).c_str(), "rb");
+        if (!fp) continue;
+        bool raw2352 = true;
+        uint32_t star_lba = 0, star_len = 0;
+        if (find_file_in_gog_iso(fp, "DATA", "STAR.DAT", raw2352, star_lba, star_len) && star_len > 24844) {
+            std::vector<uint8_t> cd_hdr;
+            if (read_iso_sectors(fp, raw2352, star_lba, 0, 24844, cd_hdr)) {
+                uint32_t cnt = rd_u32_le(cd_hdr.data());
+                if (cnt > 1 && cnt <= 1243) {
+                    for (uint32_t i = 0; i < cnt - 1; ++i) {
+                        const uint8_t *rec = &cd_hdr[4 + i * 20];
+                        char nm[15];
+                        memcpy(nm, rec, 14);
+                        nm[14] = '\0';
+                        if (_stricmp(nm, entry_name) == 0) {
+                            uint32_t off = rd_u32_le(rec + 14);
+                            uint32_t next_off = (i + 1 < cnt - 1) ? rd_u32_le(&cd_hdr[4 + (i + 1) * 20 + 14]) : (star_len - 24842u);
+                            uint32_t sz = (next_off > off) ? (next_off - off) : 0;
+                            if (sz >= 30 && sz <= 512 * 1024 && 24842u + off + sz <= star_len) {
+                                if (read_iso_sectors(fp, raw2352, star_lba, 24842u + off, sz, out_raw)) {
+                                    fclose(fp);
+                                    return true;
+                                }
+                            }
+                            break;
+                        }
+                    }
+                }
+            }
+        }
+        fclose(fp);
+    }
+    return false;
+}
+
+static bool load_dsa2_title_image(const std::string &gamedir, std::vector<uint32_t> &out_argb) {
+    const char *candidates[4] = { "ARTWORK.AIF", "FLAME1.AIF", "LOWANGEN.AIF", "CREDITS.AIF" };
+    for (int i = 0; i < 4; ++i) {
+        std::vector<uint8_t> raw;
+        if (read_stardat_aif_entry(gamedir, candidates[i], raw)) {
+            int w = 0, h = 0;
+            std::vector<uint8_t> pix;
+            uint32_t pal[256];
+            if (decode_aif_indexed(raw.data(), raw.size(), w, h, pix, pal) && w == 320 && h == 200) {
+                out_argb.resize(64000);
+                for (int y = 0; y < 200; ++y) {
+                    for (int x = 0; x < 320; ++x) {
+                        size_t k = (size_t)y * 320u + (size_t)x;
+                        uint32_t c = pal[pix[k]];
+                        /* Bei ARTWORK.AIF das Lade-Overlay ("Bitte warten!" + CD unten rechts) weich abdunkeln */
+                        if (i == 0 && x >= 184 && y >= 120) {
+                            int fx = (x >= 210) ? 0 : (210 - x) * 256 / 26;
+                            int fy = (y >= 142) ? 0 : (142 - y) * 256 / 22;
+                            int f = (fx > fy) ? fx : fy;
+                            int r = (((int)((c >> 16) & 0xFF)) * f) >> 8;
+                            int g = (((int)((c >> 8)  & 0xFF)) * f) >> 8;
+                            int b = (((int)(c         & 0xFF)) * f) >> 8;
+                            c = 0xFF000000u | ((uint32_t)r << 16) | ((uint32_t)g << 8) | (uint32_t)b;
+                        }
+                        out_argb[k] = c;
+                    }
+                }
+                return true;
+            }
+        }
+    }
+    return false;
+}
+
+/* 3. Titelbild Teil 3 (Schatten ueber Riva): GPMASK00.AIF aus DATA\RIVA.ALF
+ *    Fallback: DATA\SCHATTEN.AIF (aus game.gog oder lose) */
+static bool load_dsa3_title_image(const std::string &gamedir, std::vector<uint32_t> &out_argb, int &out_w, int &out_h) {
+    std::string alf_path = join_path(gamedir, "DATA\\RIVA.ALF");
+    if (file_exists_win(alf_path)) {
+        FILE *fp = fopen(utf8_to_win1252(alf_path).c_str(), "rb");
+        if (fp) {
+            uint8_t hdr[48];
+            if (fread(hdr, 1, 48, fp) == 48) {
+                uint16_t cnt       = rd_u16_le(hdr + 8);
+                uint32_t dir_off   = rd_u32_le(hdr + 10);
+                uint32_t data_base = rd_u32_le(hdr + 16);
+                if (cnt > 0 && cnt <= 3000) {
+                    std::vector<uint8_t> dir_buf((size_t)cnt * 28u);
+                    if (fseek(fp, (long)dir_off, SEEK_SET) == 0 &&
+                        fread(dir_buf.data(), 1, dir_buf.size(), fp) == dir_buf.size()) {
+                        uint32_t gp_off = 0, gp_sz = 0;
+                        for (uint16_t i = 0; i < cnt; ++i) {
+                            const uint8_t *rec = &dir_buf[(size_t)i * 28u];
+                            char nm[15];
+                            memcpy(nm, rec, 14);
+                            nm[14] = '\0';
+                            uint32_t sz  = rd_u32_le(rec + 14);
+                            uint32_t off = rd_u32_le(rec + 24);
+                            if (_stricmp(nm, "GPMASK00.AIF") == 0) { gp_off = data_base + off; gp_sz = sz; break; }
+                        }
+                        if (gp_sz >= 30 && gp_sz <= 256 * 1024) {
+                            std::vector<uint8_t> gp_raw(gp_sz);
+                            if (fseek(fp, (long)gp_off, SEEK_SET) == 0 && fread(gp_raw.data(), 1, gp_sz, fp) == gp_sz) {
+                                int w = 0, h = 0;
+                                std::vector<uint8_t> pix;
+                                uint32_t pal[256];
+                                if (decode_aif_indexed(gp_raw.data(), gp_raw.size(), w, h, pix, pal) && w == 320 && h >= 140 && h <= 200) {
+                                    /* Volle Motivbreite (Stadttor + alle 3 Helden) und echte Motivhoehe h (149) ohne schwarze Unterkante */
+                                    int crop_w = 304;
+                                    out_argb.resize((size_t)crop_w * (size_t)h);
+                                    for (int y = 0; y < h; ++y) {
+                                        for (int x = 0; x < crop_w; ++x) {
+                                            out_argb[(size_t)y * (size_t)crop_w + (size_t)x] = pal[pix[(size_t)y * 320u + (size_t)x]];
+                                        }
+                                    }
+                                    out_w = crop_w;
+                                    out_h = h;
+                                    fclose(fp);
+                                    return true;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            fclose(fp);
+        }
+    }
+
+    /* Fallback: DATA/SCHATTEN.AIF aus game.gog */
+    std::string iso_path = join_path(gamedir, "game.gog");
+    if (file_exists_win(iso_path)) {
+        FILE *fp = fopen(utf8_to_win1252(iso_path).c_str(), "rb");
+        if (fp) {
+            bool raw2352 = true;
+            uint32_t lba = 0, len = 0;
+            if (find_file_in_gog_iso(fp, "DATA", "SCHATTEN.AIF", raw2352, lba, len) && len >= 30 && len <= 256 * 1024) {
+                std::vector<uint8_t> raw;
+                if (read_iso_sectors(fp, raw2352, lba, 0, len, raw)) {
+                    int w = 0, h = 0;
+                    std::vector<uint8_t> pix;
+                    uint32_t pal[256];
+                    if (decode_aif_indexed(raw.data(), raw.size(), w, h, pix, pal) && w == 320 && h == 200) {
+                        out_argb.resize(64000);
+                        for (size_t k = 0; k < 64000; ++k) out_argb[k] = pal[pix[k]];
+                        out_w = 320;
+                        out_h = 200;
+                        fclose(fp);
+                        return true;
+                    }
+                }
+            }
+            fclose(fp);
+        }
+    }
+    return false;
+}
+
+/* Entfernt schwarze Pillarbox-/Letterbox-Raender (z. B. links/rechts bei DSAART.ULI und ARTWORK.AIF),
+ * damit alle drei Titelbilder exakt buendig am selben linken Rand starten und die volle Hoehe/Breite fuellen. */
+static void crop_title_image_black_margins(std::vector<uint32_t> &pixels, int &w, int &h) {
+    if (w <= 16 || h <= 16 || pixels.size() < (size_t)(w * h)) return;
+
+    auto is_visible_px = [](uint32_t c) -> bool {
+        int r = (int)((c >> 16) & 0xFF);
+        int g = (int)((c >> 8)  & 0xFF);
+        int b = (int)(c         & 0xFF);
+        return (r + g + b) > 18;
+    };
+
+    int band_y0 = h / 10;
+    int band_y1 = (h * 6) / 10;
+    int x0 = 0;
+    while (x0 < w / 3) {
+        int cnt = 0;
+        for (int y = band_y0; y < band_y1; ++y) {
+            if (is_visible_px(pixels[(size_t)y * (size_t)w + (size_t)x0])) ++cnt;
+        }
+        if (cnt > 4) break;
+        ++x0;
+    }
+
+    int x1 = w - 1;
+    while (x1 > (w * 2) / 3) {
+        int cnt = 0;
+        for (int y = band_y0; y < band_y1; ++y) {
+            if (is_visible_px(pixels[(size_t)y * (size_t)w + (size_t)x1])) ++cnt;
+        }
+        if (cnt > 4) break;
+        --x1;
+    }
+
+    int y0 = 0;
+    while (y0 < h / 4) {
+        int cnt = 0;
+        for (int x = x0; x <= x1; ++x) {
+            if (is_visible_px(pixels[(size_t)y0 * (size_t)w + (size_t)x])) ++cnt;
+        }
+        if (cnt > 4) break;
+        ++y0;
+    }
+
+    int y1 = h - 1;
+    while (y1 > (h * 3) / 4) {
+        int cnt = 0;
+        for (int x = x0; x <= x1; ++x) {
+            if (is_visible_px(pixels[(size_t)y1 * (size_t)w + (size_t)x])) ++cnt;
+        }
+        if (cnt > 4) break;
+        --y1;
+    }
+
+    int nw = x1 - x0 + 1;
+    int nh = y1 - y0 + 1;
+    if (nw <= 32 || nh <= 32 || (nw == w && nh == h)) return;
+
+    std::vector<uint32_t> cropped((size_t)nw * (size_t)nh);
+    for (int y = 0; y < nh; ++y) {
+        for (int x = 0; x < nw; ++x) {
+            cropped[(size_t)y * (size_t)nw + (size_t)x] = pixels[(size_t)(y0 + y) * (size_t)w + (size_t)(x0 + x)];
+        }
+    }
+    pixels.swap(cropped);
+    w = nw;
+    h = nh;
+}
+
+static void load_game_title_image(GameCatalogEntry &g) {
+    if (!g.gamedir_valid || g.resolved_gamedir.empty()) {
+        g.has_title_image = false;
+        g.title_w = 0;
+        g.title_h = 0;
+        g.title_pixels.clear();
+        g.title_loaded_dir.clear();
+        return;
+    }
+    if (g.has_title_image && _stricmp(g.title_loaded_dir.c_str(), g.resolved_gamedir.c_str()) == 0) {
+        return;
+    }
+    g.has_title_image = false;
+    g.title_w = 0;
+    g.title_h = 0;
+    g.title_pixels.clear();
+    g.title_loaded_dir.clear();
+
+    bool ok = false;
+    int lw = 320, lh = 200;
+    if (g.teil == 1) {
+        ok = load_dsa1_title_image(g.resolved_gamedir, g.title_pixels);
+    } else if (g.teil == 2) {
+        ok = load_dsa2_title_image(g.resolved_gamedir, g.title_pixels);
+    } else if (g.teil == 3) {
+        ok = load_dsa3_title_image(g.resolved_gamedir, g.title_pixels, lw, lh);
+    }
+    if (ok && !g.title_pixels.empty()) {
+        g.title_w = lw;
+        g.title_h = lh;
+        if (g.title_w == 320 && g.title_h == 200) {
+            crop_title_image_black_margins(g.title_pixels, g.title_w, g.title_h);
+        }
+        g.has_title_image = (g.title_w > 0 && g.title_h > 0);
+        g.title_loaded_dir = g.resolved_gamedir;
+    } else {
+        g.title_pixels.clear();
+    }
+}
+
 static void refresh_game_status(GameCatalogEntry &g) {
     /* 1. Port-Ordner & EXEs pruefen (inkl. g_exe_dir fuer Starter/release/) */
     std::vector<std::string> dirs_to_check;
@@ -820,22 +1754,26 @@ static void refresh_game_status(GameCatalogEntry &g) {
     g.gamedir_valid = false;
     g.gamedir_writable = false;
 
-    if (!g.custom_spielpfad.empty() && check_gamedir_candidate(g, g.custom_spielpfad, g.resolved_gamedir)) {
+    bool explicitly_disabled = (g.custom_spielpfad == "-" ||
+                                _stricmp(g.custom_spielpfad.c_str(), "keiner") == 0 ||
+                                _stricmp(g.custom_spielpfad.c_str(), "none") == 0);
+
+    if (!explicitly_disabled && !g.custom_spielpfad.empty() && check_gamedir_candidate(g, g.custom_spielpfad, g.resolved_gamedir)) {
         g.gamedir_valid = true;
     }
-    if (!g.gamedir_valid) {
+    if (!explicitly_disabled && !g.gamedir_valid) {
         std::string local_spieldaten = join_path(g_starter_dir, "Spieldaten\\" + g.id);
         if (check_gamedir_candidate(g, local_spieldaten, g.resolved_gamedir)) {
             g.gamedir_valid = true;
         }
     }
-    if (!g.gamedir_valid) {
+    if (!explicitly_disabled && !g.gamedir_valid) {
         std::string exe_spieldaten = join_path(g_exe_dir, "Spieldaten\\" + g.id);
         if (check_gamedir_candidate(g, exe_spieldaten, g.resolved_gamedir)) {
             g.gamedir_valid = true;
         }
     }
-    if (!g.gamedir_valid && !g_disable_gog_autoscan) {
+    if (!explicitly_disabled && !g.gamedir_valid && !g_disable_gog_autoscan) {
         const char *env_sp = getenv("SPIELPFAD");
         if (!env_sp || !env_sp[0]) env_sp = getenv("DSA_GAMEDIR");
         if (!env_sp || !env_sp[0]) env_sp = getenv("DSA_GAME_DIR");
@@ -843,7 +1781,7 @@ static void refresh_game_status(GameCatalogEntry &g) {
             g.gamedir_valid = true;
         }
     }
-    if (!g.gamedir_valid && !g_disable_gog_autoscan) {
+    if (!explicitly_disabled && !g.gamedir_valid && !g_disable_gog_autoscan) {
         std::string sp_candidates[] = {
             join_path(g_exe_dir, "SPIELPFAD.txt"),
             join_path(g_starter_dir, "SPIELPFAD.txt"),
@@ -858,7 +1796,7 @@ static void refresh_game_status(GameCatalogEntry &g) {
             }
         }
     }
-    if (!g.gamedir_valid && !g_disable_gog_autoscan) {
+    if (!explicitly_disabled && !g.gamedir_valid && !g_disable_gog_autoscan) {
         for (size_t i = 0; i < g.gog_pfade.size(); ++i) {
             if (check_gamedir_candidate(g, g.gog_pfade[i], g.resolved_gamedir)) {
                 g.gamedir_valid = true;
@@ -869,6 +1807,9 @@ static void refresh_game_status(GameCatalogEntry &g) {
     if (g.gamedir_valid) {
         g.gamedir_writable = is_dir_writable_win(g.resolved_gamedir);
     }
+
+    /* T1 (Etappe 4): Original-Titelbild zur Laufzeit aus dem Spielordner laden (auch wenn Port-EXE noch fehlt, z. B. Riva) */
+    load_game_title_image(g);
 
     /* 3. Grafikpaket-Verfuegbarkeit pruefen (T1: Modus 'paket' nur waehlbar, wenn Paket erzeugt wurde) */
     g.has_grafikpaket = false;
@@ -1365,6 +2306,10 @@ static uint32_t game_logo_color(int teil, bool verfuegbar) {
     }
 }
 
+static inline bool point_in_rect(int px, int py, int rx, int ry, int rw, int rh) {
+    return px >= rx && px < rx + rw && py >= ry && py < ry + rh;
+}
+
 static void render_background_and_header(const char *subtitle) {
     init_gdi_font_canvas();
     bool bg_hover = (!g_help_active && !g_modal_active);
@@ -1375,12 +2320,13 @@ static void render_background_and_header(const char *subtitle) {
     fill_gradient_v(18, 12, SCREEN_W - 36, 68, 0xFF1A202Eu, 0xFF111520u);
     draw_rect_border(18, 12, SCREEN_W - 36, 68, 0xFF626C80u, 0xFF2E3442u);
 
-    /* Haupttitel "Das Schwarze Auge: Die Nordland-Trilogie" in ruhigem, edlem Pergament-Elfenbein */
-    draw_text(34, 13, "Das Schwarze Auge: Die Nordland-Trilogie", 0xFFECE6D8u, 3, true);
+    /* Haupttitel in ruhigem, edlem Pergament-Elfenbein */
+    draw_text(34, 13, L("Das Schwarze Auge: Die Nordland-Trilogie", "Realms of Arkania: The Northland Trilogy"), 0xFFECE6D8u, 3, true);
     draw_text(34, 51, subtitle, 0xFFA4B0C2u, 1, true);
 
-    /* Rechts oben nur der Hilfe-Knopf (F1) mit reichlich Abstand */
-    draw_button(SCREEN_W - 148, 27, 122, 38, "Hilfe (F1)", g_help_active, true, false, bg_hover);
+    /* Rechts oben: Sprachumschaltung (F2) + Hilfe-Knopf (F1) */
+    draw_button(SCREEN_W - 252, 27, 94, 38, g_lang_en ? "EN (F2)" : "DE (F2)", false, true, false, bg_hover);
+    draw_button(SCREEN_W - 148, 27, 122, 38, L("Hilfe (F1)", "Help (F1)"), g_help_active, true, false, bg_hover);
 }
 
 static const char *fenster_label_str(const std::string &f) {
@@ -1388,33 +2334,121 @@ static const char *fenster_label_str(const std::string &f) {
     if (f == "3") return "3x (960x720)";
     if (f == "4") return "4x (1280x960)";
     if (f == "5") return "5x (1600x1200)";
-    return "Vollbild (4:3)";
+    return L("Vollbild (4:3)", "Fullscreen (4:3)");
 }
 
 static const char *skalierung_label_str(const std::string &s) {
-    if (_stricmp(s.c_str(), "ganzzahlig") == 0) return "Ganzzahlig";
-    return "Füllend";
+    if (_stricmp(s.c_str(), "ganzzahlig") == 0) return L("Ganzzahlig", "Integer");
+    return L("Füllend (scharf)", "Fill (sharp)");
 }
 
 static const char *stufe_short_label(PatchStufe s) {
-    if (s == STUFE_ORIG) return "Original";
-    if (s == STUFE_WICHTIG) return "Wichtige Fixes";
-    return "Alle Fixes";
+    if (s == STUFE_ORIG) return L("Original", "Original");
+    if (s == STUFE_WICHTIG) return L("Wichtige Fixes", "Essential Fixes");
+    return L("Alle Fixes", "All Fixes");
+}
+
+static std::string get_active_exe_name(const GameCatalogEntry &g) {
+    if (g.chosen_stufe == STUFE_ORIG) return g.exe_orig;
+    if (g.chosen_stufe == STUFE_WICHTIG) return g.exe_wichtig;
+    if (!g.exe_alles.empty()) return g.exe_alles;
+    return g.exe_standard;
+}
+
+static void draw_tooltip_box(int mx, int my, const std::string &txt) {
+    if (txt.empty()) return;
+    int tw = text_width_px(txt.c_str(), 0) + 24;
+    int th = 30;
+    int bx = mx + 14;
+    int by = my - th - 6;
+    if (bx + tw > SCREEN_W - 12) bx = SCREEN_W - 12 - tw;
+    if (bx < 12) bx = 12;
+    if (by < 12) by = my + 18;
+    fill_gradient_v(bx, by, tw, th, 0xFF242E42u, 0xFF161C2Au);
+    draw_rect_border(bx, by, tw, th, 0xFFD4B458u, 0xFF4A4024u);
+    draw_text(bx + 12, by + 6, txt.c_str(), 0xFFF4E8C4u, 0, true);
+}
+
+/* T1: Zeichnet das aus dem Spielordner gelesene Original-Titelbild links auf der Karte:
+ * - Alle drei Karten identisch ausgerichtet: gleicher linker Abstand (cx + 2),
+ *   gleiche Breite (224 px) und volle Karteninnenhoehe (176 px, cy + 2 .. cy + 178).
+ * - Nearest-Neighbor-Sampling, leicht abgedunkelt, rechts mit weichem Verlauf (Smoothstep)
+ *   in den Kartenhintergrund auslaufend. */
+static void draw_card_title_image(const GameCatalogEntry &g, int cx, int cy) {
+    const int ix = cx + 2;
+    const int iy = cy + 2;
+    const int dst_w = 224;
+    const int dst_h = 176; /* volle Karteninnenhoehe (ch - 4 = 180 - 4 = 176) */
+    const int fade_start = 136;
+    const int src_w = g.title_w;
+    const int src_h = g.title_h;
+    if (!g.has_title_image || src_w <= 0 || src_h <= 0 || g.title_pixels.size() < (size_t)(src_w * src_h)) {
+        return;
+    }
+
+    for (int dy = 0; dy < dst_h; ++dy) {
+        int py = iy + dy;
+        if ((unsigned)py >= SCREEN_H) continue;
+        int sy = (dy * src_h) / dst_h; /* Nearest-Neighbor vertikal */
+        const uint32_t *src_row = &g.title_pixels[(size_t)sy * (size_t)src_w];
+        uint32_t *dst_row = &g_fb[py * SCREEN_W];
+
+        for (int dx = 0; dx < dst_w; ++dx) {
+            int px = ix + dx;
+            if ((unsigned)px >= SCREEN_W) continue;
+            int sx = (dx * src_w) / dst_w; /* Nearest-Neighbor horizontal */
+            uint32_t scol = src_row[sx];
+
+            int sr = (int)((scol >> 16) & 0xFF);
+            int sg = (int)((scol >> 8)  & 0xFF);
+            int sb = (int)(scol         & 0xFF);
+
+            /* Weicher horizontaler Verlauf (Smoothstep) am rechten Bildrand in den Kartenhintergrund */
+            int alpha = 226; /* Grundhelligkeit ~88 % (leicht abgedunkelt) */
+            if (dx >= fade_start) {
+                int span = dst_w - 1 - fade_start;
+                int rem  = dst_w - 1 - dx;
+                if (rem <= 0 || span <= 0) {
+                    alpha = 0;
+                } else {
+                    int t = (rem * 256) / span; /* 0..256 */
+                    int smooth = (t * t * (768 - 2 * t)) >> 16; /* Smoothstep 0..256 */
+                    alpha = (226 * smooth) >> 8;
+                }
+            }
+
+            uint32_t bcol = dst_row[px];
+            int br = (int)((bcol >> 16) & 0xFF);
+            int bg = (int)((bcol >> 8)  & 0xFF);
+            int bb = (int)(bcol         & 0xFF);
+
+            int rr = (sr * alpha + br * (256 - alpha)) >> 8;
+            int rg = (sg * alpha + bg * (256 - alpha)) >> 8;
+            int rb = (sb * alpha + bb * (256 - alpha)) >> 8;
+            dst_row[px] = 0xFF000000u | ((uint32_t)rr << 16) | ((uint32_t)rg << 8) | (uint32_t)rb;
+        }
+    }
 }
 
 static void render_screen_select_game(void) {
     bool bg_hover = (!g_help_active && !g_modal_active);
     render_background_and_header(
-        "Gemeinsamer Starter – Jedes Spiel direkt auf seiner eigenen Karte einstellen und starten"
+        L("Gemeinsamer Starter – Jedes Spiel direkt auf seiner eigenen Karte einstellen und starten",
+          "Unified Launcher – Configure and start each game directly on its own card")
     );
 
-    /* Kompakter Hinweis-Balken oben fuer Drag & Drop */
+    /* Kompakter Hinweis-Balken oben fuer Drag & Drop (ohne Dateiendungen) */
     fill_gradient_v(18, 92, SCREEN_W - 36, 46, 0xFF151B26u, 0xFF10141Eu);
     draw_rect_border(18, 92, SCREEN_W - 36, 46, 0xFF485264u, 0xFF242A36u);
-    draw_text(34, 105, "Tipp: GOG-Spielordner, .zip-Archiv oder Port-Ordner einfach ins Fenster ziehen – oder direkt beim jeweiligen Spiel einstellen:", 0xFFC8D2E2u, 1, true);
+    draw_text(34, 105,
+        L("Tipp: Spielordner oder Archiv einfach mit der Maus ins Fenster ziehen – oder direkt beim jeweiligen Spiel auswählen:",
+          "Tip: Simply drag & drop a game folder or archive into this window – or select it directly on each game card:"),
+        0xFFC8D2E2u, 1, true);
+
+    std::string active_tooltip;
 
     /* ---------------------------------------------------------------------
-     * Die 3 Spielkarten – ALLES direkt pro Spiel regelbar (keine Fuss-/Statusleiste)
+     * Die 3 Spielkarten – ALLES direkt pro Spiel regelbar
      * --------------------------------------------------------------------- */
     for (size_t i = 0; i < g_games.size() && i < 3; ++i) {
         const GameCatalogEntry &g = g_games[i];
@@ -1427,7 +2461,7 @@ static void render_screen_select_game(void) {
         bool is_hov = bg_hover && ((int)i == g_hover_game);
 
         uint32_t bg_top, bg_bot, b_out, b_in;
-        if (!g.verfuegbar) {
+        if (!g.verfuegbar && !g.has_title_image) {
             bg_top = 0xFF151820u;
             bg_bot = 0xFF101218u;
             b_out  = is_sel ? 0xFF606878u : 0xFF3E4554u;
@@ -1451,69 +2485,93 @@ static void render_screen_select_game(void) {
         }
 
         fill_gradient_v(cx, cy, cw, ch, bg_top, bg_bot);
+
+        int tx0 = cx + 110;
+        if (g.has_title_image) {
+            draw_card_title_image(g, cx, cy);
+            tx0 = cx + 226;
+        } else {
+            draw_game_emblem(cx + 20, cy + 20, g.teil, g.verfuegbar || g.gamedir_valid);
+        }
+
         draw_rect_border(cx, cy, cw, ch, b_out, b_in);
         if (is_sel) {
             draw_corner_ornaments(cx, cy, cw, ch, 0xFFB0BED4u);
         }
 
-        draw_game_emblem(cx + 20, cy + 20, g.teil, g.verfuegbar);
-
         /* Zeile 1: Spieletitel in der jeweiligen Originalfarbe des Spiel-Schriftzugs + Startknopf rechts oben */
         char title_buf[160];
         snprintf(title_buf, sizeof(title_buf), "%d. %s", g.teil, g.name.c_str());
-        uint32_t title_col = game_logo_color(g.teil, g.verfuegbar);
-        draw_text(cx + 110, cy + 16, title_buf, title_col, 2, true);
+        uint32_t title_col = game_logo_color(g.teil, g.verfuegbar || g.gamedir_valid);
+        draw_text(tx0, cy + 16, title_buf, title_col, 2, true);
 
         int title_w = text_width_px(title_buf, 2);
-        const char *short_sub = (g.teil == 1) ? "(DSA Teil 1 – 1992)" : ((g.teil == 2) ? "(DSA Teil 2 – 1994)" : "(DSA Teil 3 – 1996)");
-        draw_text(cx + 124 + title_w, cy + 22, short_sub, g.verfuegbar ? 0xFFA4B0C2u : 0xFF707888u, 0, true);
+        const char *short_sub = (g.teil == 1)
+            ? L("(DSA Teil 1 – 1992)", "(Part 1 – 1992)")
+            : ((g.teil == 2) ? L("(DSA Teil 2 – 1994)", "(Part 2 – 1994)")
+                             : L("(DSA Teil 3 – 1996)", "(Part 3 – 1996)"));
+        draw_text(tx0 + 14 + title_w, cy + 22, short_sub, (g.verfuegbar || g.gamedir_valid) ? 0xFFA4B0C2u : 0xFF707888u, 0, true);
 
-        if (g.verfuegbar) {
-            draw_button(cx + cw - 236, cy + 16, 216, 42, ">> Windows-Version", true, true, true, bg_hover);
-        } else if (!g.has_any_exe) {
-            draw_button(cx + cw - 236, cy + 16, 216, 42, "Windows-EXE fehlt", false, false, false, false);
+        /* T2: Riva-Karte (bzw. solange kein Port im Ordner liegt): "Kommt bald" statt "Spiel starten" (deaktiviert) */
+        if (!g.has_any_exe) {
+            draw_button(cx + cw - 236, cy + 16, 216, 42, L("Kommt bald", "Coming soon"), false, false, false, false);
+        } else if (g.verfuegbar) {
+            draw_button(cx + cw - 236, cy + 16, 216, 42, L(">> Spiel starten", ">> Start Game"), true, true, true, bg_hover);
         } else {
-            draw_button(cx + cw - 236, cy + 16, 216, 42, "Spieldaten fehlen", false, false, false, false);
+            draw_button(cx + cw - 236, cy + 16, 216, 42, L(">> Spiel starten", ">> Start Game"), false, false, false, false);
         }
-        draw_button(cx + cw - 236, cy + 66, 216, 40, ">> DOS-Version", false, g.gamedir_valid, false, bg_hover);
 
-        /* Zeile 2: Ruhige Status-Checkliste pro Spiel (Haken / Kreuz) */
-        uint32_t row_txt_col = g.verfuegbar ? 0xFFD0D8E4u : 0xFF98A2B2u;
+        /* Zeile 2: Ruhige Status-Checkliste pro Spiel in Spielersprache (T2: Dateiname nur als Tooltip / in der Hilfe) */
+        uint32_t row_txt_col = (g.verfuegbar || g.gamedir_valid) ? 0xFFD0D8E4u : 0xFF98A2B2u;
 
-        std::string exe_name = (g.chosen_stufe == STUFE_ORIG) ? g.exe_orig
-                             : ((g.chosen_stufe == STUFE_WICHTIG) ? g.exe_wichtig : g.exe_alles);
-        draw_status_badge(cx + 110, cy + 54, g.has_any_exe);
-        std::string prog_lbl = g.has_any_exe ? ("Programm OK (" + exe_name + ")") : ("Programm fehlt (" + exe_name + ")");
-        draw_text(cx + 134, cy + 52, prog_lbl.c_str(), row_txt_col, 1, true);
+        draw_status_badge(tx0, cy + 54, g.has_any_exe);
+        const char *prog_lbl = g.has_any_exe
+            ? L("Programm gefunden", "Program found")
+            : L("Programm fehlt", "Program missing");
+        draw_text(tx0 + 24, cy + 52, prog_lbl, row_txt_col, 1, true);
 
-        draw_status_badge(cx + 452, cy + 54, g.gamedir_valid);
-        std::string dat_lbl = g.gamedir_valid ? ("Spieldaten OK (" + g.kennungsdatei + ")") : ("Spieldaten fehlen (" + g.kennungsdatei + ")");
-        draw_text(cx + 476, cy + 52, dat_lbl.c_str(), row_txt_col, 1, true);
+        int dat_bx = tx0 + 230;
+        draw_status_badge(dat_bx, cy + 54, g.gamedir_valid);
+        const char *dat_lbl = g.gamedir_valid
+            ? L("Spieldaten gefunden", "Game data found")
+            : L("Spieldaten fehlen", "Game data missing");
+        draw_text(dat_bx + 24, cy + 52, dat_lbl, row_txt_col, 1, true);
+
+        if (bg_hover && (point_in_rect(g_mouse_x, g_mouse_y, tx0, cy + 48, 215, 28) ||
+                         point_in_rect(g_mouse_x, g_mouse_y, cx + 182, cy + 124, 196, 38))) {
+            active_tooltip = std::string(L("Programmdatei: ", "Executable: ")) + get_active_exe_name(g);
+        }
 
         /* Zeile 3: Erkannter Spielordner & Anzeige-Zusammenfassung dieses Spiels */
         std::string path_info;
         if (g.gamedir_valid) {
-            std::string p_prefix = "Spielordner: ";
-            int rem_px = 450 - text_width_px(p_prefix.c_str(), 0);
-            path_info = p_prefix + clip_text_px_left(g.resolved_gamedir, rem_px > 160 ? rem_px : 160, 0)
-                      + "  |  Skalierung: " + skalierung_label_str(g.chosen_skalierung) + " (4:3)";
+            std::string p_prefix = L("Spielordner: ", "Game folder: ");
+            std::string p_suffix = std::string(L("  |  Skalierung: ", "  |  Scaling: ")) + skalierung_label_str(g.chosen_skalierung);
+            int max_path_px = (cx + cw - 28) - tx0 - text_width_px((p_prefix + p_suffix).c_str(), 0);
+            if (max_path_px < 180) max_path_px = 180;
+            path_info = p_prefix + clip_text_px_left(g.resolved_gamedir, max_path_px, 0) + p_suffix;
         } else {
-            path_info = "Spielordner noch nicht gesetzt – bitte Ordner/ZIP reinziehen oder unten [Ordner wählen...] klicken.";
+            path_info = L("Spielordner noch nicht gewählt – bitte Ordner ins Fenster ziehen oder [Ordner wählen...] klicken.",
+                          "Game folder not set yet – please drag & drop folder into window or click [Select Folder...].");
         }
-        draw_text(cx + 110, cy + 86, path_info.c_str(), 0xFFA4B0C2u, 0, true);
+        draw_text(tx0, cy + 86, path_info.c_str(), 0xFFA4B0C2u, 0, true);
 
         /* Zeile 4: Alle 6 Bedienknoepfe DIREKT PRO SPIEL auf der Karte (buendig von cx+20 bis cx+cw-20) */
-        std::string btn_plog    = std::string("Probenlog: ") + (g.chosen_probenlog ? "AN" : "AUS");
-        std::string btn_patches = std::string("Patches: ") + stufe_short_label(g.chosen_stufe);
-        std::string btn_fen     = std::string("Fenster: ") + (g.chosen_fenster == "vollbild" ? "Vollbild" : (g.chosen_fenster + "x"));
-        std::string btn_intro   = std::string("Intro: ") + (g.chosen_intro ? "AN" : "AUS");
+        std::string btn_plog    = std::string(L("Probenlog: ", "Roll Log: ")) + (g.chosen_probenlog ? L("AN", "ON") : L("AUS", "OFF"));
+        std::string btn_patches = std::string(L("Patches: ", "Patches: ")) + stufe_short_label(g.chosen_stufe);
+        std::string btn_fen     = std::string(L("Fenster: ", "Window: ")) + (g.chosen_fenster == "vollbild" ? L("Vollbild", "Fullscreen") : (g.chosen_fenster + "x"));
+        std::string btn_intro   = std::string(L("Intro: ", "Intro: ")) + (g.chosen_intro ? L("AN", "ON") : L("AUS", "OFF"));
 
         draw_button(cx + 20,  cy + 124, 152, 38, btn_plog.c_str(),    g.chosen_probenlog, true, g.chosen_probenlog, bg_hover);
         draw_button(cx + 182, cy + 124, 196, 38, btn_patches.c_str(), false,              true, false,              bg_hover);
         draw_button(cx + 388, cy + 124, 154, 38, btn_fen.c_str(),     false,              true, false,              bg_hover);
         draw_button(cx + 552, cy + 124, 122, 38, btn_intro.c_str(),   g.chosen_intro,     true, g.chosen_intro,     bg_hover);
-        draw_button(cx + 684, cy + 124, 156, 38, "Ordner wählen...",  false,              true, false,              bg_hover);
-        draw_button(cx + 850, cy + 124, 154, 38, "Einstellungen...",  false,              true, false,              bg_hover);
+        draw_button(cx + 684, cy + 124, 156, 38, L("Ordner wählen...", "Select Folder..."), false, true, false,      bg_hover);
+        draw_button(cx + 850, cy + 124, 154, 38, L("Einstellungen...", "Settings..."),      false, true, false,      bg_hover);
+    }
+
+    if (!active_tooltip.empty()) {
+        draw_tooltip_box(g_mouse_x, g_mouse_y, active_tooltip);
     }
 }
 
@@ -1523,7 +2581,10 @@ static void render_screen_settings(void) {
     bool bg_hover = (!g_help_active && !g_modal_active);
 
     char sub_buf[200];
-    snprintf(sub_buf, sizeof(sub_buf), "Teil %d: %s – Einstellungen anpassen und Spiel starten", g.teil, g.name.c_str());
+    snprintf(sub_buf, sizeof(sub_buf),
+             L("Teil %d: %s – Einstellungen anpassen und Spiel starten",
+               "Part %d: %s – Customize settings and start game"),
+             g.teil, g.name.c_str());
     render_background_and_header(sub_buf);
 
     fill_gradient_v(18, 90, SCREEN_W - 36, 550, 0xFF182030u, 0xFF101622u);
@@ -1536,84 +2597,117 @@ static void render_screen_settings(void) {
         draw_rect_border(26, row_y[g_settings_row], SCREEN_W - 52, row_h[g_settings_row], 0xFF7A6828u, 0xFF383018u);
     }
 
-    /* 1. Patches */
-    draw_text(40, 112, "1. Patches [S]:", 0xFFF4D068u, 4, true);
-    draw_button(276, 105, 224, 38, "Original (0)", g.chosen_stufe == STUFE_ORIG, true, false, bg_hover);
-    draw_button(512, 105, 244, 38, "Wichtige Fixes (1)", g.chosen_stufe == STUFE_WICHTIG, true, false, bg_hover);
-    draw_button(768, 105, 254, 38, "Alle Fixes (2)", g.chosen_stufe == STUFE_ALLES, true, false, bg_hover);
+    std::string active_tooltip;
 
-    std::string stufe_exe = (g.chosen_stufe == STUFE_ORIG) ? g.exe_orig : ((g.chosen_stufe == STUFE_WICHTIG) ? g.exe_wichtig : g.exe_alles);
+    /* 1. Patches (T2: Keine EXE-Namen in der Oberflaeche, Dateiname nur als Tooltip / in der Hilfe) */
+    draw_text(40, 112, L("1. Patches [S]:", "1. Patches [S]:"), 0xFFF4D068u, 4, true);
+    draw_button(276, 105, 224, 38, L("Original", "Original"),                 g.chosen_stufe == STUFE_ORIG,    true, false, bg_hover);
+    draw_button(512, 105, 244, 38, L("Wichtige Fixes", "Essential Fixes"),    g.chosen_stufe == STUFE_WICHTIG, true, false, bg_hover);
+    draw_button(768, 105, 254, 38, L("Alle Fixes", "All Fixes"),              g.chosen_stufe == STUFE_ALLES,   true, false, bg_hover);
+
     bool stufe_exe_ok = (g.chosen_stufe == STUFE_ORIG) ? g.has_exe_orig : ((g.chosen_stufe == STUFE_WICHTIG) ? g.has_exe_wichtig : (g.has_exe_alles || g.has_exe_standard));
     const char *stufe_desc = (g.chosen_stufe == STUFE_ORIG)
-        ? "100 % Originalverhalten von 1992/1993"
-        : ((g.chosen_stufe == STUFE_WICHTIG) ? "Behebt Abstürze & kritische Spielstand-Fehler" : "Alle 154 Fehlerkorrekturen + Komfort (Empfohlen)");
+        ? L("Unverändertes Originalverhalten von 1992–1996", "Unmodified original behavior from 1992–1996")
+        : ((g.chosen_stufe == STUFE_WICHTIG)
+            ? L("Behebt Abstürze und kritische Spielstand-Fehler", "Fixes crashes and critical savegame issues")
+            : L("Alle Fehlerkorrekturen und Komfortfunktionen (Empfohlen)", "All bug fixes and quality-of-life improvements (Recommended)"));
     draw_status_badge(276, 152, stufe_exe_ok);
     char stufe_sub[240];
-    snprintf(stufe_sub, sizeof(stufe_sub), "%s [%s] – %s",
-             stufe_exe.c_str(), stufe_exe_ok ? "OK" : "FEHLT", stufe_desc);
+    snprintf(stufe_sub, sizeof(stufe_sub), "%s – %s",
+             stufe_exe_ok ? L("Programm gefunden", "Program found") : L("Programm fehlt", "Program missing"),
+             stufe_desc);
     draw_text(302, 150, stufe_sub, stufe_exe_ok ? 0xFFB0C0D8u : 0xFFFF8080u, 1, true);
 
+    if (bg_hover && point_in_rect(g_mouse_x, g_mouse_y, 276, 105, 746, 70)) {
+        active_tooltip = std::string(L("Programmdatei: ", "Executable: ")) + get_active_exe_name(g);
+    }
+
     /* 2. Anzeige - Fenstergroesse (immer exakt 4:3) */
-    draw_text(40, 198, "2. Fenstergröße [F]:", 0xFFF4D068u, 4, true);
+    draw_text(40, 198, L("2. Fenstergröße [F]:", "2. Window Size [F]:"), 0xFFF4D068u, 4, true);
     draw_button(276, 191, 140, 38, "2x (640x480)",   g.chosen_fenster == "2", true, false, bg_hover);
     draw_button(424, 191, 140, 38, "3x (960x720)",   g.chosen_fenster == "3", true, false, bg_hover);
     draw_button(572, 191, 150, 38, "4x (1280x960)",  g.chosen_fenster == "4", true, false, bg_hover);
     draw_button(730, 191, 156, 38, "5x (1600x1200)", g.chosen_fenster == "5", true, false, bg_hover);
-    draw_button(894, 191, 128, 38, "Vollbild",       g.chosen_fenster == "vollbild", true, false, bg_hover);
+    draw_button(894, 191, 128, 38, L("Vollbild", "Fullscreen"), g.chosen_fenster == "vollbild", true, false, bg_hover);
 
-    draw_text(276, 236, "Immer exakt 4:3 wie auf dem Röhrenmonitor (Alt+Enter schaltet Vollbild um)", 0xFFB0C0D8u, 1, true);
+    draw_text(276, 236,
+        L("Immer exakt 4:3 wie auf dem Röhrenmonitor (Alt+Enter schaltet Vollbild um)",
+          "Always exact 4:3 aspect ratio like on a CRT monitor (Alt+Enter toggles fullscreen)"),
+        0xFFB0C0D8u, 1, true);
 
-    /* 3. Anzeige - Skalierung (ganzzahlig vs. fuellend / Sharp Bilinear) */
-    draw_text(40, 284, "3. Skalierung [K]:", 0xFFF4D068u, 4, true);
+    /* 3. Anzeige - Skalierung (T2: "Ganzzahlig (exakte Vielfache)" / "Füllend (scharf)") */
+    draw_text(40, 284, L("3. Skalierung [K]:", "3. Scaling [K]:"), 0xFFF4D068u, 4, true);
     bool is_ganz = (_stricmp(g.chosen_skalierung.c_str(), "ganzzahlig") == 0);
-    draw_button(276, 277, 364, 38, "Ganzzahlig (exakte Vielfache)", is_ganz, true, false, bg_hover);
-    draw_button(652, 277, 370, 38, "Füllend (Sharp Bilinear)",     !is_ganz, true, false, bg_hover);
+    draw_button(276, 277, 364, 38, L("Ganzzahlig (exakte Vielfache)", "Integer (exact multiples)"), is_ganz, true, false, bg_hover);
+    draw_button(652, 277, 370, 38, L("Füllend (scharf)", "Fill (sharp)"),                          !is_ganz, true, false, bg_hover);
 
     const char *skal_desc = is_ganz
-        ? "Ganzzahlig: Nur ganze Vielfache, alle Pixelspalten exakt gleich breit"
-        : "Füllend: Größtmöglich in 4:3 (Nearest-Neighbor + Rest per Sharp-Bilinear)";
+        ? L("Ganzzahlig: Nur ganze Vielfache, alle Pixelspalten exakt gleich breit",
+            "Integer: Whole multiples only, all pixel columns have the exact same width")
+        : L("Füllend: Nutzt die gesamte 4:3-Fläche mit gestochen scharfen Pixelkanten",
+            "Fill: Uses the full 4:3 area with crisp, sharp pixel edges");
     draw_text(276, 322, skal_desc, 0xFFB0C0D8u, 1, true);
 
-    /* 4. Probenlog */
-    draw_text(40, 374, "4. Probenlog [P]:", 0xFFF4D068u, 4, true);
-    draw_button(276, 367, 234, 38, "Ausgeschaltet", !g.chosen_probenlog, true, false, bg_hover);
-    draw_button(522, 367, 500, 38, "Eingeschaltet (PROBEN.CSV + Live-Fenster)", g.chosen_probenlog, true, false, bg_hover);
+    /* 4. Probenlog (T2: "Eingeschaltet (mit Live-Fenster)") */
+    draw_text(40, 374, L("4. Probenlog [P]:", "4. Roll Log [P]:"), 0xFFF4D068u, 4, true);
+    draw_button(276, 367, 234, 38, L("Ausgeschaltet", "Disabled"), !g.chosen_probenlog, true, false, bg_hover);
+    draw_button(522, 367, 500, 38, L("Eingeschaltet (mit Live-Fenster)", "Enabled (with live window)"), g.chosen_probenlog, true, false, bg_hover);
 
-    /* 5. Vorspann / Intro */
-    draw_text(40, 442, "5. Vorspann [I]:", 0xFFF4D068u, 4, true);
-    draw_button(276, 435, 346, 38, "Überspringen (--kein-intro)", !g.chosen_intro, true, false, bg_hover);
-    draw_button(634, 435, 388, 38, "Abspielen (Original-Vorspann)", g.chosen_intro, true, false, bg_hover);
+    /* 5. Vorspann / Intro (T2: "Überspringen" ohne --kein-intro) */
+    draw_text(40, 442, L("5. Vorspann [I]:", "5. Intro [I]:"), 0xFFF4D068u, 4, true);
+    draw_button(276, 435, 346, 38, L("Überspringen", "Skip"), !g.chosen_intro, true, false, bg_hover);
+    draw_button(634, 435, 388, 38, L("Abspielen (Original-Vorspann)", "Play (Original Intro)"), g.chosen_intro, true, false, bg_hover);
 
-    /* 6. Spielordner & Status-Checks */
-    draw_text(40, 510, "6. Spieldaten [O]:", 0xFFF4D068u, 4, true);
+    /* 6. Spielordner & Status-Checks (T2: Keine Dateiendungen oder Dateinamen in der Oberflaeche) */
+    draw_text(40, 510, L("6. Spieldaten [O]:", "6. Game Data [O]:"), 0xFFF4D068u, 4, true);
     fill_rect(276, 503, 536, 38, 0xFF0E121Cu);
     draw_rect_border(276, 503, 536, 38, g.gamedir_valid ? 0xFF4C8858u : 0xFF985050u, 0xFF242C3Cu);
-    std::string disp_gd = g.gamedir_valid ? clip_text_px_left(g.resolved_gamedir, 512, 1) : "Noch nicht gefunden – Ordner oder .zip ins Fenster ziehen";
+    std::string disp_gd = g.gamedir_valid
+        ? clip_text_px_left(g.resolved_gamedir, 512, 1)
+        : L("Noch nicht gewählt – Spielordner oder Archiv ins Fenster ziehen",
+            "Not selected yet – Drag & drop game folder or archive into window");
     draw_text(288, 511, disp_gd.c_str(), g.gamedir_valid ? 0xFFD8E8D8u : 0xFFFF9898u, 1, true);
-    draw_button(824, 503, 198, 38, "Ordner wählen...", g_settings_row == 5, true, false, bg_hover);
+    draw_button(824, 503, 198, 38, L("Ordner wählen...", "Select Folder..."), g_settings_row == 5, true, false, bg_hover);
 
     draw_status_badge(276, 556, g.gamedir_valid);
     std::string save_info;
     if (!g.gamedir_valid) {
-        save_info = "NOCH NICHT ERLEDIGT – Pflichtdatei " + g.kennungsdatei + " fehlt noch";
+        save_info = L("Spieldaten fehlen – Bitte den Original-Spielordner auswählen",
+                      "Game data missing – Please select your original game folder");
     } else if (g.gamedir_writable) {
-        save_info = "CHECK OK – " + g.kennungsdatei + " erkannt  |  Spielstände im Spielordner";
+        save_info = L("Spieldaten gefunden  |  Spielstände werden im Spielordner gespeichert",
+                      "Game data found  |  Savegames are stored in the game folder");
     } else {
-        save_info = "CHECK OK – " + g.kennungsdatei + " erkannt  |  Spielstände in Spielstaende\\";
+        save_info = L("Spieldaten gefunden  |  Spielstände werden im eigenen Spielstandsordner gespeichert",
+                      "Game data found  |  Savegames are stored in the local savegames folder");
     }
     draw_text(302, 554, save_info.c_str(), g.gamedir_valid ? 0xFF8CE09Au : 0xFFFF9090u, 1, true);
 
     draw_status_badge(276, 590, g.verfuegbar);
-    draw_text(302, 588, g.verfuegbar ? "CHECK OK – Spiel ist vollständig startbereit (Originalpixel 4:3)" : "NOCH NICHT BEREIT – Bitte Spieldaten bereitstellen",
-              g.verfuegbar ? 0xFF8CE09Au : 0xFFE8C078u, 1, true);
+    const char *ready_info = g.verfuegbar
+        ? L("Startbereit – Spiel kann sofort gestartet werden (Originalgetreu 4:3)",
+            "Ready to play – Game can be started immediately (Authentic 4:3)")
+        : (!g.has_any_exe
+            ? L("Kommt bald – Programm für diesen Teil ist noch in Vorbereitung",
+                "Coming soon – Program for this part is still in preparation")
+            : L("Noch nicht startbereit – Bitte zuerst den Spielordner bereitstellen",
+                "Not ready yet – Please provide the game folder first"));
+    draw_text(302, 588, ready_info, g.verfuegbar ? 0xFF8CE09Au : 0xFFE8C078u, 1, true);
 
     /* Untere Aktionsleiste */
     fill_gradient_v(18, 694, SCREEN_W - 36, 52, 0xFF181E2Cu, 0xFF10141Eu);
     draw_rect_border(18, 694, SCREEN_W - 36, 52, 0xFF687288u, 0xFF303644u);
 
-    draw_button(30, 701, 264, 38, "< Zurück zur Übersicht", false, true, false, bg_hover);
-    draw_button(370, 699, 326, 42, ">> DOS-VERSION [D]", false, g.gamedir_valid, false, bg_hover);
-    draw_button(716, 699, 314, 42, ">> WINDOWS-VERSION (Enter)", g_settings_row == 6, true, true, bg_hover);
+    draw_button(30, 701, 264, 38, L("< Zurück zur Übersicht", "< Back to Overview"), false, true, false, bg_hover);
+    if (!g.has_any_exe) {
+        draw_button(716, 699, 314, 42, L("Kommt bald", "Coming soon"), false, false, false, false);
+    } else {
+        draw_button(716, 699, 314, 42, L(">> Spiel starten (Enter)", ">> Start Game (Enter)"), g_settings_row == 6, g.verfuegbar, true, bg_hover);
+    }
+
+    if (!active_tooltip.empty()) {
+        draw_tooltip_box(g_mouse_x, g_mouse_y, active_tooltip);
+    }
 }
 
 static void render_help_overlay(void) {
@@ -1625,37 +2719,60 @@ static void render_help_overlay(void) {
     draw_rect_border(mx, my, mw, mh, 0xFFFFDF70u, 0xFF8A7028u);
     draw_corner_ornaments(mx, my, mw, mh, 0xFFFFE484u);
 
-    draw_text_centered(mx, my + 18, mw, "HILFE & BEDIENUNG (F1)", 0xFFFFE484u, 2, true);
+    draw_text_centered(mx, my + 18, mw, L("HILFE & BEDIENUNG (F1)", "HELP & CONTROLS (F1)"), 0xFFFFE484u, 2, true);
 
     const char *lines_de[] = {
         "SCHRITT 1 – SPIELDATEN BEREITSTELLEN (REINZIEHEN / DRAG & DROP):",
-        "   Einfach den GOG-Spielordner oder eine .zip-Datei direkt in dieses",
-        "   Starter-Fenster ziehen! Eine .zip wird automatisch mit Fortschrittsbalken",
-        "   nach Spieldaten\\<Spiel>\\ entpackt. Alternativ: Knopf [Ordner wählen].",
+        "   Einfach den Spielordner oder ein Archiv direkt in dieses Starter-Fenster",
+        "   ziehen! Archive werden automatisch mit Fortschrittsbalken nach",
+        "   Spieldaten\\<Spiel>\\ entpackt. Alternativ: Knopf [Ordner wählen...].",
         "",
         "SCHRITT 2 – ANZEIGE & 4:3-SKALIERUNG [F / K]:",
         "   • Fenstergröße [F]: 2x (640x480), 3x (960x720), 4x (1280x960), 5x (1600x1200)",
         "     oder Vollbild. Seitenverhältnis ist immer exakt 4:3 wie auf dem Röhrenmonitor.",
-        "   • Skalierung [K]: Ganzzahlig (exakte Vielfache) oder Füllend (Sharp Bilinear).",
+        "   • Skalierung [K]: Ganzzahlig (exakte Vielfache) oder Füllend (scharf).",
         "",
-        "SCHRITT 3 – PATCH-STUFEN [S] & SPIEL STARTEN:",
-        "   • Original (0): 100 % Originalverhalten von 1992/1993 ohne Eingriffe",
-        "   • Wichtige Fixes (1): Behebt Abstürze & kritische Spielstand-Fehler",
-        "   • Alle Fixes (2): Alle 154 Korrekturen + Komfortfunktionen (Empfohlen)",
+        "SCHRITT 3 – PATCH-STUFEN [S] & PROGRAMMDATEIEN:",
+        "   • Original:       *_PORT_ORIG.EXE    (Unverändertes Originalverhalten)",
+        "   • Wichtige Fixes: *_PORT_WICHTIG.EXE (Behebt Abstürze & Spielstand-Fehler)",
+        "   • Alle Fixes:     *_PORT.EXE         (Alle Fehlerkorrekturen + Komfort, empfohlen)",
         "",
         "TASTENKÜRZEL IM STARTER & IM SPIEL:",
-        "   Starter: [1–3]=Spiel, [F1]=Hilfe, [F5]=Letztes Spiel sofort starten,",
+        "   Starter: [1–3]=Spiel, [F1]=Hilfe, [F2]=Sprache DE/EN, [F5]=Schnellstart,",
         "            [Pfeile/Tab/Enter]=Wahl, [S/F/K/P/I/O], [Esc]=Zurück/Beenden",
         "   Im Spiel: [Alt+Enter]=Vollbild/Fenster, [Tab]=Größe, [F10]=Musik, [F11/F12]=Ton"
     };
 
+    const char *lines_en[] = {
+        "STEP 1 – PROVIDE GAME DATA (DRAG & DROP):",
+        "   Simply drag & drop your game folder or archive directly into this launcher",
+        "   window! Archives are automatically extracted with a progress bar to",
+        "   Spieldaten\\<Game>\\. Alternatively: click [Select Folder...].",
+        "",
+        "STEP 2 – DISPLAY & 4:3 SCALING [F / K]:",
+        "   • Window Size [F]: 2x (640x480), 3x (960x720), 4x (1280x960), 5x (1600x1200)",
+        "     or Fullscreen. Aspect ratio is always exact 4:3 like on a CRT monitor.",
+        "   • Scaling [K]: Integer (exact multiples) or Fill (sharp).",
+        "",
+        "STEP 3 – PATCH LEVELS [S] & EXECUTABLES:",
+        "   • Original:        *_PORT_ORIG.EXE    (Unmodified original behavior)",
+        "   • Essential Fixes: *_PORT_WICHTIG.EXE (Fixes crashes & savegame issues)",
+        "   • All Fixes:       *_PORT.EXE         (All bug fixes + quality-of-life, recommended)",
+        "",
+        "KEYBOARD SHORTCUTS IN LAUNCHER & IN GAME:",
+        "   Launcher: [1–3]=Game, [F1]=Help, [F2]=Language DE/EN, [F5]=Quick Start,",
+        "             [Arrows/Tab/Enter]=Select, [S/F/K/P/I/O], [Esc]=Back/Quit",
+        "   In Game:  [Alt+Enter]=Fullscreen/Window, [Tab]=Size, [F10]=Music, [F11/F12]=Volume"
+    };
+
     for (int i = 0; i < 19; ++i) {
-        const char *ln = lines_de[i];
-        bool is_hdr = (strncmp(ln, "SCHRITT", 7) == 0 || strncmp(ln, "TASTEN", 6) == 0);
+        const char *ln = g_lang_en ? lines_en[i] : lines_de[i];
+        bool is_hdr = (strncmp(ln, "SCHRITT", 7) == 0 || strncmp(ln, "TASTEN", 6) == 0 ||
+                       strncmp(ln, "STEP", 4) == 0 || strncmp(ln, "KEYBOARD", 8) == 0);
         draw_text(mx + 34, my + 62 + i * 21, ln, is_hdr ? 0xFFF4D068u : 0xFFD8E2F0u, is_hdr ? 4 : 1, true);
     }
 
-    draw_button(mx + (mw - 320) / 2, my + mh - 54, 320, 38, "Hilfe schließen (F1 / Enter)", true, true, true, true);
+    draw_button(mx + (mw - 320) / 2, my + mh - 54, 320, 38, L("Hilfe schließen (F1 / Enter)", "Close Help (F1 / Enter)"), true, true, true, true);
 }
 
 static void render_modal_dialog(void) {
@@ -1679,7 +2796,7 @@ static void render_modal_dialog(void) {
         draw_text_centered(mx + 24, my + 170, mw - 48, g_modal_line4.c_str(), 0xFFFFDF70u, 1, true);
     }
 
-    draw_button(mx + (mw - 280) / 2, my + mh - 56, 280, 38, "OK – Schließen (Enter)", true, true, g_modal_is_ok, true);
+    draw_button(mx + (mw - 280) / 2, my + mh - 56, 280, 38, L("OK – Schließen (Enter)", "OK – Close (Enter)"), true, true, g_modal_is_ok, true);
 }
 
 static void render_progress_modal(const std::string &title, const std::string &sub1, const std::string &cur_file, int percent) {
@@ -2652,10 +3769,6 @@ static int launch_dos_game(GameCatalogEntry &g) {
  * 12. Maus- und Tastatur-Ereignisbehandlung (komplett bedienbar)
  * ========================================================================= */
 
-static bool point_in_rect(int px, int py, int rx, int ry, int rw, int rh) {
-    return px >= rx && px < rx + rw && py >= ry && py < ry + rh;
-}
-
 static void cycle_fenster_mode(GameCatalogEntry &g, int dir) {
     static const char *opts[5] = {"2", "3", "4", "5", "vollbild"};
     int cur = 4;
@@ -2683,6 +3796,14 @@ static void toggle_skalierung_mode(GameCatalogEntry &g) {
 }
 
 static void handle_mouse_click(int mx, int my, bool &running) {
+    (void)running;
+    /* Header-Knopf Sprachumschaltung (F2) */
+    if (point_in_rect(mx, my, SCREEN_W - 252, 27, 94, 38)) {
+        g_lang_en = !g_lang_en;
+        g_status_msg = L("Sprache: Deutsch", "Language: English");
+        save_einstellungen_ini();
+        return;
+    }
     /* Header-Knopf Hilfe (F1) */
     if (point_in_rect(mx, my, SCREEN_W - 148, 27, 122, 38)) {
         g_help_active = !g_help_active;
@@ -2712,8 +3833,10 @@ static void handle_mouse_click(int mx, int my, bool &running) {
                 /* 1. Knopf: [Probenlog: AN / AUS] */
                 if (point_in_rect(mx, my, cx + 20, cy + 124, 152, 38)) {
                     g_games[i].chosen_probenlog = !g_games[i].chosen_probenlog;
-                    g_status_msg = g_games[i].name + " – Probenlogger: " +
-                                   (g_games[i].chosen_probenlog ? "EINGESCHALTET (PROBEN.CSV + Live-Fenster)" : "AUSGESCHALTET");
+                    g_status_msg = g_games[i].name + L(" – Probenlog: ", " – Roll Log: ") +
+                                   (g_games[i].chosen_probenlog
+                                       ? L("Eingeschaltet (mit Live-Fenster)", "Enabled (with live window)")
+                                       : L("Ausgeschaltet", "Disabled"));
                     save_einstellungen_ini();
                     return;
                 }
@@ -2726,10 +3849,7 @@ static void handle_mouse_click(int mx, int my, bool &running) {
                     } else {
                         g_games[i].chosen_stufe = STUFE_ORIG;
                     }
-                    std::string exe_n = (g_games[i].chosen_stufe == STUFE_ORIG) ? g_games[i].exe_orig
-                                      : ((g_games[i].chosen_stufe == STUFE_WICHTIG) ? g_games[i].exe_wichtig : g_games[i].exe_alles);
-                    g_status_msg = g_games[i].name + " – Patches: " +
-                                   stufe_short_label(g_games[i].chosen_stufe) + " (" + exe_n + ")";
+                    g_status_msg = g_games[i].name + " – Patches: " + stufe_short_label(g_games[i].chosen_stufe);
                     save_einstellungen_ini();
                     return;
                 }
@@ -2743,14 +3863,14 @@ static void handle_mouse_click(int mx, int my, bool &running) {
                 if (point_in_rect(mx, my, cx + 552, cy + 124, 122, 38)) {
                     g_games[i].chosen_intro = !g_games[i].chosen_intro;
                     g_status_msg = g_games[i].name + " – Intro: " +
-                                   (g_games[i].chosen_intro ? "EINGESCHALTET" : "AUSGESCHALTET");
+                                   (g_games[i].chosen_intro ? L("Abspielen", "Play") : L("Überspringen", "Skip"));
                     save_einstellungen_ini();
                     return;
                 }
                 /* 5. Knopf: [Ordner wählen...] */
                 if (point_in_rect(mx, my, cx + 684, cy + 124, 156, 38)) {
                     std::string picked = browse_for_gamedir_dialog(
-                        (g_games[i].name + " – Spielordner oder Port-Ordner wählen:").c_str());
+                        (g_games[i].name + L(" – Spielordner wählen:", " – Select game folder:")).c_str());
                     if (!picked.empty()) {
                         handle_dropped_folder(picked);
                     }
@@ -2760,33 +3880,25 @@ static void handle_mouse_click(int mx, int my, bool &running) {
                 if (point_in_rect(mx, my, cx + 850, cy + 124, 154, 38)) {
                     g_screen = SCREEN_SETTINGS;
                     g_settings_row = 0;
-                    g_status_msg = g_games[i].name + " – Einstellungen anpassen und [>> SPIEL STARTEN] klicken.";
+                    g_status_msg = g_games[i].name + L(" – Einstellungen anpassen.", " – Customize settings.");
                     save_einstellungen_ini();
                     return;
                 }
-                /* 6b. Knopf: [>> DOS-Version] rechts unter Nativ starten */
-                if (g_games[i].gamedir_valid && point_in_rect(mx, my, cx + cw - 236, cy + 66, 216, 40)) {
-                    launch_dos_game(g_games[i]);
-                    return;
-                }
-                /* 7. Knopf rechts oben: [>> Nativ starten] (bzw. [Ordner wählen...] falls noch nicht startbereit) */
+                /* 7. Knopf rechts oben: [>> Spiel starten] (nur wenn Port-EXE vorhanden; bei "Kommt bald" deaktiviert) */
                 if (point_in_rect(mx, my, cx + cw - 236, cy + 16, 216, 42)) {
+                    if (!g_games[i].has_any_exe) {
+                        return;
+                    }
                     if (g_games[i].verfuegbar) {
                         save_einstellungen_ini();
                         std::vector<std::string> no_extra;
                         launch_selected_game(g_games[i], false, no_extra, false, 0);
-                    } else {
-                        std::string picked = browse_for_gamedir_dialog(
-                            (g_games[i].name + " – Spielordner oder Port-Ordner wählen:").c_str());
-                        if (!picked.empty()) {
-                            handle_dropped_folder(picked);
-                        }
                     }
                     return;
                 }
 
                 /* Klick auf die Karte selbst wählt das Spiel aus */
-                g_status_msg = g_games[i].name + " ausgewählt.";
+                g_status_msg = g_games[i].name + L(" ausgewählt.", " selected.");
                 save_einstellungen_ini();
                 return;
             }
@@ -2799,21 +3911,21 @@ static void handle_mouse_click(int mx, int my, bool &running) {
         if (point_in_rect(mx, my, 276, 105, 224, 38)) {
             g.chosen_stufe = STUFE_ORIG;
             g_settings_row = 0;
-            g_status_msg = "Patch-Stufe: Original (FIX_BUGS=0)";
+            g_status_msg = L("Patches: Original", "Patches: Original");
             save_einstellungen_ini();
             return;
         }
         if (point_in_rect(mx, my, 512, 105, 244, 38)) {
             g.chosen_stufe = STUFE_WICHTIG;
             g_settings_row = 0;
-            g_status_msg = "Patch-Stufe: Wichtige Fixes (FIX_BUGS=1)";
+            g_status_msg = L("Patches: Wichtige Fixes", "Patches: Essential Fixes");
             save_einstellungen_ini();
             return;
         }
         if (point_in_rect(mx, my, 768, 105, 254, 38)) {
             g.chosen_stufe = STUFE_ALLES;
             g_settings_row = 0;
-            g_status_msg = "Patch-Stufe: Alle Fixes (FIX_BUGS=2)";
+            g_status_msg = L("Patches: Alle Fixes", "Patches: All Fixes");
             save_einstellungen_ini();
             return;
         }
@@ -2827,7 +3939,7 @@ static void handle_mouse_click(int mx, int my, bool &running) {
                 g.chosen_fenster = fx_v[fi];
                 g.chosen_vollbild = (g.chosen_fenster == "vollbild");
                 g_settings_row = 1;
-                g_status_msg = std::string("Fenstergröße: ") + fenster_label_str(g.chosen_fenster);
+                g_status_msg = std::string(L("Fenstergröße: ", "Window Size: ")) + fenster_label_str(g.chosen_fenster);
                 save_einstellungen_ini();
                 return;
             }
@@ -2837,14 +3949,14 @@ static void handle_mouse_click(int mx, int my, bool &running) {
         if (point_in_rect(mx, my, 276, 277, 364, 38)) {
             g.chosen_skalierung = "ganzzahlig";
             g_settings_row = 2;
-            g_status_msg = "Skalierung: Ganzzahlig (exakte Vielfache, alle Pixelspalten gleich breit).";
+            g_status_msg = L("Skalierung: Ganzzahlig (exakte Vielfache)", "Scaling: Integer (exact multiples)");
             save_einstellungen_ini();
             return;
         }
         if (point_in_rect(mx, my, 652, 277, 370, 38)) {
             g.chosen_skalierung = "fuellend";
             g_settings_row = 2;
-            g_status_msg = "Skalierung: Füllend (Sharp Bilinear, größtmögliches 4:3-Bild).";
+            g_status_msg = L("Skalierung: Füllend (scharf)", "Scaling: Fill (sharp)");
             save_einstellungen_ini();
             return;
         }
@@ -2853,14 +3965,14 @@ static void handle_mouse_click(int mx, int my, bool &running) {
         if (point_in_rect(mx, my, 276, 367, 234, 38)) {
             g.chosen_probenlog = false;
             g_settings_row = 3;
-            g_status_msg = "Probenlog ausgeschaltet.";
+            g_status_msg = L("Probenlog ausgeschaltet.", "Roll Log disabled.");
             save_einstellungen_ini();
             return;
         }
         if (point_in_rect(mx, my, 522, 367, 500, 38)) {
             g.chosen_probenlog = true;
             g_settings_row = 3;
-            g_status_msg = "Probenlog eingeschaltet (PROBEN.CSV + Live-Fenster).";
+            g_status_msg = L("Probenlog eingeschaltet (mit Live-Fenster).", "Roll Log enabled (with live window).");
             save_einstellungen_ini();
             return;
         }
@@ -2869,14 +3981,14 @@ static void handle_mouse_click(int mx, int my, bool &running) {
         if (point_in_rect(mx, my, 276, 435, 346, 38)) {
             g.chosen_intro = false;
             g_settings_row = 4;
-            g_status_msg = "Vorspann ausgeschaltet (--kein-intro).";
+            g_status_msg = L("Vorspann überspringen.", "Skip intro.");
             save_einstellungen_ini();
             return;
         }
         if (point_in_rect(mx, my, 634, 435, 388, 38)) {
             g.chosen_intro = true;
             g_settings_row = 4;
-            g_status_msg = "Vorspann eingeschaltet.";
+            g_status_msg = L("Vorspann abspielen.", "Play intro.");
             save_einstellungen_ini();
             return;
         }
@@ -2884,7 +3996,7 @@ static void handle_mouse_click(int mx, int my, bool &running) {
         /* 6. Spielordner */
         if (point_in_rect(mx, my, 824, 503, 198, 38)) {
             g_settings_row = 5;
-            std::string picked = browse_for_gamedir_dialog("Spielordner wählen:");
+            std::string picked = browse_for_gamedir_dialog(L("Spielordner wählen:", "Select game folder:"));
             if (!picked.empty()) {
                 handle_dropped_folder(picked);
             }
@@ -2894,19 +4006,14 @@ static void handle_mouse_click(int mx, int my, bool &running) {
         /* Fusszeile: "< Zurück zur Übersicht" */
         if (point_in_rect(mx, my, 30, 701, 264, 38)) {
             g_screen = SCREEN_SELECT_GAME;
-            g_status_msg = "Übersicht: Schritt für Schritt prüfen und Spiel starten.";
+            g_status_msg = L("Übersicht", "Overview");
             save_einstellungen_ini();
             return;
         }
 
-        /* Fusszeile: ">> DOS-VERSION STARTEN [D]" */
-        if (g.gamedir_valid && point_in_rect(mx, my, 370, 699, 326, 42)) {
-            launch_dos_game(g);
-            return;
-        }
-
-        /* Fusszeile: ">> SPIEL STARTEN (Enter)" */
+        /* Fusszeile: ">> Spiel starten (Enter)" */
         if (point_in_rect(mx, my, 716, 699, 314, 42)) {
+            if (!g.has_any_exe) return;
             g_settings_row = 6;
             std::vector<std::string> no_extra;
             launch_selected_game(g, false, no_extra, false, 0);
@@ -2922,6 +4029,12 @@ static void handle_keydown(const SDL_KeyboardEvent &kev, bool &running) {
 
     if (vk == VK_F1) {
         g_help_active = !g_help_active;
+        return;
+    }
+    if (vk == VK_F2 || ch == 'L') {
+        g_lang_en = !g_lang_en;
+        g_status_msg = L("Sprache: Deutsch", "Language: English");
+        save_einstellungen_ini();
         return;
     }
     if (vk == VK_F4) {
@@ -2960,7 +4073,7 @@ static void handle_keydown(const SDL_KeyboardEvent &kev, bool &running) {
             return;
         }
         if (ch == 'O') {
-            std::string picked = browse_for_gamedir_dialog("Spielordner (oder GOG-Oberordner) wählen:");
+            std::string picked = browse_for_gamedir_dialog(L("Spielordner wählen:", "Select game folder:"));
             if (!picked.empty()) {
                 handle_dropped_folder(picked);
             }
@@ -2976,7 +4089,10 @@ static void handle_keydown(const SDL_KeyboardEvent &kev, bool &running) {
         }
         if (ch == 'P') {
             g_games[sel_idx].chosen_probenlog = !g_games[sel_idx].chosen_probenlog;
-            g_status_msg = std::string("Probenlogger: ") + (g_games[sel_idx].chosen_probenlog ? "EINGESCHALTET (PROBEN.CSV + Live-Fenster)" : "AUSGESCHALTET");
+            g_status_msg = std::string(L("Probenlog: ", "Roll Log: ")) +
+                           (g_games[sel_idx].chosen_probenlog
+                               ? L("Eingeschaltet (mit Live-Fenster)", "Enabled (with live window)")
+                               : L("Ausgeschaltet", "Disabled"));
             save_einstellungen_ini();
             return;
         }
@@ -2987,39 +4103,27 @@ static void handle_keydown(const SDL_KeyboardEvent &kev, bool &running) {
         if (vk == '1' || vk == '2' || vk == '3') {
             int idx = vk - '1';
             if (idx >= 0 && idx < (int)g_games.size()) {
-                if (g_games[idx].verfuegbar) {
-                    g_selected_game = idx;
-                    g_screen = SCREEN_SETTINGS;
-                    g_settings_row = 0;
-                    save_einstellungen_ini();
-                } else {
-                    g_status_msg = g_games[idx].name + ": Noch nicht freigeschaltet.";
-                }
-            }
-            return;
-        }
-        if (vk == VK_UP) {
-            for (int step = 1; step <= (int)g_games.size(); ++step) {
-                int cand = (g_selected_game - step + (int)g_games.size()) % (int)g_games.size();
-                if (g_games[cand].verfuegbar) { g_selected_game = cand; break; }
-            }
-            save_einstellungen_ini();
-            return;
-        }
-        if (vk == VK_DOWN || vk == VK_TAB) {
-            for (int step = 1; step <= (int)g_games.size(); ++step) {
-                int cand = (g_selected_game + step) % (int)g_games.size();
-                if (g_games[cand].verfuegbar) { g_selected_game = cand; break; }
-            }
-            save_einstellungen_ini();
-            return;
-        }
-        if (vk == VK_RETURN || vk == VK_SPACE) {
-            if (g_games[sel_idx].verfuegbar) {
+                g_selected_game = idx;
                 g_screen = SCREEN_SETTINGS;
                 g_settings_row = 0;
                 save_einstellungen_ini();
             }
+            return;
+        }
+        if (vk == VK_UP) {
+            g_selected_game = (g_selected_game - 1 + (int)g_games.size()) % (int)g_games.size();
+            save_einstellungen_ini();
+            return;
+        }
+        if (vk == VK_DOWN || vk == VK_TAB) {
+            g_selected_game = (g_selected_game + 1) % (int)g_games.size();
+            save_einstellungen_ini();
+            return;
+        }
+        if (vk == VK_RETURN || vk == VK_SPACE) {
+            g_screen = SCREEN_SETTINGS;
+            g_settings_row = 0;
+            save_einstellungen_ini();
             return;
         }
     } else if (g_screen == SCREEN_SETTINGS) {
@@ -3040,8 +4144,10 @@ static void handle_keydown(const SDL_KeyboardEvent &kev, bool &running) {
             return;
         }
         if (vk == VK_F5) {
-            std::vector<std::string> no_extra;
-            launch_selected_game(g, false, no_extra, false, 0);
+            if (g.has_any_exe) {
+                std::vector<std::string> no_extra;
+                launch_selected_game(g, false, no_extra, false, 0);
+            }
             return;
         }
 
@@ -3075,7 +4181,7 @@ static void handle_keydown(const SDL_KeyboardEvent &kev, bool &running) {
         }
         if (ch == 'O') {
             g_settings_row = 5;
-            std::string picked = browse_for_gamedir_dialog("Spielordner wählen:");
+            std::string picked = browse_for_gamedir_dialog(L("Spielordner wählen:", "Select game folder:"));
             if (!picked.empty()) {
                 handle_dropped_folder(picked);
             }
@@ -3120,11 +4226,11 @@ static void handle_keydown(const SDL_KeyboardEvent &kev, bool &running) {
                 g.chosen_intro = !g.chosen_intro;
                 save_einstellungen_ini();
             } else if (g_settings_row == 5) {
-                std::string picked = browse_for_gamedir_dialog("Spielordner wählen:");
+                std::string picked = browse_for_gamedir_dialog(L("Spielordner wählen:", "Select game folder:"));
                 if (!picked.empty()) {
                     handle_dropped_folder(picked);
                 }
-            } else {
+            } else if (g.has_any_exe) {
                 std::vector<std::string> no_extra;
                 launch_selected_game(g, false, no_extra, false, 0);
             }
@@ -3168,9 +4274,9 @@ int main(int argc, char **argv) {
     }
 
     load_einstellungen_ini();
-    g_lang_en = false;
     refresh_all_games();
-    g_status_msg = "Tipp: Spielordner oder .zip einfach in dieses Fenster ziehen! (F1=Hilfe, F5=Schnellstart)";
+    g_status_msg = L("Tipp: Spielordner oder Archiv einfach ins Fenster ziehen! (F1=Hilfe, F2=Sprache, F5=Schnellstart)",
+                     "Tip: Simply drag & drop a game folder or archive into this window! (F1=Help, F2=Language, F5=Quick Start)");
 
     std::string screenshot_path;
     std::string test_absturz_path;
@@ -3187,6 +4293,29 @@ int main(int argc, char **argv) {
         std::string a = argv[i];
         if (a == "--no-auto-gog" || a == "--no-grafikpaket") {
             continue;
+        } else if (a == "--clear-spielpfade") {
+            for (size_t k = 0; k < g_games.size(); ++k) {
+                g_games[k].custom_spielpfad = "-";
+            }
+            refresh_all_games();
+        } else if (strncmp(a.c_str(), "--spielpfad-", 12) == 0) {
+            size_t eq = a.find('=', 12);
+            if (eq != std::string::npos) {
+                std::string gid = a.substr(12, eq - 12);
+                std::string gdir = a.substr(eq + 1);
+                for (size_t k = 0; k < g_games.size(); ++k) {
+                    if (_stricmp(g_games[k].id.c_str(), gid.c_str()) == 0) {
+                        g_games[k].custom_spielpfad = gdir.empty() ? "-" : gdir;
+                        refresh_game_status(g_games[k]);
+                    }
+                }
+            }
+        } else if (strncmp(a.c_str(), "--sprache=", 10) == 0) {
+            std::string lv = a.substr(10);
+            g_lang_en = (_stricmp(lv.c_str(), "en") == 0 || _stricmp(lv.c_str(), "english") == 0);
+        } else if (strncmp(a.c_str(), "--lang=", 7) == 0) {
+            std::string lv = a.substr(7);
+            g_lang_en = (_stricmp(lv.c_str(), "en") == 0 || _stricmp(lv.c_str(), "english") == 0);
         } else if (a == "--screenshot" && i + 1 < argc) {
             screenshot_path = argv[++i];
         } else if (strncmp(a.c_str(), "--screenshot=", 13) == 0) {

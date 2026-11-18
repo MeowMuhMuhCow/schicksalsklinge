@@ -1,56 +1,58 @@
 # Das Schwarze Auge — Nordlandtrilogie Starter (`NORDLANDTRILOGIE.EXE`)
-## Release-Paket für *Die Schicksalsklinge* (V3.02de, nativ ohne DOSBox)
+## Gemeinsames Release-Paket (*Die Schicksalsklinge* V3.02de & *Sternenschweif* V1.02de, nativ ohne DOSBox)
 
 Willkommen beim gemeinsamen Starter für die nativen Windows-Ports der **Nordlandtrilogie**:
-- **Teil 1:** *Die Schicksalsklinge* (1992/1993) — **in diesem Paket enthalten** (`SCHICK_PORT_ALLES.EXE`, `SCHICK_PORT_WICHTIG.EXE`, `SCHICK_PORT_ORIG.EXE`)
-- **Teil 2:** *Sternenschweif* (1994) — vorbereitet (automatisch freigeschaltet, sobald die Port-EXE im Ordner liegt)
-- **Teil 3:** *Schatten über Riva* (1996) — vorbereitet (automatisch freigeschaltet, sobald die Port-EXE im Ordner liegt)
+- **Teil 1:** *Die Schicksalsklinge* (1992/1993) — **in diesem Paket enthalten** (`SCHICK_PORT.EXE`, `SCHICK_PORT_WICHTIG.EXE`, `SCHICK_PORT_ORIG.EXE`)
+- **Teil 2:** *Sternenschweif* (1994) — **in diesem Paket enthalten** (`SCHWEIF_PORT.EXE`, `SCHWEIF_PORT_WICHTIG.EXE`, `SCHWEIF_PORT_ORIG.EXE`)
+- **Teil 3:** *Schatten über Riva* (1996) — vorbereitet (zeigt `Kommt bald`, solange noch kein Riva-Port im Ordner liegt; das originale Titelbild wird bereits angezeigt, sobald der Riva-Spielordner gewählt ist)
 
 ---
 
-## 1. Schnellstart (in 3 einfachen Schritten)
+## 1. Schnellstart
 
 1. **`NORDLANDTRILOGIE.EXE`** doppelklicken.
-2. **Schritt 1 — Spieldaten bereitstellen** (wird automatisch mit **grünem Haken ✔** erkannt, falls die GOG-Version installiert ist):
-   - Oder einfach den **Installationsordner** bzw. eine **`.zip`-Datei** mit den Original-Spieldaten (deutsche Version V3.02de mit `SCHICK.DAT`, `DSAGEN.DAT`, `SCHICKM.EXE`) aus dem Windows-Explorer **in das Starter-Fenster ziehen und ablegen (Drag & Drop)**.
-   - Alternativ im Starter auf **`Ordner wählen...`** (`[O]`) klicken.
-3. **Schritt 2 & 3 — Anzeige wählen & Spiel starten:**
-   - Auf **`>> Spiel starten`** bei *Die Schicksalsklinge* klicken (oder über **`Einstellungen...`** Patch-Stufe, Fenstergröße, Skalierung, Probenlog und Vorspann anpassen).
-   - Ab dem zweiten Start genügt im Hauptmenü auch ein Druck auf **`F5`** (*Letztes Spiel starten*), um sofort mit den zuletzt gewählten Einstellungen loszuspielen.
+2. **Spieldaten bereitstellen** (Standard-GOG-Installationen aller drei Teile werden beim Start automatisch erkannt und mit **`✔ Spieldaten gefunden`** markiert):
+   - Oder einfach den **Spielordner** bzw. ein **Archiv (`.zip` / `.7z` / `.rar`)** mit den Original-Spieldaten aus dem Windows-Explorer **in das Starter-Fenster ziehen (Drag & Drop)**.
+   - Alternativ direkt auf der jeweiligen Spielkarte auf **`Ordner wählen...`** klicken.
+3. **Direkt auf der Karte einstellen & starten:**
+   - Jede Spielkarte zeigt links das **echte 4:3-Titelbild direkt aus deinem jeweiligen Spielordner** (ohne Spielordner ein dezentes Wappen als Platzhalter).
+   - Direkt auf der Karte lassen sich **`Probenlog`**, **`Patches`**, **`Fenster`** und **`Intro`** per Klick umschalten oder über **`Einstellungen...`** im Detail anpassen.
+   - Ein Klick auf **`>> Spiel starten`** startet das gewählte Spiel sofort.
 
 ---
 
-## 2. Funktionen des Starters & der 4:3-Originalskalierung
+## 2. Funktionen des Starters (Etappe 4)
+
+### Echte Titelbilder zur Laufzeit (0 mitgelieferte Bildbytes)
+- Sobald für *Die Schicksalsklinge*, *Sternenschweif* oder *Schatten über Riva* ein gültiger Spielordner hinterlegt ist, liest der Starter das jeweilige Original-Titelbild beim Start direkt aus den Spieldaten (`INTRODAT.VOL` / `SCHICK.DAT`, `DATA\STAR.DAT` / `gamea.gog`, `DATA\RIVA.ALF` / `game.gog`), dekodiert die 6-Bit-VGA-Palette originalgetreu und stellt das Bild im exakten **4:3-Seitenverhältnis** per Nearest-Neighbor mit sanftem Verlauf auf der Spielkarte dar.
+- Es werden **0 Bildbytes** mitgeliefert oder auf der Festplatte zwischengespeichert.
+
+### Klare Spielersprache (Deutsch & Englisch per `F2`)
+- **Übersichtliche Statusanzeige:** **`✔ Programm gefunden`** und **`✔ Spieldaten gefunden`** (der technische Dateiname der aktiven `.EXE` erscheint dezent als **Tooltip**, wenn die Maus über *Programm gefunden* schwebt, sowie im **`F1`-Hilfefenster**).
+- **Sprachumschaltung (`F2`):** Jederzeit per Knopf **`DE (F2)` / `EN (F2)`** oben rechts oder mit der Taste **`F2`** zwischen Deutsch und Englisch umschalten (wird in `einstellungen.ini` gespeichert).
 
 ### Einstellungen pro Spiel (automatisch gespeichert in `einstellungen.ini`)
-- **1. Patch-Stufe (`[S]`):**
-  - `Alle Fixes` (`SCHICK_PORT_ALLES.EXE`, empfohlen): Alle 154 dokumentierten Fehlerkorrekturen aus `s_fix.h` sowie Komfortfunktionen.
-  - `Wichtige Fixes` (`SCHICK_PORT_WICHTIG.EXE`): Behebt Abstürze, Endlosschleifen und Spielstand-Korruption bei unveränderter Spielmechanik.
-  - `Original` (`SCHICK_PORT_ORIG.EXE`): 100 % historisches Originalverhalten von 1992/1993.
-- **2. Fenstergröße (`[F]`, `--fenster=2|3|4|5|vollbild`, Standard: `vollbild`):**
-  - Das Seitenverhältnis ist **immer exakt 4:3**, genau wie die 320×200-Auflösung damals auf dem Röhrenmonitor erschien (wie DOSBox `aspect=true`). Außerhalb des 4:3-Bildbereichs bleibt ein sauberer schwarzer Rand.
-  - Wählbare Stufen: **`2x (640×480)`**, **`3x (960×720)`**, **`4x (1280×960)`**, **`5x (1600×1200)`** oder **`Vollbild`**.
-  - Im laufenden Spiel schaltet **`Alt+Enter`** jederzeit zwischen Fenster und Vollbild um; das Fenster ist außerdem frei mit der Maus ziehbar und der Inhalt skaliert im 4:3-Verhältnis automatisch mit.
-- **3. Skalierung der Originalpixel (`[K]`, `--skalierung=ganzzahlig|fuellend`, Standard: `fuellend`):**
-  - **`Ganzzahlig` (`--skalierung=ganzzahlig`):** Nur ganze Pixel-Vielfache (`320*k × 240*k`, z. B. 5× horizontal / 6× vertikal = 1600×1200 exakt) — alle 320 Originalpixel-Spalten sind exakt gleich breit, der Rest bleibt schwarzer Rand.
-  - **`Füllend` (`--skalierung=fuellend`):** So groß wie möglich im exakten 4:3-Seitenverhältnis mittels **Sharp Bilinear** (zuerst Nearest-Neighbor auf das größte ganze Vielfache, dann nur der Übergangsrest per Bilinear — knackige Pixel ohne Flimmern).
+- **1. Patches (`[S]`):**
+  - **`Alle Fixes`** (empfohlen): Alle Fehlerkorrekturen und Komfortfunktionen.
+  - **`Wichtige Fixes`**: Behebt Abstürze, Endlosschleifen und kritische Spielstand-Fehler bei unveränderter Spielmechanik.
+  - **`Original`**: 100 % unverändertes Originalverhalten.
+- **2. Fenstergröße (`[F]`, Standard: `Vollbild`):**
+  - Seitenverhältnis immer exakt **4:3** wie damals auf dem Röhrenmonitor: **`2x (640×480)`**, **`3x (960×720)`**, **`4x (1280×960)`**, **`5x (1600×1200)`** oder **`Vollbild`** (`Alt+Enter` schaltet im Spiel jederzeit um).
+- **3. Skalierung (`[K]`, Standard: `Füllend (scharf)`):**
+  - **`Ganzzahlig (exakte Vielfache)`**: Nur ganze Vielfache, alle Pixelspalten exakt gleich breit.
+  - **`Füllend (scharf)`**: Nutzt die gesamte 4:3-Fläche mit gestochen scharfen Pixelkanten.
 - **4. Probenlog (`[P]`):**
-  - Schreibt alle Talent-, Zauber-, Attributs- und Kampfproben in `PROBEN.CSV`, archiviert frühere Logs mit Zeitstempel nach `Probenlogs\` und öffnet parallel das Live-Probenlog-Fenster (`Probenlog\probenlog_fenster.ps1`).
-- **5. Vorspann / Intro (`[I]`):**
-  - Spielt das Original-Intro (`INTRO_E.OVL`) mit CD-Musik ab oder überspringt es direkt ins Hauptmenü (`--kein-intro`).
+  - **`Ausgeschaltet`** oder **`Eingeschaltet (mit Live-Fenster)`**.
+- **5. Vorspann (`[I]`):**
+  - **`Abspielen (Original-Vorspann)`** oder **`Überspringen`**.
 
 ### Tastenkürzel im Starter & im Spiel
 - **Im Starter:**
-  - `Pfeiltasten` / `Tab`: Navigation | `Enter` / `Leertaste`: Auswahl bestätigen / Spiel starten
-  - `F1`: Hilfe-Overlay ein-/ausblenden | `F5`: Letztes Spiel direkt starten | `Esc`: Zurück / Beenden
+  - `1` / `2` / `3`: Spielkarte wählen | `Pfeiltasten` / `Tab`: Navigation | `Enter` / `Leertaste`: Auswahl bestätigen / Spiel starten
+  - `F1`: Hilfe ein-/ausblenden | `F2`: Sprache Deutsch/Englisch | `F5`: Schnellstart | `Esc`: Zurück / Beenden
 - **Im Spiel:**
-  - **`Alt+Enter`**: Zwischen Vollbild und Fenstermodus umschalten
-  - **`Tab`**: Fenstergröße (`2x`..`5x`) durchschalten
-  - **`F10`**: Musikquelle umschalten (`CD-Audio` ↔ `General MIDI` ↔ `AdLib/OPL2`)
-  - **`F11` / `F12`**: Gesamtlautstärke leiser / lauter
-- **Schreibschutz-Umleitung & Absturz-Diagnose (`absturz.log`):**
-  - Ist der Original-Spielordner schreibgeschützt, leitet der Starter Spielstände automatisch nach `Spielstaende\` um.
-  - Sollte das Spiel unerwartet abstürzen, zeigt der Starter nach der Rückkehr automatisch den Inhalt von `absturz.log` samt Hinweis zur Fehlermeldung auf GitHub (`https://github.com/MeowMuhMuhCow/schicksalsklinge/issues`) an.
+  - **`Alt+Enter`**: Vollbild / Fenster umschalten | **`Tab`**: Fenstergröße (`2x`..`5x`) durchschalten
+  - **`F10`**: Musikquelle umschalten (`CD-Audio` ↔ `General MIDI` ↔ `AdLib/OPL2`) | **`F11` / `F12`**: Lautstärke leiser / lauter
 
 ---
 
@@ -60,11 +62,15 @@ Willkommen beim gemeinsamen Starter für die nativen Windows-Ports der **Nordlan
 | :--- | :--- |
 | `NORDLANDTRILOGIE.EXE` | Grafischer Starter für die Nordlandtrilogie (keine externen DLLs nötig) |
 | `spiele.json` | Spielkatalog-Konfiguration für Teil 1–3 |
-| `SCHICK_PORT_ALLES.EXE` / `SCHICK_PORT.EXE` | Nativer Port von *Die Schicksalsklinge* — Stufe **Alle Fixes** |
+| `SCHICK_PORT.EXE` / `SCHICK_PORT_ALLES.EXE` | Nativer Port von *Die Schicksalsklinge* — Stufe **Alle Fixes** |
 | `SCHICK_PORT_WICHTIG.EXE` | Nativer Port von *Die Schicksalsklinge* — Stufe **Wichtige Fixes** |
-| `SCHICK_PORT_ORIG.EXE` | Nativer Port von *Die Schicksalsklinge* — Stufe **100 % Original** |
-| `Probenlog/` | Live-Probenlog-Fenster (`probenlog_fenster.ps1`), HTML-Auswertung (`Probenlog_Schicksalsklinge.html`) und Dokumentation |
-| `LIESMICH.md` / `README.md` | Dokumentation |
+| `SCHICK_PORT_ORIG.EXE` | Nativer Port von *Die Schicksalsklinge* — Stufe **Original** |
+| `SCHWEIF_PORT.EXE` / `SCHWEIF_PORT_ALLES.EXE` | Nativer Port von *Sternenschweif* — Stufe **Alle Fixes** |
+| `SCHWEIF_PORT_WICHTIG.EXE` | Nativer Port von *Sternenschweif* — Stufe **Wichtige Fixes** |
+| `SCHWEIF_PORT_ORIG.EXE` | Nativer Port von *Sternenschweif* — Stufe **Original** |
+| `Probenlog/` | Live-Probenlog-Fenster (`probenlog_fenster.ps1`), HTML-Auswertung und Dokumentation |
+| `SELBER_BAUEN.bat` | Baut `NORDLANDTRILOGIE.EXE` unter Windows mit MinGW-w64 direkt aus `src\` neu |
+| `LIESMICH.md` / `README.md` | Dokumentation (Deutsch / Englisch) |
 | `COPYING` | GNU General Public License v3.0 (GPLv3) und Herkunftsnachweise |
 
-*(Hinweis: Dieses Paket enthält **keine** urheberrechtlich geschützten Original-Spieldaten von Attic Entertainment Software.)*
+*(Hinweis: Dieses Paket enthält **keine** urheberrechtlich geschützten Original-Spieldaten oder Original-Grafiken von Attic Entertainment Software.)*
