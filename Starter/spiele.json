@@ -9,18 +9,18 @@
       "untertitel": "Das Schwarze Auge - Teil 1 (1992)",
       "status": "verfuegbar",
       "status_wenn_exe_fehlt": "noch nicht verfuegbar",
-      "port_ordner": "../Port/build",
+      "port_ordner": ".",
       "port_ordner_alternativen": [
-        "../../Port/build",
-        "../../Port/release",
-        "../Port/release",
-        ".",
-        "schicksalsklinge"
+        "release",
+        "schicksalsklinge",
+        "../Schicksalsklinge_Nativ",
+        "../Port/build",
+        "../Port/release"
       ],
       "exe_stufen": {
         "original": "SCHICK_PORT_ORIG.EXE",
         "wichtig": "SCHICK_PORT_WICHTIG.EXE",
-        "alles": "SCHICK_PORT_ALLES.EXE",
+        "alles": "SCHICK_PORT.EXE",
         "standard": "SCHICK_PORT.EXE"
       },
       "kennungsdatei": "SCHICK.DAT",
@@ -71,7 +71,7 @@
       "exe_stufen": {
         "original": "SCHWEIF_PORT_ORIG.EXE",
         "wichtig": "SCHWEIF_PORT_WICHTIG.EXE",
-        "alles": "SCHWEIF_PORT_ALLES.EXE",
+        "alles": "SCHWEIF_PORT.EXE",
         "standard": "SCHWEIF_PORT.EXE"
       },
       "kennungsdatei": "SCHWEIF.EXE",
