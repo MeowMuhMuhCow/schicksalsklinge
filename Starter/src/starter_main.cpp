@@ -1468,16 +1468,14 @@ static void render_screen_select_game(void) {
         const char *short_sub = (g.teil == 1) ? "(DSA Teil 1 – 1992)" : ((g.teil == 2) ? "(DSA Teil 2 – 1994)" : "(DSA Teil 3 – 1996)");
         draw_text(cx + 124 + title_w, cy + 22, short_sub, g.verfuegbar ? 0xFFA4B0C2u : 0xFF707888u, 0, true);
 
-        if (g.gamedir_valid) {
-            draw_button(cx + cw - 396, cy + 18, 150, 42, "DOS-Version", false, true, false, bg_hover);
-        }
         if (g.verfuegbar) {
-            draw_button(cx + cw - 236, cy + 18, 216, 42, ">> Spiel starten", true, true, true, bg_hover);
+            draw_button(cx + cw - 236, cy + 16, 216, 42, ">> Nativ starten", true, true, true, bg_hover);
         } else if (!g.has_any_exe) {
-            draw_button(cx + cw - 236, cy + 18, 216, 42, "Programm fehlt", false, false, false, false);
+            draw_button(cx + cw - 236, cy + 16, 216, 42, "Nativ-EXE fehlt", false, false, false, false);
         } else {
-            draw_button(cx + cw - 236, cy + 18, 216, 42, "Spieldaten fehlen", false, false, false, false);
+            draw_button(cx + cw - 236, cy + 16, 216, 42, "Spieldaten fehlen", false, false, false, false);
         }
+        draw_button(cx + cw - 236, cy + 66, 216, 40, ">> DOS-Version", false, g.gamedir_valid, false, bg_hover);
 
         /* Zeile 2: Ruhige Status-Checkliste pro Spiel (Haken / Kreuz) */
         uint32_t row_txt_col = g.verfuegbar ? 0xFFD0D8E4u : 0xFF98A2B2u;
@@ -1488,15 +1486,15 @@ static void render_screen_select_game(void) {
         std::string prog_lbl = g.has_any_exe ? ("Programm OK (" + exe_name + ")") : ("Programm fehlt (" + exe_name + ")");
         draw_text(cx + 134, cy + 52, prog_lbl.c_str(), row_txt_col, 1, true);
 
-        draw_status_badge(cx + 468, cy + 54, g.gamedir_valid);
+        draw_status_badge(cx + 452, cy + 54, g.gamedir_valid);
         std::string dat_lbl = g.gamedir_valid ? ("Spieldaten OK (" + g.kennungsdatei + ")") : ("Spieldaten fehlen (" + g.kennungsdatei + ")");
-        draw_text(cx + 492, cy + 52, dat_lbl.c_str(), row_txt_col, 1, true);
+        draw_text(cx + 476, cy + 52, dat_lbl.c_str(), row_txt_col, 1, true);
 
         /* Zeile 3: Erkannter Spielordner & Anzeige-Zusammenfassung dieses Spiels */
         std::string path_info;
         if (g.gamedir_valid) {
             std::string p_prefix = "Spielordner: ";
-            int rem_px = 640 - text_width_px(p_prefix.c_str(), 0);
+            int rem_px = 450 - text_width_px(p_prefix.c_str(), 0);
             path_info = p_prefix + clip_text_px_left(g.resolved_gamedir, rem_px > 160 ? rem_px : 160, 0)
                       + "  |  Skalierung: " + skalierung_label_str(g.chosen_skalierung) + " (4:3)";
         } else {
@@ -2766,13 +2764,13 @@ static void handle_mouse_click(int mx, int my, bool &running) {
                     save_einstellungen_ini();
                     return;
                 }
-                /* 6b. Knopf: [DOS-Version] auf der Karte */
-                if (g_games[i].gamedir_valid && point_in_rect(mx, my, cx + cw - 396, cy + 18, 150, 42)) {
+                /* 6b. Knopf: [>> DOS-Version] rechts unter Nativ starten */
+                if (g_games[i].gamedir_valid && point_in_rect(mx, my, cx + cw - 236, cy + 66, 216, 40)) {
                     launch_dos_game(g_games[i]);
                     return;
                 }
-                /* 7. Knopf rechts oben: [>> Spiel starten] (bzw. [Ordner wählen...] falls noch nicht startbereit) */
-                if (point_in_rect(mx, my, cx + cw - 236, cy + 18, 216, 42)) {
+                /* 7. Knopf rechts oben: [>> Nativ starten] (bzw. [Ordner wählen...] falls noch nicht startbereit) */
+                if (point_in_rect(mx, my, cx + cw - 236, cy + 16, 216, 42)) {
                     if (g_games[i].verfuegbar) {
                         save_einstellungen_ini();
                         std::vector<std::string> no_extra;
