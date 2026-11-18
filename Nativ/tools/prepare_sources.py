@@ -4436,15 +4436,19 @@ def main() -> int:
 
     q_cache = Path("/tmp/schick_quelle_cache")
     if os.name != "nt":
-        if not (q_cache / "seg122.c").exists():
-            q_cache.mkdir(parents=True, exist_ok=True)
-            (q_cache / "AIL").mkdir(parents=True, exist_ok=True)
-            (q_cache / "BrightEyes_DOSBox").mkdir(parents=True, exist_ok=True)
-            for item in sorted(QUELLE_DIR.glob("*.[ch]")):
-                shutil.copy2(item, q_cache / item.name)
+        q_cache.mkdir(parents=True, exist_ok=True)
+        (q_cache / "AIL").mkdir(parents=True, exist_ok=True)
+        (q_cache / "BrightEyes_DOSBox").mkdir(parents=True, exist_ok=True)
+        for item in sorted(QUELLE_DIR.glob("*.[ch]")):
+            dst = q_cache / item.name
+            if not dst.exists() or item.stat().st_mtime > dst.stat().st_mtime or item.stat().st_size != dst.stat().st_size:
+                shutil.copy2(item, dst)
+        if not (q_cache / "s_fix.inc").exists() or (QUELLE_DIR / "s_fix.inc").stat().st_mtime > (q_cache / "s_fix.inc").stat().st_mtime:
             shutil.copy2(QUELLE_DIR / "s_fix.inc", q_cache / "s_fix.inc")
+        if not (q_cache / "AIL" / "AIL.H").exists():
             shutil.copy2(QUELLE_DIR / "AIL" / "AIL.H", q_cache / "AIL" / "AIL.H")
-            for seg_no in ("008", "009", "010", "011"):
+        for seg_no in ("008", "009", "010", "011"):
+            if not (q_cache / "BrightEyes_DOSBox" / f"seg{seg_no}.cpp").exists():
                 shutil.copy2(BE_DOSBOX_DIR / f"seg{seg_no}.cpp", q_cache / "BrightEyes_DOSBox" / f"seg{seg_no}.cpp")
         src_q = q_cache
         src_be = q_cache / "BrightEyes_DOSBox"
@@ -4471,16 +4475,21 @@ def main() -> int:
     if SRC_DIR != FINAL_SRC_DIR:
         FINAL_SRC_DIR.mkdir(parents=True, exist_ok=True)
         (FINAL_SRC_DIR / "AIL").mkdir(parents=True, exist_ok=True)
+        rel_src_dir = PORT_DIR / "release" / "src"
         updated = 0
         for item in SRC_DIR.rglob("*"):
             if item.is_file():
                 rel = item.relative_to(SRC_DIR)
-                dst = FINAL_SRC_DIR / rel
-                dst.parent.mkdir(parents=True, exist_ok=True)
                 b = item.read_bytes()
-                if not dst.exists() or dst.read_bytes() != b:
-                    dst.write_bytes(b)
-                    updated += 1
+                for target_root in (FINAL_SRC_DIR, rel_src_dir):
+                    if not target_root.parent.exists():
+                        continue
+                    dst = target_root / rel
+                    dst.parent.mkdir(parents=True, exist_ok=True)
+                    if not dst.exists() or dst.read_bytes() != b:
+                        dst.write_bytes(b)
+                        if target_root == FINAL_SRC_DIR:
+                            updated += 1
         print(f"      {updated} geaenderte Dateien nach Port/src/ synchronisiert.")
 
     print("[prepare_sources] Fertig.")

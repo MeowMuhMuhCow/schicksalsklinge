@@ -256,10 +256,27 @@ void hero_disease_test(struct struct_hero *hero, const signed int disease_id, co
 #endif
 
 	/* check the probability and if hero is diseased*/
+#if FIX_PROBENLOG
+	/* Probenlog (Art 9, Typ 9): Krankheitsprobe (W100 <= Schwelle). Werte: Typ, Krankheit, W100, Schwelle, angesteckt (1/0) */
+	{
+		signed int w[5];
+
+		w[0] = 9;
+		w[1] = disease_id;
+		w[2] = random_schick(100);
+		w[3] = probability;
+		w[4] = ((w[2] <= probability) && (hero->disease[disease_id].status != DISEASE_STATUS_DISEASED)) ? 1 : 0;
+		fix_probenlog(9, hero->alias, 5, w);
+		if (w[4]) {
+			hero_gets_diseased(hero, disease_id);
+		}
+	}
+#else
 	if ((random_schick(100) <= probability) && (hero->disease[disease_id].status != DISEASE_STATUS_DISEASED)) {
 
 		hero_gets_diseased(hero, disease_id);
 	}
+#endif
 }
 
 /**

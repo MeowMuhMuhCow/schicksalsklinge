@@ -15,9 +15,15 @@ Dieses Release-Paket enthält **ausschließlich den Programmquellcode** und **ke
 
 ---
 
-## 2. Kompilieren (Bauen)
+## 2. Kompilieren / Selber bauen (auch komplett ohne Python!)
 
-### Option A: Ein-Befehl-Buildskript (`bauen_port.py`)
+### Option A:Unter Windows ohne Python (`SELBER_BAUEN.bat`)
+Wer keine fertigen `.EXE`-Dateien aus dem Internet nutzen möchte (und auch kein Python installiert hat), lädt einfach das Quelltext-Repository herunter (**Code → Download ZIP**, enthält keine einzige `.EXE`) und doppelklickt **`SELBER_BAUEN.bat`**:
+- Baut zuerst die DOS-Bugfix-EXEs (`Patch\patchen.ps1`) aus deiner GOG-Installation.
+- Sucht einen 32-Bit-MinGW-Compiler (`gcc.exe`/`g++.exe`) oder lädt auf Wunsch mit einem Tastendruck (`[J/N]`) das portable `w64devkit (i686)` automatisch von GitHub nach `Compiler\w64devkit` herunter (keine Systeminstallation).
+- Kompiliert alle nativen Windows-EXEs (`SCHICK_PORT_ORIG.EXE`, `SCHICK_PORT_WICHTIG.EXE`, `SCHICK_PORT_ALLES.EXE`, `SCHICK_PORT.EXE`) sowie den Auswahl-Starter (`NORDLANDTRILOGIE.EXE`) lokal aus dem C/C++-Quelltext.
+
+### Option B: Ein-Befehl-Buildskript mit Python (`bauen_port.py`)
 Baut automatisch alle drei Bugfix-Sammelstufen (`SCHICK_PORT_ORIG.EXE`, `SCHICK_PORT_WICHTIG.EXE`, `SCHICK_PORT_ALLES.EXE`) sowie die Standard-Programmdatei `SCHICK_PORT.EXE`:
 
 ```bash
@@ -32,7 +38,7 @@ python3 bauen_port.py alles
 python3 bauen_port.py alles -DFIX_0042=0 -DFIX_HIMMEL=1 -DFIX_SPEICHERN=1 -DFIX_PROBENLOG=0
 ```
 
-### Option B: CMake (`CMakeLists.txt`)
+### Option C: CMake (`CMakeLists.txt`)
 Unter Linux oder Windows (MinGW / MSVC) mit installiertem `SDL2`:
 ```bash
 cmake -B build -DCMAKE_BUILD_TYPE=Release

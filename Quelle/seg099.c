@@ -1159,11 +1159,18 @@ char* spell_analues(void)
 	inv_slot = select_item_to_drop(get_spelluser());
 
 #if FIX_0200
-	/* Fix 200: Abbruch der Gegenstandswahl (-1) nicht als Inventarplatz benutzen */
+	/* Fix 200: Abbruch der Gegenstandswahl (-1) nicht als Inventarplatz benutzen;
+	 * wie bei Odem Arcanum ohne Meldung abbrechen (in der Akademie Text 52 zurueckgeben) */
 	/* If the player cancels item selection or has no items select_item_to_drop() returns -1.
 	The original uses the return value to calculate an index, whithout checking for this. */
-	if (inv_slot == -1) item_id = 0;
-	else item_id = get_spelluser()->inventory[inv_slot].item_id;
+	if (inv_slot == -1) {
+		if (gs_in_academy != 99) {
+			return g_text_output_buf;
+		}
+		item_id = 0;
+	} else {
+		item_id = get_spelluser()->inventory[inv_slot].item_id;
+	}
 #else
 	item_id = get_spelluser()->inventory[inv_slot].item_id;
 #endif

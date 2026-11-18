@@ -230,7 +230,14 @@ def main() -> int:
     prep_py = PORT_DIR / "tools" / "prepare_sources.py"
     ngen_c = PORT_DIR / "tools" / "ngen_base.c"
     seg2_c = PORT_DIR / "src" / "seg002.c"
-    need_prep = force_prep or (not seg2_c.exists()) or (prep_py.stat().st_mtime > seg2_c.stat().st_mtime) or (ngen_c.exists() and ngen_c.stat().st_mtime > seg2_c.stat().st_mtime)
+    quelle_mtime = max((p.stat().st_mtime for p in (ROOT_DIR / "Quelle").glob("*.[ch]")), default=0.0)
+    need_prep = (
+        force_prep
+        or (not seg2_c.exists())
+        or (prep_py.stat().st_mtime > seg2_c.stat().st_mtime)
+        or (ngen_c.exists() and ngen_c.stat().st_mtime > seg2_c.stat().st_mtime)
+        or (quelle_mtime > seg2_c.stat().st_mtime)
+    )
     if need_prep:
         print("[1/3] Bereite Port-Quellen vor (Port/tools/prepare_sources.py)...")
         subprocess.run([sys.executable, str(prep_py)], check=True)

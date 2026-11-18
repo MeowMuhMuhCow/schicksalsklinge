@@ -154,9 +154,21 @@ signed int DNG10_handler(void)
 
 			if (gs_dng10_hole_state == 2 || GUI_bool(get_tx(6))) /* "EIN STEIN IN DER WAND SCHEINT LOSE ZU SEIN.@WOLLT IHR IHN ENTFERNEN?" */
 			{
+#if FIX_0115
+				/* Fix 115 (Teil 2): wenn der Stein schon entfernt ist (Zustand 2), Text 41
+				 * ("HIER IST EIN LOCH IN DER WAND, WO IHR VORHIN DEN STEIN ENTFERNT HABT...")
+				 * statt Text 11 ("...HAT DEN STEIN DANN ABER IN DER HAND...") zeigen */
+				if (gs_dng10_hole_state == 2) {
+					strcpy(g_dtp2, get_tx(41));
+				} else {
+					gs_dng10_hole_state = 2;
+					sprintf(g_dtp2, get_tx(11), hero->alias);
+				}
+#else
 				gs_dng10_hole_state = 2;
 
 				sprintf(g_dtp2,	get_tx(11), hero->alias); /* "%s VERSPÜRT EINEN KURZEN SCHMERZ, HAT DEN STEIN DANN ABER IN DER HA..." */
+#endif
 
 				if (GUI_bool(g_dtp2))
 				{

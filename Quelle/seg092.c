@@ -252,7 +252,11 @@ void loot_simple_chest(struct struct_chest *chest)
 	tw_bak = g_textbox_width;
 	g_textbox_width = 7;
 
+#if !FIX_0440
+	/* Fix 440: chest->lock liegt in der Truhentabelle im Datensegment und wird beim Laden eines Spielstands
+	 * nicht zurueckgesetzt; ob die Truhe schon offen ist, merkt sich Bit 1 (0x02) der Dungeonkarte */
 	chest->lock.key = 0;
+#endif
 
 	do {
 
@@ -341,7 +345,9 @@ void loot_chest(struct struct_chest *chest, char *text_non_empty, char *text_emp
 	char names[20][20];
 #endif
 
+#if !FIX_0440
 	chest->lock.key = 0;
+#endif
 
 	tw_bak = g_textbox_width;
 	g_textbox_width = 7;

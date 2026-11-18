@@ -675,6 +675,44 @@ void sea_travel(const signed int route_id, const signed int reverse)
 	 * I (siebenstreich) think that the original idea was 18h * gs_travel_speed, copying the
 	 * corresponding part from trv_do_journey, and then messing up the removal of speed_mod */
 
+#if FIX_PROBENLOG
+	/* Probenlog (Art 9, Typ 6..8): Zufallswuerfe bei Beginn einer Seereise (W100 <= Schwelle).
+	 * Werte: Typ (6 = Totenschiff, 7 = Krakenmolch, 8 = Piraten), W100, Schwelle, Ereignis (1/0). Gleiche Wuerfe wie im Original. */
+	{
+		signed int w[4];
+
+		if (route_id <= 6 && gs_quest_deadship && !gs_quest_deadship_done) {
+			w[0] = 6;
+			w[1] = random_schick(100);
+			w[2] = 20;
+			w[3] = gs_passage_deadship_flag = (w[1] <= 20 ? 1 : 0);
+			if (w[3]) {
+				gs_passage_deadship_position = random_schick(gs_travel_distance_per_18_hours);
+			}
+			fix_probenlog(9, NULL, 4, w);
+		} else {
+			gs_passage_deadship_flag = 0;
+		}
+
+		w[0] = 7;
+		w[1] = random_schick(100);
+		w[2] = 5;
+		w[3] = gs_passage_octopus_flag = (w[1] <= 5 ? 1 : 0);
+		if (w[3]) {
+			gs_passage_octopus_position = random_schick(gs_travel_distance_per_18_hours);
+		}
+		fix_probenlog(9, NULL, 4, w);
+
+		w[0] = 8;
+		w[1] = random_schick(100);
+		w[2] = 10;
+		w[3] = gs_passage_pirates_flag = (w[1] <= 10 ? 1 : 0);
+		if (w[3]) {
+			gs_passage_pirates_position = random_schick(gs_travel_distance_per_18_hours);
+		}
+		fix_probenlog(9, NULL, 4, w);
+	}
+#else
 	if (route_id <= 6 && gs_quest_deadship && !gs_quest_deadship_done) {
 		/* only on high seas routes */
 
@@ -703,6 +741,7 @@ void sea_travel(const signed int route_id, const signed int reverse)
 		D1_INFO("Piratenangriff wurde bei %o0 Schritt aktiviert!\n", gs_passage_pirates_position);
 #endif
 	}
+#endif
 
 	/* from now on gs_travel_distance_per_18_hours is the distance travelled so far, like gs_travel_distance_made */
 	gs_travel_step_counter = gs_travel_distance_made = gs_travel_distance_per_18_hours = gs_travel_detour = 0;

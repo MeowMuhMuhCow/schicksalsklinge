@@ -1118,7 +1118,12 @@ void DNG_waterbarrel(uint8_t *unit_ptr)
 
 			/* print a message if no hero used the barrel */
 			if (!hero_refilled_counter) {
+#if FIX_0091
+				/* Fix 91 (Teil 2): wenn das Fass schon leer war, "DAS FASS IST NUN LEER." statt "VORRAETE SIND NOCH ALLE VOLL." */
+				GUI_output(*unit_ptr == 0 ? get_ttx(785) : get_ttx(786));
+#else
 				GUI_output(get_ttx(786)); /* "EURE VORRÄTE SIND NOCH ALLE VOLL." */
+#endif
 			}
 
 			done = 1;

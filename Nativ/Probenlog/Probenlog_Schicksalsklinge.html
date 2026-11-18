@@ -111,16 +111,22 @@ function lies(text) {
     } else if (art === 9 && w.length >= 4) {
       vor = null; const typ = w[0]; let titel, zusatz = '', wu = '', ok = null, erg = '';
       const wa = w.length >= 5 && w[4] >= 0 ? `Überfall in der ${w[4] + 1}. Wache` : '';
-      if (typ === 1 && w.length >= 5) { titel = `Kampf ${nm(D.KAMPF, w[1]) || 'Nr. ' + w[1]}`; zusatz = 'Gegnerzahl';
-        wu = `höchstens ${w[2]}`; erg = `${w[4]} von ${w[3]} Gegnern kämpfen mit`; }
+      let heldErg = '';
+      const KR = ['keine','Wundfieber','Dumpfschädel','Blaue Keuche','Paralyse','Schlachtenfieber','Frostschäden','Tollwut'];
+      if (typ === 1 && w.length >= 5) { titel = `Kampf ${nm(D.KAMPF, w[1]) || 'Nr. ' + w[1]}`; zusatz = w[2] > 0 ? 'Gegnerzahl' : 'feste Kampfliste';
+        wu = w[2] > 0 ? `höchstens ${w[2]}` : `${w[3]} Gegner`; erg = w[2] > 0 ? `${w[4]} von ${w[3]} Gegnern kämpfen mit` : `${w[3]} Gegner`; }
       else if (typ === 2 && w.length >= 5) { titel = 'Nachtlager'; zusatz = w[2] === 60 ? 'Überfallwurf, keine Wache' : 'Überfallwurf, mit Wache';
         wu = `W100 = ${w[1]}, Überfall unter ${w[2]}`; ok = w[4] < 0; erg = w[4] >= 0 ? wa : (w[3] && w[1] < w[2] ? 'kein Überfall (Travias Segen)' : 'kein Überfall'); }
       else if (typ === 3 && w.length >= 5) { titel = `Lager im Dungeon (${w[3]} Std.)`; zusatz = w[3] && w[2] === 4 * w[3] ? 'Überfallwurf, keine Wache' : 'Überfallwurf, mit Wache';
         wu = `W100 = ${w[1]}, Überfall unter ${w[2]}`; ok = w[4] < 0; erg = w[4] >= 0 ? wa : 'kein Überfall'; }
       else if (typ === 4 || typ === 5) { titel = 'Reise'; zusatz = typ === 4 ? 'Zufallsbegegnung' : 'Kampf';
         wu = `W100 = ${w[1]}, bis ${w[2]}`; erg = w[3] ? (typ === 4 ? 'Begegnung' : 'Kampf') : 'nichts'; if (typ === 5) ok = !w[3]; }
+      else if (typ >= 6 && typ <= 8) { titel = 'Seereise'; zusatz = typ === 6 ? 'Totenschiff' : (typ === 7 ? 'Krakenmolch' : 'Piratenangriff');
+        wu = `W100 = ${w[1]}, bis ${w[2]}`; ok = !w[3]; erg = w[3] ? zusatz : 'nichts'; }
+      else if (typ === 9 && w.length >= 5) { heldErg = name; titel = `Krankheitsprobe (${KR[w[1]] || w[1]})`; zusatz = '';
+        wu = `W100 = ${w[2]}, bis ${w[3]}`; ok = !w[4]; erg = w[4] ? 'angesteckt' : 'nicht angesteckt'; }
       else titel = 'Ereignis Typ ' + typ;
-      r = {zeit, held: '', typ: 'erg', titel, zusatz, wuerfe: wu, ok, pz: false, erg};
+      r = {zeit, held: heldErg, typ: 'erg', titel, zusatz, wuerfe: wu, ok, pz: false, erg};
     } else continue;
     out.push(r);
   }

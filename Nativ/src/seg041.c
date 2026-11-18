@@ -325,7 +325,11 @@ signed int FIG_get_hero_weapon_attack_damage(struct struct_hero* hero, struct st
 
 		damage = dice_roll(weapon->damage_d6, 6, weapon->damage_const);
 
+#if FIX_0034
+		if (weapon->ranged_index != -1 || right_hand_item_id == ITEM_ID_SCHNEIDZAHN) {
+#else
 		if (weapon->ranged_index != -1) {
+#endif
 
 			/* weapon does ranged damage */
 
@@ -352,7 +356,14 @@ signed int FIG_get_hero_weapon_attack_damage(struct struct_hero* hero, struct st
 				ranged_distance_type = RANGED_DISTANCE_TYPE_EXTREM_WEIT;
 			}
 
+#if FIX_0034
+			/* Fix 34 (Teil 2): Schneidzahn hat in g_weapon_stats_table ranged_index == -1 (Original-Bug 61) ->
+			 * ohne Eintrag wuerde keine Wurfwaffen-Probe gewuerfelt; Entfernungstabelle von Wurfbeil/Wurfaxt nutzen */
+			p_rangedtab = &g_ranged_weapon_stats_table[
+				weapon->ranged_index != -1 ? weapon->ranged_index : RANGED_WEAPON_STATS_ID_WURFBEIL_WURFAXT];
+#else
 			p_rangedtab = &g_ranged_weapon_stats_table[weapon->ranged_index];
+#endif
 
 			if (attack_hero) {
 				if (target->typus == HERO_TYPE_ZWERG) {
@@ -375,7 +386,11 @@ signed int FIG_get_hero_weapon_attack_damage(struct struct_hero* hero, struct st
 					(item_p_rh->item_subtype_id == WEAPON_TYPE_WURFWAFFE ? TA_WURFWAFFEN : TA_SCHUSSWAFFEN),
 					p_rangedtab->base_handicap + 2 * ranged_distance_type - 2 * target_size)
 				> 0) ?
+#if FIX_0034
+					p_rangedtab->damage_modifier[ranged_distance_type] :
+#else
 					g_ranged_weapon_stats_table[weapon->ranged_index].damage_modifier[ranged_distance_type] :
+#endif
 					-damage;
 
 			if (damage_mod != 0) { /* test is redundant */

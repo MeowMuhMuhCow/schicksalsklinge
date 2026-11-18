@@ -104,15 +104,23 @@ def finde_compiler(arg, projekt):
             'zu finden auf archive.org: https://archive.org/details/bcpp31')
 
 
+def _wsl_win_pfad(p):
+    m = re.match(r'^/mnt/([a-zA-Z])/(.*)$', os.path.abspath(p))
+    return f'{m[1].upper()}:\\' + m[2].replace('/', '\\') if m else p
+
+
 def finde_dosbox(arg):
     """liefert den Aufruf als Liste: [Programm] oder [flatpak, run, io.github.dosbox-staging].
-    Linux: dieselbe Reihenfolge wie Linux/gemeinsam.sh (dosbox-staging, dosbox, dosbox-x, Flatpak)"""
+    Linux: dieselbe Reihenfolge wie Linux/gemeinsam.sh (dosbox-staging, dosbox, dosbox-x, Flatpak, WSL-GOG)"""
     kand = [arg] if arg else []
     kand += [os.path.join(HIER, 'DOSBox', 'DOSBox.exe')]
     if WINDOWS:
         kand += [os.path.join(g, 'DOSBOX', 'DOSBox.exe') for g in GOG]
     else:
         kand += [shutil.which(n) or '' for n in ('dosbox-staging', 'dosbox', 'dosbox-x')]
+        for g in GOG:
+            if len(g) > 3 and g[1:3] == ':\\':
+                kand.append('/mnt/' + g[0].lower() + '/' + g[3:].replace('\\', '/') + '/DOSBOX/DOSBox.exe')
     for k in kand:
         if k and os.path.isfile(k): return [os.path.abspath(k)]
     if not WINDOWS and shutil.which('flatpak'):
@@ -131,7 +139,7 @@ def dosbox_art(cmd):
     Unter Windows ist es die DOSBox aus dem GOG-Spiel (0.74), dort wird nicht nachgefragt."""
     k = ' '.join(cmd)
     if k in _ART: return _ART[k]
-    if WINDOWS:
+    if WINDOWS or cmd[0].lower().endswith('.exe'):
         _ART[k] = 'klassisch'; return _ART[k]
     try:
         r = subprocess.run(cmd + ['--version'], capture_output=True, text=True, timeout=20)
@@ -142,7 +150,7 @@ def dosbox_art(cmd):
     return _ART[k]
 
 
-def baudir(arg, projekt):
+def baudir(arg, projekt, dosbox_cmd=None):
     if arg: return os.path.abspath(arg)
     if WINDOWS:
         d = os.path.join(tempfile.gettempdir(), 'schicksalsklinge_bau')
@@ -160,6 +168,7 @@ def baudir(arg, projekt):
 class Dos:
     def __init__(self, cmd, root, sichtbar):
         self.cmd, self.root, self.sichtbar = cmd, root, sichtbar
+        self.win_exe = WINDOWS or cmd[0].lower().endswith('.exe')
         self.art = dosbox_art(cmd)
         if self.art != 'klassisch' and not sichtbar:
             # DOSBox Staging und DOSBox-X brauchen eine Bildausgabe (OpenGL), unsichtbar laufen sie nicht
@@ -178,7 +187,10 @@ class Dos:
             # nur die klassische DOSBox 0.74 (SDL 1.2) laeuft mit dem Dummy-Treiber ohne Fenster
             env['SDL_VIDEODRIVER'] = 'dummy'
         env.setdefault('SDL_AUDIODRIVER', 'dummy')
-        arg = self.cmd + ['-conf', cp] + (['-noconsole'] if WINDOWS else []) + ['-exit']
+        if self.win_exe and not WINDOWS:
+            env['WSLENV'] = 'SDL_VIDEODRIVER:SDL_AUDIODRIVER'
+        cp_arg = _wsl_win_pfad(cp) if (self.win_exe and not WINDOWS) else cp
+        arg = self.cmd + ['-conf', cp_arg] + (['-noconsole'] if self.win_exe else []) + ['-exit']
         if DOSLOG: DOSLOG.write(f'\n===== {name} ({"unsichtbar" if unsichtbar else "sichtbar"}, {self.art}): {" ".join(arg)}\n'); DOSLOG.flush()
         t0 = time.time()
         try:
@@ -192,12 +204,13 @@ class Dos:
         """fuehrt DOS-Befehle im Ordner C:\\wd aus; Ausgaben leiten die Befehle selbst in Dateien um"""
         sdl = ['[sdl]', 'fullscreen=false', 'autolock=false']
         if self.art == 'klassisch': sdl.insert(1, 'output=surface')
+        mount_root = _wsl_win_pfad(self.root) if (self.win_exe and not WINDOWS) else self.root
         conf = '\n'.join(sdl + ['[dosbox]', 'machine=svga_s3', 'memsize=16',
                           '[cpu]', 'core=normal', 'cputype=auto', 'cycles=max',
                           '[mixer]', 'nosound=true', '[speaker]', 'pcspeaker=false',
                           '[sblaster]', 'sbtype=none', '[gus]', 'gus=false', '[midi]', 'mpu401=none',
                           '[dos]', 'keyboardlayout=none',
-                          '[autoexec]', f'mount c "{self.root}"', 'c:', 'C:\\DATUM.COM', f'cd \\{wd}']
+                          '[autoexec]', f'mount c "{mount_root}"', 'c:', 'C:\\DATUM.COM', f'cd \\{wd}']
                          + befehle + ['exit', ''])
         cp = os.path.join(self.run_dir, 'lauf.conf')
         open(cp, 'w', encoding='mbcs' if WINDOWS else 'utf-8').write(conf)
@@ -294,7 +307,7 @@ def main():
     orig = finde_ci(os.path.join(projekt, 'Original'), 'SCHICKM.EXE')
     if orig and md5(orig) != ORIGINAL_MD5:
         say(f'Hinweis: {pfad("Original", "SCHICKM.EXE")} ist nicht die CD-Fassung 3.02 (andere MD5). Verglichen wird trotzdem.')
-    root = baudir(a.baudir, projekt); say('Bauordner:', root)
+    root = baudir(a.baudir, projekt, dosbox); say('Bauordner:', root)
 
     N = 7 if a.fix else 4
     say(f'[1/{N}] Bauordner vorbereiten')
