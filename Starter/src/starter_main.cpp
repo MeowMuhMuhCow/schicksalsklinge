@@ -1469,9 +1469,9 @@ static void render_screen_select_game(void) {
         draw_text(cx + 124 + title_w, cy + 22, short_sub, g.verfuegbar ? 0xFFA4B0C2u : 0xFF707888u, 0, true);
 
         if (g.verfuegbar) {
-            draw_button(cx + cw - 236, cy + 16, 216, 42, ">> Nativ starten", true, true, true, bg_hover);
+            draw_button(cx + cw - 236, cy + 16, 216, 42, ">> Windows-Version", true, true, true, bg_hover);
         } else if (!g.has_any_exe) {
-            draw_button(cx + cw - 236, cy + 16, 216, 42, "Nativ-EXE fehlt", false, false, false, false);
+            draw_button(cx + cw - 236, cy + 16, 216, 42, "Windows-EXE fehlt", false, false, false, false);
         } else {
             draw_button(cx + cw - 236, cy + 16, 216, 42, "Spieldaten fehlen", false, false, false, false);
         }
@@ -1612,8 +1612,8 @@ static void render_screen_settings(void) {
     draw_rect_border(18, 694, SCREEN_W - 36, 52, 0xFF687288u, 0xFF303644u);
 
     draw_button(30, 701, 264, 38, "< Zurück zur Übersicht", false, true, false, bg_hover);
-    draw_button(370, 699, 326, 42, ">> DOS-VERSION STARTEN [D]", false, g.gamedir_valid, false, bg_hover);
-    draw_button(716, 699, 314, 42, ">> SPIEL STARTEN (Enter)", g_settings_row == 6, true, true, bg_hover);
+    draw_button(370, 699, 326, 42, ">> DOS-VERSION [D]", false, g.gamedir_valid, false, bg_hover);
+    draw_button(716, 699, 314, 42, ">> WINDOWS-VERSION (Enter)", g_settings_row == 6, true, true, bg_hover);
 }
 
 static void render_help_overlay(void) {
