@@ -132,6 +132,9 @@ void decomp_pp20(uint8_t *src, uint8_t *dst, uint8_t *p3, uint32_t plen)
 		D1_ERR("PP20: No PP20 file\n");
 	}
 #endif
+#if !defined(_WIN32)
+	if (plen < 12 || unplen == 0) return;
+#endif
 	ppDecrunch(&src[8],  dst, &src[4], plen - 12, unplen, src[plen -1]);
 
 	return;

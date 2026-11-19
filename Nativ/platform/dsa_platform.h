@@ -70,6 +70,8 @@ const char *dsa_platform_get_save_dir(void);
 int         dsa_platform_is_save_dir_redirected(void);
 int         dsa_platform_is_replay_active(void);
 const char *dsa_platform_resolve_path(const char *dos_path, char *out_buf, size_t out_size);
+int         dsa_platform_open_ci(const char *fname, int flags, int mode);
+int         dsa_platform_unlink_ci(const char *fname);
 
 /* Audio: CD-Audio (MUSIC/Track02..15.OGG wie MobileEyes/GOG) + General MIDI + DOSBox OPL2 & VOC-Effekte */
 #define DSA_MUSIC_MODE_CD  0

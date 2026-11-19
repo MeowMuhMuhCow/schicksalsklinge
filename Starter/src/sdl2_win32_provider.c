@@ -500,6 +500,24 @@ int SDL_SetWindowFullscreen(SDL_Window *window, Uint32 flags) {
     return 0;
 }
 
+void SDL_HideWindow(SDL_Window *window) {
+    if (window && !g_using_dll && window->hwnd) {
+        ShowWindow(window->hwnd, SW_HIDE);
+    }
+}
+
+void SDL_ShowWindow(SDL_Window *window) {
+    if (window && !g_using_dll && window->hwnd) {
+        ShowWindow(window->hwnd, SW_SHOW);
+    }
+}
+
+void SDL_RaiseWindow(SDL_Window *window) {
+    if (window && !g_using_dll && window->hwnd) {
+        SetForegroundWindow(window->hwnd);
+    }
+}
+
 SDL_Renderer *SDL_CreateRenderer(SDL_Window *window, int index, Uint32 flags) {
     SDL_Renderer *ren;
     if (g_using_dll && p_SDL_CreateRenderer) {

@@ -1,0 +1,65 @@
+===========================================================================
+Das Schwarze Auge: Die Schicksalsklinge — Nativer macOS-Port (Universal)
+===========================================================================
+
+1. SYSTEMVORAUSSETZUNGEN & UNIVERSAL BINARY
+-------------------------------------------
+- Dieser Port enthaelt 64-Bit-Universal-Binaries (arm64 fuer Apple Silicon
+  M1/M2/M3/M4 sowie x86_64 fuer Intel-Macs) fuer macOS 11 (Big Sur) oder neuer.
+- Original-Spieldateien der deutschen Version V3.02de (z. B. aus der
+  GOG-Version "Realms of Arkania: Blade of Destiny" oder Steam).
+  Gross-/Kleinschreibung der Spieldateien (SCHICK.DAT / schick.dat) ist egal.
+- SDL2.framework liegt unter Frameworks/SDL2.framework bei (alternativ via
+  Homebrew: `brew install sdl2`).
+
+2. WICHTIG: UNSIGNIERTES PROGRAMM UNTER MACOS STARTEN (RECHTSKLICK > OEFFNEN)
+-----------------------------------------------------------------------------
+Da dieser freie Community-Port nicht mit einem kostenpflichtigen Apple-Developer-
+Zertifikat signiert ist, blockiert macOS Gatekeeper den ersten Direktstart per
+Doppelklick mit einer Meldung wie:
+  "SCHICK_PORT kann nicht geoeffnet werden, da der Entwickler nicht
+   verifiziert werden kann" bzw. "... nicht geoeffnet, da es von einem
+   nicht identifizierten Entwickler stammt."
+
+So geben Sie das Programm unter macOS frei:
+
+  Methode A (Finder — Rechtsklick > Oeffnen):
+  1. Klicken Sie im Finder mit der RECHTEN Maustaste (oder bei gedrueckter
+     Ctrl-Taste) auf das Startskript (z. B. `Schicksalsklinge_starten_ALLE_FIXES.sh`)
+     bzw. auf `SCHICK_PORT`.
+  2. Waehlen Sie im Kontextmenue **"Oeffnen"** (Open).
+  3. Bestaetigen Sie im folgenden Dialog erneut mit **"Oeffnen"**
+     (unter macOS Sequoia ggf. unter *Systemeinstellungen -> Datenschutz &
+     Sicherheit -> Trotzdem oeffnen*).
+
+  Methode B (Terminal — Quarantaene-Attribut einmalig entfernen):
+  Oeffnen Sie das Terminal im entpackten Ordner und fuehren Sie einmalig aus:
+    xattr -cr .
+  Danach starten alle 4 Stufen und Startskripte ohne Gatekeeper-Warnung.
+
+3. SPIELPFAD & START DER 4 STUFEN
+---------------------------------
+Das Startskript sucht die Spieldaten automatisch in:
+- dem als ersten Parameter uebergebenen Ordner,
+- dem Pfad in `SPIELPFAD.txt`,
+- `~/GOG Games/Realms of Arkania - Blade of Destiny German` (bzw. `Realms of Arkania`),
+- `/Applications/Realms of Arkania.app/Contents/Resources/game`.
+
+Startskripte fuer alle 4 Stufen + Live-Probenlog (Python-Fenster):
+- `./Schicksalsklinge_starten_STANDARD.sh`
+- `./Schicksalsklinge_starten_ALLE_FIXES.sh`
+- `./Schicksalsklinge_starten_ALLE_FIXES_MIT_PROBENLOG.sh`
+- `./Schicksalsklinge_starten_WICHTIGE_FIXES.sh`
+- `./Schicksalsklinge_starten_WICHTIGE_FIXES_MIT_PROBENLOG.sh`
+- `./Schicksalsklinge_starten_ORIGINAL.sh`
+
+4. HINWEIS ZU DSA 2: STERNENSCHWEIF UNTER MACOS
+-----------------------------------------------
+Die 64-Bit-Pruefung (L2) hat ergeben, dass Schicksalsklinge nach Fixliste
+vollstaendig 64-Bit-faehig ist ("64-Bit geht nach Fixliste"), waehrend
+Sternenschweif aufgrund von 31 fest auf 32-Bit-Layout bemessenen C++-Objekt-
+Slices im globalen Datensegment (`OVL032.CPP`) zwingend ein 32-Bit-Binary
+(`-m32`) benoetigt ("64-Bit geht nicht"). Da macOS ab Catalina (10.15) keine
+32-Bit-Prozesse mehr direkt ausfuehrt, steht der native macOS-Universal-Build
+fuer Teil 1 (Schicksalsklinge) bereit; Sternenschweif laeuft nativ unter
+Linux (`x86_64` mit 32-Bit-ELF-Support) und Windows.

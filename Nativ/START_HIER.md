@@ -60,7 +60,7 @@ cmake --build build -j4
    ```bat
    start_schicksalsklinge.bat "C:\GOG Games\Realms of Arkania - Blade of Destiny German"
    ```
-   *(Ohne Angabe sucht das Startskript automatisch im aktuellen Ordner sowie in den typischen GOG-Installationspfaden. Ist der Spielordner schreibgeschützt, werden Spielstände und `PROBEN.CSV` automatisch in einen Ordner `Spielstaende\` neben der EXE umgeleitet und das beim Start einmal gemeldet.)*
+   *(Ohne Angabe sucht das Startskript automatisch im aktuellen Ordner sowie in den typischen GOG-Installationspfaden. Ist der Spielordner schreibgeschützt, werden Spielstände und `PROBEN.CSV` automatisch in einen Ordner `Spielstaende\` neben der EXE umgeleitet.)*
 
 ### Probenlog (`Probenlog\`)
 - Beim Start über `*_MIT_PROBENLOG.bat` wird `PROBEN.CSV` im Spielordner (bzw. bei Schreibschutz in `Spielstaende\PROBEN.CSV`) angelegt (ein vorhandenes altes Log wandert vorher mit Datum im Namen nach `Probenlogs\`) und neben dem Spiel öffnet sich das Live-Fenster (`Probenlog\probenlog_fenster.ps1`).

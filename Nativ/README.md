@@ -51,7 +51,7 @@ Or pass the game directory directly as the first argument:
 ```bat
 start_schicksalsklinge.bat "C:\GOG Games\Realms of Arkania - Blade of Destiny German"
 ```
-*(If the game directory is write-protected, savegames and `PROBEN.CSV` are automatically redirected to a `Spielstaende\` folder next to the EXE and reported once at startup. With `*_MIT_PROBENLOG.bat`, previous `PROBEN.CSV` files are archived with a timestamp to `Probenlogs\` and the live roll log window `Probenlog\probenlog_fenster.ps1` opens alongside the game; see `Probenlog/LIESMICH.md` and `Probenlog/Probenlog_Schicksalsklinge.html`.)*
+*(If the game directory is write-protected, savegames and `PROBEN.CSV` are automatically redirected to a `Spielstaende\` folder next to the EXE. With `*_MIT_PROBENLOG.bat`, previous `PROBEN.CSV` files are archived with a timestamp to `Probenlogs\` and the live roll log window `Probenlog\probenlog_fenster.ps1` opens alongside the game; see `Probenlog/LIESMICH.md` and `Probenlog/Probenlog_Schicksalsklinge.html`.)*
 
 ### Linux (`start_schicksalsklinge.sh`)
 ```bash

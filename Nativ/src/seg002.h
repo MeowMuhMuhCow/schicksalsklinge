@@ -50,7 +50,11 @@ void sub_mod_timers(const int32_t);
 signed int get_free_mod_slot(void);
 void set_mod_slot(const signed int, const int32_t, const uint8_t*, const signed char, const signed char);
 void sub_heal_staffspell_timers(const int32_t);
-void sub_light_timers(); /* ohne Prototyp wie bei Attic: seg065/seg116 uebergeben ein int, seg002 sieht ab der Definition den long-Parameter */
+#if defined(__BORLANDC__)
+void sub_light_timers();
+#else
+void sub_light_timers(const int32_t);
+#endif /* ohne Prototyp wie bei Attic: seg065/seg116 uebergeben ein int, seg002 sieht ab der Definition den long-Parameter */
 void herokeeping(void);
 
 void update_travelmap(void);

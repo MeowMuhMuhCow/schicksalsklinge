@@ -41,6 +41,9 @@
 
 #include "dsa_platform.h"
 #include "vgalib.h"
+#if !defined(_WIN32)
+#define _open(f, m) dsa_platform_open_ci((f), (m), 0666)
+#endif
 
 #pragma pack(1)
 struct gen_attribs {
@@ -175,12 +178,16 @@ static inline uint32_t readds(const unsigned char *p)
 	return readd(p);
 }
 #endif
-#if 0
-#else
+#if defined(_WIN32)
 #define readw(p) (*(const unsigned short*)(p))
 #define readws(p) (*(const signed short*)(p))
 #define readd(p) (*(const unsigned long*)(p))
 #define readds(p) (*(const signed long*)(p))
+#else
+#define readw(p) (*(const uint16_t*)(p))
+#define readws(p) (*(const int16_t*)(p))
+#define readd(p) (*(const uint32_t*)(p))
+#define readds(p) (*(const int32_t*)(p))
 #endif
 
 #if !defined(__BORLANDC__)
@@ -3124,9 +3131,9 @@ static signed short open_datfile(const signed short index)
 
 #if defined(__BORLANDC__) || defined(_WIN32)
 	/* 0x8001 = O_BINARY | O_RDONLY */
-	{ char dsagen_buf[512]; const char *dsagen_p = (access(g_str_dsagen_dat, 0) == 0) ? g_str_dsagen_dat : dsa_platform_resolve_path(g_str_dsagen_dat, dsagen_buf, sizeof(dsagen_buf)); handle = open(dsagen_p, O_BINARY | O_RDONLY); }
+	{ char dsagen_buf[512]; const char *dsagen_p = (access(g_str_dsagen_dat, 0) == 0) ? g_str_dsagen_dat : dsa_platform_resolve_path(g_str_dsagen_dat, dsagen_buf, sizeof(dsagen_buf)); handle = _open(dsagen_p, O_BINARY | O_RDONLY); }
 #else
-	{ char dsagen_buf[512]; const char *dsagen_p = (access(g_str_dsagen_dat, 0) == 0) ? g_str_dsagen_dat : dsa_platform_resolve_path(g_str_dsagen_dat, dsagen_buf, sizeof(dsagen_buf)); handle = open(dsagen_p, O_RDONLY); }
+	{ char dsagen_buf[512]; const char *dsagen_p = (access(g_str_dsagen_dat, 0) == 0) ? g_str_dsagen_dat : dsa_platform_resolve_path(g_str_dsagen_dat, dsagen_buf, sizeof(dsagen_buf)); handle = _open(dsagen_p, O_RDONLY); }
 #endif
 
 	/* failed to open DSAGEN.DAT */
@@ -3216,9 +3223,9 @@ static int detect_datfile(void)
 
 #if defined(__BORLANDC__) || defined(_WIN32)
 	/* 0x8001 = O_BINARY | O_RDONLY */
-	{ char dsagen_buf[512]; const char *dsagen_p = (access(g_str_dsagen_dat, 0) == 0) ? g_str_dsagen_dat : dsa_platform_resolve_path(g_str_dsagen_dat, dsagen_buf, sizeof(dsagen_buf)); handle = open(dsagen_p, O_BINARY | O_RDONLY); }
+	{ char dsagen_buf[512]; const char *dsagen_p = (access(g_str_dsagen_dat, 0) == 0) ? g_str_dsagen_dat : dsa_platform_resolve_path(g_str_dsagen_dat, dsagen_buf, sizeof(dsagen_buf)); handle = _open(dsagen_p, O_BINARY | O_RDONLY); }
 #else
-	{ char dsagen_buf[512]; const char *dsagen_p = (access(g_str_dsagen_dat, 0) == 0) ? g_str_dsagen_dat : dsa_platform_resolve_path(g_str_dsagen_dat, dsagen_buf, sizeof(dsagen_buf)); handle = open(dsagen_p, O_RDONLY); }
+	{ char dsagen_buf[512]; const char *dsagen_p = (access(g_str_dsagen_dat, 0) == 0) ? g_str_dsagen_dat : dsa_platform_resolve_path(g_str_dsagen_dat, dsagen_buf, sizeof(dsagen_buf)); handle = _open(dsagen_p, O_RDONLY); }
 #endif
 	if (handle == -1) {
 		fprintf(stderr, "ERROR: DSAGEN.DAT not found\n");

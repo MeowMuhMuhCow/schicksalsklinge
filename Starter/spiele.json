@@ -11,16 +11,20 @@
       "status_wenn_exe_fehlt": "noch nicht verfuegbar",
       "port_ordner": ".",
       "port_ordner_alternativen": [
+        "Schicksalsklinge/Nativ",
         "release",
         "schicksalsklinge",
         "../Schicksalsklinge_Nativ",
         "../Port/build",
         "../Port/release"
       ],
+      "dos_ordner": "Schicksalsklinge/DOS",
+      "browser_url": "https://meowmuhmuhcow.github.io/schicksalsklinge/",
+      "browser_status": "verfuegbar",
       "exe_stufen": {
         "original": "SCHICK_PORT_ORIG.EXE",
         "wichtig": "SCHICK_PORT_WICHTIG.EXE",
-        "alles": "SCHICK_PORT.EXE",
+        "alles": "SCHICK_PORT_ALLES.EXE",
         "standard": "SCHICK_PORT.EXE"
       },
       "kennungsdatei": "SCHICK.DAT",
@@ -29,6 +33,9 @@
         "DSAGEN.DAT",
         "SCHICKM.EXE"
       ],
+      "erwartete_exe_datei": "SCHICKM.EXE",
+      "erwartete_exe_groesse": 556208,
+      "erwartete_exe_md5": "4ce035f95ead01a8b2553b4487544e5d",
       "gog_pfade": [
         "C:\\Program Files (x86)\\GOG Galaxy\\Games\\Realms of Arkania",
         "C:\\Program Files\\GOG Galaxy\\Games\\Realms of Arkania",
@@ -62,16 +69,20 @@
       "status_wenn_exe_fehlt": "noch nicht verfuegbar",
       "port_ordner": ".",
       "port_ordner_alternativen": [
+        "Sternenschweif/Nativ",
         "release",
         "sternenschweif",
         "../Sternenschweif_Nativ",
         "../Port/build",
         "../Port/release"
       ],
+      "dos_ordner": "Sternenschweif/DOS",
+      "browser_url": "https://meowmuhmuhcow.github.io/sternenschweif/",
+      "browser_status": "verfuegbar",
       "exe_stufen": {
         "original": "SCHWEIF_PORT_ORIG.EXE",
         "wichtig": "SCHWEIF_PORT_WICHTIG.EXE",
-        "alles": "SCHWEIF_PORT.EXE",
+        "alles": "SCHWEIF_PORT_ALLES.EXE",
         "standard": "SCHWEIF_PORT.EXE"
       },
       "kennungsdatei": "SCHWEIF.EXE",
@@ -79,6 +90,9 @@
         "SCHWEIF.EXE",
         "DATA\\STAR.DAT"
       ],
+      "erwartete_exe_datei": "SCHWEIF.EXE",
+      "erwartete_exe_groesse": 1387552,
+      "erwartete_exe_md5": "da3b59ce86a82e4b8bb14d36ed37d4d0",
       "gog_pfade": [
         "C:\\Program Files (x86)\\GOG Galaxy\\Games\\Realms of Arkania 2",
         "C:\\Program Files\\GOG Galaxy\\Games\\Realms of Arkania 2",
@@ -106,13 +120,22 @@
       "teil": 3,
       "name": "Schatten über Riva",
       "untertitel": "Das Schwarze Auge - Teil 3 (1996)",
-      "status": "noch_nicht_verfuegbar",
+      "status": "verfuegbar",
       "status_wenn_exe_fehlt": "noch nicht verfuegbar",
       "port_ordner": ".",
       "port_ordner_alternativen": [
+        "Riva/Nativ",
+        "Riva/Nativ/bin",
+        "Riva",
         "riva",
-        "../Riva_Nativ"
+        "bin",
+        "../Riva_Nativ",
+        "../Port/release",
+        "../Port/release/bin"
       ],
+      "dos_ordner": "Riva/DOS",
+      "browser_url": "https://meowmuhmuhcow.github.io/riva/",
+      "browser_status": "verfuegbar",
       "exe_stufen": {
         "original": "RIVA_PORT_ORIG.EXE",
         "wichtig": "RIVA_PORT_WICHTIG.EXE",
@@ -124,6 +147,9 @@
         "RIVA.EXE",
         "DATA\\RIVA.ALF"
       ],
+      "erwartete_exe_datei": "RIVA.EXE",
+      "erwartete_exe_groesse": 2477899,
+      "erwartete_exe_md5": "fb8f5fc3ba5454c7344c17aaf362de35",
       "gog_pfade": [
         "C:\\Program Files (x86)\\GOG Galaxy\\Games\\Realms of Arkania 3",
         "C:\\Program Files\\GOG Galaxy\\Games\\Realms of Arkania 3",

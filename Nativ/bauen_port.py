@@ -30,7 +30,7 @@ import sys
 from pathlib import Path
 
 PORT_DIR = Path(__file__).resolve().parent
-ROOT_DIR = PORT_DIR.parent
+ROOT_DIR = PORT_DIR.parent if (PORT_DIR.parent / "Quelle").exists() else PORT_DIR.parent.parent
 
 
 def _default_win_root() -> Path:
@@ -63,7 +63,8 @@ STUFEN = {
 
 def run_cmd_win(cmd_str: str, cwd: Path = WIN_BUILD_DIR) -> tuple[int, str]:
     env = os.environ.copy()
-    env["PATH"] = f"{MINGW_BIN_WSL}:{env.get('PATH', '')}"
+    home_local_bin = str(Path.home() / ".local" / "bin")
+    env["PATH"] = f"{home_local_bin}:{MINGW_BIN_WSL}:{env.get('PATH', '')}"
     env["WSLENV"] = "PATH/l"
     res = subprocess.run(
         ["bash", "-c", cmd_str],
@@ -76,6 +77,121 @@ def run_cmd_win(cmd_str: str, cwd: Path = WIN_BUILD_DIR) -> tuple[int, str]:
         encoding="latin-1",
     )
     return res.returncode, res.stdout
+
+
+def build_stufe_linux(fix_bugs: int, bin_name: str, extra_defines: list[str], copy_to_default: bool, linux_build_dir: Path, arch_flag: str = "-m64") -> Path:
+    obj_dir = linux_build_dir / f"obj_linux_fix{fix_bugs}"
+    obj_dir.mkdir(parents=True, exist_ok=True)
+
+    def_flags = [f"-DFIX_BUGS={fix_bugs}", "-DSKIP_COPY_PROTECTION=1"] + extra_defines
+    def_str = " ".join(def_flags)
+
+    tc_inc = "-I/tmp/linux_tc/usr/include/x86_64-linux-gnu -I/tmp/linux_tc/usr/include" if Path("/tmp/linux_tc/usr/include").exists() else ""
+    c_files = sorted((linux_build_dir / "src").glob("*.c"))
+    h_mtime = max((p.stat().st_mtime for p in (linux_build_dir / "src").glob("*.h")), default=0.0)
+    dirty_c: list[str] = []
+
+    for c_path in c_files:
+        stem = c_path.stem
+        obj_path = obj_dir / f"{stem}.o"
+        if obj_path.exists() and obj_path.stat().st_mtime >= max(c_path.stat().st_mtime, h_mtime):
+            continue
+        dirty_c.append(f"../src/{c_path.name}")
+
+    if dirty_c:
+        print(f"      [Linux 64-Bit] Kompiliere {len(dirty_c)} Spiel-Module fuer FIX_BUGS={fix_bugs} ({bin_name})...")
+        c_rsp = obj_dir / "dirty_c.rsp"
+        c_rsp.write_text("\n".join(dirty_c) + "\n", encoding="utf-8")
+        batch_cmd = (
+            f"gcc {arch_flag} -std=gnu99 -O2 -fno-strict-overflow -fno-aggressive-loop-optimizations -fpack-struct=1 -fsigned-char -w "
+            f"{def_str} -I../src -I../src/AIL -I../platform {tc_inc} "
+            f"-c @dirty_c.rsp"
+        )
+        rc, out = run_cmd_win(batch_cmd, cwd=obj_dir)
+        if rc != 0:
+            print(f"\n--- FEHLER beim Kompilieren (Linux) ---\n{out}", file=sys.stderr)
+            raise RuntimeError("Spiel-Module konnten nicht fuer Linux uebersetzt werden.")
+
+    plat_defs = [
+        (
+            "vgalib.c",
+            linux_build_dir / "platform/vgalib.c",
+            f"gcc {arch_flag} -std=gnu99 -O2 -Isrc -Iplatform {tc_inc} "
+            f"-c platform/vgalib.c -o {obj_dir.name}/vgalib.o",
+            obj_dir / "vgalib.o",
+        ),
+        (
+            "stb_vorbis.c",
+            linux_build_dir / "third_party/stb_vorbis/stb_vorbis.c",
+            f"gcc {arch_flag} -std=gnu99 -O2 -w {tc_inc} "
+            f"-c third_party/stb_vorbis/stb_vorbis.c -o {obj_dir.name}/stb_vorbis.o",
+            obj_dir / "stb_vorbis.o",
+        ),
+        (
+            "dbopl.cpp",
+            linux_build_dir / "third_party/dbopl/dbopl.cpp",
+            f"g++ {arch_flag} -O2 -Ithird_party/dbopl {tc_inc} "
+            f"-c third_party/dbopl/dbopl.cpp -o {obj_dir.name}/dbopl.o",
+            obj_dir / "dbopl.o",
+        ),
+        (
+            "dsa_platform_sdl2.cpp",
+            linux_build_dir / "platform/dsa_platform_sdl2.cpp",
+            f"g++ {arch_flag} -O2 -Iplatform -Ithird_party/dbopl {tc_inc} "
+            f"-c platform/dsa_platform_sdl2.cpp -o {obj_dir.name}/dsa_platform_sdl2.o",
+            obj_dir / "dsa_platform_sdl2.o",
+        ),
+        (
+            "dsa_intro.cpp",
+            linux_build_dir / "platform/dsa_intro.cpp",
+            f"g++ {arch_flag} -O2 -Iplatform {tc_inc} "
+            f"-c platform/dsa_intro.cpp -o {obj_dir.name}/dsa_intro.o",
+            obj_dir / "dsa_intro.o",
+        ),
+    ]
+    for pname, psrc, pcmd, pobj in plat_defs:
+        if pobj.exists() and pobj.stat().st_mtime >= psrc.stat().st_mtime:
+            continue
+        print(f"      [Linux 64-Bit] Kompiliere Plattform-Modul {pname}...")
+        rc, out = run_cmd_win(pcmd, cwd=linux_build_dir)
+        if rc != 0:
+            print(f"\n--- FEHLER in {pname} ---\n{out}", file=sys.stderr)
+            raise RuntimeError(f"{pname} konnte nicht fuer Linux uebersetzt werden.")
+
+    rsp_file = linux_build_dir / f"objs_linux_fix{fix_bugs}.rsp"
+    rsp_items = [f"{obj_dir.name}/{p.stem}.o" for p in c_files] + [
+        f"{obj_dir.name}/vgalib.o",
+        f"{obj_dir.name}/stb_vorbis.o",
+        f"{obj_dir.name}/dbopl.o",
+        f"{obj_dir.name}/dsa_platform_sdl2.o",
+        f"{obj_dir.name}/dsa_intro.o",
+    ]
+    rsp_file.write_text("\n".join(rsp_items) + "\n", encoding="utf-8")
+
+    rpath_flag = "-Wl,-rpath,'$ORIGIN/lib' -rdynamic" if sys.platform.startswith("linux") else ""
+    dl_flag = "-ldl" if sys.platform.startswith("linux") else ""
+    link_cmd = (
+        f"g++ {arch_flag} {rpath_flag} -o {bin_name} @{rsp_file.name} -lSDL2 -lm -lpthread {dl_flag}"
+    )
+    rc, out = run_cmd_win(link_cmd, cwd=linux_build_dir)
+    if rc != 0:
+        print(out, file=sys.stderr)
+        raise RuntimeError(f"Linken von {bin_name} fehlgeschlagen.")
+
+    build_out_dir = PORT_DIR / "build"
+    build_out_dir.mkdir(parents=True, exist_ok=True)
+    out_bin = build_out_dir / bin_name
+    shutil.copy2(linux_build_dir / bin_name, out_bin)
+    os.chmod(out_bin, 0o755)
+    print(f"      Gebaut (Linux): {out_bin} ({out_bin.stat().st_size:,} Bytes)")
+
+    if copy_to_default:
+        default_bin = build_out_dir / "SCHICK_PORT"
+        shutil.copy2(linux_build_dir / bin_name, default_bin)
+        os.chmod(default_bin, 0o755)
+        print(f"      Standard-Binary (Linux): {default_bin} ({default_bin.stat().st_size:,} Bytes)")
+
+    return out_bin
 
 
 def build_stufe(fix_bugs: int, exe_name: str, extra_defines: list[str], copy_to_default: bool) -> Path:
@@ -211,10 +327,18 @@ def main() -> int:
     stufe_arg = "alles"
     extra_defines: list[str] = []
     force_prep = False
+    target_linux = False
+    arch_flag = "-m64"
 
     for arg in sys.argv[1:]:
         if arg == "--prep":
             force_prep = True
+        elif arg in ("--linux", "--posix", "--mac"):
+            target_linux = True
+        elif arg == "--win32":
+            target_linux = False
+        elif arg.startswith("--arch="):
+            arch_flag = arg.split("=", 1)[1]
         elif arg.startswith("--build-dir="):
             WIN_BUILD_DIR = Path(arg.split("=", 1)[1])
         elif arg.startswith("--mingw-bin="):
@@ -243,6 +367,33 @@ def main() -> int:
         subprocess.run([sys.executable, str(prep_py)], check=True)
     else:
         print("[1/3] Port/src/ ist aktuell (prepare_sources.py unveraendert).")
+
+    if target_linux:
+        linux_build_dir = Path("/tmp/schick_linux_build")
+        print(f"[2/3] Synchronisiere Quellen nach {linux_build_dir}...")
+        linux_build_dir.mkdir(parents=True, exist_ok=True)
+        (linux_build_dir / "src" / "AIL").mkdir(parents=True, exist_ok=True)
+        stage_src = Path("/tmp/schick_src_stage") if Path("/tmp/schick_src_stage/seg002.c").exists() else (PORT_DIR / "src")
+        for src_item in stage_src.rglob("*"):
+            if src_item.is_file():
+                rel = src_item.relative_to(stage_src)
+                dst_item = linux_build_dir / "src" / rel
+                dst_item.parent.mkdir(parents=True, exist_ok=True)
+                if not dst_item.exists() or dst_item.stat().st_size != src_item.stat().st_size or dst_item.read_bytes() != src_item.read_bytes():
+                    shutil.copy2(src_item, dst_item)
+        shutil.copytree(PORT_DIR / "platform", linux_build_dir / "platform", dirs_exist_ok=True)
+        shutil.copytree(PORT_DIR / "third_party", linux_build_dir / "third_party", dirs_exist_ok=True)
+
+        print(f"[3/3] Kompiliere und linke native Linux/POSIX-Executable(s) ({arch_flag})...")
+        if stufe_arg == "alle_stufen":
+            build_stufe_linux(0, "SCHICK_PORT_ORIG", extra_defines, False, linux_build_dir, arch_flag)
+            build_stufe_linux(1, "SCHICK_PORT_WICHTIG", extra_defines, False, linux_build_dir, arch_flag)
+            build_stufe_linux(2, "SCHICK_PORT_ALLES", extra_defines, True, linux_build_dir, arch_flag)
+        else:
+            fix_bugs, exe_name = STUFEN[stufe_arg]
+            bin_name = exe_name[:-4] if exe_name.endswith(".EXE") else exe_name
+            build_stufe_linux(fix_bugs, bin_name, extra_defines, True, linux_build_dir, arch_flag)
+        return 0
 
     print("[2/3] Synchronisiere Quellen nach C:/Windows/Temp/schick_port_build...")
     WIN_BUILD_DIR.mkdir(parents=True, exist_ok=True)

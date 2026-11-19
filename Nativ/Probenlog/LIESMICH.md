@@ -16,7 +16,7 @@ die man sonst nie sieht, etwa Gefahrensinn oder Sinnesschärfe an Fallen.
 | Ohne Probenlog | `Schicksalsklinge_starten_ALLE_FIXES.bat` (bzw. `…_WICHTIGE_FIXES.bat`) | `bash start_schicksalsklinge.sh` |
 | Hinterher ansehen | `Probenlog_Schicksalsklinge.html` im Browser öffnen und die Datei `PROBEN.CSV` hineinziehen: alle Proben als Tabelle, dazu Erfolgsquote je Held, Talent und Zauber. In Chrome/Edge kann die Seite auch live mitlesen | ebenso |
 
-Die Datei `PROBEN.CSV` wird im Spielordner angelegt (ist der Spielordner nicht beschreibbar, z. B. unter `C:\Program Files (x86)\...`, werden Spielstände und `PROBEN.CSV` automatisch in den Ordner `Spielstaende\` neben der EXE umgeleitet und beim Start einmal gemeldet). Beim nächsten Start wandert ein vorhandenes Log mit Datum im Namen nach `Probenlogs\`.
+Die Datei `PROBEN.CSV` wird im Spielordner angelegt (ist der Spielordner nicht beschreibbar, z. B. unter `C:\Program Files (x86)\...`, werden Spielstände und `PROBEN.CSV` automatisch in den Ordner `Spielstaende\` neben der EXE umgeleitet). Beim nächsten Start wandert ein vorhandenes Log mit Datum im Namen nach `Probenlogs\`.
 
 ## Was drinsteht
 

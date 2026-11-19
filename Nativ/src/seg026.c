@@ -131,7 +131,11 @@ const char* g_fnames_v302de[] = {
 }; // ds:0x4c8c
 
 signed int g_loaded_head_id = -1; // ds:0x515c
+#if defined(__BORLANDC__) || defined(_WIN32)
 const char g_str_temp_fmt[] = "TEMP\\%s"; // ds:0x515e
+#else
+const char g_str_temp_fmt[] = "TEMP/%s"; // ds:0x515e
+#endif
 
 // ds:0x5166, names of files in SCHICK.DAT
 char g_fn_v302de_XXX[] = "";
@@ -540,11 +544,19 @@ void load_ltx(const signed int index)
 
 	g_area_prepared = AREA_TYPE_NONE;
 
+#if defined(__BORLANDC__)
 	len = (int16_t)read_archive_file(handle, ((uint8_t*)g_buffer9_ptr3) + 1000, 64000);
 
 	close(handle);
 
 	split_textbuffer((char**)g_buffer9_ptr3, (char*)(g_buffer9_ptr3 + 1000L), len);
+#else
+	len = (int16_t)read_archive_file(handle, ((uint8_t*)g_buffer9_ptr3) + 250 * sizeof(char*), 64000);
+
+	close(handle);
+
+	split_textbuffer((char**)g_buffer9_ptr3, (char*)(g_buffer9_ptr3 + 250 * sizeof(char*)), len);
+#endif
 }
 
 /* zerlegt len Byte nullterminierter Texte in eine Liste von Zeigern auf die einzelnen Texte */
@@ -687,8 +699,8 @@ static void status_from_dos(const uint8_t *buf)
 #define STATUS_DUMMY STATUS_VAR
 #define STATUS_PTR(off, len, var) \
 	memcpy(&hero_off, buf + (off), 4); \
-	(var) = (hero_off && (hero_off / sizeof(struct struct_hero) <= 6)) \
-		? (g_heroes + (hero_off / sizeof(struct struct_hero))) : NULL;
+	(var) = (typeof(var))((hero_off && (hero_off / sizeof(struct struct_hero) <= 6)) \
+		? (g_heroes + (hero_off / sizeof(struct struct_hero))) : NULL);
 #define STATUS_SKIP(off, len, var)
 #include "datseg_status.h"
 #undef STATUS_VAR
@@ -1322,7 +1334,7 @@ signed int save_game_state(void)
 			done = findnext(&blk);
 
 		} while (done == 0);
-#else
+#elif defined(_WIN32)
 		{
 			DIR *dir = opendir("TEMP");
 			struct dirent *dp;
@@ -1344,6 +1356,46 @@ signed int save_game_state(void)
 					}
 				}
 				closedir(dir);
+			}
+		}
+#else
+		{
+			DIR *dir = opendir("TEMP");
+			struct dirent *dp;
+			char names[128][32];
+			int n_names = 0;
+			if (dir != NULL) {
+				while ((dp = readdir(dir)) != NULL && n_names < 128) {
+					if (!has_suffix_ci(dp->d_name, g_chr_file_suffix)) continue;
+					strncpy(names[n_names], dp->d_name, 31);
+					names[n_names][31] = ' ';
+					n_names++;
+				}
+				closedir(dir);
+				for (int a = 0; a < n_names - 1; ++a) {
+					for (int b = a + 1; b < n_names; ++b) {
+						if (_stricmp(names[a], names[b]) > 0) {
+							char tmp[32];
+							memcpy(tmp, names[a], 32);
+							memcpy(names[a], names[b], 32);
+							memcpy(names[b], tmp, 32);
+						}
+					}
+				}
+				for (int a = 0; a < n_names; ++a) {
+					sprintf(g_text_output_buf, g_str_temp_fmt_ptr, names[a]);
+					handle = _open(g_text_output_buf, O_BINARY | O_RDWR);
+					if (handle != -1) {
+						_read(handle, g_renderbuf_ptr, sizeof(struct struct_hero));
+						close(handle);
+						len = write(handle_sg, g_renderbuf_ptr, sizeof(struct struct_hero));
+						if (len != sizeof(struct struct_hero)) {
+							GUI_output(get_ttx(348));
+							close(handle_sg);
+							return 0;
+						}
+					}
+				}
 			}
 		}
 #endif
@@ -1380,10 +1432,17 @@ signed int read_chr_temp(char *fname, const signed int hero_pos, const signed in
 
 	sprintf(g_text_output_buf, g_str_temp_fmt_ptr, fname);
 
+#if defined(__BORLANDC__)
 	if ((handle = open(g_text_output_buf, O_BINARY | O_RDWR)) == -1) {
 		copy_file_to_temp(fname, g_text_output_buf);
 		handle = open(g_text_output_buf, O_BINARY | O_RDWR);
 	}
+#else
+	if ((handle = _open(g_text_output_buf, O_BINARY | O_RDWR)) == -1) {
+		copy_file_to_temp(fname, g_text_output_buf);
+		handle = _open(g_text_output_buf, O_BINARY | O_RDWR);
+	}
+#endif
 
 	if (handle != -1) {
 
@@ -1464,7 +1523,7 @@ void write_chr_temp(const signed int hero_pos)
 signed int copy_chr_names(char *ptr, const signed int temple_id)
 {
 	dsa_trace_enter(269, "seg026:copy_chr_names");
-#if !defined(__BORLANDC__)
+#if defined(_WIN32)
 	signed int count = 0;
 	DIR *dir = opendir("TEMP");
 	struct dirent *dp;
@@ -1491,6 +1550,52 @@ signed int copy_chr_names(char *ptr, const signed int temple_id)
 			}
 		}
 		closedir(dir);
+	}
+	return count;
+#elif !defined(__BORLANDC__)
+	signed int count = 0;
+	DIR *dir = opendir("TEMP");
+	struct dirent *dp;
+	char path[260];
+	char names[128][32];
+	int n_names = 0;
+	struct struct_hero *hero = (struct struct_hero*)g_renderbuf_ptr;
+
+	if (dir != NULL) {
+		while ((dp = readdir(dir)) != NULL && n_names < 128) {
+			if (!has_suffix_ci(dp->d_name, g_chr_file_suffix)) continue;
+			strncpy(names[n_names], dp->d_name, 31);
+			names[n_names][31] = '\0';
+			n_names++;
+		}
+		closedir(dir);
+		for (int a = 0; a < n_names - 1; ++a) {
+			for (int b = a + 1; b < n_names; ++b) {
+				if (_stricmp(names[a], names[b]) > 0) {
+					char tmp[32];
+					memcpy(tmp, names[a], 32);
+					memcpy(names[a], names[b], 32);
+					memcpy(names[b], tmp, 32);
+				}
+			}
+		}
+		for (int a = 0; a < n_names; ++a) {
+			snprintf(path, sizeof(path), "TEMP/%s", names[a]);
+			{
+				signed int handle = _open(path, O_BINARY | O_RDONLY);
+				if (handle != -1) {
+					_read(handle, hero, sizeof(struct struct_hero));
+					close(handle);
+					if (((hero->temple_id == temple_id) && !hero->slot_pos) ||
+						(!hero->slot_pos && (temple_id == -1)))
+					{
+						strcpy((char*)ptr + 32 * count, hero->name);
+						strcpy((char*)ptr + 32 * count + 16, hero->alias);
+						count++;
+					}
+				}
+			}
+		}
 	}
 	return count;
 #elif defined(__BORLANDC__)

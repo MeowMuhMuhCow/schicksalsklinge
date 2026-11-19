@@ -146,9 +146,15 @@ void FIG_preload_gfx(void)
 
 	g_fig_list_head = NULL;
 
+#if defined(__BORLANDC__)
 	g_fig_list_buffer = (struct struct_fighter*)(((HugePt)g_fig_figure2_buf) - 0x115d);
 
 	memset(g_fig_list_buffer, 0, 0x115d);
+#else
+	g_fig_list_buffer = (struct struct_fighter*)(((HugePt)g_fig_figure2_buf) - 127 * sizeof(struct struct_fighter));
+
+	memset(g_fig_list_buffer, 0, 127 * sizeof(struct struct_fighter));
+#endif
 	p_fighter = g_fig_list_buffer;
 
 	for (i = 0; i < 127; i++) {
@@ -160,7 +166,11 @@ void FIG_preload_gfx(void)
 	g_weapons_nvf_buf =(HugePt)g_current_fight + sizeof(struct fight);
 	g_spellobj_nvf_buf = g_weapons_nvf_buf + 0x1953;
 	g_figobj_gfxbuf_table = (unsigned char**)(((HugePt)g_spellobj_nvf_buf) + 0xf5fL);
+#if defined(__BORLANDC__)
 	g_figobj_gfxwidth_table = (int16_t*)(((HugePt)g_figobj_gfxbuf_table) + 0xfcL);
+#else
+	g_figobj_gfxwidth_table = (int16_t*)(((HugePt)g_figobj_gfxbuf_table) + 63 * sizeof(unsigned char*));
+#endif
 	g_figobj_gfxheight_table = (int16_t*)(((HugePt)g_figobj_gfxwidth_table) + 0x7eL);
 	g_fightobj_buf_seek_ptr = (unsigned char*)(((HugePt)g_figobj_gfxheight_table) + 0x7eL);
 	g_fightobj_buf = (unsigned char*)(((HugePt)g_fig_list_buffer) - 0x4217L);

@@ -1,54 +1,91 @@
 #!/usr/bin/env bash
 # ===========================================================================
-# Startskript fuer Das Schwarze Auge: Die Schicksalsklinge (Nativer Port)
+# Startskript fuer Das Schwarze Auge: Die Schicksalsklinge (Nativer Linux/macOS-Port)
 # ===========================================================================
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+PORT_EXE_NAME="${PORT_EXE_NAME:-SCHICK_PORT}"
 PROBENLOG="${PROBENLOG:-0}"
+
+if [[ -d "$SCRIPT_DIR/lib" ]]; then
+    export LD_LIBRARY_PATH="$SCRIPT_DIR/lib:${LD_LIBRARY_PATH:-}"
+fi
 
 if [[ $# -ge 1 && ( "$1" == "--probenlog" || "$1" == "log" ) ]]; then
     PROBENLOG=1
     shift
 fi
 
-# 1. SPIELPFAD aus erstem Parameter oder Umgebungsvariable uebernehmen
-if [[ $# -ge 1 && -f "$1/SCHICK.DAT" ]]; then
-    SPIELPFAD="$1"
+has_schick_dat() {
+    local d="$1"
+    [[ -d "$d" ]] && ( find "$d" -maxdepth 1 -iname "SCHICK.DAT" -print -quit 2>/dev/null | grep -q . || \
+                       find "$d/DATA" -maxdepth 1 -iname "SCHICK.DAT" -print -quit 2>/dev/null | grep -q . )
+}
+
+# 1. SPIELPFAD aus erstem Parameter, SPIELPFAD.txt oder Umgebungsvariable uebernehmen
+if [[ $# -ge 1 ]] && has_schick_dat "$1"; then
+    SPIELPFAD="$(cd "$1" && pwd)"
     shift
 fi
 
-# 2. Automatische Erkennung, falls SPIELPFAD noch nicht gesetzt ist
-if [[ -z "${SPIELPFAD:-}" ]]; then
+for sp_file in "$SCRIPT_DIR/SPIELPFAD.txt" "$SCRIPT_DIR/../SPIELPFAD.txt" "$PWD/SPIELPFAD.txt"; do
+    if [[ -z "${SPIELPFAD:-}" && -f "$sp_file" ]]; then
+        CAND_FILE="$(tr -d '\r\n' < "$sp_file")"
+        if [[ "$CAND_FILE" =~ ^([A-Za-z]):[\\/](.*)$ ]]; then
+            DRV="$(echo "${BASH_REMATCH[1]}" | tr 'A-Z' 'a-z')"
+            REL="${BASH_REMATCH[2]//\\//}"
+            CAND_FILE="/mnt/$DRV/$REL"
+        fi
+        if [[ -n "$CAND_FILE" ]] && has_schick_dat "$CAND_FILE"; then
+            SPIELPFAD="$CAND_FILE"
+            break
+        fi
+    fi
+done
+
+# 2. Automatische Erkennung (GOG, Steam, Lutris, Heroic, lokal)
+if [[ -z "${SPIELPFAD:-}" ]] || ! has_schick_dat "${SPIELPFAD:-}"; then
     for cand in \
         "$PWD" \
         "$SCRIPT_DIR" \
+        "$SCRIPT_DIR/.." \
         "$SCRIPT_DIR/../../Original/V3.02de_GOG" \
+        "$SCRIPT_DIR/../../../Original/V3.02de_GOG" \
         "$HOME/GOG Games/Realms of Arkania - Blade of Destiny German" \
+        "$HOME/GOG Games/Realms of Arkania" \
+        "$HOME/GOG Games/Realms of Arkania 1" \
+        "$HOME/GOG Games/Das Schwarze Auge - Die Schicksalsklinge" \
+        "$HOME/GOG Games/Schicksalsklinge" \
+        "$HOME/.local/share/Steam/steamapps/common/Realms of Arkania - Blade of Destiny Classic" \
+        "$HOME/.local/share/Steam/steamapps/common/Realms of Arkania 1" \
+        "$HOME/Games/gog/realms-of-arkania-blade-of-destiny" \
+        "$HOME/Games/Heroic/Realms of Arkania 1" \
         "$HOME/.local/share/schicksalsklinge"; do
-        if [[ -f "$cand/SCHICK.DAT" ]]; then
+        if has_schick_dat "$cand"; then
             SPIELPFAD="$(cd "$cand" && pwd)"
             break
         fi
     done
 fi
 
-if [[ -z "${SPIELPFAD:-}" || ! -f "$SPIELPFAD/SCHICK.DAT" ]]; then
+if [[ -z "${SPIELPFAD:-}" ]] || ! has_schick_dat "$SPIELPFAD"; then
     echo "[FEHLER] SCHICK.DAT wurde nicht gefunden!" >&2
-    echo "Bitte setzen Sie SPIELPFAD auf das Verzeichnis Ihres Originalspiels (V3.02de):" >&2
-    echo "  SPIELPFAD=/pfad/zu/Schicksalsklinge ./start_schicksalsklinge.sh" >&2
+    echo "Bitte Pfad in $SCRIPT_DIR/SPIELPFAD.txt eintragen oder als ersten Parameter uebergeben:" >&2
+    echo "  ./start_schicksalsklinge.sh \"/pfad/zu/Schicksalsklinge\"" >&2
     exit 1
 fi
 
-# 3. Port-Binary suchen (nativ unter Linux oder via Wine/WSL)
+# 3. Port-Binary suchen (4 Stufen: SCHICK_PORT_ORIG, SCHICK_PORT_WICHTIG, SCHICK_PORT_ALLES, SCHICK_PORT)
 PORT_BIN=""
+BASE_NAME="${PORT_EXE_NAME%.EXE}"
 for bin in \
+    "$SCRIPT_DIR/$BASE_NAME" \
+    "$SCRIPT_DIR/build/$BASE_NAME" \
+    "$SCRIPT_DIR/../build/$BASE_NAME" \
     "$SCRIPT_DIR/SCHICK_PORT" \
     "$SCRIPT_DIR/build/SCHICK_PORT" \
-    "$SCRIPT_DIR/../build/SCHICK_PORT" \
-    "$SCRIPT_DIR/SCHICK_PORT.EXE" \
-    "$SCRIPT_DIR/build/SCHICK_PORT.EXE" \
-    "$SCRIPT_DIR/../build/SCHICK_PORT.EXE"; do
+    "$SCRIPT_DIR/../build/SCHICK_PORT"; do
     if [[ -f "$bin" ]]; then
         PORT_BIN="$bin"
         break
@@ -56,13 +93,11 @@ for bin in \
 done
 
 if [[ -z "$PORT_BIN" ]]; then
-    echo "[HINWEIS] Port-Binary noch nicht gebaut. Baue mit CMake ..."
-    cmake -S "$SCRIPT_DIR" -B "$SCRIPT_DIR/build" -DCMAKE_BUILD_TYPE=Release
-    cmake --build "$SCRIPT_DIR/build" -j4
-    PORT_BIN="$SCRIPT_DIR/build/SCHICK_PORT"
+    echo "[FEHLER] Port-Binary '$BASE_NAME' nicht gefunden." >&2
+    exit 1
 fi
 
-# 4. Pruefen, ob Spielordner beschreibbar ist; sonst nach Spielstaende/ neben der EXE umleiten
+# 4. Pruefen, ob Spielordner beschreibbar ist; sonst nach Spielstaende/ neben dem Binary umleiten
 SAVEDIR="$SPIELPFAD"
 if [[ "${DSA_FORCE_READONLY_GAMEDIR:-0}" == "1" ]] || ! touch "$SPIELPFAD/.schick_wtest_$$" 2>/dev/null; then
     SAVEDIR="$(dirname "$PORT_BIN")/Spielstaende"
@@ -81,7 +116,7 @@ if [[ -f "$SAVEDIR/PROBEN.CSV" ]]; then
     else
         mkdir -p "$SCRIPT_DIR/Probenlogs"
         TS="$(date +%Y-%m-%d_%H-%M-%S)"
-        mv -f "$SAVEDIR/PROBEN.CSV" "$SCRIPT_DIR/Probenlogs/PROBEN_Fix_Alles_${TS}.CSV"
+        mv -f "$SAVEDIR/PROBEN.CSV" "$SCRIPT_DIR/Probenlogs/PROBEN_${BASE_NAME}_${TS}.CSV"
     fi
 fi
 
@@ -95,11 +130,16 @@ trap cleanup_log EXIT
 
 if [[ "$PROBENLOG" == "1" ]]; then
     : > "$SAVEDIR/PROBEN.CSV"
-    if [[ -f "$SCRIPT_DIR/Probenlog/probenlog.py" && "${DSA_NO_PROBENLOG_WINDOW:-0}" != "1" ]]; then
-        python3 "$SCRIPT_DIR/Probenlog/probenlog.py" "$SAVEDIR/PROBEN.CSV" &
-        LOG_PID="$!"
+    if [[ "${DSA_NO_PROBENLOG_WINDOW:-0}" != "1" ]]; then
+        if [[ -f "$SCRIPT_DIR/Probenlog/probenlog_fenster.py" ]]; then
+            python3 "$SCRIPT_DIR/Probenlog/probenlog_fenster.py" "$SAVEDIR/PROBEN.CSV" &
+            LOG_PID="$!"
+        elif [[ -f "$SCRIPT_DIR/Probenlog/probenlog.py" ]]; then
+            python3 "$SCRIPT_DIR/Probenlog/probenlog.py" --live "$SAVEDIR/PROBEN.CSV" &
+            LOG_PID="$!"
+        fi
     fi
 fi
 
-echo "Starte Schicksalsklinge mit Spieldaten aus: $SPIELPFAD"
-"$PORT_BIN" "$SPIELPFAD" "$@"
+echo "Starte Schicksalsklinge ($BASE_NAME) mit Spieldaten aus: $SPIELPFAD"
+"$PORT_BIN" --gamedir "$SPIELPFAD" "$@"

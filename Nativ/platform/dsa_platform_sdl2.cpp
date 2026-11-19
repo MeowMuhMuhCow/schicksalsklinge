@@ -22,13 +22,29 @@
 #define STRNICMP _strnicmp
 #define STRICMP _stricmp
 #else
+#include <dlfcn.h>
+#include <fcntl.h>
+#include <limits.h>
+#include <pthread.h>
+#include <signal.h>
 #include <strings.h>
 #include <sys/stat.h>
 #include <unistd.h>
+#ifdef __APPLE__
+#include <mach-o/dyld.h>
+#endif
 #define MKDIR(p) mkdir(p, 0755)
 #define ACCESS(p, m) access(p, m)
 #define STRNICMP strncasecmp
 #define STRICMP strcasecmp
+
+static inline int  SDL_PortUsingExternalDLL(void) { return 1; }
+static inline void SDL_SetWindowViewport(SDL_Window *w, int vx, int vy, int vw, int vh) {
+    (void)w; (void)vx; (void)vy; (void)vw; (void)vh;
+}
+static inline void SDL_SetFullscreenOverrideRes(int w, int h) {
+    (void)w; (void)h;
+}
 #endif
 
 #include "dbopl.h"
@@ -87,6 +103,29 @@ static void init_exe_dir_once(void) {
         mod_path[len] = '\0';
         char *last_sep = strrchr(mod_path, '\\');
         if (!last_sep) last_sep = strrchr(mod_path, '/');
+        if (last_sep) {
+            *last_sep = '\0';
+            strncpy(g_exe_dir, mod_path, sizeof(g_exe_dir) - 1);
+            return;
+        }
+    }
+#elif defined(__linux__)
+    char mod_path[512] = "";
+    ssize_t len = readlink("/proc/self/exe", mod_path, sizeof(mod_path) - 1);
+    if (len > 0) {
+        mod_path[len] = '\0';
+        char *last_sep = strrchr(mod_path, '/');
+        if (last_sep) {
+            *last_sep = '\0';
+            strncpy(g_exe_dir, mod_path, sizeof(g_exe_dir) - 1);
+            return;
+        }
+    }
+#elif defined(__APPLE__)
+    char mod_path[512] = "";
+    uint32_t sz = (uint32_t)(sizeof(mod_path) - 1);
+    if (_NSGetExecutablePath(mod_path, &sz) == 0) {
+        char *last_sep = strrchr(mod_path, '/');
         if (last_sep) {
             *last_sep = '\0';
             strncpy(g_exe_dir, mod_path, sizeof(g_exe_dir) - 1);
@@ -280,13 +319,186 @@ static void dsa_install_crash_handlers_once(void) {
         s_installed = 1;
     }
 }
+#else
+static void dsa_resolve_crash_symbol(const void *addr, char *out_func, size_t out_func_sz, char *out_mod, size_t out_mod_sz) {
+    struct SymEntry { const void *fn; const char *name; };
+    const SymEntry table[] = {
+        { (const void *)&dsa_platform_init,                      "dsa_platform_init" },
+        { (const void *)&dsa_platform_shutdown,                  "dsa_platform_shutdown" },
+        { (const void *)&dsa_platform_set_mode,                  "dsa_platform_set_mode" },
+        { (const void *)&dsa_platform_present,                   "dsa_platform_present" },
+        { (const void *)&dsa_platform_pump_and_present_if_due,   "dsa_platform_pump_and_present_if_due" },
+        { (const void *)&dsa_platform_wait_vsync,                "dsa_platform_wait_vsync" },
+        { (const void *)&dsa_platform_get_mouse,                 "dsa_platform_get_mouse" },
+        { (const void *)&dsa_platform_poll_mouse_events,         "dsa_platform_poll_mouse_events" },
+        { (const void *)&dsa_platform_set_mouse_pos,             "dsa_platform_set_mouse_pos" },
+        { (const void *)&dsa_platform_key_ready,                 "dsa_platform_key_ready" },
+        { (const void *)&dsa_platform_key_read,                  "dsa_platform_key_read" },
+        { (const void *)&dsa_platform_play_cd_track,             "dsa_platform_play_cd_track" },
+        { (const void *)&dsa_platform_play_xmidi,                "dsa_platform_play_xmidi" },
+        { (const void *)&dsa_platform_play_voc,                  "dsa_platform_play_voc" },
+        { (const void *)&dsa_save_bmp,                           "dsa_save_bmp" },
+    };
+    uintptr_t target = (uintptr_t)addr;
+    const char *best_name = NULL;
+    uintptr_t best_diff = (uintptr_t)-1;
+    for (size_t i = 0; i < sizeof(table) / sizeof(table[0]); ++i) {
+        uintptr_t fn_addr = (uintptr_t)table[i].fn;
+        if (target >= fn_addr && (target - fn_addr) < 0x2000 && (target - fn_addr) < best_diff) {
+            best_diff = target - fn_addr;
+            best_name = table[i].name;
+        }
+    }
+    Dl_info dli;
+    memset(&dli, 0, sizeof(dli));
+    int has_dli = (addr && dladdr(addr, &dli) != 0);
+    if (!best_name && has_dli && dli.dli_sname) {
+        best_name = dli.dli_sname;
+        best_diff = target - (uintptr_t)dli.dli_saddr;
+    }
+    if (best_name) {
+        snprintf(out_func, out_func_sz, "%s+0x%lX", best_name, (unsigned long)best_diff);
+    } else if (g_dsa_plat_func && strcmp(g_dsa_plat_func, "keine") != 0) {
+        snprintf(out_func, out_func_sz, "%s (aktiv)", g_dsa_plat_func);
+    } else if (g_dsa_last_func && g_dsa_last_func[0]) {
+        snprintf(out_func, out_func_sz, "%s", g_dsa_last_func);
+    } else {
+        snprintf(out_func, out_func_sz, "unbekannt");
+    }
+
+    if (has_dli && dli.dli_fname) {
+        const char *base = strrchr(dli.dli_fname, '/');
+        base = base ? (base + 1) : dli.dli_fname;
+        uintptr_t rva = target - (uintptr_t)dli.dli_fbase;
+        snprintf(out_mod, out_mod_sz, "%s+0x%lX", base[0] ? base : "modul", (unsigned long)rva);
+    } else {
+        snprintf(out_mod, out_mod_sz, "%p", addr);
+    }
+}
+
+static void dsa_write_crash_file(const char *path, const char *msg, size_t msg_len, const char *state_buf, size_t state_len) {
+    if (!path || !path[0]) return;
+    int fd = open(path, O_CREAT | O_TRUNC | O_WRONLY, 0644);
+    if (fd >= 0) {
+        if (msg_len > 0) { ssize_t r = write(fd, msg, msg_len); (void)r; }
+        if (state_len > 0) { ssize_t r = write(fd, state_buf, state_len); (void)r; }
+        close(fd);
+    }
+}
+
+static const char *dsa_sig_name(int sig) {
+    switch (sig) {
+    case SIGSEGV: return "SIGSEGV (Speicherzugriffsfehler)";
+    case SIGBUS:  return "SIGBUS (Bus-Fehler)";
+    case SIGFPE:  return "SIGFPE (Arithmetikfehler)";
+    case SIGILL:  return "SIGILL (Ungueltiger Befehl)";
+    case SIGABRT: return "SIGABRT (Abbruch)";
+    default:      return "SIGNAL";
+    }
+}
+
+static void dsa_posix_crash_signal_handler(int sig, siginfo_t *si, void *ucontext) {
+    (void)ucontext;
+    static volatile sig_atomic_t in_crash = 0;
+    static char s_msg[2048];
+    static char s_state_buf[2048];
+    static char s_func_name[160];
+    static char s_mod_info[160];
+    static char s_path1[512];
+    static char s_path2[512];
+
+    if (in_crash) {
+        _exit(98);
+    }
+    in_crash = 1;
+
+    const void *fault_addr = si ? si->si_addr : NULL;
+    const void *pc_addr = fault_addr;
+    const void *ret_addr = NULL;
+    unsigned long reg_rdx = 0;
+#if defined(__linux__) && defined(__x86_64__)
+    if (ucontext) {
+        const ucontext_t *uc = (const ucontext_t *)ucontext;
+        pc_addr = (const void *)uc->uc_mcontext.gregs[16];
+        reg_rdx = (unsigned long)uc->uc_mcontext.gregs[12];
+        const void * const *rsp = (const void * const *)uc->uc_mcontext.gregs[15];
+        if (rsp) ret_addr = rsp[0];
+    }
+#endif
+    dsa_resolve_crash_symbol(
+        pc_addr,
+        s_func_name, sizeof(s_func_name),
+        s_mod_info, sizeof(s_mod_info)
+    );
+
+    int n = snprintf(s_msg, sizeof(s_msg),
+        "=== ABSTURZ-BERICHT (W1) ===\n"
+        "Ausnahme:        Signal %d (%s)\n"
+        "Adresse:         %p (PC=%p, RET=%p, RDX=0x%lX, %s)\n"
+        "Funktion:        %s\n"
+        "Plattform_Funk:  %s\n"
+        "Letzte_Funktion: %s\n"
+        "Poll_Schritt:    %u\n",
+        sig, dsa_sig_name(sig),
+        fault_addr,
+        pc_addr,
+        ret_addr,
+        reg_rdx,
+        s_mod_info,
+        s_func_name,
+        g_dsa_plat_func ? g_dsa_plat_func : "keine",
+        g_dsa_last_func ? g_dsa_last_func : "unbekannt",
+        (unsigned int)g_poll_step
+    );
+    size_t msg_len = (n > 0) ? (size_t)n : 0;
+
+    s_state_buf[0] = '\0';
+    if (g_crash_state_cb) {
+        g_crash_state_cb(s_state_buf, sizeof(s_state_buf));
+    }
+    size_t state_len = strlen(s_state_buf);
+
+    build_tool_log_path("absturz.log", s_path1, sizeof(s_path1));
+    dsa_write_crash_file(s_path1, s_msg, msg_len, s_state_buf, state_len);
+
+    if (g_save_dir[0]) {
+        snprintf(s_path2, sizeof(s_path2), "%s/absturz.log", g_save_dir);
+        if (strcmp(s_path1, s_path2) != 0) {
+            dsa_write_crash_file(s_path2, s_msg, msg_len, s_state_buf, state_len);
+        }
+    }
+    dsa_write_crash_file("absturz.log", s_msg, msg_len, s_state_buf, state_len);
+
+    const char *env_cl = getenv("DSA_CRASH_LOG");
+    if (env_cl && env_cl[0]) {
+        dsa_write_crash_file(env_cl, s_msg, msg_len, s_state_buf, state_len);
+    }
+
+    _exit(99);
+}
+
+static void dsa_install_crash_handlers_once(void) {
+    static int s_installed = 0;
+    if (!s_installed) {
+        init_exe_dir_once();
+        struct sigaction sa;
+        memset(&sa, 0, sizeof(sa));
+        sa.sa_sigaction = dsa_posix_crash_signal_handler;
+        sigemptyset(&sa.sa_mask);
+        sa.sa_flags = SA_SIGINFO | SA_RESETHAND;
+        sigaction(SIGSEGV, &sa, NULL);
+        sigaction(SIGBUS,  &sa, NULL);
+        sigaction(SIGFPE,  &sa, NULL);
+        sigaction(SIGILL,  &sa, NULL);
+        sigaction(SIGABRT, &sa, NULL);
+        s_installed = 1;
+    }
+}
 #endif
 
 void dsa_platform_register_crash_state_cb(void (*cb)(char *buf, int buf_size)) {
     g_crash_state_cb = cb;
-#ifdef _WIN32
     dsa_install_crash_handlers_once();
-#endif
 }
 
 void dsa_platform_log_stub(const char *func_name) {
@@ -586,7 +798,14 @@ static int is_dir_writable(const char *dir) {
 }
 
 static void copy_file_if_missing(const char *src_path, const char *dst_path) {
-    if (ACCESS(dst_path, 0) == 0) return;
+    if (ACCESS(dst_path, 0) == 0) {
+#ifdef _WIN32
+        _chmod(dst_path, 0666);
+#else
+        chmod(dst_path, 0666);
+#endif
+        return;
+    }
     FILE *in_fp = fopen(src_path, "rb");
     if (!in_fp) return;
     FILE *out_fp = fopen(dst_path, "wb");
@@ -601,6 +820,53 @@ static void copy_file_if_missing(const char *src_path, const char *dst_path) {
     }
     fclose(out_fp);
     fclose(in_fp);
+#ifdef _WIN32
+    _chmod(dst_path, 0666);
+#else
+    chmod(dst_path, 0666);
+#endif
+}
+
+static int is_foreign_dsa1_save_dir(const char *dir, const char *gamedir) {
+    if (!dir || !dir[0]) return 0;
+    if (gamedir && gamedir[0] && STRICMP(dir, gamedir) == 0) return 0;
+    char low[600];
+    size_t i = 0;
+    for (; dir[i] && i + 1 < sizeof(low); ++i) {
+        char c = (char)tolower((unsigned char)dir[i]);
+        if (c == '\\') c = '/';
+        low[i] = c;
+    }
+    low[i] = '\0';
+    if (strstr(low, "realms of arkania 2") != NULL) return 1;
+    if (strstr(low, "realms of arkania 3") != NULL) return 1;
+    if (strstr(low, "sternenschweif") != NULL) return 1;
+
+    char p[600];
+#ifdef _WIN32
+    snprintf(p, sizeof(p), "%s\\SCHWEIF.EXE", dir);
+    if (ACCESS(p, 0) == 0) return 1;
+    snprintf(p, sizeof(p), "%s\\DATA\\STAR.DAT", dir);
+    if (ACCESS(p, 0) == 0) return 1;
+    snprintf(p, sizeof(p), "%s\\GAMES\\LASTGAME", dir);
+    if (ACCESS(p, 0) == 0) {
+        char p_schick[600];
+        snprintf(p_schick, sizeof(p_schick), "%s\\SCHICK.DAT", dir);
+        if (ACCESS(p_schick, 0) != 0) return 1;
+    }
+#else
+    snprintf(p, sizeof(p), "%s/SCHWEIF.EXE", dir);
+    if (ACCESS(p, 0) == 0) return 1;
+    snprintf(p, sizeof(p), "%s/DATA/STAR.DAT", dir);
+    if (ACCESS(p, 0) == 0) return 1;
+    snprintf(p, sizeof(p), "%s/GAMES/LASTGAME", dir);
+    if (ACCESS(p, 0) == 0) {
+        char p_schick[600];
+        snprintf(p_schick, sizeof(p_schick), "%s/SCHICK.DAT", dir);
+        if (ACCESS(p_schick, 0) != 0) return 1;
+    }
+#endif
+    return 0;
 }
 
 static void seed_save_dir_from_dir(const char *src_dir, const char *dst_dir) {
@@ -637,16 +903,27 @@ static void setup_save_dir(void) {
     init_exe_dir_once();
     const char *env_sd = getenv("DSA_SAVE_DIR");
     const char *chosen_sd = NULL;
-    if (g_explicit_save_dir[0]) {
+    if (g_explicit_save_dir[0] && !is_foreign_dsa1_save_dir(g_explicit_save_dir, g_game_dir)) {
         chosen_sd = g_explicit_save_dir;
-    } else if (env_sd && env_sd[0]) {
+    } else if (env_sd && env_sd[0] && !is_foreign_dsa1_save_dir(env_sd, g_game_dir)) {
         chosen_sd = env_sd;
+    }
+
+    if (chosen_sd && chosen_sd[0] && STRICMP(chosen_sd, g_game_dir) == 0) {
+        chosen_sd = NULL;
+    }
+
+    if (chosen_sd && chosen_sd[0]) {
+        MKDIR(chosen_sd);
+        if (!is_dir_writable(chosen_sd)) {
+            chosen_sd = NULL;
+        }
     }
 
     if (chosen_sd && chosen_sd[0]) {
         strncpy(g_save_dir, chosen_sd, sizeof(g_save_dir) - 1);
         g_save_dir[sizeof(g_save_dir) - 1] = '\0';
-        g_save_dir_redirected = (STRICMP(g_save_dir, g_game_dir) != 0 || !is_dir_writable(g_game_dir)) ? 1 : 0;
+        g_save_dir_redirected = 1;
     } else if (is_dir_writable(g_game_dir)) {
         strncpy(g_save_dir, g_game_dir, sizeof(g_save_dir) - 1);
         g_save_dir[sizeof(g_save_dir) - 1] = '\0';
@@ -689,6 +966,127 @@ static void trim_crlf(char *s) {
     }
 }
 
+#ifndef _WIN32
+static void dsa_translate_win_drive_path(const char *in_path, char *out_buf, size_t out_size) {
+    if (!in_path || !out_buf || out_size == 0) return;
+    char tmp[1024];
+    size_t i = 0;
+    if (isalpha((unsigned char)in_path[0]) && in_path[1] == ':' && (in_path[2] == '\\' || in_path[2] == '/')) {
+        char drive = (char)tolower((unsigned char)in_path[0]);
+        char mnt_root[16];
+        snprintf(mnt_root, sizeof(mnt_root), "/mnt/%c", drive);
+        if (access(mnt_root, F_OK) == 0) {
+            snprintf(tmp, sizeof(tmp), "/mnt/%c/%s", drive, in_path + 3);
+        } else {
+            strncpy(tmp, in_path, sizeof(tmp) - 1);
+            tmp[sizeof(tmp) - 1] = '\0';
+        }
+    } else {
+        strncpy(tmp, in_path, sizeof(tmp) - 1);
+        tmp[sizeof(tmp) - 1] = '\0';
+    }
+    for (i = 0; tmp[i] && i < out_size - 1; ++i) {
+        out_buf[i] = (tmp[i] == '\\') ? '/' : tmp[i];
+    }
+    out_buf[i] = '\0';
+}
+
+static int dsa_resolve_existing_ci(const char *in_path, char *out_buf, size_t out_size) {
+    if (!in_path || !out_buf || out_size == 0) return 0;
+    char norm[1024];
+    dsa_translate_win_drive_path(in_path, norm, sizeof(norm));
+    if (access(norm, F_OK) == 0) {
+        strncpy(out_buf, norm, out_size - 1);
+        out_buf[out_size - 1] = '\0';
+        return 1;
+    }
+
+    char cur[1024] = "";
+    const char *p = norm;
+    if (*p == '/') {
+        strcpy(cur, "/");
+        while (*p == '/') ++p;
+    }
+
+    while (*p) {
+        char comp[256];
+        size_t ci = 0;
+        while (*p && *p != '/' && ci < sizeof(comp) - 1) {
+            comp[ci++] = *p++;
+        }
+        comp[ci] = '\0';
+        while (*p == '/') ++p;
+
+        if (comp[0] == '\0' || strcmp(comp, ".") == 0) continue;
+
+        char cand[1024];
+        if (cur[0] == '\0') {
+            snprintf(cand, sizeof(cand), "%s", comp);
+        } else if (strcmp(cur, "/") == 0) {
+            snprintf(cand, sizeof(cand), "/%s", comp);
+        } else {
+            snprintf(cand, sizeof(cand), "%s/%s", cur, comp);
+        }
+
+        if (access(cand, F_OK) == 0) {
+            strncpy(cur, cand, sizeof(cur) - 1);
+            cur[sizeof(cur) - 1] = '\0';
+            continue;
+        }
+
+        const char *scan_dir = cur[0] ? cur : ".";
+        DIR *d = opendir(scan_dir);
+        int matched = 0;
+        if (d) {
+            struct dirent *ent;
+            while ((ent = readdir(d)) != NULL) {
+                if (strcasecmp(ent->d_name, comp) == 0) {
+                    if (cur[0] == '\0') {
+                        snprintf(cand, sizeof(cand), "%s", ent->d_name);
+                    } else if (strcmp(cur, "/") == 0) {
+                        snprintf(cand, sizeof(cand), "/%s", ent->d_name);
+                    } else {
+                        snprintf(cand, sizeof(cand), "%s/%s", cur, ent->d_name);
+                    }
+                    matched = 1;
+                    break;
+                }
+            }
+            closedir(d);
+        }
+        strncpy(cur, cand, sizeof(cur) - 1);
+        cur[sizeof(cur) - 1] = '\0';
+        (void)matched;
+    }
+
+    strncpy(out_buf, cur[0] ? cur : norm, out_size - 1);
+    out_buf[out_size - 1] = '\0';
+    return (access(out_buf, F_OK) == 0) ? 1 : 0;
+}
+
+static int dsa_dir_has_schick_dat(const char *dir_path, char *out_dir, size_t out_size) {
+    if (!dir_path || !dir_path[0]) return 0;
+    char norm_dir[1024];
+    dsa_translate_win_drive_path(dir_path, norm_dir, sizeof(norm_dir));
+    char test_dat[1024];
+    char resolved_dat[1024];
+    snprintf(test_dat, sizeof(test_dat), "%s/SCHICK.DAT", norm_dir);
+    if (dsa_resolve_existing_ci(test_dat, resolved_dat, sizeof(resolved_dat))) {
+        char *slash = strrchr(resolved_dat, '/');
+        if (slash) {
+            *slash = '\0';
+            strncpy(out_dir, resolved_dat, out_size - 1);
+            out_dir[out_size - 1] = '\0';
+        } else {
+            strncpy(out_dir, norm_dir, out_size - 1);
+            out_dir[out_size - 1] = '\0';
+        }
+        return 1;
+    }
+    return 0;
+}
+#endif
+
 static void discover_game_dir(const char *explicit_dir) {
     const char *env_dir;
     FILE *fp;
@@ -700,6 +1098,7 @@ static void discover_game_dir(const char *explicit_dir) {
         "../SPIELPFAD.txt",
         "..\\..\\SPIELPFAD.txt",
         "../../SPIELPFAD.txt",
+        "../../../SPIELPFAD.txt",
         NULL
     };
     const char *gog_defaults[] = {
@@ -712,23 +1111,41 @@ static void discover_game_dir(const char *explicit_dir) {
     int i;
 
     if (explicit_dir && explicit_dir[0]) {
+#ifndef _WIN32
+        if (!dsa_dir_has_schick_dat(explicit_dir, g_game_dir, sizeof(g_game_dir))) {
+            dsa_translate_win_drive_path(explicit_dir, g_game_dir, sizeof(g_game_dir));
+        }
+#else
         strncpy(g_game_dir, explicit_dir, sizeof(g_game_dir) - 1);
         g_game_dir[sizeof(g_game_dir) - 1] = '\0';
+#endif
         return;
     }
 
     env_dir = getenv("DSA_GAME_DIR");
     if (!env_dir || !env_dir[0]) env_dir = getenv("DSA_GAMEDIR");
     if (env_dir && env_dir[0]) {
+#ifndef _WIN32
+        if (!dsa_dir_has_schick_dat(env_dir, g_game_dir, sizeof(g_game_dir))) {
+            dsa_translate_win_drive_path(env_dir, g_game_dir, sizeof(g_game_dir));
+        }
+#else
         strncpy(g_game_dir, env_dir, sizeof(g_game_dir) - 1);
         g_game_dir[sizeof(g_game_dir) - 1] = '\0';
+#endif
         return;
     }
 
+#ifdef _WIN32
     if (ACCESS("SCHICK.DAT", 0) == 0) {
         strcpy(g_game_dir, ".");
         return;
     }
+#else
+    if (dsa_dir_has_schick_dat(".", g_game_dir, sizeof(g_game_dir))) {
+        return;
+    }
+#endif
 
     for (i = 0; candidates[i]; ++i) {
         fp = fopen(candidates[i], "r");
@@ -736,12 +1153,17 @@ static void discover_game_dir(const char *explicit_dir) {
             while (fgets(line, sizeof(line), fp)) {
                 trim_crlf(line);
                 if (line[0] == '\0' || line[0] == '#' || line[0] == ';') continue;
-                if (strncmp(line, "gamedir=", 8) == 0) {
-                    strncpy(g_game_dir, line + 8, sizeof(g_game_dir) - 1);
+                const char * raw_p = (strncmp(line, "gamedir=", 8) == 0) ? (line + 8) : line;
+#ifndef _WIN32
+                if (dsa_dir_has_schick_dat(raw_p, g_game_dir, sizeof(g_game_dir))) {
                     fclose(fp);
                     return;
                 }
-                strncpy(g_game_dir, line, sizeof(g_game_dir) - 1);
+                dsa_translate_win_drive_path(raw_p, g_game_dir, sizeof(g_game_dir));
+#else
+                strncpy(g_game_dir, raw_p, sizeof(g_game_dir) - 1);
+                g_game_dir[sizeof(g_game_dir) - 1] = '\0';
+#endif
                 fclose(fp);
                 return;
             }
@@ -750,13 +1172,58 @@ static void discover_game_dir(const char *explicit_dir) {
     }
 
     for (i = 0; gog_defaults[i]; ++i) {
+#ifdef _WIN32
         char test_dat[600];
         snprintf(test_dat, sizeof(test_dat), "%s\\SCHICK.DAT", gog_defaults[i]);
         if (ACCESS(test_dat, 0) == 0) {
             strcpy(g_game_dir, gog_defaults[i]);
             return;
         }
+#else
+        if (dsa_dir_has_schick_dat(gog_defaults[i], g_game_dir, sizeof(g_game_dir))) {
+            return;
+        }
+#endif
     }
+
+#ifndef _WIN32
+    const char *home = getenv("HOME");
+    if (home && home[0]) {
+        const char *home_rel[] = {
+            "GOG Games/Realms of Arkania",
+            "GOG Games/Realms of Arkania 1",
+            "GOG Games/Realms of Arkania - Blade of Destiny",
+            "GOG Games/Das Schwarze Auge - Die Schicksalsklinge",
+            ".local/share/Steam/steamapps/common/Realms of Arkania Blade of Destiny Classic",
+            ".local/share/Steam/steamapps/common/Realms of Arkania",
+            ".steam/steam/steamapps/common/Realms of Arkania Blade of Destiny Classic",
+            "Games/gog/realms-of-arkania",
+            "Games/lutris/realms-of-arkania",
+            "Games/Heroic/Realms of Arkania",
+            "Library/Application Support/Steam/steamapps/common/Realms of Arkania Blade of Destiny Classic",
+            NULL
+        };
+        for (i = 0; home_rel[i]; ++i) {
+            char cand_dir[1024];
+            snprintf(cand_dir, sizeof(cand_dir), "%s/%s", home, home_rel[i]);
+            if (dsa_dir_has_schick_dat(cand_dir, g_game_dir, sizeof(g_game_dir))) {
+                return;
+            }
+        }
+    }
+    const char *extra_dirs[] = {
+        "/Applications/Realms of Arkania.app/Contents/Resources/game",
+        "../Original",
+        "../../Original",
+        "../../../Original",
+        NULL
+    };
+    for (i = 0; extra_dirs[i]; ++i) {
+        if (dsa_dir_has_schick_dat(extra_dirs[i], g_game_dir, sizeof(g_game_dir))) {
+            return;
+        }
+    }
+#endif
 
     strcpy(g_game_dir, ".");
 }
@@ -843,9 +1310,43 @@ const char *dsa_platform_resolve_path(const char *dos_path, char *out_buf, size_
 #ifdef _WIN32
     snprintf(out_buf, out_size, "%s\\%s", g_game_dir, rel);
 #else
-    snprintf(out_buf, out_size, "%s/%s", g_game_dir, rel);
+    char combined[1024];
+    snprintf(combined, sizeof(combined), "%s/%s", g_game_dir, rel);
+    dsa_resolve_existing_ci(combined, out_buf, out_size);
 #endif
     return out_buf;
+}
+
+int dsa_platform_open_ci(const char *fname, int flags, int mode) {
+    if (!fname || !fname[0]) return -1;
+#ifdef _WIN32
+    return open(fname, flags, mode);
+#else
+    char resolved[1024];
+    dsa_resolve_existing_ci(fname, resolved, sizeof(resolved));
+    int fd = open(resolved, flags, mode);
+    if (fd >= 0) return fd;
+
+    if ((flags & (O_WRONLY | O_RDWR | O_CREAT)) == 0 && fname[0] != '/') {
+        char game_resolved[1024];
+        dsa_platform_resolve_path(fname, game_resolved, sizeof(game_resolved));
+        fd = open(game_resolved, flags, mode);
+    }
+    return fd;
+#endif
+}
+
+int dsa_platform_unlink_ci(const char *fname) {
+    if (!fname || !fname[0]) return -1;
+#ifdef _WIN32
+    return unlink(fname);
+#else
+    char resolved[1024];
+    if (dsa_resolve_existing_ci(fname, resolved, sizeof(resolved))) {
+        return unlink(resolved);
+    }
+    return unlink(fname);
+#endif
 }
 
 /* =========================================================================
@@ -870,6 +1371,20 @@ static DWORD WINAPI dsa_watchdog_thread_proc(LPVOID param) {
     if (g_record_fp)   { fflush(g_record_fp); }
     TerminateProcess(GetCurrentProcess(), 124);
     return 0;
+}
+#else
+static void *dsa_posix_watchdog_thread_proc(void *param) {
+    uint32_t timeout_ms = (uint32_t)(uintptr_t)param;
+    uint32_t elapsed = 0;
+    while (elapsed < timeout_ms) {
+        uint32_t step = (timeout_ms - elapsed > 100) ? 100 : (timeout_ms - elapsed);
+        usleep(step * 1000);
+        elapsed += step;
+    }
+    if (g_coverage_fp) { fflush(g_coverage_fp); }
+    if (g_record_fp)   { fflush(g_record_fp); }
+    _exit(124);
+    return NULL;
 }
 #endif
 
@@ -953,6 +1468,40 @@ static void dsa_display_init_from_env(void) {
             }
             tok[ti] = '\0';
 
+            if (STRNICMP(tok, "--fenster=", 10) == 0) {
+                dsa_parse_fenster_token(tok + 10);
+            } else if (STRICMP(tok, "--vollbild") == 0 || STRICMP(tok, "--fullscreen") == 0) {
+                g_is_fullscreen = 1;
+                g_fenster_explicit = 1;
+            } else if (STRICMP(tok, "--fenstermodus") == 0 || STRICMP(tok, "--windowed") == 0) {
+                g_is_fullscreen = 0;
+                g_fenster_explicit = 1;
+            } else if (STRNICMP(tok, "--skalierung=", 13) == 0) {
+                dsa_parse_skalierung_token(tok + 13);
+            } else if (STRNICMP(tok, "--vollbild-aufloesung=", 22) == 0) {
+                int fw = 0, fh = 0;
+                if (sscanf(tok + 22, "%dx%d", &fw, &fh) == 2 && fw >= 320 && fh >= 240) {
+                    SDL_SetFullscreenOverrideRes(fw, fh);
+                }
+            } else if (STRNICMP(tok, "--skaliertes-bild=", 18) == 0) {
+                strncpy(g_scaled_shot_path, tok + 18, sizeof(g_scaled_shot_path) - 1);
+            } else if (STRNICMP(tok, "--maustest-log=", 15) == 0) {
+                strncpy(g_maustest_log_path, tok + 15, sizeof(g_maustest_log_path) - 1);
+            }
+        }
+    }
+#elif defined(__linux__)
+    FILE *cmd_fp = fopen("/proc/self/cmdline", "rb");
+    if (cmd_fp) {
+        char cmd_buf[4096];
+        size_t n = fread(cmd_buf, 1, sizeof(cmd_buf) - 1, cmd_fp);
+        fclose(cmd_fp);
+        cmd_buf[n] = '\0';
+        size_t pos = 0;
+        while (pos < n) {
+            const char *tok = cmd_buf + pos;
+            size_t tlen = strlen(tok);
+            pos += tlen + 1;
             if (STRNICMP(tok, "--fenster=", 10) == 0) {
                 dsa_parse_fenster_token(tok + 10);
             } else if (STRICMP(tok, "--vollbild") == 0 || STRICMP(tok, "--fullscreen") == 0) {
@@ -1230,6 +1779,20 @@ int dsa_platform_init(const char *window_title, int width, int height, const cha
         }
         crash_handler_installed = 1;
     }
+#else
+    static int crash_handler_installed = 0;
+    if (!crash_handler_installed) {
+        dsa_install_crash_handlers_once();
+        const char *wd_env = getenv("DSA_WATCHDOG_MS");
+        uint32_t wd_ms = (wd_env && wd_env[0]) ? (uint32_t)atoi(wd_env) : (g_replay_active ? 25000u : 0u);
+        if (wd_ms > 0) {
+            pthread_t tid;
+            if (pthread_create(&tid, NULL, dsa_posix_watchdog_thread_proc, (void *)(uintptr_t)wd_ms) == 0) {
+                pthread_detach(tid);
+            }
+        }
+        crash_handler_installed = 1;
+    }
 #endif
     {
         const char *cov = getenv("DSA_ABDECKUNG");
@@ -1373,6 +1936,7 @@ static void poll_sdl_events_internal(void) {
             break;
 
         case SDL_MOUSEMOTION: {
+            if (g_replay_active) break;
             int mx = ev.motion.x;
             int my = ev.motion.y;
             if (SDL_PortUsingExternalDLL() && g_vp_w > 0 && g_vp_h > 0) {
@@ -1391,6 +1955,7 @@ static void poll_sdl_events_internal(void) {
 
         case SDL_MOUSEBUTTONDOWN:
         case SDL_MOUSEBUTTONUP: {
+            if (g_replay_active) break;
             int bit = 0;
             if (ev.button.button == SDL_BUTTON_LEFT)        bit = 1;
             else if (ev.button.button == SDL_BUTTON_RIGHT)  bit = 2;
@@ -1427,6 +1992,7 @@ static void poll_sdl_events_internal(void) {
 
         case SDL_KEYDOWN:
         case SDL_KEYUP: {
+            if (g_replay_active) break;
             int down = (ev.type == SDL_KEYDOWN);
             unsigned char dos_sc = 0;
             unsigned char ascii = 0;
@@ -1499,7 +2065,33 @@ void dsa_platform_poll_events_only(void) {
 
 static void dsa_save_bmp(const char *path) {
     DsaPlatScope plat_scope("dsa_save_bmp");
+    if (!path || !path[0]) return;
+#ifdef _WIN32
     FILE *fp = fopen(path, "wb");
+#else
+    char norm_path[1024];
+    const char *shot_dir = getenv("DSA_SCREENSHOT_DIR");
+    if (shot_dir && shot_dir[0]) {
+        const char *base1 = strrchr(path, '/');
+        const char *base2 = strrchr(path, '\\');
+        const char *base = (base1 && base2) ? ((base1 > base2) ? (base1 + 1) : (base2 + 1))
+                         : (base1 ? (base1 + 1) : (base2 ? (base2 + 1) : path));
+        snprintf(norm_path, sizeof(norm_path), "%s/%s", shot_dir, base);
+    } else {
+        dsa_translate_win_drive_path(path, norm_path, sizeof(norm_path));
+    }
+    {
+        char parent_dir[1024];
+        strncpy(parent_dir, norm_path, sizeof(parent_dir) - 1);
+        parent_dir[sizeof(parent_dir) - 1] = '\0';
+        char *last_slash = strrchr(parent_dir, '/');
+        if (last_slash && last_slash != parent_dir) {
+            *last_slash = '\0';
+            MKDIR(parent_dir);
+        }
+    }
+    FILE *fp = fopen(norm_path, "wb");
+#endif
     if (!fp) return;
     int w = g_width;
     int h = g_height;
@@ -1549,6 +2141,20 @@ void dsa_platform_present(void) {
         if (!do_crash) {
             const char *cmd = GetCommandLineA();
             if (cmd && strstr(cmd, "--test-crash")) do_crash = 1;
+        }
+#elif defined(__linux__)
+        if (!do_crash) {
+            FILE *cfp = fopen("/proc/self/cmdline", "rb");
+            if (cfp) {
+                char cbuf[2048];
+                size_t cn = fread(cbuf, 1, sizeof(cbuf) - 1, cfp);
+                fclose(cfp);
+                for (size_t ci = 0; ci < cn; ++ci) {
+                    if (cbuf[ci] == '\0') cbuf[ci] = ' ';
+                }
+                cbuf[cn] = '\0';
+                if (strstr(cbuf, "--test-crash")) do_crash = 1;
+            }
         }
 #endif
         if (do_crash) {
@@ -2750,6 +3356,19 @@ int dsa_platform_play_cd_track(int track_no) {
         "music/Track%02d.ogg"
     };
     char found_path[1024] = "";
+#ifndef _WIN32
+    {
+        char rel[64];
+        char cand[1024];
+        snprintf(rel, sizeof(rel), "MUSIC/Track%02d.OGG", track_no);
+        dsa_platform_resolve_path(rel, cand, sizeof(cand));
+        FILE *tf = fopen(cand, "rb");
+        if (tf) {
+            fclose(tf);
+            strncpy(found_path, cand, sizeof(found_path) - 1);
+        }
+    }
+#endif
     for (int d = 0; d < 4 && !found_path[0]; ++d) {
         for (int p = 0; p < 4; ++p) {
             char rel[64];

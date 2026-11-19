@@ -250,7 +250,11 @@ uint8_t* load_fight_figs(signed int fig)
 
 		close(handle);
 
+#if defined(__BORLANDC__)
 		if ((dst = schick_alloc(len))) {
+#else
+		if (((int32_t)len > 0) && (dst = schick_alloc(len))) {
+#endif
 #if !defined(__BORLANDC__)
 			D1_LOG("use HEAP for fig %d\n", fig);
 #endif

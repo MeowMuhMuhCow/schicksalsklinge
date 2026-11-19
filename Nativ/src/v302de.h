@@ -161,13 +161,6 @@ static inline unsigned short cast_u16(unsigned char v)
 #include <fcntl.h>
 #if defined(_WIN32)
 #include <io.h>
-#else
-#include <unistd.h>
-#endif
-#ifndef O_BINARY
-#define O_BINARY 0
-#endif
-
 static inline int schick_creat_binary(const char *fname, int attr)
 {
 	(void)attr;
@@ -178,6 +171,28 @@ static inline int schick_open_binary(const char *fname, int mode)
 {
 	return open(fname, mode | O_BINARY);
 }
+#else
+#include <unistd.h>
+#ifndef O_BINARY
+#define O_BINARY 0
+#endif
+extern int dsa_platform_open_ci(const char *fname, int flags, int mode);
+extern int dsa_platform_unlink_ci(const char *fname);
+
+static inline int schick_creat_binary(const char *fname, int attr)
+{
+	(void)attr;
+	return dsa_platform_open_ci(fname, O_BINARY | O_CREAT | O_TRUNC | O_WRONLY, 0666);
+}
+
+static inline int schick_open_binary(const char *fname, int mode)
+{
+	return dsa_platform_open_ci(fname, mode | O_BINARY, 0666);
+}
+#endif
+#ifndef O_BINARY
+#define O_BINARY 0
+#endif
 
 #define _open schick_open_binary
 #define _creat schick_creat_binary
@@ -260,6 +275,7 @@ static inline signed char get_cb_val(const signed short x, const signed short y)
 }
 #if !defined(_WIN32)
 #define itoa my_itoa
+#define ltoa(v, s, r) my_itoa((int)(v), (s), (r))
 #endif
 
 static inline void dump_cb(void)

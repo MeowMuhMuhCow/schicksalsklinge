@@ -85,6 +85,7 @@
 #include <io.h>
 #define MKDIR_PORT_S2(p) _mkdir(p)
 #else
+#include <ctype.h>
 #include <sys/stat.h>
 #define MKDIR_PORT_S2(p) mkdir(p, 0755)
 #endif
@@ -1204,7 +1205,7 @@ static signed int open_and_seek_dat(const uint16_t fileindex)
 	const char *schick_dat_path = (access(g_fname_schick_dat, 0) == 0)
 		? g_fname_schick_dat
 		: dsa_platform_resolve_path(g_fname_schick_dat, schick_dat_buf, sizeof(schick_dat_buf));
-	if ( (handle = open(schick_dat_path, O_BINARY | O_RDONLY)) != -1) {
+	if ( (handle = _open(schick_dat_path, O_BINARY | O_RDONLY)) != -1) {
 #endif
 
 		/* seek to the fileindex position in the offset table */
@@ -1298,14 +1299,14 @@ signed int load_regular_file(const signed int index)
 #if defined(__BORLANDC__)
 	if ( (handle = open(g_fnames_v302de[index], O_BINARY | O_RDWR)) == -1) {
 #else
-	handle = open(g_fnames_v302de[index], O_BINARY | O_RDWR);
+	handle = _open(g_fnames_v302de[index], O_BINARY | O_RDWR);
 	if (handle == -1) {
-		handle = open(g_fnames_v302de[index], O_BINARY | O_RDONLY);
+		handle = _open(g_fnames_v302de[index], O_BINARY | O_RDONLY);
 	}
 	if (handle == -1) {
 		char reg_buf[512];
 		const char *reg_path = dsa_platform_resolve_path(g_fnames_v302de[index], reg_buf, sizeof(reg_buf));
-		handle = open(reg_path, O_BINARY | O_RDONLY);
+		handle = _open(reg_path, O_BINARY | O_RDONLY);
 	}
 	if (handle == -1) {
 #endif
@@ -1345,10 +1346,10 @@ static signed int open_temp_file(const signed int index)
 
 	sprintf((char*)tmppath, g_str_temp_fmt_ptr, g_fnames_v302de[index]);
 
-#if defined(__BORLANDC__) || defined(_WIN32)
+#if defined(__BORLANDC__)
 	while ( (handle = open(tmppath, O_BINARY | O_RDWR)) == -1) {
 #else
-	while ( (handle = open(tmppath, O_RDWR)) == -1) {
+	while ( (handle = _open(tmppath, O_BINARY | O_RDWR)) == -1) {
 #endif
 
 		copy_from_archive_to_temp(index, tmppath);
@@ -1402,7 +1403,7 @@ void copy_file_to_temp(const char* src_file, const char* fname)
 	const char *src_path = (access(src_file, 0) == 0)
 		? src_file
 		: dsa_platform_resolve_path(src_file, src_buf, sizeof(src_buf));
-	if ( (handle1 = open(src_path, O_BINARY | O_RDONLY)) != -1) {
+	if ( (handle1 = _open(src_path, O_BINARY | O_RDONLY)) != -1) {
 #endif
 
 		/* create new file in TEMP */
@@ -6527,19 +6528,6 @@ int main(int argc, char** argv)
 			dsa_platform_set_mouse_range_y(0, 199);
 			call_mouse();
 			flush_keyboard_queue();
-		}
-		if (dsa_platform_is_save_dir_redirected()) {
-			const char *show_gui = getenv("DSA_SHOW_REDIRECT_GUI");
-			if (!dsa_platform_is_replay_active() || (show_gui && show_gui[0] == '1')) {
-				uint8_t pal_white_r[3] = { 0x3f, 0x3f, 0x3f };
-				signed int tw_bak_redir = g_textbox_width;
-				set_color(pal_white_r, 0xff);
-				refresh_colors();
-				g_textbox_width = 5;
-				strcpy((char*)g_dtp2, "DER SPIELORDNER IST SCHREIBGESCHšTZT.@SPIELSTŽNDE UND PROBEN.CSV WERDEN IM ORDNER <SPIELSTAENDE> NEBEN DER EXE GESPEICHERT.");
-				GUI_output(g_dtp2);
-				g_textbox_width = tw_bak_redir;
-			}
 		}
 #endif
 		/* select game mode */

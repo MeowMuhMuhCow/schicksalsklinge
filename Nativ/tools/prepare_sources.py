@@ -22,7 +22,7 @@ import sys
 from pathlib import Path
 
 PORT_DIR = Path(__file__).resolve().parent.parent
-ROOT_DIR = PORT_DIR.parent
+ROOT_DIR = PORT_DIR.parent if (PORT_DIR.parent / "Quelle").exists() else PORT_DIR.parent.parent
 QUELLE_DIR = ROOT_DIR / "Quelle"
 BE_DOSBOX_DIR = QUELLE_DIR / "BrightEyes_DOSBox"
 FINAL_SRC_DIR = PORT_DIR / "src"
@@ -228,13 +228,6 @@ static inline int bioskey(const int cmd) { return 0; }""",
         """#include <fcntl.h>
 #if defined(_WIN32)
 #include <io.h>
-#else
-#include <unistd.h>
-#endif
-#ifndef O_BINARY
-#define O_BINARY 0
-#endif
-
 static inline int schick_creat_binary(const char *fname, int attr)
 {
 	(void)attr;
@@ -245,6 +238,28 @@ static inline int schick_open_binary(const char *fname, int mode)
 {
 	return open(fname, mode | O_BINARY);
 }
+#else
+#include <unistd.h>
+#ifndef O_BINARY
+#define O_BINARY 0
+#endif
+extern int dsa_platform_open_ci(const char *fname, int flags, int mode);
+extern int dsa_platform_unlink_ci(const char *fname);
+
+static inline int schick_creat_binary(const char *fname, int attr)
+{
+	(void)attr;
+	return dsa_platform_open_ci(fname, O_BINARY | O_CREAT | O_TRUNC | O_WRONLY, 0666);
+}
+
+static inline int schick_open_binary(const char *fname, int mode)
+{
+	return dsa_platform_open_ci(fname, mode | O_BINARY, 0666);
+}
+#endif
+#ifndef O_BINARY
+#define O_BINARY 0
+#endif
 
 #define _open schick_open_binary
 #define _creat schick_creat_binary
@@ -289,6 +304,7 @@ static inline signed int CD_bioskey(const signed int cmd) { return bioskey(cmd);
 }
 #if !defined(_WIN32)
 #define itoa my_itoa
+#define ltoa(v, s, r) my_itoa((int)(v), (s), (r))
 #endif""",
         "v302de.h:get_cb_val",
     )
@@ -532,6 +548,12 @@ void set_palette(uint8_t *ptr, const signed int first_color, const signed int co
         "uint32_t swap_u32(uint32_t);",
         "seg002.h:swap_u32",
     )
+    s2h_txt = replace_once(
+        s2h_txt,
+        "void sub_light_timers();",
+        "#if defined(__BORLANDC__)\nvoid sub_light_timers();\n#else\nvoid sub_light_timers(const int32_t);\n#endif",
+        "seg002.h:sub_light_timers",
+    )
     s2h_p.write_text(s2h_txt, encoding="latin-1")
 
     # seg002.c
@@ -568,7 +590,7 @@ static inline uint32_t readds(uint8_t *p)
     s2_txt = replace_once(
         s2_txt,
         '#include "seg120.h"\n#include "seg121.h"',
-        '#include "seg120.h"\n#include "seg121.h"\n\n#if !defined(__BORLANDC__)\n#if defined(_WIN32)\n#include <direct.h>\n#include <io.h>\n#define MKDIR_PORT_S2(p) _mkdir(p)\n#else\n#include <sys/stat.h>\n#define MKDIR_PORT_S2(p) mkdir(p, 0755)\n#endif\n#include "dsa_platform.h"\n#include "vgalib.h"\nstatic int g_skip_copy_protection = \n#if defined(SKIP_COPY_PROTECTION)\n    SKIP_COPY_PROTECTION;\n#else\n    1;\n#endif\n#endif',
+        '#include "seg120.h"\n#include "seg121.h"\n\n#if !defined(__BORLANDC__)\n#if defined(_WIN32)\n#include <direct.h>\n#include <io.h>\n#define MKDIR_PORT_S2(p) _mkdir(p)\n#else\n#include <ctype.h>\n#include <sys/stat.h>\n#define MKDIR_PORT_S2(p) mkdir(p, 0755)\n#endif\n#include "dsa_platform.h"\n#include "vgalib.h"\nstatic int g_skip_copy_protection = \n#if defined(SKIP_COPY_PROTECTION)\n    SKIP_COPY_PROTECTION;\n#else\n    1;\n#endif\n#endif',
         "seg002.c:includes",
     )
     s2_txt = replace_once(
@@ -1576,7 +1598,7 @@ int main(int argc, char** argv)
 	const char *schick_dat_path = (access(g_fname_schick_dat, 0) == 0)
 		? g_fname_schick_dat
 		: dsa_platform_resolve_path(g_fname_schick_dat, schick_dat_buf, sizeof(schick_dat_buf));
-	if ( (handle = open(schick_dat_path, O_BINARY | O_RDONLY)) != -1) {
+	if ( (handle = _open(schick_dat_path, O_BINARY | O_RDONLY)) != -1) {
 #endif""",
         "seg002.c:open_and_seek_dat_resolve",
     )
@@ -1591,14 +1613,14 @@ int main(int argc, char** argv)
         """#if defined(__BORLANDC__)
 	if ( (handle = open(g_fnames_v302de[index], O_BINARY | O_RDWR)) == -1) {
 #else
-	handle = open(g_fnames_v302de[index], O_BINARY | O_RDWR);
+	handle = _open(g_fnames_v302de[index], O_BINARY | O_RDWR);
 	if (handle == -1) {
-		handle = open(g_fnames_v302de[index], O_BINARY | O_RDONLY);
+		handle = _open(g_fnames_v302de[index], O_BINARY | O_RDONLY);
 	}
 	if (handle == -1) {
 		char reg_buf[512];
 		const char *reg_path = dsa_platform_resolve_path(g_fnames_v302de[index], reg_buf, sizeof(reg_buf));
-		handle = open(reg_path, O_BINARY | O_RDONLY);
+		handle = _open(reg_path, O_BINARY | O_RDONLY);
 	}
 	if (handle == -1) {
 #endif""",
@@ -1619,9 +1641,24 @@ int main(int argc, char** argv)
 	const char *src_path = (access(src_file, 0) == 0)
 		? src_file
 		: dsa_platform_resolve_path(src_file, src_buf, sizeof(src_buf));
-	if ( (handle1 = open(src_path, O_BINARY | O_RDONLY)) != -1) {
+	if ( (handle1 = _open(src_path, O_BINARY | O_RDONLY)) != -1) {
 #endif""",
         "seg002.c:copy_file_to_temp_resolve",
+    )
+
+    s2_txt = replace_once(
+        s2_txt,
+        """#if defined(__BORLANDC__) || defined(_WIN32)
+	while ( (handle = open(tmppath, O_BINARY | O_RDWR)) == -1) {
+#else
+	while ( (handle = open(tmppath, O_RDWR)) == -1) {
+#endif""",
+        """#if defined(__BORLANDC__)
+	while ( (handle = open(tmppath, O_BINARY | O_RDWR)) == -1) {
+#else
+	while ( (handle = _open(tmppath, O_BINARY | O_RDWR)) == -1) {
+#endif""",
+        "seg002.c:open_temp_file_resolve",
     )
 
     s2_txt = replace_once(
@@ -1658,19 +1695,6 @@ int main(int argc, char** argv)
 			dsa_platform_set_mouse_range_y(0, 199);
 			call_mouse();
 			flush_keyboard_queue();
-		}
-		if (dsa_platform_is_save_dir_redirected()) {
-			const char *show_gui = getenv("DSA_SHOW_REDIRECT_GUI");
-			if (!dsa_platform_is_replay_active() || (show_gui && show_gui[0] == '1')) {
-				uint8_t pal_white_r[3] = { 0x3f, 0x3f, 0x3f };
-				signed int tw_bak_redir = g_textbox_width;
-				set_color(pal_white_r, 0xff);
-				refresh_colors();
-				g_textbox_width = 5;
-				strcpy((char*)g_dtp2, "DER SPIELORDNER IST SCHREIBGESCH\x9aTZT.@SPIELST\x8eNDE UND PROBEN.CSV WERDEN IM ORDNER <SPIELSTAENDE> NEBEN DER EXE GESPEICHERT.");
-				GUI_output(g_dtp2);
-				g_textbox_width = tw_bak_redir;
-			}
 		}
 #endif
 		/* select game mode */
@@ -2191,9 +2215,37 @@ static inline uint16_t schick_rotl16(const uint16_t op, const uint8_t count)
     )
     s26_txt = replace_once(
         s26_txt,
+        'const char g_str_temp_fmt[] = "TEMP\\\\%s"; // ds:0x515e',
+        '#if defined(__BORLANDC__) || defined(_WIN32)\nconst char g_str_temp_fmt[] = "TEMP\\\\%s"; // ds:0x515e\n#else\nconst char g_str_temp_fmt[] = "TEMP/%s"; // ds:0x515e\n#endif',
+        "seg026.c:g_str_temp_fmt",
+    )
+    s26_txt = replace_once(
+        s26_txt,
         'char g_chr_file_suffix[5] = ".CHR"; // ds:0x5e3e',
         'const char g_chr_file_suffix[5] = ".CHR"; // ds:0x5e3e',
         "seg026.c:g_chr_file_suffix",
+    )
+    s26_txt = replace_once(
+        s26_txt,
+        """	len = (int16_t)read_archive_file(handle, ((uint8_t*)g_buffer9_ptr3) + 1000, 64000);
+
+	close(handle);
+
+	split_textbuffer((char**)g_buffer9_ptr3, (char*)(g_buffer9_ptr3 + 1000L), len);""",
+        """#if defined(__BORLANDC__)
+	len = (int16_t)read_archive_file(handle, ((uint8_t*)g_buffer9_ptr3) + 1000, 64000);
+
+	close(handle);
+
+	split_textbuffer((char**)g_buffer9_ptr3, (char*)(g_buffer9_ptr3 + 1000L), len);
+#else
+	len = (int16_t)read_archive_file(handle, ((uint8_t*)g_buffer9_ptr3) + 250 * sizeof(char*), 64000);
+
+	close(handle);
+
+	split_textbuffer((char**)g_buffer9_ptr3, (char*)(g_buffer9_ptr3 + 250 * sizeof(char*)), len);
+#endif""",
+        "seg026.c:load_ltx_64bit",
     )
 
     native_saveload_code = """#if !defined(__BORLANDC__)
@@ -2237,8 +2289,8 @@ static void status_from_dos(const uint8_t *buf)
 #define STATUS_DUMMY STATUS_VAR
 #define STATUS_PTR(off, len, var) \\
 	memcpy(&hero_off, buf + (off), 4); \\
-	(var) = (hero_off && (hero_off / sizeof(struct struct_hero) <= 6)) \\
-		? (g_heroes + (hero_off / sizeof(struct struct_hero))) : NULL;
+	(var) = (typeof(var))((hero_off && (hero_off / sizeof(struct struct_hero) <= 6)) \\
+		? (g_heroes + (hero_off / sizeof(struct struct_hero))) : NULL);
 #define STATUS_SKIP(off, len, var)
 #include "datseg_status.h"
 #undef STATUS_VAR
@@ -2646,7 +2698,7 @@ static signed int open_file_ci(const char *fname, int flags)
 			done = findnext(&blk);
 
 		} while (done == 0);
-#else
+#elif defined(_WIN32)
 		{
 			DIR *dir = opendir("TEMP");
 			struct dirent *dp;
@@ -2670,6 +2722,46 @@ static signed int open_file_ci(const char *fname, int flags)
 				closedir(dir);
 			}
 		}
+#else
+		{
+			DIR *dir = opendir("TEMP");
+			struct dirent *dp;
+			char names[128][32];
+			int n_names = 0;
+			if (dir != NULL) {
+				while ((dp = readdir(dir)) != NULL && n_names < 128) {
+					if (!has_suffix_ci(dp->d_name, g_chr_file_suffix)) continue;
+					strncpy(names[n_names], dp->d_name, 31);
+					names[n_names][31] = '\0';
+					n_names++;
+				}
+				closedir(dir);
+				for (int a = 0; a < n_names - 1; ++a) {
+					for (int b = a + 1; b < n_names; ++b) {
+						if (_stricmp(names[a], names[b]) > 0) {
+							char tmp[32];
+							memcpy(tmp, names[a], 32);
+							memcpy(names[a], names[b], 32);
+							memcpy(names[b], tmp, 32);
+						}
+					}
+				}
+				for (int a = 0; a < n_names; ++a) {
+					sprintf(g_text_output_buf, g_str_temp_fmt_ptr, names[a]);
+					handle = _open(g_text_output_buf, O_BINARY | O_RDWR);
+					if (handle != -1) {
+						_read(handle, g_renderbuf_ptr, sizeof(struct struct_hero));
+						close(handle);
+						len = write(handle_sg, g_renderbuf_ptr, sizeof(struct struct_hero));
+						if (len != sizeof(struct struct_hero)) {
+							GUI_output(get_ttx(348));
+							close(handle_sg);
+							return 0;
+						}
+					}
+				}
+			}
+		}
 #endif""",
         "seg026.c:save_append_chr",
     )
@@ -2685,6 +2777,25 @@ static signed int open_file_ci(const char *fname, int flags)
 #if 1""",
         "seg026.c:read_chr_temp",
     )
+    s26_txt = replace_once(
+        s26_txt,
+        """	if ((handle = open(g_text_output_buf, O_BINARY | O_RDWR)) == -1) {
+		copy_file_to_temp(fname, g_text_output_buf);
+		handle = open(g_text_output_buf, O_BINARY | O_RDWR);
+	}""",
+        """#if defined(__BORLANDC__)
+	if ((handle = open(g_text_output_buf, O_BINARY | O_RDWR)) == -1) {
+		copy_file_to_temp(fname, g_text_output_buf);
+		handle = open(g_text_output_buf, O_BINARY | O_RDWR);
+	}
+#else
+	if ((handle = _open(g_text_output_buf, O_BINARY | O_RDWR)) == -1) {
+		copy_file_to_temp(fname, g_text_output_buf);
+		handle = _open(g_text_output_buf, O_BINARY | O_RDWR);
+	}
+#endif""",
+        "seg026.c:read_chr_temp_open",
+    )
 
     s26_txt = replace_once(
         s26_txt,
@@ -2693,7 +2804,7 @@ static signed int open_file_ci(const char *fname, int flags)
 #if defined(__BORLANDC__)""",
         """signed int copy_chr_names(char *ptr, const signed int temple_id)
 {
-#if !defined(__BORLANDC__)
+#if defined(_WIN32)
 	signed int count = 0;
 	DIR *dir = opendir("TEMP");
 	struct dirent *dp;
@@ -2722,14 +2833,77 @@ static signed int open_file_ci(const char *fname, int flags)
 		closedir(dir);
 	}
 	return count;
+#elif !defined(__BORLANDC__)
+	signed int count = 0;
+	DIR *dir = opendir("TEMP");
+	struct dirent *dp;
+	char path[260];
+	char names[128][32];
+	int n_names = 0;
+	struct struct_hero *hero = (struct struct_hero*)g_renderbuf_ptr;
+
+	if (dir != NULL) {
+		while ((dp = readdir(dir)) != NULL && n_names < 128) {
+			if (!has_suffix_ci(dp->d_name, g_chr_file_suffix)) continue;
+			strncpy(names[n_names], dp->d_name, 31);
+			names[n_names][31] = '\\0';
+			n_names++;
+		}
+		closedir(dir);
+		for (int a = 0; a < n_names - 1; ++a) {
+			for (int b = a + 1; b < n_names; ++b) {
+				if (_stricmp(names[a], names[b]) > 0) {
+					char tmp[32];
+					memcpy(tmp, names[a], 32);
+					memcpy(names[a], names[b], 32);
+					memcpy(names[b], tmp, 32);
+				}
+			}
+		}
+		for (int a = 0; a < n_names; ++a) {
+			snprintf(path, sizeof(path), "TEMP/%s", names[a]);
+			{
+				signed int handle = _open(path, O_BINARY | O_RDONLY);
+				if (handle != -1) {
+					_read(handle, hero, sizeof(struct struct_hero));
+					close(handle);
+					if (((hero->temple_id == temple_id) && !hero->slot_pos) ||
+						(!hero->slot_pos && (temple_id == -1)))
+					{
+						strcpy((char*)ptr + 32 * count, hero->name);
+						strcpy((char*)ptr + 32 * count + 16, hero->alias);
+						count++;
+					}
+				}
+			}
+		}
+	}
+	return count;
 #elif defined(__BORLANDC__)""",
         "seg026.c:copy_chr_names",
     )
     s26_p.write_text(s26_txt, encoding="latin-1")
 
-    # seg027.c: scenarios_num & fight_count 16-bit reads, disable EMS memslots in load_ani
+    # seg009.c: guard 64-bit unsigned underflow in src[plen - 1] when plen == 0 / unplen == 0
+    s09_p = SRC_DIR / "seg009.c"
+    s09_txt = s09_p.read_text(encoding="latin-1")
+    s09_txt = replace_once(
+        s09_txt,
+        "\tppDecrunch(&src[8],  dst, &src[4], plen - 12, unplen, src[plen -1]);",
+        "#if !defined(_WIN32)\n\tif (plen < 12 || unplen == 0) return;\n#endif\n\tppDecrunch(&src[8],  dst, &src[4], plen - 12, unplen, src[plen -1]);",
+        "seg009.c:decomp_pp20_guard",
+    )
+    s09_p.write_text(s09_txt, encoding="latin-1")
+
+    # seg027.c: scenarios_num & fight_count 16-bit reads, disable EMS memslots in load_ani, guard negative len in load_fight_figs on 64-bit
     s27_p = SRC_DIR / "seg027.c"
     s27_txt = s27_p.read_text(encoding="latin-1")
+    s27_txt = replace_once(
+        s27_txt,
+        "\t\tif ((dst = schick_alloc(len))) {",
+        "#if defined(__BORLANDC__)\n\t\tif ((dst = schick_alloc(len))) {\n#else\n\t\tif (((int32_t)len > 0) && (dst = schick_alloc(len))) {\n#endif",
+        "seg027.c:load_fight_figs_len_guard",
+    )
     s27_txt = replace_once(
         s27_txt,
         """	/* clear the old ani */
@@ -2893,6 +3067,39 @@ static signed int open_file_ci(const char *fname, int flags)
         "seg035.c:loot_bound",
     )
     s35_p.write_text(s35_txt, encoding="latin-1")
+
+    # seg040.c: 64-bit buffer sizes for g_fig_list_buffer (127 * sizeof(struct struct_fighter)) and g_figobj_gfxbuf_table (63 * sizeof(unsigned char*))
+    s40_p = SRC_DIR / "seg040.c"
+    s40_txt = s40_p.read_text(encoding="latin-1")
+    s40_txt = replace_once(
+        s40_txt,
+        """	g_fig_list_buffer = (struct struct_fighter*)(((HugePt)g_fig_figure2_buf) - 0x115d);
+
+	memset(g_fig_list_buffer, 0, 0x115d);""",
+        """#if defined(__BORLANDC__)
+	g_fig_list_buffer = (struct struct_fighter*)(((HugePt)g_fig_figure2_buf) - 0x115d);
+
+	memset(g_fig_list_buffer, 0, 0x115d);
+#else
+	g_fig_list_buffer = (struct struct_fighter*)(((HugePt)g_fig_figure2_buf) - 127 * sizeof(struct struct_fighter));
+
+	memset(g_fig_list_buffer, 0, 127 * sizeof(struct struct_fighter));
+#endif""",
+        "seg040.c:g_fig_list_buffer_64bit",
+    )
+    s40_txt = replace_once(
+        s40_txt,
+        """	g_figobj_gfxbuf_table = (unsigned char**)(((HugePt)g_spellobj_nvf_buf) + 0xf5fL);
+	g_figobj_gfxwidth_table = (int16_t*)(((HugePt)g_figobj_gfxbuf_table) + 0xfcL);""",
+        """	g_figobj_gfxbuf_table = (unsigned char**)(((HugePt)g_spellobj_nvf_buf) + 0xf5fL);
+#if defined(__BORLANDC__)
+	g_figobj_gfxwidth_table = (int16_t*)(((HugePt)g_figobj_gfxbuf_table) + 0xfcL);
+#else
+	g_figobj_gfxwidth_table = (int16_t*)(((HugePt)g_figobj_gfxbuf_table) + 63 * sizeof(unsigned char*));
+#endif""",
+        "seg040.c:g_figobj_gfxbuf_table_64bit",
+    )
+    s40_p.write_text(s40_txt, encoding="latin-1")
 
     # seg063.c: sea_travel course check
     s63_p = SRC_DIR / "seg063.c"
@@ -3578,6 +3785,9 @@ def generate_ngen_embed_c() -> None:
 
 #include "dsa_platform.h"
 #include "vgalib.h"
+#if !defined(_WIN32)
+#define _open(f, m) dsa_platform_open_ci((f), (m), 0666)
+#endif
 
 #pragma pack(1)
 struct gen_attribs {
@@ -3735,8 +3945,26 @@ static inline uint32_t readds(const unsigned char *p)
 #if !defined(__BORLANDC__)
 static inline signed short readws(const unsigned char *p) { return *(const signed short*)p; }
 static inline unsigned int readd(const unsigned char *p) { return *(const unsigned int*)p; }
-static inline signed int readds(const unsigned char *p) { return *(const signed int*)p; }""",
-        header_repl + "\n#endif\n#if 0",
+static inline signed int readds(const unsigned char *p) { return *(const signed int*)p; }
+#else
+#define readw(p) (*(const unsigned short*)(p))
+#define readws(p) (*(const signed short*)(p))
+#define readd(p) (*(const unsigned long*)(p))
+#define readds(p) (*(const signed long*)(p))
+#endif""",
+        header_repl + """
+#endif
+#if defined(_WIN32)
+#define readw(p) (*(const unsigned short*)(p))
+#define readws(p) (*(const signed short*)(p))
+#define readd(p) (*(const unsigned long*)(p))
+#define readds(p) (*(const signed long*)(p))
+#else
+#define readw(p) (*(const uint16_t*)(p))
+#define readws(p) (*(const int16_t*)(p))
+#define readd(p) (*(const uint32_t*)(p))
+#define readds(p) (*(const int32_t*)(p))
+#endif""",
         "ngen:headers",
     )
 
@@ -4214,11 +4442,11 @@ static void start_music_orig(const signed short track)
 
     txt = txt.replace(
         "handle = open(g_str_dsagen_dat, O_BINARY | O_RDONLY);",
-        "{ char dsagen_buf[512]; const char *dsagen_p = (access(g_str_dsagen_dat, 0) == 0) ? g_str_dsagen_dat : dsa_platform_resolve_path(g_str_dsagen_dat, dsagen_buf, sizeof(dsagen_buf)); handle = open(dsagen_p, O_BINARY | O_RDONLY); }",
+        "{ char dsagen_buf[512]; const char *dsagen_p = (access(g_str_dsagen_dat, 0) == 0) ? g_str_dsagen_dat : dsa_platform_resolve_path(g_str_dsagen_dat, dsagen_buf, sizeof(dsagen_buf)); handle = _open(dsagen_p, O_BINARY | O_RDONLY); }",
     )
     txt = txt.replace(
         "handle = open(g_str_dsagen_dat, O_RDONLY);",
-        "{ char dsagen_buf[512]; const char *dsagen_p = (access(g_str_dsagen_dat, 0) == 0) ? g_str_dsagen_dat : dsa_platform_resolve_path(g_str_dsagen_dat, dsagen_buf, sizeof(dsagen_buf)); handle = open(dsagen_p, O_RDONLY); }",
+        "{ char dsagen_buf[512]; const char *dsagen_p = (access(g_str_dsagen_dat, 0) == 0) ? g_str_dsagen_dat : dsa_platform_resolve_path(g_str_dsagen_dat, dsagen_buf, sizeof(dsagen_buf)); handle = _open(dsagen_p, O_RDONLY); }",
     )
 
     txt = replace_once(

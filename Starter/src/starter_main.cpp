@@ -29,26 +29,28 @@
 #include <string>
 #include <vector>
 
-#define SCREEN_W 1060
-#define SCREEN_H 760
+#define SCREEN_W 1040
+#define SCREEN_H 647
 
 static uint32_t      g_fb_fallback[SCREEN_W * SCREEN_H];
 static uint32_t     *g_fb       = g_fb_fallback;
 static HDC           g_mem_dc   = NULL;
 static HBITMAP       g_dib_bmp  = NULL;
-static HFONT         g_fonts[5] = {NULL, NULL, NULL, NULL, NULL};
+static HFONT         g_fonts[7] = {NULL, NULL, NULL, NULL, NULL, NULL, NULL};
 static SDL_Window   *g_window   = NULL;
 static SDL_Renderer *g_renderer = NULL;
 static SDL_Texture  *g_texture  = NULL;
 
 static std::string g_exe_dir;
 static std::string g_starter_dir;
+static std::string g_data_dir;
 static bool        g_disable_gog_autoscan     = false;
 static bool        g_force_no_grafikpaket     = false;
+static bool        g_no_browser_exec          = false;
 static std::string g_screenshot_progress_path;
 static bool        g_screenshot_progress_saved = false;
 
-/* Komplett auf Deutsch + gemerkte Fensterposition & Mausposition fuer Hover */
+/* Komplett auf Deutsch (NACHTRAG 1 Etappe 6: kein Sprachumschalter) + gemerkte Fensterposition & Mausposition fuer Hover */
 static bool g_lang_en = false;
 static int  g_win_x   = (int)SDL_WINDOWPOS_CENTERED;
 static int  g_win_y   = (int)SDL_WINDOWPOS_CENTERED;
@@ -58,7 +60,8 @@ static int  g_mouse_x = -1000;
 static int  g_mouse_y = -1000;
 
 static inline const char *L(const char *de, const char *en) {
-    return g_lang_en ? en : de;
+    (void)en;
+    return de;
 }
 
 static bool save_framebuffer_bmp(const std::string &bmp_path);
@@ -201,12 +204,21 @@ static void init_starter_dirs(void) {
     } else {
         g_exe_dir = ".";
     }
-    if (file_exists_win(join_path(g_exe_dir, "spiele.json"))) {
+    if (file_exists_win(join_path(g_exe_dir, "_starter\\spiele.json"))) {
         g_starter_dir = g_exe_dir;
+        g_data_dir    = join_path(g_exe_dir, "_starter");
+    } else if (file_exists_win(join_path(g_exe_dir, "spiele.json"))) {
+        g_starter_dir = g_exe_dir;
+        g_data_dir    = dir_exists_win(join_path(g_exe_dir, "_starter")) ? join_path(g_exe_dir, "_starter") : g_exe_dir;
+    } else if (file_exists_win(join_path(g_exe_dir, "..\\_starter\\spiele.json"))) {
+        g_starter_dir = full_win_path(join_path(g_exe_dir, ".."));
+        g_data_dir    = join_path(g_starter_dir, "_starter");
     } else if (file_exists_win(join_path(g_exe_dir, "..\\spiele.json"))) {
         g_starter_dir = full_win_path(join_path(g_exe_dir, ".."));
+        g_data_dir    = g_starter_dir;
     } else {
         g_starter_dir = g_exe_dir;
+        g_data_dir    = g_exe_dir;
     }
 }
 
@@ -247,6 +259,12 @@ struct GameCatalogEntry {
     std::vector<std::string> grafikmodi;
     bool        probenlog_supported;
     std::string probenlog_skript;
+    std::string dos_ordner;
+    std::string browser_url;
+    std::string browser_status;
+    std::string erwartete_exe_datei;
+    int         erwartete_exe_groesse;
+    std::string erwartete_exe_md5;
 
     /* Laufzeit-Einstellungen (aus einstellungen.ini) */
     PatchStufe  chosen_stufe;
@@ -270,6 +288,14 @@ struct GameCatalogEntry {
     std::string resolved_gamedir;
     bool        gamedir_valid;
     bool        gamedir_writable;
+    bool        gamedir_wrong_version;
+    std::string wrong_version_dir;
+    std::string wrong_version_msg_de;
+    std::string wrong_version_msg_en;
+    std::string resolved_dos_dir;
+    std::string resolved_dos_copy_dir;
+    bool        has_dos_patcher;
+    bool        dos_fix_exists;
     bool        has_grafikpaket;
     std::string resolved_paket_dir;
 
@@ -289,11 +315,17 @@ enum ScreenMode {
     SCREEN_SETTINGS    = 1
 };
 
-static ScreenMode  g_screen           = SCREEN_SELECT_GAME;
-static int         g_settings_row     = 0;
-static bool        g_modal_active     = false;
-static bool        g_modal_is_ok      = false;
-static bool        g_modal_is_crash   = false;
+static ScreenMode  g_screen                  = SCREEN_SELECT_GAME;
+static int         g_settings_row            = 0;
+static int         g_open_dd_game            = -1;   /* -1 = geschlossen, 0..2 = Anzeige-Klappliste offen fuer Karte */
+static int         g_open_dd_sel             = -1;   /* 0..4 = hervorgehobener Eintrag in der offenen Klappliste */
+static int         g_card_focus              = 0;    /* 0=Fixes, 1=Anzeige, 2=Intro, 3=Probenlog, 4=Ordner, 5=Zahnrad, 6=Windows, 7=DOS, 8=Browser */
+static bool        g_show_focus_ring         = false;
+static bool        g_modal_active            = false;
+static bool        g_modal_is_ok             = false;
+static bool        g_modal_is_crash          = false;
+static bool        g_modal_is_readonly_dos   = false;
+static int         g_modal_readonly_game_idx = -1;
 static std::string g_modal_title;
 static std::string g_modal_line1;
 static std::string g_modal_line2;
@@ -429,6 +461,30 @@ static GameCatalogEntry make_default_entry(int teil) {
     e.verfuegbar = false;
     e.gamedir_valid = false;
     e.gamedir_writable = false;
+    e.gamedir_wrong_version = false;
+    e.has_dos_patcher = false;
+    e.dos_fix_exists = false;
+    e.browser_status = "verfuegbar";
+    e.erwartete_exe_groesse = 0;
+    if (teil == 1) {
+        e.dos_ordner = "Schicksalsklinge\\DOS";
+        e.browser_url = "https://meowmuhmuhcow.github.io/schicksalsklinge/";
+        e.erwartete_exe_datei = "SCHICKM.EXE";
+        e.erwartete_exe_groesse = 556208;
+        e.erwartete_exe_md5 = "4ce035f95ead01a8b2553b4487544e5d";
+    } else if (teil == 2) {
+        e.dos_ordner = "Sternenschweif\\DOS";
+        e.browser_url = "https://meowmuhmuhcow.github.io/sternenschweif/";
+        e.erwartete_exe_datei = "SCHWEIF.EXE";
+        e.erwartete_exe_groesse = 1387552;
+        e.erwartete_exe_md5 = "da3b59ce86a82e4b8bb14d36ed37d4d0";
+    } else if (teil == 3) {
+        e.dos_ordner = "Riva\\DOS";
+        e.browser_url = "https://meowmuhmuhcow.github.io/riva/";
+        e.erwartete_exe_datei = "RIVA.EXE";
+        e.erwartete_exe_groesse = 2477899;
+        e.erwartete_exe_md5 = "fb8f5fc3ba5454c7344c17aaf362de35";
+    }
     e.has_grafikpaket = false;
     e.has_title_image = false;
     e.title_w = 0;
@@ -465,6 +521,12 @@ static void parse_game_object(const char *&p, GameCatalogEntry &e) {
         }
         else if (key == "probenlog") e.probenlog_supported = parse_json_bool(p);
         else if (key == "probenlog_skript") e.probenlog_skript = parse_json_string(p);
+        else if (key == "dos_ordner") e.dos_ordner = parse_json_string(p);
+        else if (key == "browser_url") e.browser_url = parse_json_string(p);
+        else if (key == "browser_status") e.browser_status = parse_json_string(p);
+        else if (key == "erwartete_exe_datei") e.erwartete_exe_datei = parse_json_string(p);
+        else if (key == "erwartete_exe_groesse") e.erwartete_exe_groesse = parse_json_int(p);
+        else if (key == "erwartete_exe_md5") e.erwartete_exe_md5 = parse_json_string(p);
         else if (key == "exe_stufen" && *p == '{') {
             ++p;
             while (*p) {
@@ -567,9 +629,10 @@ static PatchStufe str_to_stufe(const std::string &s) {
 }
 
 static void load_einstellungen_ini(void) {
+    std::string p0 = join_path(g_data_dir, "einstellungen.ini");
     std::string p1 = join_path(g_exe_dir, "einstellungen.ini");
     std::string p2 = join_path(g_starter_dir, "einstellungen.ini");
-    std::string chosen = file_exists_win(p1) ? p1 : (file_exists_win(p2) ? p2 : "");
+    std::string chosen = file_exists_win(p0) ? p0 : (file_exists_win(p1) ? p1 : (file_exists_win(p2) ? p2 : ""));
     if (chosen.empty()) return;
 
     FILE *fp = fopen(utf8_to_win1252(chosen).c_str(), "r");
@@ -601,17 +664,18 @@ static void load_einstellungen_ini(void) {
                 if (_stricmp(v.c_str(), "einstellungen") == 0) g_screen = SCREEN_SETTINGS;
                 else g_screen = SCREEN_SELECT_GAME;
             } else if (_stricmp(k.c_str(), "sprache") == 0) {
-                g_lang_en = (_stricmp(v.c_str(), "en") == 0 || _stricmp(v.c_str(), "english") == 0);
+                /* NACHTRAG 1 (Etappe 6): Einstellung "sprache" beim Laden ignorieren */
+                g_lang_en = false;
             } else if (_stricmp(k.c_str(), "fenster_x") == 0 && !v.empty()) {
                 g_win_x = atoi(v.c_str());
             } else if (_stricmp(k.c_str(), "fenster_y") == 0 && !v.empty()) {
                 g_win_y = atoi(v.c_str());
             } else if (_stricmp(k.c_str(), "fenster_b") == 0 && !v.empty()) {
                 int w = atoi(v.c_str());
-                if (w >= SCREEN_W && w <= 3840) g_win_w = w;
+                if (w >= SCREEN_W && w <= 3840 && w != 1060) g_win_w = w;
             } else if (_stricmp(k.c_str(), "fenster_h") == 0 && !v.empty()) {
                 int h = atoi(v.c_str());
-                if (h >= SCREEN_H && h <= 2160) g_win_h = h;
+                if (h >= SCREEN_H && h <= 2160 && h != 760 && h != 680) g_win_h = h;
             }
         } else {
             for (size_t i = 0; i < g_games.size(); ++i) {
@@ -634,7 +698,11 @@ static void load_einstellungen_ini(void) {
                         g.chosen_vollbild = (v == "1" || _stricmp(v.c_str(), "true") == 0 || _stricmp(v.c_str(), "ja") == 0);
                         if (g.chosen_vollbild) g.chosen_fenster = "vollbild";
                         else if (g.chosen_fenster == "vollbild") g.chosen_fenster = "4";
-                    } else if (_stricmp(k.c_str(), "spielpfad") == 0) g.custom_spielpfad = v;
+                    } else if (_stricmp(k.c_str(), "spielpfad") == 0) {
+                        if (v != "-" && _stricmp(v.c_str(), "keiner") != 0 && _stricmp(v.c_str(), "none") != 0) {
+                            g.custom_spielpfad = v;
+                        }
+                    }
                     else if (_stricmp(k.c_str(), "port_ordner") == 0) g.custom_port_ordner = v;
                 }
             }
@@ -669,7 +737,6 @@ static void write_one_ini(const std::string &ini_path) {
         fprintf(fp, "letztes_spiel=%s\n", g_games[g_selected_game].id.c_str());
     }
     fprintf(fp, "letzter_bildschirm=%s\n", (g_screen == SCREEN_SETTINGS) ? "einstellungen" : "auswahl");
-    fprintf(fp, "sprache=%s\n", g_lang_en ? "en" : "de");
     if (g_win_x != (int)SDL_WINDOWPOS_CENTERED && g_win_x != (int)SDL_WINDOWPOS_UNDEFINED) {
         fprintf(fp, "fenster_x=%d\n", g_win_x);
         fprintf(fp, "fenster_y=%d\n", g_win_y);
@@ -685,7 +752,9 @@ static void write_one_ini(const std::string &ini_path) {
         fprintf(fp, "skalierung=%s\n", g.chosen_skalierung.c_str());
         fprintf(fp, "probenlog=%d\n", g.chosen_probenlog ? 1 : 0);
         fprintf(fp, "intro=%d\n", g.chosen_intro ? 1 : 0);
-        if (!g.custom_spielpfad.empty()) {
+        if (!g.custom_spielpfad.empty() && g.custom_spielpfad != "-" &&
+            _stricmp(g.custom_spielpfad.c_str(), "keiner") != 0 &&
+            _stricmp(g.custom_spielpfad.c_str(), "none") != 0) {
             fprintf(fp, "spielpfad=%s\n", g.custom_spielpfad.c_str());
         }
         if (!g.custom_port_ordner.empty()) {
@@ -698,11 +767,14 @@ static void write_one_ini(const std::string &ini_path) {
 
 static void save_einstellungen_ini(void) {
     sync_window_geometry_to_globals();
-    std::string p1 = join_path(g_exe_dir, "einstellungen.ini");
-    std::string p2 = join_path(g_starter_dir, "einstellungen.ini");
-    write_one_ini(p1);
-    if (_stricmp(p1.c_str(), p2.c_str()) != 0) {
-        write_one_ini(p2);
+    std::string p0 = join_path(g_data_dir, "einstellungen.ini");
+    mkdir_recursive_win(g_data_dir);
+    write_one_ini(p0);
+    if (_stricmp(g_data_dir.c_str(), g_exe_dir.c_str()) == 0) {
+        std::string p2 = join_path(g_starter_dir, "einstellungen.ini");
+        if (_stricmp(p0.c_str(), p2.c_str()) != 0) {
+            write_one_ini(p2);
+        }
     }
 }
 
@@ -710,9 +782,14 @@ static void save_einstellungen_ini(void) {
  * 6. Erkennung von Port-EXEs, Spielordner, Grafikpaket & Fassungspruefung
  * ========================================================================= */
 
-static bool is_dir_writable_win(const std::string &dir) {
-    const char *force_ro = getenv("DSA_FORCE_READONLY_GAMEDIR");
-    if (force_ro && force_ro[0] == '1') return false;
+static bool is_program_files_dir(const std::string &dir) {
+    std::string low = normalize_slash_lower(dir);
+    if (low.find("/program files/") != std::string::npos) return true;
+    if (low.find("/program files (x86)/") != std::string::npos) return true;
+    return false;
+}
+
+static bool is_dir_writable_real_win(const std::string &dir) {
     if (dir.empty()) return false;
     std::string wdir = utf8_to_win1252(normalize_win_sep(dir));
     char test_file[MAX_PATH * 2];
@@ -725,14 +802,184 @@ static bool is_dir_writable_win(const std::string &dir) {
     return true;
 }
 
+/* Nachtrag 3: Nur der echte Schreibtest entscheidet (Testdatei anlegen und wieder loeschen),
+ * KEINE pauschale Program-Files-Sperre. DSA_FORCE_READONLY_GAMEDIR bleibt fuer Tests erhalten. */
+static bool is_dir_writable_win(const std::string &dir) {
+    const char *force_ro = getenv("DSA_FORCE_READONLY_GAMEDIR");
+    if (force_ro && force_ro[0] == '1') return false;
+    return is_dir_writable_real_win(dir);
+}
+
+/* RFC 1321 MD5 fuer die Vorab-Pruefung der Original-Spiel-EXEs (T2) */
+static void compute_buffer_md5_hex(const uint8_t *msg, size_t len, char out_hex[33]) {
+    static const uint32_t K[64] = {
+        0xd76aa478u,0xe8c7b756u,0x242070dbu,0xc1bdceeeu,0xf57c0fafu,0x4787c62au,0xa8304613u,0xfd469501u,
+        0x698098d8u,0x8b44f7afu,0xffff5bb1u,0x895cd7beu,0x6b901122u,0xfd987193u,0xa679438eu,0x49b40821u,
+        0xf61e2562u,0xc040b340u,0x265e5a51u,0xe9b6c7aau,0xd62f105du,0x02441453u,0xd8a1e681u,0xe7d3fbc8u,
+        0x21e1cde6u,0xc33707d6u,0xf4d50d87u,0x455a14edu,0xa9e3e905u,0xfcefa3f8u,0x676f02d9u,0x8d2a4c8au,
+        0xfffa3942u,0x8771f681u,0x6d9d6122u,0xfde5380cu,0xa4beea44u,0x4bdecfa9u,0xf6bb4b60u,0xbebfbc70u,
+        0x289b7ec6u,0xeaa127fau,0xd4ef3085u,0x04881d05u,0xd9d4d039u,0xe6db99e5u,0x1fa27cf8u,0xc4ac5665u,
+        0xf4292244u,0x432aff97u,0xab9423a7u,0xfc93a039u,0x655b59c3u,0x8f0ccc92u,0xffeff47du,0x85845dd1u,
+        0x6fa87e4fu,0xfe2ce6e0u,0xa3014314u,0x4e0811a1u,0xf7537e82u,0xbd3af235u,0x2ad7d2bbu,0xeb86d391u
+    };
+    static const uint32_t S[64] = {
+        7,12,17,22,7,12,17,22,7,12,17,22,7,12,17,22,
+        5,9,14,20,5,9,14,20,5,9,14,20,5,9,14,20,
+        4,11,16,23,4,11,16,23,4,11,16,23,4,11,16,23,
+        6,10,15,21,6,10,15,21,6,10,15,21,6,10,15,21
+    };
+    uint32_t a0 = 0x67452301u, b0 = 0xefcdab89u, c0 = 0x98badcfeu, d0 = 0x10325476u;
+    size_t new_len = ((len + 8) / 64 + 1) * 64;
+    std::vector<uint8_t> buf(new_len, 0);
+    if (len > 0) memcpy(buf.data(), msg, len);
+    buf[len] = 0x80;
+    uint64_t bits_len = (uint64_t)len * 8ull;
+    memcpy(buf.data() + new_len - 8, &bits_len, 8);
+
+    for (size_t offset = 0; offset < new_len; offset += 64) {
+        const uint32_t *M = (const uint32_t *)(buf.data() + offset);
+        uint32_t A = a0, B = b0, C = c0, D = d0;
+        for (uint32_t i = 0; i < 64; ++i) {
+            uint32_t F, g;
+            if (i < 16)      { F = (B & C) | ((~B) & D); g = i; }
+            else if (i < 32) { F = (D & B) | ((~D) & C); g = (5 * i + 1) % 16; }
+            else if (i < 48) { F = B ^ C ^ D;            g = (3 * i + 5) % 16; }
+            else             { F = C ^ (B | (~D));       g = (7 * i) % 16; }
+            F = F + A + K[i] + M[g];
+            A = D; D = C; C = B;
+            B = B + ((F << S[i]) | (F >> (32 - S[i])));
+        }
+        a0 += A; b0 += B; c0 += C; d0 += D;
+    }
+    uint8_t digest[16];
+    memcpy(digest + 0,  &a0, 4);
+    memcpy(digest + 4,  &b0, 4);
+    memcpy(digest + 8,  &c0, 4);
+    memcpy(digest + 12, &d0, 4);
+    static const char hex_chars[] = "0123456789abcdef";
+    for (int i = 0; i < 16; ++i) {
+        out_hex[i * 2]     = hex_chars[(digest[i] >> 4) & 0xF];
+        out_hex[i * 2 + 1] = hex_chars[digest[i] & 0xF];
+    }
+    out_hex[32] = '\0';
+}
+
+struct Md5FileCacheEntry {
+    std::string path;
+    long        size;
+    DWORD       mtime_low;
+    DWORD       mtime_high;
+    std::string md5;
+};
+static std::vector<Md5FileCacheEntry> g_md5_cache;
+
+static bool get_file_size_and_md5(const std::string &path, long &out_size, std::string &out_md5) {
+    out_size = -1;
+    out_md5.clear();
+    std::string w = utf8_to_win1252(normalize_win_sep(path));
+    WIN32_FILE_ATTRIBUTE_DATA fad;
+    if (!GetFileAttributesExA(w.c_str(), GetFileExInfoStandard, &fad)) {
+        return false;
+    }
+    out_size = (long)fad.nFileSizeLow;
+    for (size_t i = 0; i < g_md5_cache.size(); ++i) {
+        if (_stricmp(g_md5_cache[i].path.c_str(), w.c_str()) == 0 &&
+            g_md5_cache[i].size == out_size &&
+            g_md5_cache[i].mtime_low == fad.ftLastWriteTime.dwLowDateTime &&
+            g_md5_cache[i].mtime_high == fad.ftLastWriteTime.dwHighDateTime) {
+            out_md5 = g_md5_cache[i].md5;
+            return true;
+        }
+    }
+    if (out_size < 0 || out_size > 32 * 1024 * 1024) return false;
+    FILE *fp = fopen(w.c_str(), "rb");
+    if (!fp) return false;
+    std::vector<uint8_t> buf((size_t)out_size);
+    if (out_size > 0 && fread(buf.data(), 1, (size_t)out_size, fp) != (size_t)out_size) {
+        fclose(fp);
+        return false;
+    }
+    fclose(fp);
+    char hex[33];
+    compute_buffer_md5_hex(buf.data(), (size_t)out_size, hex);
+    out_md5 = hex;
+
+    Md5FileCacheEntry ce;
+    ce.path       = w;
+    ce.size       = out_size;
+    ce.mtime_low  = fad.ftLastWriteTime.dwLowDateTime;
+    ce.mtime_high = fad.ftLastWriteTime.dwHighDateTime;
+    ce.md5        = out_md5;
+    g_md5_cache.push_back(ce);
+    return true;
+}
+
+static void get_wrong_version_messages(const GameCatalogEntry &g, std::string &out_de, std::string &out_en) {
+    if (g.teil == 3) {
+        out_de = "Diese Riva-Fassung wird nicht unterstützt - benötigt wird die deutsche GOG-Fassung";
+        out_en = "This Riva version is not supported - the German GOG version is required";
+    } else if (g.teil == 2) {
+        out_de = "Diese Sternenschweif-Fassung wird nicht unterstützt - benötigt wird die deutsche GOG-Fassung";
+        out_en = "This Star Trail version is not supported - the German GOG version is required";
+    } else {
+        out_de = "Diese Schicksalsklinge-Fassung wird nicht unterstützt - benötigt wird die deutsche GOG-Fassung";
+        out_en = "This Blade of Destiny version is not supported - the German GOG version is required";
+    }
+}
+
+/* Prueft, ob die Spieldaten im Ordner zur erwarteten deutschen GOG-Fassung passen (T2) */
+static bool validate_game_version(const GameCatalogEntry &g, const std::string &dir) {
+    std::string exe_rel = !g.erwartete_exe_datei.empty()
+        ? g.erwartete_exe_datei
+        : ((g.teil == 1) ? "SCHICKM.EXE" : ((g.teil == 2) ? "SCHWEIF.EXE" : "RIVA.EXE"));
+    int exp_size = (g.erwartete_exe_groesse > 0)
+        ? g.erwartete_exe_groesse
+        : ((g.teil == 1) ? 556208 : ((g.teil == 2) ? 1387552 : 2477899));
+    std::string exp_md5 = !g.erwartete_exe_md5.empty()
+        ? g.erwartete_exe_md5
+        : ((g.teil == 1) ? "4ce035f95ead01a8b2553b4487544e5d"
+                         : ((g.teil == 2) ? "da3b59ce86a82e4b8bb14d36ed37d4d0"
+                                          : "fb8f5fc3ba5454c7344c17aaf362de35"));
+
+    std::string exe_path = join_path(dir, exe_rel);
+    if (!file_exists_win(exe_path) && file_exists_win(join_path(dir, std::string("DATA\\") + exe_rel))) {
+        exe_path = join_path(dir, std::string("DATA\\") + exe_rel);
+    }
+    long actual_size = -1;
+    std::string actual_md5;
+    if (!get_file_size_and_md5(exe_path, actual_size, actual_md5)) {
+        return false;
+    }
+    if (actual_size != (long)exp_size || _stricmp(actual_md5.c_str(), exp_md5.c_str()) != 0) {
+        return false;
+    }
+    if (g.teil == 1) {
+        long dsagen_sz = file_size_win(join_path(dir, "DSAGEN.DAT"));
+        if (dsagen_sz != 663221L) {
+            return false;
+        }
+    }
+    return true;
+}
+
+static bool file_exists_in_gamedir(const std::string &dir, const std::string &rel) {
+    if (file_exists_win(join_path(dir, rel))) return true;
+    if (_strnicmp(rel.c_str(), "DATA\\", 5) == 0 || _strnicmp(rel.c_str(), "DATA/", 5) == 0) {
+        if (file_exists_win(join_path(dir, rel.substr(5)))) return true;
+    } else {
+        if (file_exists_win(join_path(dir, std::string("DATA\\") + rel))) return true;
+    }
+    return false;
+}
+
 static bool validate_gamedir_files(const GameCatalogEntry &g, const std::string &dir, std::string &out_missing) {
     out_missing.clear();
-    if (!file_exists_win(join_path(dir, g.kennungsdatei))) {
+    if (!file_exists_in_gamedir(dir, g.kennungsdatei)) {
         out_missing = g.kennungsdatei;
         return false;
     }
     for (size_t i = 0; i < g.pflichtdateien.size(); ++i) {
-        if (!file_exists_win(join_path(dir, g.pflichtdateien[i]))) {
+        if (!file_exists_in_gamedir(dir, g.pflichtdateien[i])) {
             out_missing = g.pflichtdateien[i];
             return false;
         }
@@ -740,7 +987,8 @@ static bool validate_gamedir_files(const GameCatalogEntry &g, const std::string 
     return true;
 }
 
-static bool check_gamedir_candidate(const GameCatalogEntry &g, const std::string &cand, std::string &out_dir) {
+static bool check_gamedir_candidate_ex(const GameCatalogEntry &g, const std::string &cand, std::string &out_dir, bool &out_wrong_version) {
+    out_wrong_version = false;
     std::string c = trim_str(cand);
     if (c.empty()) return false;
     if (!is_abs_win_path(c)) {
@@ -748,15 +996,30 @@ static bool check_gamedir_candidate(const GameCatalogEntry &g, const std::string
     }
     std::string missing;
     if (validate_gamedir_files(g, c, missing)) {
+        if (!validate_game_version(g, c)) {
+            out_dir = full_win_path(c);
+            out_wrong_version = true;
+            return false;
+        }
         out_dir = full_win_path(c);
         return true;
     }
     std::string parent = join_path(c, "..");
     if (validate_gamedir_files(g, parent, missing)) {
+        if (!validate_game_version(g, parent)) {
+            out_dir = full_win_path(parent);
+            out_wrong_version = true;
+            return false;
+        }
         out_dir = full_win_path(parent);
         return true;
     }
     return false;
+}
+
+static bool check_gamedir_candidate(const GameCatalogEntry &g, const std::string &cand, std::string &out_dir) {
+    bool wrong_ver = false;
+    return check_gamedir_candidate_ex(g, cand, out_dir, wrong_ver);
 }
 
 static bool read_spielpfad_txt(const GameCatalogEntry &g, const std::string &txt_path, std::string &out_dir) {
@@ -1498,14 +1761,14 @@ static bool load_dsa2_title_image(const std::string &gamedir, std::vector<uint32
                     for (int x = 0; x < 320; ++x) {
                         size_t k = (size_t)y * 320u + (size_t)x;
                         uint32_t c = pal[pix[k]];
-                        /* Bei ARTWORK.AIF das Lade-Overlay ("Bitte warten!" + CD unten rechts) weich abdunkeln */
+                        /* Bei ARTWORK.AIF das Lade-Overlay ("Bitte warten!" + CD unten rechts) weich in den Kartenhintergrund (#1b2232) ueberblenden */
                         if (i == 0 && x >= 184 && y >= 120) {
                             int fx = (x >= 210) ? 0 : (210 - x) * 256 / 26;
                             int fy = (y >= 142) ? 0 : (142 - y) * 256 / 22;
                             int f = (fx > fy) ? fx : fy;
-                            int r = (((int)((c >> 16) & 0xFF)) * f) >> 8;
-                            int g = (((int)((c >> 8)  & 0xFF)) * f) >> 8;
-                            int b = (((int)(c         & 0xFF)) * f) >> 8;
+                            int r = ((((int)((c >> 16) & 0xFF)) * f) + 0x1B * (256 - f)) >> 8;
+                            int g = ((((int)((c >> 8)  & 0xFF)) * f) + 0x22 * (256 - f)) >> 8;
+                            int b = ((((int)(c         & 0xFF)) * f) + 0x32 * (256 - f)) >> 8;
                             c = 0xFF000000u | ((uint32_t)r << 16) | ((uint32_t)g << 8) | (uint32_t)b;
                         }
                         out_argb[k] = c;
@@ -1712,16 +1975,33 @@ static void load_game_title_image(GameCatalogEntry &g) {
 }
 
 static void refresh_game_status(GameCatalogEntry &g) {
-    /* 1. Port-Ordner & EXEs pruefen (inkl. g_exe_dir fuer Starter/release/) */
+    /* 1. Port-Ordner & EXEs pruefen (inkl. g_exe_dir, Unterordner Nativ/bin sowie gewaehltem Spielpfad fuer Einzelpakete) */
     std::vector<std::string> dirs_to_check;
     if (!g.custom_port_ordner.empty()) {
         dirs_to_check.push_back(g.custom_port_ordner);
-    } else {
-        dirs_to_check.push_back(g_exe_dir);
-        if (!g.port_ordner.empty()) dirs_to_check.push_back(g.port_ordner);
-        for (size_t i = 0; i < g.port_ordner_alt.size(); ++i) {
-            dirs_to_check.push_back(g.port_ordner_alt[i]);
-        }
+        dirs_to_check.push_back(join_path(g.custom_port_ordner, "bin"));
+        dirs_to_check.push_back(join_path(g.custom_port_ordner, "Nativ"));
+    }
+    if (!g.port_ordner.empty() && g.port_ordner != ".") {
+        dirs_to_check.push_back(g.port_ordner);
+        dirs_to_check.push_back(join_path(g.port_ordner, "bin"));
+    }
+    dirs_to_check.push_back(g_exe_dir);
+    if (!g.port_ordner.empty()) dirs_to_check.push_back(g.port_ordner);
+    for (size_t i = 0; i < g.port_ordner_alt.size(); ++i) {
+        dirs_to_check.push_back(g.port_ordner_alt[i]);
+        dirs_to_check.push_back(join_path(g.port_ordner_alt[i], "bin"));
+    }
+    const char *sub_folder = (g.teil == 1) ? "Schicksalsklinge" : ((g.teil == 2) ? "Sternenschweif" : "Riva");
+    dirs_to_check.push_back(std::string(sub_folder) + "\\Nativ");
+    dirs_to_check.push_back(std::string("trilogie\\Nordlandtrilogie\\") + sub_folder + "\\Nativ");
+    dirs_to_check.push_back(std::string("..\\trilogie\\Nordlandtrilogie\\") + sub_folder + "\\Nativ");
+    dirs_to_check.push_back("release");
+    dirs_to_check.push_back("..\\release");
+    if (!g.custom_spielpfad.empty() && g.custom_spielpfad != "-") {
+        dirs_to_check.push_back(g.custom_spielpfad);
+        dirs_to_check.push_back(join_path(g.custom_spielpfad, "bin"));
+        dirs_to_check.push_back(join_path(g.custom_spielpfad, "Nativ"));
     }
 
     g.has_exe_orig = false;
@@ -1749,31 +2029,42 @@ static void refresh_game_status(GameCatalogEntry &g) {
         }
     }
 
-    /* 2. Spielordner (SPIELPFAD) automatisch suchen */
+    /* 2. Spielordner (SPIELPFAD) automatisch suchen + Fassung pruefen (T2) */
     g.resolved_gamedir.clear();
     g.gamedir_valid = false;
     g.gamedir_writable = false;
+    g.gamedir_wrong_version = false;
+    g.wrong_version_dir.clear();
+    get_wrong_version_messages(g, g.wrong_version_msg_de, g.wrong_version_msg_en);
 
     bool explicitly_disabled = (g.custom_spielpfad == "-" ||
                                 _stricmp(g.custom_spielpfad.c_str(), "keiner") == 0 ||
                                 _stricmp(g.custom_spielpfad.c_str(), "none") == 0);
 
-    if (!explicitly_disabled && !g.custom_spielpfad.empty() && check_gamedir_candidate(g, g.custom_spielpfad, g.resolved_gamedir)) {
-        g.gamedir_valid = true;
+    if (!explicitly_disabled && !g.custom_spielpfad.empty()) {
+        std::string cand_dir;
+        bool wrong_ver = false;
+        if (check_gamedir_candidate_ex(g, g.custom_spielpfad, cand_dir, wrong_ver)) {
+            g.resolved_gamedir = cand_dir;
+            g.gamedir_valid = true;
+        } else if (wrong_ver) {
+            g.gamedir_wrong_version = true;
+            g.wrong_version_dir = cand_dir;
+        }
     }
-    if (!explicitly_disabled && !g.gamedir_valid) {
+    if (!explicitly_disabled && !g.gamedir_valid && !g.gamedir_wrong_version) {
+        std::string data_spieldaten = join_path(g_data_dir, "Spieldaten\\" + g.id);
+        if (check_gamedir_candidate(g, data_spieldaten, g.resolved_gamedir)) {
+            g.gamedir_valid = true;
+        }
+    }
+    if (!explicitly_disabled && !g.gamedir_valid && !g.gamedir_wrong_version) {
         std::string local_spieldaten = join_path(g_starter_dir, "Spieldaten\\" + g.id);
         if (check_gamedir_candidate(g, local_spieldaten, g.resolved_gamedir)) {
             g.gamedir_valid = true;
         }
     }
-    if (!explicitly_disabled && !g.gamedir_valid) {
-        std::string exe_spieldaten = join_path(g_exe_dir, "Spieldaten\\" + g.id);
-        if (check_gamedir_candidate(g, exe_spieldaten, g.resolved_gamedir)) {
-            g.gamedir_valid = true;
-        }
-    }
-    if (!explicitly_disabled && !g.gamedir_valid && !g_disable_gog_autoscan) {
+    if (!explicitly_disabled && !g.gamedir_valid && !g.gamedir_wrong_version && !g_disable_gog_autoscan) {
         const char *env_sp = getenv("SPIELPFAD");
         if (!env_sp || !env_sp[0]) env_sp = getenv("DSA_GAMEDIR");
         if (!env_sp || !env_sp[0]) env_sp = getenv("DSA_GAME_DIR");
@@ -1781,11 +2072,11 @@ static void refresh_game_status(GameCatalogEntry &g) {
             g.gamedir_valid = true;
         }
     }
-    if (!explicitly_disabled && !g.gamedir_valid && !g_disable_gog_autoscan) {
+    if (!explicitly_disabled && !g.gamedir_valid && !g.gamedir_wrong_version && !g_disable_gog_autoscan) {
         std::string sp_candidates[] = {
+            join_path(g_data_dir, "SPIELPFAD.txt"),
             join_path(g_exe_dir, "SPIELPFAD.txt"),
             join_path(g_starter_dir, "SPIELPFAD.txt"),
-            join_path(g_starter_dir, "..\\SPIELPFAD.txt"),
             join_path(g.resolved_port_dir, "SPIELPFAD.txt"),
             join_path(g.resolved_port_dir, "..\\SPIELPFAD.txt")
         };
@@ -1796,7 +2087,7 @@ static void refresh_game_status(GameCatalogEntry &g) {
             }
         }
     }
-    if (!explicitly_disabled && !g.gamedir_valid && !g_disable_gog_autoscan) {
+    if (!explicitly_disabled && !g.gamedir_valid && !g.gamedir_wrong_version && !g_disable_gog_autoscan) {
         for (size_t i = 0; i < g.gog_pfade.size(); ++i) {
             if (check_gamedir_candidate(g, g.gog_pfade[i], g.resolved_gamedir)) {
                 g.gamedir_valid = true;
@@ -1808,32 +2099,80 @@ static void refresh_game_status(GameCatalogEntry &g) {
         g.gamedir_writable = is_dir_writable_win(g.resolved_gamedir);
     }
 
-    /* T1 (Etappe 4): Original-Titelbild zur Laufzeit aus dem Spielordner laden (auch wenn Port-EXE noch fehlt, z. B. Riva) */
+    /* T1 (Etappe 4): Original-Titelbild zur Laufzeit aus dem Spielordner laden */
     load_game_title_image(g);
 
-    /* 3. Grafikpaket-Verfuegbarkeit pruefen (T1: Modus 'paket' nur waehlbar, wenn Paket erzeugt wurde) */
-    g.has_grafikpaket = false;
-    g.resolved_paket_dir.clear();
-    if (!g_force_no_grafikpaket) {
-        std::string pk_candidates[5] = {
-            join_path(g_starter_dir, "Grafikpakete\\" + g.id),
-            join_path(g_exe_dir, "Grafikpakete\\" + g.id),
-            join_path(g_starter_dir, "..\\Grafik\\pakete\\stiltreu"),
-            join_path(g_starter_dir, "..\\Grafik\\pakete\\xbrz"),
-            join_path(g_exe_dir, "Grafik\\pakete\\stiltreu")
-        };
-        for (int i = 0; i < 5; ++i) {
-            if (dir_has_grafikpaket(pk_candidates[i])) {
-                g.has_grafikpaket = true;
-                g.resolved_paket_dir = full_win_path(pk_candidates[i]);
+    /* 3. DOS-Patch-Ordner & erzeugte Fix-EXEs pruefen (Nachtrag 1 & Nachtrag 3) */
+    g.resolved_dos_dir.clear();
+    g.resolved_dos_copy_dir.clear();
+    g.has_dos_patcher = false;
+    g.dos_fix_exists = false;
+    {
+        std::vector<std::string> dos_cands;
+        if (!g.dos_ordner.empty()) {
+            dos_cands.push_back(join_path(g_starter_dir, g.dos_ordner));
+            dos_cands.push_back(join_path(g_exe_dir, g.dos_ordner));
+        }
+        if (!g.resolved_port_dir.empty()) {
+            dos_cands.push_back(join_path(g.resolved_port_dir, "..\\DOS"));
+            dos_cands.push_back(g.resolved_port_dir);
+        }
+        dos_cands.push_back(join_path(g_starter_dir, std::string(sub_folder) + "\\DOS"));
+        dos_cands.push_back(join_path(g_starter_dir, std::string("trilogie\\Nordlandtrilogie\\") + sub_folder + "\\DOS"));
+        dos_cands.push_back(join_path(g_exe_dir, std::string("..\\trilogie\\Nordlandtrilogie\\") + sub_folder + "\\DOS"));
+        if (g.teil == 1) {
+            dos_cands.push_back(join_path(g_starter_dir, "..\\GitHub\\schicksalsklinge"));
+        }
+        for (size_t di = 0; di < dos_cands.size(); ++di) {
+            if (file_exists_win(join_path(dos_cands[di], "Patch\\patchen.ps1"))) {
+                g.resolved_dos_dir = full_win_path(dos_cands[di]);
+                g.has_dos_patcher = true;
                 break;
             }
         }
-    }
-    if (!g.has_grafikpaket && _stricmp(g.chosen_grafik.c_str(), "paket") == 0) {
-        g.chosen_grafik = "original";
+        if (g.has_dos_patcher && g.gamedir_valid) {
+            const char *prefix = (g.teil == 1) ? "BLADEM" : ((g.teil == 2) ? "SCHWEIF" : "RIVA");
+            std::string fw_b = join_path(g.resolved_dos_dir, std::string("Build\\") + prefix + "_FIX_WICHTIG.EXE");
+            std::string fa_b = join_path(g.resolved_dos_dir, std::string("Build\\") + prefix + "_FIX_ALLES.EXE");
+            std::string marker = join_path(g.resolved_dos_dir, "Build\\gepatchter_spielpfad.txt");
+            std::string src_marker = join_path(g.resolved_dos_dir, "Build\\quell_spielpfad.txt");
+            if (file_exists_win(fw_b) && file_exists_win(fa_b) && file_exists_win(marker)) {
+                std::string patched_dir;
+                std::string source_dir;
+                FILE *mfp = fopen(utf8_to_win1252(marker).c_str(), "r");
+                if (mfp) {
+                    char mline[1024] = "";
+                    if (fgets(mline, sizeof(mline), mfp)) {
+                        patched_dir = trim_str(mline);
+                    }
+                    fclose(mfp);
+                }
+                FILE *sfp = fopen(utf8_to_win1252(src_marker).c_str(), "r");
+                if (sfp) {
+                    char sline[1024] = "";
+                    if (fgets(sline, sizeof(sline), sfp)) {
+                        source_dir = trim_str(sline);
+                    }
+                    fclose(sfp);
+                }
+                if (!patched_dir.empty()) {
+                    std::string fw_p = join_path(patched_dir, std::string(prefix) + "_FIX_WICHTIG.EXE");
+                    std::string fa_p = join_path(patched_dir, std::string(prefix) + "_FIX_ALLES.EXE");
+                    if (file_exists_win(fw_p) && file_exists_win(fa_p)) {
+                        if (_stricmp(patched_dir.c_str(), g.resolved_gamedir.c_str()) == 0) {
+                            g.dos_fix_exists = true;
+                        } else if (!source_dir.empty() && _stricmp(source_dir.c_str(), g.resolved_gamedir.c_str()) == 0) {
+                            g.dos_fix_exists = true;
+                            g.resolved_dos_copy_dir = patched_dir;
+                        }
+                    }
+                }
+            }
+        }
     }
 
+    g.has_grafikpaket = false;
+    g.resolved_paket_dir.clear();
     g.verfuegbar = (g.has_any_exe && g.gamedir_valid);
 }
 
@@ -1886,12 +2225,20 @@ static void fill_gradient_v(int x, int y, int w, int h, uint32_t col_top, uint32
     }
 }
 
+static void draw_border_1px(int x, int y, int w, int h, uint32_t col) {
+    if (w <= 0 || h <= 0) return;
+    fill_rect(x, y, w, 1, col);
+    fill_rect(x, y + h - 1, w, 1, col);
+    fill_rect(x, y, 1, h, col);
+    fill_rect(x + w - 1, y, 1, h, col);
+}
+
 static void draw_rect_border(int x, int y, int w, int h, uint32_t col_outer, uint32_t col_inner) {
     fill_rect(x, y, w, 1, col_outer);
     fill_rect(x, y + h - 1, w, 1, col_outer);
     fill_rect(x, y, 1, h, col_outer);
     fill_rect(x + w - 1, y, 1, h, col_outer);
-    if (w > 4 && h > 4) {
+    if (w > 4 && h > 4 && col_inner != col_outer) {
         fill_rect(x + 1, y + 1, w - 2, 1, col_inner);
         fill_rect(x + 1, y + h - 2, w - 2, 1, col_inner);
         fill_rect(x + 1, y + 1, 1, h - 2, col_inner);
@@ -1910,6 +2257,16 @@ static void draw_corner_ornaments(int x, int y, int w, int h, uint32_t col) {
     fill_rect(x + w - sz, y + h - 2, sz, 2, col);
     fill_rect(x + w - 2, y + h - sz, 2, sz, col);
 }
+
+enum StarterFontIndex {
+    FONT_12      = 0,
+    FONT_13      = 1,
+    FONT_14      = 2,
+    FONT_15      = 3,
+    FONT_15_SEMI = 4,
+    FONT_23_BOLD = 5,
+    FONT_27_BOLD = 6
+};
 
 static void apply_font_variant(int variant);
 static int  g_font_variant        = 4;
@@ -1945,79 +2302,29 @@ static void init_gdi_font_canvas(void) {
     }
 }
 
-struct FontVariantSpec {
-    const char    *name;
-    const wchar_t *faces[5];   /* [0]=Detail, [1]=UI/Button, [2]=Spieletitel, [3]=Haupttitel, [4]=Schritt-Header */
-    int            heights[5];
-    int            weights[5];
-};
-
-static const FontVariantSpec g_font_specs[6] = {
-    /* Variante 1: Klassik-Rollenspiel (Georgia Bold fuer Titel + ruhige Segoe UI fuer UI/Buttons) */
-    {
-        "Variante 1: Georgia + Segoe UI (Klassik-Rollenspiel)",
-        { L"Segoe UI", L"Segoe UI", L"Georgia", L"Georgia", L"Segoe UI" },
-        { -14, -15, -23, -28, -16 },
-        { FW_NORMAL, FW_MEDIUM, FW_BOLD, FW_BOLD, FW_BOLD }
-    },
-    /* Variante 2: Aventurischer Chronist (Palatino Linotype + warme Calibri, 1 Nummer groesser) */
-    {
-        "Variante 2: Palatino Linotype + Calibri (Aventurischer Chronist)",
-        { L"Calibri", L"Calibri", L"Palatino Linotype", L"Palatino Linotype", L"Palatino Linotype" },
-        { -15, -17, -23, -29, -17 },
-        { FW_NORMAL, FW_SEMIBOLD, FW_BOLD, FW_BOLD, FW_BOLD }
-    },
-    /* Variante 3: Klares PC-Interface (Trebuchet MS + offene Verdana mit weiter Laufweite) */
-    {
-        "Variante 3: Trebuchet MS + Verdana (Weite Laufweite & Maximale Schaerfe)",
-        { L"Verdana", L"Verdana", L"Trebuchet MS", L"Trebuchet MS", L"Trebuchet MS" },
-        { -13, -14, -23, -28, -16 },
-        { FW_NORMAL, FW_NORMAL, FW_BOLD, FW_BOLD, FW_BOLD }
-    },
-    /* Variante 4: Moderne Eleganz (Reine Segoe UI mit feiner Gewichts-Abstufung Regular/Semibold/Bold) */
-    {
-        "Variante 4: Segoe UI Fein-Abstufung (Gross & Luftig, Regular + Bold)",
-        { L"Segoe UI", L"Segoe UI", L"Segoe UI", L"Segoe UI", L"Segoe UI" },
-        { -14, -16, -24, -30, -17 },
-        { FW_NORMAL, FW_NORMAL, FW_BOLD, FW_BOLD, FW_SEMIBOLD }
-    },
-    /* Variante 5: Epische Buchschrift (Constantia Serif + geschwungene Candara) */
-    {
-        "Variante 5: Constantia + Candara (Epische Fantasy-Buchschrift)",
-        { L"Candara", L"Candara", L"Constantia", L"Constantia", L"Candara" },
-        { -15, -17, -23, -29, -18 },
-        { FW_NORMAL, FW_MEDIUM, FW_BOLD, FW_BOLD, FW_BOLD }
-    },
-    /* Variante 6: Kompakt & Gestochen Scharf (Cambria + klassische Tahoma) */
-    {
-        "Variante 6: Cambria + Tahoma (Klassisch & Gestochen Scharf)",
-        { L"Tahoma", L"Tahoma", L"Cambria", L"Cambria", L"Tahoma" },
-        { -13, -15, -22, -28, -16 },
-        { FW_NORMAL, FW_NORMAL, FW_BOLD, FW_BOLD, FW_BOLD }
-    }
-};
-
 static void apply_font_variant(int variant) {
-    if (variant < 1 || variant > 6) variant = 1;
+    if (variant < 1 || variant > 6) variant = 4;
     g_font_variant = variant;
     g_loaded_font_variant = variant;
-    const FontVariantSpec &spec = g_font_specs[variant - 1];
 
-    for (int i = 0; i < 5; ++i) {
+    static const int heights[7] = { -12, -13, -14, -15, -15, -23, -27 };
+    static const int weights[7] = { FW_NORMAL, FW_NORMAL, FW_NORMAL, FW_NORMAL, FW_SEMIBOLD, FW_BOLD, FW_BOLD };
+
+    for (int i = 0; i < 7; ++i) {
         if (g_fonts[i]) {
             DeleteObject(g_fonts[i]);
             g_fonts[i] = NULL;
         }
         g_fonts[i] = CreateFontW(
-            spec.heights[i], 0, 0, 0, spec.weights[i],
+            heights[i], 0, 0, 0, weights[i],
             FALSE, FALSE, FALSE,
             DEFAULT_CHARSET, OUT_TT_PRECIS, CLIP_DEFAULT_PRECIS,
             CLEARTYPE_QUALITY, DEFAULT_PITCH | FF_DONTCARE,
-            spec.faces[i]
+            L"Segoe UI"
         );
         if (!g_fonts[i]) {
             g_fonts[i] = CreateFontW(
-                spec.heights[i], 0, 0, 0, spec.weights[i],
+                heights[i], 0, 0, 0, weights[i],
                 FALSE, FALSE, FALSE,
                 DEFAULT_CHARSET, OUT_DEFAULT_PRECIS, CLIP_DEFAULT_PRECIS,
                 ANTIALIASED_QUALITY, DEFAULT_PITCH | FF_SWISS,
@@ -2044,11 +2351,11 @@ static int utf8_to_wstr(const char *text, wchar_t *wbuf, int cap) {
 static HFONT select_font_idx(int font_idx) {
     init_gdi_font_canvas();
     if (font_idx < 0) font_idx = 0;
-    if (font_idx > 4) font_idx = 4;
+    if (font_idx > 6) font_idx = 6;
     return g_fonts[font_idx];
 }
 
-static int text_width_px(const char *text, int font_idx = 1) {
+static int text_width_px(const char *text, int font_idx = FONT_14) {
     if (!text || !text[0]) return 0;
     HFONT hf = select_font_idx(font_idx);
     if (g_mem_dc && hf) {
@@ -2060,10 +2367,10 @@ static int text_width_px(const char *text, int font_idx = 1) {
             return (int)sz.cx;
         }
     }
-    return (int)strlen(text) * 9;
+    return (int)strlen(text) * 8;
 }
 
-static int text_height_px(int font_idx = 1) {
+static int text_height_px(int font_idx = FONT_14) {
     HFONT hf = select_font_idx(font_idx);
     if (g_mem_dc && hf) {
         SelectObject(g_mem_dc, hf);
@@ -2075,7 +2382,7 @@ static int text_height_px(int font_idx = 1) {
     return 18;
 }
 
-static void draw_text(int x, int y, const char *text, uint32_t col, int font_idx = 1, bool shadow = true) {
+static void draw_text(int x, int y, const char *text, uint32_t col, int font_idx = FONT_14, bool shadow = false) {
     if (!text || !text[0]) return;
     HFONT hf = select_font_idx(font_idx);
     if (g_mem_dc && hf) {
@@ -2114,7 +2421,7 @@ static void draw_text(int x, int y, const char *text, uint32_t col, int font_idx
     }
 }
 
-static void draw_text_centered(int x, int y, int w, const char *text, uint32_t col, int font_idx = 1, bool shadow = true) {
+static void draw_text_centered(int x, int y, int w, const char *text, uint32_t col, int font_idx = FONT_14, bool shadow = false) {
     int tw = text_width_px(text, font_idx);
     int tx = x + (w - tw) / 2;
     draw_text(tx, y, text, col, font_idx, shadow);
@@ -2130,29 +2437,139 @@ static uint32_t lighten_color(uint32_t c, int delta) {
     return 0xFF000000u | ((uint32_t)r << 16) | ((uint32_t)g << 8) | (uint32_t)b;
 }
 
-/* Zeichnet ein ruhiges, dezentes 18x18 Status-Abzeichen:
- * ok == true  -> Gedaempftes Dunkelgruen mit klarem Haken
- * ok == false -> Gedaempftes Dunkelrot/Schiefer mit klarem Kreuz
+/* Antialias-Masken fuer die 4 UI-Symbole aus Starter_Entwurf_Etappe6.png (Zahnrad, Haken, Pfeil, Dreieck) */
+static const uint8_t g_mask_gear_14x14[14][14] = {
+    {  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0},
+    {  0,  0,  0,  0,  0,  0, 34, 15,  0,  0,  0,  0,  0,  0},
+    {  0,  0,  0, 20, 62,  0,235,119,  4, 73,  0,  0,  0,  0},
+    {  0,  0,  0,140,247,196,255,236,191,252, 29,  0,  0,  0},
+    {  0,  0, 14, 88,236, 97, 22, 48,164,223,  8, 12,  0,  0},
+    {  0, 14,248,246, 66,  0,  0,  0,  0,183,246,148,  0,  0},
+    {  0,  9,125,224,  0, 37,233,158,  0, 87,221, 52,  0,  0},
+    {  0,  3,116,223,  0, 38,244,167,  0, 86,220, 38,  0,  0},
+    {  0, 21,251,255, 73,  0, 16,  2,  0,190,255,158,  0,  0},
+    {  0,  0, 24,101,236, 98, 23, 49,164,227, 24, 14,  0,  0},
+    {  0,  0,  0,136,247,196,255,236,207,250, 28,  0,  0,  0},
+    {  0,  0,  0, 20, 62,  0,236,120,  7, 75,  0,  0,  0,  0},
+    {  0,  0,  0,  0,  0,  0, 61, 28,  0,  0,  0,  0,  0,  0},
+    {  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0}
+};
+
+static const uint8_t g_mask_check_13x13[13][13] = {
+    {  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0},
+    {  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0},
+    {  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0},
+    {  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0},
+    {  0,  0,  0,  0,  0,  0,  0,  0, 10,105,  0,  0,  0},
+    {  0,  0,  0,  0,  0,  0,  0, 12,192,252, 55,  0,  0},
+    {  0,  0,  0, 68,  0,  0, 12,193,252, 93,  0,  0,  0},
+    {  0,  0, 80,255,131, 14,194,253, 93,  0,  0,  0,  0},
+    {  0,  0,  5,175,255,223,252, 96,  0,  0,  0,  0,  0},
+    {  0,  0,  0,  5,173,252, 96,  0,  0,  0,  0,  0,  0},
+    {  0,  0,  0,  0,  5, 67,  0,  0,  0,  0,  0,  0,  0},
+    {  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0},
+    {  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0}
+};
+
+static const uint8_t g_mask_dd_arrow_10x10[10][10] = {
+    {  0,  0,  0,  0,  0,  0,  0,  0,  0,  0},
+    { 13, 40, 40, 40, 40, 40, 40, 24,  0,  0},
+    { 24,244,255,255,255,255,255, 86,  0,  0},
+    {  0,141,255,255,255,255,211,  2,  0,  0},
+    {  0, 24,244,255,255,255, 86,  0,  0,  0},
+    {  0,  0,141,255,255,211,  2,  0,  0,  0},
+    {  0,  0, 24,244,255, 86,  0,  0,  0,  0},
+    {  0,  0,  0,141,211,  2,  0,  0,  0,  0},
+    {  0,  0,  0, 24, 80,  0,  0,  0,  0,  0},
+    {  0,  0,  0,  0,  0,  0,  0,  0,  0,  0}
+};
+
+static const uint8_t g_mask_play_14x14[14][14] = {
+    {  0,  0,  0,235,107,  4,  0,  0,  0,  0,  0,  0,  0,  0},
+    {  0,  0,  0,255,255,212, 70,  0,  0,  0,  0,  0,  0,  0},
+    {  0,  0,  0,255,255,255,255,179, 40,  0,  0,  0,  0,  0},
+    {  0,  0,  0,255,255,255,255,255,249,143, 17,  0,  0,  0},
+    {  0,  0,  0,255,255,255,255,255,255,255,235,107,  4,  0},
+    {  0,  0,  0,255,255,255,255,255,255,255,255,255,212, 70},
+    {  0,  0,  0,255,255,255,255,255,255,255,255,255,255,255},
+    {  0,  0,  0,255,255,255,255,255,255,255,255,255,218, 74},
+    {  0,  0,  0,255,255,255,255,255,255,255,241,116,  7,  0},
+    {  0,  0,  0,255,255,255,255,255,253,157, 23,  0,  0,  0},
+    {  0,  0,  0,255,255,255,255,198, 53,  0,  0,  0,  0,  0},
+    {  0,  0,  0,255,255,230, 92,  1,  0,  0,  0,  0,  0,  0},
+    {  0,  0,  0,247,134, 14,  0,  0,  0,  0,  0,  0,  0,  0},
+    {  0,  0,  0, 36,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0}
+};
+
+static void draw_alpha_mask(int x0, int y0, int w, int h, const uint8_t *mask, uint32_t fg_col) {
+    int fr = (int)((fg_col >> 16) & 0xFF);
+    int fg = (int)((fg_col >> 8)  & 0xFF);
+    int fb = (int)(fg_col         & 0xFF);
+    for (int dy = 0; dy < h; ++dy) {
+        int py = y0 + dy;
+        if ((unsigned)py >= SCREEN_H) continue;
+        uint32_t *row = &g_fb[py * SCREEN_W];
+        for (int dx = 0; dx < w; ++dx) {
+            int px = x0 + dx;
+            if ((unsigned)px >= SCREEN_W) continue;
+            int a = (int)mask[dy * w + dx];
+            if (a <= 0) continue;
+            if (a >= 255) {
+                row[px] = 0xFF000000u | ((uint32_t)fr << 16) | ((uint32_t)fg << 8) | (uint32_t)fb;
+            } else {
+                uint32_t bg = row[px];
+                int br = (int)((bg >> 16) & 0xFF);
+                int bg_g = (int)((bg >> 8) & 0xFF);
+                int bb = (int)(bg & 0xFF);
+                int rr = (fr * a + br * (255 - a)) / 255;
+                int rg = (fg * a + bg_g * (255 - a)) / 255;
+                int rb = (fb * a + bb * (255 - a)) / 255;
+                row[px] = 0xFF000000u | ((uint32_t)rr << 16) | ((uint32_t)rg << 8) | (uint32_t)rb;
+            }
+        }
+    }
+}
+
+/* Zeichnet das 15x15 Status-Abzeichen (.ok b aus Starter_Entwurf_Etappe6.html):
+ * ok == true  -> #1f5a36 mit 1px Rahmen #4caf72 und Haken #ccffee
+ * ok == false -> #4e2428 mit 1px Rahmen #8e4a50 und Kreuz #ffcccc
  */
 static void draw_status_badge(int x, int y, bool ok) {
     if (ok) {
-        fill_gradient_v(x, y, 18, 18, 0xFF245434u, 0xFF163620u);
-        draw_rect_border(x, y, 18, 18, 0xFF4E8E62u, 0xFF1C4228u);
-        /* Haken (Checkmark) in 18x18 */
-        for (int i = 0; i < 4; ++i) {
-            fill_rect(x + 4 + i, y + 9 + i, 2, 2, 0xFFDCEEE2u);
-        }
-        for (int i = 0; i < 7; ++i) {
-            fill_rect(x + 7 + i, y + 12 - i, 2, 2, 0xFFDCEEE2u);
-        }
+        fill_rect(x, y, 15, 15, 0xFF1F5A36u);
+        draw_border_1px(x, y, 15, 15, 0xFF4CAF72u);
+        draw_alpha_mask(x + 1, y + 1, 13, 13, &g_mask_check_13x13[0][0], 0xFFCCFFEEu);
     } else {
-        fill_gradient_v(x, y, 18, 18, 0xFF4E2428u, 0xFF321618u);
-        draw_rect_border(x, y, 18, 18, 0xFF8E4A50u, 0xFF3E1C20u);
-        /* Kreuz (X) in 18x18 */
-        for (int i = 0; i < 9; ++i) {
-            fill_rect(x + 4 + i, y + 4 + i, 2, 2, 0xFFE6C8C8u);
-            fill_rect(x + 12 - i, y + 4 + i, 2, 2, 0xFFE6C8C8u);
+        fill_rect(x, y, 15, 15, 0xFF4E2428u);
+        draw_border_1px(x, y, 15, 15, 0xFF8E4A50u);
+        for (int i = 0; i < 7; ++i) {
+            put_px(x + 4 + i, y + 4 + i, 0xFFFFCCCCu);
+            put_px(x + 10 - i, y + 4 + i, 0xFFFFCCCCu);
         }
+    }
+}
+
+static void draw_checkbox_16(int x, int y, bool checked, bool hovered, bool dimmed = false) {
+    if (dimmed) {
+        if (checked) {
+            fill_rect(x, y, 16, 16, 0xFF173326u);
+            draw_border_1px(x, y, 16, 16, 0xFF2D5940u);
+            draw_alpha_mask(x + 1, y + 2, 13, 13, &g_mask_check_13x13[0][0], 0xFF6E9E82u);
+        } else {
+            fill_rect(x, y, 16, 16, 0xFF121722u);
+            draw_border_1px(x, y, 16, 16, 0xFF2E3646u);
+        }
+        return;
+    }
+    if (checked) {
+        uint32_t bg = hovered ? lighten_color(0xFF1F5A36u, 16) : 0xFF1F5A36u;
+        fill_rect(x, y, 16, 16, bg);
+        draw_border_1px(x, y, 16, 16, 0xFF4CAF72u);
+        draw_alpha_mask(x + 1, y + 2, 13, 13, &g_mask_check_13x13[0][0], 0xFFCCFFEEu);
+    } else {
+        uint32_t bg = hovered ? lighten_color(0xFF10151Fu, 14) : 0xFF10151Fu;
+        fill_rect(x, y, 16, 16, bg);
+        draw_border_1px(x, y, 16, 16, 0xFF4A5568u);
     }
 }
 
@@ -2162,7 +2579,7 @@ static std::string clip_text_left(const std::string &s, size_t max_chars) {
     return "..." + s.substr(s.size() - (max_chars - 3));
 }
 
-static std::string clip_text_px_left(const std::string &s, int max_px, int font_idx = 1) {
+static std::string clip_text_px_left(const std::string &s, int max_px, int font_idx = FONT_13) {
     if (text_width_px(s.c_str(), font_idx) <= max_px) return s;
     for (size_t cut = 1; cut < s.size(); ++cut) {
         std::string cand = "..." + s.substr(cut);
@@ -2174,7 +2591,7 @@ static std::string clip_text_px_left(const std::string &s, int max_px, int font_
 }
 
 static void draw_game_emblem(int x, int y, int teil, bool active) {
-    /* 72x72 Emblem mit den charakteristischen Originalfarben der 3 Teile (auch dezent erkennbar, wenn noch nicht aktiv) */
+    /* 72x72 Emblem als Fallback in der linken 250px-Bildspalte, falls noch keine Spieldaten vorliegen */
     uint32_t bg_top = (teil == 1) ? (active ? 0xFF381A1Au : 0xFF28181Au)
                     : ((teil == 2) ? (active ? 0xFF16283Eu : 0xFF16202Eu)
                                    : (active ? 0xFF2A2418u : 0xFF221E18u));
@@ -2184,9 +2601,8 @@ static void draw_game_emblem(int x, int y, int teil, bool active) {
     uint32_t border = (teil == 1) ? (active ? 0xFFC85A4Cu : 0xFF7A4440u)
                     : ((teil == 2) ? (active ? 0xFF5A9CD6u : 0xFF466888u)
                                    : (active ? 0xFFC89A48u : 0xFF786238u));
-    uint32_t b_in   = active ? 0xFF464C58u : 0xFF2C3038u;
     fill_gradient_v(x, y, 72, 72, bg_top, bg_bot);
-    draw_rect_border(x, y, 72, 72, border, b_in);
+    draw_border_1px(x, y, 72, 72, border);
 
     if (teil == 1) {
         uint32_t blade_hi = active ? 0xFFE8EEF5u : 0xFFA8B0BAu;
@@ -2243,66 +2659,76 @@ static void draw_game_emblem(int x, int y, int teil, bool active) {
     }
 }
 
-static void draw_button(int x, int y, int w, int h, const char *label, bool selected, bool enabled, bool primary = false, bool allow_hover = true) {
-    uint32_t top, bot, b_out, b_in, tcol;
+static void draw_button(
+    int x, int y, int w, int h,
+    const char *label,
+    bool selected,
+    bool enabled,
+    bool primary = false,
+    bool allow_hover = true,
+    int font_idx = FONT_15,
+    bool with_play_icon = false
+) {
+    uint32_t bg, border, tcol;
     if (!enabled) {
-        top   = 0xFF1E2128u;
-        bot   = 0xFF16181Eu;
-        b_out = 0xFF3A3E48u;
-        b_in  = 0xFF252830u;
-        tcol  = 0xFF666C78u;
+        bg     = 0xFF232B3Cu;
+        border = 0xFF323A4Au;
+        tcol   = 0xFF5D6576u;
     } else if (primary) {
-        top   = selected ? 0xFF26543Au : 0xFF1E422Eu;
-        bot   = selected ? 0xFF183826u : 0xFF12281Cu;
-        b_out = selected ? 0xFF68A880u : 0xFF4E8262u;
-        b_in  = selected ? 0xFF346E4Cu : 0xFF28543Au;
-        tcol  = 0xFFEBF4EEu;
+        bg     = 0xFF1F5A36u;
+        border = 0xFF4CAF72u;
+        tcol   = 0xFFE6E9EFu;
     } else if (selected) {
-        top   = 0xFF343E52u;
-        bot   = 0xFF222836u;
-        b_out = 0xFF8CA0BCu;
-        b_in  = 0xFF48566Eu;
-        tcol  = 0xFFF0F4FAu;
+        bg     = 0xFF3A4A66u;
+        border = 0xFF4A5568u;
+        tcol   = 0xFFFFFFFFu;
     } else {
-        top   = 0xFF252A36u;
-        bot   = 0xFF181C24u;
-        b_out = 0xFF586072u;
-        b_in  = 0xFF323846u;
-        tcol  = 0xFFD4DCE8u;
+        bg     = 0xFF232B3Cu;
+        border = 0xFF4A5568u;
+        tcol   = 0xFFE6E9EFu;
     }
 
-    /* Sanfter Hover-Effekt: KEINE Raender aendern, nur die Fuellung dezent aufhellen */
     if (enabled && allow_hover &&
         g_mouse_x >= x && g_mouse_x < x + w &&
         g_mouse_y >= y && g_mouse_y < y + h) {
-        top  = lighten_color(top, 24);
-        bot  = lighten_color(bot, 20);
+        bg   = lighten_color(bg, 16);
         tcol = 0xFFFFFFFFu;
     }
 
-    fill_gradient_v(x, y, w, h, top, bot);
-    draw_rect_border(x, y, w, h, b_out, b_in);
-    int th = text_height_px(1);
-    int ty = y + (h - th) / 2 - 1;
-    draw_text_centered(x, ty, w, label, tcol, 1, true);
+    fill_rect(x, y, w, h, bg);
+    draw_border_1px(x, y, w, h, border);
+
+    int use_font = primary ? FONT_15_SEMI : font_idx;
+    int th = text_height_px(use_font);
+    int ty = y + (h - th) / 2;
+    if (with_play_icon && enabled) {
+        int tw = text_width_px(label, use_font);
+        int total_w = 18 + tw;
+        int sx = x + (w - total_w) / 2;
+        draw_alpha_mask(sx, y + (h - 14) / 2, 14, 14, &g_mask_play_14x14[0][0], tcol);
+        draw_text(sx + 18, ty, label, tcol, use_font, false);
+    } else {
+        draw_text_centered(x, ty, w, label, tcol, use_font, false);
+    }
 }
 
 /* =========================================================================
- * 8. Zeichnen der Bildschirme (Ruhige Farbgebung + Originalfarben der 3 Spiele)
+ * 8. Zeichnen der Bildschirme (Etappe 6: Starter_Entwurf_Etappe6.html/.png)
  * ========================================================================= */
 
-/* Charakteristische Original-Schriftzugfarben der drei Nordlandtrilogie-Spiele:
- * - Teil 1 (Die Schicksalsklinge, 1992): Klassisches Schicksalsklinge-Glutrot / Karmesin
- * - Teil 2 (Sternenschweif, 1994):       Sternenschweif-Kometen-Eisblau / Silberblau
- * - Teil 3 (Schatten ueber Riva, 1996):  Riva-Bernstein-Gold / Abendrot-Ocker
+/* Exakte Schriftzugfarben aus Starter_Entwurf_Etappe6.html:
+ * .c1 .t { color: #e2553f }
+ * .c2 .t { color: #5aa9e6 }
+ * .c3 .t { color: #e3a63a }
  */
 static uint32_t game_logo_color(int teil, bool verfuegbar) {
+    (void)verfuegbar;
     if (teil == 1) {
-        return verfuegbar ? 0xFFE86852u : 0xFFB85848u;
+        return 0xFFE2553Fu;
     } else if (teil == 2) {
-        return verfuegbar ? 0xFF68B6F2u : 0xFF5A96C8u;
+        return 0xFF5AA9E6u;
     } else {
-        return verfuegbar ? 0xFFE2AE52u : 0xFFC29648u;
+        return 0xFFE3A63Au;
     }
 }
 
@@ -2310,23 +2736,29 @@ static inline bool point_in_rect(int px, int py, int rx, int ry, int rw, int rh)
     return px >= rx && px < rx + rw && py >= ry && py < ry + rh;
 }
 
-static void render_background_and_header(const char *subtitle) {
+/* Kopfzeile (NACHTRAG 1 Etappe 6: Sprachumschalter entfernt, nur "Hilfe (F1)" rechts oben) */
+static const int HDR_HELP_X = 905;
+static const int HDR_HELP_Y = 29;
+static const int HDR_HELP_W = 104;
+static const int HDR_HELP_H = 37;
+
+static void render_background_and_header(const char *subtitle, std::string *out_tooltip = NULL) {
+    (void)out_tooltip;
     init_gdi_font_canvas();
-    bool bg_hover = (!g_help_active && !g_modal_active);
-    fill_gradient_v(0, 0, SCREEN_W, SCREEN_H, 0xFF0E121Cu, 0xFF080B12u);
-    draw_rect_border(5, 5, SCREEN_W - 10, SCREEN_H - 10, 0xFF566074u, 0xFF282E3Au);
-    draw_corner_ornaments(5, 5, SCREEN_W - 10, SCREEN_H - 10, 0xFF8894A8u);
+    bool bg_hover = (!g_help_active && !g_modal_active && g_open_dd_game < 0);
 
-    fill_gradient_v(18, 12, SCREEN_W - 36, 68, 0xFF1A202Eu, 0xFF111520u);
-    draw_rect_border(18, 12, SCREEN_W - 36, 68, 0xFF626C80u, 0xFF2E3442u);
+    /* Hintergrund --bg: #141a26 */
+    fill_rect(0, 0, SCREEN_W, SCREEN_H, 0xFF141A26u);
 
-    /* Haupttitel in ruhigem, edlem Pergament-Elfenbein */
-    draw_text(34, 13, L("Das Schwarze Auge: Die Nordland-Trilogie", "Realms of Arkania: The Northland Trilogy"), 0xFFECE6D8u, 3, true);
-    draw_text(34, 51, subtitle, 0xFFA4B0C2u, 1, true);
+    /* Kopfzeile .head: x=14, y=10, w=1012, h=74, bg=#181f2d, border=#3a4558 */
+    fill_rect(14, 10, 1012, 74, 0xFF181F2Du);
+    draw_border_1px(14, 10, 1012, 74, 0xFF3A4558u);
 
-    /* Rechts oben: Sprachumschaltung (F2) + Hilfe-Knopf (F1) */
-    draw_button(SCREEN_W - 252, 27, 94, 38, g_lang_en ? "EN (F2)" : "DE (F2)", false, true, false, bg_hover);
-    draw_button(SCREEN_W - 148, 27, 122, 38, L("Hilfe (F1)", "Help (F1)"), g_help_active, true, false, bg_hover);
+    draw_text(30, 16, "Das Schwarze Auge: Die Nordland-Trilogie", 0xFFE6E9EFu, FONT_27_BOLD, false);
+    draw_text(30, 53, subtitle, 0xFF9AA3B2u, FONT_14, false);
+
+    /* Hilfe-Knopf "Hilfe (F1)" */
+    draw_button(HDR_HELP_X, HDR_HELP_Y, HDR_HELP_W, HDR_HELP_H, "Hilfe (F1)", g_help_active, true, false, bg_hover, FONT_15, false);
 }
 
 static const char *fenster_label_str(const std::string &f) {
@@ -2335,6 +2767,14 @@ static const char *fenster_label_str(const std::string &f) {
     if (f == "4") return "4x (1280x960)";
     if (f == "5") return "5x (1600x1200)";
     return L("Vollbild (4:3)", "Fullscreen (4:3)");
+}
+
+static const char *fenster_dd_short_label(const std::string &f) {
+    if (f == "2") return L("Fenster 2\xC3\x97", "Window 2\xC3\x97");
+    if (f == "3") return L("Fenster 3\xC3\x97", "Window 3\xC3\x97");
+    if (f == "4") return L("Fenster 4\xC3\x97", "Window 4\xC3\x97");
+    if (f == "5") return L("Fenster 5\xC3\x97", "Window 5\xC3\x97");
+    return L("Vollbild", "Fullscreen");
 }
 
 static const char *skalierung_label_str(const std::string &s) {
@@ -2355,64 +2795,98 @@ static std::string get_active_exe_name(const GameCatalogEntry &g) {
     return g.exe_standard;
 }
 
-static void draw_tooltip_box(int mx, int my, const std::string &txt) {
-    if (txt.empty()) return;
-    int tw = text_width_px(txt.c_str(), 0) + 24;
-    int th = 30;
-    int bx = mx + 14;
-    int by = my - th - 6;
-    if (bx + tw > SCREEN_W - 12) bx = SCREEN_W - 12 - tw;
-    if (bx < 12) bx = 12;
-    if (by < 12) by = my + 18;
-    fill_gradient_v(bx, by, tw, th, 0xFF242E42u, 0xFF161C2Au);
-    draw_rect_border(bx, by, tw, th, 0xFFD4B458u, 0xFF4A4024u);
-    draw_text(bx + 12, by + 6, txt.c_str(), 0xFFF4E8C4u, 0, true);
+static std::string get_active_dos_exe_name(const GameCatalogEntry &g) {
+    if (g.chosen_stufe == STUFE_ORIG) {
+        return (g.teil == 1) ? "SCHICKM.EXE" : ((g.teil == 2) ? "SCHWEIF.EXE" : "RIVA.EXE");
+    }
+    const char *prefix = (g.teil == 1) ? "BLADEM" : ((g.teil == 2) ? "SCHWEIF" : "RIVA");
+    return std::string(prefix) + ((g.chosen_stufe == STUFE_WICHTIG) ? "_FIX_WICHTIG.EXE" : "_FIX_ALLES.EXE");
 }
 
-/* T1: Zeichnet das aus dem Spielordner gelesene Original-Titelbild links auf der Karte:
- * - Alle drei Karten identisch ausgerichtet: gleicher linker Abstand (cx + 2),
- *   gleiche Breite (224 px) und volle Karteninnenhoehe (176 px, cy + 2 .. cy + 178).
- * - Nearest-Neighbor-Sampling, leicht abgedunkelt, rechts mit weichem Verlauf (Smoothstep)
- *   in den Kartenhintergrund auslaufend. */
+static bool is_browser_available(const GameCatalogEntry &g) {
+    return !g.browser_url.empty() && _stricmp(g.browser_status.c_str(), "verfuegbar") == 0;
+}
+
+static std::string build_browser_launch_url(const GameCatalogEntry &g) {
+    if (g.browser_url.empty()) return "";
+    std::string url = g.browser_url;
+    char sep = (url.find('?') == std::string::npos) ? '?' : '&';
+    url += sep;
+    url += "stufe=";
+    url += stufe_to_str(g.chosen_stufe);
+    if (!g.chosen_intro) {
+        if (g.teil == 1) {
+            url += "&intro=0";
+        } else {
+            url += "&kein_intro=1";
+        }
+    }
+    if (g.chosen_probenlog && g.chosen_stufe != STUFE_ORIG) {
+        url += "&probenlog=1";
+    }
+    return url;
+}
+
+static void draw_tooltip_box(int mx, int my, const std::string &txt) {
+    if (txt.empty()) return;
+    int tw = text_width_px(txt.c_str(), FONT_13) + 20;
+    int th = 28;
+    int bx = mx + 12;
+    int by = my - th - 6;
+    if (bx + tw > SCREEN_W - 14) bx = SCREEN_W - 14 - tw;
+    if (bx < 14) bx = 14;
+    if (by < 10) by = my + 18;
+    fill_rect(bx, by, tw, th, 0xFF181F2Du);
+    draw_border_1px(bx, by, tw, th, 0xFF4CAF72u);
+    draw_text(bx + 10, by + 5, txt.c_str(), 0xFFE6E9EFu, FONT_13, false);
+}
+
+/* Titelbild in eigener linker Spalte (250 px breit, volle Karteninnenhoehe 148 px),
+ * rechts weicher Verlauf (ab 55 % = dx 137) in den Kartenhintergrund (#1b2232).
+ * NICHTS ueberdeckt das Bild mehr. */
 static void draw_card_title_image(const GameCatalogEntry &g, int cx, int cy) {
-    const int ix = cx + 2;
-    const int iy = cy + 2;
-    const int dst_w = 224;
-    const int dst_h = 176; /* volle Karteninnenhoehe (ch - 4 = 180 - 4 = 176) */
-    const int fade_start = 136;
+    const int ix = cx + 1;
+    const int iy = cy + 1;
+    const int dst_w = 250;
+    const int dst_h = 148;
+    const int fade_start = 137; /* 55 % von 250 px */
     const int src_w = g.title_w;
     const int src_h = g.title_h;
     if (!g.has_title_image || src_w <= 0 || src_h <= 0 || g.title_pixels.size() < (size_t)(src_w * src_h)) {
         return;
     }
 
+    /* 4:3-gerechter Bildausschnitt (oben verankert wie im freigegebenen Entwurf Starter_Entwurf_Etappe6.png) */
+    int vis_h = (src_h * 124) / 176;
+    if (vis_h <= 0 || vis_h > src_h) vis_h = src_h;
+
     for (int dy = 0; dy < dst_h; ++dy) {
         int py = iy + dy;
         if ((unsigned)py >= SCREEN_H) continue;
-        int sy = (dy * src_h) / dst_h; /* Nearest-Neighbor vertikal */
+        int sy = (dy * vis_h) / dst_h;
+        if (sy >= src_h) sy = src_h - 1;
         const uint32_t *src_row = &g.title_pixels[(size_t)sy * (size_t)src_w];
         uint32_t *dst_row = &g_fb[py * SCREEN_W];
 
         for (int dx = 0; dx < dst_w; ++dx) {
             int px = ix + dx;
             if ((unsigned)px >= SCREEN_W) continue;
-            int sx = (dx * src_w) / dst_w; /* Nearest-Neighbor horizontal */
+            int sx = (dx * src_w) / dst_w;
             uint32_t scol = src_row[sx];
 
             int sr = (int)((scol >> 16) & 0xFF);
             int sg = (int)((scol >> 8)  & 0xFF);
             int sb = (int)(scol         & 0xFF);
 
-            /* Weicher horizontaler Verlauf (Smoothstep) am rechten Bildrand in den Kartenhintergrund */
-            int alpha = 226; /* Grundhelligkeit ~88 % (leicht abgedunkelt) */
+            int alpha = 226;
             if (dx >= fade_start) {
                 int span = dst_w - 1 - fade_start;
                 int rem  = dst_w - 1 - dx;
                 if (rem <= 0 || span <= 0) {
                     alpha = 0;
                 } else {
-                    int t = (rem * 256) / span; /* 0..256 */
-                    int smooth = (t * t * (768 - 2 * t)) >> 16; /* Smoothstep 0..256 */
+                    int t = (rem * 256) / span;
+                    int smooth = (t * t * (768 - 2 * t)) >> 16;
                     alpha = (226 * smooth) >> 8;
                 }
             }
@@ -2430,144 +2904,397 @@ static void draw_card_title_image(const GameCatalogEntry &g, int cx, int cy) {
     }
 }
 
+/* Geometrie-Struktur fuer Zeile 4 einer Spielkarte (identisch fuer Rendern & Mausklicks) */
+struct CardRow4Layout {
+    int y;
+    int h;
+    int fixes_lbl_x;
+    int seg_x;
+    int seg_w[3];
+    int seg_total_w;
+    int anz_lbl_x;
+    int dd_x;
+    int dd_w;
+    int chk_intro_x;
+    int chk_intro_w;
+    int chk_plog_x;
+    int chk_plog_w;
+    int btn_folder_x;
+    int btn_folder_w;
+    int btn_gear_x;
+    int btn_gear_w;
+};
+
+static void compute_card_row4_layout(const GameCatalogEntry &g, int cx, int cy, int cw, CardRow4Layout &L4) {
+    const int tx0 = cx + 1 + 250 + 18; /* 283 */
+    const int rx  = cx + cw - 1 - 16;  /* 1009 */
+    L4.y = cy + 111;
+    L4.h = 29;
+    L4.fixes_lbl_x = tx0;
+
+    if (!g_lang_en) {
+        L4.seg_x    = 319;
+        L4.seg_w[0] = 72; /* Original: 319..391 */
+        L4.seg_w[1] = 79; /* Wichtige: 391..470 */
+        L4.seg_w[2] = 46; /* Alle:     470..516 */
+        L4.seg_total_w = L4.seg_w[0] + L4.seg_w[1] + L4.seg_w[2]; /* 197 */
+        L4.anz_lbl_x = L4.seg_x + L4.seg_total_w + 10; /* 526 */
+        L4.dd_x      = 579;
+        L4.dd_w      = (g.chosen_fenster == "vollbild") ? 81 : 104;
+    } else {
+        int fw = text_width_px("Fixes", FONT_12);
+        L4.seg_x    = tx0 + fw + 6;
+        L4.seg_w[0] = 72;
+        L4.seg_w[1] = 76;
+        L4.seg_w[2] = 44;
+        L4.seg_total_w = L4.seg_w[0] + L4.seg_w[1] + L4.seg_w[2];
+        L4.anz_lbl_x = L4.seg_x + L4.seg_total_w + 10;
+        int dw = text_width_px("Display", FONT_12);
+        L4.dd_x      = L4.anz_lbl_x + dw + 6;
+        L4.dd_w      = (g.chosen_fenster == "vollbild") ? 96 : 108;
+    }
+
+    L4.chk_intro_x = L4.dd_x + L4.dd_w + 10;
+    L4.chk_intro_w = !g_lang_en ? 52 : (22 + text_width_px("Intro", FONT_14));
+    L4.chk_plog_x  = L4.chk_intro_x + L4.chk_intro_w + 10;
+    L4.chk_plog_w  = 22 + text_width_px(L("Probenlog", "Roll Log"), FONT_14);
+
+    L4.btn_gear_w   = 35;
+    L4.btn_gear_x   = rx - L4.btn_gear_w; /* 974 */
+    L4.btn_folder_w = 84;
+    L4.btn_folder_x = L4.btn_gear_x - 10 - L4.btn_folder_w; /* 880 */
+}
+
+static const char *g_dd_fenster_vals[5] = { "vollbild", "2", "3", "4", "5" };
+
+static int get_dd_fenster_index(const std::string &f) {
+    for (int k = 0; k < 5; ++k) {
+        if (_stricmp(f.c_str(), g_dd_fenster_vals[k]) == 0) return k;
+    }
+    return 0;
+}
+
+static void get_open_dd_menu_rect(int game_idx, int &out_x, int &out_y, int &out_w, int &out_h) {
+    int cx = 14;
+    int cy = 147 + game_idx * 162;
+    int cw = 1012;
+    CardRow4Layout L4;
+    compute_card_row4_layout(g_games[game_idx], cx, cy, cw, L4);
+    out_x = L4.dd_x;
+    out_w = (L4.dd_w >= 116) ? L4.dd_w : 116;
+    out_h = 5 * 26 + 2;
+    if (game_idx >= 2) {
+        /* Auf Karte 3 nach oben aufklappen, damit alle 5 Eintraege komplett im Fenster liegen */
+        out_y = L4.y - out_h + 1;
+    } else {
+        out_y = L4.y + L4.h - 1;
+    }
+}
+
 static void render_screen_select_game(void) {
-    bool bg_hover = (!g_help_active && !g_modal_active);
+    std::string active_tooltip;
+    std::string tip_override;
+    uint32_t    tip_border_col = 0xFF3A4558u;
+    uint32_t    tip_text_col   = 0xFFE6E9EFu;
+    bool bg_hover = (!g_help_active && !g_modal_active && g_open_dd_game < 0);
+
     render_background_and_header(
-        L("Gemeinsamer Starter – Jedes Spiel direkt auf seiner eigenen Karte einstellen und starten",
-          "Unified Launcher – Configure and start each game directly on its own card")
+        L("Gemeinsamer Starter – jedes Spiel auf seiner eigenen Karte einstellen und starten",
+          "Unified Launcher – configure and start each game on its own card"),
+        &active_tooltip
     );
 
-    /* Kompakter Hinweis-Balken oben fuer Drag & Drop (ohne Dateiendungen) */
-    fill_gradient_v(18, 92, SCREEN_W - 36, 46, 0xFF151B26u, 0xFF10141Eu);
-    draw_rect_border(18, 92, SCREEN_W - 36, 46, 0xFF485264u, 0xFF242A36u);
-    draw_text(34, 105,
-        L("Tipp: Spielordner oder Archiv einfach mit der Maus ins Fenster ziehen – oder direkt beim jeweiligen Spiel auswählen:",
-          "Tip: Simply drag & drop a game folder or archive into this window – or select it directly on each game card:"),
-        0xFFC8D2E2u, 1, true);
-
-    std::string active_tooltip;
-
     /* ---------------------------------------------------------------------
-     * Die 3 Spielkarten – ALLES direkt pro Spiel regelbar
+     * Die 3 Spielkarten (x=14, y=147 + i*162, w=1012, h=150)
      * --------------------------------------------------------------------- */
     for (size_t i = 0; i < g_games.size() && i < 3; ++i) {
         const GameCatalogEntry &g = g_games[i];
-        int cy = 154 + (int)i * 198;
-        int cx = 18;
-        int cw = SCREEN_W - 36;
-        int ch = 180;
+        int cx = 14;
+        int cy = 147 + (int)i * 162;
+        int cw = 1012;
+        int ch = 150;
+        int tx0 = cx + 1 + 250 + 18; /* 283 */
+        int rx  = cx + cw - 1 - 16;  /* 1009 */
 
         bool is_sel = ((int)i == g_selected_game);
-        bool is_hov = bg_hover && ((int)i == g_hover_game);
 
-        uint32_t bg_top, bg_bot, b_out, b_in;
-        if (!g.verfuegbar && !g.has_title_image) {
-            bg_top = 0xFF151820u;
-            bg_bot = 0xFF101218u;
-            b_out  = is_sel ? 0xFF606878u : 0xFF3E4554u;
-            b_in   = 0xFF222630u;
-        } else if (is_sel) {
-            bg_top = 0xFF1E2636u;
-            bg_bot = 0xFF141926u;
-            b_out  = 0xFF8898B2u;
-            b_in   = 0xFF424C60u;
-        } else {
-            bg_top = 0xFF181E2Cu;
-            bg_bot = 0xFF111520u;
-            b_out  = 0xFF525C6Eu;
-            b_in   = 0xFF2C3240u;
-        }
+        /* Kartenhintergrund --card: #1b2232 */
+        fill_rect(cx, cy, cw, ch, 0xFF1B2232u);
 
-        /* Hover auf der Spielkarte: nur Hintergrund minimal aufhellen, keine Raender zufuegen */
-        if (is_hov) {
-            bg_top = lighten_color(bg_top, 14);
-            bg_bot = lighten_color(bg_bot, 12);
-        }
-
-        fill_gradient_v(cx, cy, cw, ch, bg_top, bg_bot);
-
-        int tx0 = cx + 110;
+        /* Linke Spalte (250 px breit, volle Kartenhoehe): Titelbild mit Verlauf nach rechts */
         if (g.has_title_image) {
             draw_card_title_image(g, cx, cy);
-            tx0 = cx + 226;
         } else {
-            draw_game_emblem(cx + 20, cy + 20, g.teil, g.verfuegbar || g.gamedir_valid);
+            draw_game_emblem(cx + 89, cy + 39, g.teil, g.verfuegbar || g.gamedir_valid);
         }
 
-        draw_rect_border(cx, cy, cw, ch, b_out, b_in);
-        if (is_sel) {
-            draw_corner_ornaments(cx, cy, cw, ch, 0xFFB0BED4u);
-        }
+        draw_border_1px(cx, cy, cw, ch, 0xFF3A4558u);
 
-        /* Zeile 1: Spieletitel in der jeweiligen Originalfarbe des Spiel-Schriftzugs + Startknopf rechts oben */
+        /* Zeile 1: Spieletitel + "DSA Teil X – Jahr", rechts die zwei Haekchen */
         char title_buf[160];
         snprintf(title_buf, sizeof(title_buf), "%d. %s", g.teil, g.name.c_str());
         uint32_t title_col = game_logo_color(g.teil, g.verfuegbar || g.gamedir_valid);
-        draw_text(tx0, cy + 16, title_buf, title_col, 2, true);
+        draw_text(tx0, cy + 7, title_buf, title_col, FONT_23_BOLD, false);
 
-        int title_w = text_width_px(title_buf, 2);
+        int title_w = text_width_px(title_buf, FONT_23_BOLD);
         const char *short_sub = (g.teil == 1)
-            ? L("(DSA Teil 1 – 1992)", "(Part 1 – 1992)")
-            : ((g.teil == 2) ? L("(DSA Teil 2 – 1994)", "(Part 2 – 1994)")
-                             : L("(DSA Teil 3 – 1996)", "(Part 3 – 1996)"));
-        draw_text(tx0 + 14 + title_w, cy + 22, short_sub, (g.verfuegbar || g.gamedir_valid) ? 0xFFA4B0C2u : 0xFF707888u, 0, true);
+            ? L("DSA Teil 1 – 1992", "DSA Part 1 – 1992")
+            : ((g.teil == 2) ? L("DSA Teil 2 – 1994", "DSA Part 2 – 1994")
+                             : L("DSA Teil 3 – 1996", "DSA Part 3 – 1996"));
+        draw_text(tx0 + title_w + 8, cy + 16, short_sub, 0xFF9AA3B2u, FONT_13, false);
 
-        /* T2: Riva-Karte (bzw. solange kein Port im Ordner liegt): "Kommt bald" statt "Spiel starten" (deaktiviert) */
-        if (!g.has_any_exe) {
-            draw_button(cx + cw - 236, cy + 16, 216, 42, L("Kommt bald", "Coming soon"), false, false, false, false);
-        } else if (g.verfuegbar) {
-            draw_button(cx + cw - 236, cy + 16, 216, 42, L(">> Spiel starten", ">> Start Game"), true, true, true, bg_hover);
-        } else {
-            draw_button(cx + cw - 236, cy + 16, 216, 42, L(">> Spiel starten", ">> Start Game"), false, false, false, false);
-        }
-
-        /* Zeile 2: Ruhige Status-Checkliste pro Spiel in Spielersprache (T2: Dateiname nur als Tooltip / in der Hilfe) */
-        uint32_t row_txt_col = (g.verfuegbar || g.gamedir_valid) ? 0xFFD0D8E4u : 0xFF98A2B2u;
-
-        draw_status_badge(tx0, cy + 54, g.has_any_exe);
+        /* Rechtsbuendig die zwei Status-Haekchen (Programm gefunden / Spieldaten gefunden) */
+        const char *dat_lbl = g.gamedir_valid
+            ? L("Spieldaten gefunden", "Game data found")
+            : (g.gamedir_wrong_version
+                ? L("Falsche Fassung", "Unsupported version")
+                : L("Spieldaten fehlen", "Game data missing"));
         const char *prog_lbl = g.has_any_exe
             ? L("Programm gefunden", "Program found")
             : L("Programm fehlt", "Program missing");
-        draw_text(tx0 + 24, cy + 52, prog_lbl, row_txt_col, 1, true);
 
-        int dat_bx = tx0 + 230;
-        draw_status_badge(dat_bx, cy + 54, g.gamedir_valid);
-        const char *dat_lbl = g.gamedir_valid
-            ? L("Spieldaten gefunden", "Game data found")
-            : L("Spieldaten fehlen", "Game data missing");
-        draw_text(dat_bx + 24, cy + 52, dat_lbl, row_txt_col, 1, true);
+        int dat_tw  = text_width_px(dat_lbl, FONT_14);
+        int dat_tx  = rx - dat_tw;
+        int dat_bx  = dat_tx - 6 - 15;
+        int prog_tw = text_width_px(prog_lbl, FONT_14);
+        int prog_tx = dat_bx - 16 - prog_tw;
+        int prog_bx = prog_tx - 6 - 15;
 
-        if (bg_hover && (point_in_rect(g_mouse_x, g_mouse_y, tx0, cy + 48, 215, 28) ||
-                         point_in_rect(g_mouse_x, g_mouse_y, cx + 182, cy + 124, 196, 38))) {
-            active_tooltip = std::string(L("Programmdatei: ", "Executable: ")) + get_active_exe_name(g);
-        }
+        draw_status_badge(prog_bx, cy + 16, g.has_any_exe);
+        draw_text(prog_tx, cy + 13, prog_lbl, 0xFFE6E9EFu, FONT_14, false);
 
-        /* Zeile 3: Erkannter Spielordner & Anzeige-Zusammenfassung dieses Spiels */
+        draw_status_badge(dat_bx, cy + 16, g.gamedir_valid);
+        draw_text(dat_tx, cy + 13, dat_lbl, g.gamedir_wrong_version ? 0xFFFF8870u : 0xFFE6E9EFu, FONT_14, false);
+
+        /* Zeile 2: Spielordner (klein, grau) */
         std::string path_info;
-        if (g.gamedir_valid) {
+        uint32_t path_col = 0xFF9AA3B2u;
+        if (g.gamedir_wrong_version) {
+            path_info = L(g.wrong_version_msg_de.c_str(), g.wrong_version_msg_en.c_str());
+            path_col = 0xFFFF8870u;
+        } else if (g.gamedir_valid) {
             std::string p_prefix = L("Spielordner: ", "Game folder: ");
-            std::string p_suffix = std::string(L("  |  Skalierung: ", "  |  Scaling: ")) + skalierung_label_str(g.chosen_skalierung);
-            int max_path_px = (cx + cw - 28) - tx0 - text_width_px((p_prefix + p_suffix).c_str(), 0);
-            if (max_path_px < 180) max_path_px = 180;
-            path_info = p_prefix + clip_text_px_left(g.resolved_gamedir, max_path_px, 0) + p_suffix;
+            int max_path_px = (rx - tx0) - text_width_px(p_prefix.c_str(), FONT_13);
+            if (max_path_px < 200) max_path_px = 200;
+            path_info = p_prefix + clip_text_px_left(g.resolved_gamedir, max_path_px, FONT_13);
         } else {
-            path_info = L("Spielordner noch nicht gewählt – bitte Ordner ins Fenster ziehen oder [Ordner wählen...] klicken.",
-                          "Game folder not set yet – please drag & drop folder into window or click [Select Folder...].");
+            path_info = L("Spielordner: Noch nicht gewählt – bitte Ordner ins Fenster ziehen oder [Ordner …] klicken.",
+                          "Game folder: Not set yet – please drag & drop folder into window or click [Folder …].");
         }
-        draw_text(tx0, cy + 86, path_info.c_str(), 0xFFA4B0C2u, 0, true);
+        draw_text(tx0, cy + 41, path_info.c_str(), path_col, FONT_13, false);
 
-        /* Zeile 4: Alle 6 Bedienknoepfe DIREKT PRO SPIEL auf der Karte (buendig von cx+20 bis cx+cw-20) */
-        std::string btn_plog    = std::string(L("Probenlog: ", "Roll Log: ")) + (g.chosen_probenlog ? L("AN", "ON") : L("AUS", "OFF"));
-        std::string btn_patches = std::string(L("Patches: ", "Patches: ")) + stufe_short_label(g.chosen_stufe);
-        std::string btn_fen     = std::string(L("Fenster: ", "Window: ")) + (g.chosen_fenster == "vollbild" ? L("Vollbild", "Fullscreen") : (g.chosen_fenster + "x"));
-        std::string btn_intro   = std::string(L("Intro: ", "Intro: ")) + (g.chosen_intro ? L("AN", "ON") : L("AUS", "OFF"));
+        /* Zeile 3: Die drei grossen Knoepfe (235, 236, 235 px mit 10 px Abstand) */
+        int btn_y = cy + 66;
+        int btn_h = 37;
+        bool hov_win_btn = bg_hover && g.has_any_exe && point_in_rect(g_mouse_x, g_mouse_y, tx0, btn_y, 235, btn_h);
+        bool hov_dos_btn = bg_hover && point_in_rect(g_mouse_x, g_mouse_y, tx0 + 245, btn_y, 236, btn_h);
+        bool hov_web_btn = bg_hover && is_browser_available(g) && point_in_rect(g_mouse_x, g_mouse_y, tx0 + 491, btn_y, 235, btn_h);
 
-        draw_button(cx + 20,  cy + 124, 152, 38, btn_plog.c_str(),    g.chosen_probenlog, true, g.chosen_probenlog, bg_hover);
-        draw_button(cx + 182, cy + 124, 196, 38, btn_patches.c_str(), false,              true, false,              bg_hover);
-        draw_button(cx + 388, cy + 124, 154, 38, btn_fen.c_str(),     false,              true, false,              bg_hover);
-        draw_button(cx + 552, cy + 124, 122, 38, btn_intro.c_str(),   g.chosen_intro,     true, g.chosen_intro,     bg_hover);
-        draw_button(cx + 684, cy + 124, 156, 38, L("Ordner wählen...", "Select Folder..."), false, true, false,      bg_hover);
-        draw_button(cx + 850, cy + 124, 154, 38, L("Einstellungen...", "Settings..."),      false, true, false,      bg_hover);
+        /* Etappe 7 (E3): Wenn der Mauszeiger (oder Tab-Fokus) auf "Im Browser spielen" liegt,
+         * werden die fuer den Browser nicht vom Starter steuerbaren Optionen (Anzeige & lokales Probenlog)
+         * sanft abgedimmt, ohne das Layout zu verschieben. Bei Fixes="Original" ist Probenlog ebenfalls
+         * abgedimmt, da die unveraenderte Original-Engine (1992-1996) kein Probenlog enthaelt. */
+        bool web_way_active = hov_web_btn || (is_sel && g_show_focus_ring && !g_help_active && !g_modal_active && g_card_focus == 8);
+        bool dim_anzeige    = web_way_active;
+        bool dim_probenlog  = (g.chosen_stufe == STUFE_ORIG) || web_way_active;
+
+        if (!g.has_any_exe) {
+            draw_button(tx0, btn_y, 235, btn_h, L("Kommt bald", "Coming soon"), false, false, false, false, FONT_15, false);
+        } else {
+            draw_button(tx0, btn_y, 235, btn_h, L("Spielen (Windows)", "Play (Windows)"),
+                        false, true, true, bg_hover, FONT_15_SEMI, true);
+        }
+
+        const char *dos_btn_lbl = g.dos_fix_exists
+            ? L("In DOSBox spielen", "Play in DOSBox")
+            : L("DOS-Fassung patchen", "Patch DOS Version");
+        draw_button(tx0 + 245, btn_y, 236, btn_h, dos_btn_lbl,
+                    false, true, false, bg_hover, FONT_15, false);
+
+        if (is_browser_available(g)) {
+            draw_button(tx0 + 491, btn_y, 235, btn_h, L("Im Browser spielen", "Play in Browser"),
+                        false, true, false, bg_hover, FONT_15, false);
+        } else {
+            draw_button(tx0 + 491, btn_y, 235, btn_h, L("Im Browser spielen", "Play in Browser"),
+                        false, false, false, false, FONT_15, false);
+        }
+
+        /* Zeile 4: Optionen in exakt vorgegebener Reihenfolge:
+         * 1. "Fixes" als Segmentschalter [Original | Wichtige | Alle]
+         * 2. "Anzeige" als Klappliste (Vollbild / Fenster 2x..5x)
+         * 3. Haekchen "Intro"
+         * 4. Haekchen "Probenlog"
+         * 5. Rechtsbuendig "Ordner …" und Zahnrad (Einstellungen) */
+        CardRow4Layout L4;
+        compute_card_row4_layout(g, cx, cy, cw, L4);
+
+        /* 4.1 "Fixes" + Segmentschalter [Original | Wichtige | Alle] */
+        draw_text(L4.fixes_lbl_x, L4.y + 6, "Fixes", 0xFF9AA3B2u, FONT_12, false);
+
+        const char *seg_labels[3] = {
+            L("Original", "Original"),
+            L("Wichtige", "Essential"),
+            L("Alle", "All")
+        };
+        PatchStufe seg_stufen[3] = { STUFE_ORIG, STUFE_WICHTIG, STUFE_ALLES };
+        int cur_sx = L4.seg_x;
+        int seg_th = text_height_px(FONT_14);
+        int seg_ty = L4.y + (L4.h - seg_th) / 2;
+
+        for (int sk = 0; sk < 3; ++sk) {
+            int sw = L4.seg_w[sk];
+            bool active_seg = (g.chosen_stufe == seg_stufen[sk]);
+            bool hov_seg    = bg_hover && point_in_rect(g_mouse_x, g_mouse_y, cur_sx, L4.y, sw, L4.h);
+            uint32_t sbg = active_seg ? 0xFF3A4A66u : (hov_seg ? lighten_color(0xFF232B3Cu, 16) : 0xFF232B3Cu);
+            uint32_t sfg = active_seg ? 0xFFFFFFFFu : (hov_seg ? 0xFFE6E9EFu : 0xFF9AA3B2u);
+            fill_rect(cur_sx, L4.y, sw, L4.h, sbg);
+            if (sk > 0) {
+                fill_rect(cur_sx, L4.y, 1, L4.h, 0xFF4A5568u);
+            }
+            draw_text_centered(cur_sx, seg_ty, sw, seg_labels[sk], sfg, FONT_14, false);
+            cur_sx += sw;
+        }
+        draw_border_1px(L4.seg_x, L4.y, L4.seg_total_w, L4.h, 0xFF4A5568u);
+
+        /* 4.2 "Anzeige" + Klappliste (abgedimmt, wenn Maus ueber "Im Browser spielen" schwebt) */
+        draw_text(L4.anz_lbl_x, L4.y + 6, L("Anzeige", "Display"),
+                  dim_anzeige ? 0xFF555E6Eu : 0xFF9AA3B2u, FONT_12, false);
+
+        bool dd_is_open = (g_open_dd_game == (int)i);
+        bool hov_dd     = bg_hover && point_in_rect(g_mouse_x, g_mouse_y, L4.dd_x, L4.y, L4.dd_w, L4.h);
+        uint32_t dd_bg  = dim_anzeige
+            ? 0xFF19202Eu
+            : (dd_is_open ? 0xFF3A4A66u : (hov_dd ? lighten_color(0xFF232B3Cu, 16) : 0xFF232B3Cu));
+        uint32_t dd_brd = dim_anzeige ? 0xFF2E3646u : (dd_is_open ? 0xFF5AA9E6u : 0xFF4A5568u);
+        uint32_t dd_fg  = dim_anzeige ? 0xFF636C7Eu : 0xFFE6E9EFu;
+        fill_rect(L4.dd_x, L4.y, L4.dd_w, L4.h, dd_bg);
+        draw_border_1px(L4.dd_x, L4.y, L4.dd_w, L4.h, dd_brd);
+        draw_text(L4.dd_x + 10, seg_ty, fenster_dd_short_label(g.chosen_fenster), dd_fg, FONT_14, false);
+        draw_alpha_mask(L4.dd_x + L4.dd_w - 18, L4.y + 10, 10, 10, &g_mask_dd_arrow_10x10[0][0], dd_fg);
+
+        /* 4.3 Haekchen "Intro" */
+        bool hov_intro = bg_hover && point_in_rect(g_mouse_x, g_mouse_y, L4.chk_intro_x, L4.y, L4.chk_intro_w, L4.h);
+        draw_checkbox_16(L4.chk_intro_x, L4.y + 7, g.chosen_intro, hov_intro, false);
+        draw_text(L4.chk_intro_x + 22, seg_ty, "Intro", 0xFFE6E9EFu, FONT_14, false);
+
+        /* 4.4 Haekchen "Probenlog" (abgedimmt bei Fixes="Original" sowie bei Maus ueber "Im Browser spielen") */
+        bool hov_plog = bg_hover && point_in_rect(g_mouse_x, g_mouse_y, L4.chk_plog_x, L4.y, L4.chk_plog_w, L4.h);
+        draw_checkbox_16(L4.chk_plog_x, L4.y + 7, g.chosen_probenlog, hov_plog, dim_probenlog);
+        draw_text(L4.chk_plog_x + 22, seg_ty, L("Probenlog", "Roll Log"),
+                  dim_probenlog ? 0xFF636C7Eu : 0xFFE6E9EFu, FONT_14, false);
+
+        /* 4.5 Rechtsbuendig "Ordner …" und Zahnrad (Einstellungen) */
+        draw_button(L4.btn_folder_x, L4.y, L4.btn_folder_w, L4.h,
+                    L("Ordner \xE2\x80\xA6", "Folder \xE2\x80\xA6"),
+                    false, true, false, bg_hover, FONT_14, false);
+
+        bool hov_gear = bg_hover && point_in_rect(g_mouse_x, g_mouse_y, L4.btn_gear_x, L4.y, L4.btn_gear_w, L4.h);
+        uint32_t gear_bg = hov_gear ? lighten_color(0xFF232B3Cu, 16) : 0xFF232B3Cu;
+        fill_rect(L4.btn_gear_x, L4.y, L4.btn_gear_w, L4.h, gear_bg);
+        draw_border_1px(L4.btn_gear_x, L4.y, L4.btn_gear_w, L4.h, 0xFF4A5568u);
+        draw_alpha_mask(L4.btn_gear_x + 11, L4.y + 7, 14, 14, &g_mask_gear_14x14[0][0], hov_gear ? 0xFFFFFFFFu : 0xFFE6E9EFu);
+
+        /* Tastatur-Fokusrahmen (wenn per Tab navigiert wird) */
+        if (is_sel && g_show_focus_ring && !g_help_active && !g_modal_active) {
+            int fx = 0, fy = L4.y, fw = 0, fh = L4.h;
+            if (g_card_focus == 0)      { fx = L4.seg_x; fw = L4.seg_total_w; }
+            else if (g_card_focus == 1) { fx = L4.dd_x; fw = L4.dd_w; }
+            else if (g_card_focus == 2) { fx = L4.chk_intro_x - 2; fy = L4.y + 4; fw = L4.chk_intro_w + 4; fh = 22; }
+            else if (g_card_focus == 3) { fx = L4.chk_plog_x - 2;  fy = L4.y + 4; fw = L4.chk_plog_w + 4;  fh = 22; }
+            else if (g_card_focus == 4) { fx = L4.btn_folder_x; fw = L4.btn_folder_w; }
+            else if (g_card_focus == 5) { fx = L4.btn_gear_x; fw = L4.btn_gear_w; }
+            else if (g_card_focus == 6) { fx = tx0; fy = btn_y; fw = 235; fh = btn_h; }
+            else if (g_card_focus == 7) { fx = tx0 + 245; fy = btn_y; fw = 236; fh = btn_h; }
+            else if (g_card_focus == 8) { fx = tx0 + 491; fy = btn_y; fw = 235; fh = btn_h; }
+            if (fw > 0) {
+                draw_border_1px(fx - 1, fy - 1, fw + 2, fh + 2, 0xFF5AA9E6u);
+            }
+        }
+
+        /* Tooltips & ruhiger Hinweis im oberen Info-Balken (Etappe 7 E3) */
+        if (bg_hover) {
+            bool hov_fixes = point_in_rect(g_mouse_x, g_mouse_y, L4.seg_x, L4.y, L4.seg_total_w, L4.h);
+            bool hov_prog  = point_in_rect(g_mouse_x, g_mouse_y, prog_bx, cy + 10, prog_tw + 24, 24);
+            if (hov_web_btn) {
+                active_tooltip = "Browser: Fixes & Intro werden übergeben – Anzeige (Vollbild-Knopf / F11) & Probenlog direkt auf der Webseite";
+                tip_override   = "Im Browser spielen: Übergibt Fixes & Intro an die Webseite – Anzeige (Vollbild / F11) & Probenlog direkt im Browser.";
+                tip_border_col = 0xFF5AA9E6u;
+            } else if (hov_dos_btn) {
+                if (g.dos_fix_exists) {
+                    active_tooltip = std::string("DOSBox (") + get_active_dos_exe_name(g) + "): Startet mit Fixes, Anzeige (4:3), Intro" +
+                                     (g.chosen_stufe == STUFE_ORIG ? " (Probenlog nur bei Wichtige/Alle)" : " & Probenlog");
+                    tip_override   = "In DOSBox spielen: Nutzt die gewählte Fix-Stufe (Original / Wichtige / Alle), Anzeige (4:3), Intro und Probenlog.";
+                } else {
+                    active_tooltip = "Erzeugt fehlerbereinigte DOS-Programme – danach Start in DOSBox mit Fixes, Anzeige, Intro & Probenlog";
+                    tip_override   = "DOS-Fassung patchen: Erzeugt die Fix-Programme (Original bleibt unverändert) – danach gelten alle Optionen für DOSBox.";
+                }
+                tip_border_col = 0xFF5AA9E6u;
+            } else if (hov_win_btn) {
+                active_tooltip = std::string("Windows-Port (") + get_active_exe_name(g) + "): Startet mit Fixes, Anzeige (4:3), Intro" +
+                                 (g.chosen_stufe == STUFE_ORIG ? " (Probenlog nur bei Wichtige/Alle)" : " & Probenlog");
+                tip_override   = "Spielen (Windows): Alle Optionen der Karte (Fixes, Anzeige, Intro, Probenlog & ⚙ Skalierung) gelten direkt.";
+                tip_border_col = 0xFF4CAF72u;
+            } else if (hov_prog) {
+                active_tooltip = std::string("Programmdatei: ") + get_active_exe_name(g);
+            } else if (hov_fixes) {
+                active_tooltip = std::string("Fixes (") + stufe_short_label(g.chosen_stufe) + "): Gilt für alle drei Wege – Windows (" +
+                                 get_active_exe_name(g) + "), DOSBox (" + get_active_dos_exe_name(g) + ") & Browser";
+            } else if (hov_dd) {
+                active_tooltip = "Anzeige (Vollbild / Fenster 2×–5× in 4:3): Gilt für Windows & DOSBox (im Browser Vollbild-Knopf / F11 der Seite)";
+            } else if (hov_intro) {
+                active_tooltip = "Intro (Vorspann abspielen oder überspringen): Gilt für alle drei Wege (Windows, DOSBox & Browser)";
+            } else if (hov_plog) {
+                if (g.chosen_stufe == STUFE_ORIG) {
+                    active_tooltip = "Probenlog: Nur mit Fixes »Wichtige« oder »Alle« verfügbar (Original-Fassung ist unverändert)";
+                    tip_override   = "Hinweis: Das Probenlog ist in »Original« nicht enthalten – bitte unter Fixes »Wichtige« oder »Alle« wählen.";
+                    tip_border_col = 0xFFE3A63Au;
+                } else {
+                    active_tooltip = "Probenlog (Live-Fenster & PROBEN.CSV): Gilt für Windows & DOSBox (im Browser eigener Knopf oben rechts)";
+                }
+            } else if (hov_gear) {
+                active_tooltip = std::string("Einstellungen öffnen (Skalierung: ") +
+                                 skalierung_label_str(g.chosen_skalierung) + " – gilt für Windows)";
+            }
+        }
+    }
+
+    /* Hinweis-Balken .tip: x=14, y=94, w=1012, h=43 (zeigt kontextbezogene Hinweise zu den 3 Wegen & Optionen) */
+    fill_rect(14, 94, 1012, 43, 0xFF181F2Du);
+    draw_border_1px(14, 94, 1012, 43, tip_border_col);
+    const char *default_tip =
+        "Tipp: Spielordner oder Archiv einfach mit der Maus ins Fenster ziehen – oder direkt beim jeweiligen Spiel auswählen.";
+    draw_text(30, 104, tip_override.empty() ? default_tip : tip_override.c_str(), tip_text_col, FONT_15, false);
+
+    /* Geoeffnete Anzeige-Klappliste als schwebendes Menue ueber den Karten zeichnen */
+    if (g_open_dd_game >= 0 && g_open_dd_game < (int)g_games.size()) {
+        const GameCatalogEntry &og = g_games[g_open_dd_game];
+        int mx = 0, my = 0, mw = 0, mh = 0;
+        get_open_dd_menu_rect(g_open_dd_game, mx, my, mw, mh);
+
+        /* Dezenter Schatten + Menue-Hintergrund */
+        fill_rect(mx + 3, my + 3, mw, mh, 0xFF0A0E16u);
+        fill_rect(mx, my, mw, mh, 0xFF181F2Du);
+        draw_border_1px(mx, my, mw, mh, 0xFF5AA9E6u);
+
+        int cur_idx = get_dd_fenster_index(og.chosen_fenster);
+        int item_th = text_height_px(FONT_14);
+
+        for (int k = 0; k < 5; ++k) {
+            int iy = my + 1 + k * 26;
+            bool is_cur = (k == cur_idx);
+            bool is_hov = point_in_rect(g_mouse_x, g_mouse_y, mx + 1, iy, mw - 2, 26) || (g_open_dd_sel == k);
+            uint32_t ibg = is_cur ? 0xFF3A4A66u : (is_hov ? 0xFF2B364Cu : 0xFF181F2Du);
+            uint32_t ifg = (is_cur || is_hov) ? 0xFFFFFFFFu : 0xFFE6E9EFu;
+            fill_rect(mx + 1, iy, mw - 2, 26, ibg);
+            if (k > 0) {
+                fill_rect(mx + 1, iy, mw - 2, 1, 0xFF2A3346u);
+            }
+            if (is_cur) {
+                draw_alpha_mask(mx + 7, iy + 6, 13, 13, &g_mask_check_13x13[0][0], 0xFF4CAF72u);
+            }
+            const char *ilbl = fenster_dd_short_label(g_dd_fenster_vals[k]);
+            draw_text(mx + 24, iy + (26 - item_th) / 2, ilbl, ifg, FONT_14, false);
+        }
     }
 
     if (!active_tooltip.empty()) {
@@ -2579,99 +3306,105 @@ static void render_screen_settings(void) {
     if (g_selected_game < 0 || g_selected_game >= (int)g_games.size()) return;
     const GameCatalogEntry &g = g_games[g_selected_game];
     bool bg_hover = (!g_help_active && !g_modal_active);
+    std::string active_tooltip;
 
     char sub_buf[200];
     snprintf(sub_buf, sizeof(sub_buf),
-             L("Teil %d: %s – Einstellungen anpassen und Spiel starten",
-               "Part %d: %s – Customize settings and start game"),
+             L("Teil %d: %s – Einstellungen (inkl. Skalierung) anpassen und starten",
+               "Part %d: %s – Customize settings (incl. scaling) and start"),
              g.teil, g.name.c_str());
-    render_background_and_header(sub_buf);
+    render_background_and_header(sub_buf, &active_tooltip);
 
-    fill_gradient_v(18, 90, SCREEN_W - 36, 550, 0xFF182030u, 0xFF101622u);
-    draw_rect_border(18, 90, SCREEN_W - 36, 550, 0xFF8A7430u, 0xFF3C3418u);
+    fill_rect(14, 92, 1012, 488, 0xFF1B2232u);
+    draw_border_1px(14, 92, 1012, 488, 0xFF3A4558u);
 
-    int row_y[6] = {98, 184, 270, 356, 424, 492};
-    int row_h[6] = {80,  80,  80,  62,  62, 138};
+    int row_y[6] = { 98, 174, 250, 326, 384, 442 };
+    int row_h[6] = { 72,  72,  72,  54,  54, 132 };
     if (g_settings_row >= 0 && g_settings_row < 6) {
-        fill_rect(26, row_y[g_settings_row], SCREEN_W - 52, row_h[g_settings_row], 0xFF222C42u);
-        draw_rect_border(26, row_y[g_settings_row], SCREEN_W - 52, row_h[g_settings_row], 0xFF7A6828u, 0xFF383018u);
+        fill_rect(22, row_y[g_settings_row], 996, row_h[g_settings_row], 0xFF232C40u);
+        draw_border_1px(22, row_y[g_settings_row], 996, row_h[g_settings_row], 0xFF4A5568u);
     }
 
-    std::string active_tooltip;
-
-    /* 1. Patches (T2: Keine EXE-Namen in der Oberflaeche, Dateiname nur als Tooltip / in der Hilfe) */
-    draw_text(40, 112, L("1. Patches [S]:", "1. Patches [S]:"), 0xFFF4D068u, 4, true);
-    draw_button(276, 105, 224, 38, L("Original", "Original"),                 g.chosen_stufe == STUFE_ORIG,    true, false, bg_hover);
-    draw_button(512, 105, 244, 38, L("Wichtige Fixes", "Essential Fixes"),    g.chosen_stufe == STUFE_WICHTIG, true, false, bg_hover);
-    draw_button(768, 105, 254, 38, L("Alle Fixes", "All Fixes"),              g.chosen_stufe == STUFE_ALLES,   true, false, bg_hover);
+    /* 1. Fixes */
+    draw_text(36, 110, L("1. Fixes [S]:", "1. Fixes [S]:"), 0xFFE3A63Au, FONT_15_SEMI, false);
+    draw_button(268, 104, 224, 34, L("Original", "Original"),                 g.chosen_stufe == STUFE_ORIG,    true, false, bg_hover, FONT_14);
+    draw_button(504, 104, 244, 34, L("Wichtige Fixes", "Essential Fixes"),    g.chosen_stufe == STUFE_WICHTIG, true, false, bg_hover, FONT_14);
+    draw_button(760, 104, 250, 34, L("Alle Fixes", "All Fixes"),              g.chosen_stufe == STUFE_ALLES,   true, false, bg_hover, FONT_14);
 
     bool stufe_exe_ok = (g.chosen_stufe == STUFE_ORIG) ? g.has_exe_orig : ((g.chosen_stufe == STUFE_WICHTIG) ? g.has_exe_wichtig : (g.has_exe_alles || g.has_exe_standard));
     const char *stufe_desc = (g.chosen_stufe == STUFE_ORIG)
-        ? L("Unverändertes Originalverhalten von 1992–1996", "Unmodified original behavior from 1992–1996")
+        ? L("Unverändertes Originalverhalten (gilt für Windows, DOSBox & Browser)", "Unmodified original behavior")
         : ((g.chosen_stufe == STUFE_WICHTIG)
-            ? L("Behebt Abstürze und kritische Spielstand-Fehler", "Fixes crashes and critical savegame issues")
-            : L("Alle Fehlerkorrekturen und Komfortfunktionen (Empfohlen)", "All bug fixes and quality-of-life improvements (Recommended)"));
-    draw_status_badge(276, 152, stufe_exe_ok);
+            ? L("Behebt Abstürze und kritische Fehler (gilt für Windows, DOSBox & Browser)", "Fixes crashes and critical savegame issues")
+            : L("Alle Fehlerkorrekturen & Komfortfunktionen (Empfohlen – Windows, DOSBox & Browser)", "All bug fixes and quality-of-life improvements"));
+    draw_status_badge(268, 146, stufe_exe_ok);
     char stufe_sub[240];
     snprintf(stufe_sub, sizeof(stufe_sub), "%s – %s",
              stufe_exe_ok ? L("Programm gefunden", "Program found") : L("Programm fehlt", "Program missing"),
              stufe_desc);
-    draw_text(302, 150, stufe_sub, stufe_exe_ok ? 0xFFB0C0D8u : 0xFFFF8080u, 1, true);
+    draw_text(290, 144, stufe_sub, stufe_exe_ok ? 0xFF9AA3B2u : 0xFFFF8080u, FONT_13, false);
 
-    if (bg_hover && point_in_rect(g_mouse_x, g_mouse_y, 276, 105, 746, 70)) {
-        active_tooltip = std::string(L("Programmdatei: ", "Executable: ")) + get_active_exe_name(g);
+    if (bg_hover && point_in_rect(g_mouse_x, g_mouse_y, 268, 104, 742, 62)) {
+        active_tooltip = std::string("Windows: ") + get_active_exe_name(g) + "  |  DOSBox: " + get_active_dos_exe_name(g) +
+                         "  |  Browser: ?stufe=" + stufe_to_str(g.chosen_stufe);
     }
 
-    /* 2. Anzeige - Fenstergroesse (immer exakt 4:3) */
-    draw_text(40, 198, L("2. Fenstergröße [F]:", "2. Window Size [F]:"), 0xFFF4D068u, 4, true);
-    draw_button(276, 191, 140, 38, "2x (640x480)",   g.chosen_fenster == "2", true, false, bg_hover);
-    draw_button(424, 191, 140, 38, "3x (960x720)",   g.chosen_fenster == "3", true, false, bg_hover);
-    draw_button(572, 191, 150, 38, "4x (1280x960)",  g.chosen_fenster == "4", true, false, bg_hover);
-    draw_button(730, 191, 156, 38, "5x (1600x1200)", g.chosen_fenster == "5", true, false, bg_hover);
-    draw_button(894, 191, 128, 38, L("Vollbild", "Fullscreen"), g.chosen_fenster == "vollbild", true, false, bg_hover);
+    /* 2. Anzeige - Fenstergroesse */
+    draw_text(36, 186, L("2. Anzeige [F]:", "2. Display [F]:"), 0xFFE3A63Au, FONT_15_SEMI, false);
+    draw_button(268, 180, 140, 34, "2x (640x480)",   g.chosen_fenster == "2", true, false, bg_hover, FONT_14);
+    draw_button(416, 180, 140, 34, "3x (960x720)",   g.chosen_fenster == "3", true, false, bg_hover, FONT_14);
+    draw_button(564, 180, 150, 34, "4x (1280x960)",  g.chosen_fenster == "4", true, false, bg_hover, FONT_14);
+    draw_button(722, 180, 156, 34, "5x (1600x1200)", g.chosen_fenster == "5", true, false, bg_hover, FONT_14);
+    draw_button(886, 180, 124, 34, L("Vollbild", "Fullscreen"), g.chosen_fenster == "vollbild", true, false, bg_hover, FONT_14);
 
-    draw_text(276, 236,
-        L("Immer exakt 4:3 wie auf dem Röhrenmonitor (Alt+Enter schaltet Vollbild um)",
+    draw_text(268, 220,
+        L("Gilt für Windows & DOSBox in 4:3 (Alt+Enter schaltet Vollbild um; im Browser Vollbild-Knopf / F11)",
           "Always exact 4:3 aspect ratio like on a CRT monitor (Alt+Enter toggles fullscreen)"),
-        0xFFB0C0D8u, 1, true);
+        0xFF9AA3B2u, FONT_13, false);
 
-    /* 3. Anzeige - Skalierung (T2: "Ganzzahlig (exakte Vielfache)" / "Füllend (scharf)") */
-    draw_text(40, 284, L("3. Skalierung [K]:", "3. Scaling [K]:"), 0xFFF4D068u, 4, true);
+    /* 3. Skalierung (bleibt in Einstellungen) */
+    draw_text(36, 262, L("3. Skalierung [K]:", "3. Scaling [K]:"), 0xFFE3A63Au, FONT_15_SEMI, false);
     bool is_ganz = (_stricmp(g.chosen_skalierung.c_str(), "ganzzahlig") == 0);
-    draw_button(276, 277, 364, 38, L("Ganzzahlig (exakte Vielfache)", "Integer (exact multiples)"), is_ganz, true, false, bg_hover);
-    draw_button(652, 277, 370, 38, L("Füllend (scharf)", "Fill (sharp)"),                          !is_ganz, true, false, bg_hover);
+    draw_button(268, 256, 364, 34, L("Ganzzahlig (exakte Vielfache)", "Integer (exact multiples)"), is_ganz, true, false, bg_hover, FONT_14);
+    draw_button(644, 256, 366, 34, L("Füllend (scharf)", "Fill (sharp)"),                          !is_ganz, true, false, bg_hover, FONT_14);
 
     const char *skal_desc = is_ganz
-        ? L("Ganzzahlig: Nur ganze Vielfache, alle Pixelspalten exakt gleich breit",
+        ? L("Ganzzahlig (Windows-Port): Nur ganze Vielfache, alle Pixelspalten exakt gleich breit (DOSBox: openglnb 4:3)",
             "Integer: Whole multiples only, all pixel columns have the exact same width")
-        : L("Füllend: Nutzt die gesamte 4:3-Fläche mit gestochen scharfen Pixelkanten",
+        : L("Füllend (Windows-Port): Nutzt die gesamte 4:3-Fläche mit scharfen Pixelkanten (DOSBox: openglnb 4:3)",
             "Fill: Uses the full 4:3 area with crisp, sharp pixel edges");
-    draw_text(276, 322, skal_desc, 0xFFB0C0D8u, 1, true);
+    draw_text(268, 296, skal_desc, 0xFF9AA3B2u, FONT_13, false);
 
-    /* 4. Probenlog (T2: "Eingeschaltet (mit Live-Fenster)") */
-    draw_text(40, 374, L("4. Probenlog [P]:", "4. Roll Log [P]:"), 0xFFF4D068u, 4, true);
-    draw_button(276, 367, 234, 38, L("Ausgeschaltet", "Disabled"), !g.chosen_probenlog, true, false, bg_hover);
-    draw_button(522, 367, 500, 38, L("Eingeschaltet (mit Live-Fenster)", "Enabled (with live window)"), g.chosen_probenlog, true, false, bg_hover);
+    /* 4. Probenlog */
+    draw_text(36, 342, L("4. Probenlog [P]:", "4. Roll Log [P]:"), 0xFFE3A63Au, FONT_15_SEMI, false);
+    bool plog_avail = (g.chosen_stufe != STUFE_ORIG);
+    draw_button(268, 336, 234, 34, L("Ausgeschaltet", "Disabled"), !g.chosen_probenlog || !plog_avail, true, false, bg_hover, FONT_14);
+    draw_button(514, 336, 496, 34,
+                plog_avail ? L("Eingeschaltet (Live-Fenster für Windows & DOSBox)", "Enabled (with live window)")
+                           : L("Nur mit Fixes »Wichtige« oder »Alle« verfügbar", "Only available with Essential/All Fixes"),
+                g.chosen_probenlog && plog_avail, plog_avail, false, bg_hover, FONT_14);
 
-    /* 5. Vorspann / Intro (T2: "Überspringen" ohne --kein-intro) */
-    draw_text(40, 442, L("5. Vorspann [I]:", "5. Intro [I]:"), 0xFFF4D068u, 4, true);
-    draw_button(276, 435, 346, 38, L("Überspringen", "Skip"), !g.chosen_intro, true, false, bg_hover);
-    draw_button(634, 435, 388, 38, L("Abspielen (Original-Vorspann)", "Play (Original Intro)"), g.chosen_intro, true, false, bg_hover);
+    /* 5. Vorspann / Intro */
+    draw_text(36, 400, L("5. Intro [I]:", "5. Intro [I]:"), 0xFFE3A63Au, FONT_15_SEMI, false);
+    draw_button(268, 394, 346, 34, L("Überspringen (Windows, DOSBox & Browser)", "Skip"), !g.chosen_intro, true, false, bg_hover, FONT_14);
+    draw_button(626, 394, 384, 34, L("Abspielen (Windows, DOSBox & Browser)", "Play (Original Intro)"), g.chosen_intro, true, false, bg_hover, FONT_14);
 
-    /* 6. Spielordner & Status-Checks (T2: Keine Dateiendungen oder Dateinamen in der Oberflaeche) */
-    draw_text(40, 510, L("6. Spieldaten [O]:", "6. Game Data [O]:"), 0xFFF4D068u, 4, true);
-    fill_rect(276, 503, 536, 38, 0xFF0E121Cu);
-    draw_rect_border(276, 503, 536, 38, g.gamedir_valid ? 0xFF4C8858u : 0xFF985050u, 0xFF242C3Cu);
+    /* 6. Spielordner & Status-Checks */
+    draw_text(36, 458, L("6. Spieldaten [O]:", "6. Game Data [O]:"), 0xFFE3A63Au, FONT_15_SEMI, false);
+    fill_rect(268, 452, 536, 34, 0xFF10151Fu);
+    draw_border_1px(268, 452, 536, 34, g.gamedir_valid ? 0xFF4CAF72u : 0xFF8E4A50u);
     std::string disp_gd = g.gamedir_valid
-        ? clip_text_px_left(g.resolved_gamedir, 512, 1)
+        ? clip_text_px_left(g.resolved_gamedir, 512, FONT_14)
         : L("Noch nicht gewählt – Spielordner oder Archiv ins Fenster ziehen",
             "Not selected yet – Drag & drop game folder or archive into window");
-    draw_text(288, 511, disp_gd.c_str(), g.gamedir_valid ? 0xFFD8E8D8u : 0xFFFF9898u, 1, true);
-    draw_button(824, 503, 198, 38, L("Ordner wählen...", "Select Folder..."), g_settings_row == 5, true, false, bg_hover);
+    draw_text(280, 459, disp_gd.c_str(), g.gamedir_valid ? 0xFFE6E9EFu : 0xFFFF9898u, FONT_14, false);
+    draw_button(816, 452, 194, 34, L("Ordner \xE2\x80\xA6", "Folder \xE2\x80\xA6"), g_settings_row == 5, true, false, bg_hover, FONT_14);
 
-    draw_status_badge(276, 556, g.gamedir_valid);
+    draw_status_badge(268, 498, g.gamedir_valid);
     std::string save_info;
-    if (!g.gamedir_valid) {
+    if (g.gamedir_wrong_version) {
+        save_info = L(g.wrong_version_msg_de.c_str(), g.wrong_version_msg_en.c_str());
+    } else if (!g.gamedir_valid) {
         save_info = L("Spieldaten fehlen – Bitte den Original-Spielordner auswählen",
                       "Game data missing – Please select your original game folder");
     } else if (g.gamedir_writable) {
@@ -2681,28 +3414,46 @@ static void render_screen_settings(void) {
         save_info = L("Spieldaten gefunden  |  Spielstände werden im eigenen Spielstandsordner gespeichert",
                       "Game data found  |  Savegames are stored in the local savegames folder");
     }
-    draw_text(302, 554, save_info.c_str(), g.gamedir_valid ? 0xFF8CE09Au : 0xFFFF9090u, 1, true);
+    draw_text(290, 496, save_info.c_str(), g.gamedir_valid ? 0xFFE6E9EFu : 0xFFFF9090u, FONT_13, false);
 
-    draw_status_badge(276, 590, g.verfuegbar);
+    draw_status_badge(268, 526, g.verfuegbar);
     const char *ready_info = g.verfuegbar
-        ? L("Startbereit – Spiel kann sofort gestartet werden (Originalgetreu 4:3)",
-            "Ready to play – Game can be started immediately (Authentic 4:3)")
+        ? L("Startbereit – Alle drei Wege (Windows, DOSBox, Browser) stehen bereit",
+            "Ready to play – All three ways (Windows, DOSBox, Browser) are available")
         : (!g.has_any_exe
             ? L("Kommt bald – Programm für diesen Teil ist noch in Vorbereitung",
                 "Coming soon – Program for this part is still in preparation")
-            : L("Noch nicht startbereit – Bitte zuerst den Spielordner bereitstellen",
-                "Not ready yet – Please provide the game folder first"));
-    draw_text(302, 588, ready_info, g.verfuegbar ? 0xFF8CE09Au : 0xFFE8C078u, 1, true);
+            : L("Noch nicht startbereit – Bitte zuerst die deutsche GOG-Fassung bereitstellen",
+                "Not ready yet – Please provide the German GOG version first"));
+    draw_text(290, 524, ready_info, g.verfuegbar ? 0xFFE6E9EFu : 0xFFE3A63Au, FONT_13, false);
 
-    /* Untere Aktionsleiste */
-    fill_gradient_v(18, 694, SCREEN_W - 36, 52, 0xFF181E2Cu, 0xFF10141Eu);
-    draw_rect_border(18, 694, SCREEN_W - 36, 52, 0xFF687288u, 0xFF303644u);
+    /* Untere Aktionsleiste mit allen drei Wegen */
+    fill_rect(14, 588, 1012, 48, 0xFF181F2Du);
+    draw_border_1px(14, 588, 1012, 48, 0xFF3A4558u);
 
-    draw_button(30, 701, 264, 38, L("< Zurück zur Übersicht", "< Back to Overview"), false, true, false, bg_hover);
-    if (!g.has_any_exe) {
-        draw_button(716, 699, 314, 42, L("Kommt bald", "Coming soon"), false, false, false, false);
+    draw_button(24, 594, 180, 36, L("< Übersicht (Esc)", "< Overview (Esc)"), false, true, false, bg_hover, FONT_15);
+    bool dos_can_patch = (g.gamedir_valid || g.gamedir_wrong_version) && g.has_dos_patcher;
+    draw_button(214, 594, 198, 36, L("DOS-Fassung patchen", "Patch DOS Version"), false, true, false, bg_hover, FONT_15);
+    draw_button(422, 594, 184, 36, L("In DOSBox spielen", "Play in DOSBox"), g.dos_fix_exists, dos_can_patch && g.dos_fix_exists, false, bg_hover, FONT_15);
+    if (is_browser_available(g)) {
+        draw_button(616, 594, 186, 36, L("Im Browser spielen", "Play in Browser"), false, true, false, bg_hover, FONT_15);
     } else {
-        draw_button(716, 699, 314, 42, L(">> Spiel starten (Enter)", ">> Start Game (Enter)"), g_settings_row == 6, g.verfuegbar, true, bg_hover);
+        draw_button(616, 594, 186, 36, L("Im Browser spielen", "Play in Browser"), false, false, false, false, FONT_15);
+    }
+    if (!g.has_any_exe) {
+        draw_button(812, 594, 204, 36, L("Kommt bald", "Coming soon"), false, false, false, false, FONT_15);
+    } else {
+        draw_button(812, 594, 204, 36, L("Spielen (Windows)", "Play (Windows)"), g_settings_row == 6, true, g.verfuegbar, bg_hover, FONT_15_SEMI, true);
+    }
+
+    if (bg_hover) {
+        if (point_in_rect(g_mouse_x, g_mouse_y, 616, 594, 186, 36) && is_browser_available(g)) {
+            active_tooltip = "Browser: Fixes & Intro werden übergeben – Anzeige (Vollbild/F11) & Probenlog direkt auf der Webseite";
+        } else if (point_in_rect(g_mouse_x, g_mouse_y, 422, 594, 184, 36) && g.dos_fix_exists) {
+            active_tooltip = std::string("DOSBox (") + get_active_dos_exe_name(g) + "): Startet mit Fixes, Anzeige (4:3), Intro & Probenlog";
+        } else if (point_in_rect(g_mouse_x, g_mouse_y, 812, 594, 204, 36) && g.has_any_exe) {
+            active_tooltip = std::string("Windows-Port (") + get_active_exe_name(g) + "): Alle Einstellungen gelten direkt";
+        }
     }
 
     if (!active_tooltip.empty()) {
@@ -2712,123 +3463,106 @@ static void render_screen_settings(void) {
 
 static void render_help_overlay(void) {
     if (!g_help_active) return;
-    int mw = 900, mh = 540;
+    int mw = 900, mh = 530;
     int mx = (SCREEN_W - mw) / 2;
     int my = (SCREEN_H - mh) / 2;
-    fill_gradient_v(mx, my, mw, mh, 0xFF182438u, 0xFF0C121Eu);
-    draw_rect_border(mx, my, mw, mh, 0xFFFFDF70u, 0xFF8A7028u);
-    draw_corner_ornaments(mx, my, mw, mh, 0xFFFFE484u);
+    fill_rect(mx, my, mw, mh, 0xFF181F2Du);
+    draw_border_1px(mx, my, mw, mh, 0xFF5AA9E6u);
 
-    draw_text_centered(mx, my + 18, mw, L("HILFE & BEDIENUNG (F1)", "HELP & CONTROLS (F1)"), 0xFFFFE484u, 2, true);
+    draw_text_centered(mx, my + 16, mw, L("HILFE & BEDIENUNG (F1)", "HELP & CONTROLS (F1)"), 0xFFE3A63Au, FONT_23_BOLD, false);
 
     const char *lines_de[] = {
-        "SCHRITT 1 – SPIELDATEN BEREITSTELLEN (REINZIEHEN / DRAG & DROP):",
-        "   Einfach den Spielordner oder ein Archiv direkt in dieses Starter-Fenster",
-        "   ziehen! Archive werden automatisch mit Fortschrittsbalken nach",
-        "   Spieldaten\\<Spiel>\\ entpackt. Alternativ: Knopf [Ordner wählen...].",
+        "DIE DREI WEGE ZUM SPIELEN:",
+        "   • Spielen (Windows): Startet die neue Windows-Fassung direkt ohne DOSBox",
+        "     im originalgetreuen 4:3-Bild mit CD-Musik, Vorspann und Probenlog.",
+        "   • DOS-Fassung patchen / In DOSBox spielen: Erzeugt aus deiner deutschen",
+        "     GOG-Fassung fehlerbereinigte DOS-Programme, ohne Originaldateien zu",
+        "     überschreiben. Danach startet [In DOSBox spielen] das Spiel in DOSBox.",
+        "   • Im Browser spielen: Öffnet die Online-Fassung im Standardbrowser",
+        "     und übergibt die gewählte Fix-Stufe sowie die Intro-Einstellung.",
         "",
-        "SCHRITT 2 – ANZEIGE & 4:3-SKALIERUNG [F / K]:",
-        "   • Fenstergröße [F]: 2x (640x480), 3x (960x720), 4x (1280x960), 5x (1600x1200)",
-        "     oder Vollbild. Seitenverhältnis ist immer exakt 4:3 wie auf dem Röhrenmonitor.",
-        "   • Skalierung [K]: Ganzzahlig (exakte Vielfache) oder Füllend (scharf).",
+        "SPIELORDNER BEREITSTELLEN:",
+        "   Den Hauptordner deiner deutschen GOG-Installation einfach mit der Maus",
+        "   in dieses Fenster ziehen oder auf der Spielkarte [Ordner …] klicken.",
         "",
-        "SCHRITT 3 – PATCH-STUFEN [S] & PROGRAMMDATEIEN:",
-        "   • Original:       *_PORT_ORIG.EXE    (Unverändertes Originalverhalten)",
-        "   • Wichtige Fixes: *_PORT_WICHTIG.EXE (Behebt Abstürze & Spielstand-Fehler)",
-        "   • Alle Fixes:     *_PORT.EXE         (Alle Fehlerkorrekturen + Komfort, empfohlen)",
+        "WELCHE OPTION GILT FÜR WELCHEN WEG?",
+        "   • Fixes [Original | Wichtige | Alle] & Intro: Gelten für ALLE drei Wege",
+        "     (Windows, DOSBox und als URL-Parameter für die Browser-Fassung).",
+        "   • Anzeige (Vollbild / Fenster 2×..5× in 4:3): Gilt für Windows & DOSBox",
+        "     (im Browser über den Vollbild-Knopf der Webseite oder F11; Skalierung via ⚙).",
+        "   • Probenlog: Öffnet bei »Wichtige«/»Alle« das Live-Fenster für Windows & DOSBox",
+        "     (im Browser eigener Knopf oben rechts; in »Original« nicht enthalten).",
         "",
-        "TASTENKÜRZEL IM STARTER & IM SPIEL:",
-        "   Starter: [1–3]=Spiel, [F1]=Hilfe, [F2]=Sprache DE/EN, [F5]=Schnellstart,",
-        "            [Pfeile/Tab/Enter]=Wahl, [S/F/K/P/I/O], [Esc]=Zurück/Beenden",
-        "   Im Spiel: [Alt+Enter]=Vollbild/Fenster, [Tab]=Größe, [F10]=Musik, [F11/F12]=Ton"
+        "TASTENKÜRZEL: [←/→]=Fixes, [Leertaste]=Häkchen, [Tab]=Element, [F1]=Hilfe, [F5]=Start, [Esc]=Ende"
     };
 
-    const char *lines_en[] = {
-        "STEP 1 – PROVIDE GAME DATA (DRAG & DROP):",
-        "   Simply drag & drop your game folder or archive directly into this launcher",
-        "   window! Archives are automatically extracted with a progress bar to",
-        "   Spieldaten\\<Game>\\. Alternatively: click [Select Folder...].",
-        "",
-        "STEP 2 – DISPLAY & 4:3 SCALING [F / K]:",
-        "   • Window Size [F]: 2x (640x480), 3x (960x720), 4x (1280x960), 5x (1600x1200)",
-        "     or Fullscreen. Aspect ratio is always exact 4:3 like on a CRT monitor.",
-        "   • Scaling [K]: Integer (exact multiples) or Fill (sharp).",
-        "",
-        "STEP 3 – PATCH LEVELS [S] & EXECUTABLES:",
-        "   • Original:        *_PORT_ORIG.EXE    (Unmodified original behavior)",
-        "   • Essential Fixes: *_PORT_WICHTIG.EXE (Fixes crashes & savegame issues)",
-        "   • All Fixes:       *_PORT.EXE         (All bug fixes + quality-of-life, recommended)",
-        "",
-        "KEYBOARD SHORTCUTS IN LAUNCHER & IN GAME:",
-        "   Launcher: [1–3]=Game, [F1]=Help, [F2]=Language DE/EN, [F5]=Quick Start,",
-        "             [Arrows/Tab/Enter]=Select, [S/F/K/P/I/O], [Esc]=Back/Quit",
-        "   In Game:  [Alt+Enter]=Fullscreen/Window, [Tab]=Size, [F10]=Music, [F11/F12]=Volume"
-    };
-
-    for (int i = 0; i < 19; ++i) {
-        const char *ln = g_lang_en ? lines_en[i] : lines_de[i];
-        bool is_hdr = (strncmp(ln, "SCHRITT", 7) == 0 || strncmp(ln, "TASTEN", 6) == 0 ||
-                       strncmp(ln, "STEP", 4) == 0 || strncmp(ln, "KEYBOARD", 8) == 0);
-        draw_text(mx + 34, my + 62 + i * 21, ln, is_hdr ? 0xFFF4D068u : 0xFFD8E2F0u, is_hdr ? 4 : 1, true);
+    for (int i = 0; i < 22; ++i) {
+        const char *ln = lines_de[i];
+        bool is_hdr = (strncmp(ln, "DIE DREI", 8) == 0 || strncmp(ln, "SPIELORDNER", 11) == 0 ||
+                       strncmp(ln, "WELCHE", 6) == 0 || strncmp(ln, "TASTEN", 6) == 0);
+        draw_text(mx + 34, my + 54 + i * 19, ln, is_hdr ? 0xFFE3A63Au : 0xFFE6E9EFu, is_hdr ? FONT_15_SEMI : FONT_14, false);
     }
 
-    draw_button(mx + (mw - 320) / 2, my + mh - 54, 320, 38, L("Hilfe schließen (F1 / Enter)", "Close Help (F1 / Enter)"), true, true, true, true);
+    draw_button(mx + (mw - 320) / 2, my + mh - 50, 320, 36, L("Hilfe schließen (F1 / Enter)", "Close Help (F1 / Enter)"), true, true, true, true, FONT_15);
 }
 
 static void render_modal_dialog(void) {
     if (!g_modal_active) return;
-    int mw = 840, mh = g_modal_is_crash ? 300 : 260;
+    bool show_ro_btns = (g_modal_is_readonly_dos && !g_modal_is_ok && !g_modal_is_crash);
+    int mw = 840, mh = g_modal_is_crash ? 290 : (show_ro_btns ? 266 : 256);
     int mx = (SCREEN_W - mw) / 2;
     int my = (SCREEN_H - mh) / 2;
-    uint32_t top = g_modal_is_ok ? 0xFF162C20u : 0xFF2A1618u;
-    uint32_t bot = g_modal_is_ok ? 0xFF0C1812u : 0xFF160C0Eu;
-    uint32_t brd = g_modal_is_ok ? 0xFF68E088u : 0xFFFF6868u;
-    uint32_t bin = g_modal_is_ok ? 0xFF287840u : 0xFF983030u;
-    fill_gradient_v(mx, my, mw, mh, top, bot);
-    draw_rect_border(mx, my, mw, mh, brd, bin);
-    draw_corner_ornaments(mx, my, mw, mh, 0xFFFFC060u);
+    uint32_t bg  = g_modal_is_ok ? 0xFF162820u : 0xFF26171Cu;
+    uint32_t brd = g_modal_is_ok ? 0xFF4CAF72u : 0xFFE2553Fu;
+    fill_rect(mx, my, mw, mh, bg);
+    draw_border_1px(mx, my, mw, mh, brd);
 
-    draw_text_centered(mx, my + 22, mw, g_modal_title.c_str(), g_modal_is_ok ? 0xFF98F4A8u : 0xFFFFB060u, 2, true);
-    draw_text_centered(mx + 24, my + 72, mw - 48, g_modal_line1.c_str(), 0xFFF0E8E8u, 1, true);
-    draw_text_centered(mx + 24, my + 104, mw - 48, g_modal_line2.c_str(), 0xFFD8E0E8u, 1, true);
-    draw_text_centered(mx + 24, my + 136, mw - 48, g_modal_line3.c_str(), 0xFFB8C4D8u, 1, true);
+    draw_text_centered(mx, my + 20, mw, g_modal_title.c_str(), g_modal_is_ok ? 0xFF98F4A8u : 0xFFFFB060u, FONT_23_BOLD, false);
+    draw_text_centered(mx + 24, my + 68, mw - 48, g_modal_line1.c_str(), 0xFFE6E9EFu, FONT_15, false);
+    draw_text_centered(mx + 24, my + 98, mw - 48, g_modal_line2.c_str(), 0xFFD8E0E8u, FONT_14, false);
+    draw_text_centered(mx + 24, my + 128, mw - 48, g_modal_line3.c_str(), 0xFF9AA3B2u, FONT_14, false);
     if (!g_modal_line4.empty()) {
-        draw_text_centered(mx + 24, my + 170, mw - 48, g_modal_line4.c_str(), 0xFFFFDF70u, 1, true);
+        draw_text_centered(mx + 24, my + 160, mw - 48, g_modal_line4.c_str(), 0xFFE3A63Au, FONT_14, false);
     }
 
-    draw_button(mx + (mw - 280) / 2, my + mh - 56, 280, 38, L("OK – Schließen (Enter)", "OK – Close (Enter)"), true, true, g_modal_is_ok, true);
+    if (show_ro_btns) {
+        draw_button(mx + 30,  my + mh - 52, 316, 36, L("Kopie anlegen und patchen", "Create Copy and Patch"), true, true, true, true, FONT_15);
+        draw_button(mx + 360, my + mh - 52, 250, 36, L("Zielordner wählen...", "Choose Target Folder..."), false, true, false, true, FONT_15);
+        draw_button(mx + 624, my + mh - 52, 186, 36, L("Schließen (Esc)", "Close (Esc)"), false, true, false, true, FONT_15);
+    } else {
+        draw_button(mx + (mw - 280) / 2, my + mh - 52, 280, 36, L("OK – Schließen (Enter)", "OK – Close (Enter)"), true, true, g_modal_is_ok, true, FONT_15);
+    }
 }
 
 static void render_progress_modal(const std::string &title, const std::string &sub1, const std::string &cur_file, int percent) {
     if (g_screen == SCREEN_SELECT_GAME) render_screen_select_game();
     else render_screen_settings();
 
-    int mw = 680, mh = 220;
+    int mw = 680, mh = 216;
     int mx = (SCREEN_W - mw) / 2;
     int my = (SCREEN_H - mh) / 2;
-    fill_gradient_v(mx, my, mw, mh, 0xFF1A263Cu, 0xFF0E1624u);
-    draw_rect_border(mx, my, mw, mh, 0xFFFFDF70u, 0xFF8A7028u);
-    draw_corner_ornaments(mx, my, mw, mh, 0xFFFFE484u);
+    fill_rect(mx, my, mw, mh, 0xFF181F2Du);
+    draw_border_1px(mx, my, mw, mh, 0xFF5AA9E6u);
 
-    draw_text_centered(mx, my + 22, mw, title.c_str(), 0xFFFFE484u, 2, true);
-    draw_text_centered(mx + 20, my + 66, mw - 40, sub1.c_str(), 0xFFD0DCECu, 1, true);
+    draw_text_centered(mx, my + 20, mw, title.c_str(), 0xFFE3A63Au, FONT_23_BOLD, false);
+    draw_text_centered(mx + 20, my + 62, mw - 40, sub1.c_str(), 0xFFE6E9EFu, FONT_15, false);
 
-    int bx = mx + 44, by = my + 106, bw = mw - 88, bh = 34;
-    fill_rect(bx, by, bw, bh, 0xFF0A0E16u);
-    draw_rect_border(bx, by, bw, bh, 0xFFC8A23Cu, 0xFF483A18u);
+    int bx = mx + 44, by = my + 102, bw = mw - 88, bh = 32;
+    fill_rect(bx, by, bw, bh, 0xFF10151Fu);
+    draw_border_1px(bx, by, bw, bh, 0xFF4A5568u);
 
     if (percent < 0) percent = 0;
     if (percent > 100) percent = 100;
-    int fill_w = ((bw - 4) * percent) / 100;
+    int fill_w = ((bw - 2) * percent) / 100;
     if (fill_w > 0) {
-        fill_gradient_v(bx + 2, by + 2, fill_w, bh - 4, 0xFF42A858u, 0xFF246834u);
+        fill_rect(bx + 1, by + 1, fill_w, bh - 2, 0xFF1F5A36u);
     }
     char pct_buf[64];
     snprintf(pct_buf, sizeof(pct_buf), "%d %%", percent);
-    draw_text_centered(bx, by + 6, bw, pct_buf, 0xFFFFF8D8u, 1, true);
+    draw_text_centered(bx, by + 6, bw, pct_buf, 0xFFE6E9EFu, FONT_14, false);
 
-    std::string fmsg = std::string("Schritt: ") + clip_text_px_left(cur_file, mw - 120, 1);
-    draw_text_centered(mx + 20, my + 158, mw - 40, fmsg.c_str(), 0xFFA8B8D0u, 1, true);
+    std::string fmsg = std::string(L("Schritt: ", "Step: ")) + clip_text_px_left(cur_file, mw - 120, FONT_13);
+    draw_text_centered(mx + 20, my + 152, mw - 40, fmsg.c_str(), 0xFF9AA3B2u, FONT_13, false);
 
     if (g_texture && g_renderer) {
         SDL_UpdateTexture(g_texture, NULL, g_fb, SCREEN_W * (int)sizeof(uint32_t));
@@ -2904,6 +3638,20 @@ static void generate_grafikpaket_for_game(GameCatalogEntry &g) {
     (void)g;
 }
 
+static void show_wrong_version_modal(const GameCatalogEntry &g) {
+    g_modal_active   = true;
+    g_modal_is_ok    = false;
+    g_modal_is_crash = false;
+    g_modal_title    = L("FASSUNG WIRD NICHT UNTERSTÜTZT", "UNSUPPORTED GAME VERSION");
+    g_modal_line1    = L(g.wrong_version_msg_de.c_str(), g.wrong_version_msg_en.c_str());
+    g_modal_line2    = L("Bitte den unveränderten Hauptordner der deutschen GOG-Installation auswählen.",
+                         "Please select the unmodified main folder of the German GOG installation.");
+    std::string disp_dir = !g.wrong_version_dir.empty() ? g.wrong_version_dir : g.custom_spielpfad;
+    g_modal_line3    = std::string(L("Geprüfter Ordner: ", "Checked folder: ")) + clip_text_left(disp_dir, 48);
+    g_modal_line4.clear();
+    g_status_msg     = g_modal_line1;
+}
+
 static bool inspect_absturz_log(const std::string &log_path, const std::string &game_name) {
     if (!file_exists_win(log_path) || file_size_win(log_path) <= 0) return false;
     FILE *fp = fopen(utf8_to_win1252(log_path).c_str(), "r");
@@ -2923,16 +3671,15 @@ static bool inspect_absturz_log(const std::string &log_path, const std::string &
     g_modal_active   = true;
     g_modal_is_ok    = false;
     g_modal_is_crash = true;
-    g_modal_title    = L("ABSTURZ ERKANNT (absturz.log)", "CRASH DETECTED (absturz.log)");
-    g_modal_line1    = game_name + L(" wurde unerwartet beendet. Details aus absturz.log:", " terminated unexpectedly. Details from absturz.log:");
+    g_modal_title    = L("SPIEL UNERWARTET BEENDET", "GAME CLOSED UNEXPECTEDLY");
+    g_modal_line1    = game_name + L(" wurde unerwartet beendet.", " terminated unexpectedly.");
     g_modal_line2    = std::string(L("Ausnahme: ", "Exception: ")) + (exc_code.empty() ? "?" : exc_code)
-                     + " @ " + (exc_addr.empty() ? "?" : exc_addr)
-                     + L(" | Funktion: ", " | Function: ") + (last_fn.empty() ? "?" : last_fn);
-    g_modal_line3    = loc_str.empty() ? (std::string(L("Protokoll: ", "Log file: ")) + clip_text_left(log_path, 50))
+                     + " @ " + (exc_addr.empty() ? "?" : exc_addr);
+    g_modal_line3    = loc_str.empty() ? L("Ein Fehlerprotokoll wurde im Spielordner abgelegt.", "A crash log was saved in the game folder.")
                                        : (std::string(L("Spielort: ", "Location: ")) + clip_text_left(loc_str, 50));
-    g_modal_line4    = L("Bitte absturz.log unter GitHub Issues (MeowMuhMuhCow/schicksalsklinge) melden!",
-                         "Please report & attach absturz.log on GitHub Issues (MeowMuhMuhCow/schicksalsklinge)!");
-    g_status_msg     = L("Absturz erkannt - siehe Hinweis zu absturz.log.", "Crash detected - see absturz.log notice.");
+    g_modal_line4    = L("Bitte das Fehlerprotokoll unter GitHub Issues (MeowMuhMuhCow/nordlandtrilogie) melden!",
+                         "Please report the crash log on GitHub Issues (MeowMuhMuhCow/nordlandtrilogie)!");
+    g_status_msg     = L("Spiel unerwartet beendet.", "Game closed unexpectedly.");
     return true;
 }
 
@@ -2958,12 +3705,14 @@ static void collect_subdirs(const std::string &dir, int max_depth, std::vector<s
 }
 
 static bool dir_looks_like_game(const GameCatalogEntry &g, const std::string &dir) {
-    if (file_exists_win(join_path(dir, g.kennungsdatei))) return true;
+    if (file_exists_in_gamedir(dir, g.kennungsdatei)) return true;
     for (size_t i = 0; i < g.pflichtdateien.size(); ++i) {
-        if (file_exists_win(join_path(dir, g.pflichtdateien[i]))) return true;
+        if (file_exists_in_gamedir(dir, g.pflichtdateien[i])) return true;
     }
-    if (g.teil == 1 && (file_exists_win(join_path(dir, "BLADEM.EXE")) || file_exists_win(join_path(dir, "BLADE.DAT")))) return true;
-    if (g.teil == 2 && (file_exists_win(join_path(dir, "STARTRAIL.EXE")) || file_exists_win(join_path(dir, "ROA2.EXE")))) return true;
+    if (g.teil == 1 && (file_exists_in_gamedir(dir, "BLADEM.EXE") || file_exists_in_gamedir(dir, "BLADE.DAT"))) return true;
+    if (g.teil == 2 && (file_exists_in_gamedir(dir, "STARTRAIL.EXE") || file_exists_in_gamedir(dir, "ROA2.EXE"))) return true;
+    if (g.teil == 3 && (file_exists_in_gamedir(dir, "RIVA.ALF") || file_exists_in_gamedir(dir, "DUNGEON.ALF") ||
+                        file_exists_in_gamedir(dir, "game.gog") || file_exists_in_gamedir(dir, "dosbox_realms3.conf"))) return true;
     return false;
 }
 
@@ -2984,9 +3733,10 @@ static void handle_dropped_folder(const std::string &raw_folder) {
     std::vector<std::string> unlocked_names;
     std::string first_missing_game;
     std::string first_missing_file;
+    int first_wrong_version_idx = -1;
     int first_matched_idx = -1;
 
-    /* 1. Pruefe, ob im gezogenen/gewaehlten Ordner Port-EXEs (SCHICK_PORT*, SCHWEIF_PORT*, RIVA_PORT*) liegen */
+    /* 1. Pruefe, ob im gezogenen/gewaehlten Ordner Port-EXEs liegen */
     for (size_t gi = 0; gi < g_games.size(); ++gi) {
         GameCatalogEntry &g = g_games[gi];
         for (size_t ci = 0; ci < candidates.size(); ++ci) {
@@ -2994,7 +3744,7 @@ static void handle_dropped_folder(const std::string &raw_folder) {
             if (dir_has_port_exe(g, cand)) {
                 g.custom_port_ordner = cand;
                 refresh_game_status(g);
-                unlocked_names.push_back(g.name + " (Port-EXE)");
+                unlocked_names.push_back(g.name);
                 if (first_matched_idx < 0) first_matched_idx = (int)gi;
                 break;
             }
@@ -3011,8 +3761,12 @@ static void handle_dropped_folder(const std::string &raw_folder) {
                 if (validate_gamedir_files(g, cand, missing)) {
                     g.custom_spielpfad = cand;
                     refresh_game_status(g);
-                    unlocked_names.push_back(g.name);
-                    if (first_matched_idx < 0) first_matched_idx = (int)gi;
+                    if (g.gamedir_wrong_version) {
+                        if (first_wrong_version_idx < 0) first_wrong_version_idx = (int)gi;
+                    } else {
+                        unlocked_names.push_back(g.name);
+                        if (first_matched_idx < 0) first_matched_idx = (int)gi;
+                    }
                     break;
                 } else if (first_missing_file.empty()) {
                     first_missing_game = g.name;
@@ -3024,7 +3778,10 @@ static void handle_dropped_folder(const std::string &raw_folder) {
 
     save_einstellungen_ini();
 
-    if (!unlocked_names.empty()) {
+    if (first_wrong_version_idx >= 0) {
+        g_selected_game = first_wrong_version_idx;
+        show_wrong_version_modal(g_games[first_wrong_version_idx]);
+    } else if (!unlocked_names.empty()) {
         if (first_matched_idx >= 0) g_selected_game = first_matched_idx;
         std::string names_joined;
         for (size_t i = 0; i < unlocked_names.size(); ++i) {
@@ -3037,19 +3794,19 @@ static void handle_dropped_folder(const std::string &raw_folder) {
         g_modal_active   = true;
         g_modal_is_ok    = false;
         g_modal_is_crash = false;
-        g_modal_title    = L("DATEI DER DEUTSCHEN FASSUNG FEHLT", "GERMAN VERSION FILE MISSING");
-        g_modal_line1    = std::string(L("Im gewählten Ordner für \"", "In the selected folder for \"")) + first_missing_game + L("\" fehlt:", "\" is missing:");
-        g_modal_line2    = std::string(L("Pflichtdatei: ", "Required file: ")) + first_missing_file + L(" (deutsche GOG/CD-Fassung)", " (German GOG/CD version)");
+        g_modal_title    = L("UNVOLLSTÄNDIGER SPIELORDNER", "INCOMPLETE GAME FOLDER");
+        g_modal_line1    = std::string(L("Der gewählte Ordner für \"", "The selected folder for \"")) + first_missing_game + L("\" ist unvollständig.", "\" is incomplete.");
+        g_modal_line2    = L("Benötigt wird der vollständige Hauptordner der deutschen GOG-Fassung.", "The complete main folder of the German GOG version is required.");
         g_modal_line3    = std::string(L("Ordner: ", "Folder: ")) + clip_text_left(base, 48);
         g_modal_line4.clear();
-        g_status_msg     = std::string(L("Fehler: Pflichtdatei ", "Error: Required file ")) + first_missing_file + L(" fehlt.", " missing.");
+        g_status_msg     = L("Gewählter Spielordner ist unvollständig.", "Selected game folder is incomplete.");
     } else {
         g_modal_active   = true;
         g_modal_is_ok    = false;
         g_modal_is_crash = false;
         g_modal_title    = L("KEIN SPIELORDNER ERKANNT", "NO GAME FOLDER RECOGNIZED");
-        g_modal_line1    = L("Im gezogenen Ordner wurde kein Teil der Nordlandtrilogie gefunden.", "No Realms of Arkania game was found in the dropped folder.");
-        g_modal_line2    = L("Erwartet: SCHICK.DAT (Teil 1), SCHWEIF.EXE (Teil 2) oder RIVA.EXE (Teil 3).", "Expected: SCHICK.DAT (Part 1), SCHWEIF.EXE (Part 2) or RIVA.EXE (Part 3).");
+        g_modal_line1    = L("Im gewählten Ordner wurde kein Teil der Nordlandtrilogie gefunden.", "No Realms of Arkania game was found in the selected folder.");
+        g_modal_line2    = L("Bitte den Original-Spielordner (deutsche GOG-Fassung) eines der drei Spiele wählen.", "Please select the original game folder (German GOG version) of one of the three games.");
         g_modal_line3    = std::string(L("Geprüfter Pfad: ", "Checked path: ")) + clip_text_left(base, 46);
         g_modal_line4.clear();
         g_status_msg     = L("Kein bekannter Spielordner erkannt.", "No known game folder recognized.");
@@ -3073,18 +3830,19 @@ static void handle_dropped_zip(const std::string &raw_zip_path) {
         g_modal_active   = true;
         g_modal_is_ok    = false;
         g_modal_is_crash = false;
-        g_modal_title    = L("UNGÜLTIGE ZIP-DATEI", "INVALID ZIP ARCHIVE");
+        g_modal_title    = L("UNGÜLTIGES ARCHIV", "INVALID ARCHIVE");
         g_modal_line1    = L("Das gezogene Archiv konnte nicht gelesen werden:", "The dropped archive could not be read:");
         g_modal_line2    = clip_text_left(raw_zip_path, 52);
-        g_modal_line3    = L("Bitte eine gültige .zip-Datei oder einen Spielordner ziehen.", "Please drop a valid .zip archive or a game folder.");
+        g_modal_line3    = L("Bitte ein gültiges Archiv oder einen Spielordner ziehen.", "Please drop a valid archive or a game folder.");
         g_modal_line4.clear();
-        g_status_msg     = L("Fehler beim Lesen der ZIP-Datei.", "Error reading ZIP archive.");
+        g_status_msg     = L("Fehler beim Lesen des Archivs.", "Error reading archive.");
         return;
     }
 
     std::vector<std::string> unlocked_names;
     std::string first_missing_game;
     std::string first_missing_file;
+    int first_wrong_version_idx = -1;
     int first_matched_idx = -1;
 
     FILE *fp = fopen(w_zip.c_str(), "rb");
@@ -3152,12 +3910,11 @@ static void handle_dropped_zip(const std::string &raw_zip_path) {
             }
         }
 
-        std::string rel_target_dir = "Spieldaten\\" + g.id;
-        std::string abs_target_dir = join_path(g_starter_dir, rel_target_dir);
+        std::string abs_target_dir = join_path(g_data_dir, "Spieldaten\\" + g.id);
         mkdir_recursive_win(abs_target_dir);
 
         uint64_t done_bytes = 0;
-        std::string sub_msg = g.name + " -> " + rel_target_dir + "\\";
+        std::string sub_msg = g.name;
         render_progress_modal(L("ENTPACKE SPIELDATEN...", "EXTRACTING GAME DATA..."), sub_msg, L("Starte...", "Starting..."), 0);
 
         bool all_extracted = true;
@@ -3183,45 +3940,52 @@ static void handle_dropped_zip(const std::string &raw_zip_path) {
         render_progress_modal(L("ENTPACKE SPIELDATEN...", "EXTRACTING GAME DATA..."), sub_msg, L("Abgeschlossen", "Completed"), 100);
 
         if (all_extracted) {
-            g.custom_spielpfad = rel_target_dir;
+            g.custom_spielpfad = abs_target_dir;
             refresh_game_status(g);
-            unlocked_names.push_back(g.name);
-            if (first_matched_idx < 0) first_matched_idx = (int)gi;
+            if (g.gamedir_wrong_version) {
+                if (first_wrong_version_idx < 0) first_wrong_version_idx = (int)gi;
+            } else {
+                unlocked_names.push_back(g.name);
+                if (first_matched_idx < 0) first_matched_idx = (int)gi;
+            }
         }
     }
 
     fclose(fp);
     save_einstellungen_ini();
 
-    if (!unlocked_names.empty()) {
+    if (first_wrong_version_idx >= 0) {
+        g_selected_game = first_wrong_version_idx;
+        show_wrong_version_modal(g_games[first_wrong_version_idx]);
+    } else if (!unlocked_names.empty()) {
         if (first_matched_idx >= 0) g_selected_game = first_matched_idx;
         std::string names_joined;
         for (size_t i = 0; i < unlocked_names.size(); ++i) {
             if (i > 0) names_joined += ", ";
             names_joined += unlocked_names[i];
         }
-        g_status_msg = std::string(L("ZIP entpackt nach Spieldaten\\ & freigeschaltet: ", "ZIP unpacked to Spieldaten\\ & unlocked: ")) + names_joined;
+        g_status_msg = std::string(L("Archiv entpackt & Spiel freigeschaltet: ", "Archive unpacked & game unlocked: ")) + names_joined;
         g_modal_active = false;
     } else if (!first_missing_file.empty()) {
         g_modal_active   = true;
         g_modal_is_ok    = false;
         g_modal_is_crash = false;
-        g_modal_title    = L("DATEI DER DEUTSCHEN FASSUNG FEHLT", "GERMAN VERSION FILE MISSING");
-        g_modal_line1    = std::string(L("Im ZIP-Archiv für \"", "In the ZIP archive for \"")) + first_missing_game + L("\" fehlt:", "\" is missing:");
-        g_modal_line2    = std::string(L("Pflichtdatei: ", "Required file: ")) + first_missing_file + L(" (deutsche GOG/CD-Fassung)", " (German GOG/CD version)");
+        g_modal_title    = L("UNVOLLSTÄNDIGES ARCHIV", "INCOMPLETE ARCHIVE");
+        g_modal_line1    = std::string(L("Das Archiv für \"", "The archive for \"")) + first_missing_game + L("\" ist unvollständig.", "\" is incomplete.");
+        g_modal_line2    = L("Benötigt wird die vollständige deutsche GOG-Fassung.", "The complete German GOG version is required.");
         g_modal_line3    = std::string(L("Archiv: ", "Archive: ")) + clip_text_left(raw_zip_path, 48);
         g_modal_line4.clear();
-        g_status_msg     = std::string(L("Fehler: In der ZIP fehlt ", "Error: Missing in ZIP: ")) + first_missing_file + ".";
+        g_status_msg     = L("Archiv enthält keine vollständigen Spieldaten.", "Archive does not contain complete game data.");
     } else {
         g_modal_active   = true;
         g_modal_is_ok    = false;
         g_modal_is_crash = false;
         g_modal_title    = L("KEIN SPIEL IM ARCHIV ERKANNT", "NO GAME FOUND IN ARCHIVE");
-        g_modal_line1    = L("In der gezogenen ZIP wurde kein Teil der Nordlandtrilogie gefunden.", "No Realms of Arkania game was found in the dropped ZIP.");
-        g_modal_line2    = L("Erwartet: SCHICK.DAT (Teil 1), SCHWEIF.EXE (Teil 2) oder RIVA.EXE (Teil 3).", "Expected: SCHICK.DAT (Part 1), SCHWEIF.EXE (Part 2) or RIVA.EXE (Part 3).");
+        g_modal_line1    = L("Im gezogenen Archiv wurde kein Teil der Nordlandtrilogie gefunden.", "No Realms of Arkania game was found in the dropped archive.");
+        g_modal_line2    = L("Bitte die deutsche GOG-Fassung eines der drei Spiele bereitstellen.", "Please provide the German GOG version of one of the three games.");
         g_modal_line3    = std::string(L("Archiv: ", "Archive: ")) + clip_text_left(raw_zip_path, 48);
         g_modal_line4.clear();
-        g_status_msg     = L("Kein bekanntes Spiel in der ZIP erkannt.", "No known game found in ZIP.");
+        g_status_msg     = L("Kein bekanntes Spiel im Archiv erkannt.", "No known game found in archive.");
     }
 }
 
@@ -3242,18 +4006,19 @@ static void handle_drop_path(const std::string &dropped_path) {
         g_modal_title    = L("PFAD NICHT GEFUNDEN", "PATH NOT FOUND");
         g_modal_line1    = L("Der gezogene Pfad existiert nicht:", "The dropped path does not exist:");
         g_modal_line2    = clip_text_left(p, 52);
-        g_modal_line3    = L("Bitte einen Spielordner oder eine .zip-Datei ziehen.", "Please drop a game folder or a .zip archive.");
+        g_modal_line3    = L("Bitte einen Spielordner oder ein Archiv ziehen.", "Please drop a game folder or an archive.");
         g_modal_line4.clear();
     }
 }
 
 static std::string browse_for_gamedir_dialog(const std::string &prompt_title) {
+    CoInitializeEx(NULL, COINIT_APARTMENTTHREADED);
     char display_name[MAX_PATH] = "";
     std::string wtitle = utf8_to_win1252(prompt_title);
 
     BROWSEINFOA bi;
     memset(&bi, 0, sizeof(bi));
-    bi.hwndOwner = NULL;
+    bi.hwndOwner = GetActiveWindow();
     bi.pszDisplayName = display_name;
     bi.lpszTitle = wtitle.c_str();
     bi.ulFlags = BIF_RETURNONLYFSDIRS | BIF_NEWDIALOGSTYLE;
@@ -3272,25 +4037,70 @@ static std::string browse_for_gamedir_dialog(const std::string &prompt_title) {
  * ========================================================================= */
 
 static void copy_file_if_missing_win(const std::string &src, const std::string &dst) {
-    if (file_exists_win(dst)) return;
-    CopyFileA(utf8_to_win1252(src).c_str(), utf8_to_win1252(dst).c_str(), TRUE);
+    if (!file_exists_win(src) || file_exists_win(dst)) return;
+    if (CopyFileA(utf8_to_win1252(src).c_str(), utf8_to_win1252(dst).c_str(), TRUE)) {
+        SetFileAttributesA(utf8_to_win1252(dst).c_str(), FILE_ATTRIBUTE_NORMAL);
+    }
 }
 
-static void seed_savedir_from_gamedir(const std::string &gamedir, const std::string &savedir) {
+static void seed_savedir_from_gamedir(const GameCatalogEntry &g, const std::string &gamedir, const std::string &savedir) {
     if (_stricmp(gamedir.c_str(), savedir.c_str()) == 0) return;
-    copy_file_if_missing_win(join_path(gamedir, "GAMES.NAM"), join_path(savedir, "GAMES.NAM"));
-    copy_file_if_missing_win(join_path(gamedir, "HIMMEL.AN"), join_path(savedir, "HIMMEL.AN"));
-    copy_file_if_missing_win(join_path(gamedir, "APFREI.AN"), join_path(savedir, "APFREI.AN"));
-
-    const char *patterns[2] = {"*.GAM", "*.CHR"};
-    for (int p = 0; p < 2; ++p) {
-        std::string pat = utf8_to_win1252(join_path(gamedir, patterns[p]));
+    if (g.teil == 1) {
+        copy_file_if_missing_win(join_path(gamedir, "GAMES.NAM"), join_path(savedir, "GAMES.NAM"));
+        copy_file_if_missing_win(join_path(gamedir, "HIMMEL.AN"), join_path(savedir, "HIMMEL.AN"));
+        copy_file_if_missing_win(join_path(gamedir, "APFREI.AN"), join_path(savedir, "APFREI.AN"));
+        const char *patterns[2] = {"*.GAM", "*.CHR"};
+        for (int p = 0; p < 2; ++p) {
+            std::string pat = utf8_to_win1252(join_path(gamedir, patterns[p]));
+            WIN32_FIND_DATAA fd;
+            HANDLE h = FindFirstFileA(pat.c_str(), &fd);
+            if (h != INVALID_HANDLE_VALUE) {
+                do {
+                    if (!(fd.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY)) {
+                        copy_file_if_missing_win(join_path(gamedir, fd.cFileName), join_path(savedir, fd.cFileName));
+                    }
+                } while (FindNextFileA(h, &fd));
+                FindClose(h);
+            }
+        }
+    } else if (g.teil == 2) {
+        copy_file_if_missing_win(join_path(gamedir, "SCHWEIF.CFG"), join_path(savedir, "SCHWEIF.CFG"));
+        copy_file_if_missing_win(join_path(gamedir, "SONDS.CFG"),   join_path(savedir, "SONDS.CFG"));
+        copy_file_if_missing_win(join_path(gamedir, "GAMES\\GAMES.NAM"),  join_path(savedir, "GAMES\\GAMES.NAM"));
+        copy_file_if_missing_win(join_path(gamedir, "GAMES\\CHARS1.DAT"), join_path(savedir, "GAMES\\CHARS1.DAT"));
+        copy_file_if_missing_win(join_path(gamedir, "GAMES\\EMPTY"),      join_path(savedir, "GAMES\\EMPTY"));
+        copy_file_if_missing_win(join_path(gamedir, "GAMES\\LASTGAME"),   join_path(savedir, "GAMES\\LASTGAME"));
+        copy_file_if_missing_win(join_path(gamedir, "GAMES\\START.GAM"),  join_path(savedir, "GAMES\\LASTGAME"));
+        const char *patterns[2] = {"GAMES\\*.GAM", "GAMES\\*.CHR"};
+        for (int p = 0; p < 2; ++p) {
+            std::string pat = utf8_to_win1252(join_path(gamedir, patterns[p]));
+            WIN32_FIND_DATAA fd;
+            HANDLE h = FindFirstFileA(pat.c_str(), &fd);
+            if (h != INVALID_HANDLE_VALUE) {
+                do {
+                    if (!(fd.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY)) {
+                        copy_file_if_missing_win(join_path(gamedir, std::string("GAMES\\") + fd.cFileName),
+                                                 join_path(savedir, std::string("GAMES\\") + fd.cFileName));
+                    }
+                } while (FindNextFileA(h, &fd));
+                FindClose(h);
+            }
+        }
+    } else if (g.teil == 3) {
+        copy_file_if_missing_win(join_path(gamedir, "DATA\\RIVA.CFG"),    join_path(savedir, "RIVA.CFG"));
+        copy_file_if_missing_win(join_path(gamedir, "RIVA.CFG"),          join_path(savedir, "RIVA.CFG"));
+        copy_file_if_missing_win(join_path(gamedir, "GAMES\\CHARS1.DAT"), join_path(savedir, "GAMES\\CHARS1.DAT"));
+        copy_file_if_missing_win(join_path(gamedir, "GAMES\\EMPTY"),      join_path(savedir, "GAMES\\EMPTY"));
+        copy_file_if_missing_win(join_path(gamedir, "GAMES\\LASTGAME"),   join_path(savedir, "GAMES\\LASTGAME"));
+        copy_file_if_missing_win(join_path(gamedir, "GAMES\\START.GAM"),  join_path(savedir, "GAMES\\LASTGAME"));
+        std::string pat = utf8_to_win1252(join_path(gamedir, "GAMES\\*.GAM"));
         WIN32_FIND_DATAA fd;
         HANDLE h = FindFirstFileA(pat.c_str(), &fd);
         if (h != INVALID_HANDLE_VALUE) {
             do {
                 if (!(fd.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY)) {
-                    copy_file_if_missing_win(join_path(gamedir, fd.cFileName), join_path(savedir, fd.cFileName));
+                    copy_file_if_missing_win(join_path(gamedir, std::string("GAMES\\") + fd.cFileName),
+                                             join_path(savedir, std::string("GAMES\\") + fd.cFileName));
                 }
             } while (FindNextFileA(h, &fd));
             FindClose(h);
@@ -3308,7 +4118,7 @@ static std::string current_timestamp_str(void) {
     return std::string(buf);
 }
 
-static HANDLE prepare_probenlog(const GameCatalogEntry &g, const std::string &savedir, DWORD *out_plog_pid) {
+static HANDLE prepare_probenlog(const GameCatalogEntry &g, const std::string &exe_dir, const std::string &savedir, DWORD *out_plog_pid) {
     if (out_plog_pid) *out_plog_pid = 0;
     std::string proben_csv = join_path(savedir, "PROBEN.CSV");
     std::string w_proben_csv = utf8_to_win1252(proben_csv);
@@ -3324,17 +4134,17 @@ static HANDLE prepare_probenlog(const GameCatalogEntry &g, const std::string &sa
             std::string ts = current_timestamp_str();
             std::string arch_name = std::string("PROBEN_") + logtag + "_" + ts + ".CSV";
 
-            std::string starter_plogs = join_path(g_starter_dir, "Probenlogs");
-            _mkdir(utf8_to_win1252(starter_plogs).c_str());
-            std::string dst_starter = join_path(starter_plogs, arch_name);
+            std::string exe_plogs = join_path(exe_dir, "Probenlogs");
+            _mkdir(utf8_to_win1252(exe_plogs).c_str());
+            std::string dst_exe = join_path(exe_plogs, arch_name);
 
             std::string save_plogs = join_path(savedir, "Probenlogs");
-            if (_stricmp(save_plogs.c_str(), starter_plogs.c_str()) != 0) {
+            if (_stricmp(save_plogs.c_str(), exe_plogs.c_str()) != 0) {
                 _mkdir(utf8_to_win1252(save_plogs).c_str());
                 std::string dst_save = join_path(save_plogs, arch_name);
                 CopyFileA(w_proben_csv.c_str(), utf8_to_win1252(dst_save).c_str(), FALSE);
             }
-            CopyFileA(w_proben_csv.c_str(), utf8_to_win1252(dst_starter).c_str(), FALSE);
+            CopyFileA(w_proben_csv.c_str(), utf8_to_win1252(dst_exe).c_str(), FALSE);
             DeleteFileA(w_proben_csv.c_str());
         }
     }
@@ -3351,15 +4161,16 @@ static HANDLE prepare_probenlog(const GameCatalogEntry &g, const std::string &sa
         return NULL;
     }
 
-    std::string ps1_candidates[5] = {
-        join_path(g_exe_dir, "Probenlog\\probenlog_fenster.ps1"),
+    std::string ps1_candidates[6] = {
+        join_path(exe_dir, "Probenlog\\probenlog_fenster.ps1"),
+        join_path(exe_dir, "..\\Probenlog\\probenlog_fenster.ps1"),
         join_path(g_starter_dir, g.probenlog_skript),
+        join_path(g_exe_dir, "Probenlog\\probenlog_fenster.ps1"),
         join_path(g_starter_dir, "..\\Port\\release\\Probenlog\\probenlog_fenster.ps1"),
-        join_path(g_starter_dir, "..\\Probenlog\\probenlog_fenster.ps1"),
         join_path(g.resolved_port_dir, "..\\release\\Probenlog\\probenlog_fenster.ps1")
     };
     std::string ps1_path;
-    for (int i = 0; i < 5; ++i) {
+    for (int i = 0; i < 6; ++i) {
         if (file_exists_win(ps1_candidates[i])) {
             ps1_path = full_win_path(ps1_candidates[i]);
             break;
@@ -3377,7 +4188,6 @@ static HANDLE prepare_probenlog(const GameCatalogEntry &g, const std::string &sa
     memset(&si, 0, sizeof(si));
     memset(&pi, 0, sizeof(pi));
     si.cb = sizeof(si);
-    /* SW_SHOWNOACTIVATE: Probenlog-Konsole darf dem Vollbild-Spiel nicht den Fokus stehlen! */
     si.dwFlags = STARTF_USESHOWWINDOW;
     si.wShowWindow = SW_SHOWNOACTIVATE;
 
@@ -3398,6 +4208,11 @@ static int launch_selected_game(
 ) {
     save_einstellungen_ini();
 
+    if (g.gamedir_wrong_version) {
+        show_wrong_version_modal(g);
+        return -5;
+    }
+
     std::string exe_name;
     if (g.chosen_stufe == STUFE_ORIG)         exe_name = g.exe_orig;
     else if (g.chosen_stufe == STUFE_WICHTIG) exe_name = g.exe_wichtig;
@@ -3416,12 +4231,12 @@ static int launch_selected_game(
         g_modal_active   = true;
         g_modal_is_ok    = false;
         g_modal_is_crash = false;
-        g_modal_title    = L("PROGRAMMDATEI FEHLT", "EXECUTABLE MISSING");
-        g_modal_line1    = L("Die gewählte Port-EXE wurde nicht gefunden:", "The selected Port executable was not found:");
-        g_modal_line2    = exe_name + " (" + L("Suchpfad: ", "Search path: ") + g.port_ordner + ")";
-        g_modal_line3    = L("Bitte zuerst bauen_port.py ausführen oder den Pfad prüfen.", "Please run bauen_port.py first or check the folder path.");
+        g_modal_title    = L("PROGRAMM NICHT GEFUNDEN", "PROGRAM NOT FOUND");
+        g_modal_line1    = L("Das gewählte Spielprogramm wurde nicht gefunden.", "The selected game program was not found.");
+        g_modal_line2    = g.name;
+        g_modal_line3    = L("Bitte prüfen, ob das Paket vollständig entpackt wurde.", "Please check that the package was extracted completely.");
         g_modal_line4.clear();
-        g_status_msg     = std::string(L("Fehler: Port-EXE ", "Error: Port EXE ")) + exe_name + L(" fehlt.", " missing.");
+        g_status_msg     = L("Programm nicht gefunden.", "Program not found.");
         return -2;
     }
 
@@ -3434,17 +4249,31 @@ static int launch_selected_game(
             }
         }
     }
+    if (g.gamedir_wrong_version) {
+        show_wrong_version_modal(g);
+        return -5;
+    }
     if (!g.gamedir_valid) {
         g_modal_active   = true;
         g_modal_is_ok    = false;
         g_modal_is_crash = false;
         g_modal_title    = L("SPIELORDNER FEHLT", "GAME FOLDER MISSING");
         g_modal_line1    = std::string(L("Der Original-Spielordner für \"", "The game data folder for \"")) + g.name + L("\" fehlt.", "\" is missing.");
-        g_modal_line2    = std::string(L("Erwartete Kennungsdatei: ", "Expected key file: ")) + g.kennungsdatei;
-        g_modal_line3    = L("Bitte Ordner oder .zip ins Fenster ziehen oder [Ordner...] wählen.", "Please drag & drop folder or .zip or click [Browse...].");
+        g_modal_line2    = L("Benötigt wird die deutsche GOG-Fassung des Spiels.", "The German GOG version of the game is required.");
+        g_modal_line3    = L("Bitte den Spielordner ins Fenster ziehen oder [Ordner wählen...] klicken.", "Please drag & drop the game folder or click [Select Folder...].");
         g_modal_line4.clear();
-        g_status_msg     = std::string(L("Fehler: Spielordner (", "Error: Game folder (")) + g.kennungsdatei + L(") nicht gefunden.", ") not found.");
+        g_status_msg     = L("Spielordner noch nicht gewählt.", "Game folder not selected yet.");
         return -3;
+    }
+
+    /* Vorab-Fassungspruefung direkt vor dem Start (T2) */
+    if (!validate_game_version(g, g.resolved_gamedir)) {
+        g.gamedir_wrong_version = true;
+        g.wrong_version_dir = g.resolved_gamedir;
+        g.gamedir_valid = false;
+        g.verfuegbar = false;
+        show_wrong_version_modal(g);
+        return -5;
     }
 
     std::string full_exe = full_win_path(exe_path);
@@ -3452,11 +4281,19 @@ static int launch_selected_game(
     std::string gamedir  = full_win_path(g.resolved_gamedir);
     std::string savedir  = gamedir;
 
-    const char *env_forced_sd = getenv("DSA_SAVE_DIR");
-    if (env_forced_sd && env_forced_sd[0]) {
-        savedir = full_win_path(env_forced_sd);
+    static bool s_initial_env_captured = false;
+    static std::string s_initial_env_savedir;
+    if (!s_initial_env_captured) {
+        const char *init_sd = getenv("DSA_SAVE_DIR");
+        if (init_sd && init_sd[0]) s_initial_env_savedir = init_sd;
+        s_initial_env_captured = true;
+    }
+    g.gamedir_writable = is_dir_writable_win(g.resolved_gamedir);
+    if (!s_initial_env_savedir.empty()) {
+        savedir = full_win_path(s_initial_env_savedir);
     } else if (!g.gamedir_writable) {
-        savedir = join_path(g_starter_dir, "Spielstaende");
+        /* Spielstaende-Umleitung je Spiel wie in den Einzelpaketen (neben der jeweiligen Port-EXE) */
+        savedir = join_path(exe_dir, "Spielstaende");
     }
 
     _mkdir(utf8_to_win1252(savedir).c_str());
@@ -3466,23 +4303,23 @@ static int launch_selected_game(
         _mkdir(utf8_to_win1252(join_path(savedir, "CTEMP")).c_str());
     }
     if (_stricmp(savedir.c_str(), gamedir.c_str()) != 0) {
-        seed_savedir_from_gamedir(gamedir, savedir);
+        seed_savedir_from_gamedir(g, gamedir, savedir);
     }
 
-    /* Alte absturz.log vor Spielstart entfernen, damit nur echte neue Abstuerze gemeldet werden */
     std::string crash_log_exe  = join_path(exe_dir, "absturz.log");
     std::string crash_log_save = join_path(savedir, "absturz.log");
     DeleteFileA(utf8_to_win1252(crash_log_exe).c_str());
     DeleteFileA(utf8_to_win1252(crash_log_save).c_str());
 
     DWORD plog_pid = 0;
-    HANDLE h_plog = prepare_probenlog(g, savedir, &plog_pid);
+    HANDLE h_plog = prepare_probenlog(g, exe_dir, savedir, &plog_pid);
 
     _putenv(("DSA_GAMEDIR=" + utf8_to_win1252(gamedir)).c_str());
     _putenv(("DSA_GAME_DIR=" + utf8_to_win1252(gamedir)).c_str());
     _putenv(("SPIELPFAD=" + utf8_to_win1252(gamedir)).c_str());
     _putenv(("DSA_SAVE_DIR=" + utf8_to_win1252(savedir)).c_str());
     _putenv(g.chosen_intro ? "DSA_INTRO=1" : "DSA_INTRO=0");
+    _putenv(g.chosen_intro ? "RIVA_SKIP_INTRO=0" : "RIVA_SKIP_INTRO=1");
     _putenv(("DSA_FENSTER=" + g.chosen_fenster).c_str());
     _putenv(("DSA_SKALIERUNG=" + g.chosen_skalierung).c_str());
     _putenv((g.chosen_fenster == "vollbild") ? "DSA_FULLSCREEN=1" : "DSA_FULLSCREEN=0");
@@ -3491,14 +4328,16 @@ static int launch_selected_game(
         char wd_buf[64];
         snprintf(wd_buf, sizeof(wd_buf), "DSA_WATCHDOG_MS=%lu", (unsigned long)timeout_ms);
         _putenv(wd_buf);
+        snprintf(wd_buf, sizeof(wd_buf), "RIVA_WATCHDOG_MS=%lu", (unsigned long)timeout_ms);
+        _putenv(wd_buf);
     }
 
     std::string cmd = "\"" + utf8_to_win1252(full_exe) + "\" --gamedir \"" + utf8_to_win1252(gamedir) + "\"";
-    if (g.id == "schicksalsklinge") {
+    if (g.id == "schicksalsklinge" || g.id == "riva") {
         cmd += " --savedir \"" + utf8_to_win1252(savedir) + "\"";
     }
     if (g.chosen_intro) {
-        if (g.id == "schicksalsklinge") cmd += " --intro";
+        cmd += " --intro";
     } else {
         cmd += " --kein-intro";
     }
@@ -3508,7 +4347,17 @@ static int launch_selected_game(
         cmd += " --vollbild";
     }
     for (size_t i = 0; i < extra_port_args.size(); ++i) {
-        cmd += " " + extra_port_args[i];
+        const std::string &ea = extra_port_args[i];
+        if (ea.find(' ') != std::string::npos && ea.find('"') == std::string::npos) {
+            size_t eq = ea.find('=');
+            if (eq != std::string::npos && ea[0] == '-') {
+                cmd += " " + ea.substr(0, eq + 1) + "\"" + ea.substr(eq + 1) + "\"";
+            } else {
+                cmd += " \"" + ea + "\"";
+            }
+        } else {
+            cmd += " " + ea;
+        }
     }
 
     std::string work_dir = (g.id == "riva") ? exe_dir : savedir;
@@ -3534,6 +4383,7 @@ static int launch_selected_game(
         &si,
         &pi
     );
+    _putenv(("DSA_SAVE_DIR=" + s_initial_env_savedir).c_str());
 
     if (!started) {
         if (h_plog) {
@@ -3544,15 +4394,20 @@ static int launch_selected_game(
         g_modal_is_ok    = false;
         g_modal_is_crash = false;
         g_modal_title    = L("START FEHLGESCHLAGEN", "LAUNCH FAILED");
-        g_modal_line1    = L("CreateProcessA konnte die Port-EXE nicht starten:", "CreateProcessA could not start the Port executable:");
-        g_modal_line2    = exe_name;
-        g_modal_line3    = L("Bitte Berechtigungen und Abhängigkeiten prüfen.", "Please check file permissions and dependencies.");
+        g_modal_line1    = L("Das Spielprogramm konnte nicht gestartet werden:", "The game program could not be started:");
+        g_modal_line2    = g.name;
+        g_modal_line3    = L("Bitte prüfen, ob alle Dateien vollständig entpackt wurden.", "Please check that all files were extracted completely.");
         g_modal_line4.clear();
         return -4;
     }
 
     CloseHandle(pi.hThread);
-    g_status_msg = std::string(L("Gestartet: ", "Started: ")) + exe_name + " (PID " + std::to_string(pi.dwProcessId) + ")";
+    g_status_msg = std::string(L("Gestartet: ", "Started: ")) + g.name;
+
+    /* Starter-Fenster ausblenden, solange das Spiel laeuft; nach Spielende kehrt der Starter zurueck */
+    if (g_window) {
+        SDL_HideWindow(g_window);
+    }
 
     DWORD exit_code = 0;
     if (wait_for_exit) {
@@ -3572,10 +4427,15 @@ static int launch_selected_game(
         }
         CloseHandle(pi.hProcess);
 
-        /* Pruefe nach Spielende, ob absturz.log geschrieben wurde */
+        if (g_window) {
+            SDL_ShowWindow(g_window);
+            SDL_RaiseWindow(g_window);
+        }
+
         if (!inspect_absturz_log(crash_log_exe, g.name)) {
             inspect_absturz_log(crash_log_save, g.name);
         }
+        g_status_msg = g.name + L(" beendet – zurück im Starter.", " closed – welcome back to the launcher.");
     } else {
         if (h_plog) CloseHandle(h_plog);
         if (g_watched_game_proc) CloseHandle(g_watched_game_proc);
@@ -3585,13 +4445,15 @@ static int launch_selected_game(
         g_watched_game_name = g.name;
     }
 
-    std::string log_path = join_path(g_exe_dir, "letzter_start.log");
+    mkdir_recursive_win(g_data_dir);
+    std::string log_path = join_path(g_data_dir, "letzter_start.log");
     FILE *lfp = fopen(utf8_to_win1252(log_path).c_str(), "w");
     if (lfp) {
         fprintf(lfp, "zeit=%s\n", current_timestamp_str().c_str());
         fprintf(lfp, "spiel=%s\n", g.id.c_str());
         fprintf(lfp, "stufe=%s\n", stufe_to_str(g.chosen_stufe));
         fprintf(lfp, "exe=%s\n", exe_name.c_str());
+        fprintf(lfp, "savedir=%s\n", savedir.c_str());
         fprintf(lfp, "fenster=%s\n", g.chosen_fenster.c_str());
         fprintf(lfp, "skalierung=%s\n", g.chosen_skalierung.c_str());
         fprintf(lfp, "probenlog=%d\n", (g.chosen_probenlog && g.chosen_stufe != STUFE_ORIG) ? 1 : 0);
@@ -3605,164 +4467,906 @@ static int launch_selected_game(
     return (int)exit_code;
 }
 
-static int launch_dos_game(GameCatalogEntry &g) {
+/* =========================================================================
+ * 11b. Weg 2: DOS-Fassung patchen & In DOSBox spielen (Nachtrag 1 & Nachtrag 3)
+ *      Schreibt NIE ueber Originaldateien, erzeugt nur neue *_FIX_*.EXE!
+ *      Ist der Spielordner wirklich schreibgeschuetzt, kopiert
+ *      "Kopie anlegen und patchen" die fuer DOS noetigen Spieldateien in einen
+ *      beschreibbaren Ordner (Nordlandtrilogie\<Spiel>\DOS\Spiel\ bzw. waehlbar),
+ *      patcht dort und spielt von dort ueber die GOG-DOSBox.
+ * ========================================================================= */
+
+static bool should_skip_dos_copy_dir(const char *dirname) {
+    static const char *skip_dirs[] = {
+        ".", "..", "DOSBOX", "MUSIC", "__support", "cloud_saves",
+        "Documentation", "Video Codec", "Build", "Probenlogs",
+        "Nativ", "DOS", "Browser", "Spiel", "Spielstaende", NULL
+    };
+    for (int i = 0; skip_dirs[i]; ++i) {
+        if (_stricmp(dirname, skip_dirs[i]) == 0) return true;
+    }
+    return false;
+}
+
+static bool should_skip_dos_copy_file(const char *filename) {
+    std::string low = filename;
+    for (size_t i = 0; i < low.size(); ++i) low[i] = (char)tolower((unsigned char)low[i]);
+    if (strncmp(low.c_str(), "unins000.", 9) == 0) return true;
+    if (strncmp(low.c_str(), "goggame", 7) == 0) return true;
+    if (strncmp(low.c_str(), "dosbox", 6) == 0) return true;
+    if (strncmp(low.c_str(), ".starter_", 9) == 0) return true;
+    if (low.find("_fix_") != std::string::npos) return true;
+    static const char *skip_exts[] = {
+        ".gog", ".ins", ".inst", ".pdf", ".jpg", ".zip", ".lnk", ".ico",
+        ".dll", ".ini", ".info", ".hashdb", ".script", ".log", ".tmp",
+        ".ndp", ".ps1", ".py", NULL
+    };
+    for (int i = 0; skip_exts[i]; ++i) {
+        if (ends_with_ci(low, skip_exts[i])) return true;
+    }
+    return false;
+}
+
+static void collect_dos_copy_files(
+    const std::string &src_root,
+    const std::string &rel_sub,
+    int max_depth,
+    std::vector<std::string> &out_rel_files
+) {
+    if (max_depth < 0) return;
+    std::string cur_dir = rel_sub.empty() ? src_root : join_path(src_root, rel_sub);
+    std::string pat = utf8_to_win1252(join_path(cur_dir, "*"));
+    WIN32_FIND_DATAA fd;
+    HANDLE h = FindFirstFileA(pat.c_str(), &fd);
+    if (h == INVALID_HANDLE_VALUE) return;
+    do {
+        if (fd.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) {
+            if (!should_skip_dos_copy_dir(fd.cFileName)) {
+                std::string sub_rel = rel_sub.empty() ? std::string(fd.cFileName) : (rel_sub + "\\" + fd.cFileName);
+                collect_dos_copy_files(src_root, sub_rel, max_depth - 1, out_rel_files);
+            }
+        } else {
+            if (!should_skip_dos_copy_file(fd.cFileName)) {
+                std::string file_rel = rel_sub.empty() ? std::string(fd.cFileName) : (rel_sub + "\\" + fd.cFileName);
+                out_rel_files.push_back(file_rel);
+            }
+        }
+    } while (FindNextFileA(h, &fd));
+    FindClose(h);
+}
+
+static bool copy_single_file_writable_win(const std::string &src_path, const std::string &dst_path) {
+    ensure_parent_dirs_win(dst_path);
+    std::string wsrc = utf8_to_win1252(normalize_win_sep(src_path));
+    std::string wdst = utf8_to_win1252(normalize_win_sep(dst_path));
+    if (file_exists_win(dst_path)) {
+        SetFileAttributesA(wdst.c_str(), FILE_ATTRIBUTE_NORMAL);
+    }
+    if (CopyFileA(wsrc.c_str(), wdst.c_str(), FALSE)) {
+        SetFileAttributesA(wdst.c_str(), FILE_ATTRIBUTE_NORMAL);
+        return true;
+    }
+    FILE *in = fopen(wsrc.c_str(), "rb");
+    if (!in) return false;
+    FILE *out = fopen(wdst.c_str(), "wb");
+    if (!out) {
+        fclose(in);
+        return false;
+    }
+    std::vector<uint8_t> buf(65536);
+    size_t n = 0;
+    bool ok = true;
+    while ((n = fread(buf.data(), 1, buf.size(), in)) > 0) {
+        if (fwrite(buf.data(), 1, n, out) != n) {
+            ok = false;
+            break;
+        }
+    }
+    fclose(out);
+    fclose(in);
+    if (ok) {
+        SetFileAttributesA(wdst.c_str(), FILE_ATTRIBUTE_NORMAL);
+    }
+    return ok;
+}
+
+static std::string find_gog_dosbox_root(const GameCatalogEntry &g) {
+    if (!g.resolved_gamedir.empty() && file_exists_win(join_path(g.resolved_gamedir, "DOSBOX\\DOSBox.exe"))) {
+        return full_win_path(g.resolved_gamedir);
+    }
+    if (!g.resolved_dos_copy_dir.empty() && file_exists_win(join_path(g.resolved_dos_copy_dir, "DOSBOX\\DOSBox.exe"))) {
+        return full_win_path(g.resolved_dos_copy_dir);
+    }
+    for (size_t i = 0; i < g.gog_pfade.size(); ++i) {
+        if (file_exists_win(join_path(g.gog_pfade[i], "DOSBOX\\DOSBox.exe"))) {
+            return full_win_path(g.gog_pfade[i]);
+        }
+    }
+    return "";
+}
+
+static std::string win_short_or_full_path(const std::string &path) {
+    std::string w = utf8_to_win1252(full_win_path(path));
+    char sbuf[MAX_PATH * 2] = "";
+    DWORD n = GetShortPathNameA(w.c_str(), sbuf, sizeof(sbuf) - 1);
+    if (n > 0 && n < sizeof(sbuf)) {
+        return std::string(sbuf);
+    }
+    return w;
+}
+
+static std::string format_display_copy_path(const std::string &abs_path) {
+    std::string full_p = normalize_win_sep(full_win_path(abs_path));
+    std::string full_s = normalize_win_sep(full_win_path(g_starter_dir));
+    if (!full_s.empty() && full_p.size() > full_s.size() + 1 &&
+        _strnicmp(full_p.c_str(), full_s.c_str(), full_s.size()) == 0 &&
+        full_p[full_s.size()] == '\\') {
+        return std::string("Nordlandtrilogie\\") + full_p.substr(full_s.size() + 1);
+    }
+    return clip_text_left(full_p, 54);
+}
+
+static int run_dos_patcher_on_dir(
+    GameCatalogEntry &g,
+    const std::string &target_gamedir,
+    const std::string &source_gamedir,
+    bool is_copy
+) {
+    std::string gamedir     = full_win_path(target_gamedir);
+    std::string src_gamedir = full_win_path(source_gamedir);
+    std::string dos_dir     = full_win_path(g.resolved_dos_dir);
+    std::string build_dir   = join_path(dos_dir, "Build");
+    std::string patchen_ps1 = join_path(dos_dir, "Patch\\patchen.ps1");
+    const char *prefix      = (g.teil == 1) ? "BLADEM" : ((g.teil == 2) ? "SCHWEIF" : "RIVA");
+    const char *orig_exe    = (g.teil == 1) ? "SCHICKM.EXE" : ((g.teil == 2) ? "SCHWEIF.EXE" : "RIVA.EXE");
+
+    mkdir_recursive_win(build_dir);
+
+    /* SPIELPFAD.txt im DOS-Ordner auf den Ordner mit DOSBox (bzw. Spielordner) setzen */
+    {
+        std::string gog_box = find_gog_dosbox_root(g);
+        std::string sp_val = !gog_box.empty() ? gog_box : gamedir;
+        std::string sp_txt = join_path(dos_dir, "SPIELPFAD.txt");
+        FILE *fp = fopen(utf8_to_win1252(sp_txt).c_str(), "w");
+        if (fp) {
+            fprintf(fp, "%s\n", utf8_to_win1252(sp_val).c_str());
+            fclose(fp);
+        }
+    }
+
+    render_progress_modal(
+        L("DOS-FASSUNG WIRD GEPATCHT...", "PATCHING DOS VERSION..."),
+        g.name,
+        L("Erzeuge fehlerbereinigte DOS-Programme (Original bleibt unverändert)...",
+          "Generating bug-fixed DOS executables (original stays untouched)..."),
+        60
+    );
+
+    std::string fw_build = join_path(build_dir, std::string(prefix) + "_FIX_WICHTIG.EXE");
+    std::string fa_build = join_path(build_dir, std::string(prefix) + "_FIX_ALLES.EXE");
+    DeleteFileA(utf8_to_win1252(fw_build).c_str());
+    DeleteFileA(utf8_to_win1252(fa_build).c_str());
+
+    char pcmd[2048];
+    if (g.teil == 1) {
+        snprintf(pcmd, sizeof(pcmd),
+                 "powershell.exe -NoProfile -ExecutionPolicy Bypass -File \"%s\" -Spiel \"%s\" -Name %s -Ziel \"%s\" -Muster \"BLADEM_FIX_*.ndp\"",
+                 utf8_to_win1252(patchen_ps1).c_str(), utf8_to_win1252(gamedir).c_str(), orig_exe, utf8_to_win1252(build_dir).c_str());
+    } else {
+        snprintf(pcmd, sizeof(pcmd),
+                 "powershell.exe -NoProfile -ExecutionPolicy Bypass -File \"%s\" -Spiel \"%s\" -Name %s -Ziel \"%s\"",
+                 utf8_to_win1252(patchen_ps1).c_str(), utf8_to_win1252(gamedir).c_str(), orig_exe, utf8_to_win1252(build_dir).c_str());
+    }
+
+    STARTUPINFOA psi;
+    PROCESS_INFORMATION ppi;
+    memset(&psi, 0, sizeof(psi));
+    memset(&ppi, 0, sizeof(ppi));
+    psi.cb = sizeof(psi);
+    DWORD ps_exit = 1;
+    if (CreateProcessA(NULL, pcmd, NULL, NULL, FALSE, CREATE_NO_WINDOW, NULL, utf8_to_win1252(dos_dir).c_str(), &psi, &ppi)) {
+        WaitForSingleObject(ppi.hProcess, 30000);
+        GetExitCodeProcess(ppi.hProcess, &ps_exit);
+        CloseHandle(ppi.hThread);
+        CloseHandle(ppi.hProcess);
+    }
+    if (g.teil == 1 && ps_exit == 0) {
+        std::string orig_sdat_bak = join_path(gamedir, "SCHICK.DAT.ORIG");
+        if (file_exists_win(orig_sdat_bak)) {
+            copy_single_file_writable_win(orig_sdat_bak, join_path(gamedir, "SCHICK.DAT"));
+        }
+        std::string sdat_src_dir = file_exists_win(join_path(src_gamedir, "SCHICK.DAT")) ? src_gamedir : gamedir;
+        snprintf(pcmd, sizeof(pcmd),
+                 "powershell.exe -NoProfile -ExecutionPolicy Bypass -File \"%s\" -Spiel \"%s\" -Name SCHICK.DAT -Ziel \"%s\" -Muster \"SCHICK.DAT.ndp\"",
+                 utf8_to_win1252(patchen_ps1).c_str(), utf8_to_win1252(sdat_src_dir).c_str(), utf8_to_win1252(build_dir).c_str());
+        memset(&psi, 0, sizeof(psi));
+        memset(&ppi, 0, sizeof(ppi));
+        psi.cb = sizeof(psi);
+        if (CreateProcessA(NULL, pcmd, NULL, NULL, FALSE, CREATE_NO_WINDOW, NULL, utf8_to_win1252(dos_dir).c_str(), &psi, &ppi)) {
+            WaitForSingleObject(ppi.hProcess, 30000);
+            CloseHandle(ppi.hThread);
+            CloseHandle(ppi.hProcess);
+        }
+    }
+
+    bool ok = (ps_exit == 0 && file_exists_win(fw_build) && file_exists_win(fa_build));
+    if (!ok) {
+        g_modal_active          = true;
+        g_modal_is_ok           = false;
+        g_modal_is_crash        = false;
+        g_modal_is_readonly_dos = false;
+        g_modal_title           = L("DOS-PATCH FEHLGESCHLAGEN", "DOS PATCH FAILED");
+        g_modal_line1           = L("Die fehlerbereinigten DOS-Programme konnten nicht erzeugt werden.", "The bug-fixed DOS programs could not be generated.");
+        g_modal_line2           = L("Bitte prüfen, ob die unveränderte deutsche GOG-Fassung vorliegt.", "Please verify that you selected the unmodified German GOG version.");
+        g_modal_line3           = g.name;
+        g_modal_line4.clear();
+        return -6;
+    }
+
+    /* Neue Fix-EXEs neben die Original-EXE in den Zielordner legen,
+     * NIEMALS Originaldateien (SCHICKM.EXE, SCHICK.DAT, SCHWEIF.EXE, RIVA.EXE) ueberschreiben! */
+    std::string fw_game = join_path(gamedir, std::string(prefix) + "_FIX_WICHTIG.EXE");
+    std::string fa_game = join_path(gamedir, std::string(prefix) + "_FIX_ALLES.EXE");
+    copy_single_file_writable_win(fw_build, fw_game);
+    copy_single_file_writable_win(fa_build, fa_game);
+
+    /* Markierungen fuer welchen Spielordner bzw. welche Kopie der DOS-Patch erzeugt wurde */
+    {
+        std::string marker = join_path(build_dir, "gepatchter_spielpfad.txt");
+        FILE *mfp = fopen(utf8_to_win1252(marker).c_str(), "w");
+        if (mfp) {
+            fprintf(mfp, "%s\n", utf8_to_win1252(gamedir).c_str());
+            fclose(mfp);
+        }
+        std::string src_marker = join_path(build_dir, "quell_spielpfad.txt");
+        FILE *sfp = fopen(utf8_to_win1252(src_marker).c_str(), "w");
+        if (sfp) {
+            fprintf(sfp, "%s\n", utf8_to_win1252(src_gamedir).c_str());
+            fclose(sfp);
+        }
+    }
+
+    refresh_game_status(g);
+
+    mkdir_recursive_win(g_data_dir);
+    std::string plog = join_path(g_data_dir, "letzter_dos_patch.log");
+    FILE *pfp = fopen(utf8_to_win1252(plog).c_str(), "w");
+    if (pfp) {
+        fprintf(pfp, "zeit=%s\n", current_timestamp_str().c_str());
+        fprintf(pfp, "spiel=%s\n", g.id.c_str());
+        fprintf(pfp, "spielpfad=%s\n", gamedir.c_str());
+        fprintf(pfp, "quell_spielpfad=%s\n", src_gamedir.c_str());
+        fprintf(pfp, "kopie=%d\n", is_copy ? 1 : 0);
+        fprintf(pfp, "dos_dir=%s\n", dos_dir.c_str());
+        fprintf(pfp, "fix_wichtig=%s\n", fw_game.c_str());
+        fprintf(pfp, "fix_alles=%s\n", fa_game.c_str());
+        fprintf(pfp, "erfolg=1\n");
+        fclose(pfp);
+    }
+
+    g_modal_active          = true;
+    g_modal_is_ok           = true;
+    g_modal_is_crash        = false;
+    g_modal_is_readonly_dos = false;
+    if (is_copy) {
+        g_modal_title = L("DOS-KOPIE ANGELEGT & GEPATCHT", "DOS COPY CREATED & PATCHED");
+        g_modal_line1 = g.name + L(" – Beschreibbare DOS-Kopie angelegt und fehlerbereinigt.", " – Writable DOS copy created and bug-fixed.");
+        g_modal_line2 = L("Der schreibgeschützte Originalordner wurde nur gelesen und NICHT verändert.", "The write-protected original folder was only read and NOT modified.");
+        g_modal_line3 = std::string(L("DOS-Spielkopie: ", "DOS game copy: ")) + format_display_copy_path(gamedir);
+        g_modal_line4 = L("Du kannst jetzt über [In DOSBox spielen] direkt aus der Kopie starten.", "You can now start directly from the copy via [Play in DOSBox].");
+        g_status_msg  = g.name + L(" – DOS-Kopie angelegt und gepatcht (Original unverändert).", " – DOS copy created and patched (original untouched).");
+    } else {
+        g_modal_title = L("DOS-FASSUNG ERFOLGREICH GEPATCHT", "DOS VERSION PATCHED SUCCESSFULLY");
+        g_modal_line1 = g.name + L(" – Fehlerbereinigte DOS-Programme wurden erzeugt.", " – Bug-fixed DOS programs have been created.");
+        g_modal_line2 = L("Die Originaldateien im Spielordner wurden nur gelesen und NICHT verändert.", "The original files in the game folder were only read and NOT modified.");
+        g_modal_line3 = L("Du kannst die gepatchte Fassung jetzt über [In DOSBox spielen] starten.", "You can now start the patched version via [Play in DOSBox].");
+        g_modal_line4 = std::string(L("Gewählte DOS-Patch-Stufe: ", "Selected DOS patch level: ")) +
+                        (g.chosen_stufe == STUFE_ORIG ? L("Original", "Original") :
+                         (g.chosen_stufe == STUFE_WICHTIG ? L("Wichtige Fixes", "Essential Fixes") : L("Alle Fixes", "All Fixes")));
+        g_status_msg  = g.name + L(" – DOS-Fassung gepatcht (Original unverändert).", " – DOS version patched (original untouched).");
+    }
+    return 0;
+}
+
+static int copy_and_patch_dos_game(GameCatalogEntry &g, const std::string &custom_target_dir) {
     save_einstellungen_ini();
 
+    if (g.gamedir_wrong_version) {
+        show_wrong_version_modal(g);
+        return -5;
+    }
+    if (!g.gamedir_valid || g.resolved_gamedir.empty()) {
+        return -3;
+    }
+    if (!validate_game_version(g, g.resolved_gamedir)) {
+        g.gamedir_wrong_version = true;
+        g.wrong_version_dir = g.resolved_gamedir;
+        g.gamedir_valid = false;
+        g.verfuegbar = false;
+        show_wrong_version_modal(g);
+        return -5;
+    }
+    if (!g.has_dos_patcher || g.resolved_dos_dir.empty()) {
+        return -4;
+    }
+
+    std::string src_gamedir = full_win_path(g.resolved_gamedir);
+    std::string dos_dir     = full_win_path(g.resolved_dos_dir);
+    std::string copy_dir    = !custom_target_dir.empty()
+        ? full_win_path(custom_target_dir)
+        : join_path(dos_dir, "Spiel");
+
+    mkdir_recursive_win(copy_dir);
+    mkdir_recursive_win(join_path(copy_dir, "TEMP"));
+    if (g.teil >= 2) {
+        mkdir_recursive_win(join_path(copy_dir, "GAMES"));
+        mkdir_recursive_win(join_path(copy_dir, "CTEMP"));
+    }
+
+    if (!is_dir_writable_real_win(copy_dir) || _stricmp(copy_dir.c_str(), src_gamedir.c_str()) == 0) {
+        g_modal_active          = true;
+        g_modal_is_ok           = false;
+        g_modal_is_crash        = false;
+        g_modal_is_readonly_dos = false;
+        g_modal_title           = L("ZIELORDNER NICHT BESCHREIBBAR", "TARGET FOLDER NOT WRITABLE");
+        g_modal_line1           = L("Der gewählte Zielordner für die DOS-Kopie ist nicht beschreibbar:", "The selected target folder for the DOS copy is not writable:");
+        g_modal_line2           = clip_text_left(copy_dir, 58);
+        g_modal_line3           = L("Bitte einen freien, beschreibbaren Ordner auswählen.", "Please choose a writable target folder.");
+        g_modal_line4.clear();
+        return -8;
+    }
+
+    std::vector<std::string> rel_files;
+    collect_dos_copy_files(src_gamedir, "", 3, rel_files);
+
+    render_progress_modal(
+        L("KOPIE FÜR DOS-PATCH WIRD ANGELEGT...", "CREATING COPY FOR DOS PATCH..."),
+        g.name,
+        L("Kopiere benötigte DOS-Spieldateien...", "Copying required DOS game files..."),
+        5
+    );
+
+    for (size_t i = 0; i < rel_files.size(); ++i) {
+        int pct = 5 + (int)(((i + 1) * 50) / (rel_files.size() ? rel_files.size() : 1));
+        if ((i % 3) == 0 || i + 1 == rel_files.size()) {
+            render_progress_modal(
+                L("KOPIE FÜR DOS-PATCH WIRD ANGELEGT...", "CREATING COPY FOR DOS PATCH..."),
+                g.name,
+                rel_files[i],
+                pct
+            );
+        }
+        std::string sfile = join_path(src_gamedir, rel_files[i]);
+        std::string dfile = join_path(copy_dir, rel_files[i]);
+        copy_single_file_writable_win(sfile, dfile);
+    }
+
+    return run_dos_patcher_on_dir(g, copy_dir, src_gamedir, true);
+}
+
+static int patch_dos_game(GameCatalogEntry &g) {
+    save_einstellungen_ini();
+
+    if (g.gamedir_wrong_version) {
+        show_wrong_version_modal(g);
+        return -5;
+    }
     if (!g.gamedir_valid) {
         const char *hl = getenv("STARTER_HEADLESS");
         if (!hl || hl[0] != '1') {
-            std::string picked = browse_for_gamedir_dialog("Spielordner (mit DOSBOX) wählen:");
+            std::string picked = browse_for_gamedir_dialog(L("Spielordner (GOG) wählen:", "Select game folder (GOG):"));
             if (!picked.empty()) {
                 handle_dropped_folder(picked);
             }
         }
     }
+    if (g.gamedir_wrong_version) {
+        show_wrong_version_modal(g);
+        return -5;
+    }
     if (!g.gamedir_valid) {
-        g_modal_active   = true;
-        g_modal_is_ok    = false;
-        g_modal_is_crash = false;
-        g_modal_title    = "SPIELORDNER FEHLT";
-        g_modal_line1    = "Der Original-Spielordner für \"" + g.name + "\" fehlt.";
-        g_modal_line2    = "Erwartete Kennungsdatei: " + g.kennungsdatei;
-        g_modal_line3    = "Bitte GOG-Spielordner ins Fenster ziehen oder [Ordner wählen...] klicken.";
+        g_modal_active          = true;
+        g_modal_is_ok           = false;
+        g_modal_is_crash        = false;
+        g_modal_is_readonly_dos = false;
+        g_modal_title           = L("SPIELORDNER FEHLT", "GAME FOLDER MISSING");
+        g_modal_line1           = std::string(L("Der Original-Spielordner für \"", "The original game folder for \"")) + g.name + L("\" fehlt.", "\" is missing.");
+        g_modal_line2           = L("Benötigt wird die deutsche GOG-Fassung des Spiels.", "The German GOG version of the game is required.");
+        g_modal_line3           = L("Bitte den Spielordner ins Fenster ziehen oder [Ordner wählen...] klicken.", "Please drag & drop the game folder or click [Select Folder...].");
         g_modal_line4.clear();
         return -3;
     }
+    if (!validate_game_version(g, g.resolved_gamedir)) {
+        g.gamedir_wrong_version = true;
+        g.wrong_version_dir = g.resolved_gamedir;
+        g.gamedir_valid = false;
+        g.verfuegbar = false;
+        show_wrong_version_modal(g);
+        return -5;
+    }
+    if (!g.has_dos_patcher || g.resolved_dos_dir.empty()) {
+        g_modal_active          = true;
+        g_modal_is_ok           = false;
+        g_modal_is_crash        = false;
+        g_modal_is_readonly_dos = false;
+        g_modal_title           = L("DOS-PATCH NICHT GEFUNDEN", "DOS PATCH NOT FOUND");
+        g_modal_line1           = L("Der DOS-Patch-Ordner für dieses Spiel wurde nicht gefunden.", "The DOS patch folder for this game was not found.");
+        g_modal_line2           = g.name;
+        g_modal_line3           = L("Bitte prüfen, ob das Paket vollständig entpackt wurde.", "Please check that the package was extracted completely.");
+        g_modal_line4.clear();
+        return -4;
+    }
+
+    /* Nachtrag 3: Nur der echte Schreibtest entscheidet (Testdatei anlegen und wieder loeschen). */
+    g.gamedir_writable = is_dir_writable_win(g.resolved_gamedir);
+    if (!g.gamedir_writable) {
+        int gidx = 0;
+        for (size_t i = 0; i < g_games.size(); ++i) {
+            if (&g_games[i] == &g) {
+                gidx = (int)i;
+                break;
+            }
+        }
+        std::string def_copy = join_path(full_win_path(g.resolved_dos_dir), "Spiel");
+        g_modal_active            = true;
+        g_modal_is_ok             = false;
+        g_modal_is_crash          = false;
+        g_modal_is_readonly_dos   = true;
+        g_modal_readonly_game_idx = gidx;
+        g_modal_title             = L("SPIELORDNER IST SCHREIBGESCHÜTZT", "GAME FOLDER IS WRITE-PROTECTED");
+        if (is_program_files_dir(g.resolved_gamedir)) {
+            g_modal_line1 = L("Der gewählte Spielordner (unter 'Program Files') ist tatsächlich schreibgeschützt.",
+                              "The selected game folder (under 'Program Files') is write-protected.");
+        } else {
+            g_modal_line1 = L("Der gewählte Spielordner ist schreibgeschützt (keine Schreibberechtigung).",
+                              "The selected game folder is write-protected (no write permission).");
+        }
+        g_modal_line2 = L("Deine Originaldateien bleiben unangetastet. Mit [Kopie anlegen und patchen] werden",
+                          "Your original files stay untouched. Click [Create Copy and Patch] to copy the");
+        g_modal_line3 = L("die benötigten DOS-Spieldateien in einen beschreibbaren Ordner kopiert und gepatcht:",
+                          "required DOS game files to a writable folder and patch & play from there:");
+        g_modal_line4 = std::string(L("Zielordner: ", "Target folder: ")) + format_display_copy_path(def_copy);
+        g_status_msg  = L("Spielordner schreibgeschützt – [Kopie anlegen und patchen] verfügbar.",
+                          "Game folder is write-protected – [Create Copy and Patch] available.");
+        return -7;
+    }
 
     std::string gamedir = full_win_path(g.resolved_gamedir);
-    const char *prefix = (g.teil == 1) ? "BLADEM" : ((g.teil == 2) ? "SCHWEIF" : "RIVA");
-    const char *orig_exe = (g.teil == 1) ? "SCHICKM.EXE" : ((g.teil == 2) ? "SCHWEIF.EXE" : "RIVA.EXE");
+    return run_dos_patcher_on_dir(g, gamedir, gamedir, false);
+}
 
-    std::string bat_name;
-    std::string fix_exe_name;
-    if (g.chosen_stufe == STUFE_ORIG) {
-        bat_name = std::string(prefix) + "_STARTEN.bat";
-    } else if (g.chosen_stufe == STUFE_WICHTIG) {
-        bat_name = std::string(prefix) + (g.chosen_probenlog ? "_FIX_WICHTIG_MIT_PROBENLOG_STARTEN.bat" : "_FIX_WICHTIG_STARTEN.bat");
-        fix_exe_name = std::string(prefix) + "_FIX_WICHTIG.EXE";
+static bool patch_schick_dat_name_in_exe(const std::string &exe_path, const char *new_name_10) {
+    if (!new_name_10 || strlen(new_name_10) != 10) return false;
+    std::string wpath = utf8_to_win1252(exe_path);
+    FILE *fp = fopen(wpath.c_str(), "rb");
+    if (!fp) return false;
+    fseek(fp, 0, SEEK_END);
+    long sz = ftell(fp);
+    if (sz <= 32) {
+        fclose(fp);
+        return false;
+    }
+    fseek(fp, 0, SEEK_SET);
+    std::vector<uint8_t> buf((size_t)sz);
+    if (fread(buf.data(), 1, (size_t)sz, fp) != (size_t)sz) {
+        fclose(fp);
+        return false;
+    }
+    fclose(fp);
+
+    static const uint8_t needle[11] = { 'S','C','H','I','C','K','.','D','A','T', 0 };
+    bool found = false;
+    for (size_t i = 0; i + 11 <= buf.size(); ++i) {
+        if (memcmp(&buf[i], needle, 11) == 0) {
+            memcpy(&buf[i], new_name_10, 10);
+            buf[i + 10] = 0;
+            found = true;
+        }
+    }
+    if (!found) return false;
+    FILE *out = fopen(wpath.c_str(), "wb");
+    if (!out) return false;
+    size_t wr = fwrite(buf.data(), 1, buf.size(), out);
+    fclose(out);
+    return (wr == buf.size());
+}
+
+static int launch_dos_game(GameCatalogEntry &g) {
+    save_einstellungen_ini();
+
+    if (g.gamedir_wrong_version) {
+        show_wrong_version_modal(g);
+        return -5;
+    }
+    if (!g.gamedir_valid) {
+        const char *hl = getenv("STARTER_HEADLESS");
+        if (!hl || hl[0] != '1') {
+            std::string picked = browse_for_gamedir_dialog(L("Spielordner (GOG) wählen:", "Select game folder (GOG):"));
+            if (!picked.empty()) {
+                handle_dropped_folder(picked);
+            }
+        }
+    }
+    if (g.gamedir_wrong_version) {
+        show_wrong_version_modal(g);
+        return -5;
+    }
+    if (!g.gamedir_valid) {
+        g_modal_active          = true;
+        g_modal_is_ok           = false;
+        g_modal_is_crash        = false;
+        g_modal_is_readonly_dos = false;
+        g_modal_title           = L("SPIELORDNER FEHLT", "GAME FOLDER MISSING");
+        g_modal_line1           = std::string(L("Der Original-Spielordner für \"", "The original game folder for \"")) + g.name + L("\" fehlt.", "\" is missing.");
+        g_modal_line2           = L("Benötigt wird die deutsche GOG-Fassung des Spiels.", "The German GOG version of the game is required.");
+        g_modal_line3           = L("Bitte den Spielordner ins Fenster ziehen oder [Ordner wählen...] klicken.", "Please drag & drop the game folder or click [Select Folder...].");
+        g_modal_line4.clear();
+        return -3;
+    }
+    if (!validate_game_version(g, g.resolved_gamedir)) {
+        g.gamedir_wrong_version = true;
+        g.wrong_version_dir = g.resolved_gamedir;
+        g.gamedir_valid = false;
+        g.verfuegbar = false;
+        show_wrong_version_modal(g);
+        return -5;
+    }
+
+    bool is_orig    = (g.chosen_stufe == STUFE_ORIG);
+    bool is_wichtig = (g.chosen_stufe == STUFE_WICHTIG);
+
+    if (!is_orig && !g.dos_fix_exists) {
+        int prc = patch_dos_game(g);
+        if (prc != 0) return prc;
+    }
+
+    std::string gamedir   = full_win_path(g.resolved_gamedir);
+    std::string dos_dir   = full_win_path(g.resolved_dos_dir);
+    std::string build_dir = join_path(dos_dir, "Build");
+    std::string gog_root  = find_gog_dosbox_root(g);
+    const char *prefix    = (g.teil == 1) ? "BLADEM" : ((g.teil == 2) ? "SCHWEIF" : "RIVA");
+    const char *orig_exe  = (g.teil == 1) ? "SCHICKM.EXE" : ((g.teil == 2) ? "SCHWEIF.EXE" : "RIVA.EXE");
+    const char *dos_exe   = (g.teil == 1) ? "BLADEM.EXE"  : ((g.teil == 2) ? "SCHWEIF.EXE" : "RIVA.EXE");
+    const char *stufe_dir = is_orig ? "Original" : (is_wichtig ? "Fix_Wichtig" : "Fix_Alles");
+    const char *no_dbox   = getenv("STARTER_NO_DOSBOX_EXEC");
+    bool skip_exec        = (no_dbox && no_dbox[0] == '1');
+
+    std::string play_dir;
+    const char *modus_str = "direkt";
+    if (!g.resolved_dos_copy_dir.empty()) {
+        play_dir  = full_win_path(g.resolved_dos_copy_dir);
+        modus_str = "kopie";
+    } else if (is_program_files_dir(gamedir) || !is_dir_writable_win(gamedir)) {
+        /* Schreibgeschuetzter bzw. Program-Files-Ordner: NIEMALS direkt als C: in DOSBox mounten,
+         * sondern in eine isolierte Testspielstaende-Arbeitskopie unter Build\ umleiten. */
+        play_dir  = join_path(build_dir, std::string("Testspielstaende_") + stufe_dir);
+        modus_str = "direkt";
+        mkdir_recursive_win(play_dir);
+        mkdir_recursive_win(join_path(play_dir, "TEMP"));
+        if (g.teil >= 2) {
+            mkdir_recursive_win(join_path(play_dir, "GAMES"));
+            mkdir_recursive_win(join_path(play_dir, "CTEMP"));
+        }
+        if (!skip_exec && !file_exists_win(join_path(play_dir, orig_exe))) {
+            std::vector<std::string> rel_files;
+            collect_dos_copy_files(gamedir, "", 3, rel_files);
+            for (size_t i = 0; i < rel_files.size(); ++i) {
+                copy_single_file_writable_win(join_path(gamedir, rel_files[i]), join_path(play_dir, rel_files[i]));
+            }
+        }
+        seed_savedir_from_gamedir(g, gamedir, play_dir);
     } else {
-        bat_name = std::string(prefix) + (g.chosen_probenlog ? "_FIX_ALLES_MIT_PROBENLOG_STARTEN.bat" : "_FIX_ALLES_STARTEN.bat");
-        fix_exe_name = std::string(prefix) + "_FIX_ALLES.EXE";
-    }
-
-    std::vector<std::string> cands;
-    if (!g.resolved_port_dir.empty()) cands.push_back(g.resolved_port_dir);
-    cands.push_back(g_exe_dir);
-    cands.push_back(g_starter_dir);
-    cands.push_back(join_path(g_starter_dir, ".."));
-    if (!g.resolved_port_dir.empty()) {
-        cands.push_back(join_path(g.resolved_port_dir, ".."));
-        cands.push_back(join_path(g.resolved_port_dir, "..\\.."));
-    }
-    cands.push_back(gamedir);
-
-    std::string dos_dir;
-    std::string bat_path;
-    for (size_t i = 0; i < cands.size(); ++i) {
-        std::string p = join_path(cands[i], bat_name);
-        if (file_exists_win(p)) {
-            dos_dir = full_win_path(cands[i]);
-            bat_path = full_win_path(p);
-            break;
+        play_dir  = gamedir;
+        modus_str = "direkt";
+        mkdir_recursive_win(join_path(play_dir, "TEMP"));
+        if (g.teil >= 2) {
+            mkdir_recursive_win(join_path(play_dir, "GAMES"));
+            mkdir_recursive_win(join_path(play_dir, "CTEMP"));
         }
     }
 
-    if (!bat_path.empty()) {
-        /* 1. SPIELPFAD.txt neben der .bat aktualisieren, damit SPIELPFAD_SUCHEN.cmd sofort den Ordner hat */
-        std::string sp_txt = join_path(dos_dir, "SPIELPFAD.txt");
-        FILE *fp = fopen(utf8_to_win1252(sp_txt).c_str(), "w");
-        if (fp) {
-            fprintf(fp, "%s\n", utf8_to_win1252(gamedir).c_str());
-            fclose(fp);
+    if (!gog_root.empty() || skip_exec) {
+        std::string run_dir = join_path(build_dir, stufe_dir);
+        mkdir_recursive_win(run_dir);
+
+        std::string fix_src;
+        std::string run_exe_name;
+        if (is_orig) {
+            run_exe_name = orig_exe;
+            fix_src = join_path(gamedir, orig_exe);
+            if (!file_exists_win(fix_src) && file_exists_win(join_path(gamedir, std::string("DATA\\") + orig_exe))) {
+                fix_src = join_path(gamedir, std::string("DATA\\") + orig_exe);
+            }
+            if (!file_exists_win(fix_src)) {
+                fix_src = join_path(play_dir, orig_exe);
+            }
+            copy_single_file_writable_win(fix_src, join_path(run_dir, orig_exe));
+            if (_stricmp(orig_exe, dos_exe) != 0) {
+                copy_single_file_writable_win(fix_src, join_path(run_dir, dos_exe));
+            }
+        } else {
+            run_exe_name = dos_exe;
+            std::string fix_name = std::string(prefix) + (is_wichtig ? "_FIX_WICHTIG.EXE" : "_FIX_ALLES.EXE");
+            fix_src = join_path(play_dir, fix_name);
+            if (!file_exists_win(fix_src)) {
+                fix_src = join_path(build_dir, fix_name);
+            }
+            if (!file_exists_win(fix_src)) {
+                fix_src = join_path(gamedir, fix_name);
+            }
+            copy_single_file_writable_win(fix_src, join_path(run_dir, dos_exe));
         }
 
-        /* 2. Falls Fix-Stufe gewaehlt und Build\<FIX_EXE> noch nicht existiert: automatisch patchen.ps1 ausfuehren */
-        if (!fix_exe_name.empty()) {
-            std::string fix_exe_path = join_path(dos_dir, "Build\\" + fix_exe_name);
-            std::string patchen_ps1 = join_path(dos_dir, "Patch\\patchen.ps1");
-            if (!file_exists_win(fix_exe_path) && file_exists_win(patchen_ps1)) {
-                std::string build_dir = join_path(dos_dir, "Build");
-                _mkdir(utf8_to_win1252(build_dir).c_str());
-                char pcmd[2048];
-                if (g.teil == 1) {
-                    snprintf(pcmd, sizeof(pcmd),
-                             "powershell.exe -NoProfile -ExecutionPolicy Bypass -File \"%s\" -Spiel \"%s\" -Name %s -Ziel \"%s\" -Muster \"BLADEM_FIX_*.ndp\"",
-                             utf8_to_win1252(patchen_ps1).c_str(), utf8_to_win1252(gamedir).c_str(), orig_exe, utf8_to_win1252(build_dir).c_str());
-                } else {
-                    snprintf(pcmd, sizeof(pcmd),
-                             "powershell.exe -NoProfile -ExecutionPolicy Bypass -File \"%s\" -Spiel \"%s\" -Name %s -Ziel \"%s\"",
-                             utf8_to_win1252(patchen_ps1).c_str(), utf8_to_win1252(gamedir).c_str(), orig_exe, utf8_to_win1252(build_dir).c_str());
-                }
-                STARTUPINFOA psi;
-                PROCESS_INFORMATION ppi;
-                memset(&psi, 0, sizeof(psi));
-                memset(&ppi, 0, sizeof(ppi));
-                psi.cb = sizeof(psi);
-                if (CreateProcessA(NULL, pcmd, NULL, NULL, FALSE, CREATE_NO_WINDOW, NULL, utf8_to_win1252(dos_dir).c_str(), &psi, &ppi)) {
-                    WaitForSingleObject(ppi.hProcess, 15000);
-                    CloseHandle(ppi.hThread);
-                    CloseHandle(ppi.hProcess);
-                }
-                if (g.teil == 1) {
-                    snprintf(pcmd, sizeof(pcmd),
-                             "powershell.exe -NoProfile -ExecutionPolicy Bypass -File \"%s\" -Spiel \"%s\" -Name SCHICK.DAT -Ziel \"%s\" -Muster \"SCHICK.DAT.ndp\"",
-                             utf8_to_win1252(patchen_ps1).c_str(), utf8_to_win1252(gamedir).c_str(), utf8_to_win1252(build_dir).c_str());
-                    if (CreateProcessA(NULL, pcmd, NULL, NULL, FALSE, CREATE_NO_WINDOW, NULL, utf8_to_win1252(dos_dir).c_str(), &psi, &ppi)) {
-                        WaitForSingleObject(ppi.hProcess, 15000);
-                        CloseHandle(ppi.hThread);
-                        CloseHandle(ppi.hProcess);
+        /* DSA 1 (Die Schicksalsklinge): Original-SCHICK.DAT bei Fixes=Original,
+         * gepatchte Build\SCHICK.DAT (Magischer Brotbeutel) bei Fixes=Wichtige/Alle.
+         * Dabei wird gamedir\SCHICK.DAT NIEMALS ueberschrieben! */
+        std::string active_schick_dat = join_path(play_dir, "SCHICK.DAT");
+        if (g.teil == 1) {
+            std::string patched_sdat = join_path(build_dir, "SCHICK.DAT");
+            std::string orig_sdat    = join_path(gamedir, "SCHICK.DAT");
+            if (_stricmp(play_dir.c_str(), gamedir.c_str()) != 0) {
+                std::string play_sdat      = join_path(play_dir, "SCHICK.DAT");
+                std::string play_sdat_orig = join_path(play_dir, "SCHICK.DAT.ORIG");
+                if (!file_exists_win(play_sdat_orig)) {
+                    if (file_exists_win(orig_sdat)) {
+                        copy_single_file_writable_win(orig_sdat, play_sdat_orig);
+                    } else if (file_exists_win(play_sdat)) {
+                        copy_single_file_writable_win(play_sdat, play_sdat_orig);
                     }
+                }
+                if (is_orig) {
+                    if (file_exists_win(play_sdat_orig)) {
+                        copy_single_file_writable_win(play_sdat_orig, play_sdat);
+                    } else if (file_exists_win(orig_sdat)) {
+                        copy_single_file_writable_win(orig_sdat, play_sdat);
+                    }
+                } else if (file_exists_win(patched_sdat)) {
+                    copy_single_file_writable_win(patched_sdat, play_sdat);
+                }
+                active_schick_dat = play_sdat;
+            } else {
+                if (!is_orig && file_exists_win(patched_sdat)) {
+                    std::string fix_sdat = join_path(gamedir, "SCHICK.FIX");
+                    copy_single_file_writable_win(patched_sdat, fix_sdat);
+                    patch_schick_dat_name_in_exe(join_path(run_dir, dos_exe), "SCHICK.FIX");
+                    active_schick_dat = fix_sdat;
+                } else {
+                    active_schick_dat = orig_sdat;
                 }
             }
         }
 
-        /* 3. DOS-Start-.bat ueber Windows-Shell starten */
-        HINSTANCE hinst = ShellExecuteA(
-            NULL,
-            "open",
-            utf8_to_win1252(bat_path).c_str(),
-            NULL,
-            utf8_to_win1252(dos_dir).c_str(),
-            SW_SHOWNORMAL
-        );
-        if ((INT_PTR)hinst > 32) {
-            g_status_msg = "DOS-Version gestartet: " + bat_name;
+        /* Probenlog: prepare_probenlog archiviert/loescht eine evtl. vorhandene PROBEN.CSV immer
+         * und legt sie nur neu an (+ oeffnet das Live-Fenster), wenn Probenlog aktiv UND Fixes != Original. */
+        DWORD plog_pid = 0;
+        HANDLE h_pl = prepare_probenlog(g, dos_dir, play_dir, &plog_pid);
+        if (h_pl) CloseHandle(h_pl);
+
+        /* Intro-Steuerung fuer alle 3 Spiele in DOSBox:
+         * - DSA 1: 'if exist INTRO.EXE intro' vor dem Hauptprogramm (nur wenn chosen_intro == true)
+         * - DSA 2: 'E:\SCHWEIF.EXE -x' spielt Intro; 'E:\SCHWEIF.EXE' (mit GAMES\LASTGAME) ueberspringt Intro
+         * - DSA 3: 'E:\RIVA.EXE' spielt Intro; 'E:\RIVA.EXE LASTGAME' (mit GAMES\LASTGAME.GAM) ueberspringt Intro */
+        std::string exe_cmd = std::string("E:\\") + run_exe_name;
+        if (g.teil == 2) {
+            if (g.chosen_intro) {
+                exe_cmd += " -x";
+            } else {
+                std::string lg_dst = join_path(play_dir, "GAMES\\LASTGAME");
+                if (!file_exists_win(lg_dst)) {
+                    std::string lg_src = join_path(gamedir, "GAMES\\LASTGAME");
+                    if (file_exists_win(lg_src)) {
+                        copy_single_file_writable_win(lg_src, lg_dst);
+                    } else {
+                        FILE *lfp = fopen(utf8_to_win1252(lg_dst).c_str(), "wb");
+                        if (lfp) {
+                            fwrite("ROAMING.GAM\r\n", 1, 13, lfp);
+                            fclose(lfp);
+                        }
+                    }
+                }
+            }
+        } else if (g.teil == 3) {
+            if (!g.chosen_intro) {
+                std::string lg_gam = join_path(play_dir, "GAMES\\LASTGAME.GAM");
+                std::string lg_cur = join_path(play_dir, "GAMES\\LASTGAME");
+                std::string lg_src = join_path(gamedir,  "GAMES\\LASTGAME");
+                std::string st_src = join_path(gamedir,  "GAMES\\START.GAM");
+                if (file_exists_win(lg_cur)) {
+                    copy_single_file_writable_win(lg_cur, lg_gam);
+                } else if (file_exists_win(lg_src)) {
+                    copy_single_file_writable_win(lg_src, lg_gam);
+                } else if (file_exists_win(st_src)) {
+                    copy_single_file_writable_win(st_src, lg_gam);
+                }
+                exe_cmd += " LASTGAME";
+            }
+        }
+
+        /* Anzeige-Einstellung fuer DOSBox:
+         * - Vollbild: fullscreen=true, fullresolution=desktop, output=openglnb, [render] aspect=true
+         * - Fenster 2x..5x: fullscreen=false, windowresolution=640x480|960x720|1280x960|1600x1200 (4:3),
+         *   output=openglnb, [render] aspect=true, scaler=normal2x (bzw. normal3x ab 3x) */
+        bool is_fs = (g.chosen_fenster == "vollbild");
+        const char *win_res = "1280x960";
+        const char *scaler  = "normal3x";
+        if (g.chosen_fenster == "2") {
+            win_res = "640x480";
+            scaler  = "normal2x";
+        } else if (g.chosen_fenster == "3") {
+            win_res = "960x720";
+            scaler  = "normal3x";
+        } else if (g.chosen_fenster == "4") {
+            win_res = "1280x960";
+            scaler  = "normal3x";
+        } else if (g.chosen_fenster == "5") {
+            win_res = "1600x1200";
+            scaler  = "normal3x";
+        }
+
+        std::string conf_path  = join_path(build_dir, "dosbox_starter_kopie.conf");
+        std::string play_short = win_short_or_full_path(play_dir);
+        std::string run_short  = win_short_or_full_path(run_dir);
+        std::string eff_gog    = !gog_root.empty() ? gog_root : gamedir;
+
+        {
+            std::string sp_txt = join_path(dos_dir, "SPIELPFAD.txt");
+            FILE *sfp = fopen(utf8_to_win1252(sp_txt).c_str(), "w");
+            if (sfp) {
+                fprintf(sfp, "%s\n", utf8_to_win1252(eff_gog).c_str());
+                fclose(sfp);
+            }
+        }
+
+        FILE *cfp = fopen(utf8_to_win1252(conf_path).c_str(), "w");
+        if (cfp) {
+            fprintf(cfp, "[sdl]\n");
+            if (is_fs) {
+                fprintf(cfp, "fullscreen=true\n");
+                fprintf(cfp, "fullresolution=desktop\n");
+                fprintf(cfp, "output=openglnb\n");
+                fprintf(cfp, "[render]\n");
+                fprintf(cfp, "aspect=true\n");
+            } else {
+                fprintf(cfp, "fullscreen=false\n");
+                fprintf(cfp, "windowresolution=%s\n", win_res);
+                fprintf(cfp, "output=openglnb\n");
+                fprintf(cfp, "[render]\n");
+                fprintf(cfp, "aspect=true\n");
+                fprintf(cfp, "scaler=%s\n", scaler);
+            }
+            fprintf(cfp, "[autoexec]\n@echo off\n");
+            fprintf(cfp, "mount C \"%s\"\n", play_short.c_str());
+            if (g.teil == 1 && file_exists_win(join_path(eff_gog, "game.inst"))) {
+                fprintf(cfp, "imgmount D \"%s\" -t iso\n", utf8_to_win1252(join_path(eff_gog, "game.inst")).c_str());
+            } else if (g.teil == 2 && file_exists_win(join_path(eff_gog, "gamea.ins"))) {
+                fprintf(cfp, "imgmount D \"%s\" \"%s\" -t iso\n",
+                        utf8_to_win1252(join_path(eff_gog, "gamea.ins")).c_str(),
+                        utf8_to_win1252(join_path(eff_gog, "gameb.ins")).c_str());
+            } else if (g.teil == 3 && file_exists_win(join_path(eff_gog, "game.ins"))) {
+                std::string gog_short = win_short_or_full_path(eff_gog);
+                fprintf(cfp, "imgmount D \"%s\" -t iso -fs iso\n", utf8_to_win1252(join_path(gog_short, "game.ins")).c_str());
+            }
+            fprintf(cfp, "mount E \"%s\"\n", run_short.c_str());
+            fprintf(cfp, "C:\ncls\n");
+            if (g.teil == 1 && g.chosen_intro) {
+                fprintf(cfp, "if exist INTRO.EXE intro\n");
+            }
+            fprintf(cfp, "%s\nexit\n", exe_cmd.c_str());
+            fclose(cfp);
+        }
+
+        std::string dosbox_exe = join_path(eff_gog, "DOSBOX\\DOSBox.exe");
+        char realm_conf_name[64];
+        snprintf(realm_conf_name, sizeof(realm_conf_name), "dosbox_realms%d.conf", g.teil);
+        std::string base_conf = join_path(eff_gog, realm_conf_name);
+        std::string args;
+        if (file_exists_win(base_conf)) {
+            args = "-conf \"..\\" + std::string(realm_conf_name) + "\" -conf \"" + utf8_to_win1252(conf_path) + "\" -noconsole";
+        } else {
+            args = "-conf \"" + utf8_to_win1252(conf_path) + "\" -noconsole";
+        }
+
+        mkdir_recursive_win(g_data_dir);
+        std::string dlog = join_path(g_data_dir, "letzter_dosbox_start.log");
+        FILE *dfp = fopen(utf8_to_win1252(dlog).c_str(), "w");
+        if (dfp) {
+            fprintf(dfp, "zeit=%s\n", current_timestamp_str().c_str());
+            fprintf(dfp, "spiel=%s\n", g.id.c_str());
+            fprintf(dfp, "modus=%s\n", modus_str);
+            fprintf(dfp, "stufe=%s\n", stufe_to_str(g.chosen_stufe));
+            fprintf(dfp, "fenster=%s\n", g.chosen_fenster.c_str());
+            fprintf(dfp, "intro=%d\n", g.chosen_intro ? 1 : 0);
+            fprintf(dfp, "probenlog=%d\n", (g.chosen_probenlog && !is_orig) ? 1 : 0);
+            fprintf(dfp, "spielpfad=%s\n", play_dir.c_str());
+            fprintf(dfp, "gog_dosbox=%s\n", dosbox_exe.c_str());
+            fprintf(dfp, "fix_exe=%s\n", fix_src.c_str());
+            if (g.teil == 1) {
+                fprintf(dfp, "schick_dat=%s\n", active_schick_dat.c_str());
+            }
+            fprintf(dfp, "exe_cmd=%s\n", exe_cmd.c_str());
+            fprintf(dfp, "conf=%s\n", conf_path.c_str());
+            fclose(dfp);
+        }
+
+        std::string ok_msg = is_orig
+            ? (g.name + L(" – Original-DOS-Fassung in DOSBox gestartet.", " – Original DOS version started in DOSBox."))
+            : (g.name + L(" – Gepatchte DOS-Fassung in DOSBox gestartet.", " – Patched DOS version started in DOSBox."));
+
+        if (skip_exec) {
+            g_status_msg = ok_msg;
             return 0;
+        }
+        if (file_exists_win(dosbox_exe)) {
+            HINSTANCE hinst = ShellExecuteA(
+                NULL,
+                "open",
+                utf8_to_win1252(dosbox_exe).c_str(),
+                args.c_str(),
+                utf8_to_win1252(join_path(eff_gog, "DOSBOX")).c_str(),
+                SW_SHOWNORMAL
+            );
+            if ((INT_PTR)hinst > 32) {
+                g_status_msg = ok_msg;
+                return 0;
+            }
         }
     }
 
-    /* Fallback: Direkt DOSBOX\DOSBox.exe im GOG-Spielordner starten */
-    std::string dosbox_exe = join_path(gamedir, "DOSBOX\\DOSBox.exe");
-    if (file_exists_win(dosbox_exe)) {
-        char conf1[64], conf2[64];
-        snprintf(conf1, sizeof(conf1), "..\\dosbox_realms%d.conf", g.teil);
-        snprintf(conf2, sizeof(conf2), "..\\dosbox_realms%d_single.conf", g.teil);
-        std::string db_dir = join_path(gamedir, "DOSBOX");
-        std::string cmd = "\"" + utf8_to_win1252(dosbox_exe) + "\" -conf \"" + conf1 + "\" -conf \"" + conf2 + "\" -noconsole";
-        std::vector<char> mcmd(cmd.begin(), cmd.end());
-        mcmd.push_back('\0');
-        STARTUPINFOA si;
-        PROCESS_INFORMATION pi;
-        memset(&si, 0, sizeof(si));
-        memset(&pi, 0, sizeof(pi));
-        si.cb = sizeof(si);
-        if (CreateProcessA(NULL, mcmd.data(), NULL, NULL, FALSE, 0, NULL, utf8_to_win1252(db_dir).c_str(), &si, &pi)) {
-            CloseHandle(pi.hThread);
-            CloseHandle(pi.hProcess);
-            g_status_msg = "DOSBox gestartet: " + g.name;
-            return 0;
-        }
-    }
-
-    g_modal_active   = true;
-    g_modal_is_ok    = false;
-    g_modal_is_crash = false;
-    g_modal_title    = "DOS-START NICHT MÖGLICH";
-    g_modal_line1    = "Weder " + bat_name + " noch DOSBOX\\DOSBox.exe wurden gefunden.";
-    g_modal_line2    = "Spielordner: " + gamedir;
-    g_modal_line3    = "Für die DOS-Version wird DOSBOX\\DOSBox.exe aus der GOG-Fassung benötigt.";
+    g_modal_active          = true;
+    g_modal_is_ok           = false;
+    g_modal_is_crash        = false;
+    g_modal_is_readonly_dos = false;
+    g_modal_title           = L("DOSBOX-START NICHT MÖGLICH", "DOSBOX LAUNCH NOT POSSIBLE");
+    g_modal_line1           = L("Die DOSBox-Startumgebung konnte nicht geöffnet werden.", "The DOSBox launch environment could not be opened.");
+    g_modal_line2           = g.name;
+    g_modal_line3           = L("Für die DOS-Fassung wird DOSBox aus der deutschen GOG-Installation benötigt.", "DOSBox from the German GOG installation is required for the DOS version.");
     g_modal_line4.clear();
     return -4;
+}
+
+/* =========================================================================
+ * 11c. Weg 3: Im Browser spielen (Nachtrag 1 & Etappe 7: URL-Parameter)
+ * ========================================================================= */
+
+static int open_browser_game(GameCatalogEntry &g, bool show_modal) {
+    save_einstellungen_ini();
+    if (!is_browser_available(g)) {
+        return -1;
+    }
+
+    std::string target_url = build_browser_launch_url(g);
+
+    mkdir_recursive_win(g_data_dir);
+    std::string blog = join_path(g_data_dir, "letzter_browser_start.log");
+    FILE *bfp = fopen(utf8_to_win1252(blog).c_str(), "w");
+    if (bfp) {
+        fprintf(bfp, "zeit=%s\n", current_timestamp_str().c_str());
+        fprintf(bfp, "spiel=%s\n", g.id.c_str());
+        fprintf(bfp, "stufe=%s\n", stufe_to_str(g.chosen_stufe));
+        fprintf(bfp, "intro=%d\n", g.chosen_intro ? 1 : 0);
+        fprintf(bfp, "probenlog=%d\n", (g.chosen_probenlog && g.chosen_stufe != STUFE_ORIG) ? 1 : 0);
+        fprintf(bfp, "url=%s\n", target_url.c_str());
+        fclose(bfp);
+    }
+
+    const char *no_exec = getenv("STARTER_NO_BROWSER_EXEC");
+    if (!g_no_browser_exec && (!no_exec || no_exec[0] != '1')) {
+        ShellExecuteA(NULL, "open", target_url.c_str(), NULL, NULL, SW_SHOWNORMAL);
+    }
+
+    g_status_msg = g.name + L(" – Im Standardbrowser geöffnet: ", " – Opened in default browser: ") + target_url;
+    if (show_modal) {
+        g_modal_active   = true;
+        g_modal_is_ok    = true;
+        g_modal_is_crash = false;
+        g_modal_title    = L("IM BROWSER SPIELEN", "PLAY IN BROWSER");
+        g_modal_line1    = g.name + L(" wurde im Standardbrowser geöffnet:", " has been opened in your default web browser:");
+        g_modal_line2    = target_url;
+        g_modal_line3    = L("In der Online-Fassung einfach den eigenen GOG-Spielordner ins Browserfenster ziehen.",
+                             "In the online edition, simply drag & drop your GOG game folder into the browser window.");
+        g_modal_line4.clear();
+    }
+    return 0;
 }
 
 /* =========================================================================
@@ -3781,7 +5385,7 @@ static void cycle_fenster_mode(GameCatalogEntry &g, int dir) {
     int next = (cur + dir + 5) % 5;
     g.chosen_fenster = opts[next];
     g.chosen_vollbild = (g.chosen_fenster == "vollbild");
-    g_status_msg = std::string("Fenstergröße: ") + fenster_label_str(g.chosen_fenster);
+    g_status_msg = std::string(L("Fenstergröße: ", "Window Size: ")) + fenster_label_str(g.chosen_fenster);
     save_einstellungen_ini();
 }
 
@@ -3791,21 +5395,17 @@ static void toggle_skalierung_mode(GameCatalogEntry &g) {
     } else {
         g.chosen_skalierung = "ganzzahlig";
     }
-    g_status_msg = std::string("Skalierung: ") + skalierung_label_str(g.chosen_skalierung);
+    g_status_msg = std::string(L("Skalierung: ", "Scaling: ")) + skalierung_label_str(g.chosen_skalierung);
     save_einstellungen_ini();
 }
 
 static void handle_mouse_click(int mx, int my, bool &running) {
     (void)running;
-    /* Header-Knopf Sprachumschaltung (F2) */
-    if (point_in_rect(mx, my, SCREEN_W - 252, 27, 94, 38)) {
-        g_lang_en = !g_lang_en;
-        g_status_msg = L("Sprache: Deutsch", "Language: English");
-        save_einstellungen_ini();
-        return;
-    }
-    /* Header-Knopf Hilfe (F1) */
-    if (point_in_rect(mx, my, SCREEN_W - 148, 27, 122, 38)) {
+    g_show_focus_ring = false;
+
+    /* Header-Knopf "Hilfe (F1)" */
+    if (point_in_rect(mx, my, HDR_HELP_X, HDR_HELP_Y, HDR_HELP_W, HDR_HELP_H)) {
+        g_open_dd_game = -1;
         g_help_active = !g_help_active;
         return;
     }
@@ -3815,23 +5415,168 @@ static void handle_mouse_click(int mx, int my, bool &running) {
         return;
     }
     if (g_modal_active) {
+        if (g_modal_is_readonly_dos && !g_modal_is_ok && !g_modal_is_crash) {
+            int mw = 840, mh = 266;
+            int mdx = (SCREEN_W - mw) / 2;
+            int mdy = (SCREEN_H - mh) / 2;
+            int gidx = (g_modal_readonly_game_idx >= 0 && g_modal_readonly_game_idx < (int)g_games.size())
+                ? g_modal_readonly_game_idx : g_selected_game;
+            /* Knopf 1: [Kopie anlegen und patchen] -> Nordlandtrilogie\<Spiel>\DOS\Spiel\ */
+            if (point_in_rect(mx, my, mdx + 30, mdy + mh - 52, 316, 36)) {
+                g_modal_active = false;
+                g_modal_is_readonly_dos = false;
+                if (gidx >= 0 && gidx < (int)g_games.size()) {
+                    copy_and_patch_dos_game(g_games[gidx], "");
+                }
+                return;
+            }
+            /* Knopf 2: [Zielordner wählen...] -> frei waehlbarer Zielordner */
+            if (point_in_rect(mx, my, mdx + 360, mdy + mh - 52, 250, 36)) {
+                std::string picked = browse_for_gamedir_dialog(
+                    L("Zielordner für beschreibbare DOS-Kopie wählen:", "Select target folder for writable DOS copy:"));
+                if (!picked.empty()) {
+                    g_modal_active = false;
+                    g_modal_is_readonly_dos = false;
+                    if (gidx >= 0 && gidx < (int)g_games.size()) {
+                        copy_and_patch_dos_game(g_games[gidx], picked);
+                    }
+                }
+                return;
+            }
+            /* Knopf 3: [Schließen (Esc)] */
+            if (point_in_rect(mx, my, mdx + 624, mdy + mh - 52, 186, 36)) {
+                g_modal_active = false;
+                g_modal_is_readonly_dos = false;
+                return;
+            }
+            return;
+        }
         g_modal_active = false;
+        g_modal_is_readonly_dos = false;
         return;
     }
 
     if (g_screen == SCREEN_SELECT_GAME) {
-        /* Die 3 Spielkarten (alles direkt pro Spiel regelbar) */
+        /* Falls eine Anzeige-Klappliste offen ist, zuerst Klicks im Klapplisten-Menue auswerten */
+        if (g_open_dd_game >= 0 && g_open_dd_game < (int)g_games.size()) {
+            int ddx = 0, ddy = 0, ddw = 0, ddh = 0;
+            get_open_dd_menu_rect(g_open_dd_game, ddx, ddy, ddw, ddh);
+            if (point_in_rect(mx, my, ddx, ddy, ddw, ddh)) {
+                int idx = (my - (ddy + 1)) / 26;
+                if (idx >= 0 && idx < 5) {
+                    GameCatalogEntry &og = g_games[g_open_dd_game];
+                    og.chosen_fenster  = g_dd_fenster_vals[idx];
+                    og.chosen_vollbild = (og.chosen_fenster == "vollbild");
+                    g_status_msg = og.name + " – " + L("Anzeige: ", "Display: ") + fenster_dd_short_label(og.chosen_fenster);
+                    g_open_dd_game = -1;
+                    g_open_dd_sel  = -1;
+                    save_einstellungen_ini();
+                }
+                return;
+            }
+            /* Klick auf den Klapplisten-Knopf derselben Karte schliesst die Liste */
+            int ocx = 14, ocy = 147 + g_open_dd_game * 162, ocw = 1012;
+            CardRow4Layout oL4;
+            compute_card_row4_layout(g_games[g_open_dd_game], ocx, ocy, ocw, oL4);
+            if (point_in_rect(mx, my, oL4.dd_x, oL4.y, oL4.dd_w, oL4.h)) {
+                g_open_dd_game = -1;
+                g_open_dd_sel  = -1;
+                return;
+            }
+            g_open_dd_game = -1;
+            g_open_dd_sel  = -1;
+        }
+
+        /* Die 3 Spielkarten (x=14, y=147 + i*162, w=1012, h=150) */
         for (size_t i = 0; i < g_games.size() && i < 3; ++i) {
-            int cy = 154 + (int)i * 198;
-            int cx = 18;
-            int cw = SCREEN_W - 36;
-            int ch = 180;
+            int cx = 14;
+            int cy = 147 + (int)i * 162;
+            int cw = 1012;
+            int ch = 150;
+            int tx0 = cx + 1 + 250 + 18; /* 283 */
+            int btn_y = cy + 66;
+            int btn_h = 37;
 
             if (point_in_rect(mx, my, cx, cy, cw, ch)) {
                 g_selected_game = (int)i;
 
-                /* 1. Knopf: [Probenlog: AN / AUS] */
-                if (point_in_rect(mx, my, cx + 20, cy + 124, 152, 38)) {
+                /* Zeile 3 - WEG 1: [▶ Spielen (Windows)] */
+                if (point_in_rect(mx, my, tx0, btn_y, 235, btn_h)) {
+                    g_card_focus = 6;
+                    if (!g_games[i].has_any_exe) return;
+                    if (g_games[i].gamedir_wrong_version) {
+                        show_wrong_version_modal(g_games[i]);
+                        return;
+                    }
+                    save_einstellungen_ini();
+                    std::vector<std::string> no_extra;
+                    launch_selected_game(g_games[i], false, no_extra, false, 0);
+                    return;
+                }
+                /* Zeile 3 - WEG 2: [DOS-Fassung patchen] bzw. [In DOSBox spielen] */
+                if (point_in_rect(mx, my, tx0 + 245, btn_y, 236, btn_h)) {
+                    g_card_focus = 7;
+                    if (g_games[i].gamedir_wrong_version) {
+                        show_wrong_version_modal(g_games[i]);
+                        return;
+                    }
+                    if (g_games[i].dos_fix_exists) {
+                        launch_dos_game(g_games[i]);
+                    } else {
+                        patch_dos_game(g_games[i]);
+                    }
+                    return;
+                }
+                /* Zeile 3 - WEG 3: [Im Browser spielen] */
+                if (point_in_rect(mx, my, tx0 + 491, btn_y, 235, btn_h)) {
+                    g_card_focus = 8;
+                    if (is_browser_available(g_games[i])) {
+                        open_browser_game(g_games[i], false);
+                    }
+                    return;
+                }
+
+                /* Zeile 4: Optionen */
+                CardRow4Layout L4;
+                compute_card_row4_layout(g_games[i], cx, cy, cw, L4);
+
+                /* 4.1 Segmentschalter "Fixes" [Original | Wichtige | Alle] */
+                if (point_in_rect(mx, my, L4.seg_x, L4.y, L4.seg_total_w, L4.h)) {
+                    g_card_focus = 0;
+                    int rel_x = mx - L4.seg_x;
+                    if (rel_x < L4.seg_w[0]) {
+                        g_games[i].chosen_stufe = STUFE_ORIG;
+                    } else if (rel_x < L4.seg_w[0] + L4.seg_w[1]) {
+                        g_games[i].chosen_stufe = STUFE_WICHTIG;
+                    } else {
+                        g_games[i].chosen_stufe = STUFE_ALLES;
+                    }
+                    g_status_msg = g_games[i].name + " – Fixes: " + stufe_short_label(g_games[i].chosen_stufe);
+                    save_einstellungen_ini();
+                    return;
+                }
+
+                /* 4.2 Klappliste "Anzeige" */
+                if (point_in_rect(mx, my, L4.dd_x, L4.y, L4.dd_w, L4.h)) {
+                    g_card_focus = 1;
+                    g_open_dd_game = (int)i;
+                    g_open_dd_sel  = get_dd_fenster_index(g_games[i].chosen_fenster);
+                    return;
+                }
+
+                /* 4.3 Haekchen "Intro" */
+                if (point_in_rect(mx, my, L4.chk_intro_x, L4.y, L4.chk_intro_w, L4.h)) {
+                    g_card_focus = 2;
+                    g_games[i].chosen_intro = !g_games[i].chosen_intro;
+                    g_status_msg = g_games[i].name + " – Intro: " +
+                                   (g_games[i].chosen_intro ? L("Abspielen", "Play") : L("Überspringen", "Skip"));
+                    save_einstellungen_ini();
+                    return;
+                }
+
+                /* 4.4 Haekchen "Probenlog" */
+                if (point_in_rect(mx, my, L4.chk_plog_x, L4.y, L4.chk_plog_w, L4.h)) {
+                    g_card_focus = 3;
                     g_games[i].chosen_probenlog = !g_games[i].chosen_probenlog;
                     g_status_msg = g_games[i].name + L(" – Probenlog: ", " – Roll Log: ") +
                                    (g_games[i].chosen_probenlog
@@ -3840,35 +5585,10 @@ static void handle_mouse_click(int mx, int my, bool &running) {
                     save_einstellungen_ini();
                     return;
                 }
-                /* 2. Knopf: [Patches: Original / Wichtige Fixes / Alle Fixes] */
-                if (point_in_rect(mx, my, cx + 182, cy + 124, 196, 38)) {
-                    if (g_games[i].chosen_stufe == STUFE_ORIG) {
-                        g_games[i].chosen_stufe = STUFE_WICHTIG;
-                    } else if (g_games[i].chosen_stufe == STUFE_WICHTIG) {
-                        g_games[i].chosen_stufe = STUFE_ALLES;
-                    } else {
-                        g_games[i].chosen_stufe = STUFE_ORIG;
-                    }
-                    g_status_msg = g_games[i].name + " – Patches: " + stufe_short_label(g_games[i].chosen_stufe);
-                    save_einstellungen_ini();
-                    return;
-                }
-                /* 3. Knopf: [Fenster: Vollbild / 2x..5x] */
-                if (point_in_rect(mx, my, cx + 388, cy + 124, 154, 38)) {
-                    cycle_fenster_mode(g_games[i], 1);
-                    g_status_msg = g_games[i].name + " – " + g_status_msg;
-                    return;
-                }
-                /* 4. Knopf: [Intro: AN / AUS] */
-                if (point_in_rect(mx, my, cx + 552, cy + 124, 122, 38)) {
-                    g_games[i].chosen_intro = !g_games[i].chosen_intro;
-                    g_status_msg = g_games[i].name + " – Intro: " +
-                                   (g_games[i].chosen_intro ? L("Abspielen", "Play") : L("Überspringen", "Skip"));
-                    save_einstellungen_ini();
-                    return;
-                }
-                /* 5. Knopf: [Ordner wählen...] */
-                if (point_in_rect(mx, my, cx + 684, cy + 124, 156, 38)) {
+
+                /* 4.5 Rechtsbuendig "Ordner …" */
+                if (point_in_rect(mx, my, L4.btn_folder_x, L4.y, L4.btn_folder_w, L4.h)) {
+                    g_card_focus = 4;
                     std::string picked = browse_for_gamedir_dialog(
                         (g_games[i].name + L(" – Spielordner wählen:", " – Select game folder:")).c_str());
                     if (!picked.empty()) {
@@ -3876,28 +5596,18 @@ static void handle_mouse_click(int mx, int my, bool &running) {
                     }
                     return;
                 }
-                /* 6. Knopf: [Einstellungen...] */
-                if (point_in_rect(mx, my, cx + 850, cy + 124, 154, 38)) {
+
+                /* 4.6 Rechtsbuendig Zahnrad (Einstellungen) */
+                if (point_in_rect(mx, my, L4.btn_gear_x, L4.y, L4.btn_gear_w, L4.h)) {
+                    g_card_focus = 5;
                     g_screen = SCREEN_SETTINGS;
                     g_settings_row = 0;
                     g_status_msg = g_games[i].name + L(" – Einstellungen anpassen.", " – Customize settings.");
                     save_einstellungen_ini();
                     return;
                 }
-                /* 7. Knopf rechts oben: [>> Spiel starten] (nur wenn Port-EXE vorhanden; bei "Kommt bald" deaktiviert) */
-                if (point_in_rect(mx, my, cx + cw - 236, cy + 16, 216, 42)) {
-                    if (!g_games[i].has_any_exe) {
-                        return;
-                    }
-                    if (g_games[i].verfuegbar) {
-                        save_einstellungen_ini();
-                        std::vector<std::string> no_extra;
-                        launch_selected_game(g_games[i], false, no_extra, false, 0);
-                    }
-                    return;
-                }
 
-                /* Klick auf die Karte selbst wählt das Spiel aus */
+                /* Klick auf die Karte selbst waehlt das Spiel aus */
                 g_status_msg = g_games[i].name + L(" ausgewählt.", " selected.");
                 save_einstellungen_ini();
                 return;
@@ -3907,53 +5617,53 @@ static void handle_mouse_click(int mx, int my, bool &running) {
         if (g_selected_game < 0 || g_selected_game >= (int)g_games.size()) return;
         GameCatalogEntry &g = g_games[g_selected_game];
 
-        /* 1. Patch-Stufe */
-        if (point_in_rect(mx, my, 276, 105, 224, 38)) {
+        /* 1. Fixes */
+        if (point_in_rect(mx, my, 268, 104, 224, 34)) {
             g.chosen_stufe = STUFE_ORIG;
             g_settings_row = 0;
-            g_status_msg = L("Patches: Original", "Patches: Original");
+            g_status_msg = L("Fixes: Original", "Fixes: Original");
             save_einstellungen_ini();
             return;
         }
-        if (point_in_rect(mx, my, 512, 105, 244, 38)) {
+        if (point_in_rect(mx, my, 504, 104, 244, 34)) {
             g.chosen_stufe = STUFE_WICHTIG;
             g_settings_row = 0;
-            g_status_msg = L("Patches: Wichtige Fixes", "Patches: Essential Fixes");
+            g_status_msg = L("Fixes: Wichtige Fixes", "Fixes: Essential Fixes");
             save_einstellungen_ini();
             return;
         }
-        if (point_in_rect(mx, my, 768, 105, 254, 38)) {
+        if (point_in_rect(mx, my, 760, 104, 250, 34)) {
             g.chosen_stufe = STUFE_ALLES;
             g_settings_row = 0;
-            g_status_msg = L("Patches: Alle Fixes", "Patches: All Fixes");
+            g_status_msg = L("Fixes: Alle Fixes", "Fixes: All Fixes");
             save_einstellungen_ini();
             return;
         }
 
-        /* 2. Fenstergroesse (2x, 3x, 4x, 5x, Vollbild) */
-        const int fx_x[5] = {276, 424, 572, 730, 894};
-        const int fx_w[5] = {140, 140, 150, 156, 128};
-        const char *fx_v[5] = {"2", "3", "4", "5", "vollbild"};
+        /* 2. Anzeige (2x, 3x, 4x, 5x, Vollbild) */
+        const int fx_x[5] = { 268, 416, 564, 722, 886 };
+        const int fx_w[5] = { 140, 140, 150, 156, 124 };
+        const char *fx_v[5] = { "2", "3", "4", "5", "vollbild" };
         for (int fi = 0; fi < 5; ++fi) {
-            if (point_in_rect(mx, my, fx_x[fi], 191, fx_w[fi], 38)) {
+            if (point_in_rect(mx, my, fx_x[fi], 180, fx_w[fi], 34)) {
                 g.chosen_fenster = fx_v[fi];
                 g.chosen_vollbild = (g.chosen_fenster == "vollbild");
                 g_settings_row = 1;
-                g_status_msg = std::string(L("Fenstergröße: ", "Window Size: ")) + fenster_label_str(g.chosen_fenster);
+                g_status_msg = std::string(L("Anzeige: ", "Display: ")) + fenster_label_str(g.chosen_fenster);
                 save_einstellungen_ini();
                 return;
             }
         }
 
         /* 3. Skalierung (Ganzzahlig vs. Fuellend) */
-        if (point_in_rect(mx, my, 276, 277, 364, 38)) {
+        if (point_in_rect(mx, my, 268, 256, 364, 34)) {
             g.chosen_skalierung = "ganzzahlig";
             g_settings_row = 2;
             g_status_msg = L("Skalierung: Ganzzahlig (exakte Vielfache)", "Scaling: Integer (exact multiples)");
             save_einstellungen_ini();
             return;
         }
-        if (point_in_rect(mx, my, 652, 277, 370, 38)) {
+        if (point_in_rect(mx, my, 644, 256, 366, 34)) {
             g.chosen_skalierung = "fuellend";
             g_settings_row = 2;
             g_status_msg = L("Skalierung: Füllend (scharf)", "Scaling: Fill (sharp)");
@@ -3962,14 +5672,14 @@ static void handle_mouse_click(int mx, int my, bool &running) {
         }
 
         /* 4. Probenlog */
-        if (point_in_rect(mx, my, 276, 367, 234, 38)) {
+        if (point_in_rect(mx, my, 268, 336, 234, 34)) {
             g.chosen_probenlog = false;
             g_settings_row = 3;
             g_status_msg = L("Probenlog ausgeschaltet.", "Roll Log disabled.");
             save_einstellungen_ini();
             return;
         }
-        if (point_in_rect(mx, my, 522, 367, 500, 38)) {
+        if (point_in_rect(mx, my, 514, 336, 496, 34)) {
             g.chosen_probenlog = true;
             g_settings_row = 3;
             g_status_msg = L("Probenlog eingeschaltet (mit Live-Fenster).", "Roll Log enabled (with live window).");
@@ -3977,15 +5687,15 @@ static void handle_mouse_click(int mx, int my, bool &running) {
             return;
         }
 
-        /* 5. Vorspann */
-        if (point_in_rect(mx, my, 276, 435, 346, 38)) {
+        /* 5. Intro */
+        if (point_in_rect(mx, my, 268, 394, 346, 34)) {
             g.chosen_intro = false;
             g_settings_row = 4;
             g_status_msg = L("Vorspann überspringen.", "Skip intro.");
             save_einstellungen_ini();
             return;
         }
-        if (point_in_rect(mx, my, 634, 435, 388, 38)) {
+        if (point_in_rect(mx, my, 626, 394, 384, 34)) {
             g.chosen_intro = true;
             g_settings_row = 4;
             g_status_msg = L("Vorspann abspielen.", "Play intro.");
@@ -3994,7 +5704,7 @@ static void handle_mouse_click(int mx, int my, bool &running) {
         }
 
         /* 6. Spielordner */
-        if (point_in_rect(mx, my, 824, 503, 198, 38)) {
+        if (point_in_rect(mx, my, 816, 452, 194, 34)) {
             g_settings_row = 5;
             std::string picked = browse_for_gamedir_dialog(L("Spielordner wählen:", "Select game folder:"));
             if (!picked.empty()) {
@@ -4003,16 +5713,34 @@ static void handle_mouse_click(int mx, int my, bool &running) {
             return;
         }
 
-        /* Fusszeile: "< Zurück zur Übersicht" */
-        if (point_in_rect(mx, my, 30, 701, 264, 38)) {
+        /* Fusszeile: "< Übersicht (Esc)" */
+        if (point_in_rect(mx, my, 24, 594, 180, 36)) {
             g_screen = SCREEN_SELECT_GAME;
             g_status_msg = L("Übersicht", "Overview");
             save_einstellungen_ini();
             return;
         }
-
-        /* Fusszeile: ">> Spiel starten (Enter)" */
-        if (point_in_rect(mx, my, 716, 699, 314, 42)) {
+        /* Fusszeile: "DOS-Fassung patchen" */
+        if (point_in_rect(mx, my, 214, 594, 198, 36)) {
+            patch_dos_game(g);
+            return;
+        }
+        /* Fusszeile: "In DOSBox spielen" */
+        if (point_in_rect(mx, my, 422, 594, 184, 36)) {
+            if (g.has_dos_patcher && g.gamedir_valid && g.dos_fix_exists) {
+                launch_dos_game(g);
+            }
+            return;
+        }
+        /* Fusszeile: "Im Browser spielen" */
+        if (point_in_rect(mx, my, 616, 594, 186, 36)) {
+            if (is_browser_available(g)) {
+                open_browser_game(g, false);
+            }
+            return;
+        }
+        /* Fusszeile: "▶ Spielen (Windows)" */
+        if (point_in_rect(mx, my, 812, 594, 204, 36)) {
             if (!g.has_any_exe) return;
             g_settings_row = 6;
             std::vector<std::string> no_extra;
@@ -4028,19 +5756,12 @@ static void handle_keydown(const SDL_KeyboardEvent &kev, bool &running) {
     char ch = (char)toupper(ascii ? ascii : vk);
 
     if (vk == VK_F1) {
+        g_open_dd_game = -1;
         g_help_active = !g_help_active;
         return;
     }
-    if (vk == VK_F2 || ch == 'L') {
-        g_lang_en = !g_lang_en;
-        g_status_msg = L("Sprache: Deutsch", "Language: English");
-        save_einstellungen_ini();
-        return;
-    }
-    if (vk == VK_F4) {
-        int next_v = (g_font_variant % 6) + 1;
-        apply_font_variant(next_v);
-        g_status_msg = std::string("Schrift-Design gewechselt: ") + g_font_specs[g_font_variant - 1].name;
+    /* NACHTRAG 1 (Etappe 6): F2 ohne Funktion (Starter nur noch Deutsch) */
+    if (vk == VK_F2) {
         return;
     }
 
@@ -4052,31 +5773,156 @@ static void handle_keydown(const SDL_KeyboardEvent &kev, bool &running) {
     }
 
     if (g_modal_active) {
+        if (g_modal_is_readonly_dos && !g_modal_is_ok && !g_modal_is_crash) {
+            int gidx = (g_modal_readonly_game_idx >= 0 && g_modal_readonly_game_idx < (int)g_games.size())
+                ? g_modal_readonly_game_idx : g_selected_game;
+            if (vk == VK_RETURN || ch == 'K') {
+                g_modal_active = false;
+                g_modal_is_readonly_dos = false;
+                if (gidx >= 0 && gidx < (int)g_games.size()) {
+                    copy_and_patch_dos_game(g_games[gidx], "");
+                }
+                return;
+            }
+            if (ch == 'O') {
+                std::string picked = browse_for_gamedir_dialog(
+                    L("Zielordner für beschreibbare DOS-Kopie wählen:", "Select target folder for writable DOS copy:"));
+                if (!picked.empty()) {
+                    g_modal_active = false;
+                    g_modal_is_readonly_dos = false;
+                    if (gidx >= 0 && gidx < (int)g_games.size()) {
+                        copy_and_patch_dos_game(g_games[gidx], picked);
+                    }
+                }
+                return;
+            }
+            if (vk == VK_ESCAPE) {
+                g_modal_active = false;
+                g_modal_is_readonly_dos = false;
+                return;
+            }
+            return;
+        }
         if (vk == VK_RETURN || vk == VK_ESCAPE || vk == VK_SPACE) {
             g_modal_active = false;
+            g_modal_is_readonly_dos = false;
         }
         return;
     }
 
     if (g_screen == SCREEN_SELECT_GAME) {
         int sel_idx = (g_selected_game >= 0 && g_selected_game < (int)g_games.size()) ? g_selected_game : 0;
+
+        /* Tastaturbedienung bei geoeffneter Anzeige-Klappliste */
+        if (g_open_dd_game >= 0 && g_open_dd_game < (int)g_games.size()) {
+            GameCatalogEntry &og = g_games[g_open_dd_game];
+            if (g_open_dd_sel < 0 || g_open_dd_sel >= 5) {
+                g_open_dd_sel = get_dd_fenster_index(og.chosen_fenster);
+            }
+            if (vk == VK_ESCAPE) {
+                g_open_dd_game = -1;
+                g_open_dd_sel  = -1;
+                return;
+            }
+            if (vk == VK_UP || vk == VK_LEFT) {
+                g_open_dd_sel = (g_open_dd_sel + 4) % 5;
+                return;
+            }
+            if (vk == VK_DOWN || vk == VK_RIGHT || vk == VK_TAB) {
+                g_open_dd_sel = (g_open_dd_sel + 1) % 5;
+                return;
+            }
+            if (vk == VK_RETURN || vk == VK_SPACE) {
+                og.chosen_fenster  = g_dd_fenster_vals[g_open_dd_sel];
+                og.chosen_vollbild = (og.chosen_fenster == "vollbild");
+                g_open_dd_game = -1;
+                g_open_dd_sel  = -1;
+                save_einstellungen_ini();
+                return;
+            }
+            return;
+        }
+
         if (vk == VK_ESCAPE) {
             save_einstellungen_ini();
             running = false;
             return;
         }
         if (vk == VK_F5) {
-            if (g_games[sel_idx].verfuegbar) {
+            if (g_games[sel_idx].verfuegbar || g_games[sel_idx].gamedir_wrong_version) {
                 std::vector<std::string> no_extra;
                 launch_selected_game(g_games[sel_idx], false, no_extra, false, 0);
             }
             return;
         }
+
+        /* Tab schaltet durch die Bedienelemente der aktiven Spielkarte */
+        if (vk == VK_TAB) {
+            g_show_focus_ring = true;
+            g_card_focus = (g_card_focus + 1) % 9;
+            return;
+        }
+
+        /* Pfeiltasten Links/Rechts: Im Segmentschalter "Fixes" direkt Stufe umschalten,
+         * in "Anzeige" Fenstermodus wechseln, sonst Fokus zwischen Elementen verschieben */
+        if (vk == VK_LEFT || vk == VK_RIGHT) {
+            int dir = (vk == VK_RIGHT) ? 1 : -1;
+            if (g_card_focus == 0) {
+                g_games[sel_idx].chosen_stufe = (PatchStufe)(((int)g_games[sel_idx].chosen_stufe + dir + 3) % 3);
+                g_status_msg = g_games[sel_idx].name + " – Fixes: " + stufe_short_label(g_games[sel_idx].chosen_stufe);
+                save_einstellungen_ini();
+            } else if (g_card_focus == 1) {
+                cycle_fenster_mode(g_games[sel_idx], dir);
+            } else {
+                g_show_focus_ring = true;
+                g_card_focus = (g_card_focus + dir + 9) % 9;
+            }
+            return;
+        }
+
+        /* Leertaste: Haekchen "Intro" / "Probenlog" umschalten, Klappliste oeffnen oder Knopf ausloesen */
+        if (vk == VK_SPACE) {
+            if (g_card_focus == 2) {
+                g_games[sel_idx].chosen_intro = !g_games[sel_idx].chosen_intro;
+                save_einstellungen_ini();
+            } else if (g_card_focus == 3) {
+                g_games[sel_idx].chosen_probenlog = !g_games[sel_idx].chosen_probenlog;
+                save_einstellungen_ini();
+            } else if (g_card_focus == 1) {
+                g_open_dd_game = sel_idx;
+                g_open_dd_sel  = get_dd_fenster_index(g_games[sel_idx].chosen_fenster);
+            } else if (g_card_focus == 0) {
+                g_games[sel_idx].chosen_stufe = (PatchStufe)(((int)g_games[sel_idx].chosen_stufe + 1) % 3);
+                save_einstellungen_ini();
+            } else if (g_card_focus == 4) {
+                std::string picked = browse_for_gamedir_dialog(L("Spielordner wählen:", "Select game folder:"));
+                if (!picked.empty()) handle_dropped_folder(picked);
+            } else if (g_card_focus == 5) {
+                g_screen = SCREEN_SETTINGS;
+                g_settings_row = 0;
+                save_einstellungen_ini();
+            } else if (g_card_focus == 6) {
+                std::vector<std::string> no_extra;
+                launch_selected_game(g_games[sel_idx], false, no_extra, false, 0);
+            } else if (g_card_focus == 7) {
+                if (g_games[sel_idx].dos_fix_exists) launch_dos_game(g_games[sel_idx]);
+                else patch_dos_game(g_games[sel_idx]);
+            } else if (g_card_focus == 8) {
+                open_browser_game(g_games[sel_idx], false);
+            }
+            return;
+        }
+
         if (ch == 'O') {
             std::string picked = browse_for_gamedir_dialog(L("Spielordner wählen:", "Select game folder:"));
             if (!picked.empty()) {
                 handle_dropped_folder(picked);
             }
+            return;
+        }
+        if (ch == 'S') {
+            g_games[sel_idx].chosen_stufe = (PatchStufe)(((int)g_games[sel_idx].chosen_stufe + 1) % 3);
+            save_einstellungen_ini();
             return;
         }
         if (ch == 'F') {
@@ -4085,6 +5931,11 @@ static void handle_keydown(const SDL_KeyboardEvent &kev, bool &running) {
         }
         if (ch == 'K') {
             toggle_skalierung_mode(g_games[sel_idx]);
+            return;
+        }
+        if (ch == 'I') {
+            g_games[sel_idx].chosen_intro = !g_games[sel_idx].chosen_intro;
+            save_einstellungen_ini();
             return;
         }
         if (ch == 'P') {
@@ -4096,16 +5947,25 @@ static void handle_keydown(const SDL_KeyboardEvent &kev, bool &running) {
             save_einstellungen_ini();
             return;
         }
+        if (ch == 'E') {
+            g_screen = SCREEN_SETTINGS;
+            g_settings_row = 0;
+            save_einstellungen_ini();
+            return;
+        }
         if (ch == 'D') {
-            launch_dos_game(g_games[sel_idx]);
+            if (g_games[sel_idx].dos_fix_exists) launch_dos_game(g_games[sel_idx]);
+            else patch_dos_game(g_games[sel_idx]);
+            return;
+        }
+        if (ch == 'B') {
+            open_browser_game(g_games[sel_idx], false);
             return;
         }
         if (vk == '1' || vk == '2' || vk == '3') {
             int idx = vk - '1';
             if (idx >= 0 && idx < (int)g_games.size()) {
                 g_selected_game = idx;
-                g_screen = SCREEN_SETTINGS;
-                g_settings_row = 0;
                 save_einstellungen_ini();
             }
             return;
@@ -4115,15 +5975,37 @@ static void handle_keydown(const SDL_KeyboardEvent &kev, bool &running) {
             save_einstellungen_ini();
             return;
         }
-        if (vk == VK_DOWN || vk == VK_TAB) {
+        if (vk == VK_DOWN) {
             g_selected_game = (g_selected_game + 1) % (int)g_games.size();
             save_einstellungen_ini();
             return;
         }
-        if (vk == VK_RETURN || vk == VK_SPACE) {
-            g_screen = SCREEN_SETTINGS;
-            g_settings_row = 0;
-            save_einstellungen_ini();
+        if (vk == VK_RETURN) {
+            if (g_card_focus == 1) {
+                g_open_dd_game = sel_idx;
+                g_open_dd_sel  = get_dd_fenster_index(g_games[sel_idx].chosen_fenster);
+            } else if (g_card_focus == 2) {
+                g_games[sel_idx].chosen_intro = !g_games[sel_idx].chosen_intro;
+                save_einstellungen_ini();
+            } else if (g_card_focus == 3) {
+                g_games[sel_idx].chosen_probenlog = !g_games[sel_idx].chosen_probenlog;
+                save_einstellungen_ini();
+            } else if (g_card_focus == 4) {
+                std::string picked = browse_for_gamedir_dialog(L("Spielordner wählen:", "Select game folder:"));
+                if (!picked.empty()) handle_dropped_folder(picked);
+            } else if (g_card_focus == 5) {
+                g_screen = SCREEN_SETTINGS;
+                g_settings_row = 0;
+                save_einstellungen_ini();
+            } else if (g_card_focus == 7) {
+                if (g_games[sel_idx].dos_fix_exists) launch_dos_game(g_games[sel_idx]);
+                else patch_dos_game(g_games[sel_idx]);
+            } else if (g_card_focus == 8) {
+                open_browser_game(g_games[sel_idx], false);
+            } else if (g_games[sel_idx].has_any_exe) {
+                std::vector<std::string> no_extra;
+                launch_selected_game(g_games[sel_idx], false, no_extra, false, 0);
+            }
             return;
         }
     } else if (g_screen == SCREEN_SETTINGS) {
@@ -4188,7 +6070,12 @@ static void handle_keydown(const SDL_KeyboardEvent &kev, bool &running) {
             return;
         }
         if (ch == 'D') {
-            launch_dos_game(g);
+            if (g.dos_fix_exists) launch_dos_game(g);
+            else patch_dos_game(g);
+            return;
+        }
+        if (ch == 'B') {
+            open_browser_game(g, false);
             return;
         }
 
@@ -4247,13 +6134,16 @@ int main(int argc, char **argv) {
     init_starter_dirs();
     load_grafik_modi_md();
 
-    std::string spiele_json = join_path(g_starter_dir, "spiele.json");
+    std::string spiele_json = join_path(g_data_dir, "spiele.json");
+    if (!file_exists_win(spiele_json)) {
+        spiele_json = join_path(g_starter_dir, "spiele.json");
+    }
     if (!load_spiele_json(spiele_json)) {
         GameCatalogEntry s1 = make_default_entry(1);
         s1.id = "schicksalsklinge";
         s1.name = "Die Schicksalsklinge";
         s1.untertitel = "Das Schwarze Auge - Teil 1 (1992)";
-        s1.port_ordner = "../Port/build";
+        s1.port_ordner = "Schicksalsklinge\\Nativ";
         s1.exe_orig = "SCHICK_PORT_ORIG.EXE";
         s1.exe_wichtig = "SCHICK_PORT_WICHTIG.EXE";
         s1.exe_alles = "SCHICK_PORT_ALLES.EXE";
@@ -4270,19 +6160,26 @@ int main(int argc, char **argv) {
             g_disable_gog_autoscan = true;
         } else if (strcmp(argv[i], "--no-grafikpaket") == 0) {
             g_force_no_grafikpaket = true;
+        } else if (strcmp(argv[i], "--no-browser-exec") == 0) {
+            g_no_browser_exec = true;
         }
     }
 
     load_einstellungen_ini();
     refresh_all_games();
-    g_status_msg = L("Tipp: Spielordner oder Archiv einfach ins Fenster ziehen! (F1=Hilfe, F2=Sprache, F5=Schnellstart)",
-                     "Tip: Simply drag & drop a game folder or archive into this window! (F1=Help, F2=Language, F5=Quick Start)");
+    g_status_msg = "Tipp: Spielordner oder Archiv einfach ins Fenster ziehen! (F1=Hilfe, F5=Schnellstart)";
 
     std::string screenshot_path;
+    std::string screenshot_after_path;
     std::string test_absturz_path;
+    std::string dos_copy_target_dir;
     std::vector<std::string> simulated_drops;
     bool auto_start          = false;
     bool auto_quick_start    = false;
+    bool auto_patch_dos      = false;
+    bool auto_patch_dos_copy = false;
+    bool auto_launch_dos     = false;
+    bool auto_open_browser   = false;
     bool auto_quit           = false;
     bool test_missing_exe    = false;
     bool trigger_build_paket = false;
@@ -4291,7 +6188,7 @@ int main(int argc, char **argv) {
 
     for (int i = 1; i < argc; ++i) {
         std::string a = argv[i];
-        if (a == "--no-auto-gog" || a == "--no-grafikpaket") {
+        if (a == "--no-auto-gog" || a == "--no-grafikpaket" || a == "--no-browser-exec") {
             continue;
         } else if (a == "--clear-spielpfade") {
             for (size_t k = 0; k < g_games.size(); ++k) {
@@ -4307,19 +6204,24 @@ int main(int argc, char **argv) {
                     if (_stricmp(g_games[k].id.c_str(), gid.c_str()) == 0) {
                         g_games[k].custom_spielpfad = gdir.empty() ? "-" : gdir;
                         refresh_game_status(g_games[k]);
+                        if (g_games[k].gamedir_wrong_version) {
+                            g_selected_game = (int)k;
+                            show_wrong_version_modal(g_games[k]);
+                        }
                     }
                 }
             }
-        } else if (strncmp(a.c_str(), "--sprache=", 10) == 0) {
-            std::string lv = a.substr(10);
-            g_lang_en = (_stricmp(lv.c_str(), "en") == 0 || _stricmp(lv.c_str(), "english") == 0);
-        } else if (strncmp(a.c_str(), "--lang=", 7) == 0) {
-            std::string lv = a.substr(7);
-            g_lang_en = (_stricmp(lv.c_str(), "en") == 0 || _stricmp(lv.c_str(), "english") == 0);
+        } else if (strncmp(a.c_str(), "--sprache=", 10) == 0 || strncmp(a.c_str(), "--lang=", 7) == 0) {
+            /* NACHTRAG 1 (Etappe 6): Starter nur noch Deutsch, Sprach-Option ignorieren */
+            g_lang_en = false;
         } else if (a == "--screenshot" && i + 1 < argc) {
             screenshot_path = argv[++i];
         } else if (strncmp(a.c_str(), "--screenshot=", 13) == 0) {
             screenshot_path = a.substr(13);
+        } else if (a == "--screenshot-after" && i + 1 < argc) {
+            screenshot_after_path = argv[++i];
+        } else if (strncmp(a.c_str(), "--screenshot-after=", 19) == 0) {
+            screenshot_after_path = a.substr(19);
         } else if (a == "--screenshot-progress" && i + 1 < argc) {
             g_screenshot_progress_path = argv[++i];
         } else if (strncmp(a.c_str(), "--screenshot-progress=", 22) == 0) {
@@ -4334,14 +6236,37 @@ int main(int argc, char **argv) {
             g_screen = SCREEN_SETTINGS;
         } else if (a == "--show-help" || a == "--hilfe") {
             g_help_active = true;
+        } else if (strncmp(a.c_str(), "--open-anzeige=", 15) == 0) {
+            std::string ov = a.substr(15);
+            if (ov == "1" || ov == "2" || ov == "3") {
+                int idx = atoi(ov.c_str()) - 1;
+                if (idx >= 0 && idx < (int)g_games.size()) {
+                    g_open_dd_game = idx;
+                    g_open_dd_sel  = get_dd_fenster_index(g_games[idx].chosen_fenster);
+                }
+            } else {
+                for (size_t k = 0; k < g_games.size(); ++k) {
+                    if (_stricmp(g_games[k].id.c_str(), ov.c_str()) == 0) {
+                        g_open_dd_game = (int)k;
+                        g_open_dd_sel  = get_dd_fenster_index(g_games[k].chosen_fenster);
+                        break;
+                    }
+                }
+            }
+        } else if (strncmp(a.c_str(), "--focus=", 8) == 0) {
+            int fc = atoi(a.c_str() + 8);
+            if (fc >= 0 && fc <= 8) {
+                g_card_focus = fc;
+                g_show_focus_ring = true;
+            }
         } else if (strncmp(a.c_str(), "--mouse-pos=", 12) == 0) {
             int mx = 0, my = 0;
             if (sscanf(a.c_str() + 12, "%d,%d", &mx, &my) == 2) {
                 g_mouse_x = mx;
                 g_mouse_y = my;
                 for (size_t gi = 0; gi < g_games.size() && gi < 3; ++gi) {
-                    int cy = 154 + (int)gi * 198;
-                    if (point_in_rect(g_mouse_x, g_mouse_y, 18, cy, SCREEN_W - 36, 180)) {
+                    int cy = 147 + (int)gi * 162;
+                    if (point_in_rect(g_mouse_x, g_mouse_y, 14, cy, 1012, 150)) {
                         g_hover_game = (int)gi;
                         break;
                     }
@@ -4381,7 +6306,7 @@ int main(int argc, char **argv) {
                 g_games[g_selected_game].chosen_skalierung = a.substr(13);
             }
         } else if (strncmp(a.c_str(), "--grafik=", 9) == 0) {
-            /* S3: Alte --grafik=-Optionen ignorieren */
+            /* Alte --grafik=-Optionen ignorieren */
         } else if (strncmp(a.c_str(), "--probenlog=", 12) == 0) {
             if (g_selected_game >= 0 && g_selected_game < (int)g_games.size()) {
                 g_games[g_selected_game].chosen_probenlog = (a.substr(12) == "1");
@@ -4414,6 +6339,17 @@ int main(int argc, char **argv) {
         } else if (a == "--test-fehlende-exe") {
             test_missing_exe = true;
             g_screen = SCREEN_SETTINGS;
+        } else if (a == "--patch-dos") {
+            auto_patch_dos = true;
+        } else if (a == "--patch-dos-copy") {
+            auto_patch_dos_copy = true;
+        } else if (strncmp(a.c_str(), "--patch-dos-copy=", 17) == 0) {
+            auto_patch_dos_copy = true;
+            dos_copy_target_dir = a.substr(17);
+        } else if (a == "--launch-dos") {
+            auto_launch_dos = true;
+        } else if (a == "--open-browser") {
+            auto_open_browser = true;
         } else if (a == "--auto-start") {
             auto_start = true;
             g_screen = SCREEN_SETTINGS;
@@ -4479,6 +6415,22 @@ int main(int argc, char **argv) {
         launch_selected_game(g_games[g_selected_game], true, extra_port_args, false, timeout_ms);
     }
 
+    if (auto_patch_dos && g_selected_game >= 0 && g_selected_game < (int)g_games.size()) {
+        rc = patch_dos_game(g_games[g_selected_game]);
+    }
+
+    if (auto_patch_dos_copy && g_selected_game >= 0 && g_selected_game < (int)g_games.size()) {
+        rc = copy_and_patch_dos_game(g_games[g_selected_game], dos_copy_target_dir);
+    }
+
+    if (auto_launch_dos && g_selected_game >= 0 && g_selected_game < (int)g_games.size()) {
+        rc = launch_dos_game(g_games[g_selected_game]);
+    }
+
+    if (auto_open_browser && g_selected_game >= 0 && g_selected_game < (int)g_games.size()) {
+        rc = open_browser_game(g_games[g_selected_game], true);
+    }
+
     if (!test_absturz_path.empty() && g_selected_game >= 0 && g_selected_game < (int)g_games.size()) {
         inspect_absturz_log(test_absturz_path, g_games[g_selected_game].name);
     }
@@ -4489,9 +6441,20 @@ int main(int argc, char **argv) {
         save_framebuffer_bmp(screenshot_path);
     }
 
+    if ((auto_patch_dos || auto_patch_dos_copy || auto_launch_dos || auto_open_browser) && auto_quit) {
+        SDL_DestroyTexture(g_texture);
+        SDL_DestroyRenderer(g_renderer);
+        SDL_DestroyWindow(g_window);
+        SDL_Quit();
+        return (rc < 0) ? 1 : rc;
+    }
+
     if ((auto_start || auto_quick_start) && g_selected_game >= 0 && g_selected_game < (int)g_games.size()) {
         rc = launch_selected_game(g_games[g_selected_game], false, extra_port_args, true, timeout_ms);
         render_frame();
+        if (!screenshot_after_path.empty()) {
+            save_framebuffer_bmp(screenshot_after_path);
+        }
         SDL_DestroyTexture(g_texture);
         SDL_DestroyRenderer(g_renderer);
         SDL_DestroyWindow(g_window);
@@ -4513,11 +6476,16 @@ int main(int argc, char **argv) {
             if (WaitForSingleObject(g_watched_game_proc, 0) == WAIT_OBJECT_0) {
                 CloseHandle(g_watched_game_proc);
                 g_watched_game_proc = NULL;
+                if (g_window) {
+                    SDL_ShowWindow(g_window);
+                    SDL_RaiseWindow(g_window);
+                }
                 std::string c1 = join_path(g_watched_exe_dir, "absturz.log");
                 std::string c2 = join_path(g_watched_save_dir, "absturz.log");
                 if (!inspect_absturz_log(c1, g_watched_game_name)) {
                     inspect_absturz_log(c2, g_watched_game_name);
                 }
+                g_status_msg = g_watched_game_name + L(" beendet – zurück im Starter.", " closed – welcome back to the launcher.");
             }
         }
 
@@ -4538,8 +6506,8 @@ int main(int argc, char **argv) {
                 g_hover_game = -1;
                 if (g_screen == SCREEN_SELECT_GAME && !g_help_active && !g_modal_active) {
                     for (size_t i = 0; i < g_games.size() && i < 3; ++i) {
-                        int cy = 154 + (int)i * 198;
-                        if (point_in_rect(g_mouse_x, g_mouse_y, 18, cy, SCREEN_W - 36, 180)) {
+                        int cy = 147 + (int)i * 162;
+                        if (point_in_rect(g_mouse_x, g_mouse_y, 14, cy, 1012, 150)) {
                             g_hover_game = (int)i;
                             break;
                         }

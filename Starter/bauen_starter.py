@@ -103,9 +103,29 @@ def main() -> int:
         print(f"FEHLER beim Linken von NORDLANDTRILOGIE.EXE:\n{out}", file=sys.stderr)
         return 1
 
+    import struct
+    built_exe = WIN_STAGE_DIR / "NORDLANDTRILOGIE.EXE"
+    exe_data = bytearray(built_exe.read_bytes())
+    pe_off = struct.unpack_from("<I", exe_data, 0x3C)[0]
+    num_sec = struct.unpack_from("<H", exe_data, pe_off + 6)[0]
+    opt_sz = struct.unpack_from("<H", exe_data, pe_off + 20)[0]
+    sec_off = pe_off + 24 + opt_sz
+    hdr_pad_start = ((sec_off + 40 * num_sec + 15) & ~15)
+    first_rptr = struct.unpack_from("<I", exe_data, sec_off + 20)[0]
+    for p_off in range(hdr_pad_start, first_rptr, 16):
+        if exe_data[p_off] == 0:
+            exe_data[p_off] = 0x90
+    for s_idx in range(num_sec):
+        _, vsz, _, rsz, rptr = struct.unpack_from("<8sIIII", exe_data, sec_off + 40 * s_idx)
+        if rptr > 0 and rsz > vsz:
+            for p_off in range(rptr + ((vsz + 15) & ~15), rptr + rsz, 16):
+                if exe_data[p_off] == 0:
+                    exe_data[p_off] = 0x90
+    built_exe.write_bytes(exe_data)
+
     BUILD_OUT_DIR.mkdir(parents=True, exist_ok=True)
     out_exe = BUILD_OUT_DIR / "NORDLANDTRILOGIE.EXE"
-    shutil.copy2(WIN_STAGE_DIR / "NORDLANDTRILOGIE.EXE", out_exe)
+    shutil.copy2(built_exe, out_exe)
     rel_dir = STARTER_DIR / "release"
     if rel_dir.is_dir():
         shutil.copy2(out_exe, rel_dir / "NORDLANDTRILOGIE.EXE")

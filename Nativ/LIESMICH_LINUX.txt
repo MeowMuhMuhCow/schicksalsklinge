@@ -1,0 +1,45 @@
+===========================================================================
+Das Schwarze Auge: Die Schicksalsklinge — Nativer Linux-Port (x86_64)
+===========================================================================
+
+1. VORAUSSETZUNGEN
+------------------
+- Original-Spieldateien der deutschen Version V3.02de (z. B. aus der
+  GOG-Version "Realms of Arkania: Blade of Destiny", Steam, Lutris oder Heroic).
+  Gross-/Kleinschreibung der Spieldateien (SCHICK.DAT / schick.dat) spielt
+  unter Linux keine Rolle.
+- 64-Bit-Linux (x86_64) mit SDL2 (libSDL2-2.0.so.0 liegt bereits unter lib/ bei)
+  sowie Python 3 (optional python3-tk fuer das grafische Probenlog-Fenster).
+
+2. SPIELPFAD
+------------
+Das Startskript sucht die Spieldaten automatisch in:
+- dem als ersten Parameter uebergebenen Ordner,
+- dem Pfad in SPIELPFAD.txt,
+- ~/GOG Games/Realms of Arkania - Blade of Destiny German (bzw. Realms of Arkania),
+- ~/.local/share/Steam/steamapps/common/...,
+- ~/Games/gog/... und ~/Games/Heroic/...
+
+Alternativ kann der Pfad direkt uebergeben werden:
+  ./Schicksalsklinge_starten_ALLE_FIXES.sh "/pfad/zu/Schicksalsklinge"
+
+3. VIER STUFEN & PROBENLOG
+--------------------------
+Im Paket liegen alle 4 Stufen als native 64-Bit-ELF-Programme samt Startskripten:
+- ./Schicksalsklinge_starten_STANDARD.sh                 (SCHICK_PORT = Alle Fixes)
+- ./Schicksalsklinge_starten_ALLE_FIXES.sh               (SCHICK_PORT_ALLES, FIX_BUGS=2)
+- ./Schicksalsklinge_starten_ALLE_FIXES_MIT_PROBENLOG.sh (mit Live-Probenlog-Fenster)
+- ./Schicksalsklinge_starten_WICHTIGE_FIXES.sh           (SCHICK_PORT_WICHTIG, FIX_BUGS=1)
+- ./Schicksalsklinge_starten_WICHTIGE_FIXES_MIT_PROBENLOG.sh (mit Live-Probenlog-Fenster)
+- ./Schicksalsklinge_starten_ORIGINAL.sh                 (SCHICK_PORT_ORIG, FIX_BUGS=0)
+
+Bei den *_MIT_PROBENLOG.sh-Skripten oeffnet sich automatisch das Python-Fenster
+(Probenlog/probenlog_fenster.py), das alle Talent-, Zauber-, Eigenschafts- und
+Kampfproben live aus PROBEN.CSV im Klartext anzeigt.
+
+4. TASTENKUERZEL & OPTIONEN
+---------------------------
+- Alt+Enter : Zwischen Vollbild und Fenstermodus umschalten
+- Tab       : Fenstergroesse (2x..5x) bzw. Skalierung umschalten
+- F11 / F12 : Musiklautstaerke leiser / lauter (mit Strg: Effektlautstaerke)
+- --fenstermodus / --vollbild / --fenster=3 / --skalierung=ganzzahlig
