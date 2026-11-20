@@ -2125,6 +2125,194 @@ static void dsa_save_bmp(const char *path) {
     fclose(fp);
 }
 
+/* =========================================================================
+ * Zweig Drehen (Claude I16 / K87, 20.11.2026): fluessiger Schwenk bei 90-Grad-Drehung.
+ * Das Spiel bleibt unveraendert (vier Richtungen). update_direction() meldet die Drehung
+ * (ab FIX_BUGS >= 1), hier wird beim naechsten neu gezeichneten Bild die alte Ansicht
+ * seitlich herausgeschoben und die neue hereingeschoben. DSA_DREHEN=0 schaltet ab,
+ * DSA_DREHEN_MS (50..1000, Standard 200) setzt die Dauer. Bei Replays nie aktiv
+ * (ausser mit Testschalter DSA_DREHEN_TEST=1).
+ * ========================================================================= */
+#define TURN_W 208
+#define TURN_H 135
+/* Rahmen-Verzierungen, Kompass und Mauszeiger liegen in Palettenindizes >= 0xC8 (pic_copy Modus 1 laesst
+ * genau diese Punkte stehen). Sie bleiben beim Schwenk fest, nur die Ansicht dahinter wird geschoben. */
+#define TURN_DEKOR_AB 0xC8
+static int      g_turn_pending = 0;
+static int      g_turn_mod = 0, g_turn_x = 0, g_turn_y = 0;
+static uint32_t g_turn_t0 = 0;
+static int      g_turn_test_seq = 0;
+static unsigned char g_turn_old[TURN_W * TURN_H];
+static unsigned char g_turn_new[TURN_W * TURN_H];
+static unsigned char g_turn_new_scr[TURN_W * TURN_H];
+
+static int dsa_turn_enabled(void) {
+    static int enabled = -1;
+    if (enabled < 0) {
+        const char *e = getenv("DSA_DREHEN");
+        enabled = (e && e[0] == '0') ? 0 : 1;
+    }
+    return enabled;
+}
+
+static int dsa_turn_test_enabled(void) {
+    static int test_on = -1;
+    if (test_on < 0) {
+        const char *e = getenv("DSA_DREHEN_TEST");
+        test_on = (e && e[0] == '1') ? 1 : 0;
+    }
+    return test_on;
+}
+
+static uint32_t dsa_turn_dauer_ms(void) {
+    static int ms = -1;
+    if (ms < 0) {
+        const char *e = getenv("DSA_DREHEN_MS");
+        ms = e ? atoi(e) : 200;
+        if (ms < 50) ms = 50;
+        if (ms > 1000) ms = 1000;
+    }
+    return (uint32_t)ms;
+}
+
+static void dsa_turn_grab(unsigned char *dst) {
+    for (int r = 0; r < TURN_H; ++r)
+        memcpy(dst + r * TURN_W, g_vram + (g_turn_y + r) * g_width + g_turn_x, TURN_W);
+}
+
+/* Verzierungspunkte einer Ansicht durch den naechsten Ansichtspunkt derselben Zeile ersetzen,
+ * damit beim Schieben keine Verzierungsreste mitwandern. */
+static void dsa_turn_strip_dekor(unsigned char *v) {
+    for (int r = 0; r < TURN_H; ++r) {
+        unsigned char *row = v + r * TURN_W;
+        int last = -1;
+        for (int c = 0; c < TURN_W; ++c) {
+            if (row[c] < TURN_DEKOR_AB) last = row[c];
+            else if (last >= 0) row[c] = (unsigned char)last;
+        }
+        last = -1;
+        for (int c = TURN_W - 1; c >= 0; --c) {   /* fuehrende Verzierung von rechts auffuellen */
+            if (row[c] < TURN_DEKOR_AB) last = row[c];
+            else if (last >= 0) row[c] = (unsigned char)last;
+        }
+    }
+}
+
+extern "C" void dsa_platform_turn_hint(int mod, int x, int y) {
+    if (!dsa_turn_enabled()) return;
+    if (!dsa_turn_test_enabled() && (g_fast_replay || dsa_platform_is_replay_active())) return;
+    if (mod != 1 && mod != 3) return;
+    if (x < 0 || y < 0 || x + TURN_W > g_width || y + TURN_H > g_height) return;
+    g_turn_mod = mod; g_turn_x = x; g_turn_y = y;
+    dsa_turn_grab(g_turn_old);
+    g_turn_t0 = SDL_GetTicks();
+    g_turn_pending = 1;
+}
+
+static void dsa_turn_show_frame(void) {
+    int cw = 320 * g_fenster_faktor;
+    int ch = 240 * g_fenster_faktor;
+    if (g_window) SDL_GetWindowSize(g_window, &cw, &ch);
+    dsa_render_scaled_display_buffer(cw, ch);
+    if (g_display_tex && g_display_buf) {
+        SDL_UpdateTexture(g_display_tex, NULL, g_display_buf, g_display_w * (int)sizeof(uint32_t));
+        SDL_RenderClear(g_renderer);
+        SDL_RenderCopy(g_renderer, g_display_tex, NULL, NULL);
+        SDL_RenderPresent(g_renderer);
+    } else {
+        SDL_UpdateTexture(g_texture, NULL, g_argb_buffer, g_width * (int)sizeof(uint32_t));
+        SDL_RenderClear(g_renderer);
+        SDL_RenderCopy(g_renderer, g_texture, NULL, NULL);
+        SDL_RenderPresent(g_renderer);
+    }
+}
+
+static void dsa_turn_render_step(int s) {
+    for (int r = 0; r < TURN_H; ++r) {
+        uint32_t *dst = g_argb_buffer + (g_turn_y + r) * g_width + g_turn_x;
+        const unsigned char *o = g_turn_old + r * TURN_W;
+        const unsigned char *n = g_turn_new + r * TURN_W;
+        const unsigned char *fest = g_turn_new_scr + r * TURN_W;
+        for (int c = 0; c < TURN_W; ++c) {
+            unsigned char px;
+            if (fest[c] >= TURN_DEKOR_AB) {
+                px = fest[c];                    /* Verzierung, Kompass, Zeiger: stehen fest */
+            } else if (g_turn_mod == 1) {        /* rechts: neue Ansicht kommt von rechts */
+                int cc = c + s;
+                px = (cc < TURN_W) ? o[cc] : n[cc - TURN_W];
+            } else {                             /* links: neue Ansicht kommt von links */
+                int cc = c - s;
+                px = (cc >= 0) ? o[cc] : n[cc + TURN_W];
+            }
+            dst[c] = g_pal_argb32[px];
+        }
+    }
+}
+
+/* g_vram enthaelt das gerade fertige Bild. Ist die Ansicht neu gezeichnet, Schwenk abspielen. */
+static void dsa_turn_animate_if_ready(void) {
+    if (!g_turn_pending) return;
+    if (!dsa_turn_test_enabled() && (SDL_GetTicks() - g_turn_t0 > 600)) { g_turn_pending = 0; return; }
+    dsa_turn_grab(g_turn_new_scr);
+    int diff = 0;
+    for (int i = 0; i < TURN_W * TURN_H; ++i)
+        diff += (g_turn_new_scr[i] != g_turn_old[i]) && (g_turn_new_scr[i] < TURN_DEKOR_AB);
+    if (diff < 400) return; /* noch nicht neu gezeichnet (Mauszeiger allein reicht nicht) */
+    g_turn_pending = 0;
+
+    memcpy(g_turn_new, g_turn_new_scr, sizeof(g_turn_new));
+    dsa_turn_strip_dekor(g_turn_old);
+    dsa_turn_strip_dekor(g_turn_new);
+
+    const uint32_t dauer = dsa_turn_dauer_ms();
+    const uint32_t start = SDL_GetTicks();
+    int test_saved[3] = {0, 0, 0};
+    const int test_targets[3] = { TURN_W / 4, TURN_W / 2, (TURN_W * 3) / 4 };
+    const char *test_prefix = getenv("DSA_DREHEN_TEST_PREFIX");
+    if (dsa_turn_test_enabled()) ++g_turn_test_seq;
+    for (;;) {
+        uint32_t el = SDL_GetTicks() - start;
+        if (el >= dauer) break;
+        float t = (float)el / (float)dauer;
+        float e = t * t * (3.0f - 2.0f * t);           /* weich anfahren und abbremsen */
+        int s = (int)(e * TURN_W + 0.5f);
+        dsa_turn_render_step(s);
+        dsa_turn_show_frame();
+        if (dsa_turn_test_enabled() && test_prefix && test_prefix[0]) {
+            for (int k = 0; k < 3; ++k) {
+                if (!test_saved[k] && s >= test_targets[k]) {
+                    dsa_turn_render_step(test_targets[k]);
+                    dsa_turn_show_frame();
+                    char spath[512];
+                    snprintf(spath, sizeof(spath), "%s_turn%d_%s_mitte%d.bmp",
+                             test_prefix, g_turn_test_seq, (g_turn_mod == 1) ? "rechts" : "links", k + 1);
+                    dsa_save_bmp(spath);
+                    test_saved[k] = 1;
+                }
+            }
+        }
+        SDL_Delay(8);
+    }
+    if (dsa_turn_test_enabled() && test_prefix && test_prefix[0]) {
+        for (int k = 0; k < 3; ++k) {
+            if (!test_saved[k]) {
+                dsa_turn_render_step(test_targets[k]);
+                dsa_turn_show_frame();
+                char spath[512];
+                snprintf(spath, sizeof(spath), "%s_turn%d_%s_mitte%d.bmp",
+                         test_prefix, g_turn_test_seq, (g_turn_mod == 1) ? "rechts" : "links", k + 1);
+                dsa_save_bmp(spath);
+                test_saved[k] = 1;
+            }
+        }
+    }
+    for (int r = 0; r < TURN_H; ++r) {
+        uint32_t *dst = g_argb_buffer + (g_turn_y + r) * g_width + g_turn_x;
+        const unsigned char *fs = g_turn_new_scr + r * TURN_W;
+        for (int c = 0; c < TURN_W; ++c) dst[c] = g_pal_argb32[fs[c]];
+    }
+}
+
 void dsa_platform_present(void) {
     DsaPlatScope plat_scope("dsa_platform_present");
     static int autotest_checked = 0;
@@ -2169,7 +2357,7 @@ void dsa_platform_present(void) {
     }
     poll_sdl_events_internal();
 
-    if (g_fast_replay && !autotest_enabled && (SDL_GetTicks() - g_last_present_ms < 33)) {
+    if (g_fast_replay && !autotest_enabled && !g_turn_pending && (SDL_GetTicks() - g_last_present_ms < 33)) {
         return;
     }
 
@@ -2177,6 +2365,7 @@ void dsa_platform_present(void) {
     for (i = 0; i < total; ++i) {
         g_argb_buffer[i] = g_pal_argb32[g_vram[i]];
     }
+    dsa_turn_animate_if_ready();
 
     int cw = 320 * g_fenster_faktor;
     int ch = 240 * g_fenster_faktor;

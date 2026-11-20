@@ -35,6 +35,9 @@ static const char no_way_msg[][41] = {
  * \param   mod         Drehung in Vierteln (1 = rechts, 3 = links)
  * \return              immer -1
  */
+#if !defined(__BORLANDC__) && (FIX_BUGS >= 1)
+void dsa_platform_turn_hint(int mod, int x, int y);
+#endif
 signed int update_direction(const unsigned char mod)
 {
 	dsa_trace_enter(135, "seg003:update_direction");
@@ -42,6 +45,9 @@ signed int update_direction(const unsigned char mod)
 	gs_viewdir_bak = gs_viewdir;
 	/* set new direction */
 	gs_viewdir = ((gs_viewdir + mod) & 0x3);
+#if !defined(__BORLANDC__) && (FIX_BUGS >= 1)
+	dsa_platform_turn_hint((int)mod, (int)g_ani_posx, (int)g_ani_posy);
+#endif
 
 	/* set bogus variable to 1 */
 	/* (g_viewdir_flag_bogus wird nur geschrieben, nie gelesen) */

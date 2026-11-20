@@ -1768,6 +1768,29 @@ int main(int argc, char** argv)
 #endif""",
         "seg003.c:move_bounds",
     )
+    # Zweig Drehen: update_direction meldet die Drehung an die Plattform (fluessiger Schwenk, ab FIX_BUGS >= 1)
+    s3_txt = replace_once(
+        s3_txt,
+        """	gs_viewdir = ((gs_viewdir + mod) & 0x3);
+""",
+        """	gs_viewdir = ((gs_viewdir + mod) & 0x3);
+#if !defined(__BORLANDC__) && (FIX_BUGS >= 1)
+	dsa_platform_turn_hint((int)mod, (int)g_ani_posx, (int)g_ani_posy);
+#endif
+""",
+        "seg003.c:turn_hint",
+    )
+    s3_txt = replace_once(
+        s3_txt,
+        """signed int update_direction(const unsigned char mod)
+{""",
+        """#if !defined(__BORLANDC__) && (FIX_BUGS >= 1)
+void dsa_platform_turn_hint(int mod, int x, int y);
+#endif
+signed int update_direction(const unsigned char mod)
+{""",
+        "seg003.c:turn_hint_proto",
+    )
     s3_p.write_text(s3_txt, encoding="latin-1")
 
     # seg004.c & seg004.h

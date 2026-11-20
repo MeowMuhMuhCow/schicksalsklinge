@@ -36,6 +36,8 @@ int            dsa_platform_get_height(void);
 unsigned char *dsa_platform_get_vram(void);
 void           dsa_platform_present(void);
 void           dsa_platform_wait_vsync(void);
+/* Zweig Drehen: Hinweis auf 90-Grad-Drehung (mod 1 = rechts, 3 = links), Ansicht 208x135 bei (x,y) */
+void           dsa_platform_turn_hint(int mod, int x, int y);
 int            dsa_platform_get_scale(void);
 void           dsa_platform_cycle_scale(void);
 

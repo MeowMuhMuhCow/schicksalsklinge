@@ -273,6 +273,7 @@ struct GameCatalogEntry {
     std::string chosen_skalierung;  /* "ganzzahlig", "fuellend" (Standard: "fuellend") */
     bool        chosen_probenlog;
     bool        chosen_intro;
+    bool        chosen_drehen;      /* Fluessig drehen (Schicksalsklinge), Standard: true -> DSA_DREHEN=1/0 */
     bool        chosen_vollbild;
     std::string custom_spielpfad;
     std::string custom_port_ordner;
@@ -451,6 +452,7 @@ static GameCatalogEntry make_default_entry(int teil) {
     e.chosen_skalierung = "fuellend";
     e.chosen_probenlog = false;
     e.chosen_intro = true;
+    e.chosen_drehen = true;
     e.chosen_vollbild = true;
     e.probenlog_supported = true;
     e.has_exe_orig = false;
@@ -694,6 +696,7 @@ static void load_einstellungen_ini(void) {
                         /* S3: Alte grafik=-Eintraege beim Laden stillschweigend ignorieren */
                     } else if (_stricmp(k.c_str(), "probenlog") == 0) g.chosen_probenlog = (v == "1" || _stricmp(v.c_str(), "true") == 0 || _stricmp(v.c_str(), "ja") == 0);
                     else if (_stricmp(k.c_str(), "intro") == 0) g.chosen_intro = (v == "1" || _stricmp(v.c_str(), "true") == 0 || _stricmp(v.c_str(), "ja") == 0);
+                    else if (_stricmp(k.c_str(), "drehen") == 0 || _stricmp(k.c_str(), "fluessig_drehen") == 0) g.chosen_drehen = (v == "1" || _stricmp(v.c_str(), "true") == 0 || _stricmp(v.c_str(), "ja") == 0);
                     else if (_stricmp(k.c_str(), "vollbild") == 0) {
                         g.chosen_vollbild = (v == "1" || _stricmp(v.c_str(), "true") == 0 || _stricmp(v.c_str(), "ja") == 0);
                         if (g.chosen_vollbild) g.chosen_fenster = "vollbild";
@@ -752,6 +755,9 @@ static void write_one_ini(const std::string &ini_path) {
         fprintf(fp, "skalierung=%s\n", g.chosen_skalierung.c_str());
         fprintf(fp, "probenlog=%d\n", g.chosen_probenlog ? 1 : 0);
         fprintf(fp, "intro=%d\n", g.chosen_intro ? 1 : 0);
+        if (g.teil == 1) {
+            fprintf(fp, "drehen=%d\n", g.chosen_drehen ? 1 : 0);
+        }
         if (!g.custom_spielpfad.empty() && g.custom_spielpfad != "-" &&
             _stricmp(g.custom_spielpfad.c_str(), "keiner") != 0 &&
             _stricmp(g.custom_spielpfad.c_str(), "none") != 0) {
@@ -3066,20 +3072,29 @@ static void render_screen_select_game(void) {
         draw_status_badge(dat_bx, cy + 16, g.gamedir_valid);
         draw_text(dat_tx, cy + 13, dat_lbl, g.gamedir_wrong_version ? 0xFFFF8870u : 0xFFE6E9EFu, FONT_14, false);
 
-        /* Zeile 2: Spielordner (klein, grau) */
+        /* Zeile 2: Spielordner (klein, grau) + auf Karte 1 rechtsbuendig "Fluessig drehen (Schicksalsklinge)" */
+        const char *drehen_lbl = "Fl\xC3\xBCssig drehen (Schicksalsklinge)";
+        int chk_drehen_w = (g.teil == 1) ? (22 + text_width_px(drehen_lbl, FONT_13)) : 0;
+        int chk_drehen_x = rx - chk_drehen_w;
+        int chk_drehen_y = cy + 38;
+        int chk_drehen_h = 22;
+
         std::string path_info;
         uint32_t path_col = 0xFF9AA3B2u;
+        int path_avail_w = (rx - tx0) - ((g.teil == 1) ? (chk_drehen_w + 14) : 0);
         if (g.gamedir_wrong_version) {
-            path_info = L(g.wrong_version_msg_de.c_str(), g.wrong_version_msg_en.c_str());
+            path_info = clip_text_px_left(L(g.wrong_version_msg_de.c_str(), g.wrong_version_msg_en.c_str()), path_avail_w, FONT_13);
             path_col = 0xFFFF8870u;
         } else if (g.gamedir_valid) {
             std::string p_prefix = L("Spielordner: ", "Game folder: ");
-            int max_path_px = (rx - tx0) - text_width_px(p_prefix.c_str(), FONT_13);
-            if (max_path_px < 200) max_path_px = 200;
+            int max_path_px = path_avail_w - text_width_px(p_prefix.c_str(), FONT_13);
+            if (max_path_px < 160) max_path_px = 160;
             path_info = p_prefix + clip_text_px_left(g.resolved_gamedir, max_path_px, FONT_13);
         } else {
-            path_info = L("Spielordner: Noch nicht gewählt – bitte Ordner ins Fenster ziehen oder [Ordner …] klicken.",
-                          "Game folder: Not set yet – please drag & drop folder into window or click [Folder …].");
+            path_info = clip_text_px_left(
+                L("Spielordner: Noch nicht gewählt – bitte Ordner ins Fenster ziehen oder [Ordner …] klicken.",
+                  "Game folder: Not set yet – please drag & drop folder into window or click [Folder …]."),
+                path_avail_w, FONT_13);
         }
         draw_text(tx0, cy + 41, path_info.c_str(), path_col, FONT_13, false);
 
@@ -3097,6 +3112,14 @@ static void render_screen_select_game(void) {
         bool web_way_active = hov_web_btn || (is_sel && g_show_focus_ring && !g_help_active && !g_modal_active && g_card_focus == 8);
         bool dim_anzeige    = web_way_active;
         bool dim_probenlog  = (g.chosen_stufe == STUFE_ORIG) || web_way_active;
+        bool hov_drehen     = false;
+        if (g.teil == 1) {
+            bool dim_drehen = (g.chosen_stufe == STUFE_ORIG) || web_way_active || hov_dos_btn;
+            hov_drehen = bg_hover && point_in_rect(g_mouse_x, g_mouse_y, chk_drehen_x, chk_drehen_y, chk_drehen_w, chk_drehen_h);
+            draw_checkbox_16(chk_drehen_x, cy + 40, g.chosen_drehen, hov_drehen, dim_drehen);
+            draw_text(chk_drehen_x + 22, cy + 41, drehen_lbl,
+                      dim_drehen ? 0xFF636C7Eu : 0xFFE6E9EFu, FONT_13, false);
+        }
 
         if (!g.has_any_exe) {
             draw_button(tx0, btn_y, 235, btn_h, L("Kommt bald", "Coming soon"), false, false, false, false, FONT_15, false);
@@ -3254,6 +3277,14 @@ static void render_screen_select_game(void) {
             } else if (hov_gear) {
                 active_tooltip = std::string("Einstellungen öffnen (Skalierung: ") +
                                  skalierung_label_str(g.chosen_skalierung) + " – gilt für Windows)";
+            } else if (hov_drehen) {
+                if (g.chosen_stufe == STUFE_ORIG) {
+                    active_tooltip = "Flüssig drehen (Schicksalsklinge): Nur mit Fixes »Wichtige« oder »Alle« aktiv (Original ohne Schwenk)";
+                    tip_override   = "Hinweis: Flüssig drehen ist in »Original« nicht aktiv – bitte unter Fixes »Wichtige« oder »Alle« wählen.";
+                    tip_border_col = 0xFFE3A63Au;
+                } else {
+                    active_tooltip = "Flüssig drehen (Schicksalsklinge): Weicher 90°-Schwenk in Stadt & Dungeon (Windows-Fassung, DSA_DREHEN=1/0)";
+                }
             }
         }
     }
@@ -3426,6 +3457,17 @@ static void render_screen_settings(void) {
             : L("Noch nicht startbereit – Bitte zuerst die deutsche GOG-Fassung bereitstellen",
                 "Not ready yet – Please provide the German GOG version first"));
     draw_text(290, 524, ready_info, g.verfuegbar ? 0xFFE6E9EFu : 0xFFE3A63Au, FONT_13, false);
+
+    if (g.teil == 1) {
+        const char *dr_set_lbl = "Fl\xC3\xBCssig drehen (Schicksalsklinge) [R] – weicher 90\xC2\xB0-Schwenk beim Drehen (Windows, ab \xC2\xBBWichtige Fixes\xC2\xAB)";
+        bool dim_dr_set = (g.chosen_stufe == STUFE_ORIG);
+        bool hov_dr_set = bg_hover && point_in_rect(g_mouse_x, g_mouse_y, 268, 548, 700, 22);
+        draw_checkbox_16(268, 550, g.chosen_drehen, hov_dr_set, dim_dr_set);
+        draw_text(290, 550, dr_set_lbl, dim_dr_set ? 0xFF636C7Eu : 0xFFE6E9EFu, FONT_13, false);
+        if (hov_dr_set) {
+            active_tooltip = "Flüssig drehen (Schicksalsklinge): Setzt beim Start der Windows-Fassung DSA_DREHEN=1 bzw. 0";
+        }
+    }
 
     /* Untere Aktionsleiste mit allen drei Wegen */
     fill_rect(14, 588, 1012, 48, 0xFF181F2Du);
@@ -4283,9 +4325,29 @@ static int launch_selected_game(
 
     static bool s_initial_env_captured = false;
     static std::string s_initial_env_savedir;
+    static std::string s_initial_env_gamedir;
+    static std::string s_initial_env_game_dir;
+    static std::string s_initial_env_spielpfad;
+    static std::string s_initial_env_intro;
+    static std::string s_initial_env_riva_skip;
+    static std::string s_initial_env_fenster;
+    static std::string s_initial_env_skalierung;
+    static std::string s_initial_env_fullscreen;
+    static std::string s_initial_env_probenlog;
+    static std::string s_initial_env_drehen;
     if (!s_initial_env_captured) {
-        const char *init_sd = getenv("DSA_SAVE_DIR");
-        if (init_sd && init_sd[0]) s_initial_env_savedir = init_sd;
+        const char *v;
+        if ((v = getenv("DSA_SAVE_DIR")) != NULL && v[0])       s_initial_env_savedir    = v;
+        if ((v = getenv("DSA_GAMEDIR")) != NULL && v[0])        s_initial_env_gamedir    = v;
+        if ((v = getenv("DSA_GAME_DIR")) != NULL && v[0])       s_initial_env_game_dir   = v;
+        if ((v = getenv("SPIELPFAD")) != NULL && v[0])          s_initial_env_spielpfad  = v;
+        if ((v = getenv("DSA_INTRO")) != NULL && v[0])          s_initial_env_intro      = v;
+        if ((v = getenv("RIVA_SKIP_INTRO")) != NULL && v[0])    s_initial_env_riva_skip  = v;
+        if ((v = getenv("DSA_FENSTER")) != NULL && v[0])        s_initial_env_fenster    = v;
+        if ((v = getenv("DSA_SKALIERUNG")) != NULL && v[0])     s_initial_env_skalierung = v;
+        if ((v = getenv("DSA_FULLSCREEN")) != NULL && v[0])     s_initial_env_fullscreen = v;
+        if ((v = getenv("PROBENLOG")) != NULL && v[0])          s_initial_env_probenlog  = v;
+        if ((v = getenv("DSA_DREHEN")) != NULL && v[0])         s_initial_env_drehen     = v;
         s_initial_env_captured = true;
     }
     g.gamedir_writable = is_dir_writable_win(g.resolved_gamedir);
@@ -4324,6 +4386,11 @@ static int launch_selected_game(
     _putenv(("DSA_SKALIERUNG=" + g.chosen_skalierung).c_str());
     _putenv((g.chosen_fenster == "vollbild") ? "DSA_FULLSCREEN=1" : "DSA_FULLSCREEN=0");
     _putenv((g.chosen_probenlog && g.chosen_stufe != STUFE_ORIG) ? "PROBENLOG=1" : "PROBENLOG=0");
+    if (g.id == "schicksalsklinge" || g.teil == 1) {
+        _putenv(g.chosen_drehen ? "DSA_DREHEN=1" : "DSA_DREHEN=0");
+    } else {
+        _putenv(("DSA_DREHEN=" + s_initial_env_drehen).c_str());
+    }
     if (wait_for_exit && timeout_ms > 0) {
         char wd_buf[64];
         snprintf(wd_buf, sizeof(wd_buf), "DSA_WATCHDOG_MS=%lu", (unsigned long)timeout_ms);
@@ -4383,7 +4450,19 @@ static int launch_selected_game(
         &si,
         &pi
     );
+    _putenv(("DSA_GAMEDIR=" + s_initial_env_gamedir).c_str());
+    _putenv(("DSA_GAME_DIR=" + s_initial_env_game_dir).c_str());
+    _putenv(("SPIELPFAD=" + s_initial_env_spielpfad).c_str());
     _putenv(("DSA_SAVE_DIR=" + s_initial_env_savedir).c_str());
+    _putenv(("DSA_INTRO=" + s_initial_env_intro).c_str());
+    _putenv(("RIVA_SKIP_INTRO=" + s_initial_env_riva_skip).c_str());
+    _putenv(("DSA_FENSTER=" + s_initial_env_fenster).c_str());
+    _putenv(("DSA_SKALIERUNG=" + s_initial_env_skalierung).c_str());
+    _putenv(("DSA_FULLSCREEN=" + s_initial_env_fullscreen).c_str());
+    _putenv(("PROBENLOG=" + s_initial_env_probenlog).c_str());
+    _putenv(("DSA_DREHEN=" + s_initial_env_drehen).c_str());
+    _putenv("DSA_WATCHDOG_MS=");
+    _putenv("RIVA_WATCHDOG_MS=");
 
     if (!started) {
         if (h_plog) {
@@ -4458,6 +4537,9 @@ static int launch_selected_game(
         fprintf(lfp, "skalierung=%s\n", g.chosen_skalierung.c_str());
         fprintf(lfp, "probenlog=%d\n", (g.chosen_probenlog && g.chosen_stufe != STUFE_ORIG) ? 1 : 0);
         fprintf(lfp, "intro=%d\n", g.chosen_intro ? 1 : 0);
+        if (g.teil == 1) {
+            fprintf(lfp, "drehen=%d\n", g.chosen_drehen ? 1 : 0);
+        }
         fprintf(lfp, "pid=%lu\n", (unsigned long)pi.dwProcessId);
         fprintf(lfp, "probenlog_pid=%lu\n", (unsigned long)plog_pid);
         fprintf(lfp, "exit_code=%lu\n", (unsigned long)exit_code);
@@ -5500,6 +5582,20 @@ static void handle_mouse_click(int mx, int my, bool &running) {
             if (point_in_rect(mx, my, cx, cy, cw, ch)) {
                 g_selected_game = (int)i;
 
+                /* Zeile 2 rechts (nur Karte 1): Haekchen "Fluessig drehen (Schicksalsklinge)" */
+                if (g_games[i].teil == 1) {
+                    const char *drehen_lbl = "Fl\xC3\xBCssig drehen (Schicksalsklinge)";
+                    int chk_drehen_w = 22 + text_width_px(drehen_lbl, FONT_13);
+                    int chk_drehen_x = (cx + cw - 1 - 16) - chk_drehen_w;
+                    if (point_in_rect(mx, my, chk_drehen_x, cy + 38, chk_drehen_w, 22)) {
+                        g_games[i].chosen_drehen = !g_games[i].chosen_drehen;
+                        g_status_msg = g_games[i].name + " – Flüssig drehen: " +
+                                       (g_games[i].chosen_drehen ? "Eingeschaltet (DSA_DREHEN=1)" : "Ausgeschaltet (DSA_DREHEN=0)");
+                        save_einstellungen_ini();
+                        return;
+                    }
+                }
+
                 /* Zeile 3 - WEG 1: [▶ Spielen (Windows)] */
                 if (point_in_rect(mx, my, tx0, btn_y, 235, btn_h)) {
                     g_card_focus = 6;
@@ -5710,6 +5806,14 @@ static void handle_mouse_click(int mx, int my, bool &running) {
             if (!picked.empty()) {
                 handle_dropped_folder(picked);
             }
+            return;
+        }
+        /* Zusatz Schicksalsklinge: Haekchen "Fluessig drehen (Schicksalsklinge)" */
+        if (g.teil == 1 && point_in_rect(mx, my, 268, 548, 700, 22)) {
+            g.chosen_drehen = !g.chosen_drehen;
+            g_status_msg = std::string("Flüssig drehen (Schicksalsklinge): ") +
+                           (g.chosen_drehen ? "Eingeschaltet (DSA_DREHEN=1)" : "Ausgeschaltet (DSA_DREHEN=0)");
+            save_einstellungen_ini();
             return;
         }
 
@@ -5938,6 +6042,17 @@ static void handle_keydown(const SDL_KeyboardEvent &kev, bool &running) {
             save_einstellungen_ini();
             return;
         }
+        if (ch == 'R') {
+            for (size_t k = 0; k < g_games.size(); ++k) {
+                if (g_games[k].teil == 1) {
+                    g_games[k].chosen_drehen = !g_games[k].chosen_drehen;
+                    g_status_msg = std::string("Flüssig drehen (Schicksalsklinge): ") +
+                                   (g_games[k].chosen_drehen ? "Eingeschaltet (DSA_DREHEN=1)" : "Ausgeschaltet (DSA_DREHEN=0)");
+                }
+            }
+            save_einstellungen_ini();
+            return;
+        }
         if (ch == 'P') {
             g_games[sel_idx].chosen_probenlog = !g_games[sel_idx].chosen_probenlog;
             g_status_msg = std::string(L("Probenlog: ", "Roll Log: ")) +
@@ -6058,6 +6173,13 @@ static void handle_keydown(const SDL_KeyboardEvent &kev, bool &running) {
         if (ch == 'I') {
             g.chosen_intro = !g.chosen_intro;
             g_settings_row = 4;
+            save_einstellungen_ini();
+            return;
+        }
+        if (ch == 'R' && g.teil == 1) {
+            g.chosen_drehen = !g.chosen_drehen;
+            g_status_msg = std::string("Flüssig drehen (Schicksalsklinge): ") +
+                           (g.chosen_drehen ? "Eingeschaltet (DSA_DREHEN=1)" : "Ausgeschaltet (DSA_DREHEN=0)");
             save_einstellungen_ini();
             return;
         }
@@ -6314,6 +6436,16 @@ int main(int argc, char **argv) {
         } else if (strncmp(a.c_str(), "--intro=", 8) == 0) {
             if (g_selected_game >= 0 && g_selected_game < (int)g_games.size()) {
                 g_games[g_selected_game].chosen_intro = (a.substr(8) == "1");
+            }
+        } else if (strncmp(a.c_str(), "--drehen=", 9) == 0) {
+            bool val = (a.substr(9) == "1" || _stricmp(a.substr(9).c_str(), "true") == 0);
+            for (size_t k = 0; k < g_games.size(); ++k) {
+                if (g_games[k].teil == 1) g_games[k].chosen_drehen = val;
+            }
+        } else if (strncmp(a.c_str(), "--fluessig-drehen=", 18) == 0) {
+            bool val = (a.substr(18) == "1" || _stricmp(a.substr(18).c_str(), "true") == 0);
+            for (size_t k = 0; k < g_games.size(); ++k) {
+                if (g_games[k].teil == 1) g_games[k].chosen_drehen = val;
             }
         } else if (strncmp(a.c_str(), "--vollbild=", 11) == 0) {
             if (g_selected_game >= 0 && g_selected_game < (int)g_games.size()) {
