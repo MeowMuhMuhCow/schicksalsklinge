@@ -46,6 +46,8 @@ Documentation is in German.*
 
 **Alle Änderungen als übersichtliche Liste: [BUGFIXES.md](BUGFIXES.md).** Das fertige Paket zum Herunterladen gibt es unter **Releases** (rechts).
 
+**Neu:** In der Windows-, Linux- und Browser-Fassung schwenkt die Ansicht beim Drehen jetzt flüssig statt hart um 90 Grad (ab „Wichtige Fixes“, im Starter abschaltbar). Das Spiel selbst bleibt unverändert.
+
 Für alle, die nur spielen wollen. Nötig sind Windows und Schicksalsklinge von GOG, sonst nichts: kein Python, kein Compiler. (Linux: siehe unten.)
 
 1. Rechts unter **Releases** das Paket `…_Bugfix_1.3.zip` herunterladen (oder oben **Code → Download ZIP**) und irgendwohin entpacken.
