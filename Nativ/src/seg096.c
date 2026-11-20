@@ -472,7 +472,7 @@ char* GUI_get_definite_article(const signed int gender, const signed int grammat
  * (7 bzw. 8, Zeichenbreite). Quelle ist der 8x8-Puffer g_gui_text_buffer. */
 void GUI_write_char_to_screen(uint8_t *dst, const signed int char_height, const signed int char_width)
 {
-	dsa_trace_enter(792, "seg096:GUI_write_char_to_screen");
+	dsa_trace_enter(799, "seg096:GUI_write_char_to_screen");
 	uint8_t *ptr;
 	signed int y;
 	signed int x;
@@ -498,7 +498,7 @@ void GUI_write_char_to_screen(uint8_t *dst, const signed int char_height, const 
  */
 signed int GUI_count_lines(char *str)
 {
-	dsa_trace_enter(793, "seg096:GUI_count_lines");
+	dsa_trace_enter(800, "seg096:GUI_count_lines");
 	signed int current_pos;
 	signed int last_ws;
 	char *str_loc;
@@ -589,13 +589,17 @@ signed int GUI_count_lines(char *str)
  */
 signed int GUI_print_text(char *str)
 {
-	dsa_trace_enter(794, "seg096:GUI_print_text");
+	dsa_trace_enter(801, "seg096:GUI_print_text");
 	signed int retval = 1;
 
+#if !FIX_ZEIGER || !defined(__BORLANDC__)
 	call_mouse_bg();
+#endif
 	retval = GUI_count_lines(str);
 	GUI_print_string(str, g_textline_posx, g_textline_posy);
+#if !FIX_ZEIGER || !defined(__BORLANDC__)
 	call_mouse();
+#endif
 
 	return retval;
 }
@@ -603,7 +607,7 @@ signed int GUI_print_text(char *str)
 //614
 void GUI_print_loc_line(char *str)
 {
-	dsa_trace_enter(795, "seg096:GUI_print_loc_line");
+	dsa_trace_enter(802, "seg096:GUI_print_loc_line");
 	signed int fg_bak;
 	signed int bg_bak;
 	signed int tlx_bak;
@@ -634,13 +638,18 @@ void GUI_print_loc_line(char *str)
 //691
 void GUI_print_string(char *str, signed int x, signed int y)
 {
-	dsa_trace_enter(796, "seg096:GUI_print_string");
+	dsa_trace_enter(803, "seg096:GUI_print_string");
 	signed int l1 = 0;
 	signed int i = 0;
 	signed int x_bak;
 	unsigned char c;
+#if FIX_ZEIGER && defined(__BORLANDC__)
+	signed int hide_mouse = zeiger_ueber_rect(0, y, 319, 199);
 
+	if (hide_mouse) call_mouse_bg();
+#else
 	call_mouse_bg();
+#endif
 
 	if (g_gui_text_centered == 1) {
 		x = GUI_get_first_pos_centered(str, x, g_textline_maxlen, 0);
@@ -695,7 +704,11 @@ void GUI_print_string(char *str, signed int x, signed int y)
 		}
 	}
 
+#if FIX_ZEIGER && defined(__BORLANDC__)
+	if (hide_mouse) call_mouse();
+#else
 	call_mouse();
+#endif
 #if !defined(__BORLANDC__)
 	sdl_forced_update();
 #endif
@@ -704,7 +717,7 @@ void GUI_print_string(char *str, signed int x, signed int y)
 //7f0
 signed int GUI_print_char(const char c, const signed int x, const signed int y)
 {
-	dsa_trace_enter(797, "seg096:GUI_print_char");
+	dsa_trace_enter(804, "seg096:GUI_print_char");
 	signed int char_width;
 	signed int font_index;
 
@@ -726,7 +739,7 @@ signed int GUI_print_char(const char c, const signed int x, const signed int y)
  */
 signed int GUI_lookup_char_width(const signed char c, signed int *p)
 {
-	dsa_trace_enter(798, "seg096:GUI_lookup_char_width");
+	dsa_trace_enter(805, "seg096:GUI_lookup_char_width");
 	signed int i;
 
 	/* REMARK: This array of struct should be seen as signed char[75*3] */
@@ -752,7 +765,7 @@ signed int GUI_lookup_char_width(const signed char c, signed int *p)
 //88f
 void GUI_write_fonti_to_screen(const signed int font_index, const signed int char_width, const signed int x, const signed int y)
 {
-	dsa_trace_enter(799, "seg096:GUI_write_fonti_to_screen");
+	dsa_trace_enter(806, "seg096:GUI_write_fonti_to_screen");
 	GUI_blank_char();
 	GUI_font_to_buf(g_buf_font6 + font_index * 8);
 	GUI_write_char_to_screen_xy(x, y, 7, char_width);
@@ -763,7 +776,7 @@ void GUI_write_fonti_to_screen(const signed int font_index, const signed int cha
  */
 void GUI_blank_char(void)
 {
-	dsa_trace_enter(800, "seg096:GUI_blank_char");
+	dsa_trace_enter(807, "seg096:GUI_blank_char");
 	uint8_t *ptr = &g_gui_text_buffer[0];
 	signed int i;
 	signed int j;
@@ -777,7 +790,7 @@ void GUI_blank_char(void)
 //8f8
 void GUI_font_to_buf(uint8_t *fc)
 {
-	dsa_trace_enter(801, "seg096:GUI_font_to_buf");
+	dsa_trace_enter(808, "seg096:GUI_font_to_buf");
 	uint8_t *p;
 	char c;
 	signed int i;
@@ -805,7 +818,7 @@ void GUI_font_to_buf(uint8_t *fc)
 //956
 void GUI_write_char_to_screen_xy(const signed int x, const signed int y, const signed int char_height, const signed int char_width)
 {
-	dsa_trace_enter(802, "seg096:GUI_write_char_to_screen_xy");
+	dsa_trace_enter(809, "seg096:GUI_write_char_to_screen_xy");
 	/* screen_start */
 	uint8_t* dst = g_vga_backbuffer + y * 320 + x;
 
@@ -820,7 +833,7 @@ void GUI_write_char_to_screen_xy(const signed int x, const signed int y, const s
  */
 void set_textcolor(const signed int fg, const signed int bg)
 {
-	dsa_trace_enter(803, "seg096:set_textcolor");
+	dsa_trace_enter(810, "seg096:set_textcolor");
 	g_textcolor_fg[0] = fg;
 	g_textcolor_bg = bg;
 }
@@ -833,7 +846,7 @@ void set_textcolor(const signed int fg, const signed int bg)
  */
 void get_textcolor(signed int *fg, signed int *bg)
 {
-	dsa_trace_enter(804, "seg096:get_textcolor");
+	dsa_trace_enter(811, "seg096:get_textcolor");
 	*fg = g_textcolor_fg[0];
 	*bg = g_textcolor_bg;
 }
@@ -841,7 +854,7 @@ void get_textcolor(signed int *fg, signed int *bg)
 /* zaehlt die CR (0x0d) im String; wird nie aufgerufen */
 signed int GUI_count_cr_unused(char *str)
 {
-	dsa_trace_enter(805, "seg096:GUI_count_cr_unused");
+	dsa_trace_enter(812, "seg096:GUI_count_cr_unused");
 	signed int lines = 0;
 
 	while (*str) {
@@ -863,7 +876,7 @@ signed int GUI_count_cr_unused(char *str)
  */
 signed int GUI_get_space_for_string(char *p, const signed int dir)
 {
-	dsa_trace_enter(806, "seg096:GUI_get_space_for_string");
+	dsa_trace_enter(813, "seg096:GUI_get_space_for_string");
 	signed int sum;
 	signed int tmp;
 
@@ -888,7 +901,7 @@ signed int GUI_get_space_for_string(char *p, const signed int dir)
  */
 signed int GUI_get_first_pos_centered(char *p, const signed int x, signed int width, const signed int dir)
 {
-	dsa_trace_enter(807, "seg096:GUI_get_first_pos_centered");
+	dsa_trace_enter(814, "seg096:GUI_get_first_pos_centered");
 	register signed int i;
 	register signed int c;
 	signed int tmp;
@@ -917,7 +930,7 @@ signed int GUI_get_first_pos_centered(char *p, const signed int x, signed int wi
  */
 void GUI_draw_popup_line(const signed int line, const signed int type)
 {
-	dsa_trace_enter(808, "seg096:GUI_draw_popup_line");
+	dsa_trace_enter(815, "seg096:GUI_draw_popup_line");
 	signed int popup_left;
 	signed int i;
 	signed int popup_middle;

@@ -36,6 +36,10 @@ void mouse_move_cursor(const signed int, const signed int);
 void make_ggst_cursor(uint8_t *icon);
 void call_mouse_bg(void);
 void call_mouse(void);
+#if FIX_ZEIGER && defined(__BORLANDC__)
+signed int zeiger_ueber_rect(const signed int, const signed int, const signed int, const signed int);
+signed int zeiger_puffer(const signed int, uint8_t*, const signed int);
+#endif
 void handle_gui_input(void);
 signed int get_mouse_action(const signed int, const signed int, const struct mouse_action*);
 void handle_input(void);

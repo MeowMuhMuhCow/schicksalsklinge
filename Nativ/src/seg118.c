@@ -44,7 +44,7 @@ static const char g_str_rad3[4] = "RAD"; // ds:0xb226
 /* Phexcaer <-> Einsiedlersee; gs_tevent037_flag wird nur gesetzt, wenn ein Pfand gegeben wurde */
 void tevent_037(void)
 {
-	dsa_trace_enter(1157, "seg118:tevent_037");
+	dsa_trace_enter(1164, "seg118:tevent_037");
 	signed int answer;
 	signed int done = 0;
 	signed int hours;
@@ -232,7 +232,7 @@ void tevent_037(void)
 /* Phexcaer <-> Einsiedlersee (INFO6.TLK); gleiche Begegnung wie tevent_087 */
 void tevent_038(void)
 {
-	dsa_trace_enter(1158, "seg118:tevent_038");
+	dsa_trace_enter(1165, "seg118:tevent_038");
 	if (!gs_met_unicorn_flag && gs_got_main_quest)
 	{
 		do_talk(11, 2);
@@ -244,7 +244,7 @@ void tevent_038(void)
 /* Orkanger <-> Clanegh: Schneewaechte (nur im Winter) */
 void tevent_078(void)
 {
-	dsa_trace_enter(1159, "seg118:tevent_078");
+	dsa_trace_enter(1166, "seg118:tevent_078");
 	/* This event happens only in winter */
 	if (!get_current_season())
 	{
@@ -378,7 +378,7 @@ void tevent_078(void)
 /* Orkanger <-> Clanegh: Rastplatz */
 void tevent_079(void)
 {
-	dsa_trace_enter(1160, "seg118:tevent_079");
+	dsa_trace_enter(1167, "seg118:tevent_079");
 	if ((test_talent(get_first_hero_available_in_group(), TA_WILDNISLEBEN, 4) > 0 && !gs_tevent079_flag) ||
 		gs_tevent079_flag != 0)
 	{
@@ -391,7 +391,7 @@ void tevent_079(void)
 /* (Ottarje <-> Skjal) */
 void tevent_051(void)
 {
-	dsa_trace_enter(1161, "seg118:tevent_051");
+	dsa_trace_enter(1168, "seg118:tevent_051");
 	signed int answer;
 
 	if (test_talent(get_first_hero_available_in_group(), TA_FAEHRTENSUCHEN, 4) > 0 && !gs_tevent051_flag)
@@ -436,7 +436,7 @@ void tevent_051(void)
 /* Ottarje <-> Skjal: narrow pass blocked by a tree */
 void tevent_052(void)
 {
-	dsa_trace_enter(1162, "seg118:tevent_052");
+	dsa_trace_enter(1169, "seg118:tevent_052");
 	signed int done = 0;
 	signed int i;
 	signed int answer;
@@ -486,7 +486,7 @@ void tevent_052(void)
 /* Merske <-> Rovamund: Rastplatz mit guter Jagd */
 void tevent_120(void)
 {
-	dsa_trace_enter(1163, "seg118:tevent_120");
+	dsa_trace_enter(1170, "seg118:tevent_120");
 	if ((test_talent(get_first_hero_available_in_group(), TA_WILDNISLEBEN, 3) > 0 && !gs_tevent120_flag) || gs_tevent120_flag)
 	{
 		gs_tevent120_flag = 1;
@@ -497,14 +497,14 @@ void tevent_120(void)
 /* Orvil <-> Rovik: Furt durch den Ingval */
 void tevent_121(void)
 {
-	dsa_trace_enter(1164, "seg118:tevent_121");
+	dsa_trace_enter(1171, "seg118:tevent_121");
 	TRV_cross_a_ford(get_tx(53), 30, 0); /* "INGVAL" */
 }
 
 /* Orvil <-> Rovik: Weg an der Steilklippe */
 void tevent_124(void)
 {
-	dsa_trace_enter(1165, "seg118:tevent_124");
+	dsa_trace_enter(1172, "seg118:tevent_124");
 	signed int i;
 	signed int counter;
 	signed int answer;
@@ -587,7 +587,7 @@ void tevent_124(void)
 /* Ljasdahl (Rundweg): Hirte */
 void tevent_125(void)
 {
-	dsa_trace_enter(1166, "seg118:tevent_125");
+	dsa_trace_enter(1173, "seg118:tevent_125");
 	signed int answer;
 
 	load_in_head(17);
@@ -609,7 +609,7 @@ void tevent_125(void)
  * The reached endpoint of the crosslink is either the land route Kravik-Skelellen or theland  route Peilinen-Rovamund. */
 void tevent_145(void)
 {
-	dsa_trace_enter(1167, "seg118:tevent_145");
+	dsa_trace_enter(1174, "seg118:tevent_145");
 	signed int answer;
 
 	load_area_description(0);

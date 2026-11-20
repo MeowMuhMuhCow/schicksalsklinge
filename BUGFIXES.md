@@ -1,6 +1,6 @@
 # Die Schicksalsklinge – Bugfix-Fassung: Änderungsliste
 
-**Version 1.5e vom 18.11.2026** · inoffiziell · zur deutschen GOG-Fassung 3.02 · **im Spiel noch ungetestet, Tester willkommen**
+**Version 1.5f vom 20.11.2026** · inoffiziell · zur deutschen GOG-Fassung 3.02 · **im Spiel noch ungetestet, Tester willkommen**
 
 ## So geht's
 
@@ -20,6 +20,13 @@ Die Spielstände der Bugfix-Fassung liegen in eigenen Ordnern unter `Build\`. Al
 |---|---|
 | **WICHTIG** (empfohlen) | kritische und mittlere Fehler: Abstürze, Hänger, verlorene Ausrüstung, falsche Preise, Fehler, die man im Spiel merkt |
 | **ALLES** | zusätzlich viele kleine Fehler ohne große Spielwirkung |
+
+## Neu in Version 1.5f: Zusatzfunktion: flüssiges Drehen
+
+Eine Zusatzfunktion, keine Fehlerbehebung: **Beim Drehen schwenkt die Ansicht jetzt weich statt hart um 90 Grad.** Gilt in Städten und Dungeons (`FIX_DREHEN`, in WICHTIG und ALLES). Rahmen, Verzierungen (Drachen, Säulen), Kompass und Mauszeiger bleiben dabei fest stehen, nur die 3D-Ansicht dahinter schiebt sich weich anfahrend und abbremsend zur Seite. Standardmäßig eingeschaltet; wer wie im Original hart um 90 Grad drehen will, schaltet den Schwenk mit `DREHEN_AUS.bat` ab und mit `DREHEN_AN.bat` wieder ein (Linux: `DREHEN=0`). Die Standard-EXE bleibt bytegleich, Spielstände bleiben kompatibel.
+
+- **Keine Kopierschutzabfrage mehr in den Fix-Fassungen (wie in der Windows-Fassung):** In den DOS-Fix-Fassungen (`WICHTIG` und `ALLES`, Schalter `FIX_KOPIERSCHUTZ`) entfällt beim Spielstart nach der Wahl des Schwierigkeitsgrads die Handbuch-/Kartenabfrage, sodass es wie in der Windows-, Linux- und Browser-Fassung direkt zur Auswahl „Hauptprogramm“ / „Generierung“ weitergeht. Die Original-EXE (`BLADEM.EXE`) fragt weiterhin.
+- **Mauszeiger flackert beim Laufen und Drehen nicht mehr (DOS, Windows, Linux, Browser):** In den Fix-Fassungen (ab WICHTIG) verschwindet der Mauszeiger beim Neuzeichnen der Ansicht während Schritten, Drehungen (inkl. Schwenk) sowie beim Betreten und Verlassen von Häusern nicht mehr; unter DOS (`FIX_ZEIGER`) wird er beim Kopieren der Ansicht lückenlos über den Bildpuffer mitgezeichnet, in den nativen Port- und Browser-Fassungen werden Zwischenbilder während der kurzen Ausblend-Lücke (`call_mouse_bg` / `call_mouse`) nicht mehr vorzeitig angezeigt.
 
 ## Neu in Version 1.5e: Fünf Rückmeldungen aus dem Test (Schneidzahn, Truhenschlösser, Drachenhort-Loch, Wasserfass, Analüs) und Probenlog für Seereise, Krankheiten und alle Kämpfe
 

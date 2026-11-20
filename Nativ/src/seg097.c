@@ -122,7 +122,7 @@ signed int GUI_print_char_font8(const int c, const int x, const int y)
  * *p = Zeichenbreite (nicht Hoehe; unbekannte Zeichen 8). */
 signed int GUI_lookup_char_width_font8(const signed char c, signed int *p)
 {
-	dsa_trace_enter(809, "seg097:GUI_lookup_char_width_font8");
+	dsa_trace_enter(816, "seg097:GUI_lookup_char_width_font8");
 	signed int i;
 
 	for (i = 0; i != 201; i += 3) {
@@ -170,7 +170,7 @@ void GUI_write_font8_to_screen(const signed int index, const signed int char_wid
 //should be static
 signed int GUI_enter_string(char* dst, signed int x, const signed int y, const signed int max_len, const signed int cursor_mode)
 {
-	dsa_trace_enter(810, "seg097:GUI_enter_string");
+	dsa_trace_enter(817, "seg097:GUI_enter_string");
 	signed int x_pos;
 	register signed int si;
 	signed int pos;
@@ -327,7 +327,7 @@ dummy:
 //static
 void GUI_draw_popup_box(const signed int header, const signed int options, const signed int width, const signed int height)
 {
-	dsa_trace_enter(811, "seg097:GUI_draw_popup_box");
+	dsa_trace_enter(818, "seg097:GUI_draw_popup_box");
 	signed int i;
 
 	/* set upper left coordinates */
@@ -362,7 +362,7 @@ void GUI_draw_popup_box(const signed int header, const signed int options, const
 /* stellt den von GUI_draw_popup_box() gesicherten Hintergrund wieder her (schliesst die Box) */
 void GUI_restore_box_bg(const signed int width, const signed int height)
 {
-	dsa_trace_enter(812, "seg097:GUI_restore_box_bg");
+	dsa_trace_enter(819, "seg097:GUI_restore_box_bg");
 	g_pic_copy.x1 = g_textbox_pos_x;
 	g_pic_copy.y1 = g_textbox_pos_y;
 	g_pic_copy.x2 = g_textbox_pos_x + width - 1;
@@ -373,7 +373,7 @@ void GUI_restore_box_bg(const signed int width, const signed int height)
 
 void GUI_output(char *str)
 {
-	dsa_trace_enter(813, "seg097:GUI_output");
+	dsa_trace_enter(820, "seg097:GUI_output");
 	GUI_input(str, 0);
 }
 
@@ -386,7 +386,7 @@ void GUI_output(char *str)
  */
 signed int GUI_input(char *str, const signed int digits)
 {
-	dsa_trace_enter(814, "seg097:GUI_input");
+	dsa_trace_enter(821, "seg097:GUI_input");
 	signed int retval = 0;
 	signed int height;
 	signed int fg_bak;
@@ -492,7 +492,7 @@ signed int GUI_input(char *str, const signed int digits)
  */
 signed int GUI_bool(char *header)
 {
-	dsa_trace_enter(815, "seg097:GUI_bool");
+	dsa_trace_enter(822, "seg097:GUI_bool");
 	signed int ret_radio;
 
 	g_gui_bool_flag = 1;
@@ -515,7 +515,7 @@ signed int GUI_bool(char *header)
 //static
 void GUI_fill_radio_button(const signed int old_pos, const signed int new_pos, const signed int offset)
 {
-	dsa_trace_enter(816, "seg097:GUI_fill_radio_button");
+	dsa_trace_enter(823, "seg097:GUI_fill_radio_button");
 	signed int i;
 	signed int y;
 	signed int x;
@@ -549,7 +549,7 @@ void GUI_fill_radio_button(const signed int old_pos, const signed int new_pos, c
  */
 signed int GUI_dialogbox(uint8_t* picture, char *name, char *text, signed int options, ...)
 {
-	dsa_trace_enter(817, "seg097:GUI_dialogbox");
+	dsa_trace_enter(824, "seg097:GUI_dialogbox");
 	va_list arguments;
 	signed int i;
 	signed int opt_x;
@@ -695,7 +695,7 @@ signed int GUI_dialogbox(uint8_t* picture, char *name, char *text, signed int op
 //static
 signed int GUI_menu_input(const signed int positions, const signed int h_lines, const signed int width)
 {
-	dsa_trace_enter(818, "seg097:GUI_menu_input");
+	dsa_trace_enter(825, "seg097:GUI_menu_input");
 	signed int opt_y0;
 	signed int mouse_y_last;
 	signed int mouse_x_bak;
@@ -910,7 +910,7 @@ signed int GUI_radio(char *header, const signed int options, ...)
  */
 void GUI_print_fight_intro_msg(const signed int fight_id)
 {
-	dsa_trace_enter(819, "seg097:GUI_print_fight_intro_msg");
+	dsa_trace_enter(826, "seg097:GUI_print_fight_intro_msg");
 	const signed int tw_bak = g_textbox_width;
 	g_textbox_width = 7;
 
@@ -950,7 +950,7 @@ void GUI_print_fight_intro_msg(const signed int fight_id)
  */
 void GUI_dialog_na(const signed int head_index, char *text)
 {
-	dsa_trace_enter(820, "seg097:GUI_dialog_na");
+	dsa_trace_enter(827, "seg097:GUI_dialog_na");
 
 	if (head_index != 0)
 		load_in_head(head_index);

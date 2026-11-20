@@ -31,7 +31,7 @@
 /* Transformation / Verwandlung */
 void spell_adler(void)
 {
-	dsa_trace_enter(892, "seg101:spell_adler");
+	dsa_trace_enter(899, "seg101:spell_adler");
 	/* triggers the "spell failed" messages */
 	g_spell_special_aecost = -2;
 
@@ -42,7 +42,7 @@ void spell_adler(void)
 
 void spell_arcano(void)
 {
-	dsa_trace_enter(893, "seg101:spell_arcano");
+	dsa_trace_enter(900, "seg101:spell_arcano");
 	signed int target_hero_pos;
 	signed int mod_slot;
 
@@ -63,7 +63,7 @@ void spell_arcano(void)
 
 void spell_armatrutz(void)
 {
-	dsa_trace_enter(894, "seg101:spell_armatrutz");
+	dsa_trace_enter(901, "seg101:spell_armatrutz");
 	signed int max_bonus = 0;
 	signed int hero_pos;
 	signed int bonus;
@@ -116,7 +116,7 @@ void spell_armatrutz(void)
 
 void spell_inc_ch(void)
 {
-	dsa_trace_enter(895, "seg101:spell_inc_ch");
+	dsa_trace_enter(902, "seg101:spell_inc_ch");
 	signed int target_hero_pos;
 	signed int mod_slot;
 
@@ -155,7 +155,7 @@ void spell_inc_ch(void)
 
 void spell_feuerbann(void)
 {
-	dsa_trace_enter(896, "seg101:spell_feuerbann");
+	dsa_trace_enter(903, "seg101:spell_feuerbann");
 	signed int hero_pos;
 	signed int mod_slot;
 
@@ -184,7 +184,7 @@ void spell_feuerbann(void)
 
 void spell_inc_ff(void)
 {
-	dsa_trace_enter(897, "seg101:spell_inc_ff");
+	dsa_trace_enter(904, "seg101:spell_inc_ff");
 	signed int target_hero_pos;
 	signed int mod_slot;
 
@@ -224,7 +224,7 @@ void spell_inc_ff(void)
 
 void spell_inc_ge(void)
 {
-	dsa_trace_enter(898, "seg101:spell_inc_ge");
+	dsa_trace_enter(905, "seg101:spell_inc_ge");
 	signed int target_hero_pos;
 	signed int mod_slot;
 
@@ -263,7 +263,7 @@ void spell_inc_ge(void)
 
 void spell_inc_in(void)
 {
-	dsa_trace_enter(899, "seg101:spell_inc_in");
+	dsa_trace_enter(906, "seg101:spell_inc_in");
 	signed int target_hero_pos;
 	signed int mod_slot;
 
@@ -302,7 +302,7 @@ void spell_inc_in(void)
 
 void spell_inc_kk(void)
 {
-	dsa_trace_enter(900, "seg101:spell_inc_kk");
+	dsa_trace_enter(907, "seg101:spell_inc_kk");
 	signed int target_hero_pos;
 	signed int mod_slot;
 
@@ -341,7 +341,7 @@ void spell_inc_kk(void)
 
 void spell_inc_kl(void)
 {
-	dsa_trace_enter(901, "seg101:spell_inc_kl");
+	dsa_trace_enter(908, "seg101:spell_inc_kl");
 	signed int target_hero_pos;
 	signed int mod_slot;
 
@@ -380,7 +380,7 @@ void spell_inc_kl(void)
 
 void spell_inc_mu(void)
 {
-	dsa_trace_enter(902, "seg101:spell_inc_mu");
+	dsa_trace_enter(909, "seg101:spell_inc_mu");
 	signed int target_hero_pos;
 	signed int mod_slot;
 
@@ -419,7 +419,7 @@ void spell_inc_mu(void)
 
 void spell_mutabili(void)
 {
-	dsa_trace_enter(903, "seg101:spell_mutabili");
+	dsa_trace_enter(910, "seg101:spell_mutabili");
 	/* triggers the "spell failed" messages */
 	g_spell_special_aecost = -2;
 #if !defined(__BORLANDC__)
@@ -429,7 +429,7 @@ void spell_mutabili(void)
 
 void spell_paralue(void)
 {
-	dsa_trace_enter(904, "seg101:spell_paralue");
+	dsa_trace_enter(911, "seg101:spell_paralue");
 	if (get_spelluser()->target_object_id >= 10) {
 		/* cast at an enemy */
 
@@ -486,7 +486,7 @@ void spell_paralue(void)
  */
 void spell_salander(void)
 {
-	dsa_trace_enter(905, "seg101:spell_salander");
+	dsa_trace_enter(912, "seg101:spell_salander");
 	/* TODO: Original-Bug: Strange effect when cast on a double-size enemy */
 	signed int ae_cost;
 
@@ -524,7 +524,7 @@ void spell_salander(void)
 
 void spell_see(void)
 {
-	dsa_trace_enter(906, "seg101:spell_see");
+	dsa_trace_enter(913, "seg101:spell_see");
 #if !defined(__BORLANDC__)
 	D1_INFO("Zauberspruch \"See und Fluss\" ist nicht implementiert\n");
 #endif
@@ -537,7 +537,7 @@ void spell_see(void)
  */
 void spell_visibili(void)
 {
-	dsa_trace_enter(907, "seg101:spell_visibili");
+	dsa_trace_enter(914, "seg101:spell_visibili");
 	signed int mod_slot;
 	signed int hero_pos;
 	signed int rounds;
@@ -592,7 +592,7 @@ void spell_visibili(void)
 
 void spell_abvenenum(void)
 {
-	dsa_trace_enter(908, "seg101:spell_abvenenum");
+	dsa_trace_enter(915, "seg101:spell_abvenenum");
 #if !defined(__BORLANDC__)
 	D1_INFO("Zauberspruch \"Abvenenum\" ist nicht implementiert\n");
 #endif
@@ -600,7 +600,7 @@ void spell_abvenenum(void)
 
 void spell_aeolitus(void)
 {
-	dsa_trace_enter(909, "seg101:spell_aeolitus");
+	dsa_trace_enter(916, "seg101:spell_aeolitus");
 #if !defined(__BORLANDC__)
 	D1_INFO("Zauberspruch \"Aeolitus\" ist nicht implementiert\n");
 #endif
@@ -614,7 +614,7 @@ void spell_aeolitus(void)
  */
 void spell_brenne(void)
 {
-	dsa_trace_enter(910, "seg101:spell_brenne");
+	dsa_trace_enter(917, "seg101:spell_brenne");
 	signed int oil_inv_slot;
 	signed int answer;
 
@@ -731,7 +731,7 @@ void spell_brenne(void)
 
 void spell_claudibus(void)
 {
-	dsa_trace_enter(911, "seg101:spell_claudibus");
+	dsa_trace_enter(918, "seg101:spell_claudibus");
 #if !defined(__BORLANDC__)
 	D1_INFO("Zauberspruch \"Claudibus\" ist nicht implementiert\n");
 #endif
@@ -739,7 +739,7 @@ void spell_claudibus(void)
 
 void spell_dunkelheit(void)
 {
-	dsa_trace_enter(912, "seg101:spell_dunkelheit");
+	dsa_trace_enter(919, "seg101:spell_dunkelheit");
 	/* set dunkelheit duration (level + 3) * hours */
 	gs_ingame_timers[INGAME_TIMER_DARKNESS] = (int32_t)(get_spelluser()->level + 3) * HOURS(1);
 
@@ -749,7 +749,7 @@ void spell_dunkelheit(void)
 
 void spell_erstarre(void)
 {
-	dsa_trace_enter(913, "seg101:spell_erstarre");
+	dsa_trace_enter(920, "seg101:spell_erstarre");
 #if !defined(__BORLANDC__)
 	D1_INFO("Zauberspruch \"Erstarre\" ist nicht implementiert\n");
 #endif
@@ -757,7 +757,7 @@ void spell_erstarre(void)
 
 void spell_flim_flam(void)
 {
-	dsa_trace_enter(914, "seg101:spell_flim_flam");
+	dsa_trace_enter(921, "seg101:spell_flim_flam");
 	/* set flim flam duration (level + 3) hours */
 	gs_ingame_timers[INGAME_TIMER_FLIM_FLAM] = (int32_t)(get_spelluser()->level + 3) * HOURS(1);
 
@@ -767,7 +767,7 @@ void spell_flim_flam(void)
 
 void spell_schmelze(void)
 {
-	dsa_trace_enter(915, "seg101:spell_schmelze");
+	dsa_trace_enter(922, "seg101:spell_schmelze");
 #if !defined(__BORLANDC__)
 	D1_INFO("Zauberspruch \"Schmelze\" ist nicht implementiert\n");
 #endif
@@ -775,7 +775,7 @@ void spell_schmelze(void)
 
 void spell_silentium(void)
 {
-	dsa_trace_enter(916, "seg101:spell_silentium");
+	dsa_trace_enter(923, "seg101:spell_silentium");
 	signed int i;
 	signed int mod_slot;
 	struct struct_hero *hero = get_hero(0);
@@ -801,7 +801,7 @@ void spell_silentium(void)
 
 void spell_sturmgebr(void)
 {
-	dsa_trace_enter(917, "seg101:spell_sturmgebr");
+	dsa_trace_enter(924, "seg101:spell_sturmgebr");
 #if !defined(__BORLANDC__)
 	D1_INFO("Zauberspruch \"Sturmgebruell\" ist nicht implementiert\n");
 #endif

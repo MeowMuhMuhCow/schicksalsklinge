@@ -507,10 +507,13 @@ void read_sound_cfg(void)
 		/* g_ail_music_inactive = 1 bedeutet hier: kein MIDI-Musiktreiber aktiv */
 		g_use_cdaudio_flag = g_ail_music_inactive = 1;
 
+#if !FIX_PLATZ_SEG002	/* nie ausgefuehrt (if (0)); entfaellt mit Behebungen in diesem residenten Modul (Platz) */
 		/* disable loading of the music driver */
 		/* in v3.02 laeuft die Musik also immer von CD, SOUND.ADV wird nie geladen */
 		if (0)
 #endif
+#endif
+#if !defined(__BORLANDC__) || !FIX_PLATZ_SEG002
 		{
 			if (midi_port) {
 				load_music_driver(g_fname_sound_adv2, 3, midi_port);
@@ -524,6 +527,7 @@ void read_sound_cfg(void)
 				g_ail_midi_buffer = NULL;
 			}
 		}
+#endif
 
 		if (digi_port) {
 
@@ -623,6 +627,7 @@ void exit_AIL(void)
 #endif
 }
 
+#if !FIX_PLATZ_SEG002	/* nie aufgerufen; entfaellt mit Behebungen in diesem residenten Modul (Platz) */
 static uint8_t* read_music_driver(const char* fname)
 {
 #if defined(__BORLANDC__)
@@ -649,6 +654,7 @@ static uint8_t* read_music_driver(const char* fname)
 #endif
 	return NULL;
 }
+#endif
 
 static signed int prepare_midi_playback(const signed int sequence)
 {
@@ -765,6 +771,7 @@ static signed int do_load_midi_file(const signed int index)
 	return 0;
 }
 
+#if !FIX_PLATZ_SEG002	/* nie aufgerufen (if (0) in read_sound_cfg); entfaellt mit Behebungen in diesem residenten Modul (Platz) */
 /* laedt einen AIL-Musiktreiber (type 3 = XMIDI) und erkennt die Hardware.
  * Erfolg: g_ail_music_inactive = 0, Fehlschlag: g_ail_music_inactive = 1 */
 static signed int load_music_driver(const char* fname, const signed int type, int16_t port)
@@ -821,6 +828,7 @@ static signed int load_music_driver(const char* fname, const signed int type, in
 #endif
 	return 0;
 }
+#endif
 
 static void do_play_music_file(const signed int index)
 {
@@ -1919,6 +1927,9 @@ void make_ggst_cursor(uint8_t *icon)
 	}
 }
 
+#if !defined(__BORLANDC__)
+const int g_port_fix_stufe = FIX_BUGS;
+#endif
 void call_mouse_bg(void)
 {
 	dsa_trace_enter(48, "seg002:call_mouse_bg");
@@ -1959,6 +1970,11 @@ static void mouse_cursor(void)
 
 			/* get lock */
 			g_mouse_locked = 1;
+#if FIX_ZEIGER && defined(__BORLANDC__)
+			g_last_cursor = g_current_cursor;
+			g_mouse_pointer_offsetx = g_mouse_pointer_offsety =
+				(g_current_cursor == &g_default_mouse_cursor) ? 0 : 8;
+#endif
 
 			if (g_mouse_posx < g_mouse_pointer_offsetx)
 				g_mouse_posx = g_mouse_pointer_offsetx;
@@ -2118,6 +2134,82 @@ signed int bioskey(const signed int cmd)
 		return 0;
 	}
 	return 0;
+}
+#endif
+
+#if FIX_ZEIGER && defined(__BORLANDC__)
+/* Zusatzfunktion FIX_ZEIGER: Prueft, ob das 16x16-Feld des aktuell gezeichneten Mauszeigers das Rechteck schneidet. */
+signed int zeiger_ueber_rect(const signed int x1, const signed int y1, const signed int x2, const signed int y2)
+{
+	const signed int rx = g_mouse_posx_bak - g_mouse_pointer_offsetx_bak;
+	const signed int ry = g_mouse_posy_bak - g_mouse_pointer_offsety_bak;
+
+	return ((rx + 15 >= x1) && (rx <= x2) && (ry + 15 >= y1) && (ry <= y2)) ? 1 : 0;
+}
+
+/* Vor pic_copy (restore == 0): Neue Hintergrundpunkte unter dem Zeiger nach g_mouse_bg_bak uebernehmen
+ * und die Zeigermaske (0xff) kurz in den Quellpuffer setzen. Nach pic_copy (restore == 1): Quellpuffer wiederherstellen. */
+signed int zeiger_puffer(const signed int mode, uint8_t *bak, const signed int restore)
+{
+	signed int x1 = g_pic_copy.x1;
+	signed int y1 = g_pic_copy.y1;
+	signed int width = g_pic_copy.x2 - x1 + 1;
+	signed int cx1 = (x1 > g_pic_copy_rect.x1) ? x1 : g_pic_copy_rect.x1;
+	signed int cy1 = (y1 > g_pic_copy_rect.y1) ? y1 : g_pic_copy_rect.y1;
+	signed int cx2 = (g_pic_copy.x2 < g_pic_copy_rect.x2) ? g_pic_copy.x2 : g_pic_copy_rect.x2;
+	signed int cy2 = (g_pic_copy.y2 < g_pic_copy_rect.y2) ? g_pic_copy.y2 : g_pic_copy_rect.y2;
+	signed int rx = g_mouse_posx_bak - g_mouse_pointer_offsetx_bak;
+	signed int ry = g_mouse_posy_bak - g_mouse_pointer_offsety_bak;
+	signed int dy;
+	signed int dx;
+	signed int x;
+	signed int y;
+	signed int idx;
+	uint8_t *p;
+	uint8_t orig;
+
+	if (!restore) {
+		if (g_mouse_locked || (g_mouse_refresh_flag != 0) || (mode < 0) || (mode > 2) ||
+			(g_pic_copy.dst != g_vga_memstart))
+		{
+			return 0;
+		}
+		g_mouse_locked = 1;
+	}
+
+	for (dy = 0; dy < 16; dy++) {
+		y = ry + dy;
+		if ((y >= cy1) && (y <= cy2) && (y < 200)) {
+			for (dx = 0; dx < 16; dx++) {
+				x = rx + dx;
+				if ((x >= cx1) && (x <= cx2) && (x < 320)) {
+					idx = dy * 16 + dx;
+					p = g_pic_copy.src + (y - y1) * width + (x - x1);
+					if (!restore) {
+						orig = *p;
+						bak[idx] = orig;
+						if ((mode == 0) ||
+							((mode == 2) && (orig != 0)) ||
+							((mode == 1) && ((g_mouse_bg_bak[idx] < 0xc8) ||
+								(g_pic_copy_flag && (y >= cy2 - 38) && (x >= cx2 - 148) && (x <= cx2 - 75)))))
+						{
+							g_mouse_bg_bak[idx] = orig;
+						}
+						if ((0x8000 >> dx) & g_last_cursor->mask[dy]) {
+							*p = 0xff;
+						}
+					} else {
+						*p = bak[idx];
+					}
+				}
+			}
+		}
+	}
+
+	if (restore) {
+		g_mouse_locked = 0;
+	}
+	return 1;
 }
 #endif
 
@@ -4758,9 +4850,13 @@ void draw_compass(void)
 		/* set source */
 		g_pic_copy.src = g_icon;
 
+#if !FIX_ZEIGER || !defined(__BORLANDC__)
 		call_mouse_bg();
+#endif
 		do_pic_copy(2);
+#if !FIX_ZEIGER || !defined(__BORLANDC__)
 		call_mouse();
+#endif
 	}
 }
 
@@ -8410,6 +8506,10 @@ static signed int copy_protection(void)
 
 	set_textcolor(0xff, 0);
 
+#if FIX_KOPIERSCHUTZ && defined(__BORLANDC__)
+	/* Zusatzfunktion FIX_KOPIERSCHUTZ: keine Kopierschutzabfrage in den DOS-Fix-Fassungen (wie im Port) */
+	return 1;
+#else
 	tries = 0;
 
 	while (tries < 3) {
@@ -8476,4 +8576,5 @@ static signed int copy_protection(void)
 	}
 
 	return 0;
+#endif
 }

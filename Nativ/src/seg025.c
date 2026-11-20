@@ -95,7 +95,7 @@ static void (*g_location_handlers[19])(void) = {
 /* Eingang eines Dungeons in der Stadt: "IHR STEHT VOR EINEM MYSTERIOESEN EINGANG..." */
 void show_entrance(void)
 {
-	dsa_trace_enter(241, "seg025:show_entrance");
+	dsa_trace_enter(248, "seg025:show_entrance");
 	draw_main_screen();
 	disable_ani();
 	load_ani(34);
@@ -116,7 +116,7 @@ void show_entrance(void)
  */
 void show_citizen(void)
 {
-	dsa_trace_enter(242, "seg025:show_citizen");
+	dsa_trace_enter(249, "seg025:show_citizen");
 	g_request_refresh = 1;
 
 	do {
@@ -160,7 +160,7 @@ void show_citizen(void)
  */
 void do_house(void)
 {
-	dsa_trace_enter(243, "seg025:do_house");
+	dsa_trace_enter(250, "seg025:do_house");
 	signed int i; /* dual use as a town_id and a hero_pos */
 	signed int unarrested;
 	struct struct_hero *hero;
@@ -281,7 +281,7 @@ void do_house(void)
 /* Informant: startet das passende Gespraech (do_talk: TLK-Datei INFO1..INFO7, Gespraechspartner) */
 void do_informer(void)
 {
-	dsa_trace_enter(244, "seg025:do_informer");
+	dsa_trace_enter(251, "seg025:do_informer");
 	const signed int informer_id = gs_town_typeindex - 1;
 
 	if (informer_id == INFORMER_ID_JURGE)		do_talk(6, 0); else
@@ -306,7 +306,7 @@ void do_informer(void)
 /* Wegweiser am Stadtrand: Stadt verlassen, Reisekarte einschalten */
 void enter_map(void)
 {
-	dsa_trace_enter(245, "seg025:enter_map");
+	dsa_trace_enter(252, "seg025:enter_map");
 	gs_current_signpost_typeindex = gs_town_typeindex;
 
 	gs_town_typeindex = gs_town_id;
@@ -319,7 +319,7 @@ void enter_map(void)
 /* zeigt die gefundenen Teile der Schatzkarte (SKARTE.NVF); ab 7 Teilen ist der Weg zu Hyggelik erkennbar */
 void show_treasure_map(void)
 {
-	dsa_trace_enter(246, "seg025:show_treasure_map");
+	dsa_trace_enter(253, "seg025:show_treasure_map");
 	signed int image_num;	/* REMARK: also reused as handle */
 	signed int tw_bak;
 	signed int count;	/* #collected treasure map parts */
@@ -481,7 +481,7 @@ void show_treasure_map(void)
  */
 signed int game_options(void)
 {
-	dsa_trace_enter(247, "seg025:game_options");
+	dsa_trace_enter(254, "seg025:game_options");
 	signed int done = 0;
 	signed int answer;
 	signed int fg_bak;
@@ -681,7 +681,7 @@ signed int game_options(void)
 /* zeichnet Icon icon_id aus ICONS (24x24, je 576 Byte) in den Renderpuffer */
 void draw_icon(const signed int icon_id, const signed int x, const signed int y)
 {
-	dsa_trace_enter(248, "seg025:draw_icon");
+	dsa_trace_enter(255, "seg025:draw_icon");
 	signed int handle;
 	uint8_t* dst_bak;
 
@@ -716,7 +716,7 @@ void draw_icon(const signed int icon_id, const signed int x, const signed int y)
 /* static */
 signed int show_storytext(void)
 {
-	dsa_trace_enter(249, "seg025:show_storytext");
+	dsa_trace_enter(256, "seg025:show_storytext");
 	char *ptr;
 	signed int person;
 	signed int icon;
@@ -764,7 +764,7 @@ signed int show_storytext(void)
 /* ruft den Handler fuer den aktuellen Ortstyp (g_location_handlers[gs_town_loc_type]) */
 void do_location(void)
 {
-	dsa_trace_enter(250, "seg025:do_location");
+	dsa_trace_enter(257, "seg025:do_location");
 	signed int bak1;
 	signed int bak2;
 	signed int tw_bak;
@@ -805,7 +805,7 @@ void do_location(void)
  */
 void leave_location(void)
 {
-	dsa_trace_enter(251, "seg025:leave_location");
+	dsa_trace_enter(258, "seg025:leave_location");
 	disable_ani();
 
 	/* reset location */
@@ -826,7 +826,7 @@ void leave_location(void)
 /* verlaesst den Dungeon: Palette ausblenden, zurueck in die Stadt, Todesfalle abschalten */
 void leave_dungeon(void)
 {
-	dsa_trace_enter(252, "seg025:leave_dungeon");
+	dsa_trace_enter(259, "seg025:leave_dungeon");
 	signed int i;
 	uint8_t *ptr;
 
@@ -860,10 +860,14 @@ void leave_dungeon(void)
 	g_pic_copy.y2 = 136;
 	g_pic_copy.src = g_renderbuf_ptr;
 
+#if !FIX_ZEIGER || !defined(__BORLANDC__)
 	call_mouse_bg();
+#endif
 
 	do_pic_copy(1);
+#if !FIX_ZEIGER || !defined(__BORLANDC__)
 	call_mouse();
+#endif
 	wait_for_vsync();
 	set_palette(g_renderbuf_ptr, 0 , 0x20);
 
@@ -876,7 +880,7 @@ void leave_dungeon(void)
  */
 void tumult(void)
 {
-	dsa_trace_enter(253, "seg025:tumult");
+	dsa_trace_enter(260, "seg025:tumult");
 	signed int tw_bak;
 
 	tw_bak = g_textbox_width;
@@ -905,7 +909,7 @@ void tumult(void)
  */
 void fade_into(void)
 {
-	dsa_trace_enter(254, "seg025:fade_into");
+	dsa_trace_enter(261, "seg025:fade_into");
 	uint8_t *ptr;
 	signed int i;
 
@@ -933,7 +937,7 @@ void fade_into(void)
 /* sichert die Palette des Ortsbilds hinter das Bild im Renderpuffer und meldet Ausblenden an (g_fading_state = 2) */
 void copy_palette(void)
 {
-	dsa_trace_enter(255, "seg025:copy_palette");
+	dsa_trace_enter(262, "seg025:copy_palette");
 	memcpy(g_renderbuf_ptr + 320 * 200, (uint8_t*)g_ani_palette, 0x60);
 	g_fading_state = 2;
 }

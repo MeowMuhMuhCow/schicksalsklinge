@@ -29,6 +29,10 @@
 #include <io.h>
 #include <fcntl.h>
 #endif
+#if FIX_DREHEN && defined(__BORLANDC__)
+#include <io.h>
+#include <fcntl.h>
+#endif
 #include "common.h"
 
 #include "seg002.h"
@@ -1993,6 +1997,130 @@ void town_do_step(const signed int forward)
 	}
 }
 
+#if FIX_DREHEN && defined(__BORLANDC__)
+/* Zusatzfunktion FIX_DREHEN: fluessiger Schwenk bei 90-Grad-Drehung in der Stadt.
+ * Alte Ansicht (aus dem VGA-Speicher, ohne Verzierung >= 0xc8) in g_renderbuf_ptr + 30000 und neue Ansicht in
+ * g_renderbuf_ptr schieben sich weich anfahrend und abbremsend durch das Ansichtsfenster; Rahmen, Verzierung und
+ * Kompass (>= 0xc8) bleiben fest stehen. Vorgabe an, abschaltbar ueber DREHEN.AUS im Spielordner. */
+static void drehen_stadt(void)
+{
+	signed int mod;
+	signed int fd;
+	signed int r;
+	signed int c;
+	signed int last;
+	signed int first;
+	signed int k;
+	signed int s;
+	uint8_t *alt;
+	uint8_t *row;
+	struct struct_rect rect_bak;
+	char name[12];
+
+	if (!g_viewdir_flag_bogus) {
+		return;
+	}
+	g_viewdir_flag_bogus = 0;
+
+	if (g_fading_state || (gs_x != g_town_refresh_x_target) || (gs_y != g_town_refresh_y_target)) {
+		return;
+	}
+	mod = (gs_viewdir - g_town_refresh_direction) & 3;
+	if ((mod != 1) && (mod != 3)) {
+		return;
+	}
+
+	name[0] = 'D'; name[1] = 'R'; name[2] = 'E'; name[3] = 'H'; name[4] = 'E'; name[5] = 'N';
+	name[6] = '.'; name[7] = 'A'; name[8] = 'U'; name[9] = 'S'; name[10] = '\0';
+	if ((fd = open(name, O_BINARY | O_RDONLY)) != -1) {
+		close(fd);
+		return;
+	}
+
+	alt = (uint8_t*)g_renderbuf_ptr + 30000;
+	g_pic_copy.src = alt;
+	do_save_rect();
+#if FIX_ZEIGER && defined(__BORLANDC__)
+	if (!g_mouse_locked && !g_mouse_refresh_flag) {
+		r = g_mouse_posx_bak - g_mouse_pointer_offsetx_bak;
+		c = g_mouse_posy_bak - g_mouse_pointer_offsety_bak;
+		for (first = 0; first < 16; first++) {
+			s = c + first - g_ani_posy;
+			if ((s >= 0) && (s < 135)) {
+				for (last = 0; last < 16; last++) {
+					k = r + last - g_ani_posx;
+					if ((k >= 0) && (k < 208)) {
+						alt[s * 208 + k] = g_mouse_bg_bak[first * 16 + last];
+					}
+				}
+			}
+		}
+	}
+#endif
+
+	row = alt;
+	for (r = 0; r < 135; r++, row += 208) {
+		last = -1;
+		first = -1;
+		for (c = 0; c < 208; c++) {
+			if (row[c] < 0xc8) {
+				last = row[c];
+				if (first < 0) {
+					first = c;
+				}
+			} else if (last >= 0) {
+				row[c] = (uint8_t)last;
+			}
+		}
+		if (first > 0) {
+			last = row[first];
+			for (c = 0; c < first; c++) {
+				row[c] = (uint8_t)last;
+			}
+		}
+	}
+
+	rect_bak = g_pic_copy_rect;
+	g_pic_copy_rect.y1 = g_ani_posy;
+	g_pic_copy_rect.x1 = g_ani_posx;
+	g_pic_copy_rect.y2 = g_ani_posy + 134;
+	g_pic_copy_rect.x2 = g_ani_posx + 207;
+
+	for (k = 1; k < 10; k++) {
+		s = (signed int)(((int32_t)(k * k * (15 - k)) * 52 + 62) / 125);
+
+		if (mod == 1) {
+			g_pic_copy.x1 = g_ani_posx - s;
+			g_pic_copy.x2 = g_ani_posx + 207 - s;
+			g_pic_copy.src = alt;
+			do_pic_copy(1);
+
+			g_pic_copy.x1 = g_ani_posx + 208 - s;
+			g_pic_copy.x2 = g_ani_posx + 415 - s;
+			g_pic_copy.src = g_renderbuf_ptr;
+			do_pic_copy(1);
+		} else {
+			g_pic_copy.x1 = g_ani_posx - 208 + s;
+			g_pic_copy.x2 = g_ani_posx - 1 + s;
+			g_pic_copy.src = g_renderbuf_ptr;
+			do_pic_copy(1);
+
+			g_pic_copy.x1 = g_ani_posx + s;
+			g_pic_copy.x2 = g_ani_posx + 207 + s;
+			g_pic_copy.src = alt;
+			do_pic_copy(1);
+		}
+
+		wait_for_vsync();
+	}
+
+	g_pic_copy_rect = rect_bak;
+	g_pic_copy.x1 = g_ani_posx;
+	g_pic_copy.x2 = g_ani_posx + 207;
+	g_pic_copy.src = g_renderbuf_ptr;
+}
+#endif
+
 /**
  * \brief   show the street view, fade in if requested and set the palettes
  */
@@ -2028,7 +2156,13 @@ void town_fade_and_colors(void)
 
 	g_special_screen = 0;
 
-#if FIX_HIMMEL
+#if FIX_ZEIGER && defined(__BORLANDC__)
+	wait_for_vsync();
+#if FIX_DREHEN && defined(__BORLANDC__)
+	drehen_stadt();
+#endif
+	do_pic_copy(1);
+#elif FIX_HIMMEL
 	/* weniger Flackern des Mauszeigers bei Schritten und Drehungen: erst auf den Bildstrahl warten, dann ausblenden,
 	 * und nur, wenn der Zeiger ueber der Ansicht steht */
 	wait_for_vsync();
@@ -2036,6 +2170,9 @@ void town_fade_and_colors(void)
 		(g_mouse_posy >= g_ani_posy - 16) && (g_mouse_posy <= g_ani_posy + 134 + 16);
 	if (i) call_mouse_bg();
 
+#if FIX_DREHEN && defined(__BORLANDC__)
+	drehen_stadt();
+#endif
 	do_pic_copy(1);
 
 	if (i) call_mouse();
@@ -2043,6 +2180,9 @@ void town_fade_and_colors(void)
 	call_mouse_bg();
 	wait_for_vsync();
 
+#if FIX_DREHEN && defined(__BORLANDC__)
+	drehen_stadt();
+#endif
 	do_pic_copy(1);
 
 	call_mouse();

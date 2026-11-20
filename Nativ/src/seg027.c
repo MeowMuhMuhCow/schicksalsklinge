@@ -40,7 +40,7 @@ static unsigned char g_unkn_038[4] = { 0xb8, 0x14, 0x00, 0x50 }; // ds:0x5eb4
  * PLAYM_US und ZUSTA_UK/US werden beim ersten Laden gepackt im Speicher gehalten */
 void load_pp20(const signed int index)
 {
-	dsa_trace_enter(272, "seg027:load_pp20");
+	dsa_trace_enter(279, "seg027:load_pp20");
 	volatile signed int handle;
 	uint8_t* buffer_ptr;
 	signed int bi;
@@ -307,7 +307,7 @@ uint8_t* load_fight_figs(signed int fig)
  */
 void load_ani(const signed int ani_id)
 {
-	dsa_trace_enter(273, "seg027:load_ani");
+	dsa_trace_enter(280, "seg027:load_ani");
 	signed int i_area;
 	signed int area_pics;
 	signed int area_changes;
@@ -558,7 +558,7 @@ void load_ani(const signed int ani_id)
  */
 void load_scenario(signed int scenario_id)
 {
-	dsa_trace_enter(274, "seg027:load_scenario");
+	dsa_trace_enter(281, "seg027:load_scenario");
 	signed int handle;
 	int16_t scenarios_num = 0;
 
@@ -593,7 +593,7 @@ void load_scenario(signed int scenario_id)
  */
 signed int count_fight_enemies(signed int fight_id)
 {
-	dsa_trace_enter(275, "seg027:count_fight_enemies");
+	dsa_trace_enter(282, "seg027:count_fight_enemies");
 	signed int enemy_i;
 	signed int enemy_count;
 	struct fight *fight_lst_buf;
@@ -645,7 +645,7 @@ signed int count_fight_enemies(signed int fight_id)
  */
 void read_fight_lst(signed int fight_id)
 {
-	dsa_trace_enter(276, "seg027:read_fight_lst");
+	dsa_trace_enter(283, "seg027:read_fight_lst");
 	signed int handle;
 	int16_t fight_count = 0;
 
@@ -687,7 +687,7 @@ void read_fight_lst(signed int fight_id)
  */
 void write_fight_lst(void)
 {
-	dsa_trace_enter(277, "seg027:write_fight_lst");
+	dsa_trace_enter(284, "seg027:write_fight_lst");
 	const signed int fight_id = g_current_fight_id_2;
 
 	/* load FIGHT.LST from TEMP dir */
@@ -706,7 +706,7 @@ void write_fight_lst(void)
 /* laedt beim Start POPUP.DAT, COMPASS, ITEMS.DAT, die Figuren-/Animationstabellen, GAMES.NAM und TOWNPAL.DAT */
 void init_common_buffers(void)
 {
-	dsa_trace_enter(278, "seg027:init_common_buffers");
+	dsa_trace_enter(285, "seg027:init_common_buffers");
 	signed int handle;
 	signed int bytes;
 

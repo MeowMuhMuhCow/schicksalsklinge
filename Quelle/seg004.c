@@ -109,7 +109,9 @@ void init_ani(uint16_t mode)
 		else
 			g_ani_unknown_flag = 1;
 
+#if !FIX_ZEIGER || !defined(__BORLANDC__)
 		call_mouse_bg();
+#endif
 
 		clear_ani_pal();
 
@@ -135,7 +137,9 @@ void init_ani(uint16_t mode)
 		/* reset flag for pic_copy() */
 		g_pic_copy_flag = 0;
 
+#if !FIX_ZEIGER || !defined(__BORLANDC__)
 		call_mouse();
+#endif
 	}
 
 	if ((mode & 0x7f) != 1) {
@@ -205,7 +209,9 @@ void interrupt timer_isr(void)
 {
 	signed int i;
 	signed int areacount;
+#if !FIX_ZEIGER || !defined(__BORLANDC__)
 	signed char flag;
+#endif
 	struct ani_area *ptr;
 	struct struct_pic_copy pic_copy_bak;
 
@@ -241,12 +247,23 @@ void interrupt timer_isr(void)
 		do_timers();
 	}
 
+#if FIX_ZEIGER && defined(__BORLANDC__)
+	if (!g_mouse_locked) {
+		update_status_bars();
+		update_travelmap();
+		update_wallclock();
+		dec_splash();
+	}
+
+	if (g_ani_enabled && !g_mouse_locked) {
+#else
 	update_status_bars();
 	update_travelmap();
 	update_wallclock();
 	dec_splash();
 
 	if (g_ani_enabled) {
+#endif
 
 		/* disable interrupts */
 		asm { cli; }
@@ -300,6 +317,7 @@ void interrupt timer_isr(void)
 
 					g_ani_area_timeout[i] = 2 * ptr->changes_tb[g_ani_area_status[i]].duration;
 
+#if !FIX_ZEIGER || !defined(__BORLANDC__)
 					flag = 0;
 
 					if ((g_mouse_posx >= g_ani_posx) &&
@@ -310,6 +328,7 @@ void interrupt timer_isr(void)
 						flag = 1;
 						call_mouse_bg();
 					}
+#endif
 
 					/* set screen coordinates */
 					g_pic_copy.x1 = g_ani_posx + ptr->x;
@@ -320,10 +339,12 @@ void interrupt timer_isr(void)
 
 					do_pic_copy(1);
 
+#if !FIX_ZEIGER || !defined(__BORLANDC__)
 					if (flag != 0) {
 						call_mouse();
 						flag = 0;
 					}
+#endif
 				}
 			}
 		}
@@ -342,6 +363,7 @@ void interrupt timer_isr(void)
 	((void interrupt far(*)(__CPPARGS))g_bc_timer)();
 }
 
+#if !FIX_ZEIGER || !defined(__BORLANDC__)
 /* wartet auf den naechsten Timer-Tick; wird nie aufgerufen */
 static void unused_gfx_spinlock(void)
 {
@@ -349,6 +371,7 @@ static void unused_gfx_spinlock(void)
 
 	while (v == g_timer_tick_counter) { ; }
 }
+#endif
 #endif
 
 void update_status_bars(void)
@@ -518,8 +541,14 @@ void draw_bar(const signed int type, const signed int hero, const signed int pts
 	signed int filled; /* Hoehe des gefuellten Teils in Pixeln (hiess lost) */
 	uint8_t* dst;
 
+#if FIX_ZEIGER && defined(__BORLANDC__)
+	signed int hide_mouse = (mode == 0) && zeiger_ueber_rect(0, 158, 319, 188);
+	if (hide_mouse)
+		call_mouse_bg();
+#else
 	if (mode == 0)
 		call_mouse_bg();
+#endif
 
 	if (mode == 0) {
 		x = g_hero_pic_posx[hero] + type * 4 + 34;
@@ -565,9 +594,15 @@ void draw_bar(const signed int type, const signed int hero, const signed int pts
 		}
 	}
 
+#if FIX_ZEIGER && defined(__BORLANDC__)
+	if (hide_mouse) {
+		call_mouse();
+	}
+#else
 	if (mode == 0) {
 		call_mouse();
 	}
+#endif
 }
 
 /**
@@ -986,7 +1021,7 @@ void set_ani_pal(uint8_t *pal)
 	set_palette(pal, 0, 0x20);
 }
 
-#if defined(__BORLANDC__)
+#if defined(__BORLANDC__) && !FIX_ZEIGER
 /* a bunch of EGA routines */
 /* alle nie aufgerufen: ega1 = Grafik-Modusregister (3CEh/5), ega2 = Map Mask (3C4h/2),
  * ega3 = Set/Reset (3CEh/0), ega4 = Enable Set/Reset (3CEh/1), ega5 = Read Map Select (3CEh/4),
@@ -1112,6 +1147,10 @@ void do_pic_copy(const signed int mode)
 	signed int height;
 	uint8_t *src;
 	uint8_t* dst;
+#if FIX_ZEIGER && defined(__BORLANDC__)
+	signed int active;
+	uint8_t bak[256];
+#endif
 
 	x1 = g_pic_copy.x1;
 	y1 = g_pic_copy.y1;
@@ -1129,7 +1168,15 @@ void do_pic_copy(const signed int mode)
 	src = g_pic_copy.src;
 	dst = g_pic_copy.dst;
 
+#if FIX_ZEIGER && defined(__BORLANDC__)
+	active = zeiger_puffer(mode, bak, 0);
+#endif
 	pic_copy(dst, x1, y1, x2, y2, v1, v2, v3, v4, width, height, src, mode);
+#if FIX_ZEIGER && defined(__BORLANDC__)
+	if (active) {
+		zeiger_puffer(mode, bak, 1);
+	}
+#endif
 }
 
 /* kopiert das Rechteck (x1,y1)-(x2,y2) aus g_pic_copy.dst (Bildschirm) nach g_pic_copy.src (Gegenrichtung zu do_pic_copy) */
@@ -1166,9 +1213,17 @@ void do_fill_rect(uint8_t* dst, const signed int x, const signed int y, const si
 {
 	signed int width = x2 - x + 1;
 	signed int height = y2 - y + 1;
+#if FIX_ZEIGER && defined(__BORLANDC__)
+	signed int hide_mouse = (FP_SEG(dst) == FP_SEG(g_vga_memstart)) && zeiger_ueber_rect(x, y, x2, y2);
+#endif
 
 	dst += y * 320 + x;
 
+#if FIX_ZEIGER && defined(__BORLANDC__)
+	if (hide_mouse) call_mouse_bg();
+	fill_rect(FP_SEG(dst), FP_OFF(dst), color, width, height);
+	if (hide_mouse) call_mouse();
+#else
 	call_mouse_bg();
 #if defined(__BORLANDC__)
 	fill_rect(FP_SEG(dst), FP_OFF(dst), color, width, height);
@@ -1176,6 +1231,7 @@ void do_fill_rect(uint8_t* dst, const signed int x, const signed int y, const si
 	fill_rect(dst, color, width, height);
 #endif
 	call_mouse();
+#endif
 }
 
 /* wartet auf den Beginn des naechsten vertikalen Strahlruecklaufs (VGA-Status 3DAh) */

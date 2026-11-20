@@ -42,7 +42,7 @@ static struct viewdir_offsets g_fig_viewdir_offsets7 = { {	{ 1, 0 }, { 0, -1 }, 
  */
 signed int FIG_search_obj_on_cb(const signed int object_id, signed int *px, signed int *py)
 {
-	dsa_trace_enter(353, "seg038:FIG_search_obj_on_cb");
+	dsa_trace_enter(360, "seg038:FIG_search_obj_on_cb");
 	/* This is the Endian save version.
 	 * REMARK: x runs to 24, y only to 23 */
 	for (*px = 0; *px < 25; (*px)++) {
@@ -64,7 +64,7 @@ signed int FIG_search_obj_on_cb(const signed int object_id, signed int *px, sign
  */
 void FIG_init_list_elem(const signed int object_id)
 {
-	dsa_trace_enter(354, "seg038:FIG_init_list_elem");
+	dsa_trace_enter(361, "seg038:FIG_init_list_elem");
 	signed int x;
 	signed int y;
 
@@ -137,7 +137,7 @@ void FIG_find_path_to_target_backtrack(int8_t *dist_table_ptr, signed int target
 			signed int dist, const signed char bp_avail,
 			const signed int mode, const signed int double_size, const signed int enemy_id)
 {
-	dsa_trace_enter(355, "seg038:FIG_find_path_to_target_backtrack");
+	dsa_trace_enter(362, "seg038:FIG_find_path_to_target_backtrack");
 	signed int i; /* dual use: viewdir, index for g_fig_move_pathdir */
 	signed int dist_duplicate; /* duplicates the dist variable. apparently redundant */
 	signed int backtrack_x;
@@ -324,7 +324,7 @@ void FIG_find_path_to_target_backtrack(int8_t *dist_table_ptr, signed int target
 //static
 signed int FIG_num_viewdir_changes_of_path(signed char *path_ptr)
 {
-	dsa_trace_enter(356, "seg038:FIG_num_viewdir_changes_of_path");
+	dsa_trace_enter(363, "seg038:FIG_num_viewdir_changes_of_path");
 
 	signed int i = 0;
 	signed int count = 0;

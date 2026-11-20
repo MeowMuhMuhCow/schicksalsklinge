@@ -31,6 +31,10 @@
 #include <stdio.h>
 
 #include "v302de.h"
+#if FIX_DREHEN && defined(__BORLANDC__)
+#include <io.h>
+#include <fcntl.h>
+#endif
 #include "common.h"
 
 #include "seg002.h"
@@ -80,7 +84,7 @@ static char g_dng01_str_and[6] = " UND "; // ds:0x92cf
 /* static */
 void DNG_floor_ceil(void)
 {
-	dsa_trace_enter(585, "seg075:DNG_floor_ceil");
+	dsa_trace_enter(592, "seg075:DNG_floor_ceil");
 	struct nvf_extract_desc nvf;
 	signed int width;
 	signed int height;
@@ -117,7 +121,7 @@ void DNG_floor_ceil(void)
  */
 static void DNG_hide_occluded_squares(void)
 {
-	dsa_trace_enter(586, "seg075:DNG_hide_occluded_squares");
+	dsa_trace_enter(593, "seg075:DNG_hide_occluded_squares");
 	signed int tmp;
 
 	if ( ((tmp = div16(g_visual_square_vals[3])) == 15) || (tmp == 1)) {
@@ -314,7 +318,7 @@ static void DNG_hide_occluded_squares(void)
  */
 void DNG_render_view(void)
 {
-	dsa_trace_enter(587, "seg075:DNG_render_view");
+	dsa_trace_enter(594, "seg075:DNG_render_view");
 	DNG_floor_ceil();
 	update_visual_squares();
 	DNG_hide_occluded_squares();
@@ -332,7 +336,7 @@ void DNG_render_view(void)
  */
 void DNG_draw_doorframe(void)
 {
-	dsa_trace_enter(588, "seg075:DNG_draw_doorframe");
+	dsa_trace_enter(595, "seg075:DNG_draw_doorframe");
 	signed int tmp;
 
 	tmp = div16(g_visual_square_vals[1]);
@@ -353,7 +357,7 @@ void DNG_draw_doorframe(void)
  */
 void DNG_set_squares_tex(void)
 {
-	dsa_trace_enter(589, "seg075:DNG_set_squares_tex");
+	dsa_trace_enter(596, "seg075:DNG_set_squares_tex");
 	signed int i;
 	signed int tmp;
 
@@ -390,7 +394,7 @@ void DNG_set_squares_tex(void)
  */
 void DNG_draw_image(signed int x, signed int y, signed int image_id)
 {
-	dsa_trace_enter(590, "seg075:DNG_draw_image");
+	dsa_trace_enter(597, "seg075:DNG_draw_image");
 	signed int nvf_width;
 	signed int nvf_height;
 	signed int width2;
@@ -479,7 +483,7 @@ void DNG_draw_image(signed int x, signed int y, signed int image_id)
  */
 void DNG_draw_squares(void)
 {
-	dsa_trace_enter(591, "seg075:DNG_draw_squares");
+	dsa_trace_enter(598, "seg075:DNG_draw_squares");
 	signed int x;
 	signed int y;
 	signed char idx; /* first the index of the visual square, then its graphic (g_visual_squares_tex) */
@@ -541,12 +545,133 @@ void DNG_draw_squares(void)
 	}
 }
 
+#if FIX_DREHEN && defined(__BORLANDC__)
+/* Zusatzfunktion FIX_DREHEN: fluessiger Schwenk bei 90-Grad-Drehung im Dungeon (wie drehen_stadt in seg066). */
+static void drehen_dungeon(void)
+{
+	signed int mod;
+	signed int fd;
+	signed int r;
+	signed int c;
+	signed int last;
+	signed int first;
+	signed int k;
+	signed int s;
+	uint8_t *alt;
+	uint8_t *row;
+	struct struct_rect rect_bak;
+	char name[12];
+
+	if (!g_viewdir_flag_bogus) {
+		return;
+	}
+	g_viewdir_flag_bogus = 0;
+
+	if ((g_dng_refresh_direction < 0) || (gs_x != g_dng_refresh_x_target) || (gs_y != g_dng_refresh_y_target)) {
+		return;
+	}
+	mod = (gs_viewdir - g_dng_refresh_direction) & 3;
+	if ((mod != 1) && (mod != 3)) {
+		return;
+	}
+
+	name[0] = 'D'; name[1] = 'R'; name[2] = 'E'; name[3] = 'H'; name[4] = 'E'; name[5] = 'N';
+	name[6] = '.'; name[7] = 'A'; name[8] = 'U'; name[9] = 'S'; name[10] = '\0';
+	if ((fd = open(name, O_BINARY | O_RDONLY)) != -1) {
+		close(fd);
+		return;
+	}
+
+	alt = (uint8_t*)g_renderbuf_ptr + 30000;
+	g_pic_copy.src = alt;
+	do_save_rect();
+#if FIX_ZEIGER && defined(__BORLANDC__)
+	if (!g_mouse_locked && !g_mouse_refresh_flag) {
+		r = g_mouse_posx_bak - g_mouse_pointer_offsetx_bak;
+		c = g_mouse_posy_bak - g_mouse_pointer_offsety_bak;
+		for (first = 0; first < 16; first++) {
+			s = c + first - g_ani_posy;
+			if ((s >= 0) && (s < 135)) {
+				for (last = 0; last < 16; last++) {
+					k = r + last - g_ani_posx;
+					if ((k >= 0) && (k < 208)) {
+						alt[s * 208 + k] = g_mouse_bg_bak[first * 16 + last];
+					}
+				}
+			}
+		}
+	}
+#endif
+
+	row = alt;
+	for (r = 0; r < 135; r++, row += 208) {
+		last = -1;
+		first = -1;
+		for (c = 0; c < 208; c++) {
+			if (row[c] < 0xc8) {
+				last = row[c];
+				if (first < 0) {
+					first = c;
+				}
+			} else if (last >= 0) {
+				row[c] = (uint8_t)last;
+			}
+		}
+		if (first > 0) {
+			last = row[first];
+			for (c = 0; c < first; c++) {
+				row[c] = (uint8_t)last;
+			}
+		}
+	}
+
+	rect_bak = g_pic_copy_rect;
+	g_pic_copy_rect.y1 = g_ani_posy;
+	g_pic_copy_rect.x1 = g_ani_posx;
+	g_pic_copy_rect.y2 = g_ani_posy + 134;
+	g_pic_copy_rect.x2 = g_ani_posx + 207;
+
+	for (k = 1; k < 10; k++) {
+		s = (signed int)(((int32_t)(k * k * (15 - k)) * 52 + 62) / 125);
+
+		if (mod == 1) {
+			g_pic_copy.x1 = g_ani_posx - s;
+			g_pic_copy.x2 = g_ani_posx + 207 - s;
+			g_pic_copy.src = alt;
+			do_pic_copy(1);
+
+			g_pic_copy.x1 = g_ani_posx + 208 - s;
+			g_pic_copy.x2 = g_ani_posx + 415 - s;
+			g_pic_copy.src = g_renderbuf_ptr;
+			do_pic_copy(1);
+		} else {
+			g_pic_copy.x1 = g_ani_posx - 208 + s;
+			g_pic_copy.x2 = g_ani_posx - 1 + s;
+			g_pic_copy.src = g_renderbuf_ptr;
+			do_pic_copy(1);
+
+			g_pic_copy.x1 = g_ani_posx + s;
+			g_pic_copy.x2 = g_ani_posx + 207 + s;
+			g_pic_copy.src = alt;
+			do_pic_copy(1);
+		}
+
+		wait_for_vsync();
+	}
+
+	g_pic_copy_rect = rect_bak;
+	g_pic_copy.x1 = g_ani_posx;
+	g_pic_copy.x2 = g_ani_posx + 207;
+	g_pic_copy.src = g_renderbuf_ptr;
+}
+#endif
+
 /**
  * \brief   draws the compass, copies the rendered view to the screen and adjusts the palette to the light
  */
 void DNG_show_view(void)
 {
-	dsa_trace_enter(592, "seg075:DNG_show_view");
+	dsa_trace_enter(599, "seg075:DNG_show_view");
 	draw_compass();
 
 	g_pic_copy.x1 = g_ani_posx;
@@ -555,17 +680,24 @@ void DNG_show_view(void)
 	g_pic_copy.y2 = g_ani_posy + 134;
 	g_pic_copy.src = g_renderbuf_ptr;
 
+#if !FIX_ZEIGER || !defined(__BORLANDC__)
 	call_mouse_bg();
+#endif
 
 	g_special_screen = 0;
 
 	wait_for_vsync();
 
+#if FIX_DREHEN && defined(__BORLANDC__)
+	drehen_dungeon();
+#endif
 	do_pic_copy(1);
 
 	DNG_lights();
 
+#if !FIX_ZEIGER || !defined(__BORLANDC__)
 	call_mouse();
+#endif
 }
 
 /**
@@ -575,7 +707,7 @@ void DNG_show_view(void)
  */
 signed int is_staff_lvl2_in_group(void)
 {
-	dsa_trace_enter(593, "seg075:is_staff_lvl2_in_group");
+	dsa_trace_enter(600, "seg075:is_staff_lvl2_in_group");
 	struct struct_hero *hero_i;
 	signed int i;
 
@@ -604,7 +736,7 @@ signed int is_staff_lvl2_in_group(void)
  */
 void DNG_lights(void)
 {
-	dsa_trace_enter(594, "seg075:DNG_lights");
+	dsa_trace_enter(601, "seg075:DNG_lights");
 	if (div16(g_visual_square_vals[1]) != 11) {
 
 		signed int light_attenuation;
@@ -663,7 +795,7 @@ void DNG_lights(void)
  */
 void DNG_timestep(const signed int forward)
 {
-	dsa_trace_enter(595, "seg075:DNG_timestep");
+	dsa_trace_enter(602, "seg075:DNG_timestep");
 	signed int viewdir;
 #if FIX_0084
 	signed int i;
@@ -759,7 +891,7 @@ void DNG_timestep(const signed int forward)
  */
 void DNG_update_pos(void)
 {
-	dsa_trace_enter(596, "seg075:DNG_update_pos");
+	dsa_trace_enter(603, "seg075:DNG_update_pos");
 	disable_ani();
 
 	DNG_render_view();
@@ -771,7 +903,7 @@ void DNG_update_pos(void)
 
 void DNG_inc_level(void)
 {
-	dsa_trace_enter(597, "seg075:DNG_inc_level");
+	dsa_trace_enter(604, "seg075:DNG_inc_level");
 	g_dng_level_changed = 1;
 	gs_dungeon_level++;
 	load_area_description(1);
@@ -780,7 +912,7 @@ void DNG_inc_level(void)
 
 void DNG_dec_level(void)
 {
-	dsa_trace_enter(598, "seg075:DNG_dec_level");
+	dsa_trace_enter(605, "seg075:DNG_dec_level");
 	g_dng_level_changed = 1;
 	gs_dungeon_level--;
 	load_area_description(1);
@@ -792,7 +924,7 @@ void DNG_dec_level(void)
  */
 void DNG_open_door(void)
 {
-	dsa_trace_enter(599, "seg075:DNG_open_door");
+	dsa_trace_enter(606, "seg075:DNG_open_door");
 	signed int x;
 	signed int y;
 	signed int iters;
@@ -823,7 +955,9 @@ void DNG_open_door(void)
 
 	play_voc(ARCHIVE_FILE_FX15_VOC);
 
+#if !FIX_ZEIGER || !defined(__BORLANDC__)
 	call_mouse_bg();
+#endif
 
 	for (i = 0; i < iters; i++) {
 
@@ -834,7 +968,9 @@ void DNG_open_door(void)
 		memmove(g_renderbuf_ptr, g_renderbuf_ptr + 30000, 28080);
 	}
 
+#if !FIX_ZEIGER || !defined(__BORLANDC__)
 	call_mouse();
+#endif
 }
 
 /**
@@ -842,7 +978,7 @@ void DNG_open_door(void)
  */
 void DNG_close_door(void)
 {
-	dsa_trace_enter(600, "seg075:DNG_close_door");
+	dsa_trace_enter(607, "seg075:DNG_close_door");
 	signed int x;
 	signed int y;
 	signed int iters;
@@ -872,7 +1008,9 @@ void DNG_close_door(void)
 
 	play_voc(ARCHIVE_FILE_FX15_VOC);
 
+#if !FIX_ZEIGER || !defined(__BORLANDC__)
 	call_mouse_bg();
+#endif
 
 	for (i = iters; i >= 0; i--) {
 
@@ -883,7 +1021,9 @@ void DNG_close_door(void)
 		memmove(g_renderbuf_ptr, g_renderbuf_ptr + 30000, 28080);
 	}
 
+#if !FIX_ZEIGER || !defined(__BORLANDC__)
 	call_mouse();
+#endif
 }
 
 /**
@@ -896,7 +1036,7 @@ void DNG_close_door(void)
  */
 void DNG01_pitfall(void)
 {
-	dsa_trace_enter(601, "seg075:DNG01_pitfall");
+	dsa_trace_enter(608, "seg075:DNG01_pitfall");
 	play_voc(ARCHIVE_FILE_FX18_VOC);
 
 	if (gs_dungeon_light) {
@@ -1012,7 +1152,7 @@ void DNG01_pitfall(void)
  **/
 signed int DNG_check_climb_tools(void)
 {
-	dsa_trace_enter(602, "seg075:DNG_check_climb_tools");
+	dsa_trace_enter(609, "seg075:DNG_check_climb_tools");
 	signed int i;
 	struct struct_hero *hero = get_hero(0);
 
@@ -1045,7 +1185,7 @@ signed int DNG_check_climb_tools(void)
  */
 signed int DNG_pitfall(const signed int max_damage)
 {
-	dsa_trace_enter(603, "seg075:DNG_pitfall");
+	dsa_trace_enter(610, "seg075:DNG_pitfall");
 	signed int hero_pos;
 	signed int i;
 	signed int num_fallen_heroes;
@@ -1123,7 +1263,7 @@ signed int DNG_pitfall(const signed int max_damage)
  */
 void DNG_enter_dungeon(const signed int dungeon_id)
 {
-	dsa_trace_enter(604, "seg075:DNG_enter_dungeon");
+	dsa_trace_enter(611, "seg075:DNG_enter_dungeon");
 	signed int x_pos;
 	signed int y_pos;
 	signed int level;
@@ -1226,8 +1366,12 @@ mark2:			   goto mark1;
 		g_pic_copy.x2 = 240;
 		g_pic_copy.y2 = 136;
 		g_pic_copy.src = g_renderbuf_ptr;
+#if !FIX_ZEIGER || !defined(__BORLANDC__)
 		call_mouse_bg();
+#endif
 		do_pic_copy(1);
+#if !FIX_ZEIGER || !defined(__BORLANDC__)
 		call_mouse();
+#endif
 	}
 }

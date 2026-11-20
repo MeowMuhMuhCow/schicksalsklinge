@@ -4,6 +4,8 @@
 
 **Inoffizielle Bugfix-Fassung · spielbar ohne Compiler · das Original bleibt unangetastet · [gleich loslegen](#schnellstart-bugfix-fassung-spielen-ohne-compiler)**
 
+**Neu in Version 1.5f: Flüssiges Drehen, keine Kopierschutzabfrage mehr & Mauszeiger flackert nicht mehr.** Beim Drehen in Städten und Dungeons schwenkt die Ansicht jetzt weich statt hart um 90 Grad (Rahmen, Verzierungen, Kompass und Mauszeiger bleiben fest stehen; standardmäßig an, abschaltbar mit `DREHEN_AUS.bat` bzw. `DREHEN=0`). Außerdem entfällt in den Fix-Fassungen beim Spielstart die Kopierschutzabfrage (wie in der Windows-Fassung), und der Mauszeiger flackert beim Laufen, Drehen und Betreten/Verlassen von Häusern nicht mehr.
+
 **Neu in Version 1.5d:** Das Probenlog zeigt jetzt auch die gewürfelte Gegnerzahl (z. B. WILD8), den Überfallwurf im Nachtlager und die Begegnungs- und Kampfwürfe auf Reisen (Wunsch von Andrean). Und in der [Änderungsliste](BUGFIXES.md) steht bei jeder Behebung „So prüfst du es“: wo man sie im Spiel sieht und was vorher anders war.
 
 **Neu in Version 1.5c:** Tempel sehen jetzt auch von der Seite aus wie Tempel, mit Torbogen und Schild, statt wie ein Fachwerkhaus (Nr. 439).

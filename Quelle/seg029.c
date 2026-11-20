@@ -72,7 +72,9 @@ void draw_playmask(void)
 
 	set_palette(g_palette_allblack2, 0xe0, 0x20);
 
+#if !FIX_ZEIGER || !defined(__BORLANDC__)
 	call_mouse_bg();
+#endif
 
 	g_pic_copy.x1 = 0;
 	g_pic_copy.y1 = 0;
@@ -105,7 +107,9 @@ void draw_playmask(void)
 
 	g_update_statusline = 1;
 
+#if !FIX_ZEIGER || !defined(__BORLANDC__)
 	call_mouse();
+#endif
 }
 
 /**
@@ -173,7 +177,9 @@ void draw_status_line(void)
 
 		wait_for_vsync();
 
+#if !FIX_ZEIGER || !defined(__BORLANDC__)
 		call_mouse_bg();
+#endif
 
 		if (!get_hero(i)->typus) {
 
@@ -251,7 +257,9 @@ void draw_status_line(void)
 			}
 		}
 
+#if !FIX_ZEIGER || !defined(__BORLANDC__)
 		call_mouse();
+#endif
 	}
 
 	set_textcolor(fg_bak, bg_bak);
@@ -309,7 +317,9 @@ void draw_icons(void)
 	if (g_pp20_index != ARCHIVE_FILE_PLAYM_UK)
 		return;
 
+#if !FIX_ZEIGER || !defined(__BORLANDC__)
 	call_mouse_bg();
+#endif
 
 	for (i = 0; i < 9; i++) {
 
@@ -330,7 +340,9 @@ void draw_icons(void)
 		do_pic_copy(0);
 	}
 
+#if !FIX_ZEIGER || !defined(__BORLANDC__)
 	call_mouse();
+#endif
 }
 
 /**
@@ -363,11 +375,15 @@ void draw_main_screen(void)
 
 void clear_loc_line(void)
 {
+#if !FIX_ZEIGER || !defined(__BORLANDC__)
 	call_mouse_bg();
+#endif
 
 	do_fill_rect(g_vga_memstart, 3, 140, 316, 153, 0);
 
+#if !FIX_ZEIGER || !defined(__BORLANDC__)
 	call_mouse();
+#endif
 }
 
 /**

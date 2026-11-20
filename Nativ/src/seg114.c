@@ -39,7 +39,7 @@
 /* Skelellen <-> Phexcaer */
 void tevent_110(void)
 {
-	dsa_trace_enter(1102, "seg114:tevent_110");
+	dsa_trace_enter(1109, "seg114:tevent_110");
 	signed int i;
 	signed int answer;
 	struct struct_hero *hero;
@@ -102,7 +102,7 @@ void tevent_110(void)
 /* Skelellen <-> Phexcaer; gs_tevent111_flag: 1 = Spur bekannt, 2 = Nashorn erlegt */
 void tevent_111(void)
 {
-	dsa_trace_enter(1103, "seg114:tevent_111");
+	dsa_trace_enter(1110, "seg114:tevent_111");
 	signed int counter;
 	signed int answer;
 	signed int i;
@@ -278,7 +278,7 @@ void tevent_111(void)
 /* Skelellen <-> Phexcaer, mit Thonnysbluete (Bonus wirkungslos, siehe seg112 tevent_070) */
 void tevent_112(void)
 {
-	dsa_trace_enter(1104, "seg114:tevent_112");
+	dsa_trace_enter(1111, "seg114:tevent_112");
 	if ((test_talent(get_first_hero_available_in_group(), TA_WILDNISLEBEN, 2) > 0 && !gs_tevent112_flag) || gs_tevent112_flag)
 	{
 		gs_tevent112_flag = 1;
@@ -302,7 +302,7 @@ void tevent_112(void)
 /* Skelellen <-> Phexcaer */
 void tevent_113(void)
 {
-	dsa_trace_enter(1105, "seg114:tevent_113");
+	dsa_trace_enter(1112, "seg114:tevent_113");
 	signed int answer;
 	int32_t est_old;
 	int32_t est_diff;
@@ -352,7 +352,7 @@ void tevent_113(void)
 /* Phexcaer <-> Skelellen: a swamp */
 void tevent_114(void)
 {
-	dsa_trace_enter(1106, "seg114:tevent_114");
+	dsa_trace_enter(1113, "seg114:tevent_114");
 	signed int i;
 	signed int answer;
 	signed int done;
@@ -493,7 +493,7 @@ void tevent_114(void)
 /* Skelellen <-> Phexcaer, guter Jagdplatz */
 void tevent_116(void)
 {
-	dsa_trace_enter(1107, "seg114:tevent_116");
+	dsa_trace_enter(1114, "seg114:tevent_116");
 	if ((test_talent(get_first_hero_available_in_group(), TA_WILDNISLEBEN, 6) > 0 && !gs_tevent116_flag) ||
 		gs_tevent116_flag)
 	{
@@ -506,7 +506,7 @@ void tevent_116(void)
 /* Skelellen <-> Phexcaer: Steinschlag, der Weg zurueck ist versperrt */
 void tevent_117(void)
 {
-	dsa_trace_enter(1108, "seg114:tevent_117");
+	dsa_trace_enter(1115, "seg114:tevent_117");
 	signed int i;
 	struct struct_hero *hero;
 
@@ -534,7 +534,7 @@ void tevent_117(void)
 /* Merske <-> Rovamund (Einbeere) */
 void tevent_118(void)
 {
-	dsa_trace_enter(1109, "seg114:tevent_118");
+	dsa_trace_enter(1116, "seg114:tevent_118");
 	if ((test_talent(get_first_hero_available_in_group(), TA_PFLANZENKUNDE, 3) > 0 && !gs_tevent118_flag) ||	gs_tevent118_flag)
 	{
 		g_gather_herbs_special = ITEM_ID_EINBEERE;
@@ -551,7 +551,7 @@ void tevent_118(void)
 /* Merske <-> Rovamund */
 void tevent_119(void)
 {
-	dsa_trace_enter(1110, "seg114:tevent_119");
+	dsa_trace_enter(1117, "seg114:tevent_119");
 	if ((test_talent(get_first_hero_available_in_group(), TA_WILDNISLEBEN, 2) > 0 && !gs_tevent119_flag) || gs_tevent119_flag)
 	{
 		gs_tevent119_flag = 1;
@@ -563,7 +563,7 @@ void tevent_119(void)
 /* Orvil - Rovik: wolves threaten a sheperd */
 void tevent_122(void)
 {
-	dsa_trace_enter(1111, "seg114:tevent_122");
+	dsa_trace_enter(1118, "seg114:tevent_122");
 	signed int answer;
 
 	if (!gs_tevent122_flag)
@@ -598,7 +598,7 @@ void tevent_122(void)
 /* Orvil <-> Rovik: Haengebruecke. test_attrib(..., ATTRIB_HA, ...) > 0 heisst: Hoehenangst schlaegt zu */
 void tevent_123(void)
 {
-	dsa_trace_enter(1112, "seg114:tevent_123");
+	dsa_trace_enter(1119, "seg114:tevent_123");
 	signed int i;
 	signed int counter;
 	signed int answer;

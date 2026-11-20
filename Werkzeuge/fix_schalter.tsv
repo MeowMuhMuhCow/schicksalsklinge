@@ -32,7 +32,7 @@ nr	schalter	titel	sicherheit	kategorie	exploit	stufe	umgesetzt	aenderung	grund	d
 31	FIX_0031	Held gegen Held: Werte des Verteidigers falsch berechnet	sicher	egal	nein	alles	ja	Ruestungsbehinderung des Angegriffenen, nicht des Angreifers; PA-Zuschlag der Waffe (wie in seg043 und WERTE PRUEFEN)		SEG042.C
 32	FIX_0032	Paradepatzer setzt backfire_1 statt backfire_2	sicher	egal	nein	alles	ja	den Freischlag fuehrt der Angreifer aus, also ihn animieren		SEG042.C
 33	FIX_0033	Waffenbruch bei gleichen Würfen trifft nie die Waffe eines Gegners	unsicher	egal	nein	alles	nein		Designfrage (unsicher): Gegner haben keinen Bruchfaktor, vermutlich bewusst	
-34	FIX_0034	Wurfwaffe wird vor der Schadensberechnung abgelegt	sicher	mittel	ja	wichtig	ja	Wurfwaffe erst nach der Schadensberechnung ablegen (Bright-Eyes-Fix, Original-Bug 32)		SEG042.C
+34	FIX_0034	Wurfwaffe wird vor der Schadensberechnung abgelegt	sicher	mittel	ja	wichtig	ja	Schneidzahn hat in g_weapon_stats_table ranged_index == -1 (Original-Bug 61) ->; Wurfwaffe erst nach der Schadensberechnung ablegen (Bright-Eyes-Fix, Original-Bug 32)		SEG041.C SEG042.C
 35	FIX_0035	double_size bleibt beim Rückverwandeln eines Doppelgegners ungesetzt	unsicher	egal	nein	alles	nein		ohne Wirkung: FIG_remove_from_list(..., 1) laesst die alten Werte des Gegners in g_fig_list_elem stehen, double_size ist also schon richtig	
 36	FIX_0036	Gegner-Balsam heilt über das Maximum oder gar nicht	sicher	mittel	nein	wichtig	ja	halben Verlust, mindestens 7, hoechstens bis zum Maximum heilen (Bright-Eyes-Fix)		SEG102.C
 37	FIX_0037	Gegner-Plumbumbarum wirkt eine Stunde statt 5 Kampfrunden	unsicher	mittel	nein	wichtig	nein		Absicht unklar (unsicher): ob der Gegnerzauber laenger wirken soll als der Heldenzauber, ist nicht belegbar	
@@ -89,7 +89,7 @@ nr	schalter	titel	sicherheit	kategorie	exploit	stufe	umgesetzt	aenderung	grund	d
 88	FIX_0088	Klammerfehler: Feld (1,8,5) zeigt in jedem Dungeon den Spiegeltext	sicher	mittel	nein	wichtig	ja	beide Felder nur in Hyggeliks Ruine		SEG076.C
 89	FIX_0089	Symbol „Gruppen vereinen“ bleibt nach dem Vereinen aktiv	sicher	egal	nein	alles	ja	Symbol ausgrauen (Bright-Eyes-Fix zu Original-Bug 19)		SEG076.C
 90	FIX_0090	Rückwärtsschritt prüft halbdurchlässige Wände nicht	unsicher	mittel	ja	wichtig	ja	rueckwaerts gilt das Richtungsflag der Gegenrichtung (wie vorwaerts)		SEG076.C
-91	FIX_0091	Leeres Wasserfass füllt trotzdem alle Schläuche	sicher	mittel	ja	wichtig	ja	erst nachsehen, was im Fass ist: aus einem leeren Fass nichts fuellen,		SEG076.C
+91	FIX_0091	Leeres Wasserfass füllt trotzdem alle Schläuche	sicher	mittel	ja	wichtig	ja	erst nachsehen, was im Fass ist: aus einem leeren Fass nichts fuellen,; wenn das Fass schon leer war, "DAS FASS IST NUN LEER." statt "VORRAETE SIND NOCH ALLE VOLL."		SEG076.C
 92	FIX_0092	Totenschiff-Spalt: nur Seil oder Strickleiter, kein Magierstab	unsicher	mittel	nein	wichtig	ja	Seil, Strickleiter oder ein Magier mit Stabzauber ab Stufe 3 (Seil des Adepten), wie an den Gruben	Beleg: Osterpatch NRS 2016 (Version 1.2)	SEG077.C
 93	FIX_0093	Proben und Wirkungen mit get_hero(0) statt dem ersten handlungsfähigen Helden	sicher	egal	nein	alles	ja	der erste handlungsfaehige Held klettert; der erste handlungsfaehige Held (Bright-Eyes-Fix zu Original-Bug 66); der erste handlungsfaehige Held, mit seiner Position (vgl. Nr. 254)		SEG077.C SEG078.C SEG080.C
 94	FIX_0094	Totenschiff: Deckenloch und Grube mit Zeilenbreite 32 statt 16 gesetzt	sicher	mittel	nein	wichtig	ja	Dungeonkarten sind 16 Felder breit		SEG077.C
@@ -113,7 +113,7 @@ nr	schalter	titel	sicherheit	kategorie	exploit	stufe	umgesetzt	aenderung	grund	d
 112	FIX_0112	Merker „Rätseltruhe geplündert“ wird nie gesetzt	sicher	egal	nein	alles	nein		ob der Inhalt der Raetseltruhe immer ganz genommen wird, ist offen; der Merker wuerde uebrig gebliebene Gegenstaende sperren	
 113	FIX_0113	Hilferuf aus der Grube jede Minute statt alle 20 Minuten	sicher	egal	nein	alles	ja	alle 20 Minuten		SEG084.C
 114	FIX_0114	Armbrustfalle 4 zählt nicht herunter	sicher	mittel	nein	wichtig	ja	wie die Fallen 1 bis 3 herunterzaehlen		SEG084.C
-115	FIX_0115	Loser Stein: Zustand „entfernt“ wird überschrieben	sicher	egal	nein	alles	ja	den Zustand "Stein entfernt" (2) nicht ueberschreiben		SEG085.C
+115	FIX_0115	Loser Stein: Zustand „entfernt“ wird überschrieben	sicher	egal	nein	alles	ja	den Zustand "Stein entfernt" (2) nicht ueberschreiben; wenn der Stein schon entfernt ist (Zustand 2), Text 41		SEG085.C
 116	FIX_0116	Trittplatte wirkt nur beim Entschärfen	unsicher	egal	nein	alles	ja	gs_dng10_floorplate_found als Bits (0x01 entdeckt, 0x02 entschaerft; alter Wert 1 = entdeckt).	Beleg: Osterpatch NRS 2016 (Version 1.2)	SEG085.C
 117	FIX_0117	Opferschale: ESC und große Eingaben (16-Bit-Überlauf) schenken Geld	sicher	kritisch	ja	wichtig	ja	in 32 Bit rechnen; ESC (-1) und Ueberlaeufe (<= 0) bringen kein Geld		SEG085.C
 118	-	„possibly a bug: position (8,12) might be (8,11)“	sicher	egal	nein	-	kein Fehler		laut Raster kein Fehler	
@@ -198,7 +198,7 @@ nr	schalter	titel	sicherheit	kategorie	exploit	stufe	umgesetzt	aenderung	grund	d
 197	FIX_0197	Foramen aus dem Zaubermenü wirkt nur nach geöffnetem Türmenü	sicher	mittel	nein	wichtig	ja	freies Foramen auch vor einer geschlossenen Tuer ohne geoeffnetes Tuermenue		SEG099.C
 198	FIX_0198	Balsam: Mindestkosten 7 AE nicht einheitlich	sicher	egal	nein	alles	nein		Balancefrage: ob 7 AE auch fuer weniger fehlende LE (oder bei voller LE) gelten sollen, ist nicht belegt	
 199	FIX_0199	Hexenspeichel: AE-Prüfung greift nie	sicher	mittel	ja	wichtig	ja	hoechstens die fehlenden LE heilen, je LE 2 AE, und nicht mehr AE ausgeben, als da sind		SEG099.C
-200	FIX_0200	Abbruch der Gegenstandswahl: inventory[−1]	sicher	egal	nein	alles	ja	Abbruch der Gegenstandswahl (-1) nicht als Inventarplatz benutzen; Abbruch der Gegenstandswahl (-1) nicht als Inventarplatz benutzen (g_dtp2 ist schon leer)		SEG099.C SEG100.C
+200	FIX_0200	Abbruch der Gegenstandswahl: inventory[−1]	sicher	egal	nein	alles	ja	Abbruch der Gegenstandswahl (-1) nicht als Inventarplatz benutzen;; Abbruch der Gegenstandswahl (-1) nicht als Inventarplatz benutzen (g_dtp2 ist schon leer)		SEG099.C SEG100.C
 201	FIX_0201	Analüs: volle AE-Kosten, wenn nur der Zuschlag die Probe kippt	sicher	egal	nein	alles	ja	am Zuschlag gescheitert -> halbe AE wie bei misslungenem Zauber		SEG099.C
 202	FIX_0202	„Eigenschaften seid gelesen“ zeigt 80 % des Nahkampfschadens	sicher	egal	nein	alles	ja	Nahkampfschaden ungekuerzt anzeigen		SEG100.C
 203	FIX_0203	Exposami vergleicht mit einem noch leeren Listeneintrag	sicher	egal	nein	alles	ja	nur beschriebene Eintraege vergleichen		SEG100.C

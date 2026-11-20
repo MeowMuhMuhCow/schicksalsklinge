@@ -56,7 +56,7 @@ struct struct_chest g_dng14_specialchests[9] = {
  */
 void DNG14_dive(const signed int diver_pos, const signed char handicap, const signed int dest_x)
 {
-	dsa_trace_enter(713, "seg088:DNG14_dive");
+	dsa_trace_enter(720, "seg088:DNG14_dive");
 	signed int i;
 	struct struct_hero *hero;
 
@@ -94,7 +94,7 @@ void DNG14_dive(const signed int diver_pos, const signed char handicap, const si
  */
 void DNG14_fight_intro(const signed int fight_id)
 {
-	dsa_trace_enter(714, "seg088:DNG14_fight_intro");
+	dsa_trace_enter(721, "seg088:DNG14_fight_intro");
 	if ((fight_id == 172) || (fight_id == 174)) { /* FIGHT_ID_DTHO57_1, FIGHT_ID_DTHO59 */
 		GUI_output(get_tx(56)); /* "DIES SCHEINT EIN EHEMALIGER ZUFLUCHTSRAUM ZU SEIN, ZUMINDEST SCHEIN..." */
 	}
@@ -102,7 +102,7 @@ void DNG14_fight_intro(const signed int fight_id)
 
 void DNG14_chest00_loot(struct struct_chest* chest)
 {
-	dsa_trace_enter(715, "seg088:DNG14_chest00_loot");
+	dsa_trace_enter(722, "seg088:DNG14_chest00_loot");
 	uint8_t* ptr_bak = chest->loot.content;
 
 	chest->loot.content = gs_dng14_chest_x1;
@@ -114,7 +114,7 @@ void DNG14_chest00_loot(struct struct_chest* chest)
 
 void DNG14_chest01_loot(struct struct_chest* chest)
 {
-	dsa_trace_enter(716, "seg088:DNG14_chest01_loot");
+	dsa_trace_enter(723, "seg088:DNG14_chest01_loot");
 	uint8_t* ptr_bak = chest->loot.content;
 
 	chest->loot.content = gs_dng14_chest_x2;
@@ -126,13 +126,13 @@ void DNG14_chest01_loot(struct struct_chest* chest)
 
 void DNG14_chest02_loot(struct struct_chest* chest)
 {
-	dsa_trace_enter(717, "seg088:DNG14_chest02_loot");
+	dsa_trace_enter(724, "seg088:DNG14_chest02_loot");
 	loot_multi_chest(gs_dng14_chest_x3, get_tx(62)); /* "IN DIESER TRUHE ENTDECKT IHR EINE MENGE WAFFEN." */
 }
 
 void DNG14_chest03_loot(struct struct_chest* chest)
 {
-	dsa_trace_enter(718, "seg088:DNG14_chest03_loot");
+	dsa_trace_enter(725, "seg088:DNG14_chest03_loot");
 	uint8_t* ptr_bak = chest->loot.content;
 
 	chest->loot.content = gs_dng14_chest_x4;
@@ -144,7 +144,7 @@ void DNG14_chest03_loot(struct struct_chest* chest)
 
 void DNG14_chest04_loot(struct struct_chest* chest)
 {
-	dsa_trace_enter(719, "seg088:DNG14_chest04_loot");
+	dsa_trace_enter(726, "seg088:DNG14_chest04_loot");
 	uint8_t* ptr_bak = chest->loot.content;
 
 	chest->loot.content = gs_dng14_chest_x5;
@@ -156,7 +156,7 @@ void DNG14_chest04_loot(struct struct_chest* chest)
 
 void DNG14_chest05_loot(struct struct_chest* chest)
 {
-	dsa_trace_enter(720, "seg088:DNG14_chest05_loot");
+	dsa_trace_enter(727, "seg088:DNG14_chest05_loot");
 	uint8_t* ptr_bak;
 	unsigned char x;
 	unsigned char y;
@@ -186,7 +186,7 @@ void DNG14_chest05_loot(struct struct_chest* chest)
 
 void DNG14_chest06_loot(struct struct_chest* chest)
 {
-	dsa_trace_enter(721, "seg088:DNG14_chest06_loot");
+	dsa_trace_enter(728, "seg088:DNG14_chest06_loot");
 	uint8_t* ptr_bak = chest->loot.content;
 
 	chest->loot.content = gs_dng14_chest_x7;
@@ -198,7 +198,7 @@ void DNG14_chest06_loot(struct struct_chest* chest)
 
 void DNG14_chest07_loot(struct struct_chest* chest)
 {
-	dsa_trace_enter(722, "seg088:DNG14_chest07_loot");
+	dsa_trace_enter(729, "seg088:DNG14_chest07_loot");
 	uint8_t* ptr_bak = chest->loot.content;
 
 	chest->loot.content = gs_dng14_chest_x8;
@@ -210,7 +210,7 @@ void DNG14_chest07_loot(struct struct_chest* chest)
 
 void DNG14_chest07_trap(void)
 {
-	dsa_trace_enter(723, "seg088:DNG14_chest07_trap");
+	dsa_trace_enter(730, "seg088:DNG14_chest07_trap");
 	struct struct_hero *hero = get_first_hero_available_in_group();
 
 	print_msg_with_first_hero(get_tx(61)); /* "DUMMERWEISE IST DIESE TRUHE MIT EINEM SCHNAPPEISEN GESICHERT, DAS %..." */
@@ -228,7 +228,7 @@ void DNG14_chest07_trap(void)
  */
 void DNG15_riddle(void)
 {
-	dsa_trace_enter(724, "seg088:DNG15_riddle");
+	dsa_trace_enter(731, "seg088:DNG15_riddle");
 	signed int i;
 	signed int other_group_in_position;
 	signed int pos;

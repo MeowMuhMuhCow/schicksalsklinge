@@ -60,7 +60,7 @@ struct struct_chest g_dng09_specialchests[8] = {
  */
 signed int DNG09_handler(void)
 {
-	dsa_trace_enter(679, "seg084:DNG09_handler");
+	dsa_trace_enter(686, "seg084:DNG09_handler");
 	signed int target_pos;
 	signed int i;
 	signed int l3;
@@ -493,7 +493,7 @@ signed int DNG09_handler(void)
  */
 void DNG09_fight_intro(const signed int fight_id)
 {
-	dsa_trace_enter(680, "seg084:DNG09_fight_intro");
+	dsa_trace_enter(687, "seg084:DNG09_fight_intro");
 	if (fight_id == FIGHT_ID_F126_08)
 	{
 		GUI_output(get_tx(13)); /* "ENTLANG DER WAND DES GANGES SITZEN EIN HALBES DUTZEND IN KUTTEN GEK..." */
@@ -502,7 +502,7 @@ void DNG09_fight_intro(const signed int fight_id)
 
 void DNG09_chest00_loot(struct struct_chest* chest)
 {
-	dsa_trace_enter(681, "seg084:DNG09_chest00_loot");
+	dsa_trace_enter(688, "seg084:DNG09_chest00_loot");
 	uint8_t* ptr_bak = chest->loot.content;
 
 	chest->loot.content = gs_dng09_chest0;
@@ -514,7 +514,7 @@ void DNG09_chest00_loot(struct struct_chest* chest)
 
 void DNG09_chest01_loot(struct struct_chest* chest)
 {
-	dsa_trace_enter(682, "seg084:DNG09_chest01_loot");
+	dsa_trace_enter(689, "seg084:DNG09_chest01_loot");
 	uint8_t* ptr_bak = chest->loot.content;
 
 	chest->loot.content = gs_dng09_chest1;
@@ -526,7 +526,7 @@ void DNG09_chest01_loot(struct struct_chest* chest)
 
 void DNG09_chest02_loot(struct struct_chest* chest)
 {
-	dsa_trace_enter(683, "seg084:DNG09_chest02_loot");
+	dsa_trace_enter(690, "seg084:DNG09_chest02_loot");
 	uint8_t* ptr_bak = chest->loot.content;
 
 	chest->loot.content = gs_dng09_chest2;
@@ -538,7 +538,7 @@ void DNG09_chest02_loot(struct struct_chest* chest)
 
 void DNG09_chest03_loot(struct struct_chest* chest)
 {
-	dsa_trace_enter(684, "seg084:DNG09_chest03_loot");
+	dsa_trace_enter(691, "seg084:DNG09_chest03_loot");
 	uint8_t* ptr_bak = chest->loot.content;
 
 	chest->loot.content = gs_dng09_chest3;
@@ -554,7 +554,7 @@ void DNG09_chest03_loot(struct struct_chest* chest)
  */
 void DNG09_chest04_loot(struct struct_chest* chest)
 {
-	dsa_trace_enter(685, "seg084:DNG09_chest04_loot");
+	dsa_trace_enter(692, "seg084:DNG09_chest04_loot");
 	signed int answer;
 	struct struct_hero *hero;
 
@@ -630,7 +630,7 @@ void DNG09_chest04_loot(struct struct_chest* chest)
 
 void DNG09_chest05_loot(struct struct_chest* chest)
 {
-	dsa_trace_enter(686, "seg084:DNG09_chest05_loot");
+	dsa_trace_enter(693, "seg084:DNG09_chest05_loot");
 	uint8_t* ptr_bak = chest->loot.content;
 
 	chest->loot.content = gs_dng09_chest5;
@@ -642,7 +642,7 @@ void DNG09_chest05_loot(struct struct_chest* chest)
 
 void DNG09_chest06_loot(struct struct_chest* chest)
 {
-	dsa_trace_enter(687, "seg084:DNG09_chest06_loot");
+	dsa_trace_enter(694, "seg084:DNG09_chest06_loot");
 	uint8_t* ptr_bak = chest->loot.content;
 
 	chest->loot.content = gs_dng09_chest6;
@@ -657,7 +657,7 @@ void DNG09_chest06_loot(struct struct_chest* chest)
  */
 void DNG09_chest04_trap(void)
 {
-	dsa_trace_enter(688, "seg084:DNG09_chest04_trap");
+	dsa_trace_enter(695, "seg084:DNG09_chest04_trap");
 	g_fig_escape_position[NORTH] = g_fig_escape_position[EAST] = g_fig_escape_position[SOUTH] = g_fig_escape_position[WEST] = DNG_POS_DIR(1,10,11,SOUTH);
 
 	do_fight(FIGHT_ID_F126_22);

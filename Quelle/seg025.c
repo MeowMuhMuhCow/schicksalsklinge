@@ -848,10 +848,14 @@ void leave_dungeon(void)
 	g_pic_copy.y2 = 136;
 	g_pic_copy.src = g_renderbuf_ptr;
 
+#if !FIX_ZEIGER || !defined(__BORLANDC__)
 	call_mouse_bg();
+#endif
 
 	do_pic_copy(1);
+#if !FIX_ZEIGER || !defined(__BORLANDC__)
 	call_mouse();
+#endif
 	wait_for_vsync();
 	set_palette(g_renderbuf_ptr, 0 , 0x20);
 

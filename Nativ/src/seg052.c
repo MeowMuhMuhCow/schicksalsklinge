@@ -50,7 +50,7 @@ signed char g_area_camp_guardstatus[8];	// ds:0xe3e8
  */
 void do_area_camp(void)
 {
-	dsa_trace_enter(440, "seg052:do_area_camp");
+	dsa_trace_enter(447, "seg052:do_area_camp");
 	signed int l_si;
 	signed int watch;
 	signed int done;

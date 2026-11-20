@@ -37,7 +37,7 @@
  */
 void PHX_fuhrhaus(void)
 {
-	dsa_trace_enter(552, "seg070:PHX_fuhrhaus");
+	dsa_trace_enter(559, "seg070:PHX_fuhrhaus");
 	signed int answer;
 
 	load_in_head(42);
@@ -81,7 +81,7 @@ void PHX_fuhrhaus(void)
  */
 void PHX_stadthaus(void)
 {
-	dsa_trace_enter(553, "seg070:PHX_stadthaus");
+	dsa_trace_enter(560, "seg070:PHX_stadthaus");
 	signed int answer;
 	int32_t money;
 
@@ -142,7 +142,7 @@ void PHX_stadthaus(void)
  */
 void PHX_spielhaus(void)
 {
-	dsa_trace_enter(554, "seg070:PHX_spielhaus");
+	dsa_trace_enter(561, "seg070:PHX_spielhaus");
 	signed int answer;
 	signed int num_passed;
 	signed int pos; /* multi use: hero position, then the amount won or lost in D */
@@ -243,7 +243,7 @@ void PHX_spielhaus(void)
  */
 void PHX_villa_gremob(void)
 {
-	dsa_trace_enter(555, "seg070:PHX_villa_gremob");
+	dsa_trace_enter(562, "seg070:PHX_villa_gremob");
 	GUI_output(!gs_gremob_invited ? get_tx2(40) : get_tx2(39)); /* "DIE PROTZIGE VILLA DES EKTOR GREMOB WIRD V..." / "VOR DER PRACHTVOLLEN VILLA STEHEN VIER BEW..." */
 
 	if (gs_gremob_invited) {
@@ -256,7 +256,7 @@ void PHX_villa_gremob(void)
  */
 void PHX_bordell(void)
 {
-	dsa_trace_enter(556, "seg070:PHX_bordell");
+	dsa_trace_enter(563, "seg070:PHX_bordell");
 	signed int answer;
 
 	load_ani(24);
@@ -303,7 +303,7 @@ void PHX_bordell(void)
  */
 void PHX_apotheke(void)
 {
-	dsa_trace_enter(557, "seg070:PHX_apotheke");
+	dsa_trace_enter(564, "seg070:PHX_apotheke");
 	signed int answer;
 	signed int options;
 	int32_t money;
@@ -439,7 +439,7 @@ void PHX_apotheke(void)
  */
 void PHX_healer(void)
 {
-	dsa_trace_enter(558, "seg070:PHX_healer");
+	dsa_trace_enter(565, "seg070:PHX_healer");
 	signed int answer;
 	int32_t money;
 

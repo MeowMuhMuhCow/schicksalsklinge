@@ -51,7 +51,7 @@ struct struct_ani {
  */
 void do_market(void)
 {
-	dsa_trace_enter(486, "seg065:do_market");
+	dsa_trace_enter(493, "seg065:do_market");
 	signed int done;
 	signed int answer;
 	signed int typeindex_bak;
@@ -116,7 +116,7 @@ void do_market(void)
  */
 void final_intro(void)
 {
-	dsa_trace_enter(487, "seg065:final_intro");
+	dsa_trace_enter(494, "seg065:final_intro");
 	signed int i;
 	signed int handle;
 	signed int width;
@@ -234,7 +234,7 @@ static uint8_t* hyg_ani_extract(const signed int nvf_no, struct struct_ani *ani)
  */
 static void hyg_ani_draw(struct struct_ani *ani, const signed int x, const signed int y)
 {
-	dsa_trace_enter(488, "seg065:hyg_ani_draw");
+	dsa_trace_enter(495, "seg065:hyg_ani_draw");
 	g_pic_copy.x1 = x;
 	g_pic_copy.y1 = y;
 	g_pic_copy.x2 = x + ani->width - 1;
@@ -251,7 +251,7 @@ static void hyg_ani_draw(struct struct_ani *ani, const signed int x, const signe
  */
 static void hyg_ani_draw_background(void)
 {
-	dsa_trace_enter(489, "seg065:hyg_ani_draw_background");
+	dsa_trace_enter(496, "seg065:hyg_ani_draw_background");
 	g_pic_copy.x1 = 0;
 	g_pic_copy.y1 = 0;
 	g_pic_copy.x2 = 319;
@@ -267,7 +267,7 @@ static void hyg_ani_draw_background(void)
  */
 static void hyg_ani_show(void)
 {
-	dsa_trace_enter(490, "seg065:hyg_ani_show");
+	dsa_trace_enter(497, "seg065:hyg_ani_show");
 	g_pic_copy.x1 = 0;
 	g_pic_copy.y1 = 0;
 	g_pic_copy.x2 = 319;
@@ -283,7 +283,7 @@ static void hyg_ani_show(void)
  */
 void show_hyggelik_ani(void)
 {
-	dsa_trace_enter(491, "seg065:show_hyggelik_ani");
+	dsa_trace_enter(498, "seg065:show_hyggelik_ani");
 	signed int i;
 	signed int handle;
 	int32_t filelen;
@@ -415,7 +415,7 @@ void show_hyggelik_ani(void)
  */
 void show_times_up(void)
 {
-	dsa_trace_enter(492, "seg065:show_times_up");
+	dsa_trace_enter(499, "seg065:show_times_up");
 	signed int fi_bak;
 	signed int tw_bak;
 	signed int basepos_x_bak;
@@ -461,7 +461,7 @@ void show_times_up(void)
  */
 void show_outro(void)
 {
-	dsa_trace_enter(493, "seg065:show_outro");
+	dsa_trace_enter(500, "seg065:show_outro");
 	signed int j; /* multi use: disease_id, poison_id, attribute index */
 	signed int handle;
 	signed int width;

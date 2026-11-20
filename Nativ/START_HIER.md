@@ -97,7 +97,7 @@ SPIELPFAD="/pfad/zu/Schicksalsklinge" ./start_schicksalsklinge.sh
 
 ### Die drei Bugfix-Sammelstufen (`Quelle/s_fix.h`)
 1. **`SCHICK_PORT_ORIG.EXE` (`SAMMEL_ORIG`)**: 100 % Originalverhalten von 1992/1993 einschließlich aller historischen Original-Bugs.
-2. **`SCHICK_PORT_WICHTIG.EXE` (`SAMMEL_WICHTIG`)**: Behebt Abstürze, Endlosschleifen, Pufferüberläufe und Spielstand-Korruption bei unveränderter Spielmechanik.
+2. **`SCHICK_PORT_WICHTIG.EXE` (`SAMMEL_WICHTIG`)**: Behebt Abstürze, Endlosschleifen, Pufferüberläufe und Spielstand-Korruption bei unveränderter Spielmechanik (zudem flackert der Mauszeiger beim Laufen nicht mehr und die 3D-Ansicht schwenkt beim Drehen flüssig — Windows/Linux/Browser).
 3. **`SCHICK_PORT_ALLES.EXE` / `SCHICK_PORT.EXE` (`SAMMEL_ALLES`, Standard)**: Aktiviert alle 154 dokumentierten Fehlerkorrekturen aus `s_fix.h` sowie die optionalen Komfortfunktionen (`FIX_HIMMEL`, `FIX_SPEICHERN` via Datei `APFREI.AN`, `FIX_PROBENLOG`).
 
 ---

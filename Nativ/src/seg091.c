@@ -46,7 +46,7 @@ struct struct_chest g_dng13_specialchests[3] = {
  */
 signed int DNG13_handler(void)
 {
-	dsa_trace_enter(741, "seg091:DNG13_handler");
+	dsa_trace_enter(748, "seg091:DNG13_handler");
 	signed int target_pos;
 	signed int tw_bak;
 	int32_t p_money;
@@ -191,7 +191,7 @@ signed int DNG13_handler(void)
  */
 void DNG13_unblock_passage(char* text, uint8_t* flag)
 {
-	dsa_trace_enter(742, "seg091:DNG13_unblock_passage");
+	dsa_trace_enter(749, "seg091:DNG13_unblock_passage");
 	signed int has_items;
 
 	/* check if passage is blocked */
@@ -235,13 +235,13 @@ void DNG13_unblock_passage(char* text, uint8_t* flag)
  */
 void DNG13_chest00_open(struct struct_chest* chest)
 {
-	dsa_trace_enter(743, "seg091:DNG13_chest00_open");
+	dsa_trace_enter(750, "seg091:DNG13_chest00_open");
 	loot_corpse(chest, get_tx(9), &gs_dng13_corpse0_flag); /* "HIER LIEGT DIE BIS AUF DIE KNOCHEN ABGENAGTE LEICHE EINES ABENTEURE..." */
 }
 
 void DNG13_chest00_loot(struct struct_chest* chest)
 {
-	dsa_trace_enter(744, "seg091:DNG13_chest00_loot");
+	dsa_trace_enter(751, "seg091:DNG13_chest00_loot");
 	uint8_t* bak = chest->loot.content;
 
 	chest->loot.content = gs_dng13_chest0_content;
@@ -256,13 +256,13 @@ void DNG13_chest00_loot(struct struct_chest* chest)
  */
 void DNG13_chest01_open(struct struct_chest* chest)
 {
-	dsa_trace_enter(745, "seg091:DNG13_chest01_open");
+	dsa_trace_enter(752, "seg091:DNG13_chest01_open");
 	loot_corpse(chest, get_tx(14), &gs_dng13_corpse1_flag); /* "HIER LIEGT DIE MUMIFIZIERTE LEICHE EINES ABENTEURERS, DER ANSCHEINE..." */
 }
 
 void DNG13_chest01_loot(struct struct_chest* chest)
 {
-	dsa_trace_enter(746, "seg091:DNG13_chest01_loot");
+	dsa_trace_enter(753, "seg091:DNG13_chest01_loot");
 	uint8_t* bak = chest->loot.content;
 
 	chest->loot.content = gs_dng13_chest1_content;
@@ -279,7 +279,7 @@ void DNG13_chest01_loot(struct struct_chest* chest)
  */
 void DNG13_fight_intro(const signed int fight_id)
 {
-	dsa_trace_enter(747, "seg091:DNG13_fight_intro");
+	dsa_trace_enter(754, "seg091:DNG13_fight_intro");
 	if (fight_id == FIGHT_ID_DPRE10_1)
 	{
 		GUI_output(get_tx(13)); /* "DER RAUM, DEN IHR BETRETET IST EIN EINZIGES CHAOS. OFFENSICHTLICH D..." */
@@ -293,7 +293,7 @@ void DNG13_fight_intro(const signed int fight_id)
  */
 void DNG13_collapsing_ceiling(void)
 {
-	dsa_trace_enter(748, "seg091:DNG13_collapsing_ceiling");
+	dsa_trace_enter(755, "seg091:DNG13_collapsing_ceiling");
 	signed int i;
 	signed int fails;
 	signed int has_items;
@@ -354,7 +354,7 @@ void DNG13_collapsing_ceiling(void)
  */
 void DNG13_collapsing_ceiling_hard(void)
 {
-	dsa_trace_enter(749, "seg091:DNG13_collapsing_ceiling_hard");
+	dsa_trace_enter(756, "seg091:DNG13_collapsing_ceiling_hard");
 	signed int i;
 	signed int fails;
 	signed int has_items;

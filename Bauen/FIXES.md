@@ -59,7 +59,7 @@ Nr. 51 ist dieselbe Stelle wie Nr. 50 (`FIX_0051` folgt `FIX_0050`). In den resi
 | 31 | Held gegen Held: Werte des Verteidigers falsch berechnet | egal | nein | alles | ja | Ruestungsbehinderung des Angegriffenen, nicht des Angreifers; PA-Zuschlag der Waffe (wie in seg043 und WERTE PRUEFEN) | SEG042.C |
 | 32 | Paradepatzer setzt backfire_1 statt backfire_2 | egal | nein | alles | ja | den Freischlag fuehrt der Angreifer aus, also ihn animieren | SEG042.C |
 | 33 | Waffenbruch bei gleichen Würfen trifft nie die Waffe eines Gegners | egal | nein | alles | nein | Designfrage (unsicher): Gegner haben keinen Bruchfaktor, vermutlich bewusst |  |
-| 34 | Wurfwaffe wird vor der Schadensberechnung abgelegt | mittel | ja | wichtig | ja | Wurfwaffe erst nach der Schadensberechnung ablegen (Bright-Eyes-Fix, Original-Bug 32) | SEG042.C |
+| 34 | Wurfwaffe wird vor der Schadensberechnung abgelegt | mittel | ja | wichtig | ja | Schneidzahn hat in g_weapon_stats_table ranged_index == -1 (Original-Bug 61) ->; Wurfwaffe erst nach der Schadensberechnung ablegen (Bright-Eyes-Fix, Original-Bug 32) | SEG041.C SEG042.C |
 | 35 | double_size bleibt beim Rückverwandeln eines Doppelgegners ungesetzt | egal | nein | alles | nein | ohne Wirkung: FIG_remove_from_list(..., 1) laesst die alten Werte des Gegners in g_fig_list_elem stehen, double_size ist also schon richtig |  |
 | 36 | Gegner-Balsam heilt über das Maximum oder gar nicht | mittel | nein | wichtig | ja | halben Verlust, mindestens 7, hoechstens bis zum Maximum heilen (Bright-Eyes-Fix) | SEG102.C |
 | 37 | Gegner-Plumbumbarum wirkt eine Stunde statt 5 Kampfrunden | mittel | nein | wichtig | nein | Absicht unklar (unsicher): ob der Gegnerzauber laenger wirken soll als der Heldenzauber, ist nicht belegbar |  |
@@ -116,7 +116,7 @@ Nr. 51 ist dieselbe Stelle wie Nr. 50 (`FIX_0051` folgt `FIX_0050`). In den resi
 | 88 | Klammerfehler: Feld (1,8,5) zeigt in jedem Dungeon den Spiegeltext | mittel | nein | wichtig | ja | beide Felder nur in Hyggeliks Ruine | SEG076.C |
 | 89 | Symbol „Gruppen vereinen“ bleibt nach dem Vereinen aktiv | egal | nein | alles | ja | Symbol ausgrauen (Bright-Eyes-Fix zu Original-Bug 19) | SEG076.C |
 | 90 | Rückwärtsschritt prüft halbdurchlässige Wände nicht | mittel | ja | wichtig | ja | rueckwaerts gilt das Richtungsflag der Gegenrichtung (wie vorwaerts) | SEG076.C |
-| 91 | Leeres Wasserfass füllt trotzdem alle Schläuche | mittel | ja | wichtig | ja | erst nachsehen, was im Fass ist: aus einem leeren Fass nichts fuellen, | SEG076.C |
+| 91 | Leeres Wasserfass füllt trotzdem alle Schläuche | mittel | ja | wichtig | ja | erst nachsehen, was im Fass ist: aus einem leeren Fass nichts fuellen,; wenn das Fass schon leer war, "DAS FASS IST NUN LEER." statt "VORRAETE SIND NOCH ALLE VOLL." | SEG076.C |
 | 92 | Totenschiff-Spalt: nur Seil oder Strickleiter, kein Magierstab | mittel | nein | wichtig | ja | Seil, Strickleiter oder ein Magier mit Stabzauber ab Stufe 3 (Seil des Adepten), wie an den Gruben (Beleg: Osterpatch NRS 2016 (Version 1.2)) | SEG077.C |
 | 93 | Proben und Wirkungen mit get_hero(0) statt dem ersten handlungsfähigen Helden | egal | nein | alles | ja | der erste handlungsfaehige Held klettert; der erste handlungsfaehige Held (Bright-Eyes-Fix zu Original-Bug 66); der erste handlungsfaehige Held, mit seiner Position (vgl. Nr. 254) | SEG077.C SEG078.C SEG080.C |
 | 94 | Totenschiff: Deckenloch und Grube mit Zeilenbreite 32 statt 16 gesetzt | mittel | nein | wichtig | ja | Dungeonkarten sind 16 Felder breit | SEG077.C |
@@ -140,7 +140,7 @@ Nr. 51 ist dieselbe Stelle wie Nr. 50 (`FIX_0051` folgt `FIX_0050`). In den resi
 | 112 | Merker „Rätseltruhe geplündert“ wird nie gesetzt | egal | nein | alles | nein | ob der Inhalt der Raetseltruhe immer ganz genommen wird, ist offen; der Merker wuerde uebrig gebliebene Gegenstaende sperren |  |
 | 113 | Hilferuf aus der Grube jede Minute statt alle 20 Minuten | egal | nein | alles | ja | alle 20 Minuten | SEG084.C |
 | 114 | Armbrustfalle 4 zählt nicht herunter | mittel | nein | wichtig | ja | wie die Fallen 1 bis 3 herunterzaehlen | SEG084.C |
-| 115 | Loser Stein: Zustand „entfernt“ wird überschrieben | egal | nein | alles | ja | den Zustand "Stein entfernt" (2) nicht ueberschreiben | SEG085.C |
+| 115 | Loser Stein: Zustand „entfernt“ wird überschrieben | egal | nein | alles | ja | den Zustand "Stein entfernt" (2) nicht ueberschreiben; wenn der Stein schon entfernt ist (Zustand 2), Text 41 | SEG085.C |
 | 116 | Trittplatte wirkt nur beim Entschärfen | egal | nein | alles | ja | gs_dng10_floorplate_found als Bits (0x01 entdeckt, 0x02 entschaerft; alter Wert 1 = entdeckt). (Beleg: Osterpatch NRS 2016 (Version 1.2)) | SEG085.C |
 | 117 | Opferschale: ESC und große Eingaben (16-Bit-Überlauf) schenken Geld | kritisch | ja | wichtig | ja | in 32 Bit rechnen; ESC (-1) und Ueberlaeufe (<= 0) bringen kein Geld | SEG085.C |
 | 118 | „possibly a bug: position (8,12) might be (8,11)“ | egal | nein | - | kein Fehler | laut Raster kein Fehler |  |
@@ -225,7 +225,7 @@ Nr. 51 ist dieselbe Stelle wie Nr. 50 (`FIX_0051` folgt `FIX_0050`). In den resi
 | 197 | Foramen aus dem Zaubermenü wirkt nur nach geöffnetem Türmenü | mittel | nein | wichtig | ja | freies Foramen auch vor einer geschlossenen Tuer ohne geoeffnetes Tuermenue | SEG099.C |
 | 198 | Balsam: Mindestkosten 7 AE nicht einheitlich | egal | nein | alles | nein | Balancefrage: ob 7 AE auch fuer weniger fehlende LE (oder bei voller LE) gelten sollen, ist nicht belegt |  |
 | 199 | Hexenspeichel: AE-Prüfung greift nie | mittel | ja | wichtig | ja | hoechstens die fehlenden LE heilen, je LE 2 AE, und nicht mehr AE ausgeben, als da sind | SEG099.C |
-| 200 | Abbruch der Gegenstandswahl: inventory[−1] | egal | nein | alles | ja | Abbruch der Gegenstandswahl (-1) nicht als Inventarplatz benutzen; Abbruch der Gegenstandswahl (-1) nicht als Inventarplatz benutzen (g_dtp2 ist schon leer) | SEG099.C SEG100.C |
+| 200 | Abbruch der Gegenstandswahl: inventory[−1] | egal | nein | alles | ja | Abbruch der Gegenstandswahl (-1) nicht als Inventarplatz benutzen;; Abbruch der Gegenstandswahl (-1) nicht als Inventarplatz benutzen (g_dtp2 ist schon leer) | SEG099.C SEG100.C |
 | 201 | Analüs: volle AE-Kosten, wenn nur der Zuschlag die Probe kippt | egal | nein | alles | ja | am Zuschlag gescheitert -> halbe AE wie bei misslungenem Zauber | SEG099.C |
 | 202 | „Eigenschaften seid gelesen“ zeigt 80 % des Nahkampfschadens | egal | nein | alles | ja | Nahkampfschaden ungekuerzt anzeigen | SEG100.C |
 | 203 | Exposami vergleicht mit einem noch leeren Listeneintrag | egal | nein | alles | ja | nur beschriebene Eintraege vergleichen | SEG100.C |

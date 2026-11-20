@@ -46,7 +46,7 @@ signed char g_sleep_quality;		// ds:0xe3f1
  */
 void talk_inn(void)
 {
-	dsa_trace_enter(443, "seg054:talk_inn");
+	dsa_trace_enter(450, "seg054:talk_inn");
 	do_random_talk(1, 0);
 }
 
@@ -55,7 +55,7 @@ void talk_inn(void)
  */
 struct struct_hero* get_first_brewing_hero(void)
 {
-	dsa_trace_enter(444, "seg054:get_first_brewing_hero");
+	dsa_trace_enter(451, "seg054:get_first_brewing_hero");
 	struct struct_hero *hero;
 	signed int i;
 
@@ -85,7 +85,7 @@ struct struct_hero* get_first_brewing_hero(void)
 /* Fix 50: eine Gruppe mit der aktiven vereinen (der Rumpf von GRP_merge() fuer eine einzelne Gruppe) */
 static void fix_merge_group(const signed int group_id)
 {
-	dsa_trace_enter(445, "seg054:fix_merge_group");
+	dsa_trace_enter(452, "seg054:fix_merge_group");
 	signed int hero_pos;
 
 	gs_groups_viewdir[group_id] = gs_groups_x[group_id]
@@ -116,7 +116,7 @@ static void fix_merge_group(const signed int group_id)
  */
 void do_inn(void)
 {
-	dsa_trace_enter(446, "seg054:do_inn");
+	dsa_trace_enter(453, "seg054:do_inn");
 	signed int i;
 	signed int answer;
 	signed int done;
@@ -663,7 +663,7 @@ void do_inn(void)
  */
 void TLK_inn(const signed int state)
 {
-	dsa_trace_enter(447, "seg054:TLK_inn");
+	dsa_trace_enter(454, "seg054:TLK_inn");
 	struct struct_hero *hero = get_first_hero_available_in_group();
 
 	if (!state) {

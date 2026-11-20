@@ -41,7 +41,7 @@ static struct int8_t_15 g_temple_miracle_dice = { 0, 9, 9, 10, 17, 6, 10, 10, 18
  */
 void ask_miracle(void)
 {
-	dsa_trace_enter(477, "seg062:ask_miracle");
+	dsa_trace_enter(484, "seg062:ask_miracle");
 	signed int miracle_dice_roll;
 	signed int j;
 	struct struct_hero *hero;

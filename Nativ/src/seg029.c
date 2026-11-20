@@ -58,7 +58,7 @@ static signed char icon_array[9] = {
 //static
 void draw_playmask(void)
 {
-	dsa_trace_enter(294, "seg029:draw_playmask");
+	dsa_trace_enter(301, "seg029:draw_playmask");
 	g_update_statusline = 0;
 
 	/* load the desired playmask */
@@ -73,7 +73,9 @@ void draw_playmask(void)
 
 	set_palette(g_palette_allblack2, 0xe0, 0x20);
 
+#if !FIX_ZEIGER || !defined(__BORLANDC__)
 	call_mouse_bg();
+#endif
 
 	g_pic_copy.x1 = 0;
 	g_pic_copy.y1 = 0;
@@ -106,7 +108,9 @@ void draw_playmask(void)
 
 	g_update_statusline = 1;
 
+#if !FIX_ZEIGER || !defined(__BORLANDC__)
 	call_mouse();
+#endif
 }
 
 /**
@@ -119,7 +123,7 @@ void draw_playmask(void)
  */
 void copy_forename(char *dst, char *name)
 {
-	dsa_trace_enter(295, "seg029:copy_forename");
+	dsa_trace_enter(302, "seg029:copy_forename");
 	int i;
 
 	for (i = 0; i < 7; i++) {
@@ -140,7 +144,7 @@ void copy_forename(char *dst, char *name)
  */
 void draw_status_line(void)
 {
-	dsa_trace_enter(296, "seg029:draw_status_line");
+	dsa_trace_enter(303, "seg029:draw_status_line");
 	signed int fg_bak;
 	signed int bg_bak;
 	uint8_t *src;
@@ -176,7 +180,9 @@ void draw_status_line(void)
 
 		wait_for_vsync();
 
+#if !FIX_ZEIGER || !defined(__BORLANDC__)
 		call_mouse_bg();
+#endif
 
 		if (!get_hero(i)->typus) {
 
@@ -254,7 +260,9 @@ void draw_status_line(void)
 			}
 		}
 
+#if !FIX_ZEIGER || !defined(__BORLANDC__)
 		call_mouse();
+#endif
 	}
 
 	set_textcolor(fg_bak, bg_bak);
@@ -269,7 +277,7 @@ void draw_status_line(void)
  */
 void clear_hero_icon(const signed int hero_pos)
 {
-	dsa_trace_enter(297, "seg029:clear_hero_icon");
+	dsa_trace_enter(304, "seg029:clear_hero_icon");
 
 	/* fill icon area black */
 	do_fill_rect(g_vga_memstart, g_hero_pic_posx[hero_pos], 157, g_hero_pic_posx[hero_pos] + 31, 188, 0);
@@ -291,7 +299,7 @@ void clear_hero_icon(const signed int hero_pos)
 //static
 void load_icon(const signed int fileindex, const signed int icon_id, const signed int pos)
 {
-	dsa_trace_enter(298, "seg029:load_icon");
+	dsa_trace_enter(305, "seg029:load_icon");
 	signed int handle = load_archive_file(fileindex);
 
 	seek_archive_file(handle, icon_id * 576L, 0);
@@ -309,13 +317,15 @@ void load_icon(const signed int fileindex, const signed int icon_id, const signe
  */
 void draw_icons(void)
 {
-	dsa_trace_enter(299, "seg029:draw_icons");
+	dsa_trace_enter(306, "seg029:draw_icons");
 	signed int i;
 
 	if (g_pp20_index != ARCHIVE_FILE_PLAYM_UK)
 		return;
 
+#if !FIX_ZEIGER || !defined(__BORLANDC__)
 	call_mouse_bg();
+#endif
 
 	for (i = 0; i < 9; i++) {
 
@@ -336,7 +346,9 @@ void draw_icons(void)
 		do_pic_copy(0);
 	}
 
+#if !FIX_ZEIGER || !defined(__BORLANDC__)
 	call_mouse();
+#endif
 }
 
 /**
@@ -344,7 +356,7 @@ void draw_icons(void)
  */
 void draw_main_screen(void)
 {
-	dsa_trace_enter(300, "seg029:draw_main_screen");
+	dsa_trace_enter(307, "seg029:draw_main_screen");
 	g_wallclock_x = 241;
 	g_wallclock_y = 31;
 	g_wallclock_update = 0;
@@ -370,12 +382,16 @@ void draw_main_screen(void)
 
 void clear_loc_line(void)
 {
-	dsa_trace_enter(301, "seg029:clear_loc_line");
+	dsa_trace_enter(308, "seg029:clear_loc_line");
+#if !FIX_ZEIGER || !defined(__BORLANDC__)
 	call_mouse_bg();
+#endif
 
 	do_fill_rect(g_vga_memstart, 3, 140, 316, 153, 0);
 
+#if !FIX_ZEIGER || !defined(__BORLANDC__)
 	call_mouse();
+#endif
 }
 
 /**
@@ -387,7 +403,7 @@ void clear_loc_line(void)
  */
 void select_hero_icon(const signed int pos)
 {
-	dsa_trace_enter(302, "seg029:select_hero_icon");
+	dsa_trace_enter(309, "seg029:select_hero_icon");
 	signed int fg_bak;
 	signed int bg_bak;
 
@@ -423,7 +439,7 @@ void select_hero_icon(const signed int pos)
 /* TODO: this function an select_hero_icon() can be merged into one. */
 void deselect_hero_icon(const signed int pos)
 {
-	dsa_trace_enter(303, "seg029:deselect_hero_icon");
+	dsa_trace_enter(310, "seg029:deselect_hero_icon");
 	signed int fg_bak;
 	signed int bg_bak;
 

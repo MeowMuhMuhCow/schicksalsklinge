@@ -72,7 +72,7 @@ char* get_ship_name(const signed char ship_type, const signed int nr_ships_creat
 
 signed int prepare_passages(void)
 {
-	dsa_trace_enter(483, "seg064:prepare_passages");
+	dsa_trace_enter(490, "seg064:prepare_passages");
 	signed int prepared;
 	signed int i;
 	struct sea_route *ent = &g_sea_routes[0];
@@ -281,7 +281,7 @@ signed int get_passage_travel_hours(const signed int distance, signed int base_s
  */
 signed int get_next_passages(const signed int type)
 {
-	dsa_trace_enter(484, "seg064:get_next_passages");
+	dsa_trace_enter(491, "seg064:get_next_passages");
 	struct sea_route *entry = &g_sea_routes[0];
 	signed int option;
 	signed int i;
@@ -323,7 +323,7 @@ signed int get_next_passages(const signed int type)
  */
 signed int passage_arrival(void)
 {
-	dsa_trace_enter(485, "seg064:passage_arrival");
+	dsa_trace_enter(492, "seg064:passage_arrival");
 	signed int tmp;
 	struct trv_start_point *harbor_ptr;
 	struct location *locations_tab_ptr;

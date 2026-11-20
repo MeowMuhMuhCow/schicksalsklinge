@@ -56,7 +56,7 @@ struct struct_chest g_dng10_specialchests[6] = {
  */
 signed int DNG10_handler(void)
 {
-	dsa_trace_enter(689, "seg085:DNG10_handler");
+	dsa_trace_enter(696, "seg085:DNG10_handler");
 	signed int target_pos;
 	signed int answer;
 	signed int result;
@@ -540,13 +540,13 @@ signed int DNG10_handler(void)
  */
 void DNG10_chest00_open(struct struct_chest* chest)
 {
-	dsa_trace_enter(690, "seg085:DNG10_chest00_open");
+	dsa_trace_enter(697, "seg085:DNG10_chest00_open");
 	loot_corpse(chest, get_tx(3), (int8_t*)&gs_dng10_corpse_flag); /* "VOR EUCH LIEGT DIE LEICHE EINES TOTEN ZWERGES. ES SIND KEINE VERLET..." */
 }
 
 void DNG10_chest00_loot(struct struct_chest* chest)
 {
-	dsa_trace_enter(691, "seg085:DNG10_chest00_loot");
+	dsa_trace_enter(698, "seg085:DNG10_chest00_loot");
 	uint8_t* ptr_bak = chest->loot.content;
 
 	chest->loot.content = gs_dng10_chest0_content;
@@ -558,7 +558,7 @@ void DNG10_chest00_loot(struct struct_chest* chest)
 
 void DNG10_chest01_loot(struct struct_chest* chest)
 {
-	dsa_trace_enter(692, "seg085:DNG10_chest01_loot");
+	dsa_trace_enter(699, "seg085:DNG10_chest01_loot");
 	uint8_t* ptr_bak = chest->loot.content;
 
 	chest->loot.content = gs_dng10_chest1_content;
@@ -570,7 +570,7 @@ void DNG10_chest01_loot(struct struct_chest* chest)
 
 void DNG10_chest02_loot(struct struct_chest* chest)
 {
-	dsa_trace_enter(693, "seg085:DNG10_chest02_loot");
+	dsa_trace_enter(700, "seg085:DNG10_chest02_loot");
 	uint8_t* ptr_bak = chest->loot.content;
 
 	chest->loot.content = gs_dng10_chest2_content;
@@ -582,7 +582,7 @@ void DNG10_chest02_loot(struct struct_chest* chest)
 
 void DNG10_chest03_loot(struct struct_chest* chest)
 {
-	dsa_trace_enter(694, "seg085:DNG10_chest03_loot");
+	dsa_trace_enter(701, "seg085:DNG10_chest03_loot");
 	uint8_t* ptr_bak = chest->loot.content;
 
 	chest->loot.content = gs_dng10_chest3_content;
@@ -594,7 +594,7 @@ void DNG10_chest03_loot(struct struct_chest* chest)
 
 void DNG10_chest04_loot(struct struct_chest* chest)
 {
-	dsa_trace_enter(695, "seg085:DNG10_chest04_loot");
+	dsa_trace_enter(702, "seg085:DNG10_chest04_loot");
 	uint8_t* ptr_bak = chest->loot.content;
 
 	chest->loot.content = gs_dng10_chest4_content;

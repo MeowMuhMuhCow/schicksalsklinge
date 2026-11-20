@@ -31,6 +31,10 @@
 #include <stdio.h>
 
 #include "v302de.h"
+#if FIX_DREHEN && defined(__BORLANDC__)
+#include <io.h>
+#include <fcntl.h>
+#endif
 #include "common.h"
 
 #include "seg002.h"
@@ -878,6 +882,127 @@ void DNG_draw_squares(void)
 	}
 }
 
+#if FIX_DREHEN && defined(__BORLANDC__)
+/* Zusatzfunktion FIX_DREHEN: fluessiger Schwenk bei 90-Grad-Drehung im Dungeon (wie drehen_stadt in seg066). */
+static void drehen_dungeon(void)
+{
+	signed int mod;
+	signed int fd;
+	signed int r;
+	signed int c;
+	signed int last;
+	signed int first;
+	signed int k;
+	signed int s;
+	uint8_t *alt;
+	uint8_t *row;
+	struct struct_rect rect_bak;
+	char name[12];
+
+	if (!g_viewdir_flag_bogus) {
+		return;
+	}
+	g_viewdir_flag_bogus = 0;
+
+	if ((g_dng_refresh_direction < 0) || (gs_x != g_dng_refresh_x_target) || (gs_y != g_dng_refresh_y_target)) {
+		return;
+	}
+	mod = (gs_viewdir - g_dng_refresh_direction) & 3;
+	if ((mod != 1) && (mod != 3)) {
+		return;
+	}
+
+	name[0] = 'D'; name[1] = 'R'; name[2] = 'E'; name[3] = 'H'; name[4] = 'E'; name[5] = 'N';
+	name[6] = '.'; name[7] = 'A'; name[8] = 'U'; name[9] = 'S'; name[10] = '\0';
+	if ((fd = open(name, O_BINARY | O_RDONLY)) != -1) {
+		close(fd);
+		return;
+	}
+
+	alt = (uint8_t*)g_renderbuf_ptr + 30000;
+	g_pic_copy.src = alt;
+	do_save_rect();
+#if FIX_ZEIGER && defined(__BORLANDC__)
+	if (!g_mouse_locked && !g_mouse_refresh_flag) {
+		r = g_mouse_posx_bak - g_mouse_pointer_offsetx_bak;
+		c = g_mouse_posy_bak - g_mouse_pointer_offsety_bak;
+		for (first = 0; first < 16; first++) {
+			s = c + first - g_ani_posy;
+			if ((s >= 0) && (s < 135)) {
+				for (last = 0; last < 16; last++) {
+					k = r + last - g_ani_posx;
+					if ((k >= 0) && (k < 208)) {
+						alt[s * 208 + k] = g_mouse_bg_bak[first * 16 + last];
+					}
+				}
+			}
+		}
+	}
+#endif
+
+	row = alt;
+	for (r = 0; r < 135; r++, row += 208) {
+		last = -1;
+		first = -1;
+		for (c = 0; c < 208; c++) {
+			if (row[c] < 0xc8) {
+				last = row[c];
+				if (first < 0) {
+					first = c;
+				}
+			} else if (last >= 0) {
+				row[c] = (uint8_t)last;
+			}
+		}
+		if (first > 0) {
+			last = row[first];
+			for (c = 0; c < first; c++) {
+				row[c] = (uint8_t)last;
+			}
+		}
+	}
+
+	rect_bak = g_pic_copy_rect;
+	g_pic_copy_rect.y1 = g_ani_posy;
+	g_pic_copy_rect.x1 = g_ani_posx;
+	g_pic_copy_rect.y2 = g_ani_posy + 134;
+	g_pic_copy_rect.x2 = g_ani_posx + 207;
+
+	for (k = 1; k < 10; k++) {
+		s = (signed int)(((int32_t)(k * k * (15 - k)) * 52 + 62) / 125);
+
+		if (mod == 1) {
+			g_pic_copy.x1 = g_ani_posx - s;
+			g_pic_copy.x2 = g_ani_posx + 207 - s;
+			g_pic_copy.src = alt;
+			do_pic_copy(1);
+
+			g_pic_copy.x1 = g_ani_posx + 208 - s;
+			g_pic_copy.x2 = g_ani_posx + 415 - s;
+			g_pic_copy.src = g_renderbuf_ptr;
+			do_pic_copy(1);
+		} else {
+			g_pic_copy.x1 = g_ani_posx - 208 + s;
+			g_pic_copy.x2 = g_ani_posx - 1 + s;
+			g_pic_copy.src = g_renderbuf_ptr;
+			do_pic_copy(1);
+
+			g_pic_copy.x1 = g_ani_posx + s;
+			g_pic_copy.x2 = g_ani_posx + 207 + s;
+			g_pic_copy.src = alt;
+			do_pic_copy(1);
+		}
+
+		wait_for_vsync();
+	}
+
+	g_pic_copy_rect = rect_bak;
+	g_pic_copy.x1 = g_ani_posx;
+	g_pic_copy.x2 = g_ani_posx + 207;
+	g_pic_copy.src = g_renderbuf_ptr;
+}
+#endif
+
 /**
  * \brief   draws the compass, copies the rendered view to the screen and adjusts the palette to the light
  */
@@ -891,17 +1016,24 @@ void DNG_show_view(void)
 	g_pic_copy.y2 = g_ani_posy + 134;
 	g_pic_copy.src = g_renderbuf_ptr;
 
+#if !FIX_ZEIGER || !defined(__BORLANDC__)
 	call_mouse_bg();
+#endif
 
 	g_special_screen = 0;
 
 	wait_for_vsync();
 
+#if FIX_DREHEN && defined(__BORLANDC__)
+	drehen_dungeon();
+#endif
 	do_pic_copy(1);
 
 	DNG_lights();
 
+#if !FIX_ZEIGER || !defined(__BORLANDC__)
 	call_mouse();
+#endif
 }
 
 /**
@@ -1152,7 +1284,9 @@ void DNG_open_door(void)
 
 	play_voc(ARCHIVE_FILE_FX15_VOC);
 
+#if !FIX_ZEIGER || !defined(__BORLANDC__)
 	call_mouse_bg();
+#endif
 
 	for (i = 0; i < iters; i++) {
 
@@ -1163,7 +1297,9 @@ void DNG_open_door(void)
 		memmove(g_renderbuf_ptr, g_renderbuf_ptr + 30000, 28080);
 	}
 
+#if !FIX_ZEIGER || !defined(__BORLANDC__)
 	call_mouse();
+#endif
 }
 
 /**
@@ -1200,7 +1336,9 @@ void DNG_close_door(void)
 
 	play_voc(ARCHIVE_FILE_FX15_VOC);
 
+#if !FIX_ZEIGER || !defined(__BORLANDC__)
 	call_mouse_bg();
+#endif
 
 	for (i = iters; i >= 0; i--) {
 
@@ -1211,7 +1349,9 @@ void DNG_close_door(void)
 		memmove(g_renderbuf_ptr, g_renderbuf_ptr + 30000, 28080);
 	}
 
+#if !FIX_ZEIGER || !defined(__BORLANDC__)
 	call_mouse();
+#endif
 }
 
 /**
@@ -1548,8 +1688,12 @@ mark2:			   goto mark1;
 		g_pic_copy.x2 = 240;
 		g_pic_copy.y2 = 136;
 		g_pic_copy.src = g_renderbuf_ptr;
+#if !FIX_ZEIGER || !defined(__BORLANDC__)
 		call_mouse_bg();
+#endif
 		do_pic_copy(1);
+#if !FIX_ZEIGER || !defined(__BORLANDC__)
 		call_mouse();
+#endif
 	}
 }

@@ -59,6 +59,7 @@ Was beim Aufruf angegeben wird, hat Vorrang vor der Datei.
 | `CYCLES=3000` | Tempo in DOSBox-Zyklen (bei Staging als `cpu_cycles`) |
 | `HIMMEL=1` | lebendiger Stadthimmel an: ziehende Wolken, Sonne, Mond, Sterne (ab 1.4, Vorgabe aus) |
 | `SPEICHERN_OHNE_AP=1` | Speichern außerhalb von Tempeln kostet keine AP (ab 1.4a, Vorgabe aus). Eine Regeländerung, kein Fehler |
+| `DREHEN=0` | flüssiges Drehen aus: harter 90-Grad-Sprung wie im Original (ab 1.5f, Vorgabe an) |
 | `SPIEL=ordner` | Spielordner (sonst gesucht bzw. aus `Linux/SPIELPFAD.txt`) |
 | `CD=pfad` | eigenes CD-Abbild (siehe oben) |
 | `DOSBOX=pfad` | andere DOSBox |

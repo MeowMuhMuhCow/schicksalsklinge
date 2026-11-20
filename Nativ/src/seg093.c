@@ -371,7 +371,7 @@ struct struct_land_route_tevent g_tevents_tab[156]; // ds:0xa66d
  */
 signed int do_travel_mode(void)
 {
-	dsa_trace_enter(772, "seg093:do_travel_mode");
+	dsa_trace_enter(779, "seg093:do_travel_mode");
 	signed int tmp1; /* multiple use: route_id, screen coordinate, etc. */
 	signed int i;
 	signed int tmp2; /* multiple use: town_id, screen coordinate, menu answer, saved marker x */

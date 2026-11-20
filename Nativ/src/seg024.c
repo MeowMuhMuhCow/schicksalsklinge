@@ -44,7 +44,7 @@ static const char diary_fmt[][30] = {
 /* zeigt das Tagebuch auf dem Buchbild und wartet auf Taste (hoechstens 5000 Takte) */
 void diary_show(void)
 {
-	dsa_trace_enter(238, "seg024:diary_show");
+	dsa_trace_enter(245, "seg024:diary_show");
 	signed int fg_bak;
 	signed int bg_bak;
 	signed int bak1;
@@ -118,7 +118,7 @@ void diary_show(void)
 /* neuer Tagebucheintrag fuer die aktuelle Stadt, ausser die letzte Eintragung betrifft dieselbe Stadt */
 void diary_new_entry(void)
 {
-	dsa_trace_enter(239, "seg024:diary_new_entry");
+	dsa_trace_enter(246, "seg024:diary_new_entry");
 	struct struct_diary_entry *entry;
 
 	/* if all entries are occupied, move all entries one slot forward to have the last slot free */
@@ -166,7 +166,7 @@ void diary_new_entry(void)
  */
 signed int diary_print_entry(signed int line)
 {
-	dsa_trace_enter(240, "seg024:diary_print_entry");
+	dsa_trace_enter(247, "seg024:diary_print_entry");
 	signed int day;
 	signed int month;
 	signed int startline;

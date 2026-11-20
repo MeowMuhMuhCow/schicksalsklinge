@@ -53,14 +53,17 @@ if "%PROBENLOG%"=="1" (
   start "Probenlog" powershell -NoProfile -ExecutionPolicy Bypass -File "%HIER%Probenlog\probenlog_fenster.ps1" -Datei "%SAVES%\PROBEN.CSV"
 )
 
-rem --- Zusatzfunktionen (Vorgabe: beide aus), die Schalter liegen neben den Startdateien:
-rem     HIMMEL_AN.bat / HIMMEL_AUS.bat                   lebendiger Stadthimmel  -> HIMMEL.AN im Spielstand-Ordner
-rem     SPEICHERN_OHNE_AP_AN.bat / _AUS.bat              Speichern ohne AP-Verlust -> APFREI.AN im Spielstand-Ordner
+rem --- Zusatzfunktionen, die Schalter liegen neben den Startdateien:
+rem     HIMMEL_AN.bat / HIMMEL_AUS.bat                   lebendiger Stadthimmel (Vorgabe aus) -> HIMMEL.AN im Spielstand-Ordner
+rem     SPEICHERN_OHNE_AP_AN.bat / _AUS.bat              Speichern ohne AP-Verlust (Vorgabe aus) -> APFREI.AN im Spielstand-Ordner
+rem     DREHEN_AN.bat / DREHEN_AUS.bat                   fluessiges Drehen (Vorgabe an) -> DREHEN.AUS im Spielstand-Ordner
 if exist "%SAVES%\HIMMEL.AUS" del "%SAVES%\HIMMEL.AUS"
 if exist "%HIER%HIMMEL_AN.txt" type nul > "%SAVES%\HIMMEL.AN"
 if not exist "%HIER%HIMMEL_AN.txt" if exist "%SAVES%\HIMMEL.AN" del "%SAVES%\HIMMEL.AN"
 if exist "%HIER%SPEICHERN_OHNE_AP.txt" type nul > "%SAVES%\APFREI.AN"
 if not exist "%HIER%SPEICHERN_OHNE_AP.txt" if exist "%SAVES%\APFREI.AN" del "%SAVES%\APFREI.AN"
+if exist "%HIER%DREHEN_AUS.txt" type nul > "%SAVES%\DREHEN.AUS"
+if not exist "%HIER%DREHEN_AUS.txt" if exist "%SAVES%\DREHEN.AUS" del "%SAVES%\DREHEN.AUS"
 
 rem --- DOSBox-Startbefehle in eine kleine Zusatz-Konfiguration schreiben
 rem     C: = Spielstand-Ordner (Kopie des Spielordners, dort landen auch die Spielstaende)

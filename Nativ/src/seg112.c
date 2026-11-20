@@ -44,7 +44,7 @@ static uint8_t g_tevent067_chest[10] = {
 /* Ala <-> Tjanset / Ala <-> Thoss: alter Pfad zu einer verfallenen Huette */
 void tevent_067(void)
 {
-	dsa_trace_enter(1067, "seg112:tevent_067");
+	dsa_trace_enter(1074, "seg112:tevent_067");
 	signed int i;
 	signed int answer;
 	signed int count;
@@ -140,7 +140,7 @@ void tevent_067(void)
 /* Ala <-> Tjanset, Ala <-> Thoss, Tjanset <-> Thoss: im Original leer */
 void tevent_068(void)
 {
-	dsa_trace_enter(1068, "seg112:tevent_068");
+	dsa_trace_enter(1075, "seg112:tevent_068");
 #if !defined(__BORLANDC__)
 	D1_INFO("Reiseevent %d ist nicht implementiert\n", 68);
 #endif
@@ -148,7 +148,7 @@ void tevent_068(void)
 
 void tevent_069(void)
 {
-	dsa_trace_enter(1069, "seg112:tevent_069");
+	dsa_trace_enter(1076, "seg112:tevent_069");
 	if ((test_talent(get_first_hero_available_in_group(), TA_WILDNISLEBEN, 5) > 0 && !gs_tevent069_flag) ||
 		gs_tevent069_flag)
 	{
@@ -159,7 +159,7 @@ void tevent_069(void)
 
 void tevent_070(void)
 {
-	dsa_trace_enter(1070, "seg112:tevent_070");
+	dsa_trace_enter(1077, "seg112:tevent_070");
 	signed int answer;
 
 	if (test_talent(get_first_hero_available_in_group(), TA_WILDNISLEBEN, 3) > 0 || gs_tevent070_flag)
@@ -207,7 +207,7 @@ void tevent_070(void)
 /* Thoss <-> Liskor (laut g_tevents_tab auch Oberorken <-> Felsteyn): Monolith am anderen Ufer des Thossel */
 void tevent_071(void)
 {
-	dsa_trace_enter(1071, "seg112:tevent_071");
+	dsa_trace_enter(1078, "seg112:tevent_071");
 	signed int answer;
 	signed int have_raft = 0;
 	signed int i;
@@ -310,7 +310,7 @@ void tevent_071(void)
  */
 void TRV_swimm(const signed int handicap, const signed int percent)
 {
-	dsa_trace_enter(1072, "seg112:TRV_swimm");
+	dsa_trace_enter(1079, "seg112:TRV_swimm");
 	signed int i;
 	struct struct_hero *hero;
 
@@ -345,7 +345,7 @@ void TRV_swimm(const signed int handicap, const signed int percent)
 /* Kraeuterplatz (Gulmond) am anderen Ufer des Hjaldorval; Texte FEATURE4.LTX 29..41; nie aufgerufen */
 void tevent_unused_herb_swim(void)
 {
-	dsa_trace_enter(1073, "seg112:tevent_unused_herb_swim");
+	dsa_trace_enter(1080, "seg112:tevent_unused_herb_swim");
 	signed int answer;
 	signed int has_raft;
 	signed int options;
@@ -418,7 +418,7 @@ void tevent_unused_herb_swim(void)
 /* Oberorken <-> Felsteyn: Rastplatz mit guter Jagd */
 void tevent_072(void)
 {
-	dsa_trace_enter(1074, "seg112:tevent_072");
+	dsa_trace_enter(1081, "seg112:tevent_072");
 	if ((test_talent(get_first_hero_available_in_group(), TA_WILDNISLEBEN, 3) > 0 && !gs_tevent072_flag) ||
 		gs_tevent072_flag != 0)
 	{
@@ -431,7 +431,7 @@ void tevent_072(void)
 /* Felsteyn <-> Orkanger */
 void tevent_073(void)
 {
-	dsa_trace_enter(1075, "seg112:tevent_073");
+	dsa_trace_enter(1082, "seg112:tevent_073");
 	signed int answer;
 
 	if (!gs_tevent073_flag) {
@@ -458,7 +458,7 @@ void tevent_073(void)
 /* Felsteyn <-> Orkanger: Wegelagerer im Hohlweg */
 void tevent_074(void)
 {
-	dsa_trace_enter(1076, "seg112:tevent_074");
+	dsa_trace_enter(1083, "seg112:tevent_074");
 	signed int answer;
 	signed int i;
 	int32_t p_money;
@@ -570,7 +570,7 @@ void tevent_074(void)
  * tevent_074/077 besiegt wurden (fight_flag 0) oder noch leben (0xff = nie gekaempft, 1 = geflohen). */
 void tevent_075(void)
 {
-	dsa_trace_enter(1077, "seg112:tevent_075");
+	dsa_trace_enter(1084, "seg112:tevent_075");
 	signed int i;
 	signed int answer;
 	signed int ret;
@@ -661,7 +661,7 @@ void tevent_075(void)
 /* Felsteyn <-> Orkanger: entrance to the dungeon "goblin cave" */
 void tevent_076(void)
 {
-	dsa_trace_enter(1078, "seg112:tevent_076");
+	dsa_trace_enter(1085, "seg112:tevent_076");
 	signed int answer;
 
 	if (!gs_tevent076_flag) {
@@ -703,7 +703,7 @@ void tevent_076(void)
 /* Felsteyn <-> Orkanger: Raeuber im Wald */
 void tevent_077(void)
 {
-	dsa_trace_enter(1079, "seg112:tevent_077");
+	dsa_trace_enter(1086, "seg112:tevent_077");
 	signed int answer;
 	signed int i;
 	int32_t p_money;

@@ -665,10 +665,14 @@ signed int GUI_print_text(char *str)
 {
 	signed int retval = 1;
 
+#if !FIX_ZEIGER || !defined(__BORLANDC__)
 	call_mouse_bg();
+#endif
 	retval = GUI_count_lines(str);
 	GUI_print_string(str, g_textline_posx, g_textline_posy);
+#if !FIX_ZEIGER || !defined(__BORLANDC__)
 	call_mouse();
+#endif
 
 	return retval;
 }
@@ -710,8 +714,13 @@ void GUI_print_string(char *str, signed int x, signed int y)
 	signed int i = 0;
 	signed int x_bak;
 	unsigned char c;
+#if FIX_ZEIGER && defined(__BORLANDC__)
+	signed int hide_mouse = zeiger_ueber_rect(0, y, 319, 199);
 
+	if (hide_mouse) call_mouse_bg();
+#else
 	call_mouse_bg();
+#endif
 
 	if (g_gui_text_centered == 1) {
 		x = GUI_get_first_pos_centered(str, x, g_textline_maxlen, 0);
@@ -766,7 +775,11 @@ void GUI_print_string(char *str, signed int x, signed int y)
 		}
 	}
 
+#if FIX_ZEIGER && defined(__BORLANDC__)
+	if (hide_mouse) call_mouse();
+#else
 	call_mouse();
+#endif
 }
 
 //7f0

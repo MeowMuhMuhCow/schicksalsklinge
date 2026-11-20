@@ -43,7 +43,7 @@ struct enemy_sheet *g_spelluser_e;	// ds:0xe5c0
 
 void MON_do_spell_damage(const signed int damage)
 {
-	dsa_trace_enter(918, "seg102:MON_do_spell_damage");
+	dsa_trace_enter(925, "seg102:MON_do_spell_damage");
 	if (damage > 0) {
 
 		if (g_spelluser_e->target_object_id < 10) {
@@ -86,7 +86,7 @@ void MON_do_spell_damage(const signed int damage)
 /* unused */
 signed int MON_get_target_PA(void)
 {
-	dsa_trace_enter(919, "seg102:MON_get_target_PA");
+	dsa_trace_enter(926, "seg102:MON_get_target_PA");
 	if (g_spelluser_e->target_object_id < 10) {
 		/* target is a hero */
 
@@ -110,7 +110,7 @@ signed int MON_get_target_PA(void)
 /* unused */
 signed int MON_get_target_RS(void)
 {
-	dsa_trace_enter(920, "seg102:MON_get_target_RS");
+	dsa_trace_enter(927, "seg102:MON_get_target_RS");
 	if (g_spelluser_e->target_object_id < 10) {
 		/* target is a hero */
 
@@ -139,7 +139,7 @@ signed int MON_get_target_RS(void)
  */
 signed int MON_get_spell_cost(const signed int mspell_id, const signed int half_cost)
 {
-	dsa_trace_enter(921, "seg102:MON_get_spell_cost");
+	dsa_trace_enter(928, "seg102:MON_get_spell_cost");
 	signed char cost = g_mon_spell_descriptions[mspell_id].ae_cost;
 
 	if (half_cost != 0) {
@@ -274,7 +274,7 @@ signed int MON_test_attrib3(const struct enemy_sheet *enemy, const signed int at
 /* Name irrefuehrend: prueft einen Gegnerzauber (Probe + MR des Ziels), kein Talent */
 signed int MON_test_spell(const struct enemy_sheet *enemy, const signed int mspell_id, signed char handicap)
 {
-	dsa_trace_enter(922, "seg102:MON_test_spell");
+	dsa_trace_enter(929, "seg102:MON_test_spell");
 	struct mon_spell_description *desc = &g_mon_spell_descriptions[mspell_id];
 
 	/* depends on MR */
@@ -300,7 +300,7 @@ signed int MON_test_spell(const struct enemy_sheet *enemy, const signed int mspe
 
 void MON_sub_ae(struct enemy_sheet *enemy, signed int ae)
 {
-	dsa_trace_enter(923, "seg102:MON_sub_ae");
+	dsa_trace_enter(930, "seg102:MON_sub_ae");
 	if (!enemy->flags.dead) {
 
 		enemy->ae -= ae;
@@ -313,7 +313,7 @@ void MON_sub_ae(struct enemy_sheet *enemy, signed int ae)
 
 signed int MON_cast_spell(struct enemy_sheet* enemy, signed char handicap)
 {
-	dsa_trace_enter(924, "seg102:MON_cast_spell");
+	dsa_trace_enter(931, "seg102:MON_cast_spell");
 	signed int mspell_id;
 	signed int retval;
 	signed int cost;
@@ -393,7 +393,7 @@ signed int MON_cast_spell(struct enemy_sheet* enemy, signed char handicap)
  */
 void mspell_verwandlung(void)
 {
-	dsa_trace_enter(925, "seg102:mspell_verwandlung");
+	dsa_trace_enter(932, "seg102:mspell_verwandlung");
 	/* set pointer to an enemy target */
 	g_spelltarget_e = &g_enemy_sheets[g_spelluser_e->target_object_id - 10];
 
@@ -438,7 +438,7 @@ void mspell_verwandlung(void)
 
 void mspell_bannbaladin(void)
 {
-	dsa_trace_enter(926, "seg102:mspell_bannbaladin");
+	dsa_trace_enter(933, "seg102:mspell_bannbaladin");
 	/* set pointer to hero target */
 	g_spelltarget = get_hero(g_spelluser_e->target_object_id - 1);
 
@@ -451,7 +451,7 @@ void mspell_bannbaladin(void)
 
 void mspell_boeser_blick(void)
 {
-	dsa_trace_enter(927, "seg102:mspell_boeser_blick");
+	dsa_trace_enter(934, "seg102:mspell_boeser_blick");
 	/* set pointer to hero target */
 	g_spelltarget = get_hero(g_spelluser_e->target_object_id - 1);
 
@@ -464,7 +464,7 @@ void mspell_boeser_blick(void)
 
 void mspell_horriphobus(void)
 {
-	dsa_trace_enter(928, "seg102:mspell_horriphobus");
+	dsa_trace_enter(935, "seg102:mspell_horriphobus");
 	/* set pointer to hero target */
 	g_spelltarget = get_hero(g_spelluser_e->target_object_id - 1);
 
@@ -478,7 +478,7 @@ void mspell_horriphobus(void)
 
 void mspell_axxeleratus(void)
 {
-	dsa_trace_enter(929, "seg102:mspell_axxeleratus");
+	dsa_trace_enter(936, "seg102:mspell_axxeleratus");
 	/* set pointer to an enemy target */
 	g_spelltarget_e = &g_enemy_sheets[g_spelluser_e->target_object_id - 10];
 
@@ -498,7 +498,7 @@ void mspell_axxeleratus(void)
 
 void mspell_balsam(void)
 {
-	dsa_trace_enter(930, "seg102:mspell_balsam");
+	dsa_trace_enter(937, "seg102:mspell_balsam");
 	signed int le;
 
 	/* set pointer to an enemy target */
@@ -552,7 +552,7 @@ void mspell_balsam(void)
 
 void mspell_blitz(void)
 {
-	dsa_trace_enter(931, "seg102:mspell_blitz");
+	dsa_trace_enter(938, "seg102:mspell_blitz");
 	if (g_spelluser_e->target_object_id < 10) {
 		/* target is a hero */
 
@@ -587,7 +587,7 @@ void mspell_blitz(void)
  * nicht durch Eisenrost, ein falscher Bruchfaktor (Curians Stab: bf 5) wird dabei auf -99 berichtigt */
 static signed int fix_unbreakable_weapon(struct inventory *p)
 {
-	dsa_trace_enter(932, "seg102:fix_unbreakable_weapon");
+	dsa_trace_enter(939, "seg102:fix_unbreakable_weapon");
 	signed int item_id = p->item_id;
 
 	if ((item_id == ITEM_ID_ZAUBERSTAB) || (item_id == ITEM_ID_HEXENBESEN) || (item_id == ITEM_ID_ORKNASE__MAGIC) ||
@@ -603,7 +603,7 @@ static signed int fix_unbreakable_weapon(struct inventory *p)
 
 void mspell_eisenrost(void)
 {
-	dsa_trace_enter(933, "seg102:mspell_eisenrost");
+	dsa_trace_enter(940, "seg102:mspell_eisenrost");
 	signed int item_id;
 
 	if (g_spelluser_e->target_object_id < 10) {
@@ -670,7 +670,7 @@ void mspell_eisenrost(void)
  * Feuerbann: halbiert den Feuerschaden (Loesungsbuch, so auch in Sternenschweif); Gardianum: der Schild der Gruppe faengt Schaden ab, bis er verbraucht ist. */
 static signed int fix_hero_spell_protect(signed int damage, const signed int fire)
 {
-	dsa_trace_enter(934, "seg102:fix_hero_spell_protect");
+	dsa_trace_enter(941, "seg102:fix_hero_spell_protect");
 	if (g_spelluser_e->target_object_id < 10) {
 #if FIX_0213
 		if (fire && get_hero(g_spelluser_e->target_object_id - 1)->fireban) {
@@ -695,7 +695,7 @@ static signed int fix_hero_spell_protect(signed int damage, const signed int fir
 
 void mspell_fulminictus(void)
 {
-	dsa_trace_enter(935, "seg102:mspell_fulminictus");
+	dsa_trace_enter(942, "seg102:mspell_fulminictus");
 	signed int damage;
 
 	/* roll 3W6 */
@@ -723,7 +723,7 @@ void mspell_fulminictus(void)
 
 void mspell_ignifaxius(void)
 {
-	dsa_trace_enter(936, "seg102:mspell_ignifaxius");
+	dsa_trace_enter(943, "seg102:mspell_ignifaxius");
 	signed int damage;
 	signed int level;
 	signed int rs_malus;
@@ -816,7 +816,7 @@ void mspell_ignifaxius(void)
 
 void mspell_plumbumbarum(void)
 {
-	dsa_trace_enter(937, "seg102:mspell_plumbumbarum");
+	dsa_trace_enter(944, "seg102:mspell_plumbumbarum");
 	signed int mod_slot;
 	signed int hero_pos;
 
@@ -855,7 +855,7 @@ void mspell_plumbumbarum(void)
 
 void mspell_saft_kraft(void)
 {
-	dsa_trace_enter(938, "seg102:mspell_saft_kraft");
+	dsa_trace_enter(945, "seg102:mspell_saft_kraft");
 	/* set the pointer to the target */
 	g_spelltarget_e = &g_enemy_sheets[g_spelluser_e->target_object_id - 10];
 
@@ -874,7 +874,7 @@ void mspell_saft_kraft(void)
 
 void mspell_armatrutz(void)
 {
-	dsa_trace_enter(939, "seg102:mspell_armatrutz");
+	dsa_trace_enter(946, "seg102:mspell_armatrutz");
 	signed int i;
 	signed int rs_bonus;
 
@@ -905,7 +905,7 @@ void mspell_armatrutz(void)
 
 void mspell_paralue(void)
 {
-	dsa_trace_enter(940, "seg102:mspell_paralue");
+	dsa_trace_enter(947, "seg102:mspell_paralue");
 	if (g_spelluser_e->target_object_id >= 10) {
 		/* target is an enemy */
 

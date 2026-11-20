@@ -1360,8 +1360,15 @@ signed int bioskey(const signed int cmd)
 
 		/* reset mouse was moved */
 		g_mouse_moved = 0;
+#if FIX_ZEIGER && defined(__BORLANDC__)
+		asm { cli; }
 		mouse_bg();
 		mouse_cursor();
+		asm { sti; }
+#else
+		mouse_bg();
+		mouse_cursor();
+#endif
 	}
 }""",
         sdl_input_block,
@@ -1791,6 +1798,21 @@ signed int update_direction(const unsigned char mod)
 {""",
         "seg003.c:turn_hint_proto",
     )
+    # Zweig Drehen/Flackern: Fix-Stufe fuer die Plattformschicht (vgalib.c wird fuer alle Stufen gleich uebersetzt)
+    s2f_p = SRC_DIR / "seg002.c"
+    s2f_txt = s2f_p.read_text(encoding="latin-1")
+    s2f_txt = replace_once(
+        s2f_txt,
+        """void call_mouse_bg(void)
+{""",
+        """#if !defined(__BORLANDC__)
+const int g_port_fix_stufe = FIX_BUGS;
+#endif
+void call_mouse_bg(void)
+{""",
+        "seg002.c:port_fix_stufe",
+    )
+    s2f_p.write_text(s2f_txt, encoding="latin-1")
     s3_p.write_text(s3_txt, encoding="latin-1")
 
     # seg004.c & seg004.h
@@ -1930,6 +1952,7 @@ void timer_isr(void)
 	((void interrupt far(*)(__CPPARGS))g_bc_timer)();
 }
 
+#if !FIX_ZEIGER || !defined(__BORLANDC__)
 /* wartet auf den naechsten Timer-Tick; wird nie aufgerufen */
 static void unused_gfx_spinlock(void)""",
         """#if defined(__BORLANDC__)
@@ -1945,6 +1968,7 @@ static void unused_gfx_spinlock(void)""",
 }
 
 #if defined(__BORLANDC__)
+#if !FIX_ZEIGER
 /* wartet auf den naechsten Timer-Tick; wird nie aufgerufen */
 static void unused_gfx_spinlock(void)""",
         "seg004.c:sti_and_old_timer",
@@ -2027,11 +2051,27 @@ void schick_reset_video(void)
         s4_txt,
         """	dst = g_pic_copy.dst;
 
+#if FIX_ZEIGER && defined(__BORLANDC__)
+	active = zeiger_puffer(mode, bak, 0);
+#endif
 	pic_copy(dst, x1, y1, x2, y2, v1, v2, v3, v4, width, height, src, mode);
+#if FIX_ZEIGER && defined(__BORLANDC__)
+	if (active) {
+		zeiger_puffer(mode, bak, 1);
+	}
+#endif
 }""",
         """	dst = g_pic_copy.dst;
 
+#if FIX_ZEIGER && defined(__BORLANDC__)
+	active = zeiger_puffer(mode, bak, 0);
+#endif
 	pic_copy(dst, x1, y1, x2, y2, v1, v2, v3, v4, width, height, src, mode);
+#if FIX_ZEIGER && defined(__BORLANDC__)
+	if (active) {
+		zeiger_puffer(mode, bak, 1);
+	}
+#endif
 #if !defined(__BORLANDC__)
 	sdl_forced_update();
 #endif
@@ -3527,11 +3567,19 @@ const uint8_t g_palette_fight2[32][3] = {
     s96_txt = s96_p.read_text(encoding="latin-1")
     s96_txt = replace_once(
         s96_txt,
-        """	call_mouse();
+        """#if FIX_ZEIGER && defined(__BORLANDC__)
+	if (hide_mouse) call_mouse();
+#else
+	call_mouse();
+#endif
 }
 
 //7f0""",
-        """	call_mouse();
+        """#if FIX_ZEIGER && defined(__BORLANDC__)
+	if (hide_mouse) call_mouse();
+#else
+	call_mouse();
+#endif
 #if !defined(__BORLANDC__)
 	sdl_forced_update();
 #endif

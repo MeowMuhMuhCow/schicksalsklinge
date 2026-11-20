@@ -58,7 +58,7 @@ struct struct_chest g_dng02_specialchests[8] = {
  */
 signed int DNG02_handler(void)
 {
-	dsa_trace_enter(626, "seg078:DNG02_handler");
+	dsa_trace_enter(633, "seg078:DNG02_handler");
 	signed int target_pos;
 	signed int mod_slot; // multi use
 	signed int i; // multi use
@@ -724,7 +724,7 @@ signed int DNG02_handler(void)
 
 void DNG02_chest00_loot(struct struct_chest* chest)
 {
-	dsa_trace_enter(627, "seg078:DNG02_chest00_loot");
+	dsa_trace_enter(634, "seg078:DNG02_chest00_loot");
 	uint8_t* ptr_bak = chest->loot.content;
 
 	chest->loot.content = (gs_dng02_chest00_content);
@@ -736,7 +736,7 @@ void DNG02_chest00_loot(struct struct_chest* chest)
 
 void DNG02_chest01_loot(struct struct_chest* chest)
 {
-	dsa_trace_enter(628, "seg078:DNG02_chest01_loot");
+	dsa_trace_enter(635, "seg078:DNG02_chest01_loot");
 	uint8_t* ptr_bak = chest->loot.content;
 
 	chest->loot.content = gs_dng02_chest01_content;
@@ -748,7 +748,7 @@ void DNG02_chest01_loot(struct struct_chest* chest)
 
 void DNG02_chest02_loot(struct struct_chest* chest)
 {
-	dsa_trace_enter(629, "seg078:DNG02_chest02_loot");
+	dsa_trace_enter(636, "seg078:DNG02_chest02_loot");
 	uint8_t* ptr_bak = chest->loot.content;
 
 	chest->loot.content = gs_dng02_chest02_content;
@@ -760,7 +760,7 @@ void DNG02_chest02_loot(struct struct_chest* chest)
 
 void DNG02_chest03_loot(struct struct_chest* chest)
 {
-	dsa_trace_enter(630, "seg078:DNG02_chest03_loot");
+	dsa_trace_enter(637, "seg078:DNG02_chest03_loot");
 	uint8_t* ptr_bak = chest->loot.content;
 
 	chest->loot.content = gs_dng02_chest03_content;
@@ -778,7 +778,7 @@ void DNG02_chest03_loot(struct struct_chest* chest)
  */
 void DNG02_chest04_loot(struct struct_chest* chest)
 {
-	dsa_trace_enter(631, "seg078:DNG02_chest04_loot");
+	dsa_trace_enter(638, "seg078:DNG02_chest04_loot");
 	signed int i;
 	signed int answer;
 	signed int tw_bak;
@@ -826,7 +826,7 @@ void DNG02_chest04_loot(struct struct_chest* chest)
 
 void DNG02_chest05_loot(struct struct_chest* chest)
 {
-	dsa_trace_enter(632, "seg078:DNG02_chest05_loot");
+	dsa_trace_enter(639, "seg078:DNG02_chest05_loot");
 	uint8_t* ptr_bak = chest->loot.content;
 
 	chest->loot.content = gs_dng02_chest05_content;
@@ -838,7 +838,7 @@ void DNG02_chest05_loot(struct struct_chest* chest)
 
 void DNG02_chest06_open(struct struct_chest* chest)
 {
-	dsa_trace_enter(633, "seg078:DNG02_chest06_open");
+	dsa_trace_enter(640, "seg078:DNG02_chest06_open");
 	loot_corpse(
 		chest,
 		get_tx(19), /* "HIER LIEGT DIE NOCH RECHT FRISCHE LEICHE EINES JUNGEN WANDERERS, DE..." */ // corpse of a wanderer, slain by zombies.
@@ -848,7 +848,7 @@ void DNG02_chest06_open(struct struct_chest* chest)
 
 void DNG02_chest06_loot(struct struct_chest* chest)
 {
-	dsa_trace_enter(634, "seg078:DNG02_chest06_loot");
+	dsa_trace_enter(641, "seg078:DNG02_chest06_loot");
 	uint8_t* ptr_bak = chest->loot.content;
 
 	chest->loot.content = gs_dng02_chest06_content;
@@ -869,7 +869,7 @@ void DNG02_chest06_loot(struct struct_chest* chest)
  */
 void DNG02_fight_intro(const signed int fight_id)
 {
-	dsa_trace_enter(635, "seg078:DNG02_fight_intro");
+	dsa_trace_enter(642, "seg078:DNG02_fight_intro");
 	if (fight_id == FIGHT_ID_F046_13) {
 		GUI_output(get_tx(32)); /* "BIS AUF DIE VIER ZOMBIES, DIE SICH EUCH BEDROHLICH NÄHERN, IST DER..." */ // Four approaching zombies.
 	} else if (fight_id == FIGHT_ID_F046_22) {

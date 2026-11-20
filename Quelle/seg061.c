@@ -126,6 +126,14 @@ void do_temple(void)
 			set_audio_track(ARCHIVE_FILE_TEMPLE_XMI);
 
 			/* draw temple icon */
+#if FIX_ZEIGER && defined(__BORLANDC__)
+			g_pic_copy.x1 = 99;
+			g_pic_copy.y1 = 88;
+			g_pic_copy.x2 = 139;
+			g_pic_copy.y2 = 110;
+			g_pic_copy.src = g_buffer8_ptr + 7000;
+			do_pic_copy(0);
+#else
 			g_pic_copy.x1 = g_pic_copy.y1 = 0;
 			g_pic_copy.x2 = 40;
 			g_pic_copy.y2 = 22;
@@ -136,6 +144,7 @@ void do_temple(void)
 			do_pic_copy(0);
 			call_mouse();
 			g_pic_copy.dst = g_vga_memstart;
+#endif
 
 			/* location string */
 			sprintf(g_dtp2, get_ttx(235), /* "%s-TEMPEL IN %s" */

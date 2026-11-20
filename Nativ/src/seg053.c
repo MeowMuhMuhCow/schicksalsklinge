@@ -42,7 +42,7 @@ struct healer_descr g_healer_descr_table[41]; // ds:0x66ea
  */
 signed int is_hero_healable(const struct struct_hero *hero)
 {
-	dsa_trace_enter(441, "seg053:is_hero_healable");
+	dsa_trace_enter(448, "seg053:is_hero_healable");
 	if (hero->flags.dead || hero->flags.petrified) {
 
 		/* this hero can not be helped */
@@ -59,7 +59,7 @@ signed int is_hero_healable(const struct struct_hero *hero)
  */
 void do_healer(void)
 {
-	dsa_trace_enter(442, "seg053:do_healer");
+	dsa_trace_enter(449, "seg053:do_healer");
 	signed char motivation = 0; /* 0 = not yet greeted, 1 = normal, 2 = annoyed (night): double price */
 	signed int leave_healer = 0;
 	signed int redraw_locline;

@@ -18,7 +18,7 @@
 
 uint16_t swap_u16(const uint16_t val)
 {
-	dsa_trace_enter(201, "seg008:swap_u16");
+	dsa_trace_enter(208, "seg008:swap_u16");
 	return (val << 8) | (val >> 8);
 }
 
@@ -26,7 +26,7 @@ uint16_t swap_u16(const uint16_t val)
 
 void draw_h_line(uint8_t *ptr, signed int count, const signed int color)
 {
-	dsa_trace_enter(202, "seg008:draw_h_line");
+	dsa_trace_enter(209, "seg008:draw_h_line");
 	signed int i;
 
 	for (i = 0; i < count; i++)
@@ -35,7 +35,7 @@ void draw_h_line(uint8_t *ptr, signed int count, const signed int color)
 
 void draw_h_spaced_dots(uint8_t *ptr, const signed int count, const signed int color, const signed int space)
 {
-	dsa_trace_enter(203, "seg008:draw_h_spaced_dots");
+	dsa_trace_enter(210, "seg008:draw_h_spaced_dots");
 	signed int i;
 
 	for (i = 0; i < count; i++) {
@@ -48,7 +48,7 @@ void pic_copy(uint8_t *dst, const signed int x1, const signed int y1, const sign
 	const signed int val1, const signed int val2, const signed int val3, const signed int val4,
 	const signed int src_width, const signed int src_height, uint8_t *src, const signed int mode)
 {
-	dsa_trace_enter(204, "seg008:pic_copy");
+	dsa_trace_enter(211, "seg008:pic_copy");
 	signed int r_y2, r_y1, r_x1, r_x2;
 	signed int cur_height;
 	signed int cur_width;
@@ -235,7 +235,7 @@ void copy_solid_permuted(uint8_t *dst, uint8_t *src, const signed int width_to_c
 	const signed int height, const signed int dst_width,
 	const signed int src_width, const signed int solid)
 {
-	dsa_trace_enter(205, "seg008:copy_solid_permuted");
+	dsa_trace_enter(212, "seg008:copy_solid_permuted");
 	uint8_t *s = src;
 	uint8_t *d = dst;
 	signed int y;
@@ -260,7 +260,7 @@ void copy_solid(uint8_t *dst, uint8_t *src, const signed int width_to_copy,
 	const signed int height, const signed int dst_width,
 	const signed int src_width, const signed int solid)
 {
-	dsa_trace_enter(206, "seg008:copy_solid");
+	dsa_trace_enter(213, "seg008:copy_solid");
 	uint8_t *s = src;
 	uint8_t *d = dst;
 	signed int y;
@@ -281,7 +281,7 @@ void copy_solid(uint8_t *dst, uint8_t *src, const signed int width_to_copy,
 void decomp_rle(const signed int width, signed int height, uint8_t *dst,
 	uint8_t *src, uint8_t *tmp_buffer, const signed int mode)
 {
-	dsa_trace_enter(207, "seg008:decomp_rle");
+	dsa_trace_enter(214, "seg008:decomp_rle");
 	uint8_t *my_dst;
 	signed int i;
 	signed int x;

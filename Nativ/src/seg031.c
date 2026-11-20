@@ -41,7 +41,7 @@ struct struct_informer_tab g_informer_tab[15]; // ds:0x5ed6
  */
 void do_random_talk(const signed int talk_id, const signed int informer_id)
 {
-	dsa_trace_enter(308, "seg031:do_random_talk");
+	dsa_trace_enter(315, "seg031:do_random_talk");
 	signed int optioncount;
 	signed int answer = 0;
 	signed int txt_id;
@@ -274,7 +274,7 @@ char* get_informer_forename(void)
  */
 signed int informer_id_from_current_town(void)
 {
-	dsa_trace_enter(309, "seg031:informer_id_from_current_town");
+	dsa_trace_enter(316, "seg031:informer_id_from_current_town");
 	const struct struct_informer_tab *p_info = &g_informer_tab[0];
 	signed int i;
 
@@ -393,7 +393,7 @@ char* get_random_tavern_message(void)
  */
 void drink_while_drinking(const signed int amount)
 {
-	dsa_trace_enter(310, "seg031:drink_while_drinking");
+	dsa_trace_enter(317, "seg031:drink_while_drinking");
 	struct struct_hero *hero = get_hero(0);
 	signed int i;
 
@@ -425,7 +425,7 @@ void drink_while_drinking(const signed int amount)
  */
 void eat_while_drinking(const signed int amount)
 {
-	dsa_trace_enter(311, "seg031:eat_while_drinking");
+	dsa_trace_enter(318, "seg031:eat_while_drinking");
 	struct struct_hero *hero = get_hero(0);
 	signed int i;
 

@@ -45,7 +45,7 @@ static struct int16_t_7 g_seg047_init3 = { 0, 0, 0, 0, 0, 0, 0 }; // ds:0x64bf, 
  */
 signed int get_hero_CH_best(void)
 {
-	dsa_trace_enter(401, "seg047:get_hero_CH_best");
+	dsa_trace_enter(408, "seg047:get_hero_CH_best");
 	signed int retval;
 	struct struct_hero *hero_i;
 	signed int i;
@@ -76,7 +76,7 @@ signed int get_hero_CH_best(void)
  */
 signed int get_hero_KK_best(void)
 {
-	dsa_trace_enter(402, "seg047:get_hero_KK_best");
+	dsa_trace_enter(409, "seg047:get_hero_KK_best");
 	signed int retval;
 	struct struct_hero *hero_i;
 	signed int i;
@@ -109,7 +109,7 @@ signed int get_hero_KK_best(void)
  */
 signed int hero_is_diseased(const struct struct_hero *hero)
 {
-	dsa_trace_enter(403, "seg047:hero_is_diseased");
+	dsa_trace_enter(410, "seg047:hero_is_diseased");
 	signed int disease_id;
 
 	for (disease_id = 1; disease_id <= 7; disease_id++) {
@@ -133,7 +133,7 @@ signed int hero_is_diseased(const struct struct_hero *hero)
  */
 signed int hero_is_poisoned(const struct struct_hero *hero)
 {
-	dsa_trace_enter(404, "seg047:hero_is_poisoned");
+	dsa_trace_enter(411, "seg047:hero_is_poisoned");
 	signed int poison_id;
 
 	for (poison_id = 1; poison_id <= 9; poison_id++) {
@@ -155,7 +155,7 @@ signed int hero_is_poisoned(const struct struct_hero *hero)
  */
 void hero_gets_poisoned(struct struct_hero *hero, const signed int poison_id)
 {
-	dsa_trace_enter(405, "seg047:hero_gets_poisoned");
+	dsa_trace_enter(412, "seg047:hero_gets_poisoned");
 	if (!hero->flags.dead) {
 		/* TODO: Original-Bug?: What if the hero is already poisoned? */
 		/* Remark: probably the same problem as Original-Bug 46: the log bytes of the suffered effects are reset. */
@@ -188,7 +188,7 @@ void hero_gets_poisoned(struct struct_hero *hero, const signed int poison_id)
  */
 void hero_gets_diseased(struct struct_hero *hero, const signed int disease_id)
 {
-	dsa_trace_enter(406, "seg047:hero_gets_diseased");
+	dsa_trace_enter(413, "seg047:hero_gets_diseased");
 #ifdef M302de_ORIGINAL_BUGFIX
 	/* not a real BUG, but very useless */
 	if (hero->typus == HERO_TYPE_NONE)
@@ -253,7 +253,7 @@ void hero_gets_diseased(struct struct_hero *hero, const signed int disease_id)
  */
 void hero_disease_test(struct struct_hero *hero, const signed int disease_id, const signed int probability)
 {
-	dsa_trace_enter(407, "seg047:hero_disease_test");
+	dsa_trace_enter(414, "seg047:hero_disease_test");
 #ifdef M302de_ORIGINAL_BUGFIX
 	/* not a real BUG, but very useless */
 	if (hero->typus == HERO_TYPE_NONE) {
@@ -294,7 +294,7 @@ void hero_disease_test(struct struct_hero *hero, const signed int disease_id, co
  */
 signed int check_hero_KK_unused(const signed int val)
 {
-	dsa_trace_enter(408, "seg047:check_hero_KK_unused");
+	dsa_trace_enter(415, "seg047:check_hero_KK_unused");
 	return get_hero(0)->attrib[ATTRIB_KK].current + get_hero(0)->attrib[ATTRIB_KK].mod >= val ? 1 : 0;
 }
 
@@ -312,7 +312,7 @@ signed int check_hero_KK_unused(const signed int val)
  */
 signed int check_heroes_KK(const signed int val)
 {
-	dsa_trace_enter(409, "seg047:check_heroes_KK");
+	dsa_trace_enter(416, "seg047:check_heroes_KK");
 	struct struct_hero *hero;
 	signed int sum;
 
@@ -407,7 +407,7 @@ void make_valuta_str(char *dst, int32_t money) {
  */
 void update_atpa(struct struct_hero *hero)
 {
-	dsa_trace_enter(410, "seg047:update_atpa");
+	dsa_trace_enter(417, "seg047:update_atpa");
 	div_t erg;
 	signed int diff;
 	signed int i;
@@ -460,7 +460,7 @@ void update_atpa(struct struct_hero *hero)
  */
 signed int menu_enter_delete(char* ptr, const signed int entries, const signed int mode)
 {
-	dsa_trace_enter(411, "seg047:menu_enter_delete");
+	dsa_trace_enter(418, "seg047:menu_enter_delete");
 	signed int i;
 	signed int answer = 0;
 	signed int i_max;
@@ -523,7 +523,7 @@ signed int menu_enter_delete(char* ptr, const signed int entries, const signed i
  */
 signed int select_hero_from_group(char *title)
 {
-	dsa_trace_enter(412, "seg047:select_hero_from_group");
+	dsa_trace_enter(419, "seg047:select_hero_from_group");
 	signed int i;
 	signed int answer;
 	struct int16_t_7 dst = g_seg047_init1;
@@ -596,7 +596,7 @@ signed int select_hero_from_group(char *title)
  */
 signed int select_hero_ok(char *title)
 {
-	dsa_trace_enter(413, "seg047:select_hero_ok");
+	dsa_trace_enter(420, "seg047:select_hero_ok");
 	signed int i;
 	signed int answer;
 	struct int16_t_7 dst = g_seg047_init2;
@@ -666,7 +666,7 @@ signed int select_hero_ok(char *title)
  */
 signed int select_hero_ok_forced(char *title)
 {
-	dsa_trace_enter(414, "seg047:select_hero_ok_forced");
+	dsa_trace_enter(421, "seg047:select_hero_ok_forced");
 	signed int i;
 	signed int answer;
 	struct int16_t_7 dst = g_seg047_init3;
@@ -740,7 +740,7 @@ signed int select_hero_ok_forced(char *title)
  */
 signed int count_heroes_in_group(void)
 {
-	dsa_trace_enter(415, "seg047:count_heroes_in_group");
+	dsa_trace_enter(422, "seg047:count_heroes_in_group");
 	struct struct_hero *hero_i;
 	signed int i;
 	signed int retval = 0;
@@ -764,7 +764,7 @@ signed int count_heroes_in_group(void)
  */
 void hero_get_drunken(struct struct_hero *hero)
 {
-	dsa_trace_enter(416, "seg047:hero_get_drunken");
+	dsa_trace_enter(423, "seg047:hero_get_drunken");
 	if (!hero->drunk) {
 
 		/* set the hero drunken */
@@ -804,7 +804,7 @@ void hero_get_drunken(struct struct_hero *hero)
  */
 void hero_get_sober(struct struct_hero *hero)
 {
-	dsa_trace_enter(417, "seg047:hero_get_sober");
+	dsa_trace_enter(424, "seg047:hero_get_sober");
 	/* This is checked twice: the caller (seg002, at 10 o'clock) checks hero->drunk, too */
 	/* Is hero drunken ? */
 	if (hero->drunk == 0)

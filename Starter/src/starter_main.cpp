@@ -3114,7 +3114,7 @@ static void render_screen_select_game(void) {
         bool dim_probenlog  = (g.chosen_stufe == STUFE_ORIG) || web_way_active;
         bool hov_drehen     = false;
         if (g.teil == 1) {
-            bool dim_drehen = (g.chosen_stufe == STUFE_ORIG) || web_way_active || hov_dos_btn;
+            bool dim_drehen = (g.chosen_stufe == STUFE_ORIG) || web_way_active;
             hov_drehen = bg_hover && point_in_rect(g_mouse_x, g_mouse_y, chk_drehen_x, chk_drehen_y, chk_drehen_w, chk_drehen_h);
             draw_checkbox_16(chk_drehen_x, cy + 40, g.chosen_drehen, hov_drehen, dim_drehen);
             draw_text(chk_drehen_x + 22, cy + 41, drehen_lbl,
@@ -3283,7 +3283,7 @@ static void render_screen_select_game(void) {
                     tip_override   = "Hinweis: Flüssig drehen ist in »Original« nicht aktiv – bitte unter Fixes »Wichtige« oder »Alle« wählen.";
                     tip_border_col = 0xFFE3A63Au;
                 } else {
-                    active_tooltip = "Flüssig drehen (Schicksalsklinge): Weicher 90°-Schwenk in Stadt & Dungeon (Windows-Fassung, DSA_DREHEN=1/0)";
+                    active_tooltip = "Flüssig drehen (Schicksalsklinge): Weicher 90°-Schwenk in Stadt & Dungeon (gilt für Windows & DOSBox)";
                 }
             }
         }
@@ -3459,13 +3459,13 @@ static void render_screen_settings(void) {
     draw_text(290, 524, ready_info, g.verfuegbar ? 0xFFE6E9EFu : 0xFFE3A63Au, FONT_13, false);
 
     if (g.teil == 1) {
-        const char *dr_set_lbl = "Fl\xC3\xBCssig drehen (Schicksalsklinge) [R] – weicher 90\xC2\xB0-Schwenk beim Drehen (Windows, ab \xC2\xBBWichtige Fixes\xC2\xAB)";
+        const char *dr_set_lbl = "Fl\xC3\xBCssig drehen (Schicksalsklinge) [R] – weicher 90\xC2\xB0-Schwenk beim Drehen (Windows & DOSBox, ab \xC2\xBBWichtige Fixes\xC2\xAB)";
         bool dim_dr_set = (g.chosen_stufe == STUFE_ORIG);
         bool hov_dr_set = bg_hover && point_in_rect(g_mouse_x, g_mouse_y, 268, 548, 700, 22);
         draw_checkbox_16(268, 550, g.chosen_drehen, hov_dr_set, dim_dr_set);
         draw_text(290, 550, dr_set_lbl, dim_dr_set ? 0xFF636C7Eu : 0xFFE6E9EFu, FONT_13, false);
         if (hov_dr_set) {
-            active_tooltip = "Flüssig drehen (Schicksalsklinge): Setzt beim Start der Windows-Fassung DSA_DREHEN=1 bzw. 0";
+            active_tooltip = "Flüssig drehen (Schicksalsklinge): Schaltet den 90°-Schwenk für Windows (DSA_DREHEN) und DOSBox (DREHEN.AUS)";
         }
     }
 
@@ -5224,6 +5224,25 @@ static int launch_dos_game(GameCatalogEntry &g) {
         HANDLE h_pl = prepare_probenlog(g, dos_dir, play_dir, &plog_pid);
         if (h_pl) CloseHandle(h_pl);
 
+        /* Fluessig drehen (Schicksalsklinge DOS, FIX_DREHEN): Vorgabe AN (keine DREHEN.AUS),
+         * abgeschaltet ueber DREHEN.AUS im DOS-Arbeitsverzeichnis (play_dir) sowie DREHEN_AUS.txt im DOS-Ordner. */
+        if (g.teil == 1) {
+            std::string drehen_aus_play = join_path(play_dir, "DREHEN.AUS");
+            std::string drehen_aus_txt  = join_path(dos_dir,  "DREHEN_AUS.txt");
+            if (g.chosen_drehen) {
+                DeleteFileA(utf8_to_win1252(drehen_aus_play).c_str());
+                DeleteFileA(utf8_to_win1252(drehen_aus_txt).c_str());
+            } else {
+                FILE *df1 = fopen(utf8_to_win1252(drehen_aus_play).c_str(), "wb");
+                if (df1) fclose(df1);
+                FILE *df2 = fopen(utf8_to_win1252(drehen_aus_txt).c_str(), "w");
+                if (df2) {
+                    fprintf(df2, "Hartes Drehen gewuenscht, wieder an mit DREHEN_AN.bat\n");
+                    fclose(df2);
+                }
+            }
+        }
+
         /* Intro-Steuerung fuer alle 3 Spiele in DOSBox:
          * - DSA 1: 'if exist INTRO.EXE intro' vor dem Hauptprogramm (nur wenn chosen_intro == true)
          * - DSA 2: 'E:\SCHWEIF.EXE -x' spielt Intro; 'E:\SCHWEIF.EXE' (mit GAMES\LASTGAME) ueberspringt Intro
@@ -5299,9 +5318,25 @@ static int launch_dos_game(GameCatalogEntry &g) {
             }
         }
 
+        /* Mausempfindlichkeit fuer DOSBox: DOSBox bewegt den DOS-Zeiger pro Bildschirmpunkt der echten Maus um einen
+         * Schritt (DOS-Breite 640 Schritte), unabhaengig von der Bildgroesse. Auf grossen Bildschirmen rast der Zeiger
+         * daher. Wir skalieren so, dass eine Mausbewegung ueber die Bildbreite den Zeiger einmal ueber das Bild fuehrt. */
+        int maus_bildbreite = 1280;
+        if (is_fs) {
+            int sw = GetSystemMetrics(SM_CXSCREEN), sh = GetSystemMetrics(SM_CYSCREEN);
+            if (sw > 0 && sh > 0) maus_bildbreite = (sw * 3 > sh * 4) ? (sh * 4 / 3) : sw;
+        } else {
+            int ww = atoi(win_res);
+            if (ww > 0) maus_bildbreite = ww;
+        }
+        int maus_sens = (64000 + maus_bildbreite / 2) / maus_bildbreite;
+        if (maus_sens < 10) maus_sens = 10;
+        if (maus_sens > 100) maus_sens = 100;
+
         FILE *cfp = fopen(utf8_to_win1252(conf_path).c_str(), "w");
         if (cfp) {
             fprintf(cfp, "[sdl]\n");
+            fprintf(cfp, "sensitivity=%d\n", maus_sens);
             if (is_fs) {
                 fprintf(cfp, "fullscreen=true\n");
                 fprintf(cfp, "fullresolution=desktop\n");
@@ -5363,9 +5398,11 @@ static int launch_dos_game(GameCatalogEntry &g) {
             fprintf(dfp, "gog_dosbox=%s\n", dosbox_exe.c_str());
             fprintf(dfp, "fix_exe=%s\n", fix_src.c_str());
             if (g.teil == 1) {
+                fprintf(dfp, "drehen=%d\n", (g.chosen_drehen && !is_orig) ? 1 : 0);
                 fprintf(dfp, "schick_dat=%s\n", active_schick_dat.c_str());
             }
             fprintf(dfp, "exe_cmd=%s\n", exe_cmd.c_str());
+                fprintf(dfp, "maus_empfindlichkeit=%d\n", maus_sens);
             fprintf(dfp, "conf=%s\n", conf_path.c_str());
             fclose(dfp);
         }
@@ -5590,7 +5627,7 @@ static void handle_mouse_click(int mx, int my, bool &running) {
                     if (point_in_rect(mx, my, chk_drehen_x, cy + 38, chk_drehen_w, 22)) {
                         g_games[i].chosen_drehen = !g_games[i].chosen_drehen;
                         g_status_msg = g_games[i].name + " – Flüssig drehen: " +
-                                       (g_games[i].chosen_drehen ? "Eingeschaltet (DSA_DREHEN=1)" : "Ausgeschaltet (DSA_DREHEN=0)");
+                                       (g_games[i].chosen_drehen ? "Eingeschaltet (Windows & DOSBox)" : "Ausgeschaltet (Windows & DOSBox)");
                         save_einstellungen_ini();
                         return;
                     }
@@ -5812,7 +5849,7 @@ static void handle_mouse_click(int mx, int my, bool &running) {
         if (g.teil == 1 && point_in_rect(mx, my, 268, 548, 700, 22)) {
             g.chosen_drehen = !g.chosen_drehen;
             g_status_msg = std::string("Flüssig drehen (Schicksalsklinge): ") +
-                           (g.chosen_drehen ? "Eingeschaltet (DSA_DREHEN=1)" : "Ausgeschaltet (DSA_DREHEN=0)");
+                           (g.chosen_drehen ? "Eingeschaltet (Windows & DOSBox)" : "Ausgeschaltet (Windows & DOSBox)");
             save_einstellungen_ini();
             return;
         }
@@ -6047,7 +6084,7 @@ static void handle_keydown(const SDL_KeyboardEvent &kev, bool &running) {
                 if (g_games[k].teil == 1) {
                     g_games[k].chosen_drehen = !g_games[k].chosen_drehen;
                     g_status_msg = std::string("Flüssig drehen (Schicksalsklinge): ") +
-                                   (g_games[k].chosen_drehen ? "Eingeschaltet (DSA_DREHEN=1)" : "Ausgeschaltet (DSA_DREHEN=0)");
+                                   (g_games[k].chosen_drehen ? "Eingeschaltet (Windows & DOSBox)" : "Ausgeschaltet (Windows & DOSBox)");
                 }
             }
             save_einstellungen_ini();
@@ -6179,7 +6216,7 @@ static void handle_keydown(const SDL_KeyboardEvent &kev, bool &running) {
         if (ch == 'R' && g.teil == 1) {
             g.chosen_drehen = !g.chosen_drehen;
             g_status_msg = std::string("Flüssig drehen (Schicksalsklinge): ") +
-                           (g.chosen_drehen ? "Eingeschaltet (DSA_DREHEN=1)" : "Ausgeschaltet (DSA_DREHEN=0)");
+                           (g.chosen_drehen ? "Eingeschaltet (Windows & DOSBox)" : "Ausgeschaltet (Windows & DOSBox)");
             save_einstellungen_ini();
             return;
         }

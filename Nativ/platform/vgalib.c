@@ -38,8 +38,34 @@ void sdl_exit_video(void)
 	dsa_platform_shutdown();
 }
 
+/* Mauszeiger-Flackern (ab Wichtige Fixes): Das Spiel blendet den Zeiger vor jedem Neuzeichnen kurz aus
+ * (call_mouse_bg) und danach wieder ein (call_mouse). Wurde genau dazwischen ein Bild gezeigt, flackerte der Zeiger.
+ * Jetzt wird ein Bild, das nur waehrend dieser kurzen Luecke entsteht, nicht gezeigt - man sieht erst das fertige Bild
+ * mit Zeiger (auch bei gleichzeitigem Palettenwechsel, z. B. beim Verlassen eines Hauses). Bleibt der Zeiger laenger
+ * aus (Zwischensequenzen, Ueberblendungen), wird nach 300 ms normal gezeigt.
+ * g_port_fix_stufe kommt aus dem Spielcode (FIX_BUGS der jeweiligen Stufe), ORIG bleibt unveraendert. */
+extern const int g_port_fix_stufe;
+extern signed int g_mouse_refresh_flag;
+static uint32_t g_zeiger_aus_seit = 0;
+
+static int zeiger_luecke_aussetzen(void)
+{
+	uint32_t jetzt;
+	if (g_port_fix_stufe < 1 || g_mouse_refresh_flag >= 0) {
+		g_zeiger_aus_seit = 0;
+		return 0;
+	}
+	jetzt = dsa_platform_get_ticks_ms();
+	if (!g_zeiger_aus_seit) g_zeiger_aus_seit = jetzt ? jetzt : 1;
+	return (jetzt - g_zeiger_aus_seit) < 300;
+}
+
 static void sync_and_present_now(void)
 {
+	if (zeiger_luecke_aussetzen()) {
+		dsa_platform_poll_events_only();
+		return;
+	}
 	unsigned char *vram = dsa_platform_get_vram();
 	if (g_vga_memstart && vram && g_vga_memstart != vram) {
 		memcpy(vram, g_vga_memstart, O_WIDTH * O_HEIGHT);

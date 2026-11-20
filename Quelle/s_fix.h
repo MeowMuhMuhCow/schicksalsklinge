@@ -440,7 +440,6 @@
  * FIX_0437   wichtig  mittel    -       ja         Gruppenwechsel in eine Gruppe, die schon in einem Ort steht: Statuszeile und Herberge der alten Gruppe
  * FIX_0438   alles    egal      -       ja         Hauswaende auf der linken Strassenseite zeigen die Fassade verkehrt herum
  * FIX_0439   alles    egal      -       ja         Tempel zeigen von der Seite eine Fachwerkwand statt ihrer Front
- * FIX_0440   wichtig  mittel    ja      ja         Geoeffnete Truhe setzt Schloss-Erschwernis im Speicher auf 0 (bleibt nach Spielstand-Laden 0)
  */
 #ifndef S_FIX_H
 #define S_FIX_H
@@ -478,6 +477,24 @@
  * im Spielordner liegt (wie der optionale Extra-Patch NOAPLOSS von NRS, 2016). */
 #ifndef FIX_SPEICHERN
 #define FIX_SPEICHERN FIX_STUFE_W
+#endif
+
+/* Zusatzfunktion, keine Fehlerbehebung: fluessiger Schwenk bei 90-Grad-Drehung in Stadt und Dungeon.
+ * Vorgabe an, abschaltbar ueber DREHEN.AUS im Spielordner. */
+#ifndef FIX_DREHEN
+#define FIX_DREHEN FIX_STUFE_W
+#endif
+
+/* Zusatzfunktion, keine Fehlerbehebung: keine Kopierschutzabfrage beim Spielstart in den DOS-Fix-Fassungen
+ * (wie in der Windows-/Linux-/Browser-Fassung). */
+#ifndef FIX_KOPIERSCHUTZ
+#define FIX_KOPIERSCHUTZ FIX_STUFE_W
+#endif
+
+/* Zusatzfunktion, keine Fehlerbehebung: Mauszeiger flackert bei Schritten, Drehungen (inkl. Schwenk) und
+ * Haus-Uebergaengen nicht mehr. */
+#ifndef FIX_ZEIGER
+#define FIX_ZEIGER FIX_STUFE_W
 #endif
 
 #ifndef FIX_0001
@@ -1655,9 +1672,6 @@
 #endif
 #ifndef FIX_0439
 #define FIX_0439 FIX_STUFE_A
-#endif
-#ifndef FIX_0440
-#define FIX_0440 FIX_STUFE_WX
 #endif
 
 /* SEG002 ist resident: ohne Platz fuer die Behebungen entfallen dort nie aufgerufene Funktionen */

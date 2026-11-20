@@ -69,7 +69,7 @@ typedef unsigned int uint32;
 int ppDecrunch(uint8 *src, uint8 *dest, uint8 *offset_lens,
                uint32 src_len, uint32 dest_len, uint8 skip_bits)
 {
-	dsa_trace_enter(208, "seg009:ppDecrunch");
+	dsa_trace_enter(215, "seg009:ppDecrunch");
   uint8 *buf_src, *out, *dest_end, bits_left = 0, bit_cnt;
   uint32 bit_buffer = 0, x, todo, offbits, offset, written=0;
 
@@ -118,7 +118,7 @@ int ppDecrunch(uint8 *src, uint8 *dest, uint8 *offset_lens,
 
 void decomp_pp20(uint8_t *src, uint8_t *dst, uint8_t *p3, uint32_t plen)
 {
-	dsa_trace_enter(209, "seg009:decomp_pp20");
+	dsa_trace_enter(216, "seg009:decomp_pp20");
 	size_t unplen;
 #if !defined(__BORLANDC__)
 	if (plen < 4)

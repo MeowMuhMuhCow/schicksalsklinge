@@ -128,7 +128,16 @@ def main():
           '#ifndef FIX_HIMMEL', '#define FIX_HIMMEL FIX_STUFE_W', '#endif', '',
           '/* Zusatzfunktion, keine Fehlerbehebung (Opt-in): Speichern ausserhalb eines Tempels ohne AP-Verlust, nur wenn APFREI.AN',
           ' * im Spielordner liegt (wie der optionale Extra-Patch NOAPLOSS von NRS, 2016). */',
-          '#ifndef FIX_SPEICHERN', '#define FIX_SPEICHERN FIX_STUFE_W', '#endif', '']
+          '#ifndef FIX_SPEICHERN', '#define FIX_SPEICHERN FIX_STUFE_W', '#endif', '',
+          '/* Zusatzfunktion, keine Fehlerbehebung: fluessiger Schwenk bei 90-Grad-Drehung in Stadt und Dungeon.',
+          ' * Vorgabe an, abschaltbar ueber DREHEN.AUS im Spielordner. */',
+          '#ifndef FIX_DREHEN', '#define FIX_DREHEN FIX_STUFE_W', '#endif', '',
+          '/* Zusatzfunktion, keine Fehlerbehebung: keine Kopierschutzabfrage beim Spielstart in den DOS-Fix-Fassungen',
+          ' * (wie in der Windows-/Linux-/Browser-Fassung). */',
+          '#ifndef FIX_KOPIERSCHUTZ', '#define FIX_KOPIERSCHUTZ FIX_STUFE_W', '#endif', '',
+          '/* Zusatzfunktion, keine Fehlerbehebung: Mauszeiger flackert bei Schritten, Drehungen (inkl. Schwenk) und',
+          ' * Haus-Uebergaengen nicht mehr. */',
+          '#ifndef FIX_ZEIGER', '#define FIX_ZEIGER FIX_STUFE_W', '#endif', '']
     A = ['; s_fix.inc - Fehlerbehebungen per Schalter fuer TASM (erzeugt von Werkzeuge/mkfix.py, siehe s_fix.h)',
          'ifndef FIX_BUGS', 'FIX_BUGS = 0', 'endif', 'ifndef FIX_EXPLOITS', 'if FIX_BUGS gt 0', 'FIX_EXPLOITS = 1', 'else',
          'FIX_EXPLOITS = 0', 'endif', 'endif']

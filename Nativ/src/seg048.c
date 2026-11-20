@@ -58,7 +58,7 @@ struct mouse_cursor *g_current_cursor_bak; // ds:0xe3ae
 /* Borlandified and identical */
 void reset_item_selector(void)
 {
-	dsa_trace_enter(418, "seg048:reset_item_selector");
+	dsa_trace_enter(425, "seg048:reset_item_selector");
 	if (g_status_page_mode < 3) {
 
 		/* remove the previous border */
@@ -100,7 +100,7 @@ void reset_item_selector(void)
 /* Borlandified and identical */
 void status_menu(signed int hero_pos)
 {
-	dsa_trace_enter(419, "seg048:status_menu");
+	dsa_trace_enter(426, "seg048:status_menu");
 	signed int answer;
 	signed int done;
 	signed int force_redraw;
@@ -845,7 +845,7 @@ refresh3:
 /* Borlandified and identical */
 void status_select_hero(void)
 {
-	dsa_trace_enter(420, "seg048:status_select_hero");
+	dsa_trace_enter(427, "seg048:status_select_hero");
 
 	if (!g_statusmenu_allowed || !gs_group_member_counts[gs_active_group_id]) {
 		/* Yes, it was written that way! */

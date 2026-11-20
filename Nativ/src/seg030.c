@@ -120,7 +120,7 @@ char* get_random_unknown_informer_name(const int informer_id_plus_1)
 /* unused in the game */
 void print_date(void)
 {
-	dsa_trace_enter(304, "seg030:print_date");
+	dsa_trace_enter(311, "seg030:print_date");
 	signed int tw_bak;
 
 	prepare_date_str();
@@ -136,7 +136,7 @@ void print_date(void)
 /* schreibt Wochentag, Datum, Jahreszeit, Jahr, Stunde und ggf. den Feiertag nach g_dtp2 */
 void prepare_date_str(void)
 {
-	dsa_trace_enter(305, "seg030:prepare_date_str");
+	dsa_trace_enter(312, "seg030:prepare_date_str");
 	signed int unused = 0;
 	signed int hour = gs_day_timer / HOURS(1);
 
@@ -169,7 +169,7 @@ struct tlk_option {
  */
 void do_talk(const signed int talk_id, const signed int tlk_informer)
 {
-	dsa_trace_enter(306, "seg030:do_talk");
+	dsa_trace_enter(313, "seg030:do_talk");
 	signed int txt_id;
 	signed int txt_offset;
 	signed int answer;
@@ -565,7 +565,7 @@ void do_talk(const signed int talk_id, const signed int tlk_informer)
 /* Borlandified and identical */
 void talk_switch(void)
 {
-	dsa_trace_enter(307, "seg030:talk_switch");
+	dsa_trace_enter(314, "seg030:talk_switch");
 	signed int state = g_dialog_state;
 
 	if (g_tlk_id == 3) {

@@ -141,7 +141,7 @@ signed int g_basepos_x_bak;		//ds:0xe5d9
 /* Animation zeigen, WILD.LTX laden, Kartenmodus und Uhr sichern und abschalten */
 static void pause_traveling(const signed int ani_id)
 {
-	dsa_trace_enter(1142, "seg117:pause_traveling");
+	dsa_trace_enter(1149, "seg117:pause_traveling");
 	g_event_ani_busy = 1;
 
 	load_ani(ani_id);
@@ -170,7 +170,7 @@ static void pause_traveling(const signed int ani_id)
 /* Gegenstueck zu pause_traveling(): gesicherte Werte zurueck, Karte neu zeichnen */
 static void resume_traveling(void)
 {
-	dsa_trace_enter(1143, "seg117:resume_traveling");
+	dsa_trace_enter(1150, "seg117:resume_traveling");
 	g_basepos_x = g_basepos_x_bak;
 	g_basepos_y = g_basepos_y_bak;
 
@@ -187,7 +187,7 @@ static void resume_traveling(void)
 
 void hunt_karen(void)
 {
-	dsa_trace_enter(1144, "seg117:hunt_karen");
+	dsa_trace_enter(1151, "seg117:hunt_karen");
 	signed int answer;
 	struct struct_hero *hero;
 	signed int passed;
@@ -280,7 +280,7 @@ void hunt_karen(void)
 
 void hunt_wildboar(void)
 {
-	dsa_trace_enter(1145, "seg117:hunt_wildboar");
+	dsa_trace_enter(1152, "seg117:hunt_wildboar");
 	signed int answer;
 	struct struct_hero *hero;
 	signed int i;
@@ -368,7 +368,7 @@ void hunt_wildboar(void)
 
 void hunt_cavebear(void)
 {
-	dsa_trace_enter(1146, "seg117:hunt_cavebear");
+	dsa_trace_enter(1153, "seg117:hunt_cavebear");
 	struct struct_hero *hero;
 	signed int answer;
 	signed int i;
@@ -440,7 +440,7 @@ void hunt_cavebear(void)
 /* should be static */
 void hunt_viper(void)
 {
-	dsa_trace_enter(1147, "seg117:hunt_viper");
+	dsa_trace_enter(1154, "seg117:hunt_viper");
 	signed int choosen_hero;
 	struct struct_hero *hero_i;
 	signed int min_result; /* bleibt immer 0 (Original-Bug, siehe unten) */
@@ -513,7 +513,7 @@ void hunt_viper(void)
 
 void octopus_attack(void)
 {
-	dsa_trace_enter(1148, "seg117:octopus_attack");
+	dsa_trace_enter(1155, "seg117:octopus_attack");
 	signed int i;
 	signed int hits;
 	signed int tmp;
@@ -632,7 +632,7 @@ void octopus_attack(void)
 
 void hunt_bison(void)
 {
-	dsa_trace_enter(1149, "seg117:hunt_bison");
+	dsa_trace_enter(1156, "seg117:hunt_bison");
 	signed int answer;
 	struct struct_hero *hero;
 
@@ -664,7 +664,7 @@ void hunt_bison(void)
 
 void hunt_rhino(void)
 {
-	dsa_trace_enter(1150, "seg117:hunt_rhino");
+	dsa_trace_enter(1157, "seg117:hunt_rhino");
 	signed int answer;
 	struct struct_hero *hero;
 
@@ -695,7 +695,7 @@ void hunt_rhino(void)
 
 void pirates_attack(void)
 {
-	dsa_trace_enter(1151, "seg117:pirates_attack");
+	dsa_trace_enter(1158, "seg117:pirates_attack");
 	pause_traveling(9);
 
 	GUI_output(get_tx2(45)); /* "AM HORIZONT KÖNNT IHR EIN WEISS-ROT GESTREIFTES SEGEL ENTDECKEN!" */
@@ -728,7 +728,7 @@ void pirates_attack(void)
 /* Wegkampf aus trv_do_journey() (gs_journey_fight_flag): 5-10 Gegner, Kampf WILD8 */
 void do_wild8_fight(void)
 {
-	dsa_trace_enter(1152, "seg117:do_wild8_fight");
+	dsa_trace_enter(1159, "seg117:do_wild8_fight");
 	signed int x_bak;
 	signed int y_bak;
 
@@ -897,7 +897,7 @@ void journey_random_encounter(signed int tmp)
 /* tevent_031 mit Hyggelik-Auftrag: Weg zur Ruine (F115.TLK, Einstieg Zustand 66) */
 void search_ruin1(void)
 {
-	dsa_trace_enter(1153, "seg117:search_ruin1");
+	dsa_trace_enter(1160, "seg117:search_ruin1");
 	do_talk(17, 0);
 	disable_ani();
 }
@@ -905,7 +905,7 @@ void search_ruin1(void)
 /* Skelellen <-> Phexcaer: Weg zu Hyggeliks Ruine (F115.TLK, Einstieg Zustand 45) */
 void tevent_115(void)
 {
-	dsa_trace_enter(1154, "seg117:tevent_115");
+	dsa_trace_enter(1161, "seg117:tevent_115");
 	if (gs_find_hyggelik) {
 
 		gs_tevent115_flag = 1;
@@ -918,7 +918,7 @@ void tevent_115(void)
 
 void TLK_way_to_ruin(const signed int state)
 {
-	dsa_trace_enter(1155, "seg117:TLK_way_to_ruin");
+	dsa_trace_enter(1162, "seg117:TLK_way_to_ruin");
 	signed int i;
 	struct struct_hero *hero;
 	struct struct_hero *hero2 = get_first_hero_available_in_group();
@@ -1050,7 +1050,7 @@ void TLK_way_to_ruin(const signed int state)
 /* Oberorken <-> Einsiedlersee / Felsteyn <-> Einsiedlersee: erste Begegnung mit dem Einhorn (INFO6.TLK) */
 void tevent_087(void)
 {
-	dsa_trace_enter(1156, "seg117:tevent_087");
+	dsa_trace_enter(1163, "seg117:tevent_087");
 	if (!gs_met_unicorn_flag && gs_got_main_quest) {
 
 		do_talk(11, 2);

@@ -64,7 +64,7 @@ static struct viewdir_offsets g_fig_viewdir_offsets4 = { { { 1, 0 }, { 0, -1 }, 
  */
 static signed int load_ani_clip_from_file(int8_t *dst, const signed int clip_num, const signed int src_file_id)
 {
-	dsa_trace_enter(335, "seg036:load_ani_clip_from_file");
+	dsa_trace_enter(342, "seg036:load_ani_clip_from_file");
 	uint8_t *p_datbuffer;
 	uint8_t *p_datitem;
 	signed char len;
@@ -132,7 +132,7 @@ static signed int load_ani_clip_from_file(int8_t *dst, const signed int clip_num
  */
 void FIG_prepare_hero_ani(struct struct_hero *hero, const signed int hero_pos)
 {
-	dsa_trace_enter(336, "seg036:FIG_prepare_hero_ani");
+	dsa_trace_enter(343, "seg036:FIG_prepare_hero_ani");
 	signed int i;
 	signed char ani_index_ptr_index_1;
 	signed char ani_index_ptr_index_2;
@@ -231,7 +231,7 @@ void FIG_prepare_hero_ani(struct struct_hero *hero, const signed int hero_pos)
  */
 signed int AFIG_switch_to_melee_weapon(struct struct_hero *hero)
 {
-	dsa_trace_enter(337, "seg036:AFIG_switch_to_melee_weapon");
+	dsa_trace_enter(344, "seg036:AFIG_switch_to_melee_weapon");
 	signed int pos;
 	signed int has_new_weapon = 0;
 	struct item_stats *item_p;
@@ -307,7 +307,7 @@ signed int AFIG_switch_to_melee_weapon(struct struct_hero *hero)
 signed int AFIG_can_attack_neighbour(const signed int start_x, const signed int start_y,
 			const signed int offset_x, const signed int offset_y, const signed int mode)
 {
-	dsa_trace_enter(338, "seg036:AFIG_can_attack_neighbour");
+	dsa_trace_enter(345, "seg036:AFIG_can_attack_neighbour");
 	const signed char target_object_id = get_cb_val(start_x + offset_x, start_y + offset_y);
 
 	/* REMARK: in this file the 'dead' flag of an enemy is read via the address of the flags
@@ -384,7 +384,7 @@ signed int AFIG_can_attack_neighbour(const signed int start_x, const signed int 
  */
 signed int AFIG_search_line_target(const signed int x, const signed int y, const signed int viewdir, const signed int target_mode)
 {
-	dsa_trace_enter(339, "seg036:AFIG_search_line_target");
+	dsa_trace_enter(346, "seg036:AFIG_search_line_target");
 	signed int x_diff;
 	signed int y_diff;
 	signed char target_object_id;
@@ -515,7 +515,7 @@ signed int AFIG_search_line_target(const signed int x, const signed int y, const
  */
 signed int AFIG_select_range_target(struct struct_hero *hero, const signed int hero_pos, const signed int renegade, signed int x, signed int y)
 {
-	dsa_trace_enter(340, "seg036:AFIG_select_range_target");
+	dsa_trace_enter(347, "seg036:AFIG_select_range_target");
 	signed int viewdir;
 	signed int count;
 	signed int done;
@@ -614,7 +614,7 @@ signed int AFIG_select_range_target(struct struct_hero *hero, const signed int h
  */
 signed int AFIG_get_spell_target_mode(const signed int spell_id, const signed int renegade)
 {
-	dsa_trace_enter(341, "seg036:AFIG_get_spell_target_mode");
+	dsa_trace_enter(348, "seg036:AFIG_get_spell_target_mode");
 	struct spell_descr *spell_description;
 	signed int retval = -1;
 
@@ -655,7 +655,7 @@ signed int AFIG_get_spell_target_mode(const signed int spell_id, const signed in
  */
 signed int AFIG_select_autospell(struct struct_hero *hero, const signed int hero_pos, const signed int renegade, signed int x, signed int y)
 {
-	dsa_trace_enter(342, "seg036:AFIG_select_autospell");
+	dsa_trace_enter(349, "seg036:AFIG_select_autospell");
 	signed int i;
 	signed int count;
 	signed int spell_id;
@@ -850,7 +850,7 @@ signed int AFIG_select_autospell(struct struct_hero *hero, const signed int hero
  */
 signed int AFIG_count_heroes(const signed int hero_pos)
 {
-	dsa_trace_enter(343, "seg036:AFIG_count_heroes");
+	dsa_trace_enter(350, "seg036:AFIG_count_heroes");
 	signed int cnt = 0;
 	signed int i;
 
@@ -878,7 +878,7 @@ signed int AFIG_count_heroes(const signed int hero_pos)
  */
 void AFIG_hero_turn(struct struct_hero *hero, const signed int hero_pos, signed int x, signed int y)
 {
-	dsa_trace_enter(344, "seg036:AFIG_hero_turn");
+	dsa_trace_enter(351, "seg036:AFIG_hero_turn");
 	signed int i;
 	signed int cnt;
 	signed int done;
