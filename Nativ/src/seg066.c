@@ -203,7 +203,7 @@ unsigned char *g_town_tex[6];			// ds:0xe414
  */
 signed int enter_location(const signed int town_id)
 {
-	dsa_trace_enter(501, "seg066:enter_location");
+	dsa_trace_enter(502, "seg066:enter_location");
 	signed int map_pos;
 	signed int tile_type;
 	struct location *locations_tab_ptr;
@@ -272,7 +272,7 @@ signed int enter_location(const signed int town_id)
  */
 signed int enter_location_daspota(void)
 {
-	dsa_trace_enter(502, "seg066:enter_location_daspota");
+	dsa_trace_enter(503, "seg066:enter_location_daspota");
 	signed int map_pos;
 	signed int tile_type;
 	struct location *locations_tab_ptr;
@@ -369,7 +369,7 @@ signed int enter_location_daspota(void)
  */
 void do_special_buildings(void)
 {
-	dsa_trace_enter(503, "seg066:do_special_buildings");
+	dsa_trace_enter(504, "seg066:do_special_buildings");
 	signed int typeindex;
 	const signed int tw_bak = g_textbox_width;
 
@@ -470,7 +470,7 @@ void do_special_buildings(void)
  */
 void TLK_eremit(const signed int state)
 {
-	dsa_trace_enter(504, "seg066:TLK_eremit");
+	dsa_trace_enter(505, "seg066:TLK_eremit");
 	if (!state) {
 
 		g_dialog_next_state = (gs_hermit_visited ? 1 : 2);
@@ -511,7 +511,7 @@ void TLK_eremit(const signed int state)
  * Dateiname Zeichen fuer Zeichen, kein neuer Text im Datensegment. */
 static void himmel_schalter(void)
 {
-	dsa_trace_enter(505, "seg066:himmel_schalter");
+	dsa_trace_enter(506, "seg066:himmel_schalter");
 	char name[12];
 	signed int fd;
 
@@ -530,7 +530,7 @@ static void himmel_schalter(void)
  */
 void do_town(void)
 {
-	dsa_trace_enter(506, "seg066:do_town");
+	dsa_trace_enter(507, "seg066:do_town");
 	if ((g_town_loaded_town_id != gs_town_id) || (g_area_prepared != AREA_TYPE_TOWN))
 	{
 #if FIX_HIMMEL
@@ -564,7 +564,7 @@ void do_town(void)
  * Keine neuen Daten: Rauschen per Rechenformel, Merker fuer das Neuzeichnen ist das bisher ungenutzte g_always_zero1. */
 static unsigned int himmel_hash(const unsigned int x, const unsigned int y)
 {
-	dsa_trace_enter(507, "seg066:himmel_hash");
+	dsa_trace_enter(508, "seg066:himmel_hash");
 	unsigned int h = x * 0x9e3bU + y * 0x6f4dU;
 
 	h ^= h >> 7;
@@ -576,7 +576,7 @@ static unsigned int himmel_hash(const unsigned int x, const unsigned int y)
 /* weicher Uebergang 0..256 fuer f = 0..l */
 static unsigned int himmel_glatt(const signed int f, const signed int l)
 {
-	dsa_trace_enter(508, "seg066:himmel_glatt");
+	dsa_trace_enter(509, "seg066:himmel_glatt");
 	return (unsigned int)(((long)f * f * (3 * l - 2 * f) * 256L) / ((long)l * l * l));
 }
 
@@ -586,7 +586,7 @@ static unsigned int himmel_glatt(const signed int f, const signed int l)
 static void himmel_lage(signed int *n, const signed int off, const signed int y, const signed int cwlog,
 		const signed int ch, const signed int seed, const signed int sh)
 {
-	dsa_trace_enter(509, "seg066:himmel_lage");
+	dsa_trace_enter(510, "seg066:himmel_lage");
 	signed int nz = 832 >> cwlog;
 	signed int cw = 1 << cwlog;
 	signed int cy = y / ch;
@@ -622,7 +622,7 @@ static void himmel_lage(signed int *n, const signed int off, const signed int y,
 /* Abstand^2 eines Himmelspunkts (Rundbild-x sx, Zeile y) zur Scheibe bei (sx0, y0), Punkte sind 1,2-mal so hoch wie breit */
 static signed int himmel_kreis(const signed int sx, const signed int y, const signed int sx0, const signed int y0)
 {
-	dsa_trace_enter(510, "seg066:himmel_kreis");
+	dsa_trace_enter(511, "seg066:himmel_kreis");
 	signed int dx = sx - sx0;
 	signed int dy = y - y0;
 
@@ -639,7 +639,7 @@ static signed int himmel_kreis(const signed int sx, const signed int y, const si
  * Mauszeiger haben andere Farben und bleiben stehen. */
 static void himmel_malen(uint8_t *dst, const signed int height, const signed int stride, const signed int nur_himmel)
 {
-	dsa_trace_enter(511, "seg066:himmel_malen");
+	dsa_trace_enter(512, "seg066:himmel_malen");
 	signed int n[208];
 	signed int x;
 	signed int y;
@@ -771,7 +771,7 @@ static void himmel_malen(uint8_t *dst, const signed int height, const signed int
 
 static void refresh_floor_and_sky(void)
 {
-	dsa_trace_enter(512, "seg066:refresh_floor_and_sky");
+	dsa_trace_enter(513, "seg066:refresh_floor_and_sky");
 	signed int width;
 	signed int height;
 	struct nvf_extract_desc nvf;
@@ -805,7 +805,7 @@ static void refresh_floor_and_sky(void)
  */
 void town_update_view(void)
 {
-	dsa_trace_enter(513, "seg066:town_update_view");
+	dsa_trace_enter(514, "seg066:town_update_view");
 	refresh_floor_and_sky();
 	update_visual_squares();
 	town_set_visual_square_vals();
@@ -831,7 +831,7 @@ void town_update_view(void)
  * Der Mauszeiger (Farbe 0xff) bleibt stehen und muss nicht ausgeblendet werden. */
 static void himmel_auffrischen(void)
 {
-	dsa_trace_enter(514, "seg066:himmel_auffrischen");
+	dsa_trace_enter(515, "seg066:himmel_auffrischen");
 	g_always_zero1 = (signed int)(g_timer_tick_counter / 36);
 	himmel_malen(g_vga_memstart + 320 * g_ani_posy + g_ani_posx, 67, 320, 1);
 }
@@ -844,7 +844,7 @@ signed int get_town_tile_type(const unsigned char);
  */
 void town_set_visual_square_vals(void)
 {
-	dsa_trace_enter(515, "seg066:town_set_visual_square_vals");
+	dsa_trace_enter(516, "seg066:town_set_visual_square_vals");
 	signed int bi;
 
 	if ((bi = get_town_tile_type(g_visual_square_vals[3])) >= 2 && bi <= 5) {
@@ -1031,7 +1031,7 @@ void town_set_visual_square_vals(void)
  */
 signed int get_town_tile_type(const unsigned char val)
 {
-	dsa_trace_enter(516, "seg066:get_town_tile_type");
+	dsa_trace_enter(517, "seg066:get_town_tile_type");
 	signed int i;
 
 	i = 0;
@@ -1068,7 +1068,7 @@ signed int get_town_tile_type(const unsigned char val)
  */
 void town_set_visual_square_tex(void)
 {
-	dsa_trace_enter(517, "seg066:town_set_visual_square_tex");
+	dsa_trace_enter(518, "seg066:town_set_visual_square_tex");
 	signed int i;
 	signed int bi;
 
@@ -1099,7 +1099,7 @@ void town_set_visual_square_tex(void)
  */
 void town_water_and_grass(void)
 {
-	dsa_trace_enter(518, "seg066:town_water_and_grass");
+	dsa_trace_enter(519, "seg066:town_water_and_grass");
 	signed int i;
 	signed int nvf_no;
 	signed int x;
@@ -1151,7 +1151,7 @@ void town_water_and_grass(void)
  */
 void town_building_textures(void)
 {
-	dsa_trace_enter(519, "seg066:town_building_textures");
+	dsa_trace_enter(520, "seg066:town_building_textures");
 	signed int nvf_no;
 	signed int i;
 	signed int x;
@@ -1275,7 +1275,7 @@ void town_building_textures(void)
 static void fix_spalte(const uint8_t *p, const signed int w, const signed int h, const signed int x,
 			uint8_t *c, signed int *t, signed int *b)
 {
-	dsa_trace_enter(520, "seg066:fix_spalte");
+	dsa_trace_enter(521, "seg066:fix_spalte");
 	signed int y;
 
 	*t = -1;
@@ -1296,7 +1296,7 @@ static void fix_spalte(const uint8_t *p, const signed int w, const signed int h,
 static void fix_spalte_setzen(uint8_t *p, const signed int w, const signed int h, const signed int x,
 			const signed int t, const signed int b, const uint8_t *c, const signed int ct, const signed int cb)
 {
-	dsa_trace_enter(521, "seg066:fix_spalte_setzen");
+	dsa_trace_enter(522, "seg066:fix_spalte_setzen");
 	signed int y;
 
 	for (y = 0; y < h; y++) {
@@ -1317,7 +1317,7 @@ static void fix_spalte_setzen(uint8_t *p, const signed int w, const signed int h
  * bringen. Die Wand behaelt ihre Perspektive (nah gross, fern klein), der Inhalt laeuft in der richtigen Richtung. */
 static void fix_seite_umkehren(uint8_t *p, const signed int w, const signed int h)
 {
-	dsa_trace_enter(522, "seg066:fix_seite_umkehren");
+	dsa_trace_enter(523, "seg066:fix_seite_umkehren");
 	signed int d;
 	signed int ta, ba, tb, bb;
 	uint8_t a[136];
@@ -1344,7 +1344,7 @@ static void fix_seite_umkehren(uint8_t *p, const signed int w, const signed int 
 static void fix_tempelseite(uint8_t *p, const signed int w, const signed int h, const signed int nvf_no,
 				const signed int direction)
 {
-	dsa_trace_enter(523, "seg066:fix_tempelseite");
+	dsa_trace_enter(524, "seg066:fix_tempelseite");
 	struct nvf_extract_desc nvf;
 	signed int fw, fh;
 	signed int x, y, fx, fy, t, b, ft, fb;
@@ -1398,7 +1398,7 @@ static void fix_tempelseite(uint8_t *p, const signed int w, const signed int h, 
  */
 void load_town_texture(signed int x, signed int y, signed int nvf_no, signed int tex_set)
 {
-	dsa_trace_enter(524, "seg066:load_town_texture");
+	dsa_trace_enter(525, "seg066:load_town_texture");
 	signed int width;
 	signed int height;
 	signed int copy_width;
@@ -1514,7 +1514,7 @@ void load_town_texture(signed int x, signed int y, signed int nvf_no, signed int
  */
 void town_direction_change(void)
 {
-	dsa_trace_enter(525, "seg066:town_direction_change");
+	dsa_trace_enter(526, "seg066:town_direction_change");
 	disable_ani();
 	town_update_view();
 	g_town_refresh_x_target = gs_x;
@@ -1529,7 +1529,7 @@ void town_direction_change(void)
  */
 signed int town_step(void)
 {
-	dsa_trace_enter(526, "seg066:town_step");
+	dsa_trace_enter(527, "seg066:town_step");
 	signed int i;
 	signed int bi;
 	signed int options;
@@ -1726,7 +1726,7 @@ signed int town_step(void)
  */
 void town_do_step(const signed int forward)
 {
-	dsa_trace_enter(527, "seg066:town_do_step");
+	dsa_trace_enter(528, "seg066:town_do_step");
 	signed int viewdir;
 
 	timewarp(MINUTES(2));
@@ -1910,7 +1910,7 @@ static void drehen_stadt(void)
  */
 void town_fade_and_colors(void)
 {
-	dsa_trace_enter(528, "seg066:town_fade_and_colors");
+	dsa_trace_enter(529, "seg066:town_fade_and_colors");
 	signed int i;
 	uint8_t *dst;
 	uint8_t *pal_ptr;
@@ -2022,7 +2022,7 @@ void town_fade_and_colors(void)
  */
 void town_update_house_count(void)
 {
-	dsa_trace_enter(529, "seg066:town_update_house_count");
+	dsa_trace_enter(530, "seg066:town_update_house_count");
 	signed int l_si;
 	signed int i;
 	uint8_t *map_ptr = g_dng_map;

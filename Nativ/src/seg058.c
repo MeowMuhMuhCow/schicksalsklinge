@@ -63,7 +63,7 @@ signed int g_price_modificator; // ds:0xe3f6, price modificator for smith and se
  */
 void add_item_to_repair_selector(struct smith_descr *smith, struct struct_hero *hero, const signed int inv_slot, const signed int item_selector_pos)
 {
-	dsa_trace_enter(465, "seg058:add_item_to_repair_selector");
+	dsa_trace_enter(466, "seg058:add_item_to_repair_selector");
 	const signed int item_id = hero->inventory[inv_slot].item_id;
 
 	g_item_selector_sell[item_selector_pos].item_id = item_id;
@@ -123,7 +123,7 @@ void add_item_to_repair_selector(struct smith_descr *smith, struct struct_hero *
  */
 void repair_screen(struct smith_descr *smith, const signed int smith_id)
 {
-	dsa_trace_enter(466, "seg058:repair_screen");
+	dsa_trace_enter(467, "seg058:repair_screen");
 	signed int i; /* REMARK: also used as handle */
 	signed int j;
 	signed int items_x;
@@ -522,7 +522,7 @@ void repair_screen(struct smith_descr *smith, const signed int smith_id)
  */
 void do_smith(void)
 {
-	dsa_trace_enter(467, "seg058:do_smith");
+	dsa_trace_enter(468, "seg058:do_smith");
 	signed int done = 0;
 	signed int answer;
 	struct smith_descr *smith;
@@ -612,7 +612,7 @@ void do_smith(void)
  */
 void talk_smith(void)
 {
-	dsa_trace_enter(468, "seg058:talk_smith");
+	dsa_trace_enter(469, "seg058:talk_smith");
 	do_random_talk(13, 0);
 }
 
@@ -627,7 +627,7 @@ void talk_smith(void)
  */
 void TLK_schmied(const signed int state)
 {
-	dsa_trace_enter(469, "seg058:TLK_schmied");
+	dsa_trace_enter(470, "seg058:TLK_schmied");
 	if (!state) {
 		g_dialog_next_state = (gs_smith_kicked_flags[gs_town_typeindex] ? 1 :
 					(gs_town_typeindex == 17 ? 27 :

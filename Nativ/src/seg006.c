@@ -38,7 +38,7 @@ signed int g_fight_figs_index = -1; // ds:0x4b9e
 
 struct struct_fighter* FIG_get_fighter(const signed char fighter_id)
 {
-	dsa_trace_enter(184, "seg006:FIG_get_fighter");
+	dsa_trace_enter(183, "seg006:FIG_get_fighter");
 	struct struct_fighter *p_fighter_iter = g_fig_list_head;
 
 	while (p_fighter_iter->id != fighter_id) {
@@ -58,7 +58,7 @@ struct struct_fighter* FIG_get_fighter(const signed char fighter_id)
  * (hiess FIG_set_array; ohne Pruefung der Feldgrenze) */
 static signed char FIG_alloc_fighter_id(void)
 {
-	dsa_trace_enter(185, "seg006:FIG_alloc_fighter_id");
+	dsa_trace_enter(184, "seg006:FIG_alloc_fighter_id");
 	signed char i = 0;
 
 	/* find first element that is zero */
@@ -77,7 +77,7 @@ static signed char FIG_alloc_fighter_id(void)
 /* zeichnet alle sichtbaren Objekte (visible == 1) der Kaempferliste in den Renderpuffer */
 void FIG_draw_figures(void)
 {
-	dsa_trace_enter(186, "seg006:FIG_draw_figures");
+	dsa_trace_enter(185, "seg006:FIG_draw_figures");
 	signed int l1 = 10;
 	signed int l2 = 118;
 	struct struct_fighter *p_fighter_iter;
@@ -135,7 +135,7 @@ void FIG_draw_figures(void)
  */
 void FIG_set_gfx(void)
 {
-	dsa_trace_enter(187, "seg006:FIG_set_gfx");
+	dsa_trace_enter(186, "seg006:FIG_set_gfx");
 	/* TODO: potential bug: Just backup pointer dst or the whole struct_pic_copy ? */
 	uint8_t* dst_bak = g_pic_copy.dst;
 
@@ -154,14 +154,14 @@ void FIG_set_gfx(void)
 
 void FIG_call_draw_pic(void)
 {
-	dsa_trace_enter(188, "seg006:FIG_call_draw_pic");
+	dsa_trace_enter(187, "seg006:FIG_call_draw_pic");
 	FIG_draw_pic();
 }
 
 /* Kampfhintergrund (g_buffer8_ptr) in den Renderpuffer, dazu das Portraet des Helden bzw. Gegners am Zug */
 void FIG_draw_pic(void)
 {
-	dsa_trace_enter(189, "seg006:FIG_draw_pic");
+	dsa_trace_enter(188, "seg006:FIG_draw_pic");
 	memcpy((void*)g_renderbuf_ptr, (void*)g_buffer8_ptr, 64000);
 
 #if defined(__BORLANDC__)
@@ -178,7 +178,7 @@ void FIG_draw_pic(void)
 /* Held zur Kaempfer-ID; gibt es keinen, wird Held 0 geliefert (nie NULL) */
 struct struct_hero* FIG_get_hero_ptr(const signed int fighter_id)
 {
-	dsa_trace_enter(190, "seg006:FIG_get_hero_ptr");
+	dsa_trace_enter(189, "seg006:FIG_get_hero_ptr");
 	signed int i;
 
 	for (i = 0; i <= 6; i++) {
@@ -192,7 +192,7 @@ struct struct_hero* FIG_get_hero_ptr(const signed int fighter_id)
 /* Gegnerblatt zur Kaempfer-ID oder NULL */
 struct enemy_sheet* FIG_get_enemy_sheet(const signed int fighter_id)
 {
-	dsa_trace_enter(191, "seg006:FIG_get_enemy_sheet");
+	dsa_trace_enter(190, "seg006:FIG_get_enemy_sheet");
 	signed int i;
 
 	for (i = 0; i < 20; i++) {
@@ -205,7 +205,7 @@ struct enemy_sheet* FIG_get_enemy_sheet(const signed int fighter_id)
 
 void FIG_set_ani_track_id_base(const signed char fighter_id, const signed char ani_track_id_base)
 {
-	dsa_trace_enter(192, "seg006:FIG_set_ani_track_id_base");
+	dsa_trace_enter(191, "seg006:FIG_set_ani_track_id_base");
 	struct struct_fighter *p_fighter_iter = g_fig_list_head;
 
 	while (p_fighter_iter->id != fighter_id) {
@@ -231,7 +231,7 @@ void FIG_set_ani_track_id_base(const signed char fighter_id, const signed char a
  */
 void FIG_make_invisible(const signed char fighter_id)
 {
-	dsa_trace_enter(193, "seg006:FIG_make_invisible");
+	dsa_trace_enter(192, "seg006:FIG_make_invisible");
 	struct struct_fighter *p_fighter_iter;
 	struct struct_fighter *p_fighter_iter_ds;
 
@@ -266,7 +266,7 @@ void FIG_make_invisible(const signed char fighter_id)
  */
 void FIG_make_visible(const signed int fighter_id)
 {
-	dsa_trace_enter(194, "seg006:FIG_make_visible");
+	dsa_trace_enter(193, "seg006:FIG_make_visible");
 	struct struct_fighter *p_fighter_iter;
 	struct struct_fighter *p_fighter_iter_ds;
 
@@ -298,7 +298,7 @@ void FIG_make_visible(const signed int fighter_id)
 
 void FIG_set_ani_track_id_weapon(const signed char fighter_id, const signed char ani_track_id_weapon)
 {
-	dsa_trace_enter(195, "seg006:FIG_set_ani_track_id_weapon");
+	dsa_trace_enter(194, "seg006:FIG_set_ani_track_id_weapon");
 	struct struct_fighter *p_fighter_iter = g_fig_list_head;
 
 	while (p_fighter_iter->id != fighter_id) {
@@ -321,7 +321,7 @@ void FIG_set_ani_track_id_weapon(const signed char fighter_id, const signed char
  */
 void FIG_remove_from_list(const signed char fighter_id, const signed char keep_in_memory)
 {
-	dsa_trace_enter(196, "seg006:FIG_remove_from_list");
+	dsa_trace_enter(195, "seg006:FIG_remove_from_list");
 	struct struct_fighter *p_fighter_iter = g_fig_list_head;
 
 	if (!p_fighter_iter) return;
@@ -375,7 +375,7 @@ void FIG_remove_from_list(const signed char fighter_id, const signed char keep_i
  */
 signed char FIG_add_to_list(const signed char fighter_id)
 {
-	dsa_trace_enter(197, "seg006:FIG_add_to_list");
+	dsa_trace_enter(196, "seg006:FIG_add_to_list");
 	struct struct_fighter* p_fighter_1 = g_fig_list_buffer;
 	struct struct_fighter* p_fighter_2;
 	signed int x = g_fig_list_elem.cbx;
@@ -468,7 +468,7 @@ signed char FIG_add_to_list(const signed char fighter_id)
  */
 void FIG_draw_char_pic(const signed int loc, const signed int hero_pos)
 {
-	dsa_trace_enter(198, "seg006:FIG_draw_char_pic");
+	dsa_trace_enter(197, "seg006:FIG_draw_char_pic");
 	struct struct_hero *hero;
 	signed int fg_bak;
 	signed int bg_bak;
@@ -521,7 +521,7 @@ void FIG_draw_char_pic(const signed int loc, const signed int hero_pos)
  */
 void FIG_draw_enemy_pic(const signed int loc, const signed int enemy_id)
 {
-	dsa_trace_enter(199, "seg006:FIG_draw_enemy_pic");
+	dsa_trace_enter(198, "seg006:FIG_draw_enemy_pic");
 	signed int height_width;
 	struct enemy_sheet *p_enemy;
 	signed int fg_bak;

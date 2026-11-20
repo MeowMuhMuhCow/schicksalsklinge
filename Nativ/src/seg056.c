@@ -59,7 +59,7 @@ struct struct_shopping_cart_item *g_buy_shopping_cart; // ds:0xe3f2, to buffer o
  */
 signed int item_selector_item_compare(const void *p_item_1, const void *p_item_2)
 {
-	dsa_trace_enter(461, "seg056:item_selector_item_compare");
+	dsa_trace_enter(462, "seg056:item_selector_item_compare");
 	int32_t price1;
 	int32_t price2;
 	const struct item_selector_item *item1 = (const struct item_selector_item*)p_item_1;
@@ -76,7 +76,7 @@ signed int item_selector_item_compare(const void *p_item_1, const void *p_item_2
  */
 void buy_screen(void)
 {
-	dsa_trace_enter(462, "seg056:buy_screen");
+	dsa_trace_enter(463, "seg056:buy_screen");
 	signed int l_di; /* multi use: handle, hero_pos */
 	signed int j;
 	signed int items_x;
@@ -671,7 +671,7 @@ void buy_screen(void)
 
 void add_item_to_sell_selector(const struct merchant_descr *merchant, const struct struct_hero *hero, const signed int inv_slot, const signed int item_selector_pos)
 {
-	dsa_trace_enter(463, "seg056:add_item_to_sell_selector");
+	dsa_trace_enter(464, "seg056:add_item_to_sell_selector");
 	signed int item_id;
 	signed int sellable = 0;
 

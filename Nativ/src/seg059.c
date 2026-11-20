@@ -46,7 +46,7 @@
  */
 void do_tavern(void)
 {
-	dsa_trace_enter(470, "seg059:do_tavern");
+	dsa_trace_enter(471, "seg059:do_tavern");
 	signed int i;
 	signed int done = 0;
 	signed int answer;
@@ -257,7 +257,7 @@ void do_tavern(void)
  */
 void octopus_attack_wrapper(void)
 {
-	dsa_trace_enter(471, "seg059:octopus_attack_wrapper");
+	dsa_trace_enter(472, "seg059:octopus_attack_wrapper");
 	octopus_attack();
 	g_request_refresh = 1;
 }
@@ -267,7 +267,7 @@ void octopus_attack_wrapper(void)
  */
 void pirates_attack_wrapper(void)
 {
-	dsa_trace_enter(472, "seg059:pirates_attack_wrapper");
+	dsa_trace_enter(473, "seg059:pirates_attack_wrapper");
 	pirates_attack();
 	g_request_refresh = 1;
 }
@@ -280,7 +280,7 @@ void pirates_attack_wrapper(void)
  */
 void prolog_ghostship(void)
 {
-	dsa_trace_enter(473, "seg059:prolog_ghostship");
+	dsa_trace_enter(474, "seg059:prolog_ghostship");
 	signed int answer;
 	signed int tw_bak;
 	signed int basepos_x_bak;

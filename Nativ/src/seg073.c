@@ -151,7 +151,7 @@ static const char g_gossip_str_triple_wildcard[8] = "%s %s%s"; // ds:0x7d06
  */
 signed int get_tavern_gossip(void)
 {
-	dsa_trace_enter(578, "seg073:get_tavern_gossip");
+	dsa_trace_enter(579, "seg073:get_tavern_gossip");
 	/* Orig-Bug: Informants can be reenabled if they had been set to 2 */
 	signed int randval;
 	signed int max_gossip_texts;
@@ -619,7 +619,7 @@ char* get_drinkmate(void)
  */
 signed int tavern_quest_infos(void)
 {
-	dsa_trace_enter(579, "seg073:tavern_quest_infos");
+	dsa_trace_enter(580, "seg073:tavern_quest_infos");
 	signed int relevant_info; /* TODO: should be initialized with 0 */
 	/* Original-Bug: relevant_info is only set if something happens. In all other cases (announcement,
 	 * Alrik, informer not met by chance, no matching tavern) a random stack value is returned.
@@ -731,7 +731,7 @@ signed int tavern_quest_infos(void)
  */
 void tavern_follow_informer(void)
 {
-	dsa_trace_enter(580, "seg073:tavern_follow_informer");
+	dsa_trace_enter(581, "seg073:tavern_follow_informer");
 
 	switch (informer_id_from_current_town() + 1) {
 	case 1: {

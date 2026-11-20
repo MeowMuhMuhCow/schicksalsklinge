@@ -47,14 +47,14 @@ struct analues_item g_analues_items[28]; // ds:0xac3c
 
 void spell_beherrschung(void)
 {
-	dsa_trace_enter(840, "seg099:spell_beherrschung");
+	dsa_trace_enter(841, "seg099:spell_beherrschung");
 	g_spelltarget = get_hero(get_spelluser()->target_object_id - 1);
 
 	if (!get_spelltarget()->flags.renegade) {
 		g_spell_special_aecost = -2;
 	} else {
 		if (get_spelltarget() == get_spelluser()) {
-			strcpy(g_dtp2, get_tx(0)); /* "SELBSTAUFLEHNUNG IST UNMÖGLICH." */
+			strcpy(g_dtp2, get_tx(0)); /* "SELBSTAUFLEHNUNG IST UNMÃ–GLICH." */
 			g_spell_special_aecost = 0;
 		} else {
 			g_spell_special_aecost = random_interval(2, 5) * 4;
@@ -72,7 +72,7 @@ void spell_beherrschung(void)
 
 void spell_destructibo(void)
 {
-	dsa_trace_enter(841, "seg099:spell_destructibo");
+	dsa_trace_enter(842, "seg099:spell_destructibo");
 #if !defined(__BORLANDC__)
         D1_INFO("Zauberspruch \"Destructibo\" ist nicht implementiert\n");
 #endif
@@ -82,7 +82,7 @@ void spell_destructibo(void)
 /* Gardianum (der Funktionsname hat einen Tippfehler) */
 void spell_gardianum(void)
 {
-	dsa_trace_enter(842, "seg099:spell_gardianum");
+	dsa_trace_enter(843, "seg099:spell_gardianum");
 	signed int answer;
 
 	/* prepare a question */
@@ -114,7 +114,7 @@ void spell_gardianum(void)
 			strcpy(g_dtp2, get_tx(7)); /* "SCHUTZSCHIRM AKTIV." */
 		} else {
 			/* not enough AE */
-			sprintf(g_dtp2, get_ttx(607), get_spelluser()->alias); /* "%s HAT NICHT GENÜGEND ASTRALENERGIE FÜR DIESEN ZAUBER." */
+			sprintf(g_dtp2, get_ttx(607), get_spelluser()->alias); /* "%s HAT NICHT GENÃœGEND ASTRALENERGIE FÃœR DIESEN ZAUBER." */
 			/* set AE costs */
 			g_spell_special_aecost = 0;
 		}
@@ -125,7 +125,7 @@ void spell_gardianum(void)
 
 void spell_illusionen(void)
 {
-	dsa_trace_enter(843, "seg099:spell_illusionen");
+	dsa_trace_enter(844, "seg099:spell_illusionen");
 	/* Set pointer to enemy target */
 	g_spelltarget_e = &g_enemy_sheets[get_spelluser()->target_object_id - 10];
 
@@ -164,7 +164,7 @@ void spell_illusionen(void)
 
 void spell_verwandlung(void)
 {
-	dsa_trace_enter(844, "seg099:spell_verwandlung");
+	dsa_trace_enter(845, "seg099:spell_verwandlung");
 	signed int i;
 
 	/* set spelltarget */
@@ -220,7 +220,7 @@ void spell_verwandlung(void)
  */
 void spell_band(void)
 {
-	dsa_trace_enter(845, "seg099:spell_band");
+	dsa_trace_enter(846, "seg099:spell_band");
 	if (get_spelluser()->target_object_id >= 10) {
 		/* cast enemy */
 
@@ -268,7 +268,7 @@ void spell_band(void)
 
 void spell_bannbaladin(void)
 {
-	dsa_trace_enter(846, "seg099:spell_bannbaladin");
+	dsa_trace_enter(847, "seg099:spell_bannbaladin");
 	/* Set pointer to enemy target */
 	g_spelltarget_e = &g_enemy_sheets[get_spelluser()->target_object_id - 10];
 
@@ -293,7 +293,7 @@ void spell_bannbaladin(void)
 		/* set 'tame' flag */
 		g_spelltarget_e->flags.tame = 1;
 
-		sprintf(g_dtp2,	get_tx(9), (uint8_t*)GUI_name_inflect_with_article( /* "%s IST BESÄNFTIGT UND WIRD NICHT MEHR ANGREIFEN." */
+		sprintf(g_dtp2,	get_tx(9), (uint8_t*)GUI_name_inflect_with_article( /* "%s IST BESÃ„NFTIGT UND WIRD NICHT MEHR ANGREIFEN." */
 			INFLECT_DEFINITE_ARTICLE | INFLECT_SINGULAR | INFLECT_1ST_CASE,
 			g_spelltarget_e->monster_id,
 			INFLECT_NAME_TYPE_MONSTER
@@ -303,7 +303,7 @@ void spell_bannbaladin(void)
 
 void spell_boeser_blick(void)
 {
-	dsa_trace_enter(847, "seg099:spell_boeser_blick");
+	dsa_trace_enter(848, "seg099:spell_boeser_blick");
 	/* set attacked foe */
 	g_spelltarget_e = &g_enemy_sheets[get_spelluser()->target_object_id - 10];
 
@@ -321,7 +321,7 @@ void spell_boeser_blick(void)
 		g_spelltarget_e->attacks = 2;
 
 		/* prepare message */
-		sprintf(g_dtp2,	get_tx(10), (char*)GUI_name_inflect_with_article( /* "%s IST VERHEXT, UND WIRD AUF EURER SEITE KÄMPFEN." */
+		sprintf(g_dtp2,	get_tx(10), (char*)GUI_name_inflect_with_article( /* "%s IST VERHEXT, UND WIRD AUF EURER SEITE KÃ„MPFEN." */
 			INFLECT_DEFINITE_ARTICLE | INFLECT_SINGULAR | INFLECT_1ST_CASE,
 			g_spelltarget_e->monster_id,
 			INFLECT_NAME_TYPE_MONSTER
@@ -331,7 +331,7 @@ void spell_boeser_blick(void)
 
 void spell_grosse_gier(void)
 {
-	dsa_trace_enter(848, "seg099:spell_grosse_gier");
+	dsa_trace_enter(849, "seg099:spell_grosse_gier");
 #if !FIX_0382
 #if !defined(__BORLANDC__)
 	D1_INFO("Zauberspruch \"Grosse Gier\" ist nicht implementiert\n");
@@ -353,7 +353,7 @@ void spell_grosse_gier(void)
 
 void spell_grosse_ver(void)
 {
-	dsa_trace_enter(849, "seg099:spell_grosse_ver");
+	dsa_trace_enter(850, "seg099:spell_grosse_ver");
 	g_spelltarget_e = &g_enemy_sheets[get_spelluser()->target_object_id - 10];
 
 	/* this spell does not work on all kind of skeletons */
@@ -375,7 +375,7 @@ void spell_grosse_ver(void)
 
 void spell_herrdertiere(void)
 {
-	dsa_trace_enter(850, "seg099:spell_herrdertiere");
+	dsa_trace_enter(851, "seg099:spell_herrdertiere");
 
 	/* Set pointer to enemy target */
 	g_spelltarget_e = &g_enemy_sheets[get_spelluser()->target_object_id - 10];
@@ -401,7 +401,7 @@ void spell_herrdertiere(void)
 			/* set 'tame' flag */
 			g_spelltarget_e->flags.tame = 1;
 
-			sprintf(g_dtp2,	get_tx(9), (uint8_t*)GUI_name_inflect_with_article( /* "%s IST BESÄNFTIGT UND WIRD NICHT MEHR ANGREIFEN." */
+			sprintf(g_dtp2,	get_tx(9), (uint8_t*)GUI_name_inflect_with_article( /* "%s IST BESÃ„NFTIGT UND WIRD NICHT MEHR ANGREIFEN." */
 				INFLECT_DEFINITE_ARTICLE | INFLECT_SINGULAR | INFLECT_1ST_CASE,
 				g_spelltarget_e->monster_id,
 				INFLECT_NAME_TYPE_MONSTER
@@ -412,7 +412,7 @@ void spell_herrdertiere(void)
 
 void spell_horriphobus(void)
 {
-	dsa_trace_enter(851, "seg099:spell_horriphobus");
+	dsa_trace_enter(852, "seg099:spell_horriphobus");
 	/* Set pointer to enemy target */
 	g_spelltarget_e = &g_enemy_sheets[get_spelluser()->target_object_id - 10];
 
@@ -427,7 +427,7 @@ void spell_horriphobus(void)
 		/* unset 'renegade' flag */
 		g_spelltarget_e->flags.renegade = 0;
 
-		sprintf(g_dtp2,	get_tx(12), (uint8_t*)GUI_name_inflect_with_article( /* "%s IST TOTAL VERÄNGSTIGT UND FLIEHT." */
+		sprintf(g_dtp2,	get_tx(12), (uint8_t*)GUI_name_inflect_with_article( /* "%s IST TOTAL VERÃ„NGSTIGT UND FLIEHT." */
 			INFLECT_DEFINITE_ARTICLE | INFLECT_SINGULAR | INFLECT_1ST_CASE,
 			g_spelltarget_e->monster_id,
 			INFLECT_NAME_TYPE_MONSTER
@@ -437,7 +437,7 @@ void spell_horriphobus(void)
 
 void spell_magischerraub(void)
 {
-	dsa_trace_enter(852, "seg099:spell_magischerraub");
+	dsa_trace_enter(853, "seg099:spell_magischerraub");
 #if !defined(__BORLANDC__)
         D1_INFO("Zauberspruch \"Magischer Raub\" ist nicht implementiert\n");
 #endif
@@ -445,7 +445,7 @@ void spell_magischerraub(void)
 
 void spell_respondami(void)
 {
-	dsa_trace_enter(853, "seg099:spell_respondami");
+	dsa_trace_enter(854, "seg099:spell_respondami");
 #if !defined(__BORLANDC__)
         D1_INFO("Zauberspruch \"Respondami\" ist nicht implementiert\n");
 #endif
@@ -453,13 +453,13 @@ void spell_respondami(void)
 
 void spell_sanftmut(void)
 {
-	dsa_trace_enter(854, "seg099:spell_sanftmut");
+	dsa_trace_enter(855, "seg099:spell_sanftmut");
 	spell_herrdertiere();
 }
 
 void spell_somnigravis(void)
 {
-	dsa_trace_enter(855, "seg099:spell_somnigravis");
+	dsa_trace_enter(856, "seg099:spell_somnigravis");
 
 	if (get_spelluser()->target_object_id >= 10) {
 		/* cast an enemy */
@@ -477,7 +477,7 @@ void spell_somnigravis(void)
 		g_spelltarget_e->flags.asleep = 1;
 
 		/* prepare message */
-		sprintf(g_dtp2,	get_tx(13), (uint8_t*)GUI_name_inflect_with_article( /* "%s SCHLÄFT EIN." */
+		sprintf(g_dtp2,	get_tx(13), (uint8_t*)GUI_name_inflect_with_article( /* "%s SCHLÃ„FT EIN." */
 			INFLECT_DEFINITE_ARTICLE | INFLECT_SINGULAR | INFLECT_1ST_CASE,
 			g_spelltarget_e->monster_id,
 			INFLECT_NAME_TYPE_MONSTER
@@ -504,13 +504,13 @@ void spell_somnigravis(void)
 		get_spelltarget()->flags.asleep = 1;
 
 		/* prepare message */
-		sprintf(g_dtp2, get_tx(13), get_spelltarget()->alias); /* "%s SCHLÄFT EIN." */
+		sprintf(g_dtp2, get_tx(13), get_spelltarget()->alias); /* "%s SCHLÃ„FT EIN." */
 	}
 }
 
 void spell_zwingtanz(void)
 {
-	dsa_trace_enter(856, "seg099:spell_zwingtanz");
+	dsa_trace_enter(857, "seg099:spell_zwingtanz");
 	/* Set pointer to enemy target */
 	g_spelltarget_e = &g_enemy_sheets[get_spelluser()->target_object_id - 10];
 
@@ -523,7 +523,7 @@ void spell_zwingtanz(void)
 		g_spelltarget_e->flags.dancing = 1;
 
 		/* prepare message */
-		sprintf(g_dtp2,	get_tx(14), (uint8_t*)GUI_name_inflect_with_article( /* "%s TANZT WIE VERRÜCKT HERUM." */
+		sprintf(g_dtp2,	get_tx(14), (uint8_t*)GUI_name_inflect_with_article( /* "%s TANZT WIE VERRÃœCKT HERUM." */
 			INFLECT_DEFINITE_ARTICLE | INFLECT_SINGULAR | INFLECT_1ST_CASE,
 			g_spelltarget_e->monster_id,
 			INFLECT_NAME_TYPE_MONSTER
@@ -535,7 +535,7 @@ void spell_zwingtanz(void)
 
 void spell_furor_blut(void)
 {
-	dsa_trace_enter(857, "seg099:spell_furor_blut");
+	dsa_trace_enter(858, "seg099:spell_furor_blut");
 #if !defined(__BORLANDC__)
         D1_INFO("Zauberspruch \"Furor Blut\" ist nicht implementiert\n");
 #endif
@@ -544,7 +544,7 @@ void spell_furor_blut(void)
 
 void spell_geister_bannen(void)
 {
-	dsa_trace_enter(858, "seg099:spell_geister_bannen");
+	dsa_trace_enter(859, "seg099:spell_geister_bannen");
 #if !defined(__BORLANDC__)
         D1_INFO("Zauberspruch \"Geister bannen\" ist nicht implementiert\n");
 #endif
@@ -552,7 +552,7 @@ void spell_geister_bannen(void)
 
 void spell_geister_rufen(void)
 {
-	dsa_trace_enter(859, "seg099:spell_geister_rufen");
+	dsa_trace_enter(860, "seg099:spell_geister_rufen");
 #if !defined(__BORLANDC__)
         D1_INFO("Zauberspruch \"Geister rufen\" ist nicht implementiert\n");
 #endif
@@ -561,7 +561,7 @@ void spell_geister_rufen(void)
 
 void spell_heptagon(void)
 {
-	dsa_trace_enter(860, "seg099:spell_heptagon");
+	dsa_trace_enter(861, "seg099:spell_heptagon");
 #if !defined(__BORLANDC__)
         D1_INFO("Zauberspruch \"Heptagon\" ist nicht implementiert\n");
 #endif
@@ -570,7 +570,7 @@ void spell_heptagon(void)
 
 void spell_kraehenruf(void)
 {
-	dsa_trace_enter(861, "seg099:spell_kraehenruf");
+	dsa_trace_enter(862, "seg099:spell_kraehenruf");
 	signed int caster_level;
 	signed int pa_value;
 	signed int i;
@@ -599,7 +599,7 @@ void spell_kraehenruf(void)
 
 void spell_skelettarius(void)
 {
-	dsa_trace_enter(862, "seg099:spell_skelettarius");
+	dsa_trace_enter(863, "seg099:spell_skelettarius");
 	struct struct_fighter *p_fighter;
 	signed int x;
 	signed int y;
@@ -630,7 +630,7 @@ void spell_skelettarius(void)
 	} else {
 
 		/* prepare message */
-		sprintf(g_dtp2,	get_tx(16), (uint8_t*)GUI_name_inflect_with_article( /* "%s KEHRT VON DEN TOTEN ZURÜCK, UND WIRD ALS ZOMBIE FÜR DICH STREITEN." */
+		sprintf(g_dtp2,	get_tx(16), (uint8_t*)GUI_name_inflect_with_article( /* "%s KEHRT VON DEN TOTEN ZURÃœCK, UND WIRD ALS ZOMBIE FÃœR DICH STREITEN." */
 			INFLECT_DEFINITE_ARTICLE | INFLECT_SINGULAR | INFLECT_1ST_CASE,
 			g_spelltarget_e->monster_id,
 			INFLECT_NAME_TYPE_MONSTER
@@ -703,7 +703,7 @@ void spell_skelettarius(void)
 
 void spell_elementare(void)
 {
-	dsa_trace_enter(863, "seg099:spell_elementare");
+	dsa_trace_enter(864, "seg099:spell_elementare");
 #if !defined(__BORLANDC__)
         D1_INFO("Zauberspruch \"Elementare\" ist nicht implementiert\n");
 #endif
@@ -712,7 +712,7 @@ void spell_elementare(void)
 
 void spell_nihilatio(void)
 {
-	dsa_trace_enter(864, "seg099:spell_nihilatio");
+	dsa_trace_enter(865, "seg099:spell_nihilatio");
 #if !defined(__BORLANDC__)
         D1_INFO("Zauberspruch \"Nihilatio\" ist nicht implementiert\n");
 #endif
@@ -720,7 +720,7 @@ void spell_nihilatio(void)
 
 void spell_solidirid(void)
 {
-	dsa_trace_enter(865, "seg099:spell_solidirid");
+	dsa_trace_enter(866, "seg099:spell_solidirid");
 #if !defined(__BORLANDC__)
         D1_INFO("Zauberspruch \"Solidirid\" ist nicht implementiert\n");
 #endif
@@ -731,7 +731,7 @@ void spell_solidirid(void)
 
 void spell_axxeleratus(void)
 {
-	dsa_trace_enter(866, "seg099:spell_axxeleratus");
+	dsa_trace_enter(867, "seg099:spell_axxeleratus");
 	signed int hero_pos;
 	signed int mod_slot;
 
@@ -769,7 +769,7 @@ void spell_axxeleratus(void)
 
 void spell_foramen(void)
 {
-	dsa_trace_enter(867, "seg099:spell_foramen");
+	dsa_trace_enter(868, "seg099:spell_foramen");
 	signed int x;
 	signed int y;
 
@@ -811,7 +811,7 @@ void spell_foramen(void)
 
 void spell_motoricus(void)
 {
-	dsa_trace_enter(868, "seg099:spell_motoricus");
+	dsa_trace_enter(869, "seg099:spell_motoricus");
 #if !defined(__BORLANDC__)
         D1_INFO("Zauberspruch \"Motoricus\" ist nicht implementiert\n");
 #endif
@@ -819,7 +819,7 @@ void spell_motoricus(void)
 
 void spell_spurlos(void)
 {
-	dsa_trace_enter(869, "seg099:spell_spurlos");
+	dsa_trace_enter(870, "seg099:spell_spurlos");
 #if !defined(__BORLANDC__)
         D1_INFO("Zauberspruch \"Spurlos\" ist nicht implementiert\n");
 #endif
@@ -827,19 +827,19 @@ void spell_spurlos(void)
 
 void spell_transversalis(void)
 {
-	dsa_trace_enter(870, "seg099:spell_transversalis");
+	dsa_trace_enter(871, "seg099:spell_transversalis");
 #if FIX_0383
 	/* Fix 383: auf der Reise (Lager unterwegs) steht gs_town_id noch auf der Abreisestadt -> Meldung wie ausserhalb, keine AE */
 	if (g_traveling) {
 		g_spell_special_aecost = 0;
-		strcpy(g_dtp2, get_tx(18)); /* "DIESER SPRUCH IST NUR IN EINEM DUNGEON ODER EINER STADT MÖGLICH!" */
+		strcpy(g_dtp2, get_tx(18)); /* "DIESER SPRUCH IST NUR IN EINEM DUNGEON ODER EINER STADT MÃ–GLICH!" */
 	} else
 #endif
 	if (!gs_dungeon_id && !gs_town_id) {
 		/* cannot be used outside of a dungeon or a town */
 
 		/* prepare message */
-		strcpy(g_dtp2, get_tx(18)); /* "DIESER SPRUCH IST NUR IN EINEM DUNGEON ODER EINER STADT MÖGLICH!" */
+		strcpy(g_dtp2, get_tx(18)); /* "DIESER SPRUCH IST NUR IN EINEM DUNGEON ODER EINER STADT MÃ–GLICH!" */
 
 	} else {
 		/* set spell costs */
@@ -866,7 +866,7 @@ void spell_transversalis(void)
 
 void spell_ueber_eis(void)
 {
-	dsa_trace_enter(871, "seg099:spell_ueber_eis");
+	dsa_trace_enter(872, "seg099:spell_ueber_eis");
 #if !defined(__BORLANDC__)
         D1_INFO("Zauberspruch \"Ueber Eis\" ist nicht implementiert\n");
 #endif
@@ -878,7 +878,7 @@ void spell_ueber_eis(void)
 
 void spell_balsam(void)
 {
-	dsa_trace_enter(872, "seg099:spell_balsam");
+	dsa_trace_enter(873, "seg099:spell_balsam");
 
 	signed int le_to_heal;
 
@@ -894,7 +894,7 @@ void spell_balsam(void)
 		le_to_heal = (get_spelltarget()->le_max - get_spelltarget()->le) / 2;
 	} else {
 		/* prepare message */
-		sprintf(g_dtp2,	get_tx(19), get_spelluser()->alias, get_spelltarget()->alias); /* "WIEVIEL AE MÖCHTE %s ZUR HEILUNG VON %s INVESTIEREN?" */
+		sprintf(g_dtp2,	get_tx(19), get_spelluser()->alias, get_spelltarget()->alias); /* "WIEVIEL AE MÃ–CHTE %s ZUR HEILUNG VON %s INVESTIEREN?" */
 
 		/* ask question */
 		le_to_heal = GUI_input(g_dtp2, 2);
@@ -936,7 +936,7 @@ void spell_balsam(void)
 
 void spell_hexenspeichel(void)
 {
-	dsa_trace_enter(873, "seg099:spell_hexenspeichel");
+	dsa_trace_enter(874, "seg099:spell_hexenspeichel");
 	signed int le;
 
 	/* Set pointer to hero target */
@@ -954,7 +954,7 @@ void spell_hexenspeichel(void)
 	}
 
 	/* prepare question */
-	sprintf(g_dtp2, get_tx(19), get_spelluser()->alias, get_spelltarget()->alias); /* "WIEVIEL AE MÖCHTE %s ZUR HEILUNG VON %s INVESTIEREN?" */
+	sprintf(g_dtp2, get_tx(19), get_spelluser()->alias, get_spelltarget()->alias); /* "WIEVIEL AE MÃ–CHTE %s ZUR HEILUNG VON %s INVESTIEREN?" */
 
 	le = GUI_input(g_dtp2, 2);
 
@@ -997,7 +997,7 @@ void spell_hexenspeichel(void)
 
 void spell_klarum_purum(void)
 {
-	dsa_trace_enter(874, "seg099:spell_klarum_purum");
+	dsa_trace_enter(875, "seg099:spell_klarum_purum");
 	signed int poison_id;
 
 	/* Set pointer to hero target */
@@ -1025,13 +1025,13 @@ void spell_klarum_purum(void)
 		get_spelltarget()->poison[poison_id].status = POISON_STATUS_RECOVER;
 
 		/* prepare message */
-		sprintf(g_dtp2,	get_tx(22), get_spelltarget()->alias); /* "%s IST NICHT LÄNGER VERGIFTET." */
+		sprintf(g_dtp2,	get_tx(22), get_spelltarget()->alias); /* "%s IST NICHT LÃ„NGER VERGIFTET." */
 	}
 }
 
 void spell_ruhe_koerper(void)
 {
-	dsa_trace_enter(875, "seg099:spell_ruhe_koerper");
+	dsa_trace_enter(876, "seg099:spell_ruhe_koerper");
 	/* Set pointer to hero target */
 	g_spelltarget = get_hero(get_spelluser()->target_object_id - 1);
 
@@ -1039,12 +1039,12 @@ void spell_ruhe_koerper(void)
 	get_spelltarget()->ruhe_koerper = 1;
 
 	/* prepare message */
-	sprintf(g_dtp2, get_tx(51), get_spelltarget()->alias); /* "%s WIRD DIE NÄCHSTE NACHT SICHER SCHLAFEN WIE EIN BABY." */
+	sprintf(g_dtp2, get_tx(51), get_spelltarget()->alias); /* "%s WIRD DIE NÃ„CHSTE NACHT SICHER SCHLAFEN WIE EIN BABY." */
 }
 
 void spell_tiere_heilen(void)
 {
-	dsa_trace_enter(876, "seg099:spell_tiere_heilen");
+	dsa_trace_enter(877, "seg099:spell_tiere_heilen");
 
 #if !defined(__BORLANDC__)
         D1_INFO("Zauberspruch \"Tiere heilen\" ist nicht implementiert und dient nur zum AE ausgeben.\n");
@@ -1075,7 +1075,7 @@ void spell_tiere_heilen(void)
 
 void spell_adleraug(void)
 {
-	dsa_trace_enter(877, "seg099:spell_adleraug");
+	dsa_trace_enter(878, "seg099:spell_adleraug");
 	signed int mod_slot;
 	signed int hero_pos;
 
@@ -1087,7 +1087,7 @@ void spell_adleraug(void)
 	set_mod_slot(mod_slot, MINUTES(6), (uint8_t*)&get_spelluser()->talents[TA_SINNESSCHAERFE], 7, (signed char)hero_pos);
 
 	/* prepare message */
-	sprintf(g_dtp2,	get_tx(24), get_spelluser()->alias); /* "FÜR %s SCHEINEN SICH NEUE WELTEN AUFZUTUN." */
+	sprintf(g_dtp2,	get_tx(24), get_spelluser()->alias); /* "FÃœR %s SCHEINEN SICH NEUE WELTEN AUFZUTUN." */
 }
 
 char* spell_analues(void)
@@ -1105,13 +1105,10 @@ char* spell_analues(void)
 
 #if FIX_0200
 	/* Fix 200: Abbruch der Gegenstandswahl (-1) nicht als Inventarplatz benutzen;
-	 * wie bei Odem Arcanum ohne Meldung abbrechen (in der Akademie Text 52 zurueckgeben) */
+	 * wie im Original Text 52/53 ("<ICH KANN NICHTS BESONDERES ERKENNEN!>") ausgeben */
 	/* If the player cancels item selection or has no items select_item_to_drop() returns -1.
 	The original uses the return value to calculate an index, whithout checking for this. */
 	if (inv_slot == -1) {
-		if (gs_in_academy != 99) {
-			return g_text_output_buf;
-		}
 		item_id = 0;
 	} else {
 		item_id = get_spelluser()->inventory[inv_slot].item_id;
@@ -1124,7 +1121,7 @@ char* spell_analues(void)
 #if FIX_0386
 	/* Fix 386 (teilweise): magischer Gegenstand ohne Eintrag in g_analues_items -> Text 55 ("kann nicht sagen, was fuer ein Zauber") statt "nichts Besonderes" */
 	if (item_id && get_spelluser()->inventory[inv_slot].flags.magic) {
-		strcpy(g_text_output_buf, get_tx(55)); /* "<TUT MIR LEID, ICH KANN NICHT SAGEN, WAS FÜR EIN ZAUBER HIER ANGEWE..." */
+		strcpy(g_text_output_buf, get_tx(55)); /* "<TUT MIR LEID, ICH KANN NICHT SAGEN, WAS FÃœR EIN ZAUBER HIER ANGEWE..." */
 	}
 #endif
 
@@ -1156,7 +1153,7 @@ char* spell_analues(void)
 					/* Fix 201: am Zuschlag gescheitert -> halbe AE wie bei misslungenem Zauber */
 					g_spell_special_aecost = get_spell_cost(SP_ANALUES_ARCANSTRUKTUR, 1);
 #endif
-					strcpy(g_text_output_buf, get_tx(55)); /* "<TUT MIR LEID, ICH KANN NICHT SAGEN, WAS FÜR EIN ZAUBER HIER ANGEWE..." */
+					strcpy(g_text_output_buf, get_tx(55)); /* "<TUT MIR LEID, ICH KANN NICHT SAGEN, WAS FÃœR EIN ZAUBER HIER ANGEWE..." */
 					break;
 				}
 			}

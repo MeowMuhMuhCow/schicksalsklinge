@@ -60,7 +60,7 @@ const char g_dng01_str_marbo[6] = "MARBO"; // ds:0x93d1
  */
 signed int DNG01_handler(void)
 {
-	dsa_trace_enter(622, "seg077:DNG01_handler");
+	dsa_trace_enter(623, "seg077:DNG01_handler");
 	signed int target_pos;
 	signed int i;
 	struct struct_hero *hero;
@@ -302,7 +302,7 @@ signed int DNG01_handler(void)
 
 void DNG01_chest01_loot(struct struct_chest* chest)
 {
-	dsa_trace_enter(623, "seg077:DNG01_chest01_loot");
+	dsa_trace_enter(624, "seg077:DNG01_chest01_loot");
 	uint8_t* ptr_bak = chest->loot.content;
 
 	chest->loot.content = gs_dng01_chest1_content;
@@ -314,7 +314,7 @@ void DNG01_chest01_loot(struct struct_chest* chest)
 
 void DNG01_chest02_loot(struct struct_chest* chest)
 {
-	dsa_trace_enter(624, "seg077:DNG01_chest02_loot");
+	dsa_trace_enter(625, "seg077:DNG01_chest02_loot");
 	uint8_t* ptr_bak = chest->loot.content;
 
 	chest->loot.content = gs_dng01_chest2_content;
@@ -326,7 +326,7 @@ void DNG01_chest02_loot(struct struct_chest* chest)
 
 void DNG01_chest03_loot(struct struct_chest* chest)
 {
-	dsa_trace_enter(625, "seg077:DNG01_chest03_loot");
+	dsa_trace_enter(626, "seg077:DNG01_chest03_loot");
 	uint8_t* ptr_bak = chest->loot.content;
 
 	chest->loot.content = gs_dng01_chest3_content;
@@ -338,7 +338,7 @@ void DNG01_chest03_loot(struct struct_chest* chest)
 
 void DNG01_chest05_loot(struct struct_chest* chest)
 {
-	dsa_trace_enter(626, "seg077:DNG01_chest05_loot");
+	dsa_trace_enter(627, "seg077:DNG01_chest05_loot");
 	uint8_t* ptr_bak = chest->loot.content;
 
 	chest->loot.content = gs_dng01_chest5_content;
@@ -353,13 +353,13 @@ void DNG01_chest05_loot(struct struct_chest* chest)
  */
 void DNG01_chest07_open(struct struct_chest* chest)
 {
-	dsa_trace_enter(627, "seg077:DNG01_chest07_open");
+	dsa_trace_enter(628, "seg077:DNG01_chest07_open");
 	loot_corpse(chest, get_tx(4), &gs_dng01_corpse_looted); /* "IN DER ECKE LIEGEN DIE TRAURIGEN ÜBERRESTE EINES EHEMALSSTOLZEN ABE..." */
 }
 
 void DNG01_chest07_loot(struct struct_chest* chest)
 {
-	dsa_trace_enter(628, "seg077:DNG01_chest07_loot");
+	dsa_trace_enter(629, "seg077:DNG01_chest07_loot");
 	uint8_t* ptr_bak = chest->loot.content;
 
 	chest->loot.content = gs_dng01_chest7_content;
@@ -371,7 +371,7 @@ void DNG01_chest07_loot(struct struct_chest* chest)
 
 void DNG01_chest06_loot(struct struct_chest* chest)
 {
-	dsa_trace_enter(629, "seg077:DNG01_chest06_loot");
+	dsa_trace_enter(630, "seg077:DNG01_chest06_loot");
 #if FIX_0097
 	/* Fix 97 (Teil 2): den Goldschluessel nur einmal (die Truhe gilt nach Fix 97 als offen)
 	 * Enabling the extra loot in function DNG01_chest06_open() (formerly called DNG01_chest6_x1) also causes the special chest handler to call this function instead of DNG01_chest06_open().
@@ -407,7 +407,7 @@ void DNG01_chest06_loot(struct struct_chest* chest)
 
 void DNG01_chest06_trap(void)
 {
-	dsa_trace_enter(630, "seg077:DNG01_chest06_trap");
+	dsa_trace_enter(631, "seg077:DNG01_chest06_trap");
 	GUI_output(get_tx(3)); /* "<DIESE ANTWORT WAR LEIDER FALSCH! KOMMT SPÄTER WIEDER, WENNIHR DIE..." */
 }
 
@@ -418,7 +418,7 @@ void DNG01_chest06_trap(void)
  */
 void DNG01_chest06_open(struct struct_chest* chest)
 {
-	dsa_trace_enter(631, "seg077:DNG01_chest06_open");
+	dsa_trace_enter(632, "seg077:DNG01_chest06_open");
 	if (!gs_dng01_key_taken)
 	{
 		GUI_input(get_tx(2), 10); /* "<SPRICH DEN NAMEN DESJENIGEN, DER UNS VERFLUCHT HAT, UND DUWIRST DE..." */
@@ -451,7 +451,7 @@ void DNG01_chest06_open(struct struct_chest* chest)
  */
 void DNG01_chest00_loot(struct struct_chest* chest)
 {
-	dsa_trace_enter(632, "seg077:DNG01_chest00_loot");
+	dsa_trace_enter(633, "seg077:DNG01_chest00_loot");
 	if (!gs_deadship_final && GUI_bool(get_tx(1))) /* "UNTER ÜBLEM GESTANK LÖST SICH EINE GEISTERHAFTE ERSCHEINUNGAUS DER..." */
 	{
 		gs_deadship_final = 1;

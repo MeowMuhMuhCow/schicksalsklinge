@@ -12,7 +12,7 @@
 
 static signed int EMS_installed(void)
 {
-	dsa_trace_enter(217, "seg010:EMS_installed");
+	dsa_trace_enter(216, "seg010:EMS_installed");
 #if 0
 	unsigned char *IRQ_67;
 	char *sig;
@@ -46,7 +46,7 @@ static uint8_t* EMS_get_frame_ptr()
 
 signed int EMS_get_num_pages_unalloced(void)
 {
-	dsa_trace_enter(218, "seg010:EMS_get_num_pages_unalloced");
+	dsa_trace_enter(217, "seg010:EMS_get_num_pages_unalloced");
 #if 0
 	reg_ax = 0x04200;
 	CALLBACK_RunRealInt(0x67);
@@ -60,7 +60,7 @@ signed int EMS_get_num_pages_unalloced(void)
 
 signed int EMS_alloc_pages(const int16_t pages)
 {
-	dsa_trace_enter(219, "seg010:EMS_alloc_pages");
+	dsa_trace_enter(218, "seg010:EMS_alloc_pages");
 #if 0
 	reg_ax = 0x4300;
 	reg_bx = pages;
@@ -75,7 +75,7 @@ signed int EMS_alloc_pages(const int16_t pages)
 
 int16_t EMS_free_pages(const int16_t handle)
 {
-	dsa_trace_enter(220, "seg010:EMS_free_pages");
+	dsa_trace_enter(219, "seg010:EMS_free_pages");
 #if defined(__BORLANDC__)
 	asm {
 		mov ax, 0x4500
@@ -93,7 +93,7 @@ int16_t EMS_free_pages(const int16_t handle)
 
 int16_t EMS_map_memory(const int16_t handle, const int16_t lpage, const int16_t ppage)
 {
-	dsa_trace_enter(221, "seg010:EMS_map_memory");
+	dsa_trace_enter(220, "seg010:EMS_map_memory");
 #if defined(__BORLANDC__)
 	asm {
 		mov ax, 0x4400
@@ -130,7 +130,7 @@ uint8_t* EMS_norm_ptr(uint8_t* p)
 
 signed int EMS_init(void)
 {
-	dsa_trace_enter(222, "seg010:EMS_init");
+	dsa_trace_enter(221, "seg010:EMS_init");
 	if (EMS_installed()) {
 		g_ems_frame_ptr = EMS_get_frame_ptr();
 		return 1;

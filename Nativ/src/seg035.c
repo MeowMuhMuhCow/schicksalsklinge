@@ -40,7 +40,7 @@
  */
 void FIG_tidy_enemies(void)
 {
-	dsa_trace_enter(338, "seg035:FIG_tidy_enemies");
+	dsa_trace_enter(337, "seg035:FIG_tidy_enemies");
 	signed int i;
 	signed int j;
 	signed int enemies_num = FIG_count_active_enemies();
@@ -84,7 +84,7 @@ void FIG_tidy_enemies(void)
  */
 void FIG_loot_enemies(void)
 {
-	dsa_trace_enter(339, "seg035:FIG_loot_enemies");
+	dsa_trace_enter(338, "seg035:FIG_loot_enemies");
 	signed int page_offset = 0;
 	signed int loot_num;
 	signed int item_id;
@@ -234,7 +234,7 @@ void FIG_loot_enemies(void)
  */
 void FIG_split_ap(void)
 {
-	dsa_trace_enter(340, "seg035:FIG_split_ap");
+	dsa_trace_enter(339, "seg035:FIG_split_ap");
 	signed int i;
 	signed int ap = 0;
 	signed int known_ap;
@@ -299,7 +299,7 @@ void FIG_split_ap(void)
  */
 signed int check_hero_range_attack(const struct struct_hero *hero, const signed int hero_pos)
 {
-	dsa_trace_enter(341, "seg035:check_hero_range_attack");
+	dsa_trace_enter(340, "seg035:check_hero_range_attack");
 	signed int i;
 	signed int retval;	/* retval */
 	signed int target_x;

@@ -36,7 +36,7 @@
  */
 void PHX_drogentempel(void)
 {
-	dsa_trace_enter(566, "seg071:PHX_drogentempel");
+	dsa_trace_enter(567, "seg071:PHX_drogentempel");
 	signed int answer;
 	signed int nr_heroes;
 	int32_t money;
@@ -200,7 +200,7 @@ void PHX_drogentempel(void)
  */
 void PHX_phextempel(void)
 {
-	dsa_trace_enter(567, "seg071:PHX_phextempel");
+	dsa_trace_enter(568, "seg071:PHX_phextempel");
 	signed int answer;		/* the selected answer from the dialogs */
 	signed int tw_bak;		/* saving the width of the textboxes */
 	signed int loc_bak;		/* saving the type of the old location (gs_town_loc_type) */
@@ -363,7 +363,7 @@ void PHX_phextempel(void)
  */
 void PHX_alrik_derondan(void)
 {
-	dsa_trace_enter(568, "seg071:PHX_alrik_derondan");
+	dsa_trace_enter(569, "seg071:PHX_alrik_derondan");
 	signed int answer;
 	signed int topic = 0; /* 1 = ask for Hyggelik (price), 2 = "who are you", 3 = ask for a hint, 0 = end */
 	int32_t money;

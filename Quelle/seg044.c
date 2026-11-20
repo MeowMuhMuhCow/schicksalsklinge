@@ -91,6 +91,22 @@ static signed int copy_ani_seq(int8_t *dst, const signed int ani_num, const sign
 	return len;
 }
 
+#if FIX_0441
+/* Fix 441: maennliche Figuren (Sprite-Id 1..10) nutzen in ANI.DAT dieselben Sterbesequenzen (0x44..0x4c)
+ * wie weibliche (12..21) mit Ton 95 (FX7.VOC, Frauenschrei); fuer maennliche Figuren auf Ton 96
+ * (FX8.VOC, Maennerschrei wie bei Pirat/Raeuber/Zauberer/Ork) umstellen */
+static signed int copy_death_ani_seq(int8_t *dst, const signed int ani_num, const signed int actor_sprite_id)
+{
+	signed int len = copy_ani_seq(dst, ani_num, ANI_SRC_FILE_ID_ANI_DAT);
+
+	if ((actor_sprite_id <= ACTOR_SPRITE_ID_ELF__MALE) && (len >= 2) && (dst[0] == -9) && (dst[1] == 95)) {
+		dst[1] = 96;
+	}
+
+	return len;
+}
+#endif
+
 /**
  * \brief   returns the header byte (first byte) of an animation sequence in ANI.DAT
  *
@@ -358,7 +374,11 @@ void FANI_prepare_fight_hero_ani(const signed int ani_track_id, struct struct_he
 		*p_ani_clip_base++ = get_seq_header(ani_index_ptr[20]);
 		*p_ani_clip_base++ = 0;
 
+#if FIX_0441
+		p_ani_clip_base += copy_death_ani_seq(p_ani_clip_base, ani_index_ptr[20], hero->actor_sprite_id);
+#else
 		p_ani_clip_base += copy_ani_seq(p_ani_clip_base, ani_index_ptr[20], ANI_SRC_FILE_ID_ANI_DAT);
+#endif
 	}
 
 	if (
@@ -616,7 +636,11 @@ void FANI_prepare_fight_enemy_ani(const signed int ani_track_id, struct enemy_sh
 		*p_ani_clip_base++ = get_seq_header(ani_index_ptr[20]);
 		*p_ani_clip_base++ = 0;
 
+#if FIX_0441
+		p_ani_clip_base += copy_death_ani_seq(p_ani_clip_base, ani_index_ptr[20], enemy->actor_sprite_id);
+#else
 		p_ani_clip_base += copy_ani_seq(p_ani_clip_base, ani_index_ptr[20], 1);
+#endif
 	}
 
 	FIG_set_ani_track_id_base(enemy->fighter_id, (signed char)ani_track_id);
@@ -784,7 +808,11 @@ void FANI_prepare_spell_hero(const signed int ani_track_id, struct struct_hero *
 		*p_ani_clip_base = 0;
 		p_ani_clip_base++;
 
+#if FIX_0441
+		p_ani_clip_base += copy_death_ani_seq(p_ani_clip_base, ani_index_ptr[20], hero->actor_sprite_id);
+#else
 		p_ani_clip_base += copy_ani_seq(p_ani_clip_base, ani_index_ptr[20], ANI_SRC_FILE_ID_ANI_DAT);
+#endif
 	}
 
 	*p_ani_clip_base = -1;
@@ -924,7 +952,11 @@ void FANI_prepare_spell_enemy(const signed int ani_track_id, struct enemy_sheet 
 		*p_ani_clip_base = 0;
 		p_ani_clip_base++;
 
+#if FIX_0441
+		p_ani_clip_base += copy_death_ani_seq(p_ani_clip_base, ani_index_ptr[20], enemy->actor_sprite_id);
+#else
 		p_ani_clip_base += copy_ani_seq(p_ani_clip_base, ani_index_ptr[20], 1);
+#endif
 	}
 
 	*p_ani_clip_base = -1;

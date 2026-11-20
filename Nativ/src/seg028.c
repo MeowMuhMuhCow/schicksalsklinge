@@ -48,7 +48,7 @@ static const unsigned char g_unkn_039[8] = { 0x0b, 0xc0, 0x75, 0x06, 0xb8, 0x01,
 /* laedt Text (DTX), Kartendaten (DDT) und die Wandtexturen des aktuellen Dungeons */
 void prepare_dungeon_area(void)
 {
-	dsa_trace_enter(286, "seg028:prepare_dungeon_area");
+	dsa_trace_enter(285, "seg028:prepare_dungeon_area");
 	signed int dtx_index;
 	uint32_t file_len;
 	uint32_t offset;
@@ -118,7 +118,7 @@ void prepare_dungeon_area(void)
 /* liest die DDT-Datei des Dungeons: Kampf-, Tuer- und Treppentabelle (low/high = Laengen/Offsets aus dem Kopf) */
 void load_dungeon_ddt(void)
 {
-	dsa_trace_enter(287, "seg028:load_dungeon_ddt");
+	dsa_trace_enter(286, "seg028:load_dungeon_ddt");
 	signed int index;
 	int16_t low;
 	int16_t high;
@@ -139,7 +139,7 @@ void load_dungeon_ddt(void)
 /* laedt Text (LTX) und Texturen (Haeuser 1-4, Himmel, Boden) der aktuellen Stadt */
 void prepare_town_area(void)
 {
-	dsa_trace_enter(288, "seg028:prepare_town_area");
+	dsa_trace_enter(287, "seg028:prepare_town_area");
 	signed int i;
 	const signed int ltx_index = gs_town_id + ARCHIVE_FILE_CITY_LTX;
 	uint8_t* arr[4];
@@ -270,7 +270,7 @@ uint8_t* load_town_textures(const signed int index, const signed int firstcol, c
  * sonst (TOWN_TILE_MERCHANT) LTURM.NVF; town_tile hiess arg */
 void load_special_textures(const signed int town_tile)
 {
-	dsa_trace_enter(289, "seg028:load_special_textures");
+	dsa_trace_enter(288, "seg028:load_special_textures");
 	const signed int handle = load_archive_file(town_tile == 9 ? ARCHIVE_FILE_FINGER_NVF : ARCHIVE_FILE_LTURM_NVF);
 
 	read_archive_file(handle, (uint8_t*)g_buffer7_ptr, 64000);
@@ -281,7 +281,7 @@ void load_special_textures(const signed int town_tile)
 /* laedt die zuletzt mit load_tx() geladene Textdatei erneut (g_buffer7_ptr wurde von load_special_textures() belegt) */
 void call_load_buffer(void)
 {
-	dsa_trace_enter(290, "seg028:call_load_buffer");
+	dsa_trace_enter(289, "seg028:call_load_buffer");
 	load_tx(g_tx_file_index);
 }
 
@@ -291,7 +291,7 @@ void call_load_buffer(void)
  */
 void prepare_area(const signed int town)
 {
-	dsa_trace_enter(291, "seg028:prepare_area");
+	dsa_trace_enter(290, "seg028:prepare_area");
 	if (town == 1) {
 		prepare_town_area();
 	} else {
@@ -310,7 +310,7 @@ void prepare_area(const signed int town)
  */
 void load_area_description(const signed int type)
 {
-	dsa_trace_enter(292, "seg028:load_area_description");
+	dsa_trace_enter(291, "seg028:load_area_description");
 	signed int f_index;
 
 	if (g_areadescr_fileid && (type != 2)) {
@@ -406,7 +406,7 @@ void load_area_description(const signed int type)
 
 void call_load_area(const signed int type)
 {
-	dsa_trace_enter(293, "seg028:call_load_area");
+	dsa_trace_enter(292, "seg028:call_load_area");
 	load_area_description(type);
 }
 
@@ -467,7 +467,7 @@ uint8_t* unused_load(const signed int image_num)
 /* laedt die Reisekarte (KARTE.DAT, wenn moeglich ueber EMS), die Routendaten LROUT/HSROUT/SROUT und MAPTEXT.LTX */
 void load_map(void)
 {
-	dsa_trace_enter(294, "seg028:load_map");
+	dsa_trace_enter(293, "seg028:load_map");
 	signed int handle;	/* REMARK: reused differently */
 	signed int wallclock_update_bak;
 	struct nvf_extract_desc nvf;
@@ -557,7 +557,7 @@ void load_map(void)
 /* liest einen NSC aus TEMP nach Heldenplatz 6 und setzt sein Figurenbild */
 void load_npc(const signed int index)
 {
-	dsa_trace_enter(295, "seg028:load_npc");
+	dsa_trace_enter(294, "seg028:load_npc");
 	struct struct_hero *npc;
 	signed int handle;
 
@@ -583,7 +583,7 @@ void load_npc(const signed int index)
 
 void save_npc(const signed int index)
 {
-	dsa_trace_enter(296, "seg028:save_npc");
+	dsa_trace_enter(295, "seg028:save_npc");
 	signed int handle = load_archive_file(index | 0x8000);
 
 	write(handle, get_hero(6), sizeof(struct struct_hero));
@@ -594,7 +594,7 @@ void save_npc(const signed int index)
 /* laedt die beiden Treffer-Splashes (LE rot, AE gelb) aus SPLASHES.DAT */
 void load_splashes(void)
 {
-	dsa_trace_enter(297, "seg028:load_splashes");
+	dsa_trace_enter(296, "seg028:load_splashes");
 	signed int handle;
 	signed int width;
 	signed int height;
@@ -626,7 +626,7 @@ void load_splashes(void)
 /* laedt eine TLK-Datei fuer do_talk(): Texte nach g_buffer8_ptr / get_tx2() */
 void load_informer_tlk(const signed int index)
 {
-	dsa_trace_enter(298, "seg028:load_informer_tlk");
+	dsa_trace_enter(297, "seg028:load_informer_tlk");
 	signed int i;
 	signed int handle;
 
@@ -668,7 +668,7 @@ void load_informer_tlk(const signed int index)
 /* laedt eine TLK-Datei (do_random_talk(), Taverne): Texte nach g_buffer7_ptr / get_tx() */
 void load_tlk(const signed int index)
 {
-	dsa_trace_enter(299, "seg028:load_tlk");
+	dsa_trace_enter(298, "seg028:load_tlk");
 	signed int i;
 	signed int handle;
 	int32_t text_len;
@@ -720,7 +720,7 @@ void unused_load_archive_file(const signed int index, const uint16_t off, const 
 /* entpackt einen Kampfhintergrund nach g_buffer8_ptr */
 void load_fightbg(const signed int index)
 {
-	dsa_trace_enter(300, "seg028:load_fightbg");
+	dsa_trace_enter(299, "seg028:load_fightbg");
 	const signed int handle = load_archive_file(index);
 
 	read_archive_file(handle, g_renderbuf_ptr, 30000);

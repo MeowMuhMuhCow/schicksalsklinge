@@ -89,7 +89,7 @@ struct struct_chest g_dng15_specialchests[33] = {
  */
 signed int DNG15_handler(void)
 {
-	dsa_trace_enter(732, "seg089:DNG15_handler");
+	dsa_trace_enter(733, "seg089:DNG15_handler");
 	signed int target_pos;
 	signed int i;
 	signed int viewdir;
@@ -524,7 +524,7 @@ signed int DNG15_handler(void)
  */
 void DNG15_small_wounds(void)
 {
-	dsa_trace_enter(733, "seg089:DNG15_small_wounds");
+	dsa_trace_enter(734, "seg089:DNG15_small_wounds");
 	signed int i;
 	signed int randval;
 	struct struct_hero *hero = get_hero(0);
@@ -553,7 +553,7 @@ void DNG15_small_wounds(void)
  */
 void DNG15_debris(const signed int ladder)
 {
-	dsa_trace_enter(734, "seg089:DNG15_debris");
+	dsa_trace_enter(735, "seg089:DNG15_debris");
 	if (GUI_bool(get_tx(10))) /* "WOLLT IHR DEN SCHUTT GENAUER UNTERSUCHEN?" */
 	{
 		if (ladder == 0)
@@ -574,19 +574,19 @@ void DNG15_debris(const signed int ladder)
 
 void DNG15_empty_chest(struct struct_chest* chest)
 {
-	dsa_trace_enter(735, "seg089:DNG15_empty_chest");
+	dsa_trace_enter(736, "seg089:DNG15_empty_chest");
 	GUI_output(get_ttx(522)); /* "DIE TRUHE IST LEER!" */
 }
 
 void DNG15_rotten_clothes_chest(struct struct_chest* chest)
 {
-	dsa_trace_enter(736, "seg089:DNG15_rotten_clothes_chest");
+	dsa_trace_enter(737, "seg089:DNG15_rotten_clothes_chest");
 	GUI_output(get_tx(34)); /* "IN DIESER TRUHE LIEGEN EIN PAAR VERROTTETE KLEIDUNGSSTÜCKE, DIE NIE..." */
 }
 
 void DNG15_smelling_chest(struct struct_chest* chest)
 {
-	dsa_trace_enter(737, "seg089:DNG15_smelling_chest");
+	dsa_trace_enter(738, "seg089:DNG15_smelling_chest");
 	struct struct_hero *hero;
 
 	if (GUI_bool(get_tx(35))) { /* "ES STINKT HÖLLISCH, ALS IHR DIE TRUHE ÖFFNET. SCHNELL LASST IHR DEN..." */
@@ -602,7 +602,7 @@ void DNG15_smelling_chest(struct struct_chest* chest)
 
 void DNG15_figures_chest(struct struct_chest* chest)
 {
-	dsa_trace_enter(738, "seg089:DNG15_figures_chest");
+	dsa_trace_enter(739, "seg089:DNG15_figures_chest");
 	signed int tw_bak;
 
 	tw_bak = g_textbox_width;
@@ -616,7 +616,7 @@ void DNG15_figures_chest(struct struct_chest* chest)
  */
 void DNG15_cursed_money_chest(struct struct_chest* chest)
 {
-	dsa_trace_enter(739, "seg089:DNG15_cursed_money_chest");
+	dsa_trace_enter(740, "seg089:DNG15_cursed_money_chest");
 	int32_t p_money;
 	signed int tw_bak;
 
@@ -647,7 +647,7 @@ void DNG15_cursed_money_chest(struct struct_chest* chest)
  */
 void DNG15_collapsing_ceiling(uint8_t* ptr)
 {
-	dsa_trace_enter(740, "seg089:DNG15_collapsing_ceiling");
+	dsa_trace_enter(741, "seg089:DNG15_collapsing_ceiling");
 	signed int i;
 	signed int cnt;
 	struct struct_hero *hero;
@@ -749,7 +749,7 @@ void DNG15_collapsing_ceiling(uint8_t* ptr)
  */
 void DNG15_clear_way(uint8_t* ptr)
 {
-	dsa_trace_enter(741, "seg089:DNG15_clear_way");
+	dsa_trace_enter(742, "seg089:DNG15_clear_way");
 	signed int i;
 	struct struct_hero *hero = get_hero(0);
 	i = 0;
@@ -805,7 +805,7 @@ void DNG15_clear_way(uint8_t* ptr)
  */
 void DNG15_cursed_money(uint8_t* ptr)
 {
-	dsa_trace_enter(742, "seg089:DNG15_cursed_money");
+	dsa_trace_enter(743, "seg089:DNG15_cursed_money");
 	int32_t p_money;
 
 	if (GUI_bool(get_tx(53))) /* "EIN PAAR URALTE GOLDSTÜCKE LIEGEN VERSTREUT AUF DEM BODEN HERUM.@WO..." */
@@ -826,7 +826,7 @@ void DNG15_cursed_money(uint8_t* ptr)
  */
 void DNG15_wounds_and_ladders(char* text, const signed int wounds, const signed int ladder)
 {
-	dsa_trace_enter(743, "seg089:DNG15_wounds_and_ladders");
+	dsa_trace_enter(744, "seg089:DNG15_wounds_and_ladders");
 	GUI_output(text);
 
 	if (wounds != 0)

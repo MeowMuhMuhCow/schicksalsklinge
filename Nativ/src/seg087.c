@@ -43,7 +43,7 @@
  */
 signed int DNG14_handler(void)
 {
-	dsa_trace_enter(719, "seg087:DNG14_handler");
+	dsa_trace_enter(720, "seg087:DNG14_handler");
 	signed int target_pos;
 	signed int tmp; /* multiple use: mod_slot, item_count, result of talent test */
 	signed int hero_pos;

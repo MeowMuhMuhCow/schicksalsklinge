@@ -64,7 +64,7 @@ static struct viewdir_offsets g_fig_viewdir_offsets4 = { { { 1, 0 }, { 0, -1 }, 
  */
 static signed int load_ani_clip_from_file(int8_t *dst, const signed int clip_num, const signed int src_file_id)
 {
-	dsa_trace_enter(342, "seg036:load_ani_clip_from_file");
+	dsa_trace_enter(341, "seg036:load_ani_clip_from_file");
 	uint8_t *p_datbuffer;
 	uint8_t *p_datitem;
 	signed char len;
@@ -132,7 +132,7 @@ static signed int load_ani_clip_from_file(int8_t *dst, const signed int clip_num
  */
 void FIG_prepare_hero_ani(struct struct_hero *hero, const signed int hero_pos)
 {
-	dsa_trace_enter(343, "seg036:FIG_prepare_hero_ani");
+	dsa_trace_enter(342, "seg036:FIG_prepare_hero_ani");
 	signed int i;
 	signed char ani_index_ptr_index_1;
 	signed char ani_index_ptr_index_2;
@@ -231,7 +231,7 @@ void FIG_prepare_hero_ani(struct struct_hero *hero, const signed int hero_pos)
  */
 signed int AFIG_switch_to_melee_weapon(struct struct_hero *hero)
 {
-	dsa_trace_enter(344, "seg036:AFIG_switch_to_melee_weapon");
+	dsa_trace_enter(343, "seg036:AFIG_switch_to_melee_weapon");
 	signed int pos;
 	signed int has_new_weapon = 0;
 	struct item_stats *item_p;
@@ -292,6 +292,30 @@ signed int AFIG_switch_to_melee_weapon(struct struct_hero *hero)
 	return has_new_weapon;
 }
 
+#if FIX_0018
+/* Fix 18: prueft, ob noch mindestens ein nicht uebergelaufener aktiver Gegner im Kampf ist.
+ * Solange das gilt, greifen die Helden im Computerkampf keine uebergelaufenen Gegner (Boeser Blick,
+ * Skelettarius) an; sind nur noch uebergelaufene Gegner uebrig, werden sie wie im Original bekaempft
+ * (der erste Treffer eines Helden hebt flags.renegade in FIG_damage_enemy() auf), damit der Kampf endet. */
+static signed int AFIG_has_hostile_enemy(void)
+{
+	dsa_trace_enter(344, "seg036:AFIG_has_hostile_enemy");
+	struct enemy_sheet *enemy;
+	signed int i;
+
+	for (i = 0; i < 20; i++) {
+		enemy = &g_enemy_sheets[i];
+		if (enemy->monster_id && !enemy->flags.dead && !enemy->flags.petrified && !enemy->flags.tied &&
+			!enemy->flags.mushroom && !enemy->flags.busy && !enemy->round_appear && !enemy->flags.renegade)
+		{
+			return 1;
+		}
+	}
+
+	return 0;
+}
+#endif
+
 /**
  * \brief   check if a neighbour can be attacked
  *
@@ -342,8 +366,8 @@ signed int AFIG_can_attack_neighbour(const signed int start_x, const signed int 
 			(target_object_id >= 10) && (target_object_id < 30)
 			&& !((struct enemy_flags)g_enemy_sheets[target_object_id - 10].flags).dead
 #if FIX_0018
-			/* Fix 18: uebergelaufene Gegner (Boeser Blick) kaempfen auf der Seite der Helden */
-			&& !g_enemy_sheets[target_object_id - 10].flags.renegade
+			/* Fix 18: uebergelaufene Gegner (Boeser Blick) kaempfen auf der Seite der Helden, solange noch andere Gegner aktiv sind */
+			&& (!g_enemy_sheets[target_object_id - 10].flags.renegade || !AFIG_has_hostile_enemy())
 #endif
 		) {
 			return 1;
@@ -458,8 +482,8 @@ signed int AFIG_search_line_target(const signed int x, const signed int y, const
 				(target_object_id >= 10) && (target_object_id < 30)
 				&& !((struct enemy_flags)g_enemy_sheets[target_object_id - 10].flags).dead
 #if FIX_0018
-				/* Fix 18: uebergelaufene Gegner nicht angreifen */
-				&& !g_enemy_sheets[target_object_id - 10].flags.renegade
+				/* Fix 18: uebergelaufene Gegner nicht angreifen, solange noch andere Gegner aktiv sind */
+				&& (!g_enemy_sheets[target_object_id - 10].flags.renegade || !AFIG_has_hostile_enemy())
 #endif
 			) {
 				will_attack = 1;
@@ -577,13 +601,22 @@ signed int AFIG_select_range_target(struct struct_hero *hero, const signed int h
 			}
 
 			if (target_found != -1) {
+#if FIX_0018
+				signed int x_bak = x;
+				signed int y_bak = y;
+#endif
 
 				FIG_prepare_hero_ani(hero, hero_pos);
 
 				FIG_search_obj_on_cb(hero_pos + 1, &x, &y);
 
 				/* REMARK: a ranged attack requires 3 BP (former remark: "spells usually require 5 BP") */
-				if (hero->fight_bp_left < 3) {
+				if (
+#if FIX_0018
+					((x_bak == x) && (y_bak == y)) ||
+#endif
+					(hero->fight_bp_left < 3)
+				) {
 
 					/* set BP to 0 */
 					hero->fight_bp_left = 0;
@@ -706,6 +739,13 @@ signed int AFIG_select_autospell(struct struct_hero *hero, const signed int hero
 			continue;
 		}
 #endif
+#if FIX_0018
+		/* Fix 18: sind nur noch uebergelaufene Gegner uebrig, nicht erneut Boeser Blick auf sie wirken */
+		if ((spell_id == SP_BOESER_BLICK) && !renegade && !AFIG_has_hostile_enemy()) {
+			done = 1;
+			continue;
+		}
+#endif
 
 		if ((spell_mode = AFIG_get_spell_target_mode(spell_id, renegade)) != -1) {
 
@@ -763,9 +803,18 @@ signed int AFIG_select_autospell(struct struct_hero *hero, const signed int hero
 						}
 
 						if (target_found != -1) {
+#if FIX_0018
+							signed int x_bak = x;
+							signed int y_bak = y;
+#endif
 
 							FIG_prepare_hero_ani(hero, hero_pos);
 							FIG_search_obj_on_cb(hero_pos + 1, &x, &y);
+#if FIX_0018
+							if ((x_bak == x) && (y_bak == y)) {
+								hero->fight_bp_left = 0;
+							}
+#endif
 
 						} else {
 							/* set BP to 0 */
@@ -818,9 +867,18 @@ signed int AFIG_select_autospell(struct struct_hero *hero, const signed int hero
 						}
 
 						if (target_found != -1) {
+#if FIX_0018
+							signed int x_bak = x;
+							signed int y_bak = y;
+#endif
 
 							FIG_prepare_hero_ani(hero, hero_pos);
 							FIG_search_obj_on_cb(hero_pos + 1, &x, &y);
+#if FIX_0018
+							if ((x_bak == x) && (y_bak == y)) {
+								hero->fight_bp_left = 0;
+							}
+#endif
 
 						} else {
 							/* set BP to 0 */

@@ -46,7 +46,7 @@ static struct struct_chest g_tevent014_corpse = {0, 1, NULL, NULL, tevent_014_ch
 /* Peilinen <-> Rovamund: Spuren am anderen Ufer des Roval, Pfad zur Querverbindung (TRV_a_path) */
 void tevent_011(void)
 {
-	dsa_trace_enter(1030, "seg110:tevent_011");
+	dsa_trace_enter(1031, "seg110:tevent_011");
 	signed int answer;
 	struct struct_hero *hero;
 
@@ -97,7 +97,7 @@ void tevent_011(void)
 /* should be static */
 void TRV_swim2(const signed int handicap, const signed int percent)
 {
-	dsa_trace_enter(1031, "seg110:TRV_swim2");
+	dsa_trace_enter(1032, "seg110:TRV_swim2");
 	signed int i;
 	struct struct_hero *hero;
 
@@ -134,7 +134,7 @@ void TRV_swim2(const signed int handicap, const signed int percent)
 /* should be static */
 void TRV_a_path(void)
 {
-	dsa_trace_enter(1032, "seg110:TRV_a_path");
+	dsa_trace_enter(1033, "seg110:TRV_a_path");
 	signed int answer;
 
 	do {
@@ -182,7 +182,7 @@ void TRV_a_path(void)
 /* Rovamund <-> Nordvest: Kraeuterplatz (Belmart) */
 void tevent_013(void)
 {
-	dsa_trace_enter(1033, "seg110:tevent_013");
+	dsa_trace_enter(1034, "seg110:tevent_013");
 	if ((test_talent(get_first_hero_available_in_group(), TA_PFLANZENKUNDE, 3) > 0 && !gs_tevent013_flag) || gs_tevent013_flag)
 	{
 		g_gather_herbs_special = ITEM_ID_BELMART_BLATT;
@@ -198,7 +198,7 @@ void tevent_013(void)
 /* Rovamund <-> Nordvest: Leiche eines Wanderers (Woelfe) */
 void tevent_014(void)
 {
-	dsa_trace_enter(1034, "seg110:tevent_014");
+	dsa_trace_enter(1035, "seg110:tevent_014");
 	signed int answer;
 
 	if (!gs_tevent014_flag)
@@ -220,7 +220,7 @@ void tevent_014(void)
 
 void tevent_014_chest(struct struct_chest* chest)
 {
-	dsa_trace_enter(1035, "seg110:tevent_014_chest");
+	dsa_trace_enter(1036, "seg110:tevent_014_chest");
 	chest->loot.content = gs_tevent014_chest;
 
 	loot_chest(chest, get_tx2(47), get_tx2(48)); /* "BEIM DURCHSTÖBERN DES GEPÄCKS FINDET IHR F..." / "AUSSER EIN PAAR VERMODERTEN GEBEINEN GIBT..." */
@@ -229,13 +229,13 @@ void tevent_014_chest(struct struct_chest* chest)
 /* Rovamund <-> Nordvest: Herberge "Am Ingval" */
 void tevent_015(void)
 {
-	dsa_trace_enter(1036, "seg110:tevent_015");
+	dsa_trace_enter(1037, "seg110:tevent_015");
 	TRV_found_inn(TOWN_ID_VAERMHAG, 67); /* 44 = FEATURE.LTX "AM INGVAL" */
 }
 
 void tevent_017(void)
 {
-	dsa_trace_enter(1037, "seg110:tevent_017");
+	dsa_trace_enter(1038, "seg110:tevent_017");
 	if ((test_talent(get_first_hero_available_in_group(), TA_WILDNISLEBEN, 2) > 0 && !gs_tevent017_flag) ||
 		gs_tevent017_flag)
 	{
@@ -247,7 +247,7 @@ void tevent_017(void)
 /* Path west from the route Kravik <-> Skelellen. */
 void tevent_020(void)
 {
-	dsa_trace_enter(1038, "seg110:tevent_020");
+	dsa_trace_enter(1039, "seg110:tevent_020");
 	signed int answer;
 	struct struct_hero *hero;
 
@@ -294,7 +294,7 @@ void tevent_020(void)
 
 void tevent_021(void)
 {
-	dsa_trace_enter(1039, "seg110:tevent_021");
+	dsa_trace_enter(1040, "seg110:tevent_021");
 	if ((test_talent(get_first_hero_available_in_group(), TA_PFLANZENKUNDE, 8) > 0 && !gs_tevent021_flag) || gs_tevent021_flag)
 	{
 		g_gather_herbs_special = ITEM_ID_ALRAUNE;
@@ -375,7 +375,7 @@ static char* fix_skip_des(char *p)
 /* Vilnheim <-> Bodon: Furt durch den Bodir */
 void tevent_026(void)
 {
-	dsa_trace_enter(1040, "seg110:tevent_026");
+	dsa_trace_enter(1041, "seg110:tevent_026");
 	/* Fehler im Original: Text 72 ist "DES BODIR", der Furttext hat schon "AM UFER DES %s"
 	 * -> "IHR STEHT AM UFER DES DES BODIR." (ebenso tevent_027 mit "DES HJALDORVAL") */
 #if FIX_0156
@@ -388,7 +388,7 @@ void tevent_026(void)
 /* Vilnheim <-> Phexcaer: Furt durch den Hjaldorval ("DES DES HJALDORVAL", siehe tevent_026) */
 void tevent_027(void)
 {
-	dsa_trace_enter(1041, "seg110:tevent_027");
+	dsa_trace_enter(1042, "seg110:tevent_027");
 #if FIX_0156
 	TRV_cross_a_ford(fix_skip_des(get_tx2(73)), 30, 0);
 #else
@@ -398,7 +398,7 @@ void tevent_027(void)
 
 void tevent_028(void)
 {
-	dsa_trace_enter(1042, "seg110:tevent_028");
+	dsa_trace_enter(1043, "seg110:tevent_028");
 	if ((test_talent(get_first_hero_available_in_group(), TA_WILDNISLEBEN, 2) > 0 && !gs_tevent028_flag) ||
 		gs_tevent028_flag)
 	{
@@ -410,7 +410,7 @@ void tevent_028(void)
 /* Vilnheim <-> Phexcaer: Grenzpfahl des Orklands und Schilfmeer am Bodir */
 void tevent_029(void)
 {
-	dsa_trace_enter(1043, "seg110:tevent_029");
+	dsa_trace_enter(1044, "seg110:tevent_029");
 	signed int hero_pos;
 	signed int i; /* dual use: inv_slot and item_count */
 	struct struct_hero *hero;
@@ -484,7 +484,7 @@ void tevent_029(void)
 
 void tevent_030(void)
 {
-	dsa_trace_enter(1044, "seg110:tevent_030");
+	dsa_trace_enter(1045, "seg110:tevent_030");
 	if ((test_talent(get_first_hero_available_in_group(), TA_WILDNISLEBEN, 0) > 0 && !gs_tevent030_flag) ||
 		gs_tevent030_flag)
 	{
@@ -496,7 +496,7 @@ void tevent_030(void)
 /* Vilnheim <-> Phexcaer: Ueberfall (Kampf F031); mit Hyggelik-Auftrag stattdessen der Weg zur Ruine */
 void tevent_031(void)
 {
-	dsa_trace_enter(1045, "seg110:tevent_031");
+	dsa_trace_enter(1046, "seg110:tevent_031");
 	signed int answer;
 
 	if (gs_find_hyggelik) {
@@ -530,7 +530,7 @@ void tevent_031(void)
 
 void tevent_032(void)
 {
-	dsa_trace_enter(1046, "seg110:tevent_032");
+	dsa_trace_enter(1047, "seg110:tevent_032");
 	if ((test_talent(get_first_hero_available_in_group(), TA_WILDNISLEBEN, 2) > 0 && !gs_tevent032_flag) || gs_tevent032_flag)
 	{
 		gs_tevent032_flag = 1;
@@ -553,7 +553,7 @@ void tevent_032(void)
 /* Vilnheim <-> Phexcaer: Abenteurer am Wegrand */
 void tevent_033(void)
 {
-	dsa_trace_enter(1047, "seg110:tevent_033");
+	dsa_trace_enter(1048, "seg110:tevent_033");
 	signed int answer;
 
 	load_in_head(9);
@@ -574,7 +574,7 @@ void tevent_033(void)
 
 void tevent_034(void)
 {
-	dsa_trace_enter(1048, "seg110:tevent_034");
+	dsa_trace_enter(1049, "seg110:tevent_034");
 	if ((test_talent(get_first_hero_available_in_group(), TA_WILDNISLEBEN, 2) > 0 && !gs_tevent034_flag) ||
 		gs_tevent034_flag)
 	{
@@ -586,7 +586,7 @@ void tevent_034(void)
 /* Phexcaer <-> Einsiedlersee: Kampf F035 (Fluchtversuch mit Kriegskunst-Probe) */
 void tevent_035(void)
 {
-	dsa_trace_enter(1049, "seg110:tevent_035");
+	dsa_trace_enter(1050, "seg110:tevent_035");
 	signed int answer;
 
 	if (!gs_tevent035_flag)
@@ -614,7 +614,7 @@ void tevent_035(void)
 
 void tevent_036(void)
 {
-	dsa_trace_enter(1050, "seg110:tevent_036");
+	dsa_trace_enter(1051, "seg110:tevent_036");
 	if ((test_talent(get_first_hero_available_in_group(), TA_WILDNISLEBEN, 3) > 0 && !gs_tevent036_flag) || gs_tevent036_flag)
 	{
 		gs_tevent036_flag = 1;
@@ -636,7 +636,7 @@ void tevent_036(void)
 
 void tevent_039(void)
 {
-	dsa_trace_enter(1051, "seg110:tevent_039");
+	dsa_trace_enter(1052, "seg110:tevent_039");
 	if ((test_talent(get_first_hero_available_in_group(), TA_WILDNISLEBEN, 4) > 0 && !gs_tevent039_flag) ||
 		gs_tevent039_flag)
 	{
@@ -659,7 +659,7 @@ void tevent_040(void)
 /* Auplog <-> Varnheim: kleiner aber reissender Bach, ueber den sich urspruenglich einmal eine Haengebruecke spannte. bridge building */
 void tevent_041(void)
 {
-	dsa_trace_enter(1052, "seg110:tevent_041");
+	dsa_trace_enter(1053, "seg110:tevent_041");
 	signed int answer;
 
 	/* Fehler im Original (Text): FEATURE2.LTX 19 hat nur zwei %s ("... KOENNT IHR %s VOR DEM ERTRINKEN
@@ -712,7 +712,7 @@ void tevent_043(void)
  * gs_daspota_treasure_hint schaltet den Hoehleneingang in tevent_094 (Rybon <-> Thoss) frei. */
 void tevent_044(void)
 {
-	dsa_trace_enter(1053, "seg110:tevent_044");
+	dsa_trace_enter(1054, "seg110:tevent_044");
 	signed int answer;
 	struct struct_hero *hero;
 
@@ -746,7 +746,7 @@ void tevent_044(void)
 /* Ottarje -> Daspota: a farmer */
 void tevent_045(void)
 {
-	dsa_trace_enter(1054, "seg110:tevent_045");
+	dsa_trace_enter(1055, "seg110:tevent_045");
 	signed int answer;
 
 	if (gs_journey_destination_town_id == TOWN_ID_DASPOTA)
@@ -772,7 +772,7 @@ void tevent_045(void)
 /* (im Spiel: "Verfallene Herberge", DUNGEON_ID_VERFALLENE_HERBERGE) */
 void tevent_046(void)
 {
-	dsa_trace_enter(1055, "seg110:tevent_046");
+	dsa_trace_enter(1056, "seg110:tevent_046");
 	signed int answer;
 	signed int enter_inn;
 	struct struct_hero *hero;
@@ -850,7 +850,7 @@ void tevent_046(void)
 /* (Beschreibung zufaellig, siehe tevent_022; danach evtl. Karenjagd) */
 void tevent_048(void)
 {
-	dsa_trace_enter(1056, "seg110:tevent_048");
+	dsa_trace_enter(1057, "seg110:tevent_048");
 	signed int answer;
 
 	if ((test_talent(get_first_hero_available_in_group(), TA_WILDNISLEBEN, 3) > 0 && !gs_tevent048_flag) ||
@@ -882,7 +882,7 @@ void tevent_048(void)
 /* Ottarje <-> Skjal: Rastplatz */
 void tevent_049(void)
 {
-	dsa_trace_enter(1057, "seg110:tevent_049");
+	dsa_trace_enter(1058, "seg110:tevent_049");
 	if ((test_talent(get_first_hero_available_in_group(), TA_WILDNISLEBEN, 2) > 0 && !gs_tevent049_flag) ||
 		gs_tevent049_flag)
 	{
@@ -894,7 +894,7 @@ void tevent_049(void)
 /* Ottarje <-> Skjal: Nahrungsplatz, ggf. mit Kraeuterhinweis (der wegen Text 16 nie erscheint) */
 void tevent_050(void)
 {
-	dsa_trace_enter(1058, "seg110:tevent_050");
+	dsa_trace_enter(1059, "seg110:tevent_050");
 	if ((test_talent(get_first_hero_available_in_group(), TA_WILDNISLEBEN, 3) > 0 && !gs_tevent050_flag) ||
 		gs_tevent050_flag)
 	{

@@ -88,7 +88,7 @@ static void fight_delay(void);
  */
 static signed int FIG_obj_needs_refresh(struct struct_fighter *p_fighter, const signed int x, const signed int y)
 {
-	dsa_trace_enter(177, "seg005:FIG_obj_needs_refresh");
+	dsa_trace_enter(176, "seg005:FIG_obj_needs_refresh");
 	if (p_fighter->visible) {
 
 		struct struct_fighter *p_fighter_iter;
@@ -141,7 +141,7 @@ damn_label:
  */
 static void FIG_set_star_color(uint8_t *ptr, signed int count, signed char color)
 {
-	dsa_trace_enter(178, "seg005:FIG_set_star_color");
+	dsa_trace_enter(177, "seg005:FIG_set_star_color");
 	uint8_t *p;
 
 	color += 0x80;
@@ -201,7 +201,7 @@ static char* FIG_name_4th_case(const signed int actor_class_type, volatile const
  */
 static char *FIG_name_1st_case(const signed int actor_class_type, volatile const signed int actor_class_id)
 {
-	dsa_trace_enter(179, "seg005:FIG_name_1st_case");
+	dsa_trace_enter(178, "seg005:FIG_name_1st_case");
 	if (actor_class_type == ACTOR_CLASS_TYPE_HERO) {
 		return get_hero(actor_class_id)->alias;
 	} else {
@@ -222,7 +222,7 @@ static char *FIG_name_1st_case(const signed int actor_class_type, volatile const
  */
 static signed int fight_printer(void)
 {
-	dsa_trace_enter(180, "seg005:fight_printer");
+	dsa_trace_enter(179, "seg005:fight_printer");
 	if (!g_fig_msg_data[0].f_action) {
 		g_fig_continue_print = 0;
 	}
@@ -364,7 +364,7 @@ static signed int fight_printer(void)
  */
 void draw_fight_screen(const signed int val)
 {
-	dsa_trace_enter(181, "seg005:draw_fight_screen");
+	dsa_trace_enter(180, "seg005:draw_fight_screen");
 	signed int i;
 	signed int object_id_bak;
 	signed int width;
@@ -1104,14 +1104,14 @@ to the DOSBox-CPU and may run the timer.
 /* Verzoegerung je Animationsschritt; g_delay_timer wird vom Timer-Interrupt und von fight_delay() heruntergezaehlt */
 static void set_delay_timer(void)
 {
-	dsa_trace_enter(182, "seg005:set_delay_timer");
+	dsa_trace_enter(181, "seg005:set_delay_timer");
 	/* set delay_timer to delay_factor */
 	g_delay_timer = g_delay_factor;
 }
 
 static void fight_delay(void)
 {
-	dsa_trace_enter(183, "seg005:fight_delay");
+	dsa_trace_enter(182, "seg005:fight_delay");
 	CD_audio_repeat_check();
 
 	while (g_delay_timer > 0) {

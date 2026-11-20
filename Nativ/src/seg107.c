@@ -74,7 +74,7 @@ struct struct_hero *g_itemuser;	// ds:0xe5ce, pointer to hero
 /* Borlandified and identical */
 void use_item(const signed int inv_slot, const signed int hero_pos)
 {
-	dsa_trace_enter(987, "seg107:use_item");
+	dsa_trace_enter(988, "seg107:use_item");
 	void (*func)(void);
 
 	/* set global variables for item usage */
@@ -140,7 +140,7 @@ void use_item(const signed int inv_slot, const signed int hero_pos)
 /* Borlandified and identical */
 void item_invoke_arcano(void)
 {
-	dsa_trace_enter(988, "seg107:item_invoke_arcano");
+	dsa_trace_enter(989, "seg107:item_invoke_arcano");
 	/* RING ID 165 */
 
 	/* save index of TX_FILE_INDEX */
@@ -173,7 +173,7 @@ void item_invoke_arcano(void)
 /* Borlandified and identical */
 void item_read_recipe(void)
 {
-	dsa_trace_enter(989, "seg107:item_read_recipe");
+	dsa_trace_enter(990, "seg107:item_read_recipe");
 	char *str;
 
 	switch (g_used_item_id) {
@@ -201,7 +201,7 @@ void item_read_recipe(void)
 /* Borlandified and identical */
 void item_read_document(void)
 {
-	dsa_trace_enter(990, "seg107:item_read_document");
+	dsa_trace_enter(991, "seg107:item_read_document");
 	char *str;
 	signed int tw_bak;
 
@@ -227,7 +227,7 @@ void item_read_document(void)
 /* Borlandified and identical */
 void item_invoke_armatrutz(void)
 {
-	dsa_trace_enter(991, "seg107:item_invoke_armatrutz");
+	dsa_trace_enter(992, "seg107:item_invoke_armatrutz");
 	/* ID 171 = ITEM_ID_SILBERNER_STIRNREIF__1, 245 = ITEM_ID_SILBERNER_STIRNREIF__2 */
 
 	const signed int tx_index_bak = g_tx_file_index;
@@ -258,7 +258,7 @@ void item_invoke_armatrutz(void)
 /* Borlandified and identical */
 void item_invoke_flim_flam(void)
 {
-	dsa_trace_enter(992, "seg107:item_invoke_flim_flam");
+	dsa_trace_enter(993, "seg107:item_invoke_flim_flam");
 	/* ID 174 = ITEM_ID_AMULETT__FLIM_FLAM */
 	const signed int tx_index_bak = g_tx_file_index;
 
@@ -284,7 +284,7 @@ void item_invoke_flim_flam(void)
 /* Borlandified and identical */
 void item_read_schuldbuch(void)
 {
-	dsa_trace_enter(993, "seg107:item_read_schuldbuch");
+	dsa_trace_enter(994, "seg107:item_read_schuldbuch");
 	/* ITEM_ID_SCHULDBUCH, ID 176 */
 
 	if (gs_debtbook_read_flag) {
@@ -305,7 +305,7 @@ void item_read_schuldbuch(void)
 /* Borlandified and identical */
 void item_read_orkdokument(void)
 {
-	dsa_trace_enter(994, "seg107:item_read_orkdokument");
+	dsa_trace_enter(995, "seg107:item_read_orkdokument");
 	/* ITEM_ID_ORKDOKUMENT, ID 179 */
 
 	/* Languages + 4, or already read successful */
@@ -326,7 +326,7 @@ void item_read_orkdokument(void)
 /* Borlandified and identical */
 void item_apply_weapon_poison(void)
 {
-	dsa_trace_enter(995, "seg107:item_apply_weapon_poison");
+	dsa_trace_enter(996, "seg107:item_apply_weapon_poison");
 	/*	WEAPON POISON, EXPURGICUM, VOMICUM
 		ID 55-59, 141-144, 166, 168 */
 
@@ -488,7 +488,7 @@ void item_apply_weapon_poison(void)
 
 void item_use_miasthmaticum(void)
 {
-	dsa_trace_enter(996, "seg107:item_use_miasthmaticum");
+	dsa_trace_enter(997, "seg107:item_use_miasthmaticum");
 	/* ITEM_ID_MIASTHMATICUM, ID 238 */
 
 	if (!g_in_fight) {
@@ -500,7 +500,7 @@ void item_use_miasthmaticum(void)
 
 void item_use_hylailer_feuer(void)
 {
-	dsa_trace_enter(997, "seg107:item_use_hylailer_feuer");
+	dsa_trace_enter(998, "seg107:item_use_hylailer_feuer");
 	/* ITEM_ID_HYLAILER_FEUER, ID 239 */
 
 	if (!g_in_fight) {
@@ -512,7 +512,7 @@ void item_use_hylailer_feuer(void)
 
 void item_read_spellbook_heptagon(void)
 {
-	dsa_trace_enter(998, "seg107:item_read_spellbook_heptagon");
+	dsa_trace_enter(999, "seg107:item_read_spellbook_heptagon");
 	/* ITEM_ID_BUCH__HEPTAGON, ID 246 */
 
 	/* print message */
@@ -528,7 +528,7 @@ void item_read_spellbook_heptagon(void)
 /* Borlandified and identical */
 void item_ignite(void)
 {
-	dsa_trace_enter(999, "seg107:item_ignite");
+	dsa_trace_enter(1000, "seg107:item_ignite");
 	/* ITEM_ID_LATERNE__UNLIT, ITEM_ID_FACKEL__UNLIT, ITEM_ID_ZUNDERKAESTCHEN, ITEM_ID_LATERNE__LIT; ID 25, 65, 85, 249 */
 	signed int tx_index_bak = g_tx_file_index;
 	signed int inv_slot;
@@ -632,7 +632,7 @@ void item_ignite(void)
 /* Borlandified and identical */
 void item_use_beutel(void)
 {
-	dsa_trace_enter(1000, "seg107:item_use_beutel");
+	dsa_trace_enter(1001, "seg107:item_use_beutel");
 	/* ITEM_ID_MAGISCHER_BROTBEUTEL, ITEM_ID_BEUTEL; ID 184, 221 */
 
 #ifndef M302de_FEATURE_MOD

@@ -89,7 +89,7 @@ static const int8_t* g_anitab_spell_index[2] = {
  **/
 void FANI_add_projectile(const signed int attacker_object_id, const signed int projectile_gfx_id, const signed int viewdir)
 {
-	dsa_trace_enter(394, "seg045:FANI_add_projectile");
+	dsa_trace_enter(395, "seg045:FANI_add_projectile");
 	signed int attacker_x;
 	signed int attacker_y;
 	struct nvf_extract_desc nvf;
@@ -143,7 +143,7 @@ void FANI_add_projectile(const signed int attacker_object_id, const signed int p
 
 void FANI_remove_projectile(void)
 {
-	dsa_trace_enter(395, "seg045:FANI_remove_projectile");
+	dsa_trace_enter(396, "seg045:FANI_remove_projectile");
 	FIG_remove_from_list(g_fig_projectile_id, 0);
 	g_fig_projectile_id = -1;
 }
@@ -157,7 +157,7 @@ void FANI_remove_projectile(void)
  */
 signed int FANI_copy_sequence(int8_t *dst, const int8_t *src, const signed char term)
 {
-	dsa_trace_enter(396, "seg045:FANI_copy_sequence");
+	dsa_trace_enter(397, "seg045:FANI_copy_sequence");
 	signed int i;
 
 	for (i = 0; *src != term; i += 3) {
@@ -190,7 +190,7 @@ signed int FANI_copy_sequence(int8_t *dst, const int8_t *src, const signed char 
  */
 signed int FANI_prepare_projectile_ani(const signed int ani_track_id, const signed int projectile_gfx_id, const signed int attacker_object_id, const signed int target_object_id, const signed int viewdir)
 {
-	dsa_trace_enter(397, "seg045:FANI_prepare_projectile_ani");
+	dsa_trace_enter(398, "seg045:FANI_prepare_projectile_ani");
 	signed int i;
 	int8_t *p_ani_clip_projectile;
 	signed int attacker_x;
@@ -237,7 +237,7 @@ struct int16_pair {
  */
 void FANI_add_spell(const signed int x, const signed int y, const signed int spell_impact_gfx_id)
 {
-	dsa_trace_enter(398, "seg045:FANI_add_spell");
+	dsa_trace_enter(399, "seg045:FANI_add_spell");
 	signed int height;
 	signed int width;
 
@@ -284,7 +284,7 @@ void FANI_add_spell(const signed int x, const signed int y, const signed int spe
 
 void FANI_remove_spell(void)
 {
-	dsa_trace_enter(399, "seg045:FANI_remove_spell");
+	dsa_trace_enter(400, "seg045:FANI_remove_spell");
 	FIG_remove_from_list(g_fig_spellgfx_id, 0);
 	g_fig_spellgfx_id = -1;
 }
@@ -294,7 +294,7 @@ void FANI_remove_spell(void)
  */
 void FANI_prepare_hero_spell_ani(const signed int ani_track_id, const struct struct_hero *hero, const signed int spell_impact_gfx_id)
 {
-	dsa_trace_enter(400, "seg045:FANI_prepare_hero_spell_ani");
+	dsa_trace_enter(401, "seg045:FANI_prepare_hero_spell_ani");
 	int8_t *p_ani_clip_spell_impact;
 	signed int x;
 	signed int y;
@@ -319,7 +319,7 @@ void FANI_prepare_hero_spell_ani(const signed int ani_track_id, const struct str
  */
 void FANI_prepare_enemy_spell_ani(const signed int ani_track_id, const struct enemy_sheet *enemy, const signed int spell_impact_gfx_id)
 {
-	dsa_trace_enter(401, "seg045:FANI_prepare_enemy_spell_ani");
+	dsa_trace_enter(402, "seg045:FANI_prepare_enemy_spell_ani");
 	int8_t *p_ani_clip_spell_impact;
 	signed int x;
 	signed int y;

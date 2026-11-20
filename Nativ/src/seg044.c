@@ -92,6 +92,23 @@ static signed int copy_ani_seq(int8_t *dst, const signed int ani_num, const sign
 	return len;
 }
 
+#if FIX_0441
+/* Fix 441: maennliche Figuren (Sprite-Id 1..10) nutzen in ANI.DAT dieselben Sterbesequenzen (0x44..0x4c)
+ * wie weibliche (12..21) mit Ton 95 (FX7.VOC, Frauenschrei); fuer maennliche Figuren auf Ton 96
+ * (FX8.VOC, Maennerschrei wie bei Pirat/Raeuber/Zauberer/Ork) umstellen */
+static signed int copy_death_ani_seq(int8_t *dst, const signed int ani_num, const signed int actor_sprite_id)
+{
+	dsa_trace_enter(389, "seg044:copy_death_ani_seq");
+	signed int len = copy_ani_seq(dst, ani_num, ANI_SRC_FILE_ID_ANI_DAT);
+
+	if ((actor_sprite_id <= ACTOR_SPRITE_ID_ELF__MALE) && (len >= 2) && (dst[0] == -9) && (dst[1] == 95)) {
+		dst[1] = 96;
+	}
+
+	return len;
+}
+#endif
+
 /**
  * \brief   returns the header byte (first byte) of an animation sequence in ANI.DAT
  *
@@ -101,7 +118,7 @@ static signed int copy_ani_seq(int8_t *dst, const signed int ani_num, const sign
 /* Borlandified and identical */
 static signed char get_seq_header(const signed int ani_num)
 {
-	dsa_trace_enter(389, "seg044:get_seq_header");
+	dsa_trace_enter(390, "seg044:get_seq_header");
 	int8_t *p_datbuffer;
 	int8_t *p_datitem;
 	int8_t length;
@@ -157,7 +174,7 @@ static signed char get_seq_header(const signed int ani_num)
 /* Borlandified and identical */
 void FANI_prepare_fight_hero_ani(const signed int ani_track_id, struct struct_hero *hero, const signed int weapon_gfx_id, const signed int f_action, const signed int actor_object_id, const signed int opponent_object_id, const signed int is_defender)
 {
-	dsa_trace_enter(390, "seg044:FANI_prepare_fight_hero_ani");
+	dsa_trace_enter(391, "seg044:FANI_prepare_fight_hero_ani");
 	signed int ani_index_ptr_index_0;
 	signed int attacker_x;
 	signed int attacker_y;
@@ -361,7 +378,11 @@ void FANI_prepare_fight_hero_ani(const signed int ani_track_id, struct struct_he
 		*p_ani_clip_base++ = get_seq_header(ani_index_ptr[20]);
 		*p_ani_clip_base++ = 0;
 
+#if FIX_0441
+		p_ani_clip_base += copy_death_ani_seq(p_ani_clip_base, ani_index_ptr[20], hero->actor_sprite_id);
+#else
 		p_ani_clip_base += copy_ani_seq(p_ani_clip_base, ani_index_ptr[20], ANI_SRC_FILE_ID_ANI_DAT);
+#endif
 	}
 
 	if (
@@ -403,7 +424,7 @@ void FANI_prepare_fight_hero_ani(const signed int ani_track_id, struct struct_he
 /* Borlandified and identical */
 void FANI_prepare_fight_enemy_ani(const signed int ani_track_id, struct enemy_sheet *enemy, const signed int f_action, const signed int actor_object_id, const signed int opponent_object_id, const signed int is_defender)
 {
-	dsa_trace_enter(391, "seg044:FANI_prepare_fight_enemy_ani");
+	dsa_trace_enter(392, "seg044:FANI_prepare_fight_enemy_ani");
 	signed int ani_index_ptr_index_0;
 	signed int attacker_x;
 	signed int attacker_y;
@@ -620,7 +641,11 @@ void FANI_prepare_fight_enemy_ani(const signed int ani_track_id, struct enemy_sh
 		*p_ani_clip_base++ = get_seq_header(ani_index_ptr[20]);
 		*p_ani_clip_base++ = 0;
 
+#if FIX_0441
+		p_ani_clip_base += copy_death_ani_seq(p_ani_clip_base, ani_index_ptr[20], enemy->actor_sprite_id);
+#else
 		p_ani_clip_base += copy_ani_seq(p_ani_clip_base, ani_index_ptr[20], 1);
+#endif
 	}
 
 	FIG_set_ani_track_id_base(enemy->fighter_id, (signed char)ani_track_id);
@@ -667,7 +692,7 @@ void FANI_prepare_fight_enemy_ani(const signed int ani_track_id, struct enemy_sh
 /* Borlandified and identical */
 void FANI_prepare_spell_hero(const signed int ani_track_id, struct struct_hero *hero, const signed int ani_mode, const signed int actor_object_id, const signed int opponent_object_id, const signed int projectile_gfx_id, const signed int is_target)
 {
-	dsa_trace_enter(392, "seg044:FANI_prepare_spell_hero");
+	dsa_trace_enter(393, "seg044:FANI_prepare_spell_hero");
 	signed int x_actor;
 	signed int y_actor;
 	signed int x_opponent;
@@ -789,7 +814,11 @@ void FANI_prepare_spell_hero(const signed int ani_track_id, struct struct_hero *
 		*p_ani_clip_base = 0;
 		p_ani_clip_base++;
 
+#if FIX_0441
+		p_ani_clip_base += copy_death_ani_seq(p_ani_clip_base, ani_index_ptr[20], hero->actor_sprite_id);
+#else
 		p_ani_clip_base += copy_ani_seq(p_ani_clip_base, ani_index_ptr[20], ANI_SRC_FILE_ID_ANI_DAT);
+#endif
 	}
 
 	*p_ani_clip_base = -1;
@@ -813,7 +842,7 @@ void FANI_prepare_spell_hero(const signed int ani_track_id, struct struct_hero *
 /* Borlandified and identical */
 void FANI_prepare_spell_enemy(const signed int ani_track_id, struct enemy_sheet *enemy, const signed int ani_mode, const signed int actor_object_id, const signed int opponent_object_id, const signed int is_target)
 {
-	dsa_trace_enter(393, "seg044:FANI_prepare_spell_enemy");
+	dsa_trace_enter(394, "seg044:FANI_prepare_spell_enemy");
 	signed int ani_index_ptr_index_0;
 	signed int x_actor;
 	signed int y_actor;
@@ -930,7 +959,11 @@ void FANI_prepare_spell_enemy(const signed int ani_track_id, struct enemy_sheet 
 		*p_ani_clip_base = 0;
 		p_ani_clip_base++;
 
+#if FIX_0441
+		p_ani_clip_base += copy_death_ani_seq(p_ani_clip_base, ani_index_ptr[20], enemy->actor_sprite_id);
+#else
 		p_ani_clip_base += copy_ani_seq(p_ani_clip_base, ani_index_ptr[20], 1);
+#endif
 	}
 
 	*p_ani_clip_base = -1;

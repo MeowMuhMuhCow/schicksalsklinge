@@ -35,7 +35,7 @@
 /* Fix 404: laufende Elixierwirkung (+5) auf derselben Eigenschaft des Helden suchen, -1 wenn keine */
 static signed int fix_elixir_slot(const struct struct_hero *hero, const uint8_t *ptr)
 {
-	dsa_trace_enter(1001, "seg108:fix_elixir_slot");
+	dsa_trace_enter(1002, "seg108:fix_elixir_slot");
 	signed int i;
 
 	if (hero->timer_id != 0) {
@@ -61,7 +61,7 @@ static signed int fix_elixir_slot(const struct struct_hero *hero, const uint8_t 
  */
 void consume(struct struct_hero *owner, struct struct_hero *consumer, const signed int inv_slot)
 {
-	dsa_trace_enter(1002, "seg108:consume");
+	dsa_trace_enter(1003, "seg108:consume");
 	struct item_stats *item_desc;
 	signed int item_id;
 

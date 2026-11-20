@@ -392,11 +392,34 @@ signed int FIG_find_path_to_target(uint8_t *actor_ptr, const signed int actor_id
 	signed int target_reached_x[10];
 	signed int target_reached_y[10];
 	signed int unused[10]; /* array gets only written, but never read */
+#if FIX_0018
+	signed int skip_renegade = 0;
+#endif
 
 	struct viewdir_offsets coordinate_offset = g_fig_viewdir_offsets7;
 
 	actor_enemy_ptr = NULL;
 	double_size = 0;
+
+#if FIX_0018
+	/* Fix 18: keinen Pfad zu uebergelaufenen Gegnern (Boeser Blick, Skelettarius) suchen,
+	 * solange noch mindestens ein nicht uebergelaufener aktiver Gegner im Kampf ist
+	 * (bzw. bei Modus 2 und 7 fuer einen uebergelaufenen Gegner selbst nie) */
+	if ((mode == 2) || (mode == 7)) {
+		skip_renegade = 1;
+	} else if ((mode == 3) || (mode == 9)) {
+		for (i = 0; i < 20; i++) {
+			enemy_ptr = &g_enemy_sheets[i];
+			if (enemy_ptr->monster_id && !enemy_ptr->flags.dead && !enemy_ptr->flags.petrified &&
+				!enemy_ptr->flags.tied && !enemy_ptr->flags.mushroom && !enemy_ptr->flags.busy &&
+				!enemy_ptr->round_appear && !enemy_ptr->flags.renegade)
+			{
+				skip_renegade = 1;
+				break;
+			}
+		}
+	}
+#endif
 
 	if ((mode == 0) || (mode == 2) || (mode == 4) || (mode == 6) || (mode == 7)) /* actor is an enemy */
 	{
@@ -516,7 +539,11 @@ signed int FIG_find_path_to_target(uint8_t *actor_ptr, const signed int actor_id
 
 				enemy_ptr = &g_enemy_sheets[i];
 
-				if (enemy_ptr->monster_id && !enemy_ptr->flags.dead) {
+				if (enemy_ptr->monster_id && !enemy_ptr->flags.dead
+#if FIX_0018
+					&& (!skip_renegade || !enemy_ptr->flags.renegade)
+#endif
+				) {
 
 					FIG_search_obj_on_cb(i + 10, &x, &y);
 
@@ -678,7 +705,11 @@ signed int FIG_find_path_to_target(uint8_t *actor_ptr, const signed int actor_id
 											}
 										} else { /* enemy on square */
 											if (((mode == 2) || (mode == 3)) && /* melee attack */
-												(object_id < 30) && (!actor_enemy_ptr || (actor_enemy_ptr && (!double_size ||
+												(object_id < 30) &&
+#if FIX_0018
+												(!skip_renegade || !g_enemy_sheets[object_id - 10].flags.renegade) &&
+#endif
+												(!actor_enemy_ptr || (actor_enemy_ptr && (!double_size ||
 															((double_size != 0) &&
 																((!*(g_chessboard_cpy + tail_y * 25 + tail_x)) ||
 																(*(g_chessboard_cpy + tail_y * 25 + tail_x)) == (actor_id + 10) ||

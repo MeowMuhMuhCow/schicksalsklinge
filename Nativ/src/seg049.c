@@ -48,7 +48,7 @@
  */
 int GRP_compare_heroes(const void *p1, const void *p2)
 {
-	dsa_trace_enter(428, "seg049:GRP_compare_heroes");
+	dsa_trace_enter(429, "seg049:GRP_compare_heroes");
 	struct struct_hero *hero1 = (struct struct_hero*)p1;
 	struct struct_hero *hero2 = (struct struct_hero*)p2;
 
@@ -135,7 +135,7 @@ int GRP_compare_heroes(const void *p1, const void *p2)
  */
 void GRP_sort_heroes(void)
 {
-	dsa_trace_enter(429, "seg049:GRP_sort_heroes");
+	dsa_trace_enter(430, "seg049:GRP_sort_heroes");
 	signed int hero_pos;
 
 	qsort((void*)get_hero(0), 6, sizeof(struct struct_hero), GRP_compare_heroes);
@@ -152,7 +152,7 @@ void GRP_sort_heroes(void)
  */
 void GRP_save_pos(signed int group_id)
 {
-	dsa_trace_enter(430, "seg049:GRP_save_pos");
+	dsa_trace_enter(431, "seg049:GRP_save_pos");
 	signed int skip_redraw = 0;
 
 	if (group_id & 0x8000) {
@@ -192,7 +192,7 @@ void GRP_save_pos(signed int group_id)
  * (wie count_heroes_available_in_group(), Bright-Eyes: count_heroes_available_in_group_ignore_npc) */
 static signed int fix_count_group_no_npc(void)
 {
-	dsa_trace_enter(431, "seg049:fix_count_group_no_npc");
+	dsa_trace_enter(432, "seg049:fix_count_group_no_npc");
 	signed int i;
 	signed int cnt = 0;
 	struct struct_hero *hero = get_hero(0);
@@ -214,7 +214,7 @@ static signed int fix_count_group_no_npc(void)
  */
 void GRP_split(void)
 {
-	dsa_trace_enter(432, "seg049:GRP_split");
+	dsa_trace_enter(433, "seg049:GRP_split");
 	signed int new_group_id;
 	signed int not_empty;
 	signed int answer;
@@ -274,7 +274,7 @@ void GRP_split(void)
  */
 void GRP_merge(void)
 {
-	dsa_trace_enter(433, "seg049:GRP_merge");
+	dsa_trace_enter(434, "seg049:GRP_merge");
 	signed int group_id;
 	signed int hero_pos;
 
@@ -327,7 +327,7 @@ void GRP_merge(void)
  */
 void GRP_switch_to_next(const signed int mode)
 {
-	dsa_trace_enter(434, "seg049:GRP_switch_to_next");
+	dsa_trace_enter(435, "seg049:GRP_switch_to_next");
 	signed int hero_pos;
 	signed int state;
 
@@ -531,7 +531,7 @@ void GRP_switch_to_next(const signed int mode)
  */
 void GRP_swap_heroes(void)
 {
-	dsa_trace_enter(435, "seg049:GRP_swap_heroes");
+	dsa_trace_enter(436, "seg049:GRP_swap_heroes");
 	signed int hero_pos_1;
 	signed int hero_pos_2;
 	signed char guardstatus_bak;
@@ -611,7 +611,7 @@ void GRP_swap_heroes(void)
  */
 void GRP_move_hero(const signed int src_pos)
 {
-	dsa_trace_enter(436, "seg049:GRP_move_hero");
+	dsa_trace_enter(437, "seg049:GRP_move_hero");
 	signed int dst_pos;
 	struct struct_hero *src;
 	struct struct_hero *dst;
@@ -804,7 +804,7 @@ void GRP_move_hero(const signed int src_pos)
  */
 void GRP_hero_sleep(struct struct_hero *hero, const signed int quality)
 {
-	dsa_trace_enter(437, "seg049:GRP_hero_sleep");
+	dsa_trace_enter(438, "seg049:GRP_hero_sleep");
 	signed int le_regen;
 	signed int ae_regen;
 	signed int diff;

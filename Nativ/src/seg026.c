@@ -468,7 +468,7 @@ char g_savegame_names[5][9];			// ds:0xe2da
 /* laedt FONT6, TEXT.LTX, ITEMNAME und MONNAMES und baut die Zeigerlisten */
 void init_text(void)
 {
-	dsa_trace_enter(263, "seg026:init_text");
+	dsa_trace_enter(262, "seg026:init_text");
 	int32_t len;
 	signed int handle;
 
@@ -498,7 +498,7 @@ void init_text(void)
 /* laedt eine Textdatei in g_buffer7_ptr, Zeiger nach g_tx_index (get_tx()) */
 void load_tx(const signed int index)
 {
-	dsa_trace_enter(264, "seg026:load_tx");
+	dsa_trace_enter(263, "seg026:load_tx");
 	int32_t archive_file_len;
 	signed int archive_file_handle;
 
@@ -519,7 +519,7 @@ void load_tx(const signed int index)
 /* laedt eine Textdatei in g_buffer8_ptr, Zeiger nach g_tx2_index (get_tx2()) */
 void load_tx2(const signed int index)
 {
-	dsa_trace_enter(265, "seg026:load_tx2");
+	dsa_trace_enter(264, "seg026:load_tx2");
 	int32_t len;
 	register signed int handle;
 
@@ -538,7 +538,7 @@ void load_tx2(const signed int index)
  * WAFFINFO.LTX seems to have 19 + 40 + 67 = 126 strings, which will lead to problems */
 void load_ltx(const signed int index)
 {
-	dsa_trace_enter(266, "seg026:load_ltx");
+	dsa_trace_enter(265, "seg026:load_ltx");
 	int32_t len;
 	signed int handle = load_archive_file(index);
 
@@ -562,7 +562,7 @@ void load_ltx(const signed int index)
 /* zerlegt len Byte nullterminierter Texte in eine Liste von Zeigern auf die einzelnen Texte */
 void split_textbuffer(char **dst, char *src, uint32_t len)
 {
-	dsa_trace_enter(267, "seg026:split_textbuffer");
+	dsa_trace_enter(266, "seg026:split_textbuffer");
 	uint32_t i = 0;
 
 	*dst = src;
@@ -582,7 +582,7 @@ void split_textbuffer(char **dst, char *src, uint32_t len)
 
 void load_ggsts_nvf(void)
 {
-	dsa_trace_enter(268, "seg026:load_ggsts_nvf");
+	dsa_trace_enter(267, "seg026:load_ggsts_nvf");
 	signed int handle;
 
 	/* seek to GGSTS.NVF */
@@ -600,7 +600,7 @@ void load_ggsts_nvf(void)
 /* Dateiname fuer einen Helden: hoechstens 8 Zeichen, Sonderzeichen werden zu '_', dazu ".CHR" */
 void prepare_chr_name(char *dst, char *src)
 {
-	dsa_trace_enter(269, "seg026:prepare_chr_name");
+	dsa_trace_enter(268, "seg026:prepare_chr_name");
 	char tmp_str[40];
 	signed int i;
 
@@ -624,7 +624,7 @@ void prepare_chr_name(char *dst, char *src)
 /* Dateiname (ohne Endung) fuer einen Spielstand: genau 8 Zeichen, mit '_' aufgefuellt */
 void prepare_sg_name(char *dst, char *src)
 {
-	dsa_trace_enter(270, "seg026:prepare_sg_name");
+	dsa_trace_enter(269, "seg026:prepare_sg_name");
 	char tmp_str[40];
 	signed int i;
 
@@ -739,7 +739,7 @@ static signed int open_file_ci(const char *fname, int flags)
 
 signed int load_game_state(void)
 {
-	dsa_trace_enter(271, "seg026:load_game_state");
+	dsa_trace_enter(270, "seg026:load_game_state");
 #if 1
 	register signed int handle_sg;
 	signed int i;
@@ -1028,7 +1028,7 @@ signed int load_game_state(void)
  * Die Startdateien legen die Datei an (SPEICHERN_OHNE_AP_AN.bat) oder entfernen sie. Dateiname Zeichen fuer Zeichen. */
 static signed int speichern_ohne_ap(void)
 {
-	dsa_trace_enter(272, "seg026:speichern_ohne_ap");
+	dsa_trace_enter(271, "seg026:speichern_ohne_ap");
 	char name[12];
 	signed int fd;
 
@@ -1049,7 +1049,7 @@ static signed int speichern_ohne_ap(void)
  */
 signed int save_game_state(void)
 {
-	dsa_trace_enter(273, "seg026:save_game_state");
+	dsa_trace_enter(272, "seg026:save_game_state");
 #if 1
 	signed int handle_sg;
 	HugePt p_status_start;
@@ -1427,7 +1427,7 @@ signed int save_game_state(void)
  */
 signed int read_chr_temp(char *fname, const signed int hero_pos, const signed int group_id)
 {
-	dsa_trace_enter(274, "seg026:read_chr_temp");
+	dsa_trace_enter(273, "seg026:read_chr_temp");
 #if 1
 	signed int handle;
 	signed int hero_size = sizeof(struct struct_hero);
@@ -1498,7 +1498,7 @@ signed int read_chr_temp(char *fname, const signed int hero_pos, const signed in
  */
 void write_chr_temp(const signed int hero_pos)
 {
-	dsa_trace_enter(275, "seg026:write_chr_temp");
+	dsa_trace_enter(274, "seg026:write_chr_temp");
 	char fname[20];
 	signed int handle;
 
@@ -1525,7 +1525,7 @@ void write_chr_temp(const signed int hero_pos)
  */
 signed int copy_chr_names(char *ptr, const signed int temple_id)
 {
-	dsa_trace_enter(276, "seg026:copy_chr_names");
+	dsa_trace_enter(275, "seg026:copy_chr_names");
 #if defined(_WIN32)
 	signed int count = 0;
 	DIR *dir = opendir("TEMP");
@@ -1653,7 +1653,7 @@ signed int copy_chr_names(char *ptr, const signed int temple_id)
  */
 void load_in_head(const signed int head)
 {
-	dsa_trace_enter(277, "seg026:load_in_head");
+	dsa_trace_enter(276, "seg026:load_in_head");
 	signed int handle;
 
 	if (head >= 0) {
@@ -1677,7 +1677,7 @@ void load_in_head(const signed int head)
  */
 void load_temple_logo(signed int god_id)
 {
-	dsa_trace_enter(278, "seg026:load_temple_logo");
+	dsa_trace_enter(277, "seg026:load_temple_logo");
 	struct nvf_extract_desc nvf;
 	signed int handle; /* REMARK: reused differently */
 

@@ -71,7 +71,7 @@ signed char g_wildcamp_guardstatus[8];	// ds:0xe3d6
  */
 void do_wildcamp(void)
 {
-	dsa_trace_enter(444, "seg051:do_wildcamp");
+	dsa_trace_enter(445, "seg051:do_wildcamp");
 	signed int watch;
 	signed int redraw_locline;
 	signed int i;
@@ -465,7 +465,7 @@ void do_wildcamp(void)
  */
 signed int gather_herbs(struct struct_hero *hero, const signed int hours, const signed int handicap)
 {
-	dsa_trace_enter(445, "seg051:gather_herbs");
+	dsa_trace_enter(446, "seg051:gather_herbs");
 	signed int herb_index;
 	signed int unique_herbs_count;
 	struct gather_herbs *ptr;
@@ -568,7 +568,7 @@ signed int gather_herbs(struct struct_hero *hero, const signed int hours, const 
  */
 signed int replenish_stocks(signed int handicap, const signed int tries)
 {
-	dsa_trace_enter(446, "seg051:replenish_stocks");
+	dsa_trace_enter(447, "seg051:replenish_stocks");
 	signed int hero_pos;
 	signed int i;
 	signed int retval = 0;

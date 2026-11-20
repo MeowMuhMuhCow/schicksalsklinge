@@ -393,11 +393,11 @@ void timer_isr(void)
 #endif
 }
 
-#if defined(__BORLANDC__) && !FIX_ZEIGER
+#if defined(__BORLANDC__)
+#if !FIX_ZEIGER
 /* wartet auf den naechsten Timer-Tick; wird nie aufgerufen */
 static void unused_gfx_spinlock(void)
 {
-	dsa_trace_enter(147, "seg004:unused_gfx_spinlock");
 	int32_t v = g_timer_tick_counter;
 
 	while (v == g_timer_tick_counter) { ; }
@@ -407,7 +407,7 @@ static void unused_gfx_spinlock(void)
 
 void update_status_bars(void)
 {
-	dsa_trace_enter(148, "seg004:update_status_bars");
+	dsa_trace_enter(147, "seg004:update_status_bars");
 	signed int i;
 	struct struct_hero *hero;
 
@@ -567,7 +567,7 @@ void update_status_bars(void)
  */
 void draw_bar(const signed int type, const signed int hero, const signed int pts_cur, const signed int pts_max, const signed int mode)
 {
-	dsa_trace_enter(149, "seg004:draw_bar");
+	dsa_trace_enter(148, "seg004:draw_bar");
 	signed int i;
 	signed int y_min;
 	signed int x;
@@ -645,7 +645,7 @@ void draw_bar(const signed int type, const signed int hero, const signed int pts
  */
 void restore_rect(uint8_t *dst, uint8_t *src, const signed int x, const signed int y, const signed char width, const signed char height)
 {
-	dsa_trace_enter(150, "seg004:restore_rect");
+	dsa_trace_enter(149, "seg004:restore_rect");
 	signed int i;
 	signed int j;
 	signed char c;
@@ -674,7 +674,7 @@ void restore_rect(uint8_t *dst, uint8_t *src, const signed int x, const signed i
  */
 void restore_rect_rle(uint8_t *dst, uint8_t *src, const signed int x, const signed int y, const signed char width, const signed char height, const signed int mode)
 {
-	dsa_trace_enter(151, "seg004:restore_rect_rle");
+	dsa_trace_enter(150, "seg004:restore_rect_rle");
 	signed int si;
 	signed int di;
 	signed int i;
@@ -711,7 +711,7 @@ void restore_rect_rle(uint8_t *dst, uint8_t *src, const signed int x, const sign
 /* zeichnet die Maske des aktuellen Mauszeigers in Farbe 0xff direkt in den Bildschirmspeicher */
 void mouse_cursor_draw(void)
 {
-	dsa_trace_enter(152, "seg004:mouse_cursor_draw");
+	dsa_trace_enter(151, "seg004:mouse_cursor_draw");
 	register signed int mask;
 	signed int x;
 	signed char i;
@@ -750,7 +750,7 @@ void mouse_cursor_draw(void)
 
 void mouse_save_bg(void)
 {
-	dsa_trace_enter(153, "seg004:mouse_save_bg");
+	dsa_trace_enter(152, "seg004:mouse_save_bg");
 	uint8_t *src;
 	signed int realpos_x;
 	signed int realpos_y;
@@ -785,7 +785,7 @@ void mouse_save_bg(void)
 
 void restore_mouse_bg(void)
 {
-	dsa_trace_enter(154, "seg004:restore_mouse_bg");
+	dsa_trace_enter(153, "seg004:restore_mouse_bg");
 	signed int delta_y;
 	signed int realpos_x;
 	signed int delta_x;
@@ -817,7 +817,7 @@ void restore_mouse_bg(void)
 
 void load_wallclock_nvf(void)
 {
-	dsa_trace_enter(155, "seg004:load_wallclock_nvf");
+	dsa_trace_enter(154, "seg004:load_wallclock_nvf");
 	struct nvf_extract_desc nvf;
 	signed int handle; /* REMARK: reused differently */
 
@@ -856,7 +856,7 @@ void load_wallclock_nvf(void)
 
 void update_wallclock(void)
 {
-	dsa_trace_enter(156, "seg004:update_wallclock");
+	dsa_trace_enter(155, "seg004:update_wallclock");
 	signed int night;
 	int32_t d;
 
@@ -905,7 +905,7 @@ void update_wallclock(void)
  */
 void draw_wallclock(signed int pos, const signed int night)
 {
-	dsa_trace_enter(157, "seg004:draw_wallclock");
+	dsa_trace_enter(156, "seg004:draw_wallclock");
 	signed int y;
 	signed int mouse_updated;
 	struct struct_rect rect_bak;
@@ -1020,7 +1020,7 @@ void draw_wallclock(signed int pos, const signed int night)
  */
 void array_add(uint8_t *dst, const signed int len, const signed int op, const signed int flag)
 {
-	dsa_trace_enter(158, "seg004:array_add");
+	dsa_trace_enter(157, "seg004:array_add");
 	signed int i;
 
 	for (i = 0; i < len; i++) {
@@ -1037,7 +1037,7 @@ void array_add(uint8_t *dst, const signed int len, const signed int op, const si
 
 void schick_set_video(void)
 {
-	dsa_trace_enter(159, "seg004:schick_set_video");
+	dsa_trace_enter(158, "seg004:schick_set_video");
 	struct uint8_t_3 pal_white = g_color_pal_white;
 
 #if defined(__BORLANDC__)
@@ -1051,7 +1051,7 @@ void schick_set_video(void)
 
 void schick_reset_video(void)
 {
-	dsa_trace_enter(160, "seg004:schick_reset_video");
+	dsa_trace_enter(159, "seg004:schick_reset_video");
 #if defined(__BORLANDC__)
 	set_video_mode(g_video_mode_bak);
 	set_video_page(g_video_page_bak);
@@ -1062,7 +1062,7 @@ void schick_reset_video(void)
 
 void clear_ani_pal(void)
 {
-	dsa_trace_enter(161, "seg004:clear_ani_pal");
+	dsa_trace_enter(160, "seg004:clear_ani_pal");
 	struct uint8_t_32_3 pal = g_palette_allblack;
 
 	wait_for_vsync();
@@ -1073,7 +1073,7 @@ void clear_ani_pal(void)
 
 void set_ani_pal(uint8_t *pal)
 {
-	dsa_trace_enter(162, "seg004:set_ani_pal");
+	dsa_trace_enter(161, "seg004:set_ani_pal");
 	wait_for_vsync();
 	set_palette(pal, 0, 0x20);
 }
@@ -1086,42 +1086,42 @@ void set_ani_pal(uint8_t *pal)
 
 void unused_ega_set_mode(unsigned char a)
 {
-	dsa_trace_enter(163, "seg004:unused_ega_set_mode");
+	dsa_trace_enter(162, "seg004:unused_ega_set_mode");
 	outportb(0x3ce, 5);
 	outportb(0x3cf, a);
 }
 
 void unused_ega_map_mask(unsigned char a)
 {
-	dsa_trace_enter(164, "seg004:unused_ega_map_mask");
+	dsa_trace_enter(163, "seg004:unused_ega_map_mask");
 	outportb(0x3c4, 2);
 	outportb(0x3c5, a);
 }
 
 void unused_ega_set_reset(unsigned char a)
 {
-	dsa_trace_enter(165, "seg004:unused_ega_set_reset");
+	dsa_trace_enter(164, "seg004:unused_ega_set_reset");
 	outportb(0x3ce, 0);
 	outportb(0x3cf, a);
 }
 
 void unused_ega_enable_set_reset(unsigned char a)
 {
-	dsa_trace_enter(166, "seg004:unused_ega_enable_set_reset");
+	dsa_trace_enter(165, "seg004:unused_ega_enable_set_reset");
 	outportb(0x3ce, 1);
 	outportb(0x3cf, a);
 }
 
 void unused_ega_read_map(unsigned char a)
 {
-	dsa_trace_enter(167, "seg004:unused_ega_read_map");
+	dsa_trace_enter(166, "seg004:unused_ega_read_map");
 	outportb(0x3ce, 4);
 	outportb(0x3cf, a);
 }
 
 void unused_ega_bit_mask(unsigned char a)
 {
-	dsa_trace_enter(168, "seg004:unused_ega_bit_mask");
+	dsa_trace_enter(167, "seg004:unused_ega_bit_mask");
 	outportb(0x3ce, 8);
 	outportb(0x3cf, a);
 }
@@ -1130,7 +1130,7 @@ void unused_ega_bit_mask(unsigned char a)
 
 void do_h_line(uint8_t* ptr, signed int x1, signed int x2, const signed int y, const signed char color)
 {
-	dsa_trace_enter(169, "seg004:do_h_line");
+	dsa_trace_enter(168, "seg004:do_h_line");
 	signed int tmp;
 	signed int count;
 	uint8_t* dst;
@@ -1161,7 +1161,7 @@ void do_h_line(uint8_t* ptr, signed int x1, signed int x2, const signed int y, c
  */
 void do_v_line(uint8_t* ptr, const signed int x, signed int y1, signed int y2, const signed char color)
 {
-	dsa_trace_enter(170, "seg004:do_v_line");
+	dsa_trace_enter(169, "seg004:do_v_line");
 	signed int tmp;
 	signed int count;
 	uint8_t* dst;
@@ -1192,7 +1192,7 @@ void do_v_line(uint8_t* ptr, const signed int x, signed int y1, signed int y2, c
 
 void do_border(uint8_t* dst, const signed int x1, const signed int y1, const signed int x2, const signed int y2, const signed char color)
 {
-	dsa_trace_enter(171, "seg004:do_border");
+	dsa_trace_enter(170, "seg004:do_border");
 	call_mouse_bg();
 	do_h_line(dst, x1, x2, y1, color);
 	do_h_line(dst, x1, x2, y2, color);
@@ -1210,7 +1210,7 @@ void do_border(uint8_t* dst, const signed int x1, const signed int y1, const sig
  */
 void do_pic_copy(const signed int mode)
 {
-	dsa_trace_enter(172, "seg004:do_pic_copy");
+	dsa_trace_enter(171, "seg004:do_pic_copy");
 	signed int x1;
 	signed int y1;
 	signed int x2;
@@ -1261,7 +1261,7 @@ void do_pic_copy(const signed int mode)
 /* kopiert das Rechteck (x1,y1)-(x2,y2) aus g_pic_copy.dst (Bildschirm) nach g_pic_copy.src (Gegenrichtung zu do_pic_copy) */
 void do_save_rect(void)
 {
-	dsa_trace_enter(173, "seg004:do_save_rect");
+	dsa_trace_enter(172, "seg004:do_save_rect");
 	signed int x1,y1;
 	signed int width,height;
 	signed int x2,y2;
@@ -1291,7 +1291,7 @@ void do_save_rect(void)
 /* fuellt das Rechteck (x,y)-(x2,y2) mit color (x2/y2 hiessen w/h, sind aber Koordinaten, keine Masse) */
 void do_fill_rect(uint8_t* dst, const signed int x, const signed int y, const signed int x2, const signed int y2, const signed int color)
 {
-	dsa_trace_enter(174, "seg004:do_fill_rect");
+	dsa_trace_enter(173, "seg004:do_fill_rect");
 	signed int width = x2 - x + 1;
 	signed int height = y2 - y + 1;
 #if FIX_ZEIGER && defined(__BORLANDC__)
@@ -1319,7 +1319,7 @@ void do_fill_rect(uint8_t* dst, const signed int x, const signed int y, const si
 /* wartet auf den Beginn des naechsten vertikalen Strahlruecklaufs (VGA-Status 3DAh) */
 void wait_for_vsync(void)
 {
-	dsa_trace_enter(175, "seg004:wait_for_vsync");
+	dsa_trace_enter(174, "seg004:wait_for_vsync");
 #if defined(__BORLANDC__)
 	signed int tmp;
 
@@ -1355,7 +1355,7 @@ void wait_for_vsync(void)
  */
 void map_effect(uint8_t *src)
 {
-	dsa_trace_enter(176, "seg004:map_effect");
+	dsa_trace_enter(175, "seg004:map_effect");
 	unsigned int si;
 	unsigned int i;
 	signed int seed;

@@ -183,9 +183,11 @@ void spell_odem_arcanum(void)
 	inv_pos = select_item_to_drop(get_spelluser());
 
 #if FIX_0200
-	/* Fix 200: Abbruch der Gegenstandswahl (-1) nicht als Inventarplatz benutzen (g_dtp2 ist schon leer) */
+	/* Fix 200: Abbruch der Gegenstandswahl (-1) nicht als Inventarplatz benutzen;
+	 * g_dtp2 enthaelt aus select_item_to_drop() noch den ersten Gegenstandsnamen -> Text 52/53 ausgeben */
 	if (inv_pos == -1)
 	{
+		sprintf(g_dtp2, get_tx(53), get_spelluser()->alias, get_tx(52));
 		return;
 	}
 #endif

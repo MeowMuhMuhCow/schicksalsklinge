@@ -36,7 +36,7 @@ static inline uint16_t schick_rotl16(const uint16_t op, const uint8_t count)
  */
 int random_interval(const signed int lo, const signed int hi)
 {
-	dsa_trace_enter(200, "seg007:random_interval");
+	dsa_trace_enter(199, "seg007:random_interval");
 
 	return lo + random_schick(hi - lo + 1) - 1;
 }
@@ -50,7 +50,7 @@ int random_interval(const signed int lo, const signed int hi)
  */
 int random_schick(const signed int val)
 {
-	dsa_trace_enter(201, "seg007:random_schick");
+	dsa_trace_enter(200, "seg007:random_schick");
 	signed int retval;
 
 	if (val == 0) {
@@ -101,7 +101,7 @@ int random_schick(const signed int val)
  */
 int dice_roll(const signed int n, const signed int m, const signed int x)
 {
-	dsa_trace_enter(202, "seg007:dice_roll");
+	dsa_trace_enter(201, "seg007:dice_roll");
 	signed int sum = 0;
 	signed int i;
 
@@ -123,7 +123,7 @@ int dice_roll(const signed int n, const signed int m, const signed int x)
  */
 void calc_damage_range(const signed int n, const signed int m, const signed int x, signed int *min, signed int *max)
 {
-	dsa_trace_enter(203, "seg007:calc_damage_range");
+	dsa_trace_enter(202, "seg007:calc_damage_range");
 	*min = n + x;
 	*max = n * m + x;
 }
@@ -136,7 +136,7 @@ void calc_damage_range(const signed int n, const signed int m, const signed int 
  */
 int is_in_int_array(const signed int val, const signed int *p)
 {
-	dsa_trace_enter(204, "seg007:is_in_int_array");
+	dsa_trace_enter(203, "seg007:is_in_int_array");
 	int i;
 
 	for (i = 1; *p >= 0; i++) {
@@ -155,7 +155,7 @@ int is_in_int_array(const signed int val, const signed int *p)
  */
 int is_in_byte_array(const int8_t val, int8_t *p)
 {
-	dsa_trace_enter(205, "seg007:is_in_byte_array");
+	dsa_trace_enter(204, "seg007:is_in_byte_array");
 	int i;
 
 	for (i = 1; *p != -1; i++) {
@@ -174,7 +174,7 @@ int is_in_byte_array(const int8_t val, int8_t *p)
  */
 int dice_template(const uint16_t val)
 {
-	dsa_trace_enter(206, "seg007:dice_template");
+	dsa_trace_enter(205, "seg007:dice_template");
 	signed int n;
 	signed int m;
 	signed char x;
@@ -204,7 +204,7 @@ int dice_template(const uint16_t val)
  */
 void damage_range_template(const uint16_t val, signed int *min, signed int *max)
 {
-	dsa_trace_enter(207, "seg007:damage_range_template");
+	dsa_trace_enter(206, "seg007:damage_range_template");
 	signed int n;
 	signed int m;
 	signed char x;

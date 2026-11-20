@@ -5332,6 +5332,11 @@ static int launch_dos_game(GameCatalogEntry &g) {
         int maus_sens = (64000 + maus_bildbreite / 2) / maus_bildbreite;
         if (maus_sens < 10) maus_sens = 10;
         if (maus_sens > 100) maus_sens = 100;
+        /* Sternenschweif liest die Maus schneller aus als die anderen beiden Teile: zwei Drittel der Empfindlichkeit (halb war zu langsam) */
+        if (g.teil == 2) {
+            maus_sens = (maus_sens * 2 + 1) / 3;
+            if (maus_sens < 5) maus_sens = 5;
+        }
 
         FILE *cfp = fopen(utf8_to_win1252(conf_path).c_str(), "w");
         if (cfp) {

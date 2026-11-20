@@ -59,7 +59,7 @@ static const char g_empty_string5[1] = ""; // ds:0x5f44
  */
 void FIG_menu(struct struct_hero *hero, const signed int hero_pos, signed int x, signed int y)
 {
-	dsa_trace_enter(331, "seg033:FIG_menu");
+	dsa_trace_enter(330, "seg033:FIG_menu");
 	signed int selected;
 	signed int first_menu;
 	signed int txt_tabpos_bak;

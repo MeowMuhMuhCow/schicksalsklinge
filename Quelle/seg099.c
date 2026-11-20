@@ -46,11 +46,11 @@ static const struct analues_item g_analues_items[28] = {
 	/* messages from SPELLTXT.LTX */
 
 	{ ITEM_ID_AMULETT__ANTI_IGNIFAXIUS,  2, 0x36 },
-	/* DIENT DER ABWEHR VON IGNIFAXIUS, MÖCHT ICH MEINEN.@DA BIN ICH MIR SOGAR ZIEMLICH SICHER. */
+	/* DIENT DER ABWEHR VON IGNIFAXIUS, MÃ–CHT ICH MEINEN.@DA BIN ICH MIR SOGAR ZIEMLICH SICHER. */
 	/* Original-Bug? effect seems not to be implemented. */
 
 	{ ITEM_ID_RING__RED               ,  3, 0x38 },
-	/* HOCHINTERESSANT...EIN SCHUTZRING...ERHÖHT DIE MAGISCHEN ABWEHRKRÄFTE... SEHR BELIEBT BEI THORWALERN.*/
+	/* HOCHINTERESSANT...EIN SCHUTZRING...ERHÃ–HT DIE MAGISCHEN ABWEHRKRÃ„FTE... SEHR BELIEBT BEI THORWALERN.*/
 
 	{ ITEM_ID_SILBERNER_STIRNREIF__1  ,  4, 0x39 },
 	/* <DIESER STIRNREIF IST EINDEUTIG ELFISCHER MACHART.@ACH JA, UND EIN ARMATRUTZ IST ENTHALTEN. */
@@ -59,17 +59,17 @@ static const struct analues_item g_analues_items[28] = {
 	/* <DIESER STIRNREIF IST EINDEUTIG ELFISCHER MACHART.@ACH JA, UND EIN ARMATRUTZ IST ENTHALTEN. */
 
 	{ ITEM_ID_SAEBEL__MAGIC           ,  3, 0x3a },
-	/* DIESER SÄBEL IST BESONDERS WIRKUNGSVOLL GEGEN ZOMBIES, SKELETTE UND MUMIEN. */
+	/* DIESER SÃ„BEL IST BESONDERS WIRKUNGSVOLL GEGEN ZOMBIES, SKELETTE UND MUMIEN. */
 
 	{ ITEM_ID_AMULETT__FEUERBANN      ,  6, 0x3b },
-	/* AUF DIESEM AMULETT LIEGT DER HEXENZAUBER FEUERBANN.@JEDESMAL, WENN MAN DURCH FEUER SCHADEN ERLEIDEN WÜRDE, FÄNGT DIESES AMULETT EINEN GROSSTEIL DER WIRKUNG AUF. */
+	/* AUF DIESEM AMULETT LIEGT DER HEXENZAUBER FEUERBANN.@JEDESMAL, WENN MAN DURCH FEUER SCHADEN ERLEIDEN WÃœRDE, FÃ„NGT DIESES AMULETT EINEN GROSSTEIL DER WIRKUNG AUF. */
 	/* Original-Bug? effect seems not to be implemented. */
 
 	{ ITEM_ID_AMULETT__FLIM_FLAM      ,  0, 0x3c },
-	/* AUF DIESEM AMULETT LIEGT DER ZAUBER FLIM FLAM FUNKEL.@DER BESITZER BRAUCHT SICH DIE NÄCHSTE ZEIT KEINE UNNÖTIGEN SORGEN UM FACKELN ODER ÖLLAMPEN ZU MACHEN. */
+	/* AUF DIESEM AMULETT LIEGT DER ZAUBER FLIM FLAM FUNKEL.@DER BESITZER BRAUCHT SICH DIE NÃ„CHSTE ZEIT KEINE UNNÃ–TIGEN SORGEN UM FACKELN ODER Ã–LLAMPEN ZU MACHEN. */
 
 	{ ITEM_ID_AMULETT__TRAVIA         ,  6, 0x3d },
-	/* AUF DIESEM AMULETT LIEGT EIN ZAUBER, DER DEN TRÄGER UNEMPFINDLICH GEGEN HUNGER UND DURST MACHT. WELCHE ART ZAUBER DIES IST, KANN ICH JEDOCH NICHT BESTIMMEN. */
+	/* AUF DIESEM AMULETT LIEGT EIN ZAUBER, DER DEN TRÃ„GER UNEMPFINDLICH GEGEN HUNGER UND DURST MACHT. WELCHE ART ZAUBER DIES IST, KANN ICH JEDOCH NICHT BESTIMMEN. */
 
 	{ ITEM_ID_ZWEIHAENDER__MAGIC      ,  0, 0x3e },
 	/* DIESE WAFFE SCHEINT MIR UNZERBRECHLICH ZU SEIN. */
@@ -78,7 +78,7 @@ static const struct analues_item g_analues_items[28] = {
 	/* SCHEINT MIR EIN GUTER SCHUTZ GEGEN UNTOTE ZU SEIN. */
 
 	{ ITEM_ID_SPEER__MAGIC            ,  3, 0x40 },
-	/* MIR SCHEINT, ALS HÄTTE DIESER SPEER MACHT ÜBER SPINNENTIERE. */
+	/* MIR SCHEINT, ALS HÃ„TTE DIESER SPEER MACHT ÃœBER SPINNENTIERE. */
 	/* Original-Bug? effect seems not to be implemented. */
 
 	{ ITEM_ID_STIRNREIF__MR_BONUS     ,  4, 0x41 },
@@ -90,13 +90,13 @@ static const struct analues_item g_analues_items[28] = {
 	 * See https://www.crystals-dsa-foren.de/showthread.php?tid=6217 */
 
 	{ ITEM_ID_ORKNASE__MAGIC          ,  4, 0x43 },
-	/* AHA. DA HAT DER SCHMIED DIE WUCHT DER WAFFE AUF KOSTEN DER HANDHABUNG VERBESSTER.@NUR ETWAS FÜR ECHTE KÖNNER. */
+	/* AHA. DA HAT DER SCHMIED DIE WUCHT DER WAFFE AUF KOSTEN DER HANDHABUNG VERBESSTER.@NUR ETWAS FÃœR ECHTE KÃ–NNER. */
 
 	{ ITEM_ID_KURZSCHWERT__MAGIC      ,  4, 0x44 },
-	/* DIESES KURZSCHWERT SCHEINT DIE ATTACKE DES TRÄGERS ENTSCHEIDEND ZU VERBESSERN. */
+	/* DIESES KURZSCHWERT SCHEINT DIE ATTACKE DES TRÃ„GERS ENTSCHEIDEND ZU VERBESSERN. */
 
 	{ ITEM_ID_SICHEL__MAGIC           ,  6, 0x45 },
-	/* HM. SCHEINT MIR EIN DRUIDISCHES ARTEFAKT ZU SEIN, DAS EINEM DEN WEG ZU BESTIMMTEN KRÄUTERN WEIST. ABER ICH BIN MIR NICHT SICHER. */
+	/* HM. SCHEINT MIR EIN DRUIDISCHES ARTEFAKT ZU SEIN, DAS EINEM DEN WEG ZU BESTIMMTEN KRÃ„UTERN WEIST. ABER ICH BIN MIR NICHT SICHER. */
 
 	{ ITEM_ID_AMULETT__MR_BONUS       ,  2, 0x46 },
 	/* OFFENSICHTLICH EIN SCHUZTAMULETT, GANZ BESONDERS GEGEN VERWANDLUNGEN UND KAMPFZAUBER GEEIGNET. */
@@ -105,23 +105,23 @@ static const struct analues_item g_analues_items[28] = {
 	/* ICH KANN KEINERLEI ZAUBER FESTSTELLEN. */
 
 	{ ITEM_ID_KETTENHEMD__MAGIC       , 15, 0x48 },
-	/* ICH KANN DEN GENAUEN ZAUBER NICHT ERKENNEN, ABER ES SCHEINT ETWAS MIT DEM WESEN DER SCHWERE ZU TUN ZU HABEN.@DIESES KETTENHEMD WIRKT AUCH ZIEMLICH LEICHT FÜR SEINE STABILE MACHART. */
+	/* ICH KANN DEN GENAUEN ZAUBER NICHT ERKENNEN, ABER ES SCHEINT ETWAS MIT DEM WESEN DER SCHWERE ZU TUN ZU HABEN.@DIESES KETTENHEMD WIRKT AUCH ZIEMLICH LEICHT FÃœR SEINE STABILE MACHART. */
 
 	{ ITEM_ID_KRAFTGUERTEL            ,  7, 0x49 },
-	/* DIESER GÜRTEL VERLEIHT DEM TRÄGER EINMALIG EINE IMMENSE KÖRPERKRAFT. */
+	/* DIESER GÃœRTEL VERLEIHT DEM TRÃ„GER EINMALIG EINE IMMENSE KÃ–RPERKRAFT. */
 
 	{ ITEM_ID_SCHWERT__MAGIC          ,  5, 0x4a },
 	/* DIESES SCHWERT SOLLTE BESONDERS GEGEN UNTOTE WIRKSAM SEIN. */
 	/* Original-Bug? effect seems not to be implemented. */
 
 	{ ITEM_ID_KETTENHEMD__CURSED      ,  5, 0x4b },
-	/* DIESES RÜSTSTÜCK SCHEINT ZU MERKEN, OB UNTOTE DIE WAFFEN FÜHREN. ABER WAS GENAU DANN PASSIERT, WEISS ICH NICHT. */
+	/* DIESES RÃœSTSTÃœCK SCHEINT ZU MERKEN, OB UNTOTE DIE WAFFEN FÃœHREN. ABER WAS GENAU DANN PASSIERT, WEISS ICH NICHT. */
 
 	{ ITEM_ID_ANTIKRANKHEITSELIXIER   , 15, 0x4c },
 	/* DIESES MITTEL SCHEINT GEGEN KRANKHEITEN ZU WIRKEN. */
 
 	{ ITEM_ID_RING__GREEN             ,  5, 0x4d },
-	/* DIESER SCHMUCK SCHÜTZT DEN TRÄGER VOR MAGISCHEM FEUER, JEDENFALLS EINE GEWISSE ZEIT LANG. */
+	/* DIESER SCHMUCK SCHÃœTZT DEN TRÃ„GER VOR MAGISCHEM FEUER, JEDENFALLS EINE GEWISSE ZEIT LANG. */
 	/* Original-Bug? effect seems not to be implemented. */
 
 	{ ITEM_ID_WURFDOLCH__MAGIC        ,  6, 0x4e },
@@ -146,7 +146,7 @@ void spell_beherrschung(void)
 		g_spell_special_aecost = -2;
 	} else {
 		if (get_spelltarget() == get_spelluser()) {
-			strcpy(g_dtp2, get_tx(0)); /* "SELBSTAUFLEHNUNG IST UNM�GLICH." */
+			strcpy(g_dtp2, get_tx(0)); /* "SELBSTAUFLEHNUNG IST UNMÖGLICH." */
 			g_spell_special_aecost = 0;
 		} else {
 			g_spell_special_aecost = random_interval(2, 5) * 4;
@@ -204,7 +204,7 @@ void spell_gardianum(void)
 			strcpy(g_dtp2, get_tx(7)); /* "SCHUTZSCHIRM AKTIV." */
 		} else {
 			/* not enough AE */
-			sprintf(g_dtp2, get_ttx(607), get_spelluser()->alias); /* "%s HAT NICHT GEN�GEND ASTRALENERGIE F�R DIESEN ZAUBER." */
+			sprintf(g_dtp2, get_ttx(607), get_spelluser()->alias); /* "%s HAT NICHT GENÜGEND ASTRALENERGIE FÜR DIESEN ZAUBER." */
 			/* set AE costs */
 			g_spell_special_aecost = 0;
 		}
@@ -379,7 +379,7 @@ void spell_bannbaladin(void)
 		/* set 'tame' flag */
 		g_spelltarget_e->flags.tame = 1;
 
-		sprintf(g_dtp2,	get_tx(9), (uint8_t*)GUI_name_inflect_with_article( /* "%s IST BES�NFTIGT UND WIRD NICHT MEHR ANGREIFEN." */
+		sprintf(g_dtp2,	get_tx(9), (uint8_t*)GUI_name_inflect_with_article( /* "%s IST BESÄNFTIGT UND WIRD NICHT MEHR ANGREIFEN." */
 			INFLECT_DEFINITE_ARTICLE | INFLECT_SINGULAR | INFLECT_1ST_CASE,
 			g_spelltarget_e->monster_id,
 			INFLECT_NAME_TYPE_MONSTER
@@ -406,7 +406,7 @@ void spell_boeser_blick(void)
 		g_spelltarget_e->attacks = 2;
 
 		/* prepare message */
-		sprintf(g_dtp2,	get_tx(10), (char*)GUI_name_inflect_with_article( /* "%s IST VERHEXT, UND WIRD AUF EURER SEITE K�MPFEN." */
+		sprintf(g_dtp2,	get_tx(10), (char*)GUI_name_inflect_with_article( /* "%s IST VERHEXT, UND WIRD AUF EURER SEITE KÄMPFEN." */
 			INFLECT_DEFINITE_ARTICLE | INFLECT_SINGULAR | INFLECT_1ST_CASE,
 			g_spelltarget_e->monster_id,
 			INFLECT_NAME_TYPE_MONSTER
@@ -483,7 +483,7 @@ void spell_herrdertiere(void)
 			/* set 'tame' flag */
 			g_spelltarget_e->flags.tame = 1;
 
-			sprintf(g_dtp2,	get_tx(9), (uint8_t*)GUI_name_inflect_with_article( /* "%s IST BES�NFTIGT UND WIRD NICHT MEHR ANGREIFEN." */
+			sprintf(g_dtp2,	get_tx(9), (uint8_t*)GUI_name_inflect_with_article( /* "%s IST BESÄNFTIGT UND WIRD NICHT MEHR ANGREIFEN." */
 				INFLECT_DEFINITE_ARTICLE | INFLECT_SINGULAR | INFLECT_1ST_CASE,
 				g_spelltarget_e->monster_id,
 				INFLECT_NAME_TYPE_MONSTER
@@ -508,7 +508,7 @@ void spell_horriphobus(void)
 		/* unset 'renegade' flag */
 		g_spelltarget_e->flags.renegade = 0;
 
-		sprintf(g_dtp2,	get_tx(12), (uint8_t*)GUI_name_inflect_with_article( /* "%s IST TOTAL VER�NGSTIGT UND FLIEHT." */
+		sprintf(g_dtp2,	get_tx(12), (uint8_t*)GUI_name_inflect_with_article( /* "%s IST TOTAL VERÄNGSTIGT UND FLIEHT." */
 			INFLECT_DEFINITE_ARTICLE | INFLECT_SINGULAR | INFLECT_1ST_CASE,
 			g_spelltarget_e->monster_id,
 			INFLECT_NAME_TYPE_MONSTER
@@ -554,7 +554,7 @@ void spell_somnigravis(void)
 		g_spelltarget_e->flags.asleep = 1;
 
 		/* prepare message */
-		sprintf(g_dtp2,	get_tx(13), (uint8_t*)GUI_name_inflect_with_article( /* "%s SCHL�FT EIN." */
+		sprintf(g_dtp2,	get_tx(13), (uint8_t*)GUI_name_inflect_with_article( /* "%s SCHLÄFT EIN." */
 			INFLECT_DEFINITE_ARTICLE | INFLECT_SINGULAR | INFLECT_1ST_CASE,
 			g_spelltarget_e->monster_id,
 			INFLECT_NAME_TYPE_MONSTER
@@ -581,7 +581,7 @@ void spell_somnigravis(void)
 		get_spelltarget()->flags.asleep = 1;
 
 		/* prepare message */
-		sprintf(g_dtp2, get_tx(13), get_spelltarget()->alias); /* "%s SCHL�FT EIN." */
+		sprintf(g_dtp2, get_tx(13), get_spelltarget()->alias); /* "%s SCHLÄFT EIN." */
 	}
 }
 
@@ -599,7 +599,7 @@ void spell_zwingtanz(void)
 		g_spelltarget_e->flags.dancing = 1;
 
 		/* prepare message */
-		sprintf(g_dtp2,	get_tx(14), (uint8_t*)GUI_name_inflect_with_article( /* "%s TANZT WIE VERR�CKT HERUM." */
+		sprintf(g_dtp2,	get_tx(14), (uint8_t*)GUI_name_inflect_with_article( /* "%s TANZT WIE VERRÜCKT HERUM." */
 			INFLECT_DEFINITE_ARTICLE | INFLECT_SINGULAR | INFLECT_1ST_CASE,
 			g_spelltarget_e->monster_id,
 			INFLECT_NAME_TYPE_MONSTER
@@ -700,7 +700,7 @@ void spell_skelettarius(void)
 	} else {
 
 		/* prepare message */
-		sprintf(g_dtp2,	get_tx(16), (uint8_t*)GUI_name_inflect_with_article( /* "%s KEHRT VON DEN TOTEN ZUR�CK, UND WIRD ALS ZOMBIE F�R DICH STREITEN." */
+		sprintf(g_dtp2,	get_tx(16), (uint8_t*)GUI_name_inflect_with_article( /* "%s KEHRT VON DEN TOTEN ZURÜCK, UND WIRD ALS ZOMBIE FÜR DICH STREITEN." */
 			INFLECT_DEFINITE_ARTICLE | INFLECT_SINGULAR | INFLECT_1ST_CASE,
 			g_spelltarget_e->monster_id,
 			INFLECT_NAME_TYPE_MONSTER
@@ -894,14 +894,14 @@ void spell_transversalis(void)
 	/* Fix 383: auf der Reise (Lager unterwegs) steht gs_town_id noch auf der Abreisestadt -> Meldung wie ausserhalb, keine AE */
 	if (g_traveling) {
 		g_spell_special_aecost = 0;
-		strcpy(g_dtp2, get_tx(18)); /* "DIESER SPRUCH IST NUR IN EINEM DUNGEON ODER EINER STADT M�GLICH!" */
+		strcpy(g_dtp2, get_tx(18)); /* "DIESER SPRUCH IST NUR IN EINEM DUNGEON ODER EINER STADT MÖGLICH!" */
 	} else
 #endif
 	if (!gs_dungeon_id && !gs_town_id) {
 		/* cannot be used outside of a dungeon or a town */
 
 		/* prepare message */
-		strcpy(g_dtp2, get_tx(18)); /* "DIESER SPRUCH IST NUR IN EINEM DUNGEON ODER EINER STADT M�GLICH!" */
+		strcpy(g_dtp2, get_tx(18)); /* "DIESER SPRUCH IST NUR IN EINEM DUNGEON ODER EINER STADT MÖGLICH!" */
 
 	} else {
 		/* set spell costs */
@@ -954,7 +954,7 @@ void spell_balsam(void)
 		le_to_heal = (get_spelltarget()->le_max - get_spelltarget()->le) / 2;
 	} else {
 		/* prepare message */
-		sprintf(g_dtp2,	get_tx(19), get_spelluser()->alias, get_spelltarget()->alias); /* "WIEVIEL AE M�CHTE %s ZUR HEILUNG VON %s INVESTIEREN?" */
+		sprintf(g_dtp2,	get_tx(19), get_spelluser()->alias, get_spelltarget()->alias); /* "WIEVIEL AE MÖCHTE %s ZUR HEILUNG VON %s INVESTIEREN?" */
 
 		/* ask question */
 		le_to_heal = GUI_input(g_dtp2, 2);
@@ -1013,7 +1013,7 @@ void spell_hexenspeichel(void)
 	}
 
 	/* prepare question */
-	sprintf(g_dtp2, get_tx(19), get_spelluser()->alias, get_spelltarget()->alias); /* "WIEVIEL AE M�CHTE %s ZUR HEILUNG VON %s INVESTIEREN?" */
+	sprintf(g_dtp2, get_tx(19), get_spelluser()->alias, get_spelltarget()->alias); /* "WIEVIEL AE MÖCHTE %s ZUR HEILUNG VON %s INVESTIEREN?" */
 
 	le = GUI_input(g_dtp2, 2);
 
@@ -1083,7 +1083,7 @@ void spell_klarum_purum(void)
 		get_spelltarget()->poison[poison_id].status = POISON_STATUS_RECOVER;
 
 		/* prepare message */
-		sprintf(g_dtp2,	get_tx(22), get_spelltarget()->alias); /* "%s IST NICHT L�NGER VERGIFTET." */
+		sprintf(g_dtp2,	get_tx(22), get_spelltarget()->alias); /* "%s IST NICHT LÄNGER VERGIFTET." */
 	}
 }
 
@@ -1096,7 +1096,7 @@ void spell_ruhe_koerper(void)
 	get_spelltarget()->ruhe_koerper = 1;
 
 	/* prepare message */
-	sprintf(g_dtp2, get_tx(51), get_spelltarget()->alias); /* "%s WIRD DIE N�CHSTE NACHT SICHER SCHLAFEN WIE EIN BABY." */
+	sprintf(g_dtp2, get_tx(51), get_spelltarget()->alias); /* "%s WIRD DIE NÄCHSTE NACHT SICHER SCHLAFEN WIE EIN BABY." */
 }
 
 void spell_tiere_heilen(void)
@@ -1142,7 +1142,7 @@ void spell_adleraug(void)
 	set_mod_slot(mod_slot, MINUTES(6), (uint8_t*)&get_spelluser()->talents[TA_SINNESSCHAERFE], 7, (signed char)hero_pos);
 
 	/* prepare message */
-	sprintf(g_dtp2,	get_tx(24), get_spelluser()->alias); /* "F�R %s SCHEINEN SICH NEUE WELTEN AUFZUTUN." */
+	sprintf(g_dtp2,	get_tx(24), get_spelluser()->alias); /* "FÜR %s SCHEINEN SICH NEUE WELTEN AUFZUTUN." */
 }
 
 char* spell_analues(void)
@@ -1160,13 +1160,10 @@ char* spell_analues(void)
 
 #if FIX_0200
 	/* Fix 200: Abbruch der Gegenstandswahl (-1) nicht als Inventarplatz benutzen;
-	 * wie bei Odem Arcanum ohne Meldung abbrechen (in der Akademie Text 52 zurueckgeben) */
+	 * wie im Original Text 52/53 ("<ICH KANN NICHTS BESONDERES ERKENNEN!>") ausgeben */
 	/* If the player cancels item selection or has no items select_item_to_drop() returns -1.
 	The original uses the return value to calculate an index, whithout checking for this. */
 	if (inv_slot == -1) {
-		if (gs_in_academy != 99) {
-			return g_text_output_buf;
-		}
 		item_id = 0;
 	} else {
 		item_id = get_spelluser()->inventory[inv_slot].item_id;
@@ -1179,7 +1176,7 @@ char* spell_analues(void)
 #if FIX_0386
 	/* Fix 386 (teilweise): magischer Gegenstand ohne Eintrag in g_analues_items -> Text 55 ("kann nicht sagen, was fuer ein Zauber") statt "nichts Besonderes" */
 	if (item_id && get_spelluser()->inventory[inv_slot].flags.magic) {
-		strcpy(g_text_output_buf, get_tx(55)); /* "<TUT MIR LEID, ICH KANN NICHT SAGEN, WAS F�R EIN ZAUBER HIER ANGEWE..." */
+		strcpy(g_text_output_buf, get_tx(55)); /* "<TUT MIR LEID, ICH KANN NICHT SAGEN, WAS FÜR EIN ZAUBER HIER ANGEWE..." */
 	}
 #endif
 
@@ -1211,7 +1208,7 @@ char* spell_analues(void)
 					/* Fix 201: am Zuschlag gescheitert -> halbe AE wie bei misslungenem Zauber */
 					g_spell_special_aecost = get_spell_cost(SP_ANALUES_ARCANSTRUKTUR, 1);
 #endif
-					strcpy(g_text_output_buf, get_tx(55)); /* "<TUT MIR LEID, ICH KANN NICHT SAGEN, WAS F�R EIN ZAUBER HIER ANGEWE..." */
+					strcpy(g_text_output_buf, get_tx(55)); /* "<TUT MIR LEID, ICH KANN NICHT SAGEN, WAS FÜR EIN ZAUBER HIER ANGEWE..." */
 					break;
 				}
 			}

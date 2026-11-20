@@ -256,6 +256,10 @@ signed int FIG_enemy_can_attack_neighbour(const signed int x, const signed int y
 		if (
 			(target_object_id >= 10) && (target_object_id < 30)
 			&& !((struct enemy_flags*)&g_enemy_sheets[target_object_id - 10].flags)->dead
+#if FIX_0018
+			/* Fix 18: uebergelaufene Gegner greifen keine anderen uebergelaufenen Gegner an */
+			&& !((struct enemy_flags*)(uint8_t*)&g_enemy_sheets[target_object_id - 10].flags)->renegade
+#endif
 		) {
 			return 1;
 		} else {
@@ -368,6 +372,9 @@ signed int FIG_search_range_target(const signed int x, const signed int y, const
 				if (
 					(target_object_id >= 10) && (target_object_id < 30)
 					&& !((struct enemy_flags*)&g_enemy_sheets[target_object_id - 10].flags)->dead
+#if FIX_0018
+					&& !((struct enemy_flags*)(uint8_t*)&g_enemy_sheets[target_object_id - 10].flags)->renegade
+#endif
 				) {
 					can_attack = 1;
 					done = 1;
@@ -384,6 +391,12 @@ signed int FIG_search_range_target(const signed int x, const signed int y, const
 
 					/* handle heroes or walls */
 					if (
+#if FIX_0018
+						(
+							(target_object_id >= 10) && (target_object_id < 30)
+							&& !((struct enemy_flags*)&g_enemy_sheets[target_object_id - 10].flags)->dead
+						) ||
+#endif
 						(
 							(target_object_id < 10)
 							&& !get_hero(target_object_id - 1)->flags.dead
@@ -599,10 +612,19 @@ signed int FIG_select_mspell(struct enemy_sheet* enemy, const signed int enemy_i
 							}
 
 							if (target_found != -1) {
+#if FIX_0018
+								signed int x_bak = x;
+								signed int y_bak = y;
+#endif
 								prepare_enemy_ani(enemy, enemy_id);
 								FIG_search_obj_on_cb(enemy_id + 10, &x, &y);
 
-								if (enemy->bp < 3) {
+								if (
+#if FIX_0018
+									((x_bak == x) && (y_bak == y)) ||
+#endif
+									(enemy->bp < 3)
+								) {
 									enemy->bp = 0;
 								}
 							} else {
@@ -647,10 +669,19 @@ signed int FIG_select_mspell(struct enemy_sheet* enemy, const signed int enemy_i
 							}
 
 							if (target_found != -1) {
+#if FIX_0018
+								signed int x_bak = x;
+								signed int y_bak = y;
+#endif
 								prepare_enemy_ani(enemy, enemy_id);
 								FIG_search_obj_on_cb(enemy_id + 10, &x, &y);
 
-								if (enemy->bp < 5) {
+								if (
+#if FIX_0018
+									((x_bak == x) && (y_bak == y)) ||
+#endif
+									(enemy->bp < 5)
+								) {
 									enemy->bp = 0;
 								}
 							} else {
@@ -737,10 +768,19 @@ signed int FIG_enemy_range_attack(struct enemy_sheet *enemy, const signed int en
 					}
 
 					if (target_found != -1) {
+#if FIX_0018
+						signed int x_bak = x;
+						signed int y_bak = y;
+#endif
 						prepare_enemy_ani(enemy, enemy_id);
 						FIG_search_obj_on_cb(enemy_id + 10, &x, &y);
 
-						if (enemy->bp < 3) {
+						if (
+#if FIX_0018
+							((x_bak == x) && (y_bak == y)) ||
+#endif
+							(enemy->bp < 3)
+						) {
 							enemy->bp = 0;
 						}
 					} else {

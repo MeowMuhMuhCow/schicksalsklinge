@@ -40,7 +40,7 @@ struct struct_chest g_tevent064_chest_descr = {0, 12, use_lockpicks_on_chest, ch
 /* (Beschreibung zufaellig aus FEATURE.LTX 11..15, siehe TRV_found_camp_place()) */
 void tevent_053(void)
 {
-	dsa_trace_enter(1059, "seg111:tevent_053");
+	dsa_trace_enter(1060, "seg111:tevent_053");
 	if ((test_talent(get_first_hero_available_in_group(), TA_WILDNISLEBEN, 1) > 0 && !gs_tevent053_flag) ||
 		gs_tevent053_flag != 0)
 	{
@@ -52,7 +52,7 @@ void tevent_053(void)
 /* Prem <-> Skjal: inn "Langschiff" */
 void tevent_054(void)
 {
-	dsa_trace_enter(1060, "seg111:tevent_054");
+	dsa_trace_enter(1061, "seg111:tevent_054");
 	TRV_found_inn(TOWN_ID_BRENDHIL, 68); /* 47 = FEATURE.LTX "LANGSCHIFF" */
 }
 
@@ -60,7 +60,7 @@ void tevent_054(void)
 /* Prem <-> Kord: im Fruehling und Herbst schlammiger Bergpfad, 3 Stunden Verzoegerung */
 void tevent_055(void)
 {
-	dsa_trace_enter(1061, "seg111:tevent_055");
+	dsa_trace_enter(1062, "seg111:tevent_055");
 	signed int season;
 
 	season = get_current_season();
@@ -78,14 +78,14 @@ void tevent_055(void)
 /* Prem <-> Kord: Herberge "Adlerfels" */
 void tevent_056(void)
 {
-	dsa_trace_enter(1062, "seg111:tevent_056");
+	dsa_trace_enter(1063, "seg111:tevent_056");
 	TRV_found_inn(TOWN_ID_MANRIN, 69); /* 48 = FEATURE.LTX "ADLERFELS" */
 }
 
 /* Ottarje <-> Orvil: Erdrutsch (ueberklettern oder umgehen) */
 void tevent_057(void)
 {
-	dsa_trace_enter(1063, "seg111:tevent_057");
+	dsa_trace_enter(1064, "seg111:tevent_057");
 	signed int i;
 	signed int answer;
 	struct struct_hero *hero;
@@ -161,7 +161,7 @@ void tevent_057(void)
 /* Ottarje <-> Orvil: Nahrungsplatz */
 void tevent_058(void)
 {
-	dsa_trace_enter(1064, "seg111:tevent_058");
+	dsa_trace_enter(1065, "seg111:tevent_058");
 	if ((test_talent(get_first_hero_available_in_group(), TA_WILDNISLEBEN, 2) > 0 && !gs_tevent058_flag) || gs_tevent058_flag)
 	{
 		TRV_found_replenish_place(0);
@@ -173,7 +173,7 @@ void tevent_058(void)
 /* Ottarje <-> Orvil: Berghuette mit grummelndem Jaeger */
 void tevent_059(void)
 {
-	dsa_trace_enter(1065, "seg111:tevent_059");
+	dsa_trace_enter(1066, "seg111:tevent_059");
 	signed int answer;
 
 	if (TRV_enter_hut_question())
@@ -227,7 +227,7 @@ void tevent_059(void)
 /* Ottarje <-> Orvil: Pass mit Abstieg in eine Klamm (rechter/linker Pfad, Abseilen) */
 void tevent_060(void)
 {
-	dsa_trace_enter(1066, "seg111:tevent_060");
+	dsa_trace_enter(1067, "seg111:tevent_060");
 	signed int answer;
 	signed int i;
 	signed int done;
@@ -377,7 +377,7 @@ void tevent_060(void)
 /* Ottarje <-> Orvil: entrance to the dungeon "wolf cave" */
 void tevent_061(void)
 {
-	dsa_trace_enter(1067, "seg111:tevent_061");
+	dsa_trace_enter(1068, "seg111:tevent_061");
 	signed int answer;
 
 	/* TODO: not needed here */
@@ -429,7 +429,7 @@ void tevent_061(void)
 /* (steht auch auf Ottarje <-> Orvil; im Original leer) */
 void tevent_062(void)
 {
-	dsa_trace_enter(1068, "seg111:tevent_062");
+	dsa_trace_enter(1069, "seg111:tevent_062");
 #if !defined(__BORLANDC__)
 	D1_INFO("Reiseevent %d ist nicht implementiert\n", 62);
 #endif
@@ -438,7 +438,7 @@ void tevent_062(void)
 /* Orvil <-> Skjal: dead animal (auch Ottarje <-> Orvil) */
 void tevent_063(void)
 {
-	dsa_trace_enter(1069, "seg111:tevent_063");
+	dsa_trace_enter(1070, "seg111:tevent_063");
 	signed int i; /* multiple use: hero_pos, mod_slot */
 	signed int max; /* kleinstes bisheriges MU-Ergebnis (Startwert 9999) */
 	signed int proof;
@@ -487,7 +487,7 @@ void tevent_063(void)
 /* Ottarje <-> Orvil (Meile 58) und Skjal <-> Orvil (Meile 61): nur mit Umbriks Auftrag */
 void tevent_064(void)
 {
-	dsa_trace_enter(1070, "seg111:tevent_064");
+	dsa_trace_enter(1071, "seg111:tevent_064");
 	signed int answer;
 	signed int result;
 	signed int i;
@@ -693,14 +693,14 @@ void tevent_064(void)
 
 void tevent_064_chest(struct struct_chest* chest)
 {
-	dsa_trace_enter(1071, "seg111:tevent_064_chest");
+	dsa_trace_enter(1072, "seg111:tevent_064_chest");
 	loot_multi_chest(gs_tevent064_chest, get_tx2(74)); /* "IN DER TRUHE FINDET IHR FOLGENDES:" */
 }
 
 /* Orvil <-> Ala: rider */
 void tevent_065(void)
 {
-	dsa_trace_enter(1072, "seg111:tevent_065");
+	dsa_trace_enter(1073, "seg111:tevent_065");
 	signed int answer;
 
 	/* load dialog head */
@@ -732,7 +732,7 @@ void tevent_065(void)
 /* Orvil <-> Ala: Nahrungsplatz, danach evtl. Spur wilder Hunde (Kampf F066) */
 void tevent_066(void)
 {
-	dsa_trace_enter(1073, "seg111:tevent_066");
+	dsa_trace_enter(1074, "seg111:tevent_066");
 	signed int answer;
 	signed int i;
 	signed int count;

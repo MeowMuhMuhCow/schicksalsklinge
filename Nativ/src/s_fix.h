@@ -440,6 +440,8 @@
  * FIX_0437   wichtig  mittel    -       ja         Gruppenwechsel in eine Gruppe, die schon in einem Ort steht: Statuszeile und Herberge der alten Gruppe
  * FIX_0438   alles    egal      -       ja         Hauswaende auf der linken Strassenseite zeigen die Fassade verkehrt herum
  * FIX_0439   alles    egal      -       ja         Tempel zeigen von der Seite eine Fachwerkwand statt ihrer Front
+ * FIX_0440   wichtig  mittel    -       ja         Truhenschloss nach Spielstand-Laden auf +0
+ * FIX_0441   wichtig  mittel    -       ja         Maennliche Gegner und Helden spielen beim Tod einen Frauenschrei ab
  */
 #ifndef S_FIX_H
 #define S_FIX_H
@@ -1672,6 +1674,12 @@
 #endif
 #ifndef FIX_0439
 #define FIX_0439 FIX_STUFE_A
+#endif
+#ifndef FIX_0440
+#define FIX_0440 FIX_STUFE_W
+#endif
+#ifndef FIX_0441
+#define FIX_0441 FIX_STUFE_W
 #endif
 
 /* SEG002 ist resident: ohne Platz fuer die Behebungen entfallen dort nie aufgerufene Funktionen */

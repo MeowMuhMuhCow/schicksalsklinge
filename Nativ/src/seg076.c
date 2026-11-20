@@ -396,7 +396,7 @@ void DNG_door(const signed int action)
  */
 void print_msg_with_first_hero(char *msg)
 {
-	dsa_trace_enter(612, "seg076:print_msg_with_first_hero");
+	dsa_trace_enter(613, "seg076:print_msg_with_first_hero");
 	struct struct_hero *hero = get_first_hero_available_in_group();
 
 	sprintf(g_text_output_buf, msg, hero->alias);
@@ -417,7 +417,7 @@ void print_msg_with_first_hero(char *msg)
  */
 void DNG_pitfall_add_pit(const signed int max_damage)
 {
-	dsa_trace_enter(613, "seg076:DNG_pitfall_add_pit");
+	dsa_trace_enter(614, "seg076:DNG_pitfall_add_pit");
 	play_voc(ARCHIVE_FILE_FX18_VOC);
 
 	/* add a pit in the floor to the dungeon tile */
@@ -492,7 +492,7 @@ void DNG_pitfall_add_pit(const signed int max_damage)
  */
 signed int DNG_step(void)
 {
-	dsa_trace_enter(614, "seg076:DNG_step");
+	dsa_trace_enter(615, "seg076:DNG_step");
 	signed int dng_tile;
 	signed int l_di; /* REMARK: answer, i, ... */
 	signed int (*dungeon_handler)(void);
@@ -781,7 +781,7 @@ struct stair_struct {
  */
 void DNG_use_stairs(void)
 {
-	dsa_trace_enter(615, "seg076:DNG_use_stairs");
+	dsa_trace_enter(616, "seg076:DNG_use_stairs");
 	signed int target_pos;
 	struct stair_struct *stair_ptr;
 	stair_ptr = (struct stair_struct*)g_dungeon_stairs_buf;
@@ -837,7 +837,7 @@ void DNG_use_stairs(void)
  */
 void DNG_see_door(void)
 {
-	dsa_trace_enter(616, "seg076:DNG_see_door");
+	dsa_trace_enter(617, "seg076:DNG_see_door");
 	signed int dng_tile;
 
 	if ((dng_tile = div16(g_steptarget_front)) == DNG_TILE_CLOSED_DOOR || dng_tile == DNG_TILE_OPEN_DOOR)
@@ -871,7 +871,7 @@ void DNG_see_door(void)
  */
 void DNG_see_chest(void)
 {
-	dsa_trace_enter(617, "seg076:DNG_see_chest");
+	dsa_trace_enter(618, "seg076:DNG_see_chest");
 	if (div16(g_steptarget_front) == DNG_TILE_CHEST)
 	{
 		/* standing directly in front of a treasure chest, facing it */
@@ -898,7 +898,7 @@ void DNG_see_chest(void)
  */
 void do_dungeon(void)
 {
-	dsa_trace_enter(618, "seg076:do_dungeon");
+	dsa_trace_enter(619, "seg076:do_dungeon");
 	signed int tw_bak;
 
 	if ((g_dng_loaded_dungeon_id != gs_dungeon_id) || g_area_prepared || g_dng_init_flag)
@@ -955,7 +955,7 @@ STATIC_ASSERT(sizeof(struct dungeon_fight) == 14, struct_dungeon_fight_needs_to_
  */
 void DNG_fight(void)
 {
-	dsa_trace_enter(619, "seg076:DNG_fight");
+	dsa_trace_enter(620, "seg076:DNG_fight");
 	signed int target_pos;
 	struct dungeon_fight *fight_ptr = (struct dungeon_fight*)g_dungeon_fights_buf;
 
@@ -990,7 +990,7 @@ void DNG_fight(void)
  */
 void DNG_waterbarrel(uint8_t *unit_ptr)
 {
-	dsa_trace_enter(620, "seg076:DNG_waterbarrel");
+	dsa_trace_enter(621, "seg076:DNG_waterbarrel");
 	signed int inv_slot;
 	signed int hero_i;
 	signed int answer;
@@ -1140,7 +1140,7 @@ void DNG_waterbarrel(uint8_t *unit_ptr)
  */
 void DNG_see_lever(void)
 {
-	dsa_trace_enter(621, "seg076:DNG_see_lever");
+	dsa_trace_enter(622, "seg076:DNG_see_lever");
 	signed int target_pos;
 
 	target_pos = DNG_POS(gs_dungeon_level, gs_x, gs_y);

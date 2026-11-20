@@ -224,7 +224,7 @@ enum {
  */
 void prepare_map_marker(void)
 {
-	dsa_trace_enter(780, "seg094:prepare_map_marker");
+	dsa_trace_enter(781, "seg094:prepare_map_marker");
 	signed int i;
 	signed int handle;
 	signed int size_unused; /* nimmt Breite und Hoehe der Bilder auf, wird nicht gebraucht */
@@ -259,7 +259,7 @@ void prepare_map_marker(void)
  */
 void set_town_marker_and_textbox(const signed int town_id)
 {
-	dsa_trace_enter(781, "seg094:set_town_marker_and_textbox");
+	dsa_trace_enter(782, "seg094:set_town_marker_and_textbox");
 	signed int x;
 	signed int quadrant; /* 0 = rechts unten, 1 = links unten, 2 = rechts oben, 3 = links oben */
 	signed int y;
@@ -290,7 +290,7 @@ void set_town_marker_and_textbox(const signed int town_id)
  */
 void trv_do_journey(const signed int land_route_id, const signed int reverse)
 {
-	dsa_trace_enter(782, "seg094:trv_do_journey");
+	dsa_trace_enter(783, "seg094:trv_do_journey");
 	uint8_t* fb_start;
 	struct struct_hero *hero;
 	struct struct_journey_tevent *tevent_ptr;
@@ -936,7 +936,7 @@ signed int TM_unused_continue_journey(struct trv_start_point *signpost_ptr, cons
 /* Anzahl der Punkte eines Kartenpfads bis zur Endmarke x == -1 */
 signed int TM_get_track_length(struct struct_point *track)
 {
-	dsa_trace_enter(783, "seg094:TM_get_track_length");
+	dsa_trace_enter(784, "seg094:TM_get_track_length");
 	signed int length = 0;
 
 	while (track->x != -1)
@@ -957,7 +957,7 @@ signed int TM_get_track_length(struct struct_point *track)
  */
 signed int trv_find_dest_town_signpost(void)
 {
-	dsa_trace_enter(784, "seg094:trv_find_dest_town_signpost");
+	dsa_trace_enter(785, "seg094:trv_find_dest_town_signpost");
 	signed int tmp; /* multi use */
 	signed int signpost_typeindex;
 	signed int tmp2; /* multi use */
@@ -1045,7 +1045,7 @@ signed int trv_find_dest_town_signpost(void)
  */
 signed int trv_journey_dest_town_viewdir(const signed int coordinates)
 {
-	dsa_trace_enter(785, "seg094:trv_journey_dest_town_viewdir");
+	dsa_trace_enter(786, "seg094:trv_journey_dest_town_viewdir");
 	const signed int x = (coordinates >> 8) & 0xff;
 	const signed int y = coordinates & 0xf;
 	const signed int retval = (gs_travel_destination_x < x ? EAST :
@@ -1065,7 +1065,7 @@ signed int trv_journey_dest_town_viewdir(const signed int coordinates)
  */
 void TM_draw_track(const signed int route_id, const signed int length, const signed int direction, const signed int restore)
 {
-	dsa_trace_enter(786, "seg094:TM_draw_track");
+	dsa_trace_enter(787, "seg094:TM_draw_track");
 	signed int i;
 	int16_t *ptr;
 	uint8_t* fb_start;
@@ -1131,7 +1131,7 @@ void TM_unused2(void)
  */
 void TM_draw_track_before_crosslink(const signed int restore)
 {
-	dsa_trace_enter(787, "seg094:TM_draw_track_before_crosslink");
+	dsa_trace_enter(788, "seg094:TM_draw_track_before_crosslink");
 	if (!(g_journey_crosslink_status & 1))
 	{
 		if (gs_town_id == TOWN_ID_PEILINEN)
@@ -1156,7 +1156,7 @@ void TM_draw_track_before_crosslink(const signed int restore)
 
 void TM_do_journey_crosslink(void)
 {
-	dsa_trace_enter(788, "seg094:TM_do_journey_crosslink");
+	dsa_trace_enter(789, "seg094:TM_do_journey_crosslink");
 	trv_do_journey(LROUTE_ID__CROSSLINK, g_journey_crosslink_status & 1);
 	/* result of (g_journey_crosslink_status & 1) :
 	 * g_journey_crosslink_status 2 (from Peilinen) or 4 (from Rovamund) --> 0 (normal direction)

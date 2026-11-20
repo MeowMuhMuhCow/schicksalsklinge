@@ -47,7 +47,7 @@ struct struct_chest g_dng07_specialchests[2] = {
  */
 signed int DNG07_handler(void)
 {
-	dsa_trace_enter(672, "seg082:DNG07_handler");
+	dsa_trace_enter(673, "seg082:DNG07_handler");
 	signed int target_pos;
 	signed int i;
 	signed int tw_bak;
@@ -338,7 +338,7 @@ signed int DNG07_handler(void)
  */
 void DNG09_statues(const signed int prob, const signed int bonus)
 {
-	dsa_trace_enter(673, "seg082:DNG09_statues");
+	dsa_trace_enter(674, "seg082:DNG09_statues");
 	signed int i;
 	signed int randval;
 	struct struct_hero *hero;

@@ -86,7 +86,7 @@ signed int g_fig_dropped_weapons[30];	// ds:0xe31a
  */
 void FIG_set_cb_object(const signed int y, const signed int x, const signed int object_id)
 {
-	dsa_trace_enter(319, "seg032:FIG_set_cb_object");
+	dsa_trace_enter(318, "seg032:FIG_set_cb_object");
 	/* check that the object is in the borders */
 	if (!((y >= 0) && (y <= 24) && (x >= 0) && (x <= 24)))
 	{
@@ -103,7 +103,7 @@ void FIG_set_cb_object(const signed int y, const signed int x, const signed int 
  */
 void draw_fight_screen_pal(const signed int mode)
 {
-	dsa_trace_enter(320, "seg032:draw_fight_screen_pal");
+	dsa_trace_enter(319, "seg032:draw_fight_screen_pal");
 	FIG_draw_pic();
 
 	/* check for palette update */
@@ -135,7 +135,7 @@ void draw_fight_screen_pal(const signed int mode)
  */
 signed int FIG_choose_next_hero(void)
 {
-	dsa_trace_enter(321, "seg032:FIG_choose_next_hero");
+	dsa_trace_enter(320, "seg032:FIG_choose_next_hero");
 #if !defined(__BORLANDC__)
 	signed int loop_cnt = 0;
 	signed int tries[7] = {0, 0, 0, 0, 0, 0, 0};
@@ -210,7 +210,7 @@ signed int FIG_choose_next_hero(void)
  */
 signed int FIG_choose_next_enemy(void)
 {
-	dsa_trace_enter(322, "seg032:FIG_choose_next_enemy");
+	dsa_trace_enter(321, "seg032:FIG_choose_next_enemy");
 	signed int retval;
 
 #if !defined(__BORLANDC__)
@@ -277,7 +277,7 @@ signed int FIG_choose_next_enemy(void)
  */
 signed int FIG_count_active_enemies(void)
 {
-	dsa_trace_enter(323, "seg032:FIG_count_active_enemies");
+	dsa_trace_enter(322, "seg032:FIG_count_active_enemies");
 	struct enemy_sheet *enemy;
 	signed int i;
 	signed int retval = 0;
@@ -305,7 +305,7 @@ signed int FIG_count_active_enemies(void)
 //static
 signed int FIG_is_enemy_active(const struct enemy_sheet *enemy)
 {
-	dsa_trace_enter(324, "seg032:FIG_is_enemy_active");
+	dsa_trace_enter(323, "seg032:FIG_is_enemy_active");
 	if (enemy->flags.asleep || enemy->flags.dead || enemy->flags.petrified || enemy->flags.dancing ||
 		enemy->flags.mushroom ||enemy->flags.busy || enemy->flags.tame || (enemy->round_appear > 0))
 	{
@@ -322,7 +322,7 @@ signed int FIG_is_enemy_active(const struct enemy_sheet *enemy)
  */
 signed int FIG_get_first_active_hero(void)
 {
-	dsa_trace_enter(325, "seg032:FIG_get_first_active_hero");
+	dsa_trace_enter(324, "seg032:FIG_get_first_active_hero");
 	struct struct_hero *hero_i = get_hero(0);
 	signed int i;
 
@@ -349,7 +349,7 @@ signed int FIG_get_first_active_hero(void)
 //static
 signed int FIG_all_heroes_escaped(void)
 {
-	dsa_trace_enter(326, "seg032:FIG_all_heroes_escaped");
+	dsa_trace_enter(325, "seg032:FIG_all_heroes_escaped");
 	struct struct_hero *hero_i;
 	signed int i;
 
@@ -383,7 +383,7 @@ signed int FIG_all_heroes_escaped(void)
 //static
 signed int FIG_fight_continues(void)
 {
-	dsa_trace_enter(327, "seg032:FIG_fight_continues");
+	dsa_trace_enter(326, "seg032:FIG_fight_continues");
 	if (FIG_all_heroes_escaped()) {
 
 		g_fig_all_heroes_withdrawn = 1;
@@ -408,7 +408,7 @@ signed int FIG_fight_continues(void)
 
 void FIG_do_round(void)
 {
-	dsa_trace_enter(328, "seg032:FIG_do_round");
+	dsa_trace_enter(327, "seg032:FIG_do_round");
 	signed int i;
 	signed int nr_hero_act_phases_left_in_round; /* total number over all heroes */
 	signed int nr_enemy_action_phases_left_in_round; /* total number over all enemies */
@@ -874,7 +874,7 @@ void FIG_do_round(void)
  */
 void FIG_load_ship_sprites(void)
 {
-	dsa_trace_enter(329, "seg032:FIG_load_ship_sprites");
+	dsa_trace_enter(328, "seg032:FIG_load_ship_sprites");
 	signed int object_id;
 	signed int cb_x;
 	signed int cb_y;
@@ -973,7 +973,7 @@ void FIG_load_ship_sprites(void)
  */
 signed int do_fight(const signed int fight_id)
 {
-	dsa_trace_enter(330, "seg032:do_fight");
+	dsa_trace_enter(329, "seg032:do_fight");
 	signed int i;
 
 	signed int handle;

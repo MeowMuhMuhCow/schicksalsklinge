@@ -16,7 +16,7 @@ Quelle der Tabelle: `Werkzeuge/fix_schalter.tsv`, erzeugt von `Werkzeuge/mkfix.p
 
 | Stufe | ja | teilweise | nein | kein Fehler |
 |---|---|---|---|---|
-| wichtig (kritisch + mittel) | 139 | 6 | 32 | - |
+| wichtig (kritisch + mittel) | 141 | 6 | 32 | - |
 | alles (zusaetzlich egal) | 130 | 9 | 76 | - |
 | - (laut Raster kein Fehler) | - | - | - | 36 |
 
@@ -43,7 +43,7 @@ Nr. 51 ist dieselbe Stelle wie Nr. 50 (`FIX_0051` folgt `FIX_0050`). In den resi
 | 15 | Bei genau 30 Beutestücken schreibt „MEHR“ über einen nicht gesetzten Zeiger | kritisch | nein | wichtig | ja | auch loot_names[30] belegen, dorthin schreibt "MEHR" auf Seite 2 bei genau 30 Stueck | SEG035.C |
 | 16 | Knochen mit Rune beendet die Beuteliste | egal | nein | alles | ja | den Knochen mit Rune aus der Beuteliste nehmen, statt die Liste an ihm abzubrechen | SEG035.C |
 | 17 | Meldung „ZIEL IST NICHT MEHR IN GÜLTIGER SCHUSSPOSITION“ kann doppelt kommen | egal | nein | alles | ja | Schusslinie nur pruefen, wenn die Meldung nicht schon kam | SEG035.C |
-| 18 | Computerkampf: Helden greifen auch übergelaufene Gegner an | mittel | nein | wichtig | ja | uebergelaufene Gegner (Boeser Blick) kaempfen auf der Seite der Helden; uebergelaufene Gegner nicht angreifen; ein uebergelaufener Gegner steht in der Schusslinie wie ein Held | SEG036.C |
+| 18 | Computerkampf: Helden greifen auch übergelaufene Gegner an | mittel | nein | wichtig | ja | prueft, ob noch mindestens ein nicht uebergelaufener aktiver Gegner im Kampf ist.; uebergelaufene Gegner (Boeser Blick) kaempfen auf der Seite der Helden, solange noch andere Gegner aktiv sind; uebergelaufene Gegner nicht angreifen, solange noch andere Gegner aktiv sind; ein uebergelaufener Gegner steht in der Schusslinie wie ein Held; sind nur noch uebergelaufene Gegner uebrig, nicht erneut Boeser Blick auf sie wirken; uebergelaufene Gegner greifen keine anderen uebergelaufenen Gegner an; keinen Pfad zu uebergelaufenen Gegnern (Boeser Blick, Skelettarius) suchen, | SEG036.C SEG037.C SEG038.C |
 | 19 | Fluchtfelder (negative Ids) werden als Held gelesen | egal | nein | alles | ja | Fluchtfelder (negative Ids) sind kein Held, sie beenden die Suche; Fluchtfelder (negative Ids) sind kein Held (Bright-Eyes-Fix) | SEG036.C SEG037.C |
 | 20 | Umzingelt-Prüfung mit Grenze 25 statt 23 | egal | nein | alles | ja | Grenze 23 (das Feld ist 0..23) | SEG036.C |
 | 21 | Gegner schießen auch auf direkt benachbarte Helden | mittel | nein | wichtig | nein | Absicht unklar (unsicher): ob Gegner im Handgemenge nicht schiessen duerfen, ist eine Regelfrage |  |
@@ -225,7 +225,7 @@ Nr. 51 ist dieselbe Stelle wie Nr. 50 (`FIX_0051` folgt `FIX_0050`). In den resi
 | 197 | Foramen aus dem Zaubermenü wirkt nur nach geöffnetem Türmenü | mittel | nein | wichtig | ja | freies Foramen auch vor einer geschlossenen Tuer ohne geoeffnetes Tuermenue | SEG099.C |
 | 198 | Balsam: Mindestkosten 7 AE nicht einheitlich | egal | nein | alles | nein | Balancefrage: ob 7 AE auch fuer weniger fehlende LE (oder bei voller LE) gelten sollen, ist nicht belegt |  |
 | 199 | Hexenspeichel: AE-Prüfung greift nie | mittel | ja | wichtig | ja | hoechstens die fehlenden LE heilen, je LE 2 AE, und nicht mehr AE ausgeben, als da sind | SEG099.C |
-| 200 | Abbruch der Gegenstandswahl: inventory[−1] | egal | nein | alles | ja | Abbruch der Gegenstandswahl (-1) nicht als Inventarplatz benutzen;; Abbruch der Gegenstandswahl (-1) nicht als Inventarplatz benutzen (g_dtp2 ist schon leer) | SEG099.C SEG100.C |
+| 200 | Abbruch der Gegenstandswahl: inventory[−1] | egal | nein | alles | ja | Abbruch der Gegenstandswahl (-1) nicht als Inventarplatz benutzen; | SEG099.C SEG100.C |
 | 201 | Analüs: volle AE-Kosten, wenn nur der Zuschlag die Probe kippt | egal | nein | alles | ja | am Zuschlag gescheitert -> halbe AE wie bei misslungenem Zauber | SEG099.C |
 | 202 | „Eigenschaften seid gelesen“ zeigt 80 % des Nahkampfschadens | egal | nein | alles | ja | Nahkampfschaden ungekuerzt anzeigen | SEG100.C |
 | 203 | Exposami vergleicht mit einem noch leeren Listeneintrag | egal | nein | alles | ja | nur beschriebene Eintraege vergleichen | SEG100.C |
@@ -454,3 +454,5 @@ Nr. 51 ist dieselbe Stelle wie Nr. 50 (`FIX_0051` folgt `FIX_0050`). In den resi
 | 437 | Gruppenwechsel in eine Gruppe, die schon in einem Ort steht: Statuszeile und Herberge der alten Gruppe | mittel | nein | wichtig | ja | Ort der neuen Gruppe wie beim Betreten (enter_location) aus dem Ortsverzeichnis ihrer Stadt (gemeldet von siebenstreich im Crystals-Forum (05.11.2026)) | SEG049.C |
 | 438 | Hauswände auf der linken Straßenseite zeigen die Fassade verkehrt herum | egal | nein | alles | ja | eine Spalte einer Hauswand (Farbe 128 = durchsichtig) holen und ihren sichtbaren Bereich bestimmen; Spalte x neu fuellen: der sichtbare Bereich [t, b] bekommt den Inhalt der Quellspalte c ([ct, cb]); Seitenwand in richtiger Reihenfolge. Attic hat jede Seitenwand nur einmal gezeichnet, und zwar mit (entdeckt von MiauKuh (05.11.2026); Grafik nicht neu, Spalten der vorhandenen Bilder umgeordnet) | SEG066.C |
 | 439 | Tempel zeigen von der Seite eine Fachwerkwand statt ihrer Front | egal | nein | alles | ja | Eingangsseite eines Tempels von der Seite: aus der Tempelfront erzeugen; Seitenansicht der Tempelfront. Attic hat fuer Tempel nur die Frontansicht gezeichnet (TDIVERSE.NVF Bild 5,; 252 = Seitenwand an der Eingangsseite eines Tempels (Umriss aus Haustyp 3, siehe fix_tempelseite) (entdeckt von MiauKuh (05.11.2026); Seitenansicht aus der vorhandenen Tempelfront erzeugt) | SEG066.C |
+| 440 | Truhenschloss nach Spielstand-Laden auf +0 | mittel | nein | wichtig | ja | chest->lock liegt in der Truhentabelle im Datensegment und wird beim Laden eines Spielstands (gemeldet von Andrean im Crystals-Forum (11.2026)) | SEG092.C |
+| 441 | Männliche Gegner und Helden spielen beim Tod einen Frauenschrei ab | mittel | nein | wichtig | ja | maennliche Figuren (Sprite-Id 1..10) nutzen in ANI.DAT dieselben Sterbesequenzen (0x44..0x4c) (gemeldet von Andrean im Crystals-Forum (20.11.2026)) | SEG044.C |
