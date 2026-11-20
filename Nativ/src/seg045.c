@@ -42,38 +42,7 @@ static const signed int g_gfxtab_projectile_oy[6][FIG_VIEWDIR__END] = {
 static const signed int g_gfxtab_projectile_nvfno[6] = { 0, 4, 8, 12, 16, 20 }; // ds:0x61f8
 static const signed int g_gfxtab_projectile_height[6] = { 15, 15, 15, 5, 5, 8 }; // ds:0x6204
 static const signed int g_gfxtab_projectile_width[6] = { 25, 25, 25, 9, 9, 16 }; // ds:0x6210
-static const int8_t g_anitab_projectile_data[24][7] = {
-
-	{-2,  1,  0,  0, 0, 0, -1},
-	{-2,  0, -1,  1, 0, 0, -1},
-	{-2, -1,  0,  2, 0, 0, -1},
-	{-2,  0,  1,  3, 0, 0, -1},
-
-	{-2,  1,  0,  4, 0, 0, -1},
-	{-2,  0, -1,  5, 0, 0, -1},
-	{-2, -1,  0,  6, 0, 0, -1},
-	{-2,  0,  1,  7, 0, 0, -1},
-
-	{-2,  1,  0,  8, 0, 0, -1},
-	{-2,  0, -1,  8, 0, 0, -1},
-	{-2, -1,  0,  8, 0, 0, -1},
-	{-2,  0,  1,  8, 0, 0, -1},
-
-	{-2,  1,  0, 12, 0, 0, -1},
-	{-2,  0, -1, 13, 0, 0, -1},
-	{-2, -1,  0, 14, 0, 0, -1},
-	{-2,  0,  1, 15, 0, 0, -1},
-
-	{-2,  1,  0, 16, 0, 0, -1},
-	{-2,  0, -1, 17, 0, 0, -1},
-	{-2, -1,  0, 18, 0, 0, -1},
-	{-2,  0,  1, 19, 0, 0, -1},
-
-	{-2,  1,  0, 20, 0, 0, -1},
-	{-2,  0, -1, 21, 0, 0, -1},
-	{-2, -1,  0, 22, 0, 0, -1},
-	{-2,  0,  1, 23, 0, 0, -1}
-}; // ds:0x621c, arrays, each terminated by -1
+int8_t g_anitab_projectile_data[24][7]; // ds:0x621c, arrays, each terminated by -1
 static const int8_t *g_anitab_projectile_index2[6][FIG_VIEWDIR__END] = {
 	{g_anitab_projectile_data[0],  g_anitab_projectile_data[1],  g_anitab_projectile_data[2],  g_anitab_projectile_data[3]},
 	{g_anitab_projectile_data[4],  g_anitab_projectile_data[5],  g_anitab_projectile_data[6],  g_anitab_projectile_data[7]},

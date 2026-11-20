@@ -1501,6 +1501,7 @@ int main(int argc, char** argv)
 	g_playmask_us = 1;""",
         """#if !defined(__BORLANDC__)
 	{
+		int explicit_gamedir = (getenv("DSA_GAME_DIR") != NULL || getenv("DSA_GAMEDIR") != NULL) ? 1 : 0;
 		dsa_platform_register_crash_state_cb(schick_format_crash_state);
 		const char *env_cp = getenv("DSA_COPY_PROTECTION");
 		if (env_cp && env_cp[0]) {
@@ -1556,10 +1557,12 @@ int main(int argc, char** argv)
 				}
 			} else if (strcmp(argv[arg_i], "--gamedir") == 0 && arg_i + 1 < argc) {
 				dsa_platform_set_game_dir(argv[++arg_i]);
+				explicit_gamedir = 1;
 			} else if (strcmp(argv[arg_i], "--savedir") == 0 && arg_i + 1 < argc) {
 				dsa_platform_set_save_dir(argv[++arg_i]);
 			} else if (argv[arg_i][0] != '-') {
 				dsa_platform_set_game_dir(argv[arg_i]);
+				explicit_gamedir = 1;
 			}
 		}
 		{
@@ -1574,6 +1577,7 @@ int main(int argc, char** argv)
 			}
 		}
 		MKDIR_PORT_S2("TEMP");
+		schick_load_tables_from_exe(explicit_gamedir);
 	}
 #endif
 	g_pregame_state = 1;
@@ -2882,7 +2886,61 @@ static signed int open_file_ci(const char *fname, int flags)
 #elif defined(__BORLANDC__)""",
         "seg026.c:copy_chr_names",
     )
+    s26_txt = replace_once(
+        s26_txt,
+        """		/* rewrite GAMES.NAM */
+		handle_sg = _creat(g_fnames_v302de[207], 0);
+		write(handle_sg, &g_savegame_names[0][0], 45);
+		close(handle_sg);
+
+		return 1;""",
+        """		/* rewrite GAMES.NAM */
+		handle_sg = _creat(g_fnames_v302de[207], 0);
+		write(handle_sg, &g_savegame_names[0][0], 45);
+		close(handle_sg);
+#if defined(__EMSCRIPTEN__)
+		dsa_platform_sync_savegames();
+#endif
+
+		return 1;""",
+        "seg026.c:save_sync_savegames",
+    )
+    s26_txt += """
+#if defined(__EMSCRIPTEN__)
+void dsa_web_reload_savegame_names(void)
+{
+	signed int handle = load_regular_file(ARCHIVE_FILE_GAMES_NAM);
+	if (handle != -1) {
+		memset(g_savegame_names, 0, 45);
+		_read(handle, g_savegame_names, 45);
+		close(handle);
+	}
+}
+#endif
+"""
     s26_p.write_text(s26_txt, encoding="latin-1")
+
+    # seg061.c: POSIX path separator for TEMP/%s and IDBFS sync after char_erase
+    s61_p = SRC_DIR / "seg061.c"
+    s61_txt = s61_p.read_text(encoding="latin-1")
+    s61_txt = replace_once(
+        s61_txt,
+        'static char g_str_temp_file_wildcard[8] = "TEMP\\\\%s"; // ds:0x6e72',
+        '#if defined(__BORLANDC__) || defined(_WIN32)\nstatic char g_str_temp_file_wildcard[8] = "TEMP\\\\%s"; // ds:0x6e72\n#else\nstatic char g_str_temp_file_wildcard[8] = "TEMP/%s"; // ds:0x6e72\n#endif',
+        "seg061.c:g_str_temp_file_wildcard",
+    )
+    s61_txt = replace_once(
+        s61_txt,
+        """					sprintf(g_dtp2, g_str_temp_file_wildcard, g_text_output_buf);
+					unlink(g_dtp2);""",
+        """					sprintf(g_dtp2, g_str_temp_file_wildcard, g_text_output_buf);
+					unlink(g_dtp2);
+#if defined(__EMSCRIPTEN__)
+					dsa_platform_sync_savegames();
+#endif""",
+        "seg061.c:char_erase_sync",
+    )
+    s61_p.write_text(s61_txt, encoding="latin-1")
 
     # seg009.c: guard 64-bit unsigned underflow in src[plen - 1] when plen == 0 / unplen == 0
     s09_p = SRC_DIR / "seg009.c"
@@ -4553,6 +4611,13 @@ int main_ngen_unused(int argc, char** argv)
         "ngen:main_to_ngen_run",
     )
 
+    txt = txt.replace("#if defined(__EMSCRIPTEN__)", "#if 0")
+    txt = replace_once(
+        txt,
+        "\tdo_gen(&g_hero, l_level);\n\texit_music();",
+        "\tdo_gen(&g_hero, l_level);\n#if defined(__EMSCRIPTEN__)\n\tdsa_platform_sync_savegames();\n#endif\n\texit_music();",
+        "ngen:sync_after_do_gen",
+    )
     txt += "\n#endif\n"
     (SRC_DIR / "ngen_embed.c").write_text(txt, encoding="latin-1")
     print("      ngen_embed.c erzeugt.")
@@ -4603,7 +4668,7 @@ def instrument_coverage_and_stubs() -> None:
         r"^(?:static\s+)?(?:inline\s+)?(?:const\s+|unsigned\s+|signed\s+|struct\s+\w+\s*|[A-Za-z_]\w*\s+)+[\*\s]*([A-Za-z_]\w*)\s*\([^;{}]*\)\s*\n\{\n",
         re.M,
     )
-    skip_names = {"if", "for", "while", "switch", "schick_format_crash_state", "status_to_dos", "status_from_dos", "has_suffix_ci", "open_file_ci", "sdl_timer_emulation", "sdl_poll_input", "sdl_wait_vsync", "readb", "readws", "readds", "schick_rotl16"}
+    skip_names = {"if", "for", "while", "switch", "schick_format_crash_state", "status_to_dos", "status_from_dos", "has_suffix_ci", "open_file_ci", "sdl_timer_emulation", "sdl_poll_input", "sdl_wait_vsync", "readb", "readws", "readds", "schick_rotl16", "dsa_web_reload_savegame_names"}
     catalog_lines = ["# id\tmodul\tfunktion"]
     func_id = 0
 
@@ -4657,6 +4722,328 @@ def instrument_coverage_and_stubs() -> None:
     print(f"      abdeckung_liste.tsv erzeugt ({func_id} nativ kompilierte Funktionen).")
 
 
+def strip_original_data_tables() -> None:
+    """
+    Entfernt alle >=64-Byte-Originaltabelleninhalte aus dem Quellcode (datseg.c, seg*.c)
+    und erzeugt in seg002.c den Laufzeit-Tabellenlader schick_load_tables_from_exe(),
+    der die Tabellen beim Programmstart nach Groessen- und MD5-Pruefung (556.208 Bytes,
+    MD5 4ce035f95ead01a8b2553b4487544e5d) aus der Spieler-SCHICKM.EXE einliest.
+    """
+    ds_base = 0x0173C0
+    strip_exact = {
+        "g_ranged_weapon_stats_table",
+        "g_weapon_stats_table",
+        "g_monster_name_genders",
+        "g_staffspell_descriptions",
+        "g_spell_descriptions",
+        "g_mon_spell_descriptions",
+        "g_talent_descriptions",
+        "g_talentclasses",
+        "g_nvftab_figures_rangeweapon",
+        "g_nvftab_figures_unconscious",
+        "g_gfxtab_offsets_unconscious",
+        "g_gfxtab_figures_main",
+        "g_gfxtab_offsets_main",
+        "g_unkn_005",
+        "g_palette_unknown1",
+        "g_palette_fight1",
+        "g_palette_special",
+        "g_default_mouse_cursor",
+        "g_cursor_arrow_up",
+        "g_cursor_arrow_down",
+        "g_cursor_arrow_left",
+        "g_cursor_arrow_right",
+        "g_floor_fade_palette",
+        "g_building_fade_palette",
+        "g_sky_fade_palette",
+        "g_special_dates",
+        "g_level_ap_tab",
+        "g_questions_handbook",
+        "g_questions_map",
+        "g_visual_square_north",
+        "g_visual_square_east",
+        "g_visual_square_south",
+        "g_visual_square_west",
+        "g_wallclock_pos_y",
+        "g_informer_tab",
+        "g_anitab_projectile_data",
+        "g_statuspage_palette",
+        "g_invslot_iconxy_table",
+        "g_invslot_borderxy_table",
+        "g_gather_herbs_table",
+        "g_healer_descr_table",
+        "g_inn_descr_table",
+        "g_merchant_descr_table",
+        "g_smith_descr_table",
+        "g_tavern_descr_table",
+        "g_sea_routes",
+        "g_market_descr_table",
+        "g_visual_square_offsets_std",
+        "g_visual_square_offsets_sign",
+        "g_visual_square_offsets_inn",
+        "g_visual_square_offsets_grass",
+        "g_tex_descr_table",
+        "g_dng_gfxtab_wood",
+        "g_dng_gfxtab_stone",
+        "g_dng_gfxtab_marble",
+        "g_dng_square_pos",
+        "g_dng_square_pos_stairs",
+        "g_dng_square_pos_pit",
+        "g_dng_square_pos_pit_ceil",
+        "g_land_routes",
+        "g_town_positions",
+        "g_tevents_tab",
+        "g_gui_char_width",
+        "g_gui_char_width_font8",
+        "g_analues_items",
+        "g_alchemy_recipes",
+        "g_trv_journey_random_encounter_stats",
+        "g_palette_unknown4",
+        "g_palette_general",
+    }
+    strip_prefixes = (
+        "g_gfx_ani_descriptions_",
+        "gs_daspota_location",
+        "gs_dng14_chest_x",
+        "gs_dng02_chest",
+        "gs_dng03_chest",
+        "gs_dng04_chest_corpse",
+        "gs_dng11_chest",
+        "g_signposts_linked_lroute_",
+        "g_harbors_linked_sea_routes_",
+    )
+
+    def should_strip(name: str) -> bool:
+        return name in strip_exact or name.startswith(strip_prefixes)
+
+    # 1. Entferne 'const' in datseg.h fuer bereinigte Tabellen
+    dsh_p = SRC_DIR / "datseg.h"
+    dsh_lines = dsh_p.read_text(encoding="latin-1").split("\n")
+    for idx, line in enumerate(dsh_lines):
+        if "extern const " in line:
+            for w in re.findall(r"\b[A-Za-z_]\w*\b", line):
+                if should_strip(w):
+                    dsh_lines[idx] = line.replace("extern const ", "extern ", 1)
+                    break
+    dsh_p.write_text("\n".join(dsh_lines), encoding="latin-1")
+
+    # 2. Bestimme alle ds:0xXXXX-Adressen zur exakten Groessenberechnung
+    c_files = [SRC_DIR / "datseg.c"] + sorted(SRC_DIR.glob("seg*.c"))
+    ds_addrs: set[int] = set()
+    for p in c_files:
+        txt = p.read_text(encoding="latin-1")
+        for m in re.finditer(r"//\s*ds:0x([0-9a-fA-F]+)", txt):
+            ds_addrs.add(int(m.group(1), 16))
+    ds_sorted = sorted(ds_addrs)
+    next_ds = {
+        ds_sorted[i]: (ds_sorted[i + 1] if i + 1 < len(ds_sorted) else 0xB311)
+        for i in range(len(ds_sorted))
+    }
+
+    stripped_items: list[tuple[str, str, str, int, int, str]] = []
+
+    # 3. Bereinige die 309 Dateinamen-Strings g_fn_v302de_XXX..307 in seg026.c (ds:0x5166..0x5e3e)
+    s26_p = SRC_DIR / "seg026.c"
+    s26_lines = s26_p.read_text(encoding="latin-1").split("\n")
+    fn_re = re.compile(r"^([ \t]*)char[ \t]+(g_fn_v302de_\w+)\[\][ \t]*=[ \t]*\"([^\"]*)\";[ \t]*$")
+    cur_fn_ds = 0x5166
+    fn_count = 0
+    for idx, line in enumerate(s26_lines):
+        m = fn_re.match(line)
+        if m:
+            indent, var, raw_s = m.group(1), m.group(2), m.group(3)
+            val_bytes = raw_s.replace("\\\\", "\\").encode("latin-1") + b"\x00"
+            sz = len(val_bytes)
+            arr = f"[{sz}]"
+            s26_lines[idx] = f"{indent}char {var}{arr}; // ds:0x{cur_fn_ds:04x}"
+            stripped_items.append((var, "char", arr, cur_fn_ds, sz, "seg026.c"))
+            cur_fn_ds += sz
+            fn_count += 1
+    if fn_count != 309 or cur_fn_ds != 0x5E3E:
+        raise RuntimeError(f"Unexpected g_fn_v302de count={fn_count} end_ds={cur_fn_ds:#x}")
+    s26_p.write_text("\n".join(s26_lines), encoding="latin-1")
+
+    # 4. Bereinige alle Tabellen-Initialisierer in datseg.c und seg004.c..seg120.c
+    head_re = re.compile(
+        r"^([ \t]*)(?:static[ \t]+)?(?:const[ \t]+)?((?:unsigned[ \t]+|signed[ \t]+)?(?:struct[ \t]+\w+|\w+))[ \t]+"
+        r"([A-Za-z_]\w*)\s*((?:\[[^\]]*\])*)\s*=\s*\{"
+    )
+    for p in c_files:
+        lines = p.read_text(encoding="latin-1").split("\n")
+        new_lines: list[str] = []
+        i = 0
+        changed = False
+        while i < len(lines):
+            m = head_re.match(lines[i])
+            if m and should_strip(m.group(3)):
+                indent, ctype, var, arr = m.group(1), m.group(2), m.group(3), m.group(4)
+                j = i
+                while j < len(lines):
+                    dm = re.search(r"\};\s*(//\s*ds:0x([0-9a-fA-F]+).*)$", lines[j])
+                    if dm:
+                        comment, dsh = dm.group(1), int(dm.group(2), 16)
+                        sz = next_ds[dsh] - dsh
+                        if arr == "[]":
+                            arr = f"[{sz}]"
+                        new_lines.append(f"{indent}{ctype} {var}{arr}; {comment}")
+                        stripped_items.append((var, ctype, arr, dsh, sz, p.name))
+                        changed = True
+                        break
+                    j += 1
+                else:
+                    raise RuntimeError(f"Unclosed initializer for {var} in {p.name}:{i+1}")
+                i = j + 1
+            else:
+                new_lines.append(lines[i])
+                i += 1
+        if changed:
+            p.write_text("\n".join(new_lines), encoding="latin-1")
+
+    # 5. Erzeuge Laufzeit-Lader schick_load_tables_from_exe() in seg002.c
+    hdr_text = "\n".join(hp.read_text(encoding="latin-1") for hp in SRC_DIR.glob("*.h"))
+    extern_decls: list[str] = ["extern void ngen_load_tables_from_exe(const unsigned char *exe_buf);"]
+    copy_stmts: list[str] = []
+    total_bytes = 0
+    for var, ctype, arr, dsh, sz, _fname in stripped_items:
+        if (not re.search(r"\b" + re.escape(var) + r"\b", hdr_text)) or re.search(
+            r"\b" + re.escape(var) + r"\s*\[\s*\]", hdr_text
+        ):
+            extern_decls.append(f"extern {ctype} {var}{arr};")
+        orig_off = ds_base + dsh
+        copy_stmts.append(f"\tSTATIC_ASSERT(sizeof({var}) <= {sz}, size_check_{var});")
+        copy_stmts.append(f"\tmemcpy(&{var}, exe_buf + 0x{orig_off:06x}, sizeof({var}));")
+        total_bytes += sz
+
+    loader_code = (
+        "\n".join(extern_decls)
+        + """
+
+static void schick_md5_hex(const uint8_t *msg, uint32_t len, char out_hex[33])
+{
+	static const uint8_t s[64] = {
+		7,12,17,22, 7,12,17,22, 7,12,17,22, 7,12,17,22,
+		5, 9,14,20, 5, 9,14,20, 5, 9,14,20, 5, 9,14,20,
+		4,11,16,23, 4,11,16,23, 4,11,16,23, 4,11,16,23,
+		6,10,15,21, 6,10,15,21, 6,10,15,21, 6,10,15,21
+	};
+	static const uint32_t K[64] = {
+		0xd76aa478u,0xe8c7b756u,0x242070dbu,0xc1bdceeeu,0xf57c0fafu,0x4787c62au,0xa8304613u,0xfd469501u,
+		0x698098d8u,0x8b44f7afu,0xffff5bb1u,0x895cd7beu,0x6b901122u,0xfd987193u,0xa679438eu,0x49b40821u,
+		0xf61e2562u,0xc040b340u,0x265e5a51u,0xe9b6c7aau,0xd62f105du,0x02441453u,0xd8a1e681u,0xe7d3fbc8u,
+		0x21e1cde6u,0xc33707d6u,0xf4d50d87u,0x455a14edu,0xa9e3e905u,0xfcefa3f8u,0x676f02d9u,0x8d2a4c8au,
+		0xfffa3942u,0x8771f681u,0x6d9d6122u,0xfde5380cu,0xa4beea44u,0x4bdecfa9u,0xf6bb4b60u,0xbebfbc70u,
+		0x289b7ec6u,0xeaa127fau,0xd4ef3085u,0x04881d05u,0xd9d4d039u,0xe6db99e5u,0x1fa27cf8u,0xc4ac5665u,
+		0xf4292244u,0x432aff97u,0xab9423a7u,0xfc93a039u,0x655b59c3u,0x8f0ccc92u,0xffeff47du,0x85845dd1u,
+		0x6fa87e4fu,0xfe2ce6e0u,0xa3014314u,0x4e0811a1u,0xf7537e82u,0xbd3af235u,0x2ad7d2bbu,0xeb86d391u
+	};
+	uint32_t a0 = 0x67452301u, b0 = 0xefcdab89u, c0 = 0x98badcfeu, d0 = 0x10325476u;
+	uint32_t new_len = ((len + 8u) / 64u + 1u) * 64u;
+	uint8_t *buf = (uint8_t*)calloc(new_len, 1);
+	uint64_t bits_len = (uint64_t)len * 8u;
+	static const char hex[] = "0123456789abcdef";
+	if (!buf) { out_hex[0] = '\\0'; return; }
+	memcpy(buf, msg, len);
+	buf[len] = 0x80;
+	for (int b = 0; b < 8; ++b) buf[new_len - 8 + b] = (uint8_t)((bits_len >> (b * 8)) & 0xffu);
+	for (uint32_t off = 0; off < new_len; off += 64u) {
+		uint32_t M[16];
+		for (int j = 0; j < 16; ++j) {
+			const uint8_t *p = buf + off + j * 4;
+			M[j] = (uint32_t)p[0] | ((uint32_t)p[1] << 8) | ((uint32_t)p[2] << 16) | ((uint32_t)p[3] << 24);
+		}
+		uint32_t A = a0, B = b0, C = c0, D = d0;
+		for (uint32_t i = 0; i < 64; ++i) {
+			uint32_t F, g;
+			if (i < 16)      { F = (B & C) | ((~B) & D); g = i; }
+			else if (i < 32) { F = (D & B) | ((~D) & C); g = (5u * i + 1u) % 16u; }
+			else if (i < 48) { F = B ^ C ^ D;            g = (3u * i + 5u) % 16u; }
+			else             { F = C ^ (B | (~D));       g = (7u * i) % 16u; }
+			F = F + A + K[i] + M[g];
+			A = D; D = C; C = B;
+			B = B + ((F << s[i]) | (F >> (32u - s[i])));
+		}
+		a0 += A; b0 += B; c0 += C; d0 += D;
+	}
+	free(buf);
+	uint32_t st[4] = { a0, b0, c0, d0 };
+	for (int w = 0; w < 4; ++w) {
+		for (int b = 0; b < 4; ++b) {
+			uint8_t v = (uint8_t)((st[w] >> (b * 8)) & 0xffu);
+			out_hex[(w * 4 + b) * 2 + 0] = hex[v >> 4];
+			out_hex[(w * 4 + b) * 2 + 1] = hex[v & 0x0f];
+		}
+	}
+	out_hex[32] = '\\0';
+}
+
+static void schick_load_tables_from_exe(int explicit_gamedir)
+{
+	char exe_path[512];
+	const char *resolved = dsa_platform_resolve_path("SCHICKM.EXE", exe_path, sizeof(exe_path));
+	int fd = _open(resolved, O_BINARY | O_RDONLY);
+	if (fd == -1 && !explicit_gamedir) {
+		fd = _open("SCHICKM.EXE", O_BINARY | O_RDONLY);
+	}
+	if (fd == -1) {
+		fprintf(stderr,
+			"FEHLER: Originaldatei SCHICKM.EXE nicht gefunden (%s) - deutsche GOG-Fassung benoetigt (V3.02de, 556.208 Bytes, MD5 4ce035f95ead01a8b2553b4487544e5d).\\n",
+			resolved ? resolved : "SCHICKM.EXE");
+		fflush(stderr);
+		exit(2);
+	}
+	uint8_t *exe_buf = (uint8_t*)malloc(556208 + 1);
+	if (!exe_buf) {
+		close(fd);
+		fprintf(stderr, "FEHLER: Speicherreservierung fuer SCHICKM.EXE fehlgeschlagen - deutsche GOG-Fassung benoetigt.\\n");
+		fflush(stderr);
+		exit(2);
+	}
+	int total = 0;
+	while (total < 556209) {
+		int r = _read(fd, exe_buf + total, 556209 - total);
+		if (r <= 0) break;
+		total += r;
+	}
+	close(fd);
+	if (total != 556208) {
+		free(exe_buf);
+		fprintf(stderr,
+			"FEHLER: Ungueltige Dateigroesse von SCHICKM.EXE (%d Bytes statt 556.208 Bytes) - deutsche GOG-Fassung benoetigt (V3.02de, MD5 4ce035f95ead01a8b2553b4487544e5d).\\n",
+			total);
+		fflush(stderr);
+		exit(2);
+	}
+	char md5_hex[33];
+	schick_md5_hex(exe_buf, 556208u, md5_hex);
+	if (strcmp(md5_hex, "4ce035f95ead01a8b2553b4487544e5d") != 0) {
+		free(exe_buf);
+		fprintf(stderr,
+			"FEHLER: Ungueltige MD5-Pruefsumme von SCHICKM.EXE (%s statt 4ce035f95ead01a8b2553b4487544e5d) - deutsche GOG-Fassung benoetigt (V3.02de, 556.208 Bytes).\\n",
+			md5_hex);
+		fflush(stderr);
+		exit(2);
+	}
+"""
+        + "\n".join(copy_stmts)
+        + """
+	ngen_load_tables_from_exe(exe_buf);
+	free(exe_buf);
+}
+"""
+    )
+
+    s2_p = SRC_DIR / "seg002.c"
+    s2_txt = s2_p.read_text(encoding="latin-1")
+    s2_txt = replace_once(
+        s2_txt,
+        "static void schick_format_crash_state(char *buf, int buf_size)",
+        loader_code + "\nstatic void schick_format_crash_state(char *buf, int buf_size)",
+        "seg002.c:schick_load_tables_from_exe",
+    )
+    s2_p.write_text(s2_txt, encoding="latin-1")
+    print(f"      {len(stripped_items)} Originaltabellen ({total_bytes} Bytes) aus Quellcode entfernt und Laufzeit-Lader erzeugt.")
+
+
 def main() -> int:
     print("[prepare_sources] Kopiere Quelle/ dieser Fassung (MooMoo) nach Port/src/ ...")
     SRC_DIR.mkdir(parents=True, exist_ok=True)
@@ -4699,6 +5086,7 @@ def main() -> int:
     generate_ngen_embed_c()
     instrument_coverage_and_stubs()
     generate_datseg_status_h(SRC_DIR / "datseg.c", SRC_DIR / "datseg.h", SRC_DIR / "datseg_status.h")
+    strip_original_data_tables()
 
     if SRC_DIR != FINAL_SRC_DIR:
         FINAL_SRC_DIR.mkdir(parents=True, exist_ok=True)

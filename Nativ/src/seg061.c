@@ -80,7 +80,11 @@ static int8_t* g_god_temples_typeindex[15] = {
 	g_ifirn_temples_typeindex,
 }; // ds:0x6e36; int8_t*
 
+#if defined(__BORLANDC__) || defined(_WIN32)
 static char g_str_temp_file_wildcard[8] = "TEMP\\%s"; // ds:0x6e72
+#else
+static char g_str_temp_file_wildcard[8] = "TEMP/%s"; // ds:0x6e72
+#endif
 static char g_str_no_save_in_temple[41] = "IN DIESEM TEMPEL KEIN SPEICHERN M\x99GLICH!"; // ds:0x6e7a
 
 
@@ -464,6 +468,9 @@ signed int char_erase(void)
 
 					sprintf(g_dtp2, g_str_temp_file_wildcard, g_text_output_buf);
 					unlink(g_dtp2);
+#if defined(__EMSCRIPTEN__)
+					dsa_platform_sync_savegames();
+#endif
 				}
 
 				entries = copy_chr_names(ptr, -1);

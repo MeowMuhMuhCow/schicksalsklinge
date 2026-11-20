@@ -224,23 +224,23 @@ static const struct struct_spelltab g_spell_tab[87] = {
 };
 
 /* Antimagie */
-static const signed short house00[] = {0x01, 0x02, 0x03, 0x04, 0x05, 0x2a, -1};
+static signed short house00[7];
 /* Beherrschung */
-static const signed short house01[] = {0x07, 0x0c, 0x0e, 0x10, 0x2c, -1};
+static signed short house01[6];
 /* Beschwoerung */
-static const signed short house02[] = {0x12, 0x13, 0x15, 0x17, 0x18, 0x3b, -1};
+static signed short house02[7];
 /* Bewegung */
-static const signed short house03[] = {0x1b, 0x1c, 0x1d, 0x1e, 0x1f, -1};
+static signed short house03[6];
 /* Heilung */
-static const signed short house04[] = {0x21, 0x23, 0x24, 0x3d, 0x46, -1};
+static signed short house04[6];
 /* Hellsicht */
-static const signed short house05[] = {0x26, 0x27, 0x29, 0x28, 0x2a, 0x2b, 0x2c, -1};
+static signed short house05[8];
 /* Kampf */
-static const signed short house06[] = {0x31, 0x33, 0x34, 0x35, 0x36, 0x39, 0x3e, -1};
+static signed short house06[8];
 /* Verwandlung */
-static const signed short house07[] = {0x3c, 0x3e, 0x48, 0x49, 0x4b, -1};
+static signed short house07[6];
 /* Veraenderung */
-static const signed short house08[] = {0x4c, 0x4e, 0x4f, 0x50, 0x52, 0x53, 0x54, -1};
+static signed short house08[8];
 
 static const signed short* g_house_spells[] = {
 	house00, house01, house02,
@@ -916,16 +916,7 @@ static signed short g_mouse_moved = 0;
 static signed short g_mouse_locked = 0;
 static signed short g_mouse_refresh_flag = -1;
 
-static unsigned short g_mouse_mask[32] = {
-        0x7fff, 0x9fff, 0x87ff, 0xc1ff,
-        0xc07f, 0xe01f, 0xe007, 0xf00f,
-        0xf01f, 0xf80f, 0xf887, 0xfdc3,
-        0xffe3, 0xfff7, 0xffff, 0xffff,
-        0x8000, 0x6000, 0x7800, 0x3e00,
-        0x3f80, 0x1fe0, 0x1ff8, 0x0ff0,
-        0x0fe0, 0x07f0, 0x0778, 0x023c,
-        0x001c, 0x0008, 0x0000, 0x0000,
-};
+static unsigned short g_mouse_mask[32];
 
 #if !defined(__BORLANDC__)
 static SDL_Cursor *g_sdl_cursor = NULL;
@@ -1111,82 +1102,7 @@ struct struct_chr_lookup {
 	signed char width;
 };
 
-static const struct struct_chr_lookup g_chr_lookup[74] = {
-	{0x20, 0, 6}, // SPACE
-	{0x41, 1, 6}, // A
-	{0x42, 2, 6}, // B
-	{0x43, 3, 6},
-	{0x44, 4, 6},
-	{0x45, 5, 6},
-	{0x46, 6, 6},
-	{0x47, 7, 6},
-	{0x48, 8, 6},
-	{0x49, 9, 4},
-	{0x4a, 10, 6},
-	{0x4b, 11, 6},
-	{0x4c, 12, 5},
-	{0x4d, 13, 6},
-	{0x4e, 14, 6},
-	{0x4f, 15, 6},
-	{0x50, 16, 6},
-	{0x51, 17, 6},
-	{0x52, 18, 6},
-	{0x53, 19, 6},
-	{0x54, 20, 6},
-	{0x55, 21, 6},
-	{0x56, 22, 6},
-	{0x57, 23, 6},
-	{0x58, 24, 6},
-	{0x59, 25, 6},
-	{0x5a, 26, 6}, // Z
-	{0x8e, 27, 6}, // AE
-	{0x99, 28, 6}, // OE
-	{0x9a, 29, 6}, // UE
-	{0x2c, 30, 3}, // ,
-	{0x2e, 31, 2}, // .
-	{0x2d, 32, 6}, // -
-	{0x28, 33, 4}, // (
-	{0x29, 34, 4}, // )
-	{0x21, 35, 3}, // !
-	{0x3f, 36, 5}, // ?
-	{0x30, 37, 6}, // 0
-	{0x31, 38, 3},
-	{0x32, 39, 6},
-	{0x33, 40, 6},
-	{0x34, 41, 6},
-	{0x35, 42, 6},
-	{0x36, 43, 6},
-	{0x37, 44, 6},
-	{0x38, 45, 6},
-	{0x39, 46, 6}, // 9
-	{0x27, 47, 3}, // ´
-	{0x3a, 48, 3}, // :
-	{0x23, 49, 6}, // Star
-	{0x26, 50, 5}, // Cross
-	{0x25, 51, 5}, // Cross turned
-	{0x3c, 53, 5}, 
-	{0x3e, 52, 5},
-	{0x2f, 54, 6}, // /
-	{0x5f, 55, 6}, // _
-	{0xc8, 56, 6}, // Rune: Naudiz
-	{0xc9, 57, 6}, // Rune: Othala
-	{0xca, 58, 6}, // Rune: Thurisaz
-	{0xcb, 59, 5}, // Rune: Raidho
-	{0xcc, 60, 5}, // Rune: Sowilo
-	{0xcd, 61, 4},
-	{0xce, 62, 5},
-	{0xcf, 63, 5},
-	{0xd0, 64, 2},
-	{0xd1, 65, 6},
-	{0xd2, 66, 6},
-	{0xd3, 67, 5},
-	{0xd4, 68, 6},
-	{0xd5, 69, 5},
-	{0xd6, 70, 6},
-	{0xd7, 71, 5},
-	{0xd8, 72, 6},
-	{0xd9, 73, 5}, // End Runes
-};
+static struct struct_chr_lookup g_chr_lookup[74];
 
 static signed short g_bool_mode = 0;
 
@@ -1320,40 +1236,7 @@ static const struct struct_color g_pal_misc[3] = {
 	{0x00, 0x00, 0x28 }
 };
 
-static const struct struct_color g_pal_heads[32] = {
-	{0x00, 0x00, 0x00},
-	{0x00, 0x00, 0x3f},
-	{0x00, 0x00, 0x24},
-	{0x3c, 0x30, 0x28},
-	{0x3c, 0x2c, 0x24},
-	{0x3c, 0x28, 0x1c},
-	{0x38, 0x24, 0x18},
-	{0x34, 0x20, 0x14},
-	{0x30, 0x1c, 0x14},
-	{0x28, 0x18, 0x10},
-	{0x24, 0x14, 0x0c},
-	{0x1c, 0x10, 0x0c},
-	{0x18, 0x0c, 0x08},
-	{0x14, 0x0c, 0x08},
-	{0x38, 0x38, 0x38},
-	{0x30, 0x30, 0x30},
-	{0x2c, 0x2c, 0x2c},
-	{0x28, 0x28, 0x28},
-	{0x20, 0x20, 0x20},
-	{0x1c, 0x1c, 0x1c},
-	{0x14, 0x14, 0x14},
-	{0x10, 0x10, 0x10},
-	{0x00, 0x3f, 0x00},
-	{0x00, 0x24, 0x00},
-	{0x3c, 0x38, 0x00},
-	{0x34, 0x2c, 0x00},
-	{0x28, 0x20, 0x00},
-	{0x3c, 0x18, 0x10},
-	{0x30, 0x10, 0x08},
-	{0x24, 0x0c, 0x04},
-	{0x10, 0x08, 0x04},
-	{0x3c, 0x3c, 0x3c},
-};
+static struct struct_color g_pal_heads[32];
 
 static unsigned char g_pal_roalogo[768];
 /* FORMERLY END OF INITIALIZED GLOBAL VARIABLES _DATA */
@@ -7940,6 +7823,22 @@ static void web_gen_done(void)
 	EM_ASM({ if (Module.genFertig) Module.genFertig(); });
 }
 #endif
+
+void ngen_load_tables_from_exe(const unsigned char *exe_buf)
+{
+	memcpy(house00, exe_buf + 0x0180db + 0, 14);
+	memcpy(house01, exe_buf + 0x0180db + 14, 12);
+	memcpy(house02, exe_buf + 0x0180db + 26, 14);
+	memcpy(house03, exe_buf + 0x0180db + 40, 12);
+	memcpy(house04, exe_buf + 0x0180db + 52, 12);
+	memcpy(house05, exe_buf + 0x0180db + 64, 16);
+	memcpy(house06, exe_buf + 0x0180db + 80, 16);
+	memcpy(house07, exe_buf + 0x0180db + 96, 12);
+	memcpy(house08, exe_buf + 0x0180db + 108, 16);
+	memcpy(g_mouse_mask, exe_buf + 0x019c08, 64);
+	memcpy(g_chr_lookup, exe_buf + 0x021e11, 222);
+	memcpy(g_pal_heads, exe_buf + 0x022671, 96);
+}
 
 int main(int argc, char** argv)
 {

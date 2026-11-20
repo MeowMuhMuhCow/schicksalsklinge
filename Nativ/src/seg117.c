@@ -126,22 +126,7 @@ static unsigned char g_trv_route_landscape_type_table[59] = {
 /* Achtung: so ist die Tabelle gemeint, journey_random_encounter() prueft aber "Wert <= W100".
  * Tatsaechlich tritt nur die erste Begegnung einer Spalte ein (bei Spalte 0: ID 0 fuer W100 >= 40),
  * alle anderen nie. */
-static const uint8_t g_trv_journey_random_encounter_stats[14][7] = {
-	{  40,  40,  30,  25,  30,  25,  20 },
-	{   0,  45,   0,   0,  40,  30,   0 },
-	{   0,  50,   0,   0,  45,   0,   0 },
-	{  45,  55,  35,  30,  55,  40,  30 },
-	{  60,   0,  45,  40,   0,  45,  40 },
-	{  70,  65,  50,  50,  65,  65,  45 },
-	{  85,  70,  60,  65,   0,  80,  60 },
-	{   0,  85,   0,   0,  85,   0,   0 },
-	{   0,  95,   0,   0,  95,   0,   0 },
-	{  95, 100,  85,  85,   0,  85,  80 },
-	{   0,   0,  95,  95,   0,   0,  90 },
-	{ 100,   0, 100, 100,   0,   0,  95 },
-	{   0,   0,   0,   0, 100,  95,   0 },
-	{   0,   0,   0,   0,   0, 100, 100 }
-}; // ds:0xb1b9
+uint8_t g_trv_journey_random_encounter_stats[14][7]; // ds:0xb1b9
 
 static signed int g_tlk_ruin_hero_counter = 0; // ds:0xb21b
 static unsigned char g_unkn_068[1] = { 0x00 }; // ds:0xb21d (nirgends benutzt)

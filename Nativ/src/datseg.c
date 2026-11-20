@@ -714,176 +714,9 @@ const signed int *g_forbidden_item_ids_table[12] = {
     g_forbidden_item_ids_waldelf
 }; // ds:0x0638, items wearable depending on hero type
 
-const struct ranged_weapon_stats g_ranged_weapon_stats_table[RANGED_WEAPON_STATS_ID__END + 1] = {
-	{  1,  0,  0, -1,-99,-99,-99,  6 }, // RANGED_WEAPON_STATS_ID_WURFSTERN_WURFMESSER == 0
-#ifndef M302de_FEATURE_MOD
-	{  1,  1,  0,  0, -1,-99,-99,  6 }, // RANGED_WEAPON_STATS_ID_SCHLEUDER            == 1
-	{  2,  1,  0,  0,  0,-99,-99,  7 }, // RANGED_WEAPON_STATS_ID_WURFBEIL_WURFAXT     == 2
-	{  1,  1,  0,  0,  0, -1,-99,  4 }, // RANGED_WEAPON_STATS_ID_KURZBOGEN            == 3
-	{  2,  2,  1,  0,  0, -1, -2,  4 }, // RANGED_WEAPON_STATS_ID_LANGBOGEN            == 4
-	{  2,  2,  1,  0, -1, -2, -3,  3 }, // RANGED_WEAPON_STATS_ID_ARMBRUST             == 5
-#else
-	/* Feature mod 10:
-	 * Update weapon/armor stats to match the established original DAS3 rules ("Mit Mantel, Schwert und Zauberstab" and "Kaiser Retos Waffenkammer").
-	 */
+struct ranged_weapon_stats g_ranged_weapon_stats_table[RANGED_WEAPON_STATS_ID__END + 1]; // ds:0x0668
 
-	/* The following adjusts the distance-based damage modifiers.
-	 * The base difficulty (last value in the arrays) stays unchanged, since
-	 * MSZ and Kaiser Reto use a more refined table for the difficulty.
-	 * A better study of the original rulebooks is needed to find out if there is an official source
-	 * for the simplified difficulty computation in the game. */
-
-	{  1,  0,  0,  0, -1,-99,-99,  6 }, // RANGED_WEAPON_STATS_ID_SCHLEUDER            == 1
-	/* For the weapon "Schleuder", "Mantel, Schwert und Zauberstab" and "Kaiser Retos Waffenkammer" give the
-	 * distance-based damage modifiers as (-1, 0, 0, 0, -1).
-	 * But the leading -1 does not make sense:
-	 * As long as the projectile is fully accelerated, the closer, the higher the damage.
-	 * We assume that the first "-1" is a typo and should actually read "+1".
-	 */
-
-	{  3,  1,  0, -1,-99,-99,-99,  7 }, // RANGED_WEAPON_STATS_ID_WURFBEIL_WURFAXT     == 2
-	{  1,  1,  0,  0,  0, -1,-99,  4 }, // RANGED_WEAPON_STATS_ID_KURZBOGEN            == 3
-	{  3,  2,  1,  0,  0,  0, -1,  4 }, // RANGED_WEAPON_STATS_ID_LANGBOGEN            == 4
-
-	{  1,  1,  0,  0,  0, -1,-99,  3 }, // RANGED_WEAPON_STATS_ID_ARMBRUST             == 5
-	/* The item "Armbrust" is read as "leichte Armbrust" in the DSA3 rules (by far the best and most natural fit). */
-#endif
-
-#ifndef M302de_ORIGINAL_BUGFIX
-	/* Original-Bug 60: Speer is a melee weapon.
-	 * Original-Bug 61: missing distance-based damage modifier table for the throwing weapon Schneidzahn. */
-	{  2,  2,  1,  1,  0,  0, -1,  4 }, // RANGED_WEAPON_STATS_ID_SPEER__MAGIC         == 6
-#else
-	/* We reuse the unnecessary distance modifier table of Speer (magisch) for Schneidzahn.
-	 * Values according to "Kaiser Retos Waffenkammer". */
-	{  3,  2, -1, -2,-99,-99,-99,  8 }, // RANGED_WEAPON_STATS_ID_SCHNEIDZAHN          == 6
-#endif
-	{  9,  9,  9,  9,  9,  9,  9,  2 }, // RANGED_WEAPON_STATS_ID_WURFDOLCH__MAGIC     == 7
-	{ -1,  0,  0,  0,  0,  0,  0,  0 }  // RANGED_WEAPON_STATS_ID__END                 == 8
-}; // ds:0x0668
-
-struct weapon_stats g_weapon_stats_table[WEAPON_STATS_ID__END + 1] = {
-	{ 1, 4,  14,   2, -1,                                           0,  0 }, // WEAPON_STATS_ID_SCHWERT               ==  0
-	{ 1, 1,  14,   6, -1,                                          -1, -3 }, // WEAPON_STATS_ID_KNUEPPEL              ==  1
-	{ 1, 3,  15,   2, -1,                                           0,  0 }, // WEAPON_STATS_ID_SAEBEL                ==  2
-	{ 1, 0,  16,   4, -1,                                          -3, -4 }, // WEAPON_STATS_ID_MESSER                ==  3
-#ifndef M302de_ORIGINAL_BUGFIX
-	/* Original-Bug 60:
-	 * In ITEMS.DAT, the items "Speer" and "Speer (magisch)" are declared as weapons based on the talent "Speere".
-	 * But in the weapon stats table, they are more a hybrid of a melee and a ranged weapon,
-	 * having no KK-Zuschlag and a linked modifier table for ranged attacks.
-	 * According to DSA 2/3 rules, "Speere" is melee weapon talent, and the item "Speer" is a melee weapon.
-	 * (The throwing variant is called "Wurfspeer".)
-	 */
-	{ 1, 3,  99,   5, RANGED_WEAPON_STATS_ID_SCHLEUDER,             0, -3 }, // WEAPON_STATS_ID_SPEER                 ==  4
-#else
-	/* KK-Zuschlag 16 according to "Kaiser Retos Waffenkammer". */
-	{ 1, 3,  16,   5, -1,                                           0, -3 }, // WEAPON_STATS_ID_SPEER                 ==  4
-#endif
-	{ 1, 2,  15,   1, -1,                                           0, -1 }, // WEAPON_STATS_ID_KURZSCHWERT           ==  5
-	{ 1, 4,  14,   5, -1,                                           0, -3 }, // WEAPON_STATS_ID_KRIEGSBEIL__SPECIAL   ==  6
-	{ 1, 3,  99,   0, RANGED_WEAPON_STATS_ID_KURZBOGEN,             0,  0 }, // WEAPON_STATS_ID_KURZBOGEN             ==  7
-	{ 2, 4,  14,   3, -1,                                          -1, -4 }, // WEAPON_STATS_ID_STREITAXT             ==  8
-
-#ifndef M302de_ORIGINAL_BUGFIX
-	{ 1, 6,  99,   0, RANGED_WEAPON_STATS_ID_ARMBRUST,              0,  0 }, // WEAPON_STATS_ID_ARMBRUST              ==  9
-#else
-	/* Feature mod 10:
-	 * Update weapon/armor stats to match the established original DAS3 rules ("Mit Mantel, Schwert und Zauberstab" and "Kaiser Retos Waffenkammer").
-	 */
-
-	/* The item "Armbrust" is read as "leichte Armbrust" in the DSA3 rules (by far the best and most natural fit).
-	 * According to MSZ or "Kaiser Retos Waffenkammer", its damage roll is 2D6 + 2.
-	 */
-	{ 2, 2,  99,   0, RANGED_WEAPON_STATS_ID_ARMBRUST,              0,  0 }, // WEAPON_STATS_ID_ARMBRUST              ==  9
-#endif
-
-	{ 1, 1,  15,   3, -1,                                          -2, -3 }, // WEAPON_STATS_ID_DOLCH                 == 10
-										 /* WEAPON_STATS_ID_DOLCH, WEAPON_STATS_ID_KUKRISDOLCH */
-
-	{ 1, 3,  99,   4, RANGED_WEAPON_STATS_ID_WURFBEIL_WURFAXT,     -1, -3 }, // WEAPON_STATS_ID_WURFBEIL              == 11
-	{ 1, 1,  99,   0, RANGED_WEAPON_STATS_ID_WURFSTERN_WURFMESSER,  0,  0 }, // WEAPON_STATS_ID_WURFSTERN             == 12
-	{ 2, 4,  14,   3, -1,                                          -2, -3 }, // WEAPON_STATS_ID_ZWEIHAENDER           == 13
-	{ 1, 4,  99,   0, RANGED_WEAPON_STATS_ID_LANGBOGEN,             0,  0 }, // WEAPON_STATS_ID_LANGBOGEN             == 14
-	{ 1, 5,  15,   5, -1,                                          -1, -3 }, // WEAPON_STATS_ID_MORGENSTERN           == 15
-	{ 1, 0,  16,   6, -1,                                          -2, -3 }, // WEAPON_STATS_ID_VULKANGLASDOLCH       == 16
-	{ 1, 3,  99,   4, RANGED_WEAPON_STATS_ID_WURFBEIL_WURFAXT,     -1, -4 }, // WEAPON_STATS_ID_WURFAXT               == 17
-	{ 1, 3,  19,   7, -1,                                          -1, -4 }, // WEAPON_STATS_ID_PIKE                  == 18
-
-	{ 1, 4,  13,   1, -1,                                           0, -2 }, // WEAPON_STATS_ID_STREITKOLBEN          == 19
-										 /* WEAPON_STATS_ID_STREITKOLBEN, WEAPON_STATS_ID_SILBERSTREITKOLBEN */
-
-	{ 1, 3,  16,   3, -1,                                           0, -1 }, // WEAPON_STATS_ID_DEGEN                 == 20
-	{ 1, 3,  16,   3, -1,                                           0, -1 }, // WEAPON_STATS_ID_FLORETT               == 21
-	{ 1, 1,  15,   5, -1,                                           0, -1 }, // WEAPON_STATS_ID_KAMPFSTAB             == 22
-	{ 1, 0,  19,   2, -1,                                           0, -6 }, // WEAPON_STATS_ID_PEITSCHE              == 23
-	{ 1, 0,  99,   4, RANGED_WEAPON_STATS_ID_WURFSTERN_WURFMESSER, -3, -4 }, // WEAPON_STATS_ID_WURFMESSER            == 24
-
-	{ 1, 2,  17,   5, -1,                                          -3, -4 }, // WEAPON_STATS_ID_SICKLE                == 25
-										 /* WEAPON_STATS_ID_SICKLE, WEAPON_STATS_ID_SICKLE_MAGIC */
-
-	{ 1, 3,  17,   6, -1,                                          -3, -4 }, // WEAPON_STATS_ID_SENSE                 == 26
-	{ 2, 3,  15,   2, -1,                                          -2, -4 }, // WEAPON_STATS_ID_KRIEGSHAMMER          == 27
-	{ 1, 3,  15,   3, -1,                                           0, -3 }, // WEAPON_STATS_ID_DREIZACK              == 28
-	{ 1, 4,  15,   5, -1,                                          -1, -3 }, // WEAPON_STATS_ID_HELLEBARDE            == 29
-	{ 1, 2,  13,   6, -1,                                          -2, -3 }, // WEAPON_STATS_ID_DRESCHFLEGEL          == 30
-	{ 1, 3,  18,   4, -1,                                          -1, -1 }, // WEAPON_STATS_ID_ZWEILILIEN            == 31
-	{ 3, 3,  17,   4, -1,                                          -3, -4 }, // WEAPON_STATS_ID_OCHSENHERDE           == 32
-	{ 1, 1,  16,   4, -1,                                          -2, -3 }, // WEAPON_STATS_ID_BASILISKENZUNGE       == 33
-	{ 1, 2,  15,   4, -1,                                          -2, -3 }, // WEAPON_STATS_ID_OGERFAENGER           == 34
-
-	{ 1, 1,  16,   7, -1,                                          -3, -4 }, // WEAPON_STATS_ID_MENGBILAR             == 35
-										 /* WEAPON_STATS_ID_MENGBILAR, WEAPON_STATS_ID_KUKRIS_MENGBILAR */
-
-	{ 1, 2,  15,   2, -1,                                          -1, -2 }, // WEAPON_STATS_ID_SCHWERER_DOLCH        == 36
-	{ 2, 2,  15,   3, -1,                                          -2, -2 }, // WEAPON_STATS_ID_RONDRAKAMM            == 37
-	{ 1, 3,  15,   2, -1,                                           0, -1 }, // WEAPON_STATS_ID_ENTERMESSER           == 38
-	{ 1, 5,  14,   2, -1,                                          -1, -2 }, // WEAPON_STATS_ID_BASTARDSCHWERT        == 39
-	{ 1, 6,  15,   1, -1,                                          -2, -2 }, // WEAPON_STATS_ID_TUZAKMESSER           == 40
-	{ 1, 4,  16,   3, -1,                                          -1, -3 }, // WEAPON_STATS_ID_RABENSCHNABEL         == 41
-	{ 1, 5,  14,   1, -1,                                          -1, -2 }, // WEAPON_STATS_ID_BRABAKBENGEL          == 42
-	{ 1, 3,  16,   4, -1,                                           0, -1 }, // WEAPON_STATS_ID_RAPIER                == 43
-	{ 1, 4,  14,   2, -1,                                           0, -1 }, // WEAPON_STATS_ID_KUNCHOMER             == 44
-	{ 1, 6,  15,   3, -1,                                          -1, -3 }, // WEAPON_STATS_ID_DOPPELKUNCHOMER       == 45
-	{ 1, 2,  99,   0, RANGED_WEAPON_STATS_ID_SCHLEUDER,             0,  0 }, // WEAPON_STATS_ID_SCHLEUDER             == 46
-	{ 1, 3,  13,   4, -1,                                           0, -2 }, // WEAPON_STATS_ID_SKRAJA                == 47
-	{ 1, 4,  13,   2, -1,                                          -2, -4 }, // WEAPON_STATS_ID_KRIEGSBEIL            == 48
-	{ 1, 5,  14,   2, -1,                                          -1, -3 }, // WEAPON_STATS_ID_ORKNASE               == 49
-
-#ifndef  M302de_ORIGINAL_BUGFIX
-	/* Original-Bug 61: missing distance-based damage modifier table for the throwing weapon Schneidzahn. */
-	{ 1, 4,  99,   0, -1,                                           0,  0 }, // WEAPON_STATS_ID_SCHNEIDZAHN           == 50
-#else
-	{ 1, 4,  99,   0, RANGED_WEAPON_STATS_ID_SCHNEIDZAHN,           0,  0 }, // WEAPON_STATS_ID_SCHNEIDZAHN           == 50
-#endif
-
-	{ 1, 3,  15,   2, -1,                                           0,  0 }, // WEAPON_STATS_ID_ROBBENTOETER          == 51
-	{ 1, 3,  15,   2, -1,                                           0, -1 }, // WEAPON_STATS_ID_WOLFSMESSER           == 52
-
-	{ 0, 0,  99,   0, -1,                                           0,  0 }, // WEAPON_STATS_ID_PROJECTILE            == 53
-	                                                                         /* WEAPON_STATS_ID_PFEIL, WEAPON_STATS_ID_BOLZEN */
-
-	{ 1, 5,  14,  -5, -1,                                          -2, -3 }, // WEAPON_STATS_ID_BASTARDSCHWERT__MAGIC == 54
-	{ 1, 10, 14, -99, -1,                                          -2, -8 }, // WEAPON_STATS_ID_ORKNASE__MAGIC        == 55
-	{ 1, 2,  15, -99, -1,                                           2, -1 }, // WEAPON_STATS_ID_KURZSCHWERT__MAGIC    == 56
-	{ 1, 3,  15,   0, -1,                                           0,  0 }, // WEAPON_STATS_ID_SAEBEL__MAGIC         == 57
-	{ 2, 4,  14, -99, -1,                                          -3, -4 }, // WEAPON_STATS_ID_ZWEIHAENDER__MAGIC    == 58
-	{ 1, 4,  14, -99, -1,                                           2,  2 }, // WEAPON_STATS_ID_DAS_SCHWERT_GRIMRING  == 59
-	{ 1, 4,  14,   0, -1,                                           2,  0 }, // WEAPON_STATS_ID_SCHWERT__MAGIC        == 60
-#ifndef M302de_ORIGINAL_BUGFIX
-	/* Original-Bug 60:
-	 * Speer is a melee weapon. */
-	{ 1, 3,  99,   5, RANGED_WEAPON_STATS_ID_SPEER__MAGIC,          1,  1 }, // WEAPON_STATS_ID_SPEER__MAGIC          == 61
-#else
-	{ 1, 3,  16,   5, -1,                                           1,  1 }, // WEAPON_STATS_ID_SPEER__MAGIC          == 61
-#endif
-	{ 1, 0,  99,   4, RANGED_WEAPON_STATS_ID_WURFDOLCH__MAGIC,     -3, -4 }, // WEAPON_STATS_ID_WURFDOLCH__MAGIC      == 62
-
-	{ 1, 1,  15, -99, -1,                                           0,  0 }, // WEAPON_STATS_ID_ZAUBERSTAB_HEXENBESEN == 63
-										 /* WEAPON_STATS_ID_ZAUBERSTAB, WEAPON_STATS_ID_HEXENBESEN */
-
-	{-1, 0,   0,   0,  0,                                           0,  0 }  // WEAPON_STATS_ID__END                  == 64 // terminator entry
-}; // ds:0x06b0
+struct weapon_stats g_weapon_stats_table[WEAPON_STATS_ID__END + 1]; // ds:0x06b0
 
 struct armor_stats g_armor_stats_table[ARMOR_STATS_ID__END + 1] = {
 	{ 1, 0 }, // ARMOR_STATS_ID_SCHILD             ==  0,
@@ -1048,187 +881,11 @@ const signed int g_attack_items[3] = {
 	-1
 }; // ds:0x091f
 
-signed char g_monster_name_genders[78] = {
-	GRAMMAR_GENDER_MASCULINE, // MONSTER_ID_NONE
-	GRAMMAR_GENDER_MASCULINE, // MONSTER_ID_OGER
-	GRAMMAR_GENDER_MASCULINE, // MONSTER_ID_ORK__LVL_1
-	GRAMMAR_GENDER_MASCULINE, // MONSTER_ID_GOBLIN__LVL_1
-	GRAMMAR_GENDER_MASCULINE, // MONSTER_ID_HESHTHOT__LVL_1
-	GRAMMAR_GENDER_MASCULINE, // MONSTER_ID_SAEBELZAHNTIGER
-	GRAMMAR_GENDER_NEUTER,    // MONSTER_ID_SKELETT__LVL_1
-	GRAMMAR_GENDER_MASCULINE, // MONSTER_ID_WALDSCHRAT
-	GRAMMAR_GENDER_FEMININE,  // MONSTER_ID_MUMIE__LVL_1
-	GRAMMAR_GENDER_FEMININE,  // MONSTER_ID_HARPYIE
-	GRAMMAR_GENDER_FEMININE,  // MONSTER_ID_WALDSPINNE
-	GRAMMAR_GENDER_MASCULINE, // MONSTER_ID_GROSSE_SCHROETER
-	GRAMMAR_GENDER_MASCULINE, // MONSTER_ID_PIRAT__LVL_1
-	GRAMMAR_GENDER_MASCULINE, // MONSTER_ID_STEUERMANN
-	GRAMMAR_GENDER_MASCULINE, // MONSTER_ID_KAPITAEN
-	GRAMMAR_GENDER_MASCULINE, // MONSTER_ID_STREUNER__LVL_1
-	GRAMMAR_GENDER_MASCULINE, // MONSTER_ID_ZOMBIE
-	GRAMMAR_GENDER_MASCULINE, // MONSTER_ID_HESHTHOT__LVL_2
-	GRAMMAR_GENDER_MASCULINE, // MONSTER_ID_DRUIDE__LVL_2
-	GRAMMAR_GENDER_MASCULINE, // MONSTER_ID_DRUIDE__LVL_3
-	GRAMMAR_GENDER_MASCULINE, // MONSTER_ID_THORWALER__LVL_1
-	GRAMMAR_GENDER_MASCULINE, // MONSTER_ID_THORWALER__LVL_3
-	GRAMMAR_GENDER_MASCULINE, // MONSTER_ID_THORWALER__LVL_5
-	GRAMMAR_GENDER_MASCULINE, // MONSTER_ID_THORWALER__LVL_6
-	GRAMMAR_GENDER_MASCULINE, // MONSTER_ID_GOBLIN__LVL_2
-	GRAMMAR_GENDER_MASCULINE, // MONSTER_ID_GOBLIN__LVL_3
-	GRAMMAR_GENDER_MASCULINE, // MONSTER_ID_ORK__LVL_2
-	GRAMMAR_GENDER_MASCULINE, // MONSTER_ID_ORK__LVL_3
-	GRAMMAR_GENDER_MASCULINE, // MONSTER_ID_PIRAT__LVL_2
-	GRAMMAR_GENDER_MASCULINE, // MONSTER_ID_PIRAT__LVL_3
-	GRAMMAR_GENDER_MASCULINE, // MONSTER_ID_STREUNER__LVL_2
-	GRAMMAR_GENDER_MASCULINE, // MONSTER_ID_STREUNER__LVL_3
-	GRAMMAR_GENDER_MASCULINE, // MONSTER_ID_STREUNER__LVL_4
-	GRAMMAR_GENDER_NEUTER,    // MONSTER_ID_SKELETT__LVL_2
-	GRAMMAR_GENDER_MASCULINE, // MONSTER_ID_FOLTERKNECHT
-	GRAMMAR_GENDER_MASCULINE, // MONSTER_ID_GRIMWOLF__LVL_1
-	GRAMMAR_GENDER_MASCULINE, // MONSTER_ID_GRIMWOLF__LVL_3
-	GRAMMAR_GENDER_FEMININE,  // MONSTER_ID_HOEHLENSPINNE__LVL_1
-	GRAMMAR_GENDER_FEMININE,  // MONSTER_ID_HOEHLENSPINNE__LVL_2
-	GRAMMAR_GENDER_FEMININE,  // MONSTER_ID_HOEHLENSPINNE__LVL_3
-	GRAMMAR_GENDER_MASCULINE, // MONSTER_ID_KRIEGER
-	GRAMMAR_GENDER_MASCULINE, // MONSTER_ID_STADTGARDIST__LVL_3
-	GRAMMAR_GENDER_MASCULINE, // MONSTER_ID_STADTGARDIST__LVL_4
-	GRAMMAR_GENDER_MASCULINE, // MONSTER_ID_STADTGARDIST__LVL_5
-	GRAMMAR_GENDER_MASCULINE, // MONSTER_ID_KRIEGSVETERAN
-	GRAMMAR_GENDER_FEMININE,  // MONSTER_ID_MUMIE__LVL_2
-	GRAMMAR_GENDER_MASCULINE, // MONSTER_ID_MAGIER__LVL_3
-	GRAMMAR_GENDER_MASCULINE, // MONSTER_ID_MAGIER__LVL_6
-	GRAMMAR_GENDER_MASCULINE, // MONSTER_ID_ZAUBERER__LVL_3
-	GRAMMAR_GENDER_MASCULINE, // MONSTER_ID_ZAUBERER__LVL_6
-	GRAMMAR_GENDER_MASCULINE, // MONSTER_ID_ZWERG
-	GRAMMAR_GENDER_MASCULINE, // MONSTER_ID_LINDWURM
-	GRAMMAR_GENDER_MASCULINE, // MONSTER_ID_HOEHLENDRACHE
-	GRAMMAR_GENDER_MASCULINE, // MONSTER_ID_KULTIST__LVL_2
-	GRAMMAR_GENDER_MASCULINE, // MONSTER_ID_KULTIST__LVL_3__1
-	GRAMMAR_GENDER_MASCULINE, // MONSTER_ID_KULTIST__LVL_3__2
-	GRAMMAR_GENDER_MASCULINE, // MONSTER_ID_KULTIST__LVL_4
-	GRAMMAR_GENDER_MASCULINE, // MONSTER_ID_PRIESTER__LVL_2
-	GRAMMAR_GENDER_MASCULINE, // MONSTER_ID_PRIESTER__LVL_3
-	GRAMMAR_GENDER_MASCULINE, // MONSTER_ID_HOHEPRIESTER
-	GRAMMAR_GENDER_MASCULINE, // MONSTER_ID_ESTORIK
-	GRAMMAR_GENDER_MASCULINE, // MONSTER_ID_PIRATENBOSS
-	GRAMMAR_GENDER_MASCULINE, // MONSTER_ID_PIRAT__LVL_5
-	GRAMMAR_GENDER_MASCULINE, // MONSTER_ID_MAGIER__LVL_4
-	GRAMMAR_GENDER_MASCULINE, // MONSTER_ID_ZWERGENVETERAN
-	GRAMMAR_GENDER_MASCULINE, // MONSTER_ID_RAEUBER__LVL_2
-	GRAMMAR_GENDER_MASCULINE, // MONSTER_ID_RAEUBER__LVL_3
-	GRAMMAR_GENDER_MASCULINE, // MONSTER_ID_RAEUBER__LVL_5
-	GRAMMAR_GENDER_MASCULINE, // MONSTER_ID_RAEUBER__LVL_6
-	GRAMMAR_GENDER_MASCULINE, // MONSTER_ID_RAEUBER__LVL_8
-	GRAMMAR_GENDER_MASCULINE, // MONSTER_ID_GORAH
-	GRAMMAR_GENDER_MASCULINE, // MONSTER_ID_STEPPENHUND
-	GRAMMAR_GENDER_MASCULINE, // MONSTER_ID_ORKCHAMPION
-	GRAMMAR_GENDER_MASCULINE, // MONSTER_ID_PIRAT__LVL_10
-	GRAMMAR_GENDER_MASCULINE, // MONSTER_ID_STADTGARDIST__LVL_2
-	GRAMMAR_GENDER_MASCULINE, // MONSTER_ID_WALDLOEWE
-	GRAMMAR_GENDER_MASCULINE, // MONSTER_ID_SPINNENDAEMON
-	GRAMMAR_GENDER_MASCULINE  // MONSTER_ID_HESHTOT__WEAK
-}; // ds:0x0925
+signed char g_monster_name_genders[78]; // ds:0x0925
 
-struct staffspell_descr g_staffspell_descriptions[7] = {
-	/* The following are the older talent test attributes from DSA2 / early DSA3. */
-	{ ATTRIB_KL, ATTRIB_KL, ATTRIB_CH,  1, 21, 1 },
-	{ ATTRIB_KL, ATTRIB_KL, ATTRIB_CH,  0, 23, 0 }, /* maybe handicap 0 should be handicap 2 instead. has to be checked with the official DSA2/early DSA3 rules. */
-	{ ATTRIB_KL, ATTRIB_CH, ATTRIB_CH,  3, 19, 0 },
-	{ ATTRIB_KL, ATTRIB_CH, ATTRIB_CH,  4, 27, 0 },
-	{ ATTRIB_MU, ATTRIB_KL, ATTRIB_KL, 99, 30, 0 }, /* staff spell benefits are not implemented from the 5th one on. For that reason probably, the handicap is set to 99. */
-	{ ATTRIB_MU, ATTRIB_CH, ATTRIB_CH, 99, 26, 0 },
-	{ ATTRIB_MU, ATTRIB_KL, ATTRIB_CH, 99, 21, 2 }
-}; // ds:0x0973
+struct staffspell_descr g_staffspell_descriptions[7]; // ds:0x0973
 
-struct spell_descr g_spell_descriptions[SP__END + 1] = {
-	{  0,                    0,         0,         0,         0,  0,  0,                            0, 0, 0 }, /* ... strangely, an all-zero entry */
-	{  SPELL_ORIGIN_DRUIDE,  ATTRIB_KL, ATTRIB_IN, ATTRIB_CH, -1, 0,  SPELL_IMPACT_GFX_ID_DOME,     2, 0, 0 }, /* Beherrschung brechen */
-	{  SPELL_ORIGIN_MAGIER,  ATTRIB_KL, ATTRIB_IN, ATTRIB_FF, -1, 0,  SPELL_IMPACT_GFX_ID_GLOW,     0, 0, 0 }, /* Destructibo Arcanitas */
-	{  SPELL_ORIGIN_MAGIER,  ATTRIB_IN, ATTRIB_CH, ATTRIB_KK, -1, 1,  SPELL_IMPACT_GFX_ID_DOME,     0, 0, 0 }, /* Gardianum Paradei */
-	{  SPELL_ORIGIN_MAGIER,  ATTRIB_KL, ATTRIB_IN, ATTRIB_CH, -1, 1,  SPELL_IMPACT_GFX_ID_GLOW,     1, 1, 0 }, /* Illusionen zerstoeren */
-	{  SPELL_ORIGIN_HEXE,    ATTRIB_MU, ATTRIB_KL, ATTRIB_CH, -1, 0,  SPELL_IMPACT_GFX_ID_DOME,     2, 0, 0 }, /* Verwandlung beenden */
-	{  SPELL_ORIGIN_WALDELF, ATTRIB_KL, ATTRIB_CH, ATTRIB_KK, 12, 1,  SPELL_IMPACT_GFX_ID_GLOW,     3, 0, 1 }, /* Band und Fessel */
-	{  SPELL_ORIGIN_AUELF,   ATTRIB_IN, ATTRIB_CH, ATTRIB_CH, 8,  1,  SPELL_IMPACT_GFX_ID_GLOW,     1, 0, 1 }, /* Bannbaladin */
-	{  SPELL_ORIGIN_DRUIDE,  ATTRIB_MU, ATTRIB_CH, ATTRIB_CH, 8,  1,  SPELL_IMPACT_GFX_ID_GLOW,     1, 0, 1 }, /* Boeser Blick */
-	{  SPELL_ORIGIN_HEXE,    ATTRIB_KL, ATTRIB_IN, ATTRIB_CH, 8,  1,  SPELL_IMPACT_GFX_ID_GLOW,     1, 0, 1 }, /* Grosse Gier */
-	{  SPELL_ORIGIN_DRUIDE,  ATTRIB_KL, ATTRIB_KL, ATTRIB_CH, -1, 1,  SPELL_IMPACT_GFX_ID_GLOW,     1, 0, 1 }, /* Grosse Verwirrung */
-	{  SPELL_ORIGIN_DRUIDE,  ATTRIB_MU, ATTRIB_MU, ATTRIB_CH, -1, 1,  SPELL_IMPACT_GFX_ID_GLOW,     1, 0, 1 }, /* Herr ueber das Tierreich */
-	{  SPELL_ORIGIN_MAGIER,  ATTRIB_MU, ATTRIB_IN, ATTRIB_CH, 7,  1,  SPELL_IMPACT_GFX_ID_GLOW,     1, 0, 1 }, /* Horriphobus */
-	{  SPELL_ORIGIN_DRUIDE,  ATTRIB_MU, ATTRIB_KL, ATTRIB_KK, 6,  -1, SPELL_IMPACT_GFX_ID_GLOW,     0, 0, 1 }, /* Magischer Raub */
-	{  SPELL_ORIGIN_MAGIER,  ATTRIB_KL, ATTRIB_IN, ATTRIB_CH, 5,  -1, SPELL_IMPACT_GFX_ID_DOME,     0, 0, 1 }, /* Respondami Veritar */
-	{  SPELL_ORIGIN_HEXE,    ATTRIB_MU, ATTRIB_CH, ATTRIB_CH, -1, 1,  SPELL_IMPACT_GFX_ID_DOME,     1, 0, 1 }, /* Sanftmut */
-	{  SPELL_ORIGIN_WALDELF, ATTRIB_KL, ATTRIB_CH, ATTRIB_CH, 8,  1,  SPELL_IMPACT_GFX_ID_GLOW,     3, 1, 1 }, /* Somnigravis Tausendschlaf */
-	{  SPELL_ORIGIN_DRUIDE,  ATTRIB_MU, ATTRIB_KL, ATTRIB_CH, 6,  1,  SPELL_IMPACT_GFX_ID_GLOW,     1, 1, 1 }, /* Zwingtanz */
-	{  SPELL_ORIGIN_MAGIER,  ATTRIB_MU, ATTRIB_MU, ATTRIB_CH, 13, -1, SPELL_IMPACT_GFX_ID_GLOW,     0, 0, 0 }, /* Furor Blut und Sulphurdampf */
-	{  SPELL_ORIGIN_DRUIDE,  ATTRIB_MU, ATTRIB_MU, ATTRIB_CH, 13, -1, SPELL_IMPACT_GFX_ID_GLOW,     0, 0, 0 }, /* Geister austreiben */
-	{  SPELL_ORIGIN_DRUIDE,  ATTRIB_MU, ATTRIB_MU, ATTRIB_CH, 11, -1, SPELL_IMPACT_GFX_ID_GLOW,     0, 0, 0 }, /* Geister beschwoeren */
-	{  SPELL_ORIGIN_MAGIER,  ATTRIB_MU, ATTRIB_MU, ATTRIB_CH, 23, -1, SPELL_IMPACT_GFX_ID_GLOW,     0, 0, 0 }, /* Heptagon und Kroetenei */
-	{  SPELL_ORIGIN_HEXE,    ATTRIB_MU, ATTRIB_CH, ATTRIB_CH, 13, 1,  SPELL_IMPACT_GFX_ID_FLAME,    3, 1, 0 }, /* Kraehenruf */
-	{  SPELL_ORIGIN_MAGIER,  ATTRIB_MU, ATTRIB_MU, ATTRIB_CH, 15, 1,  SPELL_IMPACT_GFX_ID_GLOW,     1, 0, 0 }, /* Skelettarius Kryptaduft */
-	{  SPELL_ORIGIN_DRUIDE,  ATTRIB_MU, ATTRIB_KL, ATTRIB_CH, -1, -1, SPELL_IMPACT_GFX_ID_GLOW,     0, 0, 0 }, /* Elementare Beschwoeren */
-	{  SPELL_ORIGIN_MAGIER,  ATTRIB_KL, ATTRIB_KK, ATTRIB_KK, 5,  -1, SPELL_IMPACT_GFX_ID_GLOW,     0, 0, 0 }, /* Nihilatio Gravitas */
-	{  SPELL_ORIGIN_FIRNELF, ATTRIB_IN, ATTRIB_GE, ATTRIB_KK, -1, -1, SPELL_IMPACT_GFX_ID_GLOW,     0, 0, 0 }, /* Solidirid Farbenspiel */
-	{  SPELL_ORIGIN_WALDELF, ATTRIB_KL, ATTRIB_GE, ATTRIB_KK, 7,  1,  SPELL_IMPACT_GFX_ID_DOME,     2, 0, 0 }, /* Axxeleratus Blitzgeschwind */
-	{  SPELL_ORIGIN_MAGIER,  ATTRIB_KL, ATTRIB_KL, ATTRIB_FF, 6,  -1, SPELL_IMPACT_GFX_ID_GLOW,     0, 0, 0 }, /* Foramen Foraminor */
-	{  SPELL_ORIGIN_MAGIER,  ATTRIB_KL, ATTRIB_FF, ATTRIB_KK, -1, -1, SPELL_IMPACT_GFX_ID_GLOW,     0, 0, 0 }, /* Motoricus Motilitich */
-	{  SPELL_ORIGIN_WALDELF, ATTRIB_IN, ATTRIB_GE, ATTRIB_GE, 7,  -1, SPELL_IMPACT_GFX_ID_GLOW,     0, 0, 0 }, /* Spurlos trittlos faehrtenlos */
-	{  SPELL_ORIGIN_MAGIER,  ATTRIB_KL, ATTRIB_KL, ATTRIB_KK, -1, -1, SPELL_IMPACT_GFX_ID_GLOW,     0, 0, 0 }, /* Transversalis Teleport */
-	{  SPELL_ORIGIN_FIRNELF, ATTRIB_KL, ATTRIB_GE, ATTRIB_KK, 5,  -1, SPELL_IMPACT_GFX_ID_GLOW,     0, 0, 0 }, /* Ueber Eis und ueber Schnee */
-	{  SPELL_ORIGIN_AUELF,   ATTRIB_KL, ATTRIB_IN, ATTRIB_CH, -1, 0,  SPELL_IMPACT_GFX_ID_DOME,     2, 0, 0 }, /* Balsam Salabunde */
-	{  SPELL_ORIGIN_HEXE,    ATTRIB_IN, ATTRIB_CH, ATTRIB_FF, -1, 0,  SPELL_IMPACT_GFX_ID_DOME,     2, 0, 0 }, /* Hexenspeichel */
-	{  SPELL_ORIGIN_MAGIER,  ATTRIB_KL, ATTRIB_KL, ATTRIB_CH, -1, 0,  SPELL_IMPACT_GFX_ID_DOME,     2, 0, 0 }, /* Klarum Purum Kraeutersud */
-	{  SPELL_ORIGIN_FIRNELF, ATTRIB_KL, ATTRIB_CH, ATTRIB_KK, 7,  -1, SPELL_IMPACT_GFX_ID_DOME,     2, 0, 0 }, /* Ruhe Koerper ruhe Geist */
-	{  SPELL_ORIGIN_HEXE,    ATTRIB_MU, ATTRIB_IN, ATTRIB_CH, -1, 0,  SPELL_IMPACT_GFX_ID_DOME,     0, 0, 0 }, /* Tiere besprechen */
-	{  SPELL_ORIGIN_AUELF,   ATTRIB_KL, ATTRIB_IN, ATTRIB_FF, 5,  0,  SPELL_IMPACT_GFX_ID_DOME,     0, 0, 0 }, /* Adleraug und Luchsenohr */
-	{  SPELL_ORIGIN_MAGIER,  ATTRIB_KL, ATTRIB_KL, ATTRIB_IN, 10, -1, SPELL_IMPACT_GFX_ID_GLOW,     0, 0, 0 }, /* Analues Arcanstruktur */
-	{  SPELL_ORIGIN_AUELF,   ATTRIB_KL, ATTRIB_IN, ATTRIB_CH, 7,  1,  SPELL_IMPACT_GFX_ID_DOME,     1, 1, 1 }, /* Eigenschaften seid gelesen */
-	{  SPELL_ORIGIN_WALDELF, ATTRIB_KL, ATTRIB_KL, ATTRIB_IN, 5,  1,  SPELL_IMPACT_GFX_ID_DOME,     0, 0, 0 }, /* Exposami Creatur */
-	{  SPELL_ORIGIN_AUELF,   ATTRIB_KL, ATTRIB_IN, ATTRIB_CH, 5,  -1, SPELL_IMPACT_GFX_ID_DOME,     0, 0, 0 }, /* Odem Arcanum */
-	{  SPELL_ORIGIN_MAGIER,  ATTRIB_KL, ATTRIB_KL, ATTRIB_KK, 5,  -1, SPELL_IMPACT_GFX_ID_DOME,     0, 0, 0 }, /* Penetrizzel Holz und Stein */
-	{  SPELL_ORIGIN_AUELF,   ATTRIB_KL, ATTRIB_IN, ATTRIB_CH, 5,  -1, SPELL_IMPACT_GFX_ID_DOME,     0, 0, 1 }, /* Sensibar wahr und klar */
-	{  SPELL_ORIGIN_WALDELF, ATTRIB_IN, ATTRIB_CH, ATTRIB_GE, 5,  1,  SPELL_IMPACT_GFX_ID_DOME,     0, 0, 0 }, /* Chamaelioni Mimikry */
-	{  SPELL_ORIGIN_MAGIER,  ATTRIB_KL, ATTRIB_CH, ATTRIB_GE, 8,  1,  SPELL_IMPACT_GFX_ID_DOME,     0, 0, 0 }, /* Duplicatus Doppelpein */
-	{  SPELL_ORIGIN_HEXE,    ATTRIB_KL, ATTRIB_CH, ATTRIB_GE, 6,  -1, SPELL_IMPACT_GFX_ID_DOME,     0, 0, 0 }, /* Harmlose Gestalt */
-	{  SPELL_ORIGIN_HEXE,    ATTRIB_KL, ATTRIB_IN, ATTRIB_CH, 4,  1,  SPELL_IMPACT_GFX_ID_BARRIER,  0, 0, 0 }, /* Hexenknoten */
-	{  SPELL_ORIGIN_WALDELF, ATTRIB_KL, ATTRIB_IN, ATTRIB_GE, 5,  1,  SPELL_IMPACT_GFX_ID_GLOW,     3, 1, 0 }, /* Blitz dich Find */
-	{  SPELL_ORIGIN_MAGIER,  ATTRIB_MU, ATTRIB_KL, ATTRIB_KK, -1, 1,  SPELL_IMPACT_GFX_ID_GLOW,     0, 0, 0 }, /* Ecliptifactus */
-	{  SPELL_ORIGIN_MAGIER,  ATTRIB_KL, ATTRIB_CH, ATTRIB_GE, 5,  1,  SPELL_IMPACT_GFX_ID_GLOW,     3, 0, 0 }, /* Eisenrost und gruener Span */
-	{  SPELL_ORIGIN_AUELF,   ATTRIB_KL, ATTRIB_GE, ATTRIB_KK, -1, 1,  SPELL_IMPACT_GFX_ID_GLOW,     3, 1, 0 }, /* Fulminictus Donnerkeil */
-	{  SPELL_ORIGIN_MAGIER,  ATTRIB_KL, ATTRIB_GE, ATTRIB_FF, -1, 1,  SPELL_IMPACT_GFX_ID_GLOW,     3, 1, 0 }, /* Ignifaxius Flammenstrahl */
-	{  SPELL_ORIGIN_MAGIER,  ATTRIB_CH, ATTRIB_GE, ATTRIB_KK, 5,  1,  SPELL_IMPACT_GFX_ID_GLOW,     3, 1, 1 }, /* Plumbumbarum und Narretei */
-	{  SPELL_ORIGIN_HEXE,    ATTRIB_MU, ATTRIB_IN, ATTRIB_CH, 4,  1,  SPELL_IMPACT_GFX_ID_GLOW,     3, 1, 0 }, /* Radau */
-	{  SPELL_ORIGIN_MAGIER,  ATTRIB_MU, ATTRIB_IN, ATTRIB_CH, -1, 1,  SPELL_IMPACT_GFX_ID_DOME,     2, 0, 0 }, /* Saft Kraft Monstermacht */
-	{  SPELL_ORIGIN_WALDELF, ATTRIB_IN, ATTRIB_GE, ATTRIB_FF, 5,  1,  SPELL_IMPACT_GFX_ID_DOME,     2, 0, 0 }, /* Scharfes Auge und sichre Hand */
-	{  SPELL_ORIGIN_HEXE,    ATTRIB_IN, ATTRIB_IN, ATTRIB_CH, 2,  -1, SPELL_IMPACT_GFX_ID_DOME,     0, 0, 0 }, /* Hexenblick */
-	{  SPELL_ORIGIN_MAGIER,  ATTRIB_MU, ATTRIB_KL, ATTRIB_CH, 11, -1, SPELL_IMPACT_GFX_ID_DOME,     0, 0, 0 }, /* Nekropathia modernd Leich */
-	{  SPELL_ORIGIN_WALDELF, ATTRIB_MU, ATTRIB_IN, ATTRIB_GE, 7,  -1, SPELL_IMPACT_GFX_ID_DOME,     0, 0, 0 }, /* Adler Wolf und Hammerhai */
-	{  SPELL_ORIGIN_MAGIER,  ATTRIB_MU, ATTRIB_KL, ATTRIB_CH, 7,  1,  SPELL_IMPACT_GFX_ID_DOME,     2, 1, 0 }, /* Arcano Psychostabilis */
-	{  SPELL_ORIGIN_AUELF,   ATTRIB_IN, ATTRIB_GE, ATTRIB_KK, -1, 1,  SPELL_IMPACT_GFX_ID_DOME,     0, 0, 0 }, /* Armatrutz */
-	{  SPELL_ORIGIN_MAGIER,  ATTRIB_KL, ATTRIB_CH, ATTRIB_CH, 7,  0,  SPELL_IMPACT_GFX_ID_DOME,     2, 0, 0 }, /* Charisma steigern */
-	{  SPELL_ORIGIN_HEXE,    ATTRIB_MU, ATTRIB_MU, ATTRIB_KK, 7,  0,  SPELL_IMPACT_GFX_ID_DOME,     0, 0, 0 }, /* Feuerbann */
-	{  SPELL_ORIGIN_WALDELF, ATTRIB_KL, ATTRIB_CH, ATTRIB_FF, 7,  0,  SPELL_IMPACT_GFX_ID_DOME,     2, 0, 0 }, /* Fingerfertigkeit steigern */
-	{  SPELL_ORIGIN_AUELF,   ATTRIB_KL, ATTRIB_CH, ATTRIB_GE, 7,  0,  SPELL_IMPACT_GFX_ID_DOME,     2, 0, 0 }, /* Gewandheit steigern */
-	{  SPELL_ORIGIN_FIRNELF, ATTRIB_KL, ATTRIB_IN, ATTRIB_CH, 7,  0,  SPELL_IMPACT_GFX_ID_DOME,     2, 0, 0 }, /* Intuition steigern */
-	{  SPELL_ORIGIN_FIRNELF, ATTRIB_KL, ATTRIB_CH, ATTRIB_KK, 7,  0,  SPELL_IMPACT_GFX_ID_DOME,     2, 0, 0 }, /* Koerperkraft steigern */
-	{  SPELL_ORIGIN_MAGIER,  ATTRIB_KL, ATTRIB_KL, ATTRIB_CH, 7,  0,  SPELL_IMPACT_GFX_ID_DOME,     2, 0, 0 }, /* Klugheit steigern */
-	{  SPELL_ORIGIN_FIRNELF, ATTRIB_MU, ATTRIB_KL, ATTRIB_CH, 7,  0,  SPELL_IMPACT_GFX_ID_DOME,     2, 0, 0 }, /* Mut steigern */
-	{  SPELL_ORIGIN_MAGIER,  ATTRIB_KL, ATTRIB_GE, ATTRIB_KK, -1, 0,  SPELL_IMPACT_GFX_ID_GLOW,     0, 0, 0 }, /* Mutabili Hybridil */
-	{  SPELL_ORIGIN_MAGIER,  ATTRIB_IN, ATTRIB_CH, ATTRIB_KK, 13, 1,  SPELL_IMPACT_GFX_ID_GLOW,     3, 1, 1 }, /* Paralue Paralein */
-	{  SPELL_ORIGIN_MAGIER,  ATTRIB_KL, ATTRIB_IN, ATTRIB_CH, -1, 1,  SPELL_IMPACT_GFX_ID_MUSHROOM, 1, 0, 1 }, /* Salander Mutanderer */
-	{  SPELL_ORIGIN_AUELF,   ATTRIB_MU, ATTRIB_KL, ATTRIB_KK, -1, -1, SPELL_IMPACT_GFX_ID_DOME,     0, 0, 0 }, /* In See und Fluss */
-	{  SPELL_ORIGIN_AUELF,   ATTRIB_KL, ATTRIB_KL, ATTRIB_GE, -1, 0,  SPELL_IMPACT_GFX_ID_DOME,     0, 0, 0 }, /* Visibili Vanitar */
-	{  SPELL_ORIGIN_WALDELF, ATTRIB_KL, ATTRIB_KL, ATTRIB_FF, 5,  -1, SPELL_IMPACT_GFX_ID_GLOW,     0, 0, 0 }, /* Abvenenum Pest und Galle */
-	{  SPELL_ORIGIN_FIRNELF, ATTRIB_KL, ATTRIB_CH, ATTRIB_KK, 5,  -1, SPELL_IMPACT_GFX_ID_GLOW,     0, 0, 0 }, /* Aeolitus Windgebraus */
-	{  SPELL_ORIGIN_MAGIER,  ATTRIB_MU, ATTRIB_KL, ATTRIB_KK, -1, -1, SPELL_IMPACT_GFX_ID_GLOW,     0, 0, 0 }, /* Brenne toter Stoff */
-	{  SPELL_ORIGIN_MAGIER,  ATTRIB_KL, ATTRIB_FF, ATTRIB_KK, -1, -1, SPELL_IMPACT_GFX_ID_GLOW,     0, 0, 0 }, /* Claudibus Clavistibor */
-	{  SPELL_ORIGIN_DRUIDE,  ATTRIB_KL, ATTRIB_KL, ATTRIB_FF, 3,  1,  SPELL_IMPACT_GFX_ID_GLOW,     0, 0, 0 }, /* Dunkelheit */
-	{  SPELL_ORIGIN_MAGIER,  ATTRIB_MU, ATTRIB_KL, ATTRIB_KK, -1, -1, SPELL_IMPACT_GFX_ID_GLOW,     0, 0, 0 }, /* Weiches erstarre */
-	{  SPELL_ORIGIN_FIRNELF, ATTRIB_KL, ATTRIB_KL, ATTRIB_FF, 1,  -1, SPELL_IMPACT_GFX_ID_GLOW,     0, 0, 0 }, /* Flim Flam Funkel */
-	{  SPELL_ORIGIN_MAGIER,  ATTRIB_MU, ATTRIB_KL, ATTRIB_KK, -1, -1, SPELL_IMPACT_GFX_ID_GLOW,     0, 0, 0 }, /* Hartes schmelze */
-	{  SPELL_ORIGIN_AUELF,   ATTRIB_KL, ATTRIB_KL, ATTRIB_CH, -1, -1, SPELL_IMPACT_GFX_ID_GLOW,     0, 0, 0 }, /* Silentium Silentille */
-	{  SPELL_ORIGIN_FIRNELF, ATTRIB_KL, ATTRIB_CH, ATTRIB_KK, 5,  -1, SPELL_IMPACT_GFX_ID_GLOW,     0, 0, 0 }, /* Sturmgebruell besaenftge dich */
-	{                   -1,  0,         0,         0,         0,  0,  0,                            0, 0, 0 }  /* ... terminator entry */
-}; // ds:0x099d
+struct spell_descr g_spell_descriptions[SP__END + 1]; // ds:0x099d
 
 const struct spell_range g_spellclasses[12] = {
 	{ SP_BEHERRSCHUNG_BRECHEN       ,  5 }, /* Antimagie */
@@ -1439,23 +1096,7 @@ void (*g_spell_handlers[SP__END])(void) = {
 	spell_sturmgebr
 }; // ds:0x0dbb, function pointer[86]
 
-struct mon_spell_description g_mon_spell_descriptions[MONSTER_SPELL__END] = {
-	{  0, 0, 0, 0, 0, 0, 0, 0 },	/* DUMMY */
-	{ 20, 1, 0, 0, 1, 2, 0, 1 },	/* Verwandlung Beenden */
-	{  8, 2, 0, 5, 2, 2, 1, 0 },	/* Bannbaladin */
-	{  8, 2, 0, 0, 2, 2, 1, 0 },	/* Boeser Blick */
-	{  7, 2, 0, 0, 5, 2, 1, 0 },	/* Horriphobus */
-	{  7, 1, 0, 1, 4, 6, 0, 1 },	/* Axxeleratus */
-	{ -1, 1, 0, 1, 5, 2, 0, 1 },	/* Balsam */
-	{  5, 3, 1, 1, 5, 4, 1, 0 },	/* Blitz */
-	{  5, 2, 1, 1, 2, 4, 0, 0 },	/* Eisenrost */
-	{ -1, 3, 1, 1, 4, 6, 1, 0 },	/* Fulminictus */
-	{ -1, 3, 1, 1, 4, 3, 1, 0 },	/* Ignifaxius */
-	{  5, 3, 1, 2, 4, 6, 1, 0 },	/* Plumbumbarum */
-	{ -1, 1, 0, 0, 5, 2, 0, 1 },	/* Saft, Kraft, Monstermacht */
-	{ -1, 0, 0, 5, 4, 6, 0, 1 },	/* Armatrutz */
-	{ 13, 3, 0, 5, 2, 6, 1, 0 }	/* Paralue */
-}; // ds:0x0f13
+struct mon_spell_description g_mon_spell_descriptions[MONSTER_SPELL__END]; // ds:0x0f13
 
 int8_t g_mon_spellbooks[11][5] = {
 	{
@@ -1555,402 +1196,43 @@ void (*g_mon_spellhandlers[MONSTER_SPELL__END])(void) = {
 	mspell_paralue,			/* 14 */
 }; // ds:0x0fc2, function pointer[15]
 
-const struct talent_descr g_talent_descriptions[TA__END] = {
-	{ 0        , 0        , 0        , 1 }, // TA_WAFFENLOS
-	{ 0        , 0        , 0        , 1 }, // TA_HIEBWAFFEN
-	{ 0        , 0        , 0        , 1 }, // TA_STICHWAFFEN
-	{ 0        , 0        , 0        , 1 }, // TA_SCHWERTER
-	{ 0        , 0        , 0        , 1 }, // TA_AEXTE
-	{ 0        , 0        , 0        , 1 }, // TA_SPEERE
-	{ 0        , 0        , 0        , 1 }, // TA_ZWEIHAENDER
-	{ 0        , 0        , 0        , 1 }, // TA_SCHUSSWAFFEN
-	{ 0        , 0        , 0        , 1 }, // TA_WURFWAFFEN
-	{ ATTRIB_MU, ATTRIB_GE, ATTRIB_KK, 2 }, // TA_AKROBATIK
-	{ ATTRIB_MU, ATTRIB_GE, ATTRIB_KK, 2 }, // TA_KLETTERN
-	{ ATTRIB_MU, ATTRIB_IN, ATTRIB_GE, 2 }, // TA_KOERPERBEHERRSCHUNG
-	{ ATTRIB_CH, ATTRIB_GE, ATTRIB_KK, 2 }, // TA_REITEN
-	{ ATTRIB_MU, ATTRIB_IN, ATTRIB_GE, 2 }, // TA_SCHLEICHEN
-	{ ATTRIB_MU, ATTRIB_GE, ATTRIB_KK, 2 }, // TA_SCHWIMMEN
-	{ ATTRIB_MU, ATTRIB_KK, ATTRIB_KK, 2 }, // TA_SELBSTBEHERRSCHUNG
-	{ ATTRIB_MU, ATTRIB_IN, ATTRIB_GE, 2 }, // TA_TANZEN
-	{ ATTRIB_CH, ATTRIB_GE, ATTRIB_GE, 2 }, // TA_VERSTECKEN
-	{ ATTRIB_KL, ATTRIB_IN, ATTRIB_KK, 2 }, // TA_ZECHEN
-	{ ATTRIB_KL, ATTRIB_IN, ATTRIB_CH, 2 }, // TA_BEKEHREN
-	{ ATTRIB_IN, ATTRIB_CH, ATTRIB_CH, 2 }, // TA_BETOEREN
-	{ ATTRIB_MU, ATTRIB_KL, ATTRIB_CH, 2 }, // TA_FEILSCHEN
-	{ ATTRIB_KL, ATTRIB_IN, ATTRIB_CH, 2 }, // TA_GASSENWISSEN
-	{ ATTRIB_MU, ATTRIB_IN, ATTRIB_CH, 2 }, // TA_LUEGEN
-	{ ATTRIB_KL, ATTRIB_IN, ATTRIB_CH, 2 }, // TA_MENSCHENKENNTNIS
-	{ ATTRIB_KL, ATTRIB_IN, ATTRIB_IN, 2 }, // TA_SCHAETZEN
-	{ ATTRIB_KL, ATTRIB_IN, ATTRIB_GE, 2 }, // TA_FAEHRTENSUCHEN
-	{ ATTRIB_FF, ATTRIB_GE, ATTRIB_KK, 2 }, // TA_FESSELN
-	{ ATTRIB_KL, ATTRIB_IN, ATTRIB_FF, 2 }, // TA_ORIENTIERUNG
-	{ ATTRIB_KL, ATTRIB_IN, ATTRIB_IN, 2 }, // TA_PFLANZENKUNDE
-	{ ATTRIB_MU, ATTRIB_KL, ATTRIB_IN, 2 }, // TA_TIERKUNDE
-	{ ATTRIB_IN, ATTRIB_FF, ATTRIB_GE, 2 }, // TA_WILDNISLEBEN
-	{ ATTRIB_MU, ATTRIB_KL, ATTRIB_FF, 3 }, // TA_ALCHIMIE
-	{ ATTRIB_KL, ATTRIB_KL, ATTRIB_IN, 3 }, // TA_ALTE_SPRACHEN
-	{ ATTRIB_KL, ATTRIB_KL, ATTRIB_IN, 3 }, // TA_GEOGRAPHIE
-	{ ATTRIB_KL, ATTRIB_KL, ATTRIB_IN, 3 }, // TA_GESCHICHTE
-	{ ATTRIB_KL, ATTRIB_IN, ATTRIB_CH, 3 }, // TA_GOETTER_KULTE
-	{ ATTRIB_MU, ATTRIB_KL, ATTRIB_CH, 3 }, // TA_KRIEGSKUNST
-	{ ATTRIB_KL, ATTRIB_KL, ATTRIB_FF, 3 }, // TA_LESEN
-	{ ATTRIB_KL, ATTRIB_KL, ATTRIB_FF, 3 }, // TA_MAGIEKUNDE
-	{ ATTRIB_KL, ATTRIB_IN, ATTRIB_CH, 3 }, // TA_SPRACHEN
-	{ ATTRIB_MU, ATTRIB_IN, ATTRIB_CH, 2 }, // TA_ABRICHTEN
-	{ ATTRIB_IN, ATTRIB_CH, ATTRIB_FF, 2 }, // TA_FAHRZEUGE
-	{ ATTRIB_MU, ATTRIB_CH, ATTRIB_FF, 2 }, // TA_FALSCHSPIEL
-	{ ATTRIB_MU, ATTRIB_KL, ATTRIB_IN, 2 }, // TA_HEILEN_GIFT
-	{ ATTRIB_MU, ATTRIB_KL, ATTRIB_CH, 2 }, // TA_HEILEN_KRANKHEITEN
-	{ ATTRIB_KL, ATTRIB_CH, ATTRIB_FF, 2 }, // TA_HEILEN_WUNDEN
-	{ ATTRIB_KL, ATTRIB_IN, ATTRIB_FF, 2 }, // TA_MUSIZIEREN
-	{ ATTRIB_IN, ATTRIB_FF, ATTRIB_FF, 2 }, // TA_SCHLOESSER
-	{ ATTRIB_MU, ATTRIB_IN, ATTRIB_FF, 2 }, // TA_TASCHENDIEBSTAHL
-	{ ATTRIB_KL, ATTRIB_IN, ATTRIB_IN, 1 }, // TA_GEFAHRENSINN
-	{ ATTRIB_KL, ATTRIB_IN, ATTRIB_IN, 1 }  // TA_SINNESSCHAERFE
-}; // ds:0x0ffe
-const struct talent_range g_talentclasses[7] = {
-	{ TA_WAFFENLOS     ,  9 }, /* Kampf */
-	{ TA_AKROBATIK     , 10 }, /* Körper */
-	{ TA_BEKEHREN      ,  7 }, /* Gesellschaft */
-	{ TA_FAEHRTENSUCHEN,  6 }, /* Natur */
-	{ TA_ALCHIMIE      ,  9 }, /* Wissen */
-	{ TA_ABRICHTEN     ,  9 }, /* Handwerk */
-	{ TA_GEFAHRENSINN  ,  2 }  /* Intuition */
-}; // ds:0x10ce
-signed char g_nvftab_figures_rangeweapon[22][3][4] = {
-	{{0x00, 0x00, 0x00, 0x00}, {0x00, 0x00, 0x00, 0x00}, {0x00, 0x00, 0x00, 0x00}},
-	{{0x30, 0x31, 0x32, 0x33}, {0x00, 0x01, 0x02, 0x03}, {0x34, 0x35, 0x36, 0x37}},
-	{{0x34, 0x35, 0x36, 0x37}, {0x00, 0x01, 0x02, 0x03}, {0x38, 0x39, 0x3a, 0x3b}},
-	{{0x30, 0x31, 0x32, 0x33}, {0x00, 0x01, 0x02, 0x03}, {0x34, 0x35, 0x36, 0x37}},
-	{{0x34, 0x35, 0x36, 0x37}, {0x00, 0x01, 0x02, 0x03}, {0x38, 0x39, 0x3a, 0x3b}},
-	{{0x30, 0x31, 0x32, 0x33}, {0x00, 0x01, 0x02, 0x03}, {0x34, 0x35, 0x36, 0x37}},
-	{{0x2e, 0x2f, 0x30, 0x31}, {0x00, 0x01, 0x02, 0x03}, {0x32, 0x33, 0x34, 0x35}},
-	{{0x00, 0x01, 0x02, 0x03}, {0x00, 0x01, 0x02, 0x03}, {0x00, 0x01, 0x02, 0x03}},
-	{{0x00, 0x01, 0x02, 0x03}, {0x00, 0x01, 0x02, 0x03}, {0x00, 0x01, 0x02, 0x03}},
-	{{0x00, 0x01, 0x02, 0x03}, {0x00, 0x01, 0x02, 0x03}, {0x00, 0x01, 0x02, 0x03}},
-	{{0x30, 0x31, 0x32, 0x33}, {0x00, 0x01, 0x02, 0x03}, {0x34, 0x35, 0x36, 0x37}},
-	{{0x00, 0x00, 0x00, 0x00}, {0x00, 0x00, 0x00, 0x00}, {0x00, 0x00, 0x00, 0x00}},
-	{{0x30, 0x31, 0x32, 0x33}, {0x00, 0x01, 0x02, 0x03}, {0x34, 0x35, 0x36, 0x37}},
-	{{0x39, 0x3a, 0x3b, 0x3c}, {0x00, 0x01, 0x02, 0x03}, {0x3d, 0x3e, 0x3f, 0x40}},
-	{{0x39, 0x3a, 0x3b, 0x3c}, {0x00, 0x01, 0x02, 0x03}, {0x3d, 0x3e, 0x3f, 0x40}},
-	{{0x34, 0x35, 0x36, 0x37}, {0x00, 0x01, 0x02, 0x03}, {0x38, 0x39, 0x3a, 0x3b}},
-	{{0x39, 0x3a, 0x3b, 0x3c}, {0x00, 0x01, 0x02, 0x03}, {0x3d, 0x3e, 0x3f, 0x40}},
-	{{0x2e, 0x2f, 0x30, 0x31}, {0x00, 0x01, 0x02, 0x03}, {0x32, 0x33, 0x34, 0x35}},
-	{{0x00, 0x01, 0x02, 0x03}, {0x00, 0x01, 0x02, 0x03}, {0x00, 0x01, 0x02, 0x03}},
-	{{0x00, 0x01, 0x02, 0x03}, {0x00, 0x01, 0x02, 0x03}, {0x00, 0x01, 0x02, 0x03}},
-	{{0x00, 0x01, 0x02, 0x03}, {0x00, 0x01, 0x02, 0x03}, {0x00, 0x01, 0x02, 0x03}},
-	{{0x39, 0x3a, 0x3b, 0x3c}, {0x00, 0x01, 0x02, 0x03}, {0x3d, 0x3e, 0x3f, 0x40}}
-}; // ds:0x10dc, by rwt/viewdir
-short g_nvftab_figures_unconscious[22] = { 0x0000, 0x0038, 0x003c, 0x0038, 0x003c, 0x0038, 0x0038, 0x003f, 0x0043, 0x0032, 0x0038, 0x0000, 0x0038, 0x0041, 0x0041, 0x003c, 0x0041, 0x0038, 0x003f, 0x0045, 0x0032, 0x0041 }; // ds:0x11e4
-const struct point8s g_gfxtab_offsets_unconscious[22][4] = {
-	{ {  0, 0 }, {  0, 0 }, {  0, 0 }, {  0, 0 } },
-	{ {  1, 8 }, {  0, 7 }, {  1, 5 }, {  0, 4 } },
-	{ {  1, 8 }, {  0, 7 }, {  1, 5 }, {  0, 4 } },
-	{ {  1, 7 }, {  0, 7 }, {  1, 6 }, { -1, 5 } },
-	{ {  1, 8 }, {  0, 7 }, {  0, 5 }, {  0, 5 } },
-	{ {  1, 7 }, {  0, 7 }, {  1, 6 }, { -1, 5 } },
-	{ { -3, 5 }, {  0, 4 }, {  1, 6 }, {  0, 4 } },
-	{ {  1, 7 }, { -1, 8 }, {  0, 6 }, { -1, 6 } },
-	{ {  1, 6 }, { -1, 6 }, {  0, 5 }, {  0, 4 } },
-	{ {  1, 6 }, { -1, 6 }, {  1, 5 }, {  0, 4 } },
-	{ {  1, 8 }, {  0, 7 }, {  1, 5 }, {  0, 4 } },
-	{ {  0, 0 }, {  0, 0 }, {  0, 0 }, {  0, 0 } },
-	{ {  1, 8 }, {  0, 7 }, {  1, 5 }, {  0, 4 } },
-	{ {  1, 8 }, {  0, 7 }, {  1, 5 }, {  0, 4 } },
-	{ {  1, 7 }, {  0, 7 }, {  1, 6 }, { -1, 5 } },
-	{ {  1, 8 }, {  0, 7 }, {  0, 5 }, {  0, 5 } },
-	{ {  1, 7 }, {  0, 7 }, {  1, 6 }, { -1, 5 } },
-	{ { -3, 5 }, {  0, 4 }, {  1, 6 }, {  0, 4 } },
-	{ {  1, 7 }, { -1, 8 }, {  0, 6 }, { -1, 6 } },
-	{ {  1, 6 }, { -1, 6 }, {  0, 5 }, {  0, 4 } },
-	{ {  1, 6 }, { -1, 6 }, {  1, 5 }, {  0, 4 } },
-	{ {  1, 8 }, {  0, 7 }, {  1, 5 }, {  0, 4 } }
-}; // ds:0x1210, ; by viewdir
-const int8_t g_gfxtab_figures_main[125][5] = {
-	{ -0x01, -0x01, -0x01, -0x01, -1 },
-	{ 0x01, 0x02, 0x03, 0x04, -1 },
-	{ 0x05, 0x06, 0x07, 0x08, -1 },
-	{ 0x09, 0x0a, 0x0b, 0x0c, -1 },
-	{ 0x0d, 0x0e, 0x0f, 0x10, -1 },
-	{ 0x11, 0x12, 0x13, 0x14, -1 },
-	{ 0x15, 0x16, 0x17, 0x18, -1 },
-	{ 0x19, 0x1a, 0x1b, 0x1c, 0x1d },
-	{ 0x1e, 0x1f, 0x20, -0x01, 0x21 },
-	{ 0x22, 0x23, 0x24, 0x25, 0x26 },
-	{ 0x27, 0x28, 0x29, 0x2a, 0x2b },
-	{ -0x01, -0x01, -0x01, -0x01, -1 },
-	{ 0x2d, 0x2e, 0x2f, 0x30, -1 },
-	{ 0x31, 0x32, 0x33, 0x34, -1 },
-	{ 0x35, 0x36, 0x37, 0x38, -1 },
-	{ 0x39, 0x3a, 0x3b, 0x3c, -1 },
-	{ 0x3d, 0x3e, 0x3f, 0x40, -1 },
-	{ 0x41, 0x42, 0x43, 0x44, -1 },
-	{ 0x45, 0x46, 0x47, 0x48, 0x49 },
-	{ 0x4a, 0x4b, 0x4c, -0x01, 0x4d },
-	{ 0x4e, 0x4f, 0x50, 0x51, 0x52 },
-	{ 0x53, 0x54, 0x55, 0x56, 0x57 },
-	{ -0x01, -0x01, -0x01, -0x01, -1 },
-	{ 0x59, 0x5a, -0x01, -0x01, -1 },
-	{ 0x5b, 0x5c, -0x01, -0x01, -1 },
-	{ 0x5d, 0x5e, -0x01, -0x01, -1 },
-	{ 0x5f, 0x60, -0x01, -0x01, -1 },
-	{ 0x61, 0x62, -0x01, -0x01, -1 },
-	{ 0x63, 0x64, -0x01, -0x01, -1 },
-	{ 0x65, 0x66, -0x01, -0x01, -1 },
-	{ 0x67, 0x68, -0x01, -0x01, -1 },
-	{ 0x69, 0x6a, -0x01, -0x01, -1 },
-	{ 0x6b, 0x6c, -0x01, -0x01, -1 },
-	{ 0x6d, 0x6e, -0x01, -0x01, -1 },
-	{ 0x6f, 0x70, -0x01, -0x01, -1 },
-	{ 0x71, 0x72, -0x01, -0x01, -1 },
-	{ 0x73, 0x74, -0x01, -0x01, -1 },
-	{ 0x75, 0x76, -0x01, -0x01, -1 },
-	{ 0x77, 0x78, -0x01, -0x01, -1 },
-	{ 0x79, 0x7a, -0x01, -0x01, -1 },
-	{ 0x7b, 0x7c, -0x01, -0x01, -1 },
-	{ 0x00, 0x00, 0x00, 0x00, 0x00 },
-	{ 0x00, 0x00, 0x00, 0x00, 0x00 },
-	{ 0x00, 0x00, 0x00, 0x00, 0x00 },
-	{ 0x00, 0x00, 0x00, 0x00, 0x00 },
-	{ 0x00, 0x00, 0x00, 0x00, 0x00 },
-	{ 0x00, 0x00, 0x00, 0x00, 0x00 },
-	{ 0x00, 0x00, 0x00, 0x00, 0x00 },
-	{ 0x00, 0x00, 0x00, 0x00, 0x00 },
-	{ 0x00, 0x00, 0x00, 0x00, 0x00 },
-	{ 0x00, 0x00, 0x00, 0x00, 0x00 },
-	{ 0x00, 0x00, 0x00, 0x00, 0x00 },
-	{ 0x00, 0x00, 0x00, 0x00, 0x00 },
-	{ 0x00, 0x00, 0x00, 0x00, 0x00 },
-	{ 0x00, 0x00, 0x00, 0x00, 0x00 },
-	{ 0x00, 0x00, 0x00, 0x00, 0x00 },
-	{ 0x00, 0x00, 0x00, 0x00, 0x00 },
-	{ 0x00, 0x00, 0x00, 0x00, 0x00 },
-	{ 0x00, 0x00, 0x00, 0x00, 0x00 },
-	{ 0x00, 0x00, 0x00, 0x00, 0x00 },
-	{ 0x00, 0x00, 0x00, 0x00, 0x00 },
-	{ 0x00, 0x00, 0x00, 0x00, 0x00 },
-	{ 0x00, 0x00, 0x00, 0x00, 0x00 },
-	{ 0x00, 0x00, 0x00, 0x00, 0x00 },
-	{ 0x00, 0x00, 0x00, 0x00, 0x00 },
-	{ 0x00, 0x00, 0x00, 0x00, 0x00 },
-	{ 0x00, 0x00, 0x00, 0x00, 0x00 },
-	{ 0x00, 0x00, 0x00, 0x00, 0x00 },
-	{ 0x00, 0x00, 0x00, 0x00, 0x00 },
-	{ 0x00, 0x00, 0x00, 0x00, 0x00 },
-	{ 0x00, 0x00, 0x00, 0x00, 0x00 },
-	{ 0x00, 0x00, 0x00, 0x00, 0x00 },
-	{ 0x00, 0x00, 0x00, 0x00, 0x00 },
-	{ 0x00, 0x00, 0x00, 0x00, 0x00 },
-	{ 0x00, 0x00, 0x00, 0x00, 0x00 },
-	{ 0x00, 0x00, 0x00, 0x00, 0x00 },
-	{ 0x00, 0x00, 0x00, 0x00, 0x00 },
-	{ 0x00, 0x00, 0x00, 0x00, 0x00 },
-	{ 0x00, 0x00, 0x00, 0x00, 0x00 },
-	{ 0x00, 0x00, 0x00, 0x00, 0x00 },
-	{ 0x00, 0x00, 0x00, 0x00, 0x00 },
-	{ 0x00, 0x00, 0x00, 0x00, 0x00 },
-	{ 0x00, 0x00, 0x00, 0x00, 0x00 },
-	{ 0x00, 0x00, 0x00, 0x00, 0x00 },
-	{ 0x00, 0x00, 0x00, 0x00, 0x00 },
-	{ 0x00, 0x00, 0x00, 0x00, 0x00 },
-	{ 0x00, 0x00, 0x00, 0x00, 0x00 },
-	{ 0x00, 0x00, 0x00, 0x00, 0x00 },
-	{ 0x00, 0x00, 0x00, 0x00, 0x00 },
-	{ 0x00, 0x00, 0x00, 0x00, 0x00 },
-	{ 0x00, 0x00, 0x00, 0x00, 0x00 },
-	{ 0x00, 0x00, 0x00, 0x00, 0x00 },
-	{ 0x00, 0x00, 0x00, 0x00, 0x00 },
-	{ 0x00, 0x00, 0x00, 0x00, 0x00 },
-	{ 0x00, 0x00, 0x00, 0x00, 0x00 },
-	{ 0x00, 0x00, 0x00, 0x00, 0x00 },
-	{ 0x00, 0x00, 0x00, 0x00, 0x00 },
-	{ 0x00, 0x00, 0x00, 0x00, 0x00 },
-	{ 0x00, 0x00, 0x00, 0x00, 0x00 },
-	{ 0x00, 0x00, 0x00, 0x00, 0x00 },
-	{ 0x00, 0x00, 0x00, 0x00, 0x00 },
-	{ 0x00, 0x00, 0x00, 0x00, 0x00 },
-	{ 0x00, 0x00, 0x00, 0x00, 0x00 },
-	{ 0x00, 0x00, 0x00, 0x00, 0x00 },
-	{ 0x00, 0x00, 0x00, 0x00, 0x00 },
-	{ 0x00, 0x00, 0x00, 0x00, 0x00 },
-	{ 0x00, 0x00, 0x00, 0x00, 0x00 },
-	{ 0x00, 0x00, 0x00, 0x00, 0x00 },
-	{ 0x00, 0x00, 0x00, 0x00, 0x00 },
-	{ 0x00, 0x00, 0x00, 0x00, 0x00 },
-	{ 0x00, 0x00, 0x00, 0x00, 0x00 },
-	{ 0x00, 0x00, 0x00, 0x00, 0x00 },
-	{ 0x00, 0x00, 0x00, 0x00, 0x00 },
-	{ 0x00, 0x00, 0x00, 0x00, 0x00 },
-	{ 0x00, 0x00, 0x00, 0x00, 0x00 },
-	{ 0x00, 0x00, 0x00, 0x00, 0x00 },
-	{ 0x00, 0x00, 0x00, 0x00, 0x00 },
-	{ 0x00, 0x00, 0x00, 0x00, 0x00 },
-	{ 0x00, 0x00, 0x00, 0x00, 0x00 },
-	{ 0x00, 0x00, 0x00, 0x00, 0x00 },
-	{ 0x00, 0x00, 0x00, 0x00, 0x00 },
-	{ 0x00, 0x00, 0x00, 0x00, 0x00 },
-	{ 0x00, 0x00, 0x00, 0x00, 0x00 },
-	{ 0x00, 0x00, 0x00, 0x00, 0x00 },
-	{ 0x00, 0x00, 0x00, 0x00, 0x00 }
-}; // ds:0x12c0
-const struct point8s g_gfxtab_offsets_main[125][5] = {
-	{ { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 } },
-	{ { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 } },
-	{ { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 } },
-	{ { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 } },
-	{ { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 } },
-	{ { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 } },
-	{ { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 } },
-	{ { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 } },
-	{ { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 } },
-	{ { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 } },
-	{ { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 } },
-	{ { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 } },
-	{ { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 } },
-	{ { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 } },
-	{ { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 } },
-	{ { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 } },
-	{ { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 } },
-	{ { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 } },
-	{ { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 } },
-	{ { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 } },
-	{ { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 6, 0 } },
-	{ { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 } },
-	{ { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 } },
-	{ { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 3,15 } },
-	{ { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 } },
-	{ { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 } },
-	{ { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 } },
-	{ {-8, 2 }, { 8, 3 }, { 7, 7 }, {-7, 8 }, { 3, 5} },
-	{ { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0} },
-	{ { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 } },
-	{ { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 } },
-	{ { 0, 0 }, { 0, 0 }, { 1, 0 }, { 1, 0 }, { 1, 6 } },
-	{ { 0, 0 }, { 0, 0 }, {-1, 1 }, {-1, 0 }, {-4, 3 } },
-	{ { 0, 0 }, {-2, 0 }, { 0, 1 }, { 0, 1 }, {-5, 5 } },
-	{ { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 } },
-	{ { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 } },
-	{ { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 } },
-	{ { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 4, 5 } },
-	{ { 0, 1 }, { 3, 0 }, { 6, 6 }, {-6, 6 }, { 5, 2 } },
-	{ {-8, 2 }, { 8, 3 }, { 7, 7 }, {-7, 8 }, { 3, 5 } },
-	{ { 0, 1 }, { 3, 0 }, { 6, 6 }, {-6, 6 }, { 5, 2 } },
-	{ { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 } },
-	{ { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 } },
-	{ { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 } },
-	{ { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 } },
-	{ { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 } },
-	{ { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 } },
-	{ { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 } },
-	{ { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 } },
-	{ { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 } },
-	{ { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 } },
-	{ { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 } },
-	{ { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 } },
-	{ { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 } },
-	{ { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 } },
-	{ { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 } },
-	{ { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 } },
-	{ { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 } },
-	{ { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 } },
-	{ { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 } },
-	{ { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 } },
-	{ { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 } },
-	{ { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 } },
-	{ { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 } },
-	{ { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 } },
-	{ { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 } },
-	{ { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 } },
-	{ { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 } },
-	{ { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 } },
-	{ { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 } },
-	{ { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 } },
-	{ { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 } },
-	{ { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 } },
-	{ { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 } },
-	{ { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 } },
-	{ { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 } },
-	{ { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 } },
-	{ { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 } },
-	{ { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 } },
-	{ { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 } },
-	{ { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 } },
-	{ { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 } },
-	{ { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 } },
-	{ { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 } },
-	{ { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 } },
-	{ { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 } },
-	{ { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 } },
-	{ { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 } },
-	{ { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 } },
-	{ { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 } },
-	{ { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 } },
-	{ { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 } },
-	{ { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 } },
-	{ { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 } },
-	{ { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 } },
-	{ { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 } },
-	{ { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 } },
-	{ { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 } },
-	{ { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 } },
-	{ { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 } },
-	{ { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 } },
-	{ { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 } },
-	{ { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 } },
-	{ { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 } },
-	{ { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 } },
-	{ { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 } },
-	{ { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 } },
-	{ { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 } },
-	{ { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 } },
-	{ { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 } },
-	{ { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 } },
-	{ { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 } },
-	{ { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 } },
-	{ { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 } },
-	{ { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 } },
-	{ { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 } },
-	{ { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 } },
-	{ { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 } },
-	{ { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 } },
-	{ { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 } },
-	{ { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 } },
-	{ { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 } },
-	{ { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 } },
-	{ { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 } },
-	{ { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 } }
-}; // ds:0x1531, ; by viewdir+dead
+struct talent_descr g_talent_descriptions[TA__END]; // ds:0x0ffe
+struct talent_range g_talentclasses[7]; // ds:0x10ce
+signed char g_nvftab_figures_rangeweapon[22][3][4]; // ds:0x10dc, by rwt/viewdir
+short g_nvftab_figures_unconscious[22]; // ds:0x11e4
+struct point8s g_gfxtab_offsets_unconscious[22][4]; // ds:0x1210, ; by viewdir
+int8_t g_gfxtab_figures_main[125][5]; // ds:0x12c0
+struct point8s g_gfxtab_offsets_main[125][5]; // ds:0x1531, ; by viewdir+dead
 const signed int g_nvftab_figures_dead[22] = { 0x0000, 0x002f, 0x0033, 0x002f, 0x0033, 0x002f, 0x002d, 0x003e, 0x0042, 0x0031, 0x002f, 0x0000, 0x002f, 0x0038, 0x0038, 0x0033, 0x0038, 0x002d, 0x003e, 0x0044, 0x0031, 0x0038 }; // ds:0x1a13
-unsigned char g_unkn_005[38] = { 0x00, 0x00, 0x2c, 0x00, 0x38, 0x00, 0x38, 0x00, 0x3c, 0x00, 0x32, 0x00, 0x38, 0x00, 0x48, 0x00, 0x38, 0x00, 0x2c, 0x00, 0x30, 0x00, 0x44, 0x00, 0x3c, 0x00, 0x38, 0x00, 0x3c, 0x00, 0x40, 0x00, 0x48, 0x00, 0x3c, 0x00, 0x48, 0x00 }; // ds:0x1a3f
-short g_gfx_ani_descriptions_01[65] = { 0x0000, 0x0001, 0x0002, 0x0003, 0x0004, 0x0005, 0x0006, 0x0007, 0x0008, 0x0009, 0x000a, 0x000b, 0x0018, 0x0019, 0x001a, 0x001b, 0x0028, 0x0029, 0x002a, 0x002b, 0x0044, 0x004d, 0x004e, 0x004f, 0x0050, 0x005b, 0x005c, 0x005d, 0x005e, -0x0001, -0x0001, -0x0001, -0x0001, 0x00a0, 0x00a1, 0x00a2, 0x00a3, -0x0001, -0x0001, -0x0001, -0x0001, 0x006e, 0x006f, 0x0070, 0x0071, 0x007a, 0x007b, 0x007c, 0x007d, 0x0088, 0x0089, 0x008a, 0x008b, 0x0098, 0x0099, 0x009a, 0x009b, 0x00a8, 0x00a9, 0x00aa, 0x00ab, 0x00b8, 0x00b9, 0x00ba, 0x00bb }; // ds:0x1a65
-short g_gfx_ani_descriptions_02[65] = { 0x0000, 0x0001, 0x0002, 0x0003, 0x0004, 0x0005, 0x0006, 0x0007, 0x0008, 0x0009, 0x000a, 0x000b, 0x0018, 0x0019, 0x001a, 0x001b, 0x002c, 0x002d, 0x002e, 0x002f, 0x0045, 0x004d, 0x004e, 0x004f, 0x0050, 0x005b, 0x005c, 0x005d, 0x005e, -0x0001, -0x0001, -0x0001, -0x0001, 0x00a0, 0x00a1, 0x00a2, 0x00a3, -0x0001, -0x0001, -0x0001, -0x0001, 0x006e, 0x006f, 0x0070, 0x0071, 0x007a, 0x007b, 0x007c, 0x007d, 0x0088, 0x0089, 0x008a, 0x008b, 0x0098, 0x0099, 0x009a, 0x009b, 0x00a8, 0x00a9, 0x00aa, 0x00ab, 0x00b8, 0x00b9, 0x00ba, 0x00bb }; // ds:0x1ae7
-short g_gfx_ani_descriptions_03[65] = { 0x0000, 0x0001, 0x0002, 0x0003, 0x0004, 0x0005, 0x0006, 0x0007, 0x0008, 0x0009, 0x000a, 0x000b, 0x0018, 0x0019, 0x001a, 0x001b, 0x0028, 0x0029, 0x002a, 0x002b, 0x0046, 0x004d, 0x004e, 0x004f, 0x0050, 0x005b, 0x005c, 0x005d, 0x005e, -0x0001, -0x0001, -0x0001, -0x0001, 0x00a0, 0x00a1, 0x00a2, 0x00a3, -0x0001, -0x0001, -0x0001, -0x0001, 0x006e, 0x006f, 0x0070, 0x0071, 0x007a, 0x007b, 0x007c, 0x007d, 0x0088, 0x0089, 0x008a, 0x008b, 0x0098, 0x0099, 0x009a, 0x009b, 0x00a8, 0x00a9, 0x00aa, 0x00ab, 0x00b8, 0x00b9, 0x00ba, 0x00bb }; // ds:0x1b69
-short g_gfx_ani_descriptions_04[65] = { 0x0000, 0x0001, 0x0002, 0x0003, 0x0004, 0x0005, 0x0006, 0x0007, 0x0008, 0x0009, 0x000a, 0x000b, 0x0018, 0x0019, 0x001a, 0x001b, 0x002c, 0x002d, 0x002e, 0x002f, 0x0045, 0x004d, 0x004e, 0x004f, 0x0050, 0x005b, 0x005c, 0x005d, 0x005e, -0x0001, -0x0001, -0x0001, -0x0001, 0x00a0, 0x00a1, 0x00a2, 0x00a3, -0x0001, -0x0001, -0x0001, -0x0001, 0x006e, 0x006f, 0x0070, 0x0071, 0x007a, 0x007b, 0x007c, 0x007d, 0x0088, 0x0089, 0x008a, 0x008b, 0x0098, 0x0099, 0x009a, 0x009b, 0x00a8, 0x00a9, 0x00aa, 0x00ab, 0x00b8, 0x00b9, 0x00ba, 0x00bb }; // ds:0x1beb
-short g_gfx_ani_descriptions_05[65] = { 0x0000, 0x0001, 0x0002, 0x0003, 0x0004, 0x0005, 0x0006, 0x0007, 0x0008, 0x0009, 0x000a, 0x000b, 0x0018, 0x0019, 0x001a, 0x001b, 0x0028, 0x0029, 0x002a, 0x002b, 0x0046, 0x004d, 0x004e, 0x004f, 0x0050, 0x005b, 0x005c, 0x005d, 0x005e, -0x0001, -0x0001, -0x0001, -0x0001, 0x00a0, 0x00a1, 0x00a2, 0x00a3, -0x0001, -0x0001, -0x0001, -0x0001, 0x006e, 0x006f, 0x0070, 0x0071, 0x007a, 0x007b, 0x007c, 0x007d, 0x0088, 0x0089, 0x008a, 0x008b, 0x0098, 0x0099, 0x009a, 0x009b, 0x00a8, 0x00a9, 0x00aa, 0x00ab, 0x00b8, 0x00b9, 0x00ba, 0x00bb }; // ds:0x1c6d
-short g_gfx_ani_descriptions_06[65] = { 0x0000, 0x0001, 0x0002, 0x0003, 0x0004, 0x0005, 0x0006, 0x0007, 0x000c, 0x000d, 0x000e, 0x000f, 0x001c, 0x001d, 0x001e, 0x001f, 0x0030, 0x0031, 0x0032, 0x0033, 0x0047, 0x0051, 0x0052, 0x0053, 0x0054, 0x005f, 0x0060, 0x0061, 0x0062, -0x0001, -0x0001, -0x0001, -0x0001, 0x00a4, 0x00a5, 0x00a6, 0x00a7, -0x0001, -0x0001, -0x0001, -0x0001, 0x0076, 0x0077, 0x0078, 0x0079, 0x007e, 0x007f, 0x0080, 0x0081, 0x008c, 0x008d, 0x008e, 0x008f, 0x0098, 0x0099, 0x009a, 0x009b, 0x00ac, 0x00ad, 0x00ae, 0x00af, 0x00bc, 0x00bd, 0x00be, 0x00bf }; // ds:0x1cef
-short g_gfx_ani_descriptions_07[65] = { 0x0000, 0x0001, 0x0002, 0x0003, 0x0004, 0x0005, 0x0006, 0x0007, 0x0010, 0x0011, 0x0012, 0x0013, 0x0020, 0x0021, 0x0022, 0x0023, 0x0034, 0x0035, 0x0036, 0x0037, 0x0048, 0x0055, 0x0056, 0x004f, 0x0050, 0x0063, 0x005c, 0x0064, 0x0065, 0x00c0, 0x00c1, 0x00c2, 0x00c3, -0x0001, -0x0001, -0x0001, -0x0001, 0x00c0, 0x00c1, 0x00c2, 0x00c3, 0x006e, 0x006f, 0x0070, 0x0071, 0x0082, 0x0083, 0x007c, 0x007d, 0x0088, 0x0089, 0x008a, 0x008b, 0x0098, 0x0099, 0x009a, 0x009b, 0x00b0, 0x00b1, 0x00b2, 0x00b3, -0x0001, -0x0001, -0x0001, -1 }; // ds:0x1d71
-short g_gfx_ani_descriptions_08[65] = { 0x0000, 0x0001, 0x0002, 0x0003, 0x0004, 0x0005, 0x0006, 0x0007, 0x0014, 0x0015, 0x0016, 0x0017, 0x0024, 0x0025, 0x0026, 0x0027, 0x0038, 0x0039, 0x003a, 0x003b, 0x0049, 0x0057, 0x0058, 0x0059, 0x005a, 0x0066, 0x0067, 0x0068, 0x0069, 0x00c4, 0x00c5, 0x00c6, 0x00c7, -0x0001, -0x0001, -0x0001, -0x0001, 0x00c8, 0x00c9, 0x00ca, 0x00cb, 0x0072, 0x0073, 0x0074, 0x0075, 0x007a, 0x007b, 0x007c, 0x007d, 0x0090, 0x0091, 0x0092, 0x0093, 0x0098, 0x0099, 0x009a, 0x009b, -0x0001, -0x0001, -0x0001, -0x0001, -0x0001, -0x0001, -0x0001, -1 }; // ds:0x1df3
-short g_gfx_ani_descriptions_09[65] = { 0x0000, 0x0001, 0x0002, 0x0003, 0x0004, 0x0005, 0x0006, 0x0007, 0x0014, 0x0015, 0x0016, 0x0017, 0x0024, 0x0025, 0x0026, 0x0027, 0x003c, 0x003d, 0x003e, 0x003f, 0x004a, 0x0057, 0x0058, 0x0059, 0x005a, 0x006a, 0x006b, 0x006c, 0x006d, 0x00c4, 0x00c5, 0x00c6, 0x00c7, -0x0001, -0x0001, -0x0001, -0x0001, 0x00c8, 0x00c9, 0x00ca, 0x00cb, 0x0076, 0x0077, 0x0078, 0x0079, 0x0084, 0x0085, 0x0086, 0x0087, 0x0094, 0x0095, 0x0096, 0x0097, 0x009c, 0x009d, 0x009e, 0x009f, 0x00b4, 0x00b5, 0x00b6, 0x00b7, -0x0001, -0x0001, -0x0001, -1 }; // ds:0x1e75
-short g_gfx_ani_descriptions_10[65] = { 0x0000, 0x0001, 0x0002, 0x0003, 0x0004, 0x0005, 0x0006, 0x0007, 0x0008, 0x0009, 0x000a, 0x000b, 0x0018, 0x0019, 0x001a, 0x001b, 0x0028, 0x0029, 0x002a, 0x002b, 0x0044, 0x004d, 0x004e, 0x004f, 0x0050, 0x005b, 0x005c, 0x005d, 0x005e, 0x00c4, 0x00c5, 0x00c6, 0x00c7, 0x00a0, 0x00a1, 0x00a2, 0x00a3, 0x00c8, 0x00c9, 0x00ca, 0x00cb, 0x006e, 0x006f, 0x0070, 0x0071, 0x007a, 0x007b, 0x007c, 0x007d, 0x0088, 0x0089, 0x008a, 0x008b, 0x0098, 0x0099, 0x009a, 0x009b, 0x00a8, 0x00a9, 0x00aa, 0x00ab, 0x00b8, 0x00b9, 0x00ba, 0x00bb }; // ds:0x1ef7
-short g_gfx_ani_descriptions_11[65] = { 0x0000, 0x0001, 0x0002, 0x0003, 0x0004, 0x0005, 0x0006, 0x0007, 0x0010, 0x0011, 0x0012, 0x0013, 0x0020, 0x0021, 0x0022, 0x0023, 0x0034, 0x0035, 0x0036, 0x0037, 0x004b, 0x0055, 0x0056, 0x004f, 0x0050, 0x0063, 0x005c, 0x005d, 0x0065, -0x0001, -0x0001, -0x0001, -0x0001, 0x00a0, 0x00a1, 0x00a2, 0x00a3, -0x0001, -0x0001, -0x0001, -0x0001, 0x006e, 0x006f, 0x0070, 0x0071, 0x0082, 0x0083, 0x007c, 0x007d, 0x0088, 0x0089, 0x008a, 0x008b, 0x0098, 0x0099, 0x009a, 0x009b, 0x00b0, 0x00b1, 0x00b2, 0x00b3, 0x00b8, 0x00b9, 0x00ba, 0x00bb }; // ds:0x1f79
-short g_gfx_ani_descriptions_12[65] = { 0x0000, 0x0001, 0x0002, 0x0003, 0x0004, 0x0005, 0x0006, 0x0007, 0x0010, 0x0011, 0x0012, 0x0013, 0x0020, 0x0021, 0x0022, 0x0023, 0x0040, 0x0041, 0x0042, 0x0043, 0x004c, 0x0055, 0x0056, 0x004f, 0x0050, 0x0063, 0x005c, 0x0064, 0x0065, 0x00cc, 0x00cd, 0x00ce, 0x00cf, -0x0001, -0x0001, -0x0001, -0x0001, 0x00d0, 0x00d1, 0x00d2, 0x00d3, 0x0072, 0x0073, 0x0074, 0x0075, 0x0082, 0x0083, 0x007c, 0x007d, 0x0088, 0x0089, 0x008a, 0x008b, 0x0098, 0x0099, 0x009a, 0x009b, -0x0001, -0x0001, -0x0001, -0x0001, -0x0001, -0x0001, -0x0001, -1 }; // ds:0x1ffb
-short g_gfx_ani_descriptions_13[65] = { 0x0000, 0x0001, 0x0002, 0x0003, 0x0004, 0x0005, 0x0006, 0x0007, 0x0010, 0x0011, 0x0012, 0x0013, 0x0020, 0x0021, 0x0022, 0x0023, 0x0034, 0x0035, 0x0036, 0x0037, 0x004b, 0x0055, 0x0056, 0x004f, 0x0050, 0x0063, 0x005c, 0x005d, 0x0065, 0x00c4, 0x00c5, 0x00c6, 0x00c7, 0x00a0, 0x00a1, 0x00a2, 0x00a3, 0x00c8, 0x00c9, 0x00ca, 0x00cb, 0x006e, 0x006f, 0x0070, 0x0071, 0x0082, 0x0083, 0x007c, 0x007d, 0x0088, 0x0089, 0x008a, 0x008b, 0x0098, 0x0099, 0x009a, 0x009b, 0x00b0, 0x00b1, 0x00b2, 0x00b3, 0x00b8, 0x00b9, 0x00ba, 0x00bb }; // ds:0x207d
-short g_gfx_ani_descriptions_14[37] = { 0x00d4, 0x00d5, 0x00d6, 0x00d7, 0x00d8, 0x00d9, 0x00da, 0x00db, 0x0106, 0x0107, 0x0108, 0x0109, 0x0126, 0x0127, 0x0128, 0x0129, 0x01b6, 0x01b7, 0x01b8, 0x01b9, 0x01dd, 0x0146, 0x0147, 0x0148, 0x0149, 0x017a, 0x017b, 0x017c, 0x017d, -0x0001, -0x0001, -0x0001, -0x0001, -0x0001, -0x0001, -0x0001, -1 }; // ds:0x20ff
-short g_gfx_ani_descriptions_15[37] = { 0x00dc, 0x00dd, 0x00de, 0x00df, 0x00e0, 0x00e1, 0x00e2, 0x00e3, 0x010a, 0x010b, 0x010c, 0x010d, 0x012a, 0x012b, 0x012c, 0x012d, 0x01ba, 0x01bb, 0x01bc, 0x01bd, 0x01de, 0x014a, 0x014b, 0x014c, 0x014d, 0x017e, 0x017f, 0x0180, 0x0181, -0x0001, -0x0001, -0x0001, -0x0001, -0x0001, -0x0001, -0x0001, -1 }; // ds:0x2149
-short g_gfx_ani_descriptions_16[37] = { 0x00dc, 0x00dd, 0x00de, 0x00df, 0x00e0, 0x00e1, 0x00e2, 0x00e3, 0x010e, 0x010f, 0x0110, 0x0111, 0x012e, 0x012f, 0x0130, 0x0131, 0x01be, 0x01bf, 0x01c0, 0x01c1, 0x01df, 0x014e, 0x014f, 0x0150, 0x0151, 0x0182, 0x0183, 0x0184, 0x0185, -0x0001, -0x0001, -0x0001, -0x0001, -0x0001, -0x0001, -0x0001, -1 }; // ds:0x2193
-short g_gfx_ani_descriptions_17[37] = { 0x00e4, 0x00e5, 0x00e6, 0x00e7, 0x00e8, 0x00e9, 0x00ea, 0x00eb, 0x0112, 0x0113, 0x0114, 0x0115, 0x0132, 0x0133, 0x0134, 0x0135, 0x01c2, 0x01c3, 0x01c4, 0x01c5, 0x01e0, 0x0152, 0x0153, 0x0154, 0x0155, 0x0186, 0x0187, 0x0188, 0x0189, -0x0001, -0x0001, -0x0001, -0x0001, -0x0001, -0x0001, -0x0001, -1 }; // ds:0x21dd
-short g_gfx_ani_descriptions_18[37] = { 0x00dc, 0x00dd, 0x00de, 0x00df, 0x00e0, 0x00e1, 0x00e2, 0x00e3, 0x010a, 0x010b, 0x010c, 0x010d, 0x012a, 0x012b, 0x012c, 0x012d, 0x01ba, 0x01bb, 0x01bc, 0x01bd, 0x01e2, 0x014a, 0x014b, 0x014c, 0x014d, 0x018e, 0x018f, 0x0190, 0x0191, -0x0001, -0x0001, -0x0001, -0x0001, -0x0001, -0x0001, -0x0001, -1 }; // ds:0x2227
-short g_gfx_ani_descriptions_19[37] = { 0x00dc, 0x00dd, 0x00de, 0x00df, 0x00e0, 0x00e1, 0x00e2, 0x00e3, 0x010a, 0x010b, 0x010c, 0x010d, 0x012a, 0x012b, 0x012c, 0x012d, 0x01ba, 0x01bb, 0x01bc, 0x01bd, 0x01e1, 0x0156, 0x0157, 0x0158, 0x0159, 0x018a, 0x018b, 0x018c, 0x018d, -0x0001, -0x0001, -0x0001, -0x0001, -0x0001, -0x0001, -0x0001, -1 }; // ds:0x2271
-short g_gfx_ani_descriptions_20[37] = { 0x00dc, 0x00dd, 0x00de, 0x00df, 0x00e0, 0x00e1, 0x00e2, 0x00e3, 0x010a, 0x010b, 0x010c, 0x010d, 0x012a, 0x012b, 0x012c, 0x012d, 0x01ba, 0x01bb, 0x01bc, 0x01bd, 0x01de, 0x015a, 0x015b, 0x015c, 0x015d, 0x0192, 0x0193, 0x0194, 0x0195, -0x0001, -0x0001, -0x0001, -0x0001, -0x0001, -0x0001, -0x0001, -1 }; // ds:0x22bb
-short g_gfx_ani_descriptions_21[37] = { 0x00ec, 0x00ed, 0x00ee, 0x00ef, 0x00f0, 0x00f1, 0x00f2, 0x00f3, 0x0116, 0x0117, 0x0118, 0x0119, 0x0136, 0x0137, 0x0138, 0x0139, 0x01c6, 0x01c7, 0x01c8, 0x01c9, 0x01e3, 0x015e, 0x015f, 0x0160, 0x0161, 0x0196, 0x0197, 0x0198, 0x0199, -0x0001, -0x0001, -0x0001, -0x0001, -0x0001, -0x0001, -0x0001, -1 }; // ds:0x2305
-short g_gfx_ani_descriptions_22[37] = { 0x00dc, 0x00dd, 0x00f4, 0x00f5, 0x00f6, 0x00e1, 0x00e2, 0x00f7, 0x011a, 0x011b, 0x011c, 0x011d, 0x013a, 0x013b, 0x013c, 0x013d, 0x01ca, 0x01cb, 0x01cc, 0x01cd, 0x01e4, 0x0162, 0x0163, 0x0164, 0x0165, 0x019a, 0x019b, 0x019c, 0x019d, -0x0001, -0x0001, -0x0001, -0x0001, -0x0001, -0x0001, -0x0001, -1 }; // ds:0x234f
-short g_gfx_ani_descriptions_23[37] = { 0x00f8, 0x00f9, 0x00de, 0x00fa, 0x00fb, 0x00fc, 0x00fd, 0x00e3, 0x011e, 0x011f, 0x0120, 0x0121, 0x013e, 0x013f, 0x0140, 0x0141, 0x01ca, 0x01cb, 0x01cc, 0x01cd, 0x01e5, 0x0166, 0x0167, 0x0168, 0x0169, 0x019e, 0x019f, 0x01a0, 0x01a1, -0x0001, -0x0001, -0x0001, -0x0001, -0x0001, -0x0001, -0x0001, -1 }; // ds:0x2399
-short g_gfx_ani_descriptions_24[37] = { 0x00dc, 0x00dd, 0x00de, 0x00df, 0x00e0, 0x00e1, 0x00e2, 0x00e3, 0x010a, 0x010b, 0x010c, 0x010d, 0x012a, 0x012b, 0x012c, 0x012d, 0x01ba, 0x01ce, 0x01cf, 0x01d0, 0x01e6, 0x016a, 0x016b, 0x016c, 0x016d, 0x01a2, 0x01a3, 0x01a4, 0x01a5, -0x0001, -0x0001, -0x0001, -0x0001, -0x0001, -0x0001, -0x0001, -1 }; // ds:0x23e3
-short g_gfx_ani_descriptions_25[37] = { 0x0000, 0x0001, 0x0002, 0x0003, 0x0004, 0x0005, 0x0006, 0x0007, 0x0008, 0x0009, 0x000a, 0x000b, 0x0018, 0x0019, 0x001a, 0x001b, 0x01d1, 0x01d2, 0x01d3, 0x01d4, 0x01e2, 0x016e, 0x016f, 0x0170, 0x0171, 0x01a6, 0x01a7, 0x01a8, 0x01a9, -0x0001, -0x0001, -0x0001, -0x0001, 0x01ea, 0x01eb, 0x01ec, 0x01ed }; // ds:0x242d
-short g_gfx_ani_descriptions_26[37] = { 0x0000, 0x0001, 0x0002, 0x0003, 0x0004, 0x0005, 0x0006, 0x0007, 0x0008, 0x0009, 0x000a, 0x000b, 0x0018, 0x0019, 0x001a, 0x001b, 0x01d1, 0x01d2, 0x01d3, 0x01d4, 0x01e7, 0x016e, 0x016f, 0x0170, 0x0171, 0x01aa, 0x01ab, 0x01ac, 0x01ad, -0x0001, -0x0001, -0x0001, -0x0001, 0x01ee, 0x01ef, 0x01f0, 0x01f1 }; // ds:0x2477
-short g_gfx_ani_descriptions_27[37] = { 0x0000, 0x0001, 0x0002, 0x0003, 0x0004, 0x0005, 0x0006, 0x0007, 0x0014, 0x0015, 0x0016, 0x0017, 0x0024, 0x0025, 0x0026, 0x0027, 0x01d5, 0x01d6, 0x01d7, 0x01d8, 0x01e8, 0x0172, 0x0173, 0x0174, 0x0175, 0x01ae, 0x01af, 0x01b0, 0x01b1, 0x01f2, 0x01f3, 0x01f4, 0x01f5, -0x0001, -0x0001, -0x0001, -1 }; // ds:0x24c1
-short g_gfx_ani_descriptions_28[37] = { 0x00fe, 0x00ff, 0x0100, 0x0101, 0x0102, 0x0103, 0x0104, 0x0105, 0x0122, 0x0123, 0x0124, 0x0125, 0x0142, 0x0143, 0x0144, 0x0145, 0x01d9, 0x01da, 0x01db, 0x01dc, 0x01e9, 0x0176, 0x0177, 0x0178, 0x0179, 0x01b2, 0x01b3, 0x01b4, 0x01b5, -0x0001, -0x0001, -0x0001, -0x0001, -0x0001, -0x0001, -0x0001, -1 }; // ds:0x250b
+unsigned char g_unkn_005[38]; // ds:0x1a3f
+short g_gfx_ani_descriptions_01[65]; // ds:0x1a65
+short g_gfx_ani_descriptions_02[65]; // ds:0x1ae7
+short g_gfx_ani_descriptions_03[65]; // ds:0x1b69
+short g_gfx_ani_descriptions_04[65]; // ds:0x1beb
+short g_gfx_ani_descriptions_05[65]; // ds:0x1c6d
+short g_gfx_ani_descriptions_06[65]; // ds:0x1cef
+short g_gfx_ani_descriptions_07[65]; // ds:0x1d71
+short g_gfx_ani_descriptions_08[65]; // ds:0x1df3
+short g_gfx_ani_descriptions_09[65]; // ds:0x1e75
+short g_gfx_ani_descriptions_10[65]; // ds:0x1ef7
+short g_gfx_ani_descriptions_11[65]; // ds:0x1f79
+short g_gfx_ani_descriptions_12[65]; // ds:0x1ffb
+short g_gfx_ani_descriptions_13[65]; // ds:0x207d
+short g_gfx_ani_descriptions_14[37]; // ds:0x20ff
+short g_gfx_ani_descriptions_15[37]; // ds:0x2149
+short g_gfx_ani_descriptions_16[37]; // ds:0x2193
+short g_gfx_ani_descriptions_17[37]; // ds:0x21dd
+short g_gfx_ani_descriptions_18[37]; // ds:0x2227
+short g_gfx_ani_descriptions_19[37]; // ds:0x2271
+short g_gfx_ani_descriptions_20[37]; // ds:0x22bb
+short g_gfx_ani_descriptions_21[37]; // ds:0x2305
+short g_gfx_ani_descriptions_22[37]; // ds:0x234f
+short g_gfx_ani_descriptions_23[37]; // ds:0x2399
+short g_gfx_ani_descriptions_24[37]; // ds:0x23e3
+short g_gfx_ani_descriptions_25[37]; // ds:0x242d
+short g_gfx_ani_descriptions_26[37]; // ds:0x2477
+short g_gfx_ani_descriptions_27[37]; // ds:0x24c1
+short g_gfx_ani_descriptions_28[37]; // ds:0x250b
 int16_t *g_gfx_ani_index[41] = {
 	NULL,
 	g_gfx_ani_descriptions_01,
@@ -2025,167 +1307,18 @@ signed int g_tx_file_index = -1; // ds:0x26bf, index of file stored with load_tx
 signed int g_fig_discard = 0; // ds:0x26c1, whether to discard the fight data after the fight
 uint8_t g_palette_allblack2[3 * 32] = {0}; // ds:0x26c3
 
-uint8_t g_palette_unknown1[32][3] = {
-	{ 0x00, 0x00, 0x00 },
-	{ 0x00, 0x00, 0x29 },
-	{ 0x00, 0x00, 0x0e },
-	{ 0x26, 0x1a, 0x12 },
-	{ 0x26, 0x16, 0x0e },
-	{ 0x26, 0x12, 0x06 },
-	{ 0x22, 0x0e, 0x02 },
-	{ 0x1e, 0x0a, 0x00 },
-	{ 0x1a, 0x06, 0x00 },
-	{ 0x12, 0x02, 0x00 },
-	{ 0x0e, 0x00, 0x00 },
-	{ 0x06, 0x00, 0x00 },
-	{ 0x02, 0x00, 0x00 },
-	{ 0x00, 0x00, 0x00 },
-	{ 0x22, 0x22, 0x22 },
-	{ 0x1a, 0x1a, 0x1a },
-	{ 0x16, 0x16, 0x16 },
-	{ 0x12, 0x12, 0x12 },
-	{ 0x0a, 0x0a, 0x0a },
-	{ 0x06, 0x06, 0x06 },
-	{ 0x00, 0x00, 0x00 },
-	{ 0x00, 0x00, 0x00 },
-	{ 0x00, 0x20, 0x00 },
-	{ 0x00, 0x0e, 0x00 },
-	{ 0x26, 0x22, 0x00 },
-	{ 0x1e, 0x16, 0x00 },
-	{ 0x12, 0x0a, 0x00 },
-	{ 0x26, 0x02, 0x00 },
-	{ 0x1a, 0x00, 0x00 },
-	{ 0x0e, 0x00, 0x00 },
-	{ 0x00, 0x00, 0x00 },
-	{ 0x26, 0x26, 0x26 }
-}; // ds:0x2723
-uint8_t g_palette_fight1[32][3] = {
-	{ 0x00, 0x00, 0x00 },
-	{ 0x3c, 0x2c, 0x24 },
-	{ 0x3c, 0x28, 0x1c },
-	{ 0x34, 0x20, 0x18 },
-	{ 0x28, 0x18, 0x14 },
-	{ 0x20, 0x14, 0x10 },
-	{ 0x18, 0x0c, 0x08 },
-	{ 0x10, 0x08, 0x08 },
-	{ 0x0c, 0x04, 0x04 },
-	{ 0x34, 0x34, 0x34 },
-	{ 0x28, 0x28, 0x28 },
-	{ 0x20, 0x20, 0x20 },
-	{ 0x18, 0x18, 0x18 },
-	{ 0x14, 0x14, 0x14 },
-	{ 0x10, 0x10, 0x10 },
-	{ 0x0c, 0x0c, 0x0c },
-	{ 0x08, 0x08, 0x08 },
-	{ 0x14, 0x0c, 0x08 },
-	{ 0x00, 0x00, 0x00 },
-	{ 0x18, 0x14, 0x3c },
-	{ 0x14, 0x00, 0x00 },
-	{ 0x1c, 0x00, 0x00 },
-	{ 0x24, 0x00, 0x00 },
-	{ 0x2c, 0x00, 0x00 },
-	{ 0x3c, 0x00, 0x00 },
-	{ 0x1c, 0x10, 0x10 },
-	{ 0x00, 0x1c, 0x00 },
-	{ 0x00, 0x28, 0x00 },
-	{ 0x00, 0x04, 0x20 },
-	{ 0x2c, 0x2c, 0x0c },
-	{ 0x38, 0x38, 0x10 },
-	{ 0x3c, 0x3c, 0x3c }
-}; // ds:0x2783
+uint8_t g_palette_unknown1[32][3]; // ds:0x2723
+uint8_t g_palette_fight1[32][3]; // ds:0x2783
 //struct{unsigned char r,g,b;} g_palette_special[32] = {
-uint8_t g_palette_special[32][3] = {
-	{ 0x00, 0x00, 0x00 },
-	{ 0x38, 0x38, 0x38 },
-	{ 0x34, 0x34, 0x34 },
-	{ 0x30, 0x30, 0x30 },
-	{ 0x2c, 0x2c, 0x2c },
-	{ 0x28, 0x28, 0x28 },
-	{ 0x24, 0x24, 0x24 },
-	{ 0x20, 0x20, 0x20 },
-	{ 0x1c, 0x1c, 0x1c },
-	{ 0x18, 0x18, 0x18 },
-	{ 0x14, 0x14, 0x14 },
-	{ 0x10, 0x10, 0x10 },
-	{ 0x0c, 0x0c, 0x0c },
-	{ 0x08, 0x08, 0x08 },
-	{ 0x04, 0x04, 0x04 },
-	{ 0x00, 0x00, 0x00 },
-	{ 0x00, 0x3c, 0x08 },
-	{ 0x3c, 0x30, 0x28 },
-	{ 0x3c, 0x2c, 0x28 },
-	{ 0x2c, 0x1c, 0x18 },
-	{ 0x24, 0x14, 0x10 },
-	{ 0x1c, 0x10, 0x0c },
-	{ 0x14, 0x08, 0x08 },
-	{ 0x0c, 0x04, 0x04 },
-	{ 0x0c, 0x08, 0x00 },
-	{ 0x2c, 0x00, 0x00 },
-	{ 0x10, 0x14, 0x3c },
-	{ 0x00, 0x08, 0x38 },
-	{ 0x00, 0x08, 0x34 },
-	{ 0x00, 0x00, 0x18 },
-	{ 0x3c, 0x3c, 0x00 },
-	{ 0x3c, 0x3c, 0x3c }
-}; // ds:0x27e3
+uint8_t g_palette_special[32][3]; // ds:0x27e3
 unsigned char g_unkn_006[2] = { 0x32, 0x00 }; // ds:0x2843
 signed char g_pp20_index = -1; // ds:0x2845, archive file index of current pp20
 signed int g_request_refresh = 0; // ds:0x2846
-struct mouse_cursor g_default_mouse_cursor = {
-	{	0x7fff, 0x9fff, 0x87ff, 0xc1ff,
-		0xc07f, 0xe01f, 0xe007, 0xf00f,
-		0xf01f, 0xf80f, 0xf887, 0xfdc3,
-		0xffe3, 0xfff7, 0xffff, 0xffff },
-
-	{	0x8000, 0x6000, 0x7800, 0x3e00,
-		0x3f80, 0x1fe0, 0x1ff8, 0x0ff0,
-		0x0fe0, 0x07f0, 0x0778, 0x023c,
-		0x001c, 0x0008, 0x0000, 0x0000 }
-}; // ds:0x2848
-struct mouse_cursor g_cursor_arrow_up = {
-	{	0xffff, 0xffff, 0xff7f, 0xfe3f,
-		0xfc1f, 0xf80f, 0xf007, 0xe003,
-		0xfc1f, 0xfc1f, 0xfc1f, 0xfc1f,
-		0xfc1f, 0xfc1f, 0xffff, 0xffff },
-
-	{	0x0000, 0x0000, 0x0080, 0x01c0,
-		0x03e0, 0x07f0, 0x0ff8, 0x1ffc,
-		0x03e0, 0x03e0, 0x03e0, 0x03e0,
-		0x03e0, 0x03e0, 0x0000, 0x0000 }
-}; // ds:0x2888
-struct mouse_cursor g_cursor_arrow_down = {
-	{	0xffff, 0xffff, 0xf83f, 0xf83f,
-		0xf83f, 0xf83f, 0xf83f, 0xf83f,
-		0xc007, 0xe00f, 0xf01f, 0xf83f,
-		0xfc7f, 0xfeff, 0xffff, 0xffff },
-
-	{	0x0000, 0x0000, 0x07c0, 0x07c0,
-		0x07c0, 0x07c0, 0x07c0, 0x07c0,
-		0x3ff8, 0x1ff0, 0x0fe0, 0x07c0,
-		0x0380, 0x0100, 0x0000, 0x0000
-} }; // ds:0x28c8
-struct mouse_cursor g_cursor_arrow_left = {
-	{	0xffff, 0xffff, 0xfdff, 0xf9ff,
-		0xf1ff, 0xe01f, 0xc007, 0xe003,
-		0xf183, 0xf9c1, 0xfdc1, 0xffc1,
-		0xffc1, 0xffc1, 0xffff, 0xffff },
-
-	{	0x0000, 0x0000, 0x0200, 0x0600,
-		0x0e00, 0x1fe0, 0x3ff8, 0x1ffc,
-		0x0e7c, 0x063e, 0x023e, 0x003e,
-		0x003e, 0x003e, 0x0000, 0x0000
-} }; // ds:0x2908
-struct mouse_cursor g_cursor_arrow_right = {
-	{	0xffff, 0xffff, 0xffbf, 0xff9f,
-		0xff8f, 0xf807, 0xe003, 0xc007,
-		0xc18f, 0x839f, 0x83bf, 0x83ff,
-		0x83ff, 0x83ff, 0xffff, 0xffff },
-
-	{	0x0000, 0x0000, 0x0040, 0x0060,
-		0x0070, 0x07f8, 0x1ffc, 0x3ff8,
-		0x3e70, 0x7c60, 0x7c40, 0x7c00,
-		0x7c00, 0x7c00, 0x0000, 0x0000 }
-}; // ds:0x2948
+struct mouse_cursor g_default_mouse_cursor; // ds:0x2848
+struct mouse_cursor g_cursor_arrow_up; // ds:0x2888
+struct mouse_cursor g_cursor_arrow_down; // ds:0x28c8
+struct mouse_cursor g_cursor_arrow_left; // ds:0x2908
+struct mouse_cursor g_cursor_arrow_right; // ds:0x2948
 signed int g_mouse_posy_min = 0; // ds:0x2988
 signed int g_mouse_posx_min = 0; // ds:0x298a
 signed int g_mouse_posy_max = 0x00c7; // ds:0x298c
@@ -2584,160 +1717,33 @@ uint8_t  gs_dng08_secret_door_status = DNG_SECRET_DOOR_STATUS_HIDDEN; // ds:0x3c
 uint8_t  gs_dng08_chest0_looted = 0; // ds:0x3ccc
 uint8_t  gs_dng08_chest35_looted = 0; // ds:0x3ccd
 
-uint8_t  gs_daspota_location01_loot[29] = {
-	ITEM_ID_SCHUPPENRUESTUNG,        1,
-	ITEM_ID_ARMBRUST,                1,
-	ITEM_ID_BOLZEN,                 30,
-	ITEM_ID_BASTARDSCHWERT__MAGIC,   1,
-	ITEM_ID_ORKNASE__MAGIC,          1,
-	ITEM_ID_SCHNAPSFLASCHE,         10,
-	ITEM_ID_BIER,                   50,
-	ITEM_ID_WEINFLASCHE,            20,
-	ITEM_ID_GOLDSCHMUCK,             1,
-	ITEM_ID_GOLDSCHMUCK,             1,
-	ITEM_ID_MESSINGSPIEGEL,          1,
-	ITEM_ID_STARKER_HEILTRANK,       1,
-	ITEM_ID_KUKRIS,                  1,
-	ITEM_ID_DUKATEN,               255,
-	0xff
-}; // ds:0x3cce
+uint8_t gs_daspota_location01_loot[29]; // ds:0x3cce
 
-uint8_t  gs_daspota_location02_loot[15] = {
-	ITEM_ID_ARMBRUST,        1,
-	ITEM_ID_ARMBRUST,        1,
-	ITEM_ID_BOLZEN,         30,
-	ITEM_ID_SCHILD,          1,
-	ITEM_ID_SCHILD,          1,
-	ITEM_ID_LATERNE__UNLIT,  1,
-	ITEM_ID_OEL,             1,
-	0xff
-}; // ds:0x3ceb
+uint8_t gs_daspota_location02_loot[15]; // ds:0x3ceb
 
-uint8_t  gs_daspota_location03_loot[15] = {
-	ITEM_ID_ARMBRUST,        1,
-	ITEM_ID_ARMBRUST,        1,
-	ITEM_ID_BOLZEN,         30,
-	ITEM_ID_SCHILD,          1,
-	ITEM_ID_SCHILD,          1,
-	ITEM_ID_LATERNE__UNLIT,  1,
-	ITEM_ID_OEL,             1,
-	0xff
-}; // ds:0x3cfa
+uint8_t gs_daspota_location03_loot[15]; // ds:0x3cfa
 
-uint8_t  gs_daspota_location04_loot[9] = {
-	ITEM_ID_KRIEGSBEIL__SPECIAL,  1,
-	ITEM_ID_BIER,                10,
-	ITEM_ID_SCHLEIFSTEIN,         1,
-	ITEM_ID_TOPFHELM,             1,
-	0xff
-}; // ds:0x3d09
+uint8_t gs_daspota_location04_loot[9]; // ds:0x3d09
 
-uint8_t  gs_daspota_location05_loot[31] = {
-	ITEM_ID_KURZSCHWERT__MAGIC,  1,
-	ITEM_ID_SICHEL__MAGIC,       1,
-	ITEM_ID_VULKANGLASDOLCH,     1,
-	ITEM_ID_MENGBILAR,           1,
-	ITEM_ID_WEINFLASCHE,        20,
-	ITEM_ID_ROBE__RED,           2,
-	ITEM_ID_SCHREIBZEUG,         1,
-	ITEM_ID_SCHRIFTROLLE,        1,
-	ITEM_ID_MESSINGSPIEGEL,      1,
-	ITEM_ID_BRONZEFLASCHE,       1,
-	ITEM_ID_TRINKHORN,           1,
-	ITEM_ID_DIETRICHE,           1,
-	ITEM_ID_ANGSTGIFT,           1,
-	ITEM_ID_GOLDLEIM,            1,
-	ITEM_ID_BANNSTAUB,           1,
-	0xff
-}; // ds:0x3d12
+uint8_t gs_daspota_location05_loot[31]; // ds:0x3d12
 
-uint8_t  gs_daspota_location06_loot[25] = {
-	ITEM_ID_SAEBEL,              3,
-	ITEM_ID_SCHWERT,             3,
-	ITEM_ID_SCHILD,              3,
-	ITEM_ID_KRIEGSBEIL__SPECIAL, 3,
-	ITEM_ID_WURFBEIL,            3,
-	ITEM_ID_LANGBOGEN,           3,
-	ITEM_ID_SCHUPPENRUESTUNG,    3,
-	ITEM_ID_LEDERHELM,           3,
-	ITEM_ID_LEDERZEUG,           3,
-	ITEM_ID_RAPIER,              3,
-	ITEM_ID_PLATTENZEUG,         3,
-	ITEM_ID_KROETENHAUT,         3,
-	0xff
-}; // ds:0x3d31
+uint8_t gs_daspota_location06_loot[25]; // ds:0x3d31
 
-uint8_t  gs_daspota_location07_loot[7] = {
-	ITEM_ID_BIER,           20,
-	ITEM_ID_WEINFLASCHE,    20,
-	ITEM_ID_SCHNAPSFLASCHE, 10,
-	0xff
-}; // ds:0x3d4a
+uint8_t gs_daspota_location07_loot[7]; // ds:0x3d4a
 
-uint8_t  gs_daspota_location08_loot[15] = {
-	ITEM_ID_ROBE__RED,      5,
-	ITEM_ID_GOLDSCHMUCK,    5,
-	ITEM_ID_MESSINGSPIEGEL, 1,
-	ITEM_ID_MESSINGSPIEGEL, 1,
-	ITEM_ID_GLASFLASCHE,    1,
-	ITEM_ID_FLOETE,         1,
-	ITEM_ID_MESSINGSPIEGEL, 1,
-	0xff
-}; // ds:0x3d51
+uint8_t gs_daspota_location08_loot[15]; // ds:0x3d51
 
-uint8_t  gs_daspota_location10_loot[7] = {
-	ITEM_ID_BIER,           50,
-	ITEM_ID_WEINFLASCHE,    20,
-	ITEM_ID_SCHNAPSFLASCHE, 10,
-	0xff
-}; // ds:0x3d60
+uint8_t gs_daspota_location10_loot[7]; // ds:0x3d60
 
-uint8_t  gs_daspota_location12_loot[21] = {
-	ITEM_ID_BRECHEISEN,      3,
-	ITEM_ID_STRICKLEITER,    3,
-	ITEM_ID_KLETTERHAKEN,    3,
-	ITEM_ID_FLOETE,          3,
-	ITEM_ID_DECKE,           3,
-	ITEM_ID_ZUNDERKAESTCHEN, 3,
-	ITEM_ID_LAUTE,           3,
-	ITEM_ID_FACKEL__UNLIT,   3,
-	ITEM_ID_SEIL,            3,
-	ITEM_ID_GLASFLASCHE,     3,
-	0xff
-}; // ds:0x3d67
+uint8_t gs_daspota_location12_loot[21]; // ds:0x3d67
 
-uint8_t  gs_daspota_location13_loot[9] = {
-	ITEM_ID_KRIEGSBEIL__SPECIAL, 3,
-	ITEM_ID_SEIL,                3,
-	ITEM_ID_HAMMER,              3,
-	ITEM_ID_WURFBEIL,            2,
-	0xff
-}; // ds:0x3d7c
+uint8_t gs_daspota_location13_loot[9]; // ds:0x3d7c
 
-uint8_t  gs_daspota_location14_loot[5] = {
-	ITEM_ID_BIER,           80,
-	ITEM_ID_SCHNAPSFLASCHE, 10,
-	0xff
-}; // ds:0x3d85
+uint8_t gs_daspota_location14_loot[5]; // ds:0x3d85
 
-uint8_t  gs_daspota_location16_loot[5] = {
-	ITEM_ID_BIER,          50,
-	ITEM_ID_PROVIANTPAKET, 10,
-	0xff
-}; // ds:0x3d8a
+uint8_t gs_daspota_location16_loot[5]; // ds:0x3d8a
 
-uint8_t  gs_daspota_location18_loot[19] = {
-	ITEM_ID_SCHNAPSFLASCHE, 10,
-	ITEM_ID_BIER,           40,
-	ITEM_ID_ROBE__RED,       5,
-	ITEM_ID_GOLDSCHMUCK,     5,
-	ITEM_ID_GLASFLASCHE,     2,
-	ITEM_ID_LAUTE,           1,
-	ITEM_ID_ALRAUNE,         1,
-	ITEM_ID_SCHLAFGIFT,      1,
-	ITEM_ID_ILMENBLATT,      1,
-	0xff
-}; // ds:0x3d8f
+uint8_t gs_daspota_location18_loot[19]; // ds:0x3d8f
 
 uint8_t  gs_tevent004_flag = 0; // ds:0x3da2
 uint8_t  gs_tevent005_flag = 0; // ds:0x3da3
@@ -3011,277 +2017,37 @@ uint8_t  gs_dng14_chest_barrel[7] = {
 	ITEM_ID_ZWEILILIEN, 1,
 	0xff
 }; // ds:0x3fdd
-uint8_t gs_dng14_chest_x1[7] = {
-	ITEM_ID_SCHNAPSFLASCHE,
-	ITEM_ID_ZAUBERTRANK,
-	ITEM_ID_ZAUBERTRANK,
-	ITEM_ID_DOLCH,
-	ITEM_ID_ZAUBERTRANK_STARK,
-	ITEM_ID_ZAUBERTRANK_STARK,
-	0xff
-}; // ds:0x3fe4
-uint8_t gs_dng14_chest_x2[16] = {
-	ITEM_ID_BIER,
-	ITEM_ID_BIER,
-	ITEM_ID_BIER,
-	ITEM_ID_BIER,
-	ITEM_ID_BIER,
-	ITEM_ID_BIER,
-	ITEM_ID_BIER,
-	ITEM_ID_BIER,
-	ITEM_ID_BIER,
-	ITEM_ID_ZAUBERTRANK,
-	ITEM_ID_ZAUBERTRANK,
-	ITEM_ID_ZAUBERTRANK,
-	ITEM_ID_ZAUBERTRANK_STARK,
-	ITEM_ID_ZAUBERTRANK_STARK,
-	ITEM_ID_ZAUBERTRANK_STARK,
-	0xff
-}; // ds:0x3feb
-uint8_t gs_dng14_chest_x3[11] = {
-	ITEM_ID_KURZBOGEN,   3,
-	ITEM_ID_ARMBRUST,    1,
-	ITEM_ID_WURFMESSER,  4,
-	ITEM_ID_BOLZEN,     20,
-	ITEM_ID_PFEIL,      50,
-	0xff
-}; // ds:0x3ffb
-uint8_t gs_dng14_chest_x4[14] = {
-	ITEM_ID_SAEBEL,
-	ITEM_ID_SAEBEL,
-	ITEM_ID_SAEBEL,
-	ITEM_ID_SAEBEL,
-	ITEM_ID_SCHWERT,
-	ITEM_ID_SCHWERT,
-	ITEM_ID_DOLCH,
-	ITEM_ID_DOLCH,
-	ITEM_ID_DOLCH,
-	ITEM_ID_DOLCH,
-	ITEM_ID_KRIEGSBEIL,
-	ITEM_ID_KRIEGSBEIL,
-	ITEM_ID_STARKER_HEILTRANK,
-	0xff
-}; // ds:0x4006
-uint8_t gs_dng14_chest_x5[10] = {
-	ITEM_ID_WEINFLASCHE,
-	ITEM_ID_WEINFLASCHE,
-	ITEM_ID_WEINFLASCHE,
-	ITEM_ID_WEINFLASCHE,
-	ITEM_ID_WEINFLASCHE,
-	ITEM_ID_SCHNAPSFLASCHE,
-	ITEM_ID_SCHNAPSFLASCHE,
-	ITEM_ID_HEILTRANK,
-	ITEM_ID_HEILTRANK,
-	0xff
-}; // ds:0x4014
-uint8_t gs_dng14_chest_x6[8] = {
-	ITEM_ID_GOLDSCHMUCK,
-	ITEM_ID_GOLDSCHMUCK,
-	ITEM_ID_GOLDSCHMUCK,
-	ITEM_ID_SILBERSCHMUCK,
-	ITEM_ID_SILBERSCHMUCK,
-	ITEM_ID_MESSINGSPIEGEL,
-	ITEM_ID_ROBE__RED,
-	0xff
-}; // ds:0x401e
-uint8_t gs_dng14_chest_x7[7] = {
-	ITEM_ID_HYLAILER_FEUER,
-	ITEM_ID_HYLAILER_FEUER,
-	ITEM_ID_HYLAILER_FEUER,
-	ITEM_ID_HYLAILER_FEUER,
-	ITEM_ID_HYLAILER_FEUER,
-	ITEM_ID_HYLAILER_FEUER,
-	0xff
-}; // ds:0x4026
-uint8_t gs_dng14_chest_x8[13] = {
-	ITEM_ID_ORKNASE,
-	ITEM_ID_ORKNASE,
-	ITEM_ID_ORKNASE,
-	ITEM_ID_SKRAJA,
-	ITEM_ID_SKRAJA,
-	ITEM_ID_SKRAJA,
-	ITEM_ID_SPEER,
-	ITEM_ID_SPEER,
-	ITEM_ID_SPEER,
-	ITEM_ID_SCHILD,
-	ITEM_ID_SCHILD,
-	ITEM_ID_SCHILD,
-	0xff
-}; // ds:0x402d
+uint8_t gs_dng14_chest_x1[7]; // ds:0x3fe4
+uint8_t gs_dng14_chest_x2[16]; // ds:0x3feb
+uint8_t gs_dng14_chest_x3[11]; // ds:0x3ffb
+uint8_t gs_dng14_chest_x4[14]; // ds:0x4006
+uint8_t gs_dng14_chest_x5[10]; // ds:0x4014
+uint8_t gs_dng14_chest_x6[8]; // ds:0x401e
+uint8_t gs_dng14_chest_x7[7]; // ds:0x4026
+uint8_t gs_dng14_chest_x8[13]; // ds:0x402d
 uint8_t  gs_dng14_fullmap_flag = 1; // ds:0x403a
 
-uint8_t  gs_dng02_chest00_content[2] = {
-	ITEM_ID_SKRAJA,
-	0xff
-}; // ds:0x403b
-uint8_t  gs_dng02_chest01_content[4] = {
-	ITEM_ID_SAEBEL,
-	ITEM_ID_WURFMESSER,
-	ITEM_ID_MESSER,
-	0xff
-}; // ds:0x403d
-uint8_t  gs_dng02_chest06_content[4] = {
-	ITEM_ID_DECKE,
-	ITEM_ID_WASSERSCHLAUCH,
-	ITEM_ID_DOLCH,
-	0xff
-}; // ds:0x4041
-uint8_t  gs_dng02_chest02_content[8] = {
-	ITEM_ID_ALCHIMIESET,
-	ITEM_ID_KK_ELIXIER,
-	ITEM_ID_HEILTRANK,
-	ITEM_ID_HEILTRANK,
-	ITEM_ID_KL_ELIXIER,
-	ITEM_ID_REZEPT_FUER_EXPURGICUM,
-	ITEM_ID_REZEPT_FUER_HYLAILER_FEUER,
-	0xff
-}; // ds:0x4045
-uint8_t  gs_dng02_chest03_content[8] = {
-	ITEM_ID_ALCHIMIESET,
-	ITEM_ID_CH_ELIXIER,
-	ITEM_ID_WUNDERKUR,
-	ITEM_ID_GEGENGIFT,
-	ITEM_ID_REZEPT_FUER_VOMICUM,
-	ITEM_ID_REZEPT_FUER_KRAFTELIXIER,
-	ITEM_ID_REZEPT_FUER_STARKER_ZAUBERTRANK,
-	0xff
-}; // ds:0x404d
-uint8_t  gs_dng02_chest05_content[8] = {
-	ITEM_ID_ALCHIMIESET,
-	ITEM_ID_CH_ELIXIER,
-	ITEM_ID_WUNDERKUR,
-	ITEM_ID_GEGENGIFT,
-	ITEM_ID_REZEPT_FUER_VOMICUM,
-	ITEM_ID_REZEPT_FUER_KRAFTELIXIER,
-	ITEM_ID_REZEPT_FUER_STARKER_ZAUBERTRANK,
-	0xff
-}; // ds:0x4055
+uint8_t gs_dng02_chest00_content[2]; // ds:0x403b
+uint8_t gs_dng02_chest01_content[4]; // ds:0x403d
+uint8_t gs_dng02_chest06_content[4]; // ds:0x4041
+uint8_t gs_dng02_chest02_content[8]; // ds:0x4045
+uint8_t gs_dng02_chest03_content[8]; // ds:0x404d
+uint8_t gs_dng02_chest05_content[8]; // ds:0x4055
 
-uint8_t  gs_dng03_chest00_content[7] = {
-	ITEM_ID_ROBE__GREEN_1,
-	ITEM_ID_ROBE__GREEN_1,
-	ITEM_ID_ROBE__GREEN_1,
-	ITEM_ID_ROBE__GREEN_1,
-	ITEM_ID_ROBE__GREEN_1,
-	ITEM_ID_ROBE__GREEN_1,
-	0xff
-}; // ds:0x405d
-uint8_t  gs_dng03_chest01_content[8] = {
-	ITEM_ID_SEIL,
-	ITEM_ID_SEIL,
-	ITEM_ID_HAMMER,
-	ITEM_ID_SCHAUFEL,
-	ITEM_ID_BRECHEISEN,
-	ITEM_ID_KLETTERHAKEN,
-	ITEM_ID_HEILTRANK,
-	0xff
-}; // ds:0x4064
-uint8_t  gs_dng03_chest02_content[13] = {
-	ITEM_ID_WEINFLASCHE,
-	ITEM_ID_WEINFLASCHE,
-	ITEM_ID_WEINFLASCHE,
-	ITEM_ID_WEINFLASCHE,
-	ITEM_ID_WEINFLASCHE,
-	ITEM_ID_WEINFLASCHE,
-	ITEM_ID_PROVIANTPAKET,
-	ITEM_ID_PROVIANTPAKET,
-	ITEM_ID_PROVIANTPAKET,
-	ITEM_ID_PROVIANTPAKET,
-	ITEM_ID_PROVIANTPAKET,
-	ITEM_ID_PROVIANTPAKET,
-	0xff
-}; // ds:0x406c
-uint8_t  gs_dng03_chest03_content[3] = {
-	ITEM_ID_SPEER__MAGIC,
-	ITEM_ID_ZAUBERTRANK,
-	0xff
-}; // ds:0x4079
-uint8_t  gs_dng03_chest04_content[9] = {
-	ITEM_ID_ROBE__RED,
-	ITEM_ID_ROBE__RED,
-	ITEM_ID_ROBE__RED,
-	ITEM_ID_WEINFLASCHE,
-	ITEM_ID_WEINFLASCHE,
-	ITEM_ID_WEINFLASCHE,
-	ITEM_ID_PRAIOS_AMULETT,
-	0xff,
-	0xff
-}; // ds:0x407c
-uint8_t  gs_dng03_chest06_content[8] = {
-	ITEM_ID_ROBE__RED,
-	ITEM_ID_ROBE__RED,
-	ITEM_ID_ROBE__RED,
-	ITEM_ID_WEINFLASCHE,
-	ITEM_ID_WEINFLASCHE,
-	ITEM_ID_WEINFLASCHE,
-	ITEM_ID_PRAIOS_AMULETT,
-	0xff
-}; // ds:0x4085
-uint8_t  gs_dng03_chest07_content[2] = {
-	ITEM_ID_KRISTALL,
-	0xff
-}; // ds:0x408d
-uint8_t  gs_dng03_chest08_content[4] = {
-	ITEM_ID_ZAUBERTRANK,
-	ITEM_ID_ZAUBERTRANK,
-	ITEM_ID_ZAUBERTRANK,
-	0xff
-}; // ds:0x408f
-uint8_t  gs_dng03_chest09_content[11] = {
-	ITEM_ID_ARAXGIFT,
-	ITEM_ID_ARAXGIFT,
-	ITEM_ID_ARAXGIFT,
-	ITEM_ID_ARAXGIFT,
-	ITEM_ID_ARAXGIFT,
-	ITEM_ID_ARAXGIFT,
-	ITEM_ID_ARAXGIFT,
-	ITEM_ID_ARAXGIFT,
-	ITEM_ID_ARAXGIFT,
-	ITEM_ID_ARAXGIFT,
-	0xff
-}; // ds:0x4093
-uint8_t  gs_dng03_chest12_content[7] = {
-	ITEM_ID_SILBERNER_STIRNREIF__2,
-	ITEM_ID_SILBERNER_STIRNREIF__2,
-	ITEM_ID_BUCH__HEPTAGON,
-	ITEM_ID_SILBERSCHMUCK,
-	ITEM_ID_SILBERSCHMUCK,
-	ITEM_ID_ROTER_SCHLUESSEL,
-	0xff
-}; // ds:0x409e
+uint8_t gs_dng03_chest00_content[7]; // ds:0x405d
+uint8_t gs_dng03_chest01_content[8]; // ds:0x4064
+uint8_t gs_dng03_chest02_content[13]; // ds:0x406c
+uint8_t gs_dng03_chest03_content[3]; // ds:0x4079
+uint8_t gs_dng03_chest04_content[9]; // ds:0x407c
+uint8_t gs_dng03_chest06_content[8]; // ds:0x4085
+uint8_t gs_dng03_chest07_content[2]; // ds:0x408d
+uint8_t gs_dng03_chest08_content[4]; // ds:0x408f
+uint8_t gs_dng03_chest09_content[11]; // ds:0x4093
+uint8_t gs_dng03_chest12_content[7]; // ds:0x409e
 
-uint8_t  gs_dng04_chest_corpse0[4] = {
-	ITEM_ID_SAEBEL,
-	ITEM_ID_DOLCH,
-	ITEM_ID_SCHNAPSFLASCHE,
-	0xff
-}; // ds:0x40a5
-uint8_t  gs_dng04_chest_corpse1[12] = {
-	ITEM_ID_SCHWERT,
-	ITEM_ID_SCHWERT,
-	ITEM_ID_ORKNASE,
-	ITEM_ID_DOLCH,
-	ITEM_ID_DOLCH,
-	ITEM_ID_SCHWERER_DOLCH,
-	ITEM_ID_KETTENHEMD,
-	ITEM_ID_SEIL,
-	ITEM_ID_SCHAUFEL,
-	ITEM_ID_LATERNE__UNLIT,
-	ITEM_ID_SCHULDBUCH,
-	0xff
-}; // ds:0x40a9
-uint8_t  gs_dng04_chest_corpse2[10] = {
-	ITEM_ID_DOLCH,
-	ITEM_ID_LANGBOGEN,
-	ITEM_ID_LEDERZEUG,
-	ITEM_ID_SEIL,
-	ITEM_ID_DECKE,
-	ITEM_ID_WASSERSCHLAUCH,
-	ITEM_ID_ZUNDERKAESTCHEN,
-	ITEM_ID_FLOETE,
-	ITEM_ID_STARKER_HEILTRANK,
-	0xff
-}; // ds:0x40b5
+uint8_t gs_dng04_chest_corpse0[4]; // ds:0x40a5
+uint8_t gs_dng04_chest_corpse1[12]; // ds:0x40a9
+uint8_t gs_dng04_chest_corpse2[10]; // ds:0x40b5
 
 uint8_t  gs_dng06_chest1_content[16] = {
 	ITEM_ID_ENTERMESSER,
@@ -3480,119 +2246,18 @@ uint8_t  gs_dng11_secretdoor3_flag = 0; // ds:0x4167
 uint8_t  gs_dng11_lever_flag = 2; // ds:0x4168, {0-5}
 uint8_t  gs_dng11_proviant1_flag = 0; // ds:0x4169
 uint8_t  gs_dng11_proviant2_flag = 0; // ds:0x416a
-uint8_t  gs_dng11_chest3[15] = {
-	ITEM_ID_SAEBEL,
-	ITEM_ID_SAEBEL,
-	ITEM_ID_SAEBEL,
-	ITEM_ID_SAEBEL,
-	ITEM_ID_SAEBEL,
-	ITEM_ID_ENTERMESSER,
-	ITEM_ID_ENTERMESSER,
-	ITEM_ID_ENTERMESSER,
-	ITEM_ID_ENTERMESSER,
-	ITEM_ID_ENTERMESSER,
-	ITEM_ID_SCHWERT,
-	ITEM_ID_SKRAJA,
-	ITEM_ID_SKRAJA,
-	ITEM_ID_ORKNASE,
-	0xff
-}; // ds:0x416b
-uint8_t  gs_dng11_chest4[11] = {
-	ITEM_ID_KURZBOGEN,
-	ITEM_ID_KURZBOGEN,
-	ITEM_ID_SPEER,
-	ITEM_ID_SPEER,
-	ITEM_ID_SPEER,
-	ITEM_ID_SPEER,
-	ITEM_ID_SPEER,
-	ITEM_ID_ARMBRUST,
-	ITEM_ID_200_PFEILE,
-	ITEM_ID_50_BOLZEN,
-	0xff
-}; // ds:0x417a
-uint8_t  gs_dng11_chest5[5] = {
-	ITEM_ID_DOLCH,
-	ITEM_ID_SCHNAPSFLASCHE,
-	ITEM_ID_SILBERSCHMUCK,
-	ITEM_ID_HEMD,
-	0xff
-}; // ds:0x4185
-uint8_t  gs_dng11_chest6[7] = {
-	ITEM_ID_SKRAJA,
-	ITEM_ID_SILBERSCHMUCK,
-	ITEM_ID_WEINFLASCHE,
-	ITEM_ID_WINTERMANTEL,
-	ITEM_ID_HOSE,
-	ITEM_ID_HEILTRANK,
-	0xff
-}; // ds:0x418a
+uint8_t gs_dng11_chest3[15]; // ds:0x416b
+uint8_t gs_dng11_chest4[11]; // ds:0x417a
+uint8_t gs_dng11_chest5[5]; // ds:0x4185
+uint8_t gs_dng11_chest6[7]; // ds:0x418a
 uint8_t  gs_dng11_chest7 = 0xff; // ds:0x4191
-uint8_t  gs_dng11_chest8[6] = {
-	ITEM_ID_SCHNAPSFLASCHE,
-	ITEM_ID_SCHNAPSFLASCHE,
-	ITEM_ID_SCHNAPSFLASCHE,
-	ITEM_ID_DOLCH,
-	ITEM_ID_HEILTRANK,
-	0xff
-}; // ds:0x4192
-uint8_t  gs_dng11_chest9[6] = {
-	ITEM_ID_BRECHEISEN,
-	ITEM_ID_HACKE,
-	ITEM_ID_SCHAUFEL,
-	ITEM_ID_KRIEGSBEIL,
-	ITEM_ID_KRIEGSBEIL,
-	0xff
-}; // ds:0x4198
-uint8_t  gs_dng11_chest10[11] = {
-	ITEM_ID_SEIL,
-	ITEM_ID_SEIL,
-	ITEM_ID_SEIL,
-	ITEM_ID_SEIL,
-	ITEM_ID_HAMMER,
-	ITEM_ID_HAMMER,
-	ITEM_ID_HAMMER,
-	ITEM_ID_HAMMER,
-	ITEM_ID_20_KLETTERHAKEN,
-	ITEM_ID_KRIEGSBEIL,
-	0xff
-}; // ds:0x419e
-uint8_t  gs_dng11_chest11[4] = {
-	ITEM_ID_WEINFLASCHE,
-	ITEM_ID_SEEKARTE,
-	ITEM_ID_DOLCH,
-	0xff
-}; // ds:0x41a9
-uint8_t  gs_dng11_chest12[13] = {
-	ITEM_ID_GOLDSCHMUCK,
-	ITEM_ID_GOLDSCHMUCK,
-	ITEM_ID_GOLDSCHMUCK,
-	ITEM_ID_GOLDSCHMUCK,
-	ITEM_ID_SILBERSCHMUCK,
-	ITEM_ID_SILBERSCHMUCK,
-	ITEM_ID_SILBERSCHMUCK,
-	ITEM_ID_SILBERSCHMUCK,
-	ITEM_ID_SILBERSCHMUCK,
-	ITEM_ID_SILBERSCHMUCK,
-	ITEM_ID_ROBE__RED,
-	ITEM_ID_ROBE__RED,
-	0xff
-}; // ds:0x41ad
-uint8_t  gs_dng11_chest13[6] = {
-	ITEM_ID_HEILTRANK,
-	ITEM_ID_KL_ELIXIER,
-	ITEM_ID_ALCHIMIESET,
-	ITEM_ID_REZEPT_FUER_HYLAILER_FEUER,
-	ITEM_ID_SCHWERT,
-	0xff
-}; // ds:0x41ba
-uint8_t  gs_dng11_chest14[6] = {
-	ITEM_ID_SCHREIBZEUG,
-	ITEM_ID_SCHRIFTROLLE,
-	ITEM_ID_WEINFLASCHE,
-	ITEM_ID_ZAUBERTRANK,
-	ITEM_ID_LOBPREISUNGEN,
-	0xff
-}; // ds:0x41c0
+uint8_t gs_dng11_chest8[6]; // ds:0x4192
+uint8_t gs_dng11_chest9[6]; // ds:0x4198
+uint8_t gs_dng11_chest10[11]; // ds:0x419e
+uint8_t gs_dng11_chest11[4]; // ds:0x41a9
+uint8_t gs_dng11_chest12[13]; // ds:0x41ad
+uint8_t gs_dng11_chest13[6]; // ds:0x41ba
+uint8_t gs_dng11_chest14[6]; // ds:0x41c0
 uint8_t  gs_dng15_took_cursed_money = 0; // ds:0x41c6
 uint8_t  gs_dng15_door_nailed = 1; // ds:0x41c7
 uint8_t  gs_dng15_reached_hands = 0; // ds:0x41c8
@@ -3796,156 +2461,12 @@ signed char g_npc_last_farewellcheck = 0; // ds:0x4494
 signed char g_check_party = 0; // ds:0x4495
 signed char g_food_mod = 0; // ds:0x4496
 signed char g_travel_herokeeping = 0; // ds:0x4497
-uint8_t g_floor_fade_palette[32][3] = {
-	{ 0x00, 0x00, 0x00 },
-	{ 0x28, 0x00, 0x28 },
-	{ 0x16, 0x0c, 0x08 },
-	{ 0x13, 0x09, 0x06 },
-	{ 0x11, 0x06, 0x03 },
-	{ 0x0f, 0x04, 0x01 },
-	{ 0x0c, 0x01, 0x00 },
-	{ 0x0a, 0x00, 0x00 },
-	{ 0x08, 0x00, 0x00 },
-	{ 0x05, 0x00, 0x00 },
-	{ 0x03, 0x00, 0x00 },
-	{ 0x01, 0x00, 0x00 },
-	{ 0x00, 0x09, 0x00 },
-	{ 0x00, 0x07, 0x00 },
-	{ 0x00, 0x05, 0x00 },
-	{ 0x00, 0x03, 0x00 },
-	{ 0x00, 0x01, 0x00 },
-	{ 0x00, 0x00, 0x00 },
-	{ 0x00, 0x00, 0x00 },
-	{ 0x00, 0x00, 0x00 },
-	{ 0x00, 0x00, 0x00 },
-	{ 0x00, 0x00, 0x00 },
-	{ 0x00, 0x00, 0x1f },
-	{ 0x00, 0x00, 0x1c },
-	{ 0x00, 0x00, 0x1a },
-	{ 0x00, 0x00, 0x18 },
-	{ 0x00, 0x00, 0x16 },
-	{ 0x00, 0x00, 0x14 },
-	{ 0x00, 0x00, 0x11 },
-	{ 0x00, 0x00, 0x0f },
-	{ 0x00, 0x00, 0x0d },
-	{ 0x00, 0x00, 0x0b }
-}; // ds:0x4498
-uint8_t g_building_fade_palette[32][3] = {
-	{ 0x00, 0x00, 0x00 },
-	{ 0x22, 0x22, 0x26 },
-	{ 0x1b, 0x1b, 0x1f },
-	{ 0x15, 0x15, 0x19 },
-	{ 0x0f, 0x0f, 0x13 },
-	{ 0x09, 0x09, 0x0d },
-	{ 0x03, 0x03, 0x07 },
-	{ 0x00, 0x00, 0x04 },
-	{ 0x00, 0x00, 0x00 },
-	{ 0x20, 0x19, 0x19 },
-	{ 0x1b, 0x12, 0x12 },
-	{ 0x16, 0x0c, 0x0c },
-	{ 0x11, 0x06, 0x07 },
-	{ 0x0b, 0x00, 0x04 },
-	{ 0x07, 0x00, 0x04 },
-	{ 0x01, 0x00, 0x00 },
-	{ 0x00, 0x00, 0x00 },
-	{ 0x0a, 0x00, 0x00 },
-	{ 0x15, 0x00, 0x04 },
-	{ 0x20, 0x00, 0x04 },
-	{ 0x13, 0x15, 0x09 },
-	{ 0x09, 0x0e, 0x03 },
-	{ 0x00, 0x07, 0x04 },
-	{ 0x00, 0x00, 0x04 },
-	{ 0x00, 0x00, 0x00 },
-	{ 0x1b, 0x0e, 0x04 },
-	{ 0x12, 0x07, 0x04 },
-	{ 0x09, 0x00, 0x04 },
-	{ 0x00, 0x00, 0x01 },
-	{ 0x00, 0x00, 0x08 },
-	{ 0x00, 0x03, 0x0f },
-	{ 0x00, 0x08, 0x16 }
-}; // ds:0x44f8
-uint8_t g_sky_fade_palette[32][3] = {
-	{ 0x00, 0x00, 0x00 },
-	{ 0x00, 0x00, 0x11 },
-	{ 0x00, 0x00, 0x1b },
-	{ 0x28, 0x00, 0x28 },
-	{ 0x28, 0x00, 0x28 },
-	{ 0x0e, 0x0e, 0x19 },
-	{ 0x0b, 0x0b, 0x17 },
-	{ 0x09, 0x09, 0x15 },
-	{ 0x07, 0x07, 0x14 },
-	{ 0x05, 0x05, 0x12 },
-	{ 0x04, 0x04, 0x11 },
-	{ 0x02, 0x02, 0x0f },
-	{ 0x01, 0x01, 0x0d },
-	{ 0x01, 0x01, 0x0c },
-	{ 0x00, 0x00, 0x0a },
-	{ 0x00, 0x00, 0x09 },
-	{ 0x00, 0x00, 0x0e },
-	{ 0x00, 0x00, 0x0b },
-	{ 0x00, 0x00, 0x09 },
-	{ 0x00, 0x00, 0x07 },
-	{ 0x00, 0x00, 0x04 },
-	{ 0x00, 0x00, 0x02 },
-	{ 0x00, 0x00, 0x00 },
-	{ 0x28, 0x00, 0x28 },
-	{ 0x28, 0x00, 0x28 },
-	{ 0x28, 0x00, 0x28 },
-	{ 0x28, 0x00, 0x28 },
-	{ 0x28, 0x00, 0x28 },
-	{ 0x07, 0x07, 0x16 },
-	{ 0x07, 0x07, 0x15 },
-	{ 0x07, 0x07, 0x14 },
-	{ 0x08, 0x07, 0x13 }
-}; // ds:0x4558
+uint8_t g_floor_fade_palette[32][3]; // ds:0x4498
+uint8_t g_building_fade_palette[32][3]; // ds:0x44f8
+uint8_t g_sky_fade_palette[32][3]; // ds:0x4558
 signed char g_special_screen = 1; // ds:0x45b8, , e.g. diary, treasure map, game options, automap
 
-struct special_date g_special_dates[43] = {
-	// Note: dritter Rastullahellah (1. Tag des Namenlosen) is missing.
-	{  1,  1, SPECIAL_DATE_ID_SOMMERSONNENWENDE },
-	{  1,  2, SPECIAL_DATE_ID_PRAIOSFEST },
-	{  1,  3, SPECIAL_DATE_ID_PRAIOSFEST },
-	{  2,  5, SPECIAL_DATE_ID_TAG_DES_SCHWURS },
-	{  2, 15, SPECIAL_DATE_ID_SCHWERTFEST },
-	{  2, 16, SPECIAL_DATE_ID_SCHWERTFEST },
-	{  3,  1, SPECIAL_DATE_ID_TAG_DES_WASSERS },
-	{  3,  9, SPECIAL_DATE_ID_VIERTER_RASTULLAHELLAH },
-	{  3, 16, SPECIAL_DATE_ID_NEBELFEST },
-	{  3, 29, SPECIAL_DATE_ID_FISCHERFEST },
-	{  3, 30, SPECIAL_DATE_ID_PRUEFUNGSFEST },
-	{  4,  1, SPECIAL_DATE_ID_TAG_DER_HEIMKEHR },
-	{  4,  2, SPECIAL_DATE_ID_FEST_DER_EINGEBRACHTEN_FRUECHTE },
-	{  4,  3, SPECIAL_DATE_ID_FEST_DER_EINGEBRACHTEN_FRUECHTE },
-	{  4,  4, SPECIAL_DATE_ID_TAG_DER_HELDEN },
-	{  4, 12, SPECIAL_DATE_ID_TAG_DER_TREUE },
-	{  5,  1, SPECIAL_DATE_ID_TOTENFEST },
-	{  5, 22, SPECIAL_DATE_ID_FUENFTER_RASTULLAHELLAH },
-	{  5, 24, SPECIAL_DATE_ID_DES_KAISERS_GEBURTSTAG },
-	{  5, 30, SPECIAL_DATE_ID_TAG_DES_GROSSEN_SCHLAFES },
-	{  6,  7, SPECIAL_DATE_ID_ROHALS_VERHUELLUNG },
-	{  6, 30, SPECIAL_DATE_ID_ERLEUCHTUNGSFEST },
-	{  7,  1, SPECIAL_DATE_ID_TAG_DER_JAGD },
-	{  7, 30, SPECIAL_DATE_ID_TAG_DER_IFIRN },
-	{  8,  5, SPECIAL_DATE_ID_ERSTER_RASTULLAHELLAH },
-	{  8, 30, SPECIAL_DATE_ID_TAG_DER_ERNEUERUNG },
-	{  9, 16, SPECIAL_DATE_ID_TAG_DES_PHEX },
-	{  9, 24, SPECIAL_DATE_ID_GLUECKSTAG },
-	{  9, 30, SPECIAL_DATE_ID_VERSENKUNGSFEST },
-	{ 10,  1, SPECIAL_DATE_ID_SAATFEST },
-	{ 10, 18, SPECIAL_DATE_ID_ZWEITER_RASTULLAHELLAH },
-	{ 11,  1, SPECIAL_DATE_ID_TAG_DES_FEUERS },
-	{ 11,  8, SPECIAL_DATE_ID_TAG_DES_AUFBRUCHS },
-	{ 11, 21, SPECIAL_DATE_ID_TAG_DER_WAFFENSCHMIEDE },
-	{ 12,  1, SPECIAL_DATE_ID_FEST_DER_FREUDEN },
-	{ 12,  2, SPECIAL_DATE_ID_FEST_DER_FREUDEN },
-	{ 12,  3, SPECIAL_DATE_ID_FEST_DER_FREUDEN },
-	{ 12,  4, SPECIAL_DATE_ID_FEST_DER_FREUDEN },
-	{ 12,  5, SPECIAL_DATE_ID_FEST_DER_FREUDEN },
-	{ 12,  6, SPECIAL_DATE_ID_FEST_DER_FREUDEN },
-	{ 12,  7, SPECIAL_DATE_ID_FEST_DER_FREUDEN },
-	{ 12, 30, SPECIAL_DATE_ID_REINIGUNGSFEST },
-	{ -0x01, 0x00, 0x00 } // terminator entry
-}; // ds:0x45b9
+struct special_date g_special_dates[43]; // ds:0x45b9
 
 signed char g_months_spring[4] = { 10, 11, 12, -1 }; // ds:0x463a
 signed char g_months_winter[4] = { 7, 8, 9, -1 }; // ds:0x463e
@@ -3956,7 +2477,7 @@ unsigned char g_herokeeping_flag = 0; // ds:0x4649
 unsigned char g_unkn_031[4] = { 0x00, 0x00, 0x00, 0x00 }; // ds:0x464a
 
 // for the following there is an easy formula: g_level_ap_tab[i] = 50 * i * (i+1). therefore, these 84 bytes could be easily freed and reused */
-int32_t g_level_ap_tab[21] = { 0, 100, 300, 600, 1000, 1500, 2100, 2800, 3600, 4500, 5500, 6600, 7800, 9100, 10500, 12000, 13600, 15300, 17100, 19000, 21000 }; // ds:0x464e
+int32_t g_level_ap_tab[21]; // ds:0x464e
 unsigned char g_delay_or_keypress_flag = 0; // ds:0x46a2, writeonly (0,1)
 const int16_t g_merchant_items_posx[15] = { 0x001e, 0x001e, 0x001e, 0x001e, 0x001e, 0x005f, 0x005f, 0x005f, 0x005f, 0x005f, 0x00a0, 0x00a0, 0x00a0, 0x00a0, 0x00a0 }; // ds:0x46a3
 const int16_t g_merchant_items_posy[15] = { 0x0023, 0x0037, 0x004b, 0x005f, 0x0073, 0x0023, 0x0037, 0x004b, 0x005f, 0x0073, 0x0023, 0x0037, 0x004b, 0x005f, 0x0073 }; // ds:0x46c1
@@ -3968,30 +2489,8 @@ char g_version_token1 = 3; // ds:0x46f8, = 3
 char g_version_token2 = 1; // ds:0x46f9, = 1
 char g_version_token3 = 1; // ds:0x46fa, = 1
 char g_version_token4 = 1; // ds:0x46fb, = 1
-const char g_questions_handbook[10][19] = {
-	{ 1, 6, 2, 7,  (char)~'T', (char)~'H', (char)~'O', (char)~'R', (char)~'W', (char)~'A', (char)~'L', 0x00, 0x00, 0x00, 0x00, 0, 0, 0, 0 },
-	{ 1, 7, 1, 12, (char)~'V', (char)~'O', (char)~'R', (char)~'S', (char)~'I', (char)~'C', (char)~'H', (char)~'T', 0x00, 0x00, 0x00, 0, 0, 0, 0 },
-	{ 2, 2, 1, 17, (char)~'W', (char)~'I', (char)~'S', (char)~'S', (char)~'E', (char)~'N', 0x00, 0x00, 0x00, 0x00, 0x00, 0, 0, 0, 0 },
-	{ 4, 3, 2, 25, (char)~'O', (char)~'R', (char)~'T', (char)~'E', 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0, 0, 0, 0 },
-	{ 1, 5, 2, 58, (char)~'H', (char)~'E', (char)~'X', (char)~'E', (char)~'N', (char)~'K', (char)~'N', (char)~'O', (char)~'T', (char)~'E', (char)~'N', 0, 0, 0, 0 },
-	{ 1, 1, 1, 60, (char)~'S', (char)~'T', (char)~'A', (char)~'B', (char)~'Z', (char)~'A', (char)~'U', (char)~'B', (char)~'E', (char)~'R', 0x00, 0, 0, 0, 0 },
-	{ 4, 5, 1, 67, (char)~'P', (char)~'A', (char)~'R', (char)~'A', (char)~'D', (char)~'E', (char)~'W', (char)~'E', (char)~'R', (char)~'T', 0x00, 0, 0, 0, 0 },
-	{ 1, 1, 1, 74, (char)~'S', (char)~'K', (char)~'E', (char)~'L', (char)~'E', (char)~'T', (char)~'T', 0x00, 0x00, 0x00, 0x00, 0, 0, 0, 0 },
-	{ 1, 5, 2, 77, (char)~'O', (char)~'L', (char)~'G', (char)~'I', (char)~'N', (char)~'W', (char)~'U', (char)~'R', (char)~'Z', 0x00, 0x00, 0, 0, 0, 0 },
-	{ 3, 2, 1, 87, (char)~'A', (char)~'B', (char)~'S', (char)~'C', (char)~'H', (char)~'N', (char)~'I', (char)~'T', (char)~'T', 0x00, 0x00, 0, 0, 0, 0 }
-}; // ds:0x46fc
-const signed char g_questions_map[10][3] = {
-	{ 0x00, 0x0a, 0x09 },
-	{ 0x01, 0x05, 0x06 },
-	{ 0x03, 0x26, 0x20 },
-	{ 0x01, 0x1e, 0x1c },
-	{ 0x02, 0x14, 0x11 },
-	{ 0x02, 0x08, 0x07 },
-	{ 0x00, 0x0b, 0x0c },
-	{ 0x00, 0x28, 0x29 },
-	{ 0x00, 0x18, 0x2e },
-	{ 0x03, 0x19, 0x1a }
-}; // ds:0x47ba
+char g_questions_handbook[10][19]; // ds:0x46fc
+signed char g_questions_map[10][3]; // ds:0x47ba
 char g_snd_menu_title[17] = "BITTE AUSW\x8eHLEN:"; // ds:0x47d8
 char g_snd_menu_radio1[12] = "KEINE MUSIK"; // ds:0x47e9
 char g_snd_menu_radio2[10] = "NUR MUSIK"; // ds:0x47f5
@@ -4016,138 +2515,10 @@ char g_diary_string5[9] = "~~IN %s."; // ds:0x4940
 char g_diary_string6[19] = "~~ABENTEUER IN %s."; // ds:0x4949
 char g_diary_string7[19] = "~~RUMH\x8eNGEN IN %s."; // ds:0x495c
 unsigned char g_unkn_034[1] = { 0x00 }; // ds:0x496f
-struct point8s g_visual_square_north[31] = {
-	{ -1,  0 },
-	{  0,  0 },
-	{  1,  0 },
-	{ -2, -1 },
-	{ -1, -1 },
-	{  0, -1 },
-	{  1, -1 },
-	{  2, -1 },
-	{ -3, -2 },
-	{ -2, -2 },
-	{ -1, -2 },
-	{  0, -2 },
-	{  1, -2 },
-	{  2, -2 },
-	{  3, -2 },
-	{ -3, -3 },
-	{ -2, -3 },
-	{ -1, -3 },
-	{  0, -3 },
-	{  1, -3 },
-	{  2, -3 },
-	{  3, -3 },
-	{ -3, -4 },
-	{ -2, -4 },
-	{ -1, -4 },
-	{  0, -4 },
-	{  1, -4 },
-	{  2, -4 },
-	{  3, -4 },
-	{  0, -1 },
-	{  0,  1 }
-}; // ds:0x4970
-struct point8s g_visual_square_east[31] = {
-	{  0, -1 },
-	{  0,  0 },
-	{  0,  1 },
-	{  1, -2 },
-	{  1, -1 },
-	{  1,  0 },
-	{  1,  1 },
-	{  1,  2 },
-	{  2, -3 },
-	{  2, -2 },
-	{  2, -1 },
-	{  2,  0 },
-	{  2,  1 },
-	{  2,  2 },
-	{  2,  3 },
-	{  3, -3 },
-	{  3, -2 },
-	{  3, -1 },
-	{  3,  0 },
-	{  3,  1 },
-	{  3,  2 },
-	{  3,  3 },
-	{  4, -3 },
-	{  4, -2 },
-	{  4, -1 },
-	{  4,  0 },
-	{  4,  1 },
-	{  4,  2 },
-	{  4,  3 },
-	{  1,  0 },
-	{ -1,  0 }
-}; // ds:0x49ae
-struct point8s g_visual_square_south[31] = {
-	{  1,  0 },
-	{  0,  0 },
-	{ -1,  0 },
-	{  2,  1 },
-	{  1,  1 },
-	{  0,  1 },
-	{ -1,  1 },
-	{ -2,  1 },
-	{  3,  2 },
-	{  2,  2 },
-	{  1,  2 },
-	{  0,  2 },
-	{ -1,  2 },
-	{ -2,  2 },
-	{ -3,  2 },
-	{  3,  3 },
-	{  2,  3 },
-	{  1,  3 },
-	{  0,  3 },
-	{ -1,  3 },
-	{ -2,  3 },
-	{ -3,  3 },
-	{  3,  4 },
-	{  2,  4 },
-	{  1,  4 },
-	{  0,  4 },
-	{ -1,  4 },
-	{ -2,  4 },
-	{ -3,  4 },
-	{  0,  1 },
-	{  0, -1 }
-}; // ds:0x49ec
-struct point8s g_visual_square_west[31] = {
-	{  0,  1 },
-	{  0,  0 },
-	{  0, -1 },
-	{ -1,  2 },
-	{ -1,  1 },
-	{ -1,  0 },
-	{ -1, -1 },
-	{ -1, -2 },
-	{ -2,  3 },
-	{ -2,  2 },
-	{ -2,  1 },
-	{ -2,  0 },
-	{ -2, -1 },
-	{ -2, -2 },
-	{ -2, -3 },
-	{ -3,  3 },
-	{ -3,  2 },
-	{ -3,  1 },
-	{ -3,  0 },
-	{ -3, -1 },
-	{ -3, -2 },
-	{ -3, -3 },
-	{ -4,  3 },
-	{ -4,  2 },
-	{ -4,  1 },
-	{ -4,  0 },
-	{ -4, -1 },
-	{ -4, -2 },
-	{ -4, -3 },
-	{ -1,  0 },
-	{  1,  0 }
-}; // ds:0x4a2a
+struct point8s g_visual_square_north[31]; // ds:0x4970
+struct point8s g_visual_square_east[31]; // ds:0x49ae
+struct point8s g_visual_square_south[31]; // ds:0x49ec
+struct point8s g_visual_square_west[31]; // ds:0x4a2a
 char g_noway_string[40] = "IN DIESE RICHTUNG GEHT ES NICHT WEITER."; // ds:0x4a68
 
 

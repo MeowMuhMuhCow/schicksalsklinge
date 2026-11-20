@@ -953,7 +953,7 @@ extern signed int g_items_noplural[23];					// ds:0x0270; seg096
 extern const signed int g_items_pluralwords[7];				// ds:0x029e; seg106, seg107
 extern signed char g_item_name_genders[254];				// ds:0x02ac; seg096
 extern const signed int* g_forbidden_item_ids_table[12];		// ds:0x0638; seg048, seg056, seg105
-extern const struct ranged_weapon_stats g_ranged_weapon_stats_table[RANGED_WEAPON_STATS_ID__END + 1];	// ds:0x0668; seg041
+extern struct ranged_weapon_stats g_ranged_weapon_stats_table[RANGED_WEAPON_STATS_ID__END + 1];	// ds:0x0668; seg041
 extern struct weapon_stats g_weapon_stats_table[WEAPON_STATS_ID__END + 1];	// ds:0x06b0; seg033, seg041, seg105
 extern struct armor_stats g_armor_stats_table[ARMOR_STATS_ID__END + 1];				// ds:0x0877; seg079, seg100, seg102, seg105
 extern const struct usable_item_descr g_usable_items_table[USABLE_ITEM_STATS_ID__END];		// ds:0x08a9; seg105, seg107
@@ -973,13 +973,13 @@ extern void (*g_spell_handlers[SP__END])(void);				// ds:0x0dbb; seg098
 extern struct mon_spell_description g_mon_spell_descriptions[MONSTER_SPELL__END];	// ds:0x0f13; seg037, seg043, seg102
 extern int8_t g_mon_spellbooks[11][5];				// ds:0x0f8b; seg037
 extern void (*g_mon_spellhandlers[MONSTER_SPELL__END])(void);				// ds:0x0fc2; seg102
-extern const struct talent_descr g_talent_descriptions[TA__END];		// ds:0x0ffe; seg050, seg103, seg104
-extern const struct talent_range g_talentclasses[7];			//ds:0x10ce; seg046, seg103
+extern struct talent_descr g_talent_descriptions[TA__END];		// ds:0x0ffe; seg050, seg103, seg104
+extern struct talent_range g_talentclasses[7];			//ds:0x10ce; seg046, seg103
 extern signed char g_nvftab_figures_rangeweapon[22][3][4];		//ds:0x10dc; seg002, seg033, seg039
 extern signed short g_nvftab_figures_unconscious[22];			//ds:0x11e4; seg002, seg005, seg039
-extern const struct point8s g_gfxtab_offsets_unconscious[22][4];	//ds:0x1210; seg002, seg005, seg039
-extern const int8_t g_gfxtab_figures_main[125][5];			//ds:0x12c0; seg005, seg006, seg039, seg043
-extern const struct point8s g_gfxtab_offsets_main[125][5];		//ds:0x1531; seg005, seg039, seg043
+extern struct point8s g_gfxtab_offsets_unconscious[22][4];	//ds:0x1210; seg002, seg005, seg039
+extern int8_t g_gfxtab_figures_main[125][5];			//ds:0x12c0; seg005, seg006, seg039, seg043
+extern struct point8s g_gfxtab_offsets_main[125][5];		//ds:0x1531; seg005, seg039, seg043
 extern const signed int g_nvftab_figures_dead[22];	//ds:0x1a13; seg005, seg039
 extern int16_t *g_gfx_ani_index[41];			//ds:0x2555; seg036, seg037, seg044
 extern signed char g_double_size_actor_sprite_id_table[5];	//ds:0x25f9; seg032, seg034, seg037, seg038, seg039, seg042, seg043, seg044
@@ -1719,8 +1719,8 @@ extern char g_version_token1;			//ds:0x46f8; seg026
 extern char g_version_token2;			//ds:0x46f9; seg026
 extern char g_version_token3;			//ds:0x46fa; seg026
 extern char g_version_token4;			//ds:0x46fb; seg026
-extern const char g_questions_handbook[10][19];	//ds:0x46fc; seg002
-extern const signed char g_questions_map[10][3];	//ds:0x47ba; seg002
+extern char g_questions_handbook[10][19];	//ds:0x46fc; seg002
+extern signed char g_questions_map[10][3];	//ds:0x47ba; seg002
 extern char g_snd_menu_title[17];		//ds:0x47d8; seg002
 extern char g_snd_menu_radio1[12];		//ds:0x47e9; seg002
 extern char g_snd_menu_radio2[10];		//ds:0x47f5; seg002
@@ -1799,7 +1799,7 @@ extern int8_t g_gather_herbs_special;		//ds:0x66d0; seg051, seg109, seg110, seg1
 
 extern struct merchant_descr g_merchant_descr_table[95];	//ds:0x6870; seg055, seg065
 
-extern const struct inn_descr g_tavern_descr_table[89];	//ds:0x6c84; seg054, seg059, seg060
+extern struct inn_descr g_tavern_descr_table[89];	//ds:0x6c84; seg054, seg059, seg060
 
 extern struct sea_route g_sea_routes[46];	//ds:0x6f00; seg002, seg063, seg064 SHOULD BE IN GAME STATE
 extern signed char g_travel_by_ship;		//ds:0x7070; seg049, seg063

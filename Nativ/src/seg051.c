@@ -48,21 +48,7 @@ static const signed int g_campfights[4] = {
 	FIGHT_ID_CAMPFIGHT4
 }; // ds:0x6694
 
-struct gather_herbs g_gather_herbs_table[13] = {
-	{ ITEM_ID_ALRAUNE,                  5, 1, 15 },
-	{ ITEM_ID_BELMART_BLATT,           12, 3,  8 },
-	{ ITEM_ID_DONFSTENGEL,             10, 2,  9 },
-	{ ITEM_ID_GULMOND_BLATT,           15, 3,  8 },
-	{ ITEM_ID_JORUGAWURZEL,            15, 1, 10 },
-	{ ITEM_ID_KAIRANHALM,               1, 1, 18 },
-	{ ITEM_ID_SHURINKNOLLE,            12, 2,  8 },
-	{ ITEM_ID_TARNELE,                 45, 5,  4 },
-	{ ITEM_ID_THONNYSBLUETE,            3, 1, 15 },
-	{ ITEM_ID_EINBEERE,                40, 4,  8 },
-	{ ITEM_ID_WIRSELKRAUT,             30, 2,  4 },
-	{ ITEM_ID_EITRIGER_KROETENSCHEMEL, 20, 2,  4 },
-	{ 0xff,                             0, 0,  0 }
-}; // ds:0x669c
+struct gather_herbs g_gather_herbs_table[13]; // ds:0x669c
 int8_t g_gather_herbs_special = -1; 			// ds:0x66d0	/* REMARK: should be signed int */ /* item ID of a herb with better chances at this place, -1 = none */
 static char g_gather_herbs_str_found[6] = "%d^%s";	// ds:0x66d1
 static char g_gather_herbs_str_comma[3] = ", ";		// ds:0x66d7

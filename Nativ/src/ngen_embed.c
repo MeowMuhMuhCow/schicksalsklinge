@@ -356,23 +356,23 @@ static const struct struct_spelltab g_spell_tab[87] = {
 };
 
 /* Antimagie */
-static const signed short house00[] = {0x01, 0x02, 0x03, 0x04, 0x05, 0x2a, -1};
+static signed short house00[7];
 /* Beherrschung */
-static const signed short house01[] = {0x07, 0x0c, 0x0e, 0x10, 0x2c, -1};
+static signed short house01[6];
 /* Beschwoerung */
-static const signed short house02[] = {0x12, 0x13, 0x15, 0x17, 0x18, 0x3b, -1};
+static signed short house02[7];
 /* Bewegung */
-static const signed short house03[] = {0x1b, 0x1c, 0x1d, 0x1e, 0x1f, -1};
+static signed short house03[6];
 /* Heilung */
-static const signed short house04[] = {0x21, 0x23, 0x24, 0x3d, 0x46, -1};
+static signed short house04[6];
 /* Hellsicht */
-static const signed short house05[] = {0x26, 0x27, 0x29, 0x28, 0x2a, 0x2b, 0x2c, -1};
+static signed short house05[8];
 /* Kampf */
-static const signed short house06[] = {0x31, 0x33, 0x34, 0x35, 0x36, 0x39, 0x3e, -1};
+static signed short house06[8];
 /* Verwandlung */
-static const signed short house07[] = {0x3c, 0x3e, 0x48, 0x49, 0x4b, -1};
+static signed short house07[6];
 /* Veraenderung */
-static const signed short house08[] = {0x4c, 0x4e, 0x4f, 0x50, 0x52, 0x53, 0x54, -1};
+static signed short house08[8];
 
 static const signed short* g_house_spells[] = {
 	house00, house01, house02,
@@ -1048,16 +1048,7 @@ static signed short g_mouse_moved = 0;
 static signed short g_mouse_locked = 0;
 static signed short g_mouse_refresh_flag = -1;
 
-static unsigned short g_mouse_mask[32] = {
-        0x7fff, 0x9fff, 0x87ff, 0xc1ff,
-        0xc07f, 0xe01f, 0xe007, 0xf00f,
-        0xf01f, 0xf80f, 0xf887, 0xfdc3,
-        0xffe3, 0xfff7, 0xffff, 0xffff,
-        0x8000, 0x6000, 0x7800, 0x3e00,
-        0x3f80, 0x1fe0, 0x1ff8, 0x0ff0,
-        0x0fe0, 0x07f0, 0x0778, 0x023c,
-        0x001c, 0x0008, 0x0000, 0x0000,
-};
+static unsigned short g_mouse_mask[32];
 
 static char g_mouse_backbuffer[16 * 16];
 static unsigned short *g_mouse_current_cursor = g_mouse_mask;
@@ -1235,82 +1226,7 @@ struct struct_chr_lookup {
 	signed char width;
 };
 
-static const struct struct_chr_lookup g_chr_lookup[74] = {
-	{0x20, 0, 6}, // SPACE
-	{0x41, 1, 6}, // A
-	{0x42, 2, 6}, // B
-	{0x43, 3, 6},
-	{0x44, 4, 6},
-	{0x45, 5, 6},
-	{0x46, 6, 6},
-	{0x47, 7, 6},
-	{0x48, 8, 6},
-	{0x49, 9, 4},
-	{0x4a, 10, 6},
-	{0x4b, 11, 6},
-	{0x4c, 12, 5},
-	{0x4d, 13, 6},
-	{0x4e, 14, 6},
-	{0x4f, 15, 6},
-	{0x50, 16, 6},
-	{0x51, 17, 6},
-	{0x52, 18, 6},
-	{0x53, 19, 6},
-	{0x54, 20, 6},
-	{0x55, 21, 6},
-	{0x56, 22, 6},
-	{0x57, 23, 6},
-	{0x58, 24, 6},
-	{0x59, 25, 6},
-	{0x5a, 26, 6}, // Z
-	{0x8e, 27, 6}, // AE
-	{0x99, 28, 6}, // OE
-	{0x9a, 29, 6}, // UE
-	{0x2c, 30, 3}, // ,
-	{0x2e, 31, 2}, // .
-	{0x2d, 32, 6}, // -
-	{0x28, 33, 4}, // (
-	{0x29, 34, 4}, // )
-	{0x21, 35, 3}, // !
-	{0x3f, 36, 5}, // ?
-	{0x30, 37, 6}, // 0
-	{0x31, 38, 3},
-	{0x32, 39, 6},
-	{0x33, 40, 6},
-	{0x34, 41, 6},
-	{0x35, 42, 6},
-	{0x36, 43, 6},
-	{0x37, 44, 6},
-	{0x38, 45, 6},
-	{0x39, 46, 6}, // 9
-	{0x27, 47, 3}, // ´
-	{0x3a, 48, 3}, // :
-	{0x23, 49, 6}, // Star
-	{0x26, 50, 5}, // Cross
-	{0x25, 51, 5}, // Cross turned
-	{0x3c, 53, 5}, 
-	{0x3e, 52, 5},
-	{0x2f, 54, 6}, // /
-	{0x5f, 55, 6}, // _
-	{0xc8, 56, 6}, // Rune: Naudiz
-	{0xc9, 57, 6}, // Rune: Othala
-	{0xca, 58, 6}, // Rune: Thurisaz
-	{0xcb, 59, 5}, // Rune: Raidho
-	{0xcc, 60, 5}, // Rune: Sowilo
-	{0xcd, 61, 4},
-	{0xce, 62, 5},
-	{0xcf, 63, 5},
-	{0xd0, 64, 2},
-	{0xd1, 65, 6},
-	{0xd2, 66, 6},
-	{0xd3, 67, 5},
-	{0xd4, 68, 6},
-	{0xd5, 69, 5},
-	{0xd6, 70, 6},
-	{0xd7, 71, 5},
-	{0xd8, 72, 6},
-	{0xd9, 73, 5}, // End Runes
-};
+static struct struct_chr_lookup g_chr_lookup[74];
 
 static signed short g_bool_mode = 0;
 
@@ -1444,40 +1360,7 @@ static const struct struct_color g_pal_misc[3] = {
 	{0x00, 0x00, 0x28 }
 };
 
-static const struct struct_color g_pal_heads[32] = {
-	{0x00, 0x00, 0x00},
-	{0x00, 0x00, 0x3f},
-	{0x00, 0x00, 0x24},
-	{0x3c, 0x30, 0x28},
-	{0x3c, 0x2c, 0x24},
-	{0x3c, 0x28, 0x1c},
-	{0x38, 0x24, 0x18},
-	{0x34, 0x20, 0x14},
-	{0x30, 0x1c, 0x14},
-	{0x28, 0x18, 0x10},
-	{0x24, 0x14, 0x0c},
-	{0x1c, 0x10, 0x0c},
-	{0x18, 0x0c, 0x08},
-	{0x14, 0x0c, 0x08},
-	{0x38, 0x38, 0x38},
-	{0x30, 0x30, 0x30},
-	{0x2c, 0x2c, 0x2c},
-	{0x28, 0x28, 0x28},
-	{0x20, 0x20, 0x20},
-	{0x1c, 0x1c, 0x1c},
-	{0x14, 0x14, 0x14},
-	{0x10, 0x10, 0x10},
-	{0x00, 0x3f, 0x00},
-	{0x00, 0x24, 0x00},
-	{0x3c, 0x38, 0x00},
-	{0x34, 0x2c, 0x00},
-	{0x28, 0x20, 0x00},
-	{0x3c, 0x18, 0x10},
-	{0x30, 0x10, 0x08},
-	{0x24, 0x0c, 0x04},
-	{0x10, 0x08, 0x04},
-	{0x3c, 0x3c, 0x3c},
-};
+static struct struct_color g_pal_heads[32];
 
 static unsigned char g_pal_roalogo[768];
 /* FORMERLY END OF INITIALIZED GLOBAL VARIABLES _DATA */
@@ -2610,7 +2493,7 @@ static signed long process_nvf(struct nvf_desc *nvf)
 
 /* KEYBOARD AND INPUT MANAGEMENT */
 
-#if defined(__EMSCRIPTEN__)
+#if 0
 #include <emscripten.h>
 /* ---- Browser (wie im Spiel, seg002/seg097) ----
  * Textboxen zusätzlich als HTML-Overlay (werkzeuge/dialog.js); ngen bleibt für
@@ -2749,7 +2632,7 @@ EMSCRIPTEN_KEEPALIVE const char* web_gen_menue(void)
 #define WEB_ERSTE(aufruf) (aufruf)
 #endif
 
-#if defined(__EMSCRIPTEN__)
+#if 0
 /* Browser: regelmäßig abgeben (Asyncify); enter_string() wartet sonst in einer
  * leeren Schleife auf eine Taste und die Seite friert ein */
 static void web_yield(void)
@@ -2806,7 +2689,7 @@ static int sdl_event_loop(const int cmd)
 {
 	SDL_Event event;
 
-#if defined(__EMSCRIPTEN__)
+#if 0
 	web_yield();
 #endif
 
@@ -3974,7 +3857,7 @@ static signed short enter_string(char *dst, const signed short x, const signed s
 	signed short width;
 	signed short i;
 
-#if defined(__EMSCRIPTEN__)
+#if 0
 	/* Namenseingabe (txt == 1, kommt nicht aus infobox): Feld im Overlay, damit
 	 * auf dem Handy die Tastatur erscheint. Zahlen in infobox() meldet diese selbst. */
 	static char web_name_header[] = "NAME DES HELDEN:";
@@ -4037,7 +3920,7 @@ static signed short enter_string(char *dst, const signed short x, const signed s
 			g_in_key_ext = 0;
 			g_gfx_ptr = gfx_bak;
 
-#if defined(__EMSCRIPTEN__)
+#if 0
 			if (txt == 1) web_dialog_zu();
 #endif
 			return 1;
@@ -4125,7 +4008,7 @@ static signed short enter_string(char *dst, const signed short x, const signed s
 	mouse_cursor();
 	g_gfx_ptr = gfx_bak;
 
-#if defined(__EMSCRIPTEN__)
+#if 0
 	if (txt == 1) web_dialog_zu();
 #endif
 	return 0;
@@ -4227,7 +4110,7 @@ static int infobox(char *header, const signed short digits)
 
 	const int width = popup_width(g_menu_tiles);
 	const int left_border = (O_WIDTH - width) / 2 + g_text_x_mod;
-#if defined(__EMSCRIPTEN__)
+#if 0
 	web_dialog_auf(!digits ? 0 : (digits <= 3) ? 4 : 1, NULL, header, 0, NULL, digits, 0, -1, NULL, 0);
 #endif
 	g_text_x_end = width - 10;
@@ -4293,7 +4176,7 @@ static int infobox(char *header, const signed short digits)
 	g_in_infobox = 0;
 	g_in_key_ext = 0;
 
-#if defined(__EMSCRIPTEN__)
+#if 0
 	web_dialog_zu();
 #endif
 	return retval;
@@ -4367,7 +4250,7 @@ static signed short gui_radio(char *header, const signed int options, ...)
 	const int width = popup_width(g_menu_tiles);
 	const int left_border = (O_WIDTH - width) / 2 + g_text_x_mod;
 
-#if defined(__EMSCRIPTEN__)
+#if 0
 	{
 		/* vor str_splitter(), das Umbrüche in den Text schreibt */
 		const char *opt[20];
@@ -4438,7 +4321,7 @@ static signed short gui_radio(char *header, const signed int options, ...)
 		g_action_table = g_action_input;
 		handle_input();
 
-#if defined(__EMSCRIPTEN__)
+#if 0
 		if (g_web_menu_choice >= 1 && g_web_menu_choice <= options) {
 			/* Eintrag im Overlay angetippt */
 			retval = g_web_menu_choice;
@@ -4543,7 +4426,7 @@ static signed short gui_radio(char *header, const signed int options, ...)
 	g_text_x_end = 0;
 	g_in_key_ext = 0;
 
-#if defined(__EMSCRIPTEN__)
+#if 0
 	web_dialog_zu();
 #endif
 	return retval;
@@ -5020,7 +4903,7 @@ static void save_chr(volatile struct struct_hero *hero)
 	}
 
 	/* ask for output format */
-#if defined(__EMSCRIPTEN__)
+#if 0
 	/* Browser: das Spiel daneben ist immer die deutsche CD-Fassung (1754 Byte);
 	 * die Frage (eine Ergänzung von NGEN, nicht im Original) entfällt */
 	answer = 1;
@@ -6911,7 +6794,7 @@ static void select_skill(volatile struct struct_hero *hero, const int page)
 			print_values(hero, page, 2);
 		}
 
-#if defined(__EMSCRIPTEN__)
+#if 0
 		/* per Knopf gewählt: zurück zu den Knöpfen unter dem Bild statt wieder ins Menü */
 		if (g_web_gen_inline) break;
 #endif
@@ -7248,7 +7131,7 @@ static void select_spell(volatile struct struct_hero *hero, const int page)
 			print_values(hero, page, 2);
 		}
 
-#if defined(__EMSCRIPTEN__)
+#if 0
 		/* per Knopf gewählt: zurück zu den Knöpfen unter dem Bild statt wieder ins Menü */
 		if (g_web_gen_inline) break;
 #endif
@@ -7319,7 +7202,7 @@ static int select_atpa(volatile struct struct_hero *hero, const int page, const 
 
 		if (full_refresh) print_values(hero, page, level);
 
-#if defined(__EMSCRIPTEN__)
+#if 0
 		/* per Knopf gewählt: zurück zu den Knöpfen unter dem Bild statt wieder ins Menü */
 		if (g_web_gen_inline) break;
 #endif
@@ -7480,7 +7363,7 @@ static void do_gen(volatile struct struct_hero *hero, const int init_level)
 	full_refresh = clear_hero(hero);
 
 	/* emulate a right click to open the menu */
-#if defined(__EMSCRIPTEN__)
+#if 0
 	/* Browser mit Menüknöpfen: das Menü steht schon unter dem Bild */
 	if (!g_web_gen_knoepfe)
 #endif
@@ -7488,7 +7371,7 @@ static void do_gen(volatile struct struct_hero *hero, const int init_level)
 
 	/* main loop */
 	while (!done) {
-#if defined(__EMSCRIPTEN__)
+#if 0
 		g_web_gen_seite = page;
 		g_web_gen_stufe = level;
 #endif
@@ -7504,7 +7387,7 @@ static void do_gen(volatile struct struct_hero *hero, const int init_level)
 		handle_input();
 		g_action_table = NULL;
 
-#if defined(__EMSCRIPTEN__)
+#if 0
 		/* Knopf unter dem Bild: wie Menü öffnen und Eintrag wählen; auf den übrigen Seiten ist das
 		 * die erste Auswahl (Gruppe, Waffe, Zauber), die nächste erscheint ebenfalls unter dem Bild */
 		const int web_wahl = g_web_gen_wahl;
@@ -7518,7 +7401,7 @@ static void do_gen(volatile struct struct_hero *hero, const int init_level)
 		}
 #endif
 		if (g_mouse_rightclick_event || g_in_key_ext == KEY_PGUP
-#if defined(__EMSCRIPTEN__)
+#if 0
 			|| web_wahl
 #endif
 			) {
@@ -7526,7 +7409,7 @@ static void do_gen(volatile struct struct_hero *hero, const int init_level)
 			/* print the menu for each page */
 			if (page == 0) {
 
-#if defined(__EMSCRIPTEN__)
+#if 0
 				if (web_wahl)
 					menu_option = web_wahl;
 				else
@@ -7558,7 +7441,7 @@ static void do_gen(volatile struct struct_hero *hero, const int init_level)
 							full_refresh = clear_hero(hero);
 
 							/* imediately open the menu */
-#if defined(__EMSCRIPTEN__)
+#if 0
 							if (!g_web_gen_knoepfe)
 #endif
 							g_mouse_rightclick_event = 1;
@@ -7592,7 +7475,7 @@ static void do_gen(volatile struct struct_hero *hero, const int init_level)
 			  else if (page == 4)			select_atpa(hero, page, level);
 			  else if ((5 <= page) && (page <= 10)) select_spell(hero, page);
 		}
-#if defined(__EMSCRIPTEN__)
+#if 0
 		g_web_gen_vorwahl = 0;
 		g_web_gen_inline = 0;
 #endif
@@ -7699,7 +7582,7 @@ static void do_gen(volatile struct struct_hero *hero, const int init_level)
 		if (g_sdl_quit_event) done = 1;
 #endif
 	}
-#if defined(__EMSCRIPTEN__)
+#if 0
 	g_web_gen_seite = -1;
 #endif
 }
@@ -8089,7 +7972,7 @@ static void intro(void)
 	g_in_intro = 0;
 }
 
-#if defined(__EMSCRIPTEN__)
+#if 0
 /* Browser: die Seite des Spiels öffnet die Heldenerschaffung wie das Original per
  * spawnl("gen.exe", …) und wartet auf diese Meldung (CHR-Dateien sind dann gesichert). */
 static void web_gen_done(void)
@@ -8097,6 +7980,22 @@ static void web_gen_done(void)
 	EM_ASM({ if (Module.genFertig) Module.genFertig(); });
 }
 #endif
+
+void ngen_load_tables_from_exe(const unsigned char *exe_buf)
+{
+	memcpy(house00, exe_buf + 0x0180db + 0, 14);
+	memcpy(house01, exe_buf + 0x0180db + 14, 12);
+	memcpy(house02, exe_buf + 0x0180db + 26, 14);
+	memcpy(house03, exe_buf + 0x0180db + 40, 12);
+	memcpy(house04, exe_buf + 0x0180db + 52, 12);
+	memcpy(house05, exe_buf + 0x0180db + 64, 16);
+	memcpy(house06, exe_buf + 0x0180db + 80, 16);
+	memcpy(house07, exe_buf + 0x0180db + 96, 12);
+	memcpy(house08, exe_buf + 0x0180db + 108, 16);
+	memcpy(g_mouse_mask, exe_buf + 0x019c08, 64);
+	memcpy(g_chr_lookup, exe_buf + 0x021e11, 222);
+	memcpy(g_pal_heads, exe_buf + 0x022671, 96);
+}
 
 int ngen_run_intro(void)
 {
@@ -8184,6 +8083,9 @@ int ngen_run(int init_level, int called_from_game)
 		}
 	}
 	do_gen(&g_hero, l_level);
+#if defined(__EMSCRIPTEN__)
+	dsa_platform_sync_savegames();
+#endif
 	exit_music();
 	mouse_bg();
 	mouse_disable();
@@ -8197,7 +8099,7 @@ int main_ngen_unused(int argc, char** argv)
 {
 	int l_level = -1;
 	char param_level;
-#if defined(__EMSCRIPTEN__)
+#if 0
 	/* Parameter "intro": nur das Logo-Intro zeigen (Start der Web-Fassung) */
 	const int web_intro_only = (argc > 1) && !strcmp(argv[1], "intro");
 	if (web_intro_only) argc = 1;
@@ -8250,7 +8152,7 @@ int main_ngen_unused(int argc, char** argv)
 		init_colors();
 	}
 
-#if defined(__EMSCRIPTEN__)
+#if 0
 	if (web_intro_only) {
 		call_fill_rect_gen(g_vga_memstart, 0, 0, O_WIDTH - 1, O_HEIGHT - 1, 0);
 		restore_timer_isr();
@@ -8304,7 +8206,7 @@ int main_ngen_unused(int argc, char** argv)
 
 	free_buffers();
 
-#if defined(__EMSCRIPTEN__)
+#if 0
 	web_gen_done();
 #endif
 	return 0;

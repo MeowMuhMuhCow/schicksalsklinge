@@ -82,63 +82,7 @@ static const signed int g_trv_ship_to_hafen_ltx[8] = {
 	41  // SHIP_TYPE_FISCHERBOOT
 }; // ds:0x6ef0
 
-struct sea_route g_sea_routes[SEA_ROUTE_ID__END] = {
-	/* High seas routes */
-	{ TOWN_ID_THORWAL    , TOWN_ID_PREM            , 115,  1, 0, 0, 0, 0 }, // SEA_ROUTE_ID_THORWAL_PREM      ==  1
-	{ TOWN_ID_PREM       , TOWN_ID_HJALSINGOR      , 210,  3, 0, 0, 0, 0 }, // SEA_ROUTE_ID_PREM_HJALSING     ==  2
-#ifndef M302de_ORIGINAL_BUGFIX
-	 /* Original-Bug 25: According to the map, the route Prem <-> Manrin should be the longest ship route by far. Distance 54 is way too short. Maybe the original intention was a value of 310, which after a byte overflow results in 54. */
-	{ TOWN_ID_PREM       , TOWN_ID_MANRIN          ,  54,  7, 0, 0, 0, 0 }, // SEA_ROUTE_ID_PREM_MANRIN       ==  3
-#else
-	{ TOWN_ID_PREM       , TOWN_ID_MANRIN          , 255,  7, 0, 0, 0, 0 }, // SEA_ROUTE_ID_PREM_MANRIN       ==  3
-	/* set the distance to maximum possible value 255. Still too short, but much better than 54 */
-#endif
-	{ TOWN_ID_PREM       , TOWN_ID_KORD            , 135,  7, 0, 0, 0, 0 }, // SEA_ROUTE_ID_PREM_KORD         ==  4
-	{ TOWN_ID_KORD       , TOWN_ID_HJALSINGOR      ,  80,  6, 0, 0, 0, 0 }, // SEA_ROUTE_ID_KORD_HJALSING     ==  5
-	{ TOWN_ID_HJALSINGOR , TOWN_ID_OVERTHORN       , 115,  4, 0, 0, 0, 0 }, // SEA_ROUTE_ID_HJALSING_OVERTHOR ==  6
-	{ TOWN_ID_HJALSINGOR , TOWN_ID_MANRIN          , 110,  5, 0, 0, 0, 0 }, // SEA_ROUTE_ID_HJALSING_MANRIN   ==  7
-	/* Costal routes */
-	{ TOWN_ID_THORWAL    , TOWN_ID_VAERMHAG        ,  30,  7, 0, 1, 0, 0 }, // SEA_ROUTE_ID_THORWAL_VAERMHAG  ==  8
-	{ TOWN_ID_VAERMHAG   , TOWN_ID_VARNHEIM        ,  37,  5, 0, 1, 0, 0 }, // SEA_ROUTE_ID_VAERMHAG_VARNHEIM ==  9
-	{ TOWN_ID_VARNHEIM   , TOWN_ID_LJASDAHL        ,  25,  3, 0, 1, 0, 0 }, // SEA_ROUTE_ID_VARNHEIM_LJASDAHL == 10
-	{ TOWN_ID_VARNHEIM   , TOWN_ID_OTTARJE         ,  25,  8, 0, 1, 0, 0 }, // SEA_ROUTE_ID_VARNHEIM_OTTARJE  == 11
-	{ TOWN_ID_LJASDAHL   , TOWN_ID_OTTARJE         ,  10,  1, 0, 1, 0, 0 }, // SEA_ROUTE_ID_LJASDAHL_OTTARJE  == 12
-	{ TOWN_ID_SKJAL      , TOWN_ID_OTTARJE         ,  52,  3, 0, 1, 0, 0 }, // SEA_ROUTE_ID_SKJAL_OTTARJE     == 13
-	{ TOWN_ID_SKJAL      , TOWN_ID_PREM            ,  28,  4, 0, 1, 0, 0 }, // SEA_ROUTE_ID_SKJAL_PREM        == 14
-	{ TOWN_ID_PREM       , TOWN_ID_ARYN            ,  28,  6, 0, 1, 0, 0 }, // SEA_ROUTE_ID_PREM_ARYN         == 15
-	{ TOWN_ID_PREM       , TOWN_ID_RUNINSHAVEN     ,  35,  7, 0, 1, 0, 0 }, // SEA_ROUTE_ID_PREM_RUNINSHA     == 16
-	{ TOWN_ID_ARYN       , TOWN_ID_RUNINSHAVEN     ,  25,  4, 0, 1, 0, 0 }, // SEA_ROUTE_ID_ARYN_RUNINSHA     == 17
-	{ TOWN_ID_RUNINSHAVEN, TOWN_ID_TREBAN          ,  50,  7, 0, 1, 0, 0 }, // SEA_ROUTE_ID_RUNINSHA_TREBAN   == 18
-	{ TOWN_ID_TREBAN     , TOWN_ID_KORD            ,  40,  2, 0, 1, 0, 0 }, // SEA_ROUTE_ID_TREBAN_KORD       == 19
-	{ TOWN_ID_KORD       , TOWN_ID_GUDDASUNDEN     ,  65,  2, 0, 1, 0, 0 }, // SEA_ROUTE_ID_KORD_GUDDASUN     == 20
-	{ TOWN_ID_GUDDASUNDEN, TOWN_ID_HJALSINGOR      ,  20,  1, 0, 1, 0, 0 }, // SEA_ROUTE_ID_GUDDASUN_HJALSING == 21
-	{ TOWN_ID_HJALSINGOR , TOWN_ID_ROVIK           ,  46,  2, 0, 1, 0, 0 }, // SEA_ROUTE_ID_HJALSING_ROVIK    == 22
-	{ TOWN_ID_ROVIK      , TOWN_ID_OVERTHORN       ,  67,  2, 0, 1, 0, 0 }, // SEA_ROUTE_ID_ROVIK_OVERTHOR    == 23
-	{ TOWN_ID_ROVIK      , TOWN_ID_ORVIL           ,  18,  1, 0, 1, 0, 0 }, // SEA_ROUTE_ID_ROVIK_ORVIL       == 24
-	{ TOWN_ID_OVERTHORN  , TOWN_ID_TJANSET         ,  40,  3, 0, 1, 0, 0 }, // SEA_ROUTE_ID_OVERTHOR_TJANSET  == 25
-	{ TOWN_ID_OVERTHORN  , TOWN_ID_VIDSAND         ,  48,  1, 0, 1, 0, 0 }, // SEA_ROUTE_ID_OVERTHOR_VIDSAND  == 26
-	{ TOWN_ID_TJANSET    , TOWN_ID_LISKOR          ,  22,  6, 0, 1, 0, 0 }, // SEA_ROUTE_ID_TJANSET_LISKOR    == 27
-	{ TOWN_ID_LISKOR     , TOWN_ID_VIDSAND         ,  22,  1, 0, 1, 0, 0 }, // SEA_ROUTE_ID_LISKOR_VIDSAND    == 28
-	{ TOWN_ID_TJANSET    , TOWN_ID_VIDSAND         ,  36,  2, 0, 1, 0, 0 }, // SEA_ROUTE_ID_TJANSET_VIDSAND   == 29
-	{ TOWN_ID_OVERTHORN  , TOWN_ID_BRENDHIL        ,  32,  3, 0, 1, 0, 0 }, // SEA_ROUTE_ID_OVERTHOR_BRENDHIL == 30
-	{ TOWN_ID_BRENDHIL   , TOWN_ID_MANRIN          ,  57,  5, 0, 1, 0, 0 }, // SEA_ROUTE_ID_BRENDHIL_MANRIN   == 31
-	{ TOWN_ID_ROVIK      , TOWN_ID_MANRIN          ,  83,  7, 0, 1, 0, 0 }, // SEA_ROUTE_ID_ROVIK_MANRIN      == 32
-	{ TOWN_ID_THORWAL    , TOWN_ID_MERSKE          ,  30,  7, 0, 1, 0, 0 }, // SEA_ROUTE_ID_THORWAL_MERSKE    == 33
-	{ TOWN_ID_MERSKE     , TOWN_ID_EFFERDUN        ,  18,  8, 0, 1, 0, 0 }, // SEA_ROUTE_ID_MERSKE_EFFERDUN   == 34
-	{ TOWN_ID_THORWAL    , TOWN_ID_EFFERDUN        ,  47,  3, 0, 1, 0, 0 }, // SEA_ROUTE_ID_THORWAL_EFFERDUN  == 35
-	{ TOWN_ID_SERSKE     , TOWN_ID_MERSKE          ,  24,  7, 0, 1, 0, 0 }, // SEA_ROUTE_ID_SERSKE_MERSKE     == 36
-	{ TOWN_ID_SERSKE     , TOWN_ID_EFFERDUN        ,  41,  5, 0, 1, 0, 0 }, // SEA_ROUTE_ID_SERSKE_EFFERDUN   == 37
-	{ TOWN_ID_OVERTHORN  , TOWN_ID_LISKOR          ,  51,  3, 0, 1, 0, 0 }, // SEA_ROUTE_ID_OVERTHOR_LISKOR   == 38
-	{ TOWN_ID_THORWAL    , TOWN_ID_VARNHEIM        ,  67,  4, 0, 1, 0, 0 }, // SEA_ROUTE_ID_THORWAL_VARNHEIM  == 39
-	{ TOWN_ID_OTTARJE    , TOWN_ID_PREM            ,  62,  4, 0, 1, 0, 0 }, // SEA_ROUTE_ID_OTTARJE_PREM      == 40
-	{ TOWN_ID_OTTARJE    , TOWN_ID_RUNINSHAVEN     ,  73,  7, 0, 1, 0, 0 }, // SEA_ROUTE_ID_OTTARJE_RUNINSHA  == 41
-	{ TOWN_ID_SKJAL      , TOWN_ID_RUNINSHAVEN     ,  55,  6, 0, 1, 0, 0 }, // SEA_ROUTE_ID_SKJAL_RUNINSHA    == 42
-	{ TOWN_ID_RUNINSHAVEN, TOWN_ID_LEUCHTTURM_RUNIN,  25,  8, 0, 1, 0, 0 }, // SEA_ROUTE_ID_RUNINSHA_L_RUNIN  == 43
-	{ TOWN_ID_TREBAN     , TOWN_ID_LEUCHTTURM_RUNIN,  50, 10, 0, 1, 0, 0 }, // SEA_ROUTE_ID_TREBAN_L_RUNIN    == 44
-	{ TOWN_ID_MANRIN     , TOWN_ID_OVERTHORN       ,  60,  5, 0, 1, 0, 0 }, // SEA_ROUTE_ID_MANRIN_OVERTHOR   == 45
-	{ (unsigned char)-1  , 0x00                    ,   0,  0, 0, 0, 0, 0 }  // SEA_ROUTE_ID__END              == 46
-	/* TODO: towns should be signed */
-}; // ds:0x6f00
+struct sea_route g_sea_routes[SEA_ROUTE_ID__END]; // ds:0x6f00
 
 signed char g_travel_by_ship = 0; // ds:0x7070, 0 = on land, 1 = at the ship
 

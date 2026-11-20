@@ -31,25 +31,7 @@ struct tlk_option {
 	signed int txt, goto_state;
 };
 
-static const struct struct_informer_tab g_informer_tab[15] = {
-/* { name_id, town_id, unkn} */
-/* unkn ist bei Yasma, Ragna, Eliane, Swafnild und Algrid 1: vermutlich das Geschlecht (1 = weiblich); wird nicht gelesen */
-	{ 700, TOWN_ID_SKJAL      , 0 }, // INFORMER_ID_JURGE
-	{ 701, TOWN_ID_OTTARJE    , 0 }, // INFORMER_ID_HJORE
-	{ 702, TOWN_ID_THOSS      , 1 }, // INFORMER_ID_YASMA
-	{ 703, TOWN_ID_ORVIL      , 0 }, // INFORMER_ID_UMBRIK
-	{ 704, TOWN_ID_FELSTEYN   , 0 }, // INFORMER_ID_ISLEIF
-	{ 705, TOWN_ID_VIDSAND    , 1 }, // INFORMER_ID_RAGNA
-	{ 706, TOWN_ID_ANGBODIRTAL, 0 }, // INFORMER_ID_BEORN
-	{ 707, TOWN_ID_BREIDA     , 0 }, // INFORMER_ID_ASGRIMM
-	{ 708, TOWN_ID_VARNHEIM   , 1 }, // INFORMER_ID_ELIANE
-	{ 709, -1                 , 0 }, // INFORMER_ID_OLVIR
-	{ 710, -1                 , 1 }, // INFORMER_ID_SWAFNILD
-	{ 711, -1                 , 0 }, // INFORMER_ID_TREBORN
-	{ 712, -1                 , 0 }, // INFORMER_ID_UNICORN
-	{ 713, TOWN_ID_HJALSINGOR , 1 }, // INFORMER_ID_ALGRID
-	{ 714, TOWN_ID_MANRIN     , 0 }  // INFORMER_ID_TIOMAR
-}; // ds:0x5ed6
+struct struct_informer_tab g_informer_tab[15]; // ds:0x5ed6
 
 /**
  * \brief   fuehrt ein Gespraech nach einer TLK-Datei, jeder Text in 4 zufaelligen Varianten (Texte ueber get_tx())
