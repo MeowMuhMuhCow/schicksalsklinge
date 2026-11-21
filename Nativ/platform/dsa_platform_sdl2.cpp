@@ -2126,7 +2126,7 @@ static void dsa_save_bmp(const char *path) {
 }
 
 /* =========================================================================
- * Zweig Drehen (Claude I16 / K87, 20.11.2026): fluessiger Schwenk bei 90-Grad-Drehung.
+ * Zweig Drehen (20.11.2026): fluessiger Schwenk bei 90-Grad-Drehung.
  * Das Spiel bleibt unveraendert (vier Richtungen). update_direction() meldet die Drehung
  * (ab FIX_BUGS >= 1), hier wird beim naechsten neu gezeichneten Bild die alte Ansicht
  * seitlich herausgeschoben und die neue hereingeschoben. DSA_DREHEN=0 schaltet ab,

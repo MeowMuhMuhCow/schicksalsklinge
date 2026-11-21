@@ -16,7 +16,7 @@ for i in range(len(data) - 4):   # TLINK: far call im selben Segment -> push cs;
 for i, m in enumerate(mask):
     if not m and i < len(orig): data[i] = 0; orig[i] = 0
 def dis(b):
-    p = '/tmp/claude-0/dcmp.bin'; open(p, 'wb').write(b)
+    p = '/tmp/dsa1/dcmp.bin'; open(p, 'wb').write(b)
     out = subprocess.run(['ndisasm', '-b16', p], capture_output=True, text=True).stdout.splitlines()
     return [re.sub(r'^([0-9A-F]{8})\s+\S+\s+', r'\1 ', l) for l in out]
 A = dis(bytes(orig[:len(data)])); B = dis(bytes(data))

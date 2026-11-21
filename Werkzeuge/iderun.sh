@@ -7,7 +7,7 @@ cat > $CONF <<C
 output=surface
 [dosbox]
 memsize=16
-captures=/tmp/claude-0/shots
+captures=/tmp/dsa1/shots
 [cpu]
 core=normal
 cycles=max
@@ -20,6 +20,6 @@ cd \\$WD
 $CMD
 exit
 C
-rm -rf /tmp/claude-0/shots; mkdir -p /tmp/claude-0/shots
-BE_DATE=${BE_DATE:-} BE_KEYSCRIPT=$KS LD_LIBRARY_PATH=$R/sdlinst/lib SDL_VIDEODRIVER=dummy SDL_AUDIODRIVER=dummy timeout -s KILL $T $R/be-build/src/dosbox -conf $CONF -noconsole > /tmp/claude-0/ide.log 2>&1
-rm -f $CONF; grep -c SHOT /tmp/claude-0/ide.log; grep KEYSCRIPT /tmp/claude-0/ide.log
+rm -rf /tmp/dsa1/shots; mkdir -p /tmp/dsa1/shots
+BE_DATE=${BE_DATE:-} BE_KEYSCRIPT=$KS LD_LIBRARY_PATH=$R/sdlinst/lib SDL_VIDEODRIVER=dummy SDL_AUDIODRIVER=dummy timeout -s KILL $T $R/be-build/src/dosbox -conf $CONF -noconsole > /tmp/dsa1/ide.log 2>&1
+rm -f $CONF; grep -c SHOT /tmp/dsa1/ide.log; grep KEYSCRIPT /tmp/dsa1/ide.log

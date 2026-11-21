@@ -698,12 +698,17 @@ signed int DNG_step(void)
 		/* Original-Bug: unlike the step forward, a semipermeable wall (DNG_TILE_SEMIPERMEABLE_WALL)
 		 * is not checked here, so it can always be passed walking backwards (vermutlich). */
 #if FIX_0090
-		/* Fix 90: rueckwaerts gilt das Richtungsflag der Gegenrichtung (wie vorwaerts) */
+		/* Fix 90: rueckwaerts gilt das Richtungsflag der Gegenrichtung (wie vorwaerts).
+		 * Ausnahme: Waende ganz ohne Richtungsflag (0xB0) bleiben rueckwaerts durchlaessig wie im Original.
+		 * Nur so erreicht man den Giftflaschenraum (Ruine des Schwarzmagiers, Ebene 3, Wand 1,3) und die
+		 * Truhenkammer im Drachenhort (Ebene 1, Wand 3,7); beide Raeume haben keinen anderen Zugang. */
 		if ((dng_tile = div16(g_steptarget_back)) == DNG_TILE_SEMIPERMEABLE_WALL)
 		{
-			if (g_steptarget_back & (1 << REVERSE_VIEWDIR(gs_viewdir)) & 0x0f)
+			if (!(g_steptarget_back & 0x0f) || (g_steptarget_back & (1 << REVERSE_VIEWDIR(gs_viewdir)) & 0x0f))
 			{
 				DNG_timestep(-1);
+			} else {
+				no_way();
 			}
 
 		} else
