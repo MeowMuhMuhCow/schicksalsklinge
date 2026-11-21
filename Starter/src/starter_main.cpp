@@ -36,7 +36,11 @@ static uint32_t      g_fb_fallback[SCREEN_W * SCREEN_H];
 static uint32_t     *g_fb       = g_fb_fallback;
 static HDC           g_mem_dc   = NULL;
 static HBITMAP       g_dib_bmp  = NULL;
-static HFONT         g_fonts[7] = {NULL, NULL, NULL, NULL, NULL, NULL, NULL};
+static HFONT         g_fonts[9] = {NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL};
+static int           g_clip_x0  = 0;
+static int           g_clip_y0  = 0;
+static int           g_clip_x1  = SCREEN_W;
+static int           g_clip_y1  = SCREEN_H;
 static SDL_Window   *g_window   = NULL;
 static SDL_Renderer *g_renderer = NULL;
 static SDL_Texture  *g_texture  = NULL;
@@ -245,6 +249,7 @@ struct GameCatalogEntry {
     int         teil;
     std::string name;
     std::string untertitel;
+    std::string version;      /* Stand der Fehlerliste, z. B. "Fanpatch v1.5h" (spiele.json) */
     std::string status_cfg;
     std::string status_wenn_exe_fehlt;
     std::string port_ordner;
@@ -333,6 +338,8 @@ static std::string g_modal_line2;
 static std::string g_modal_line3;
 static std::string g_modal_line4;
 static bool        g_help_active      = false;
+static bool        g_fp_active        = false;
+static int         g_fp_game_idx      = 0;
 static std::string g_status_msg;
 static int         g_hover_game       = -1;
 
@@ -510,6 +517,7 @@ static void parse_game_object(const char *&p, GameCatalogEntry &e) {
         else if (key == "teil") e.teil = parse_json_int(p);
         else if (key == "name") e.name = parse_json_string(p);
         else if (key == "untertitel") e.untertitel = parse_json_string(p);
+        else if (key == "version") e.version = parse_json_string(p);
         else if (key == "status") e.status_cfg = parse_json_string(p);
         else if (key == "status_wenn_exe_fehlt") e.status_wenn_exe_fehlt = parse_json_string(p);
         else if (key == "port_ordner") e.port_ordner = parse_json_string(p);
@@ -2201,21 +2209,43 @@ static void refresh_all_games(void) {
  * ========================================================================= */
 
 static inline void put_px(int x, int y, uint32_t col) {
-    if ((unsigned)x < SCREEN_W && (unsigned)y < SCREEN_H) {
+    if (x >= g_clip_x0 && x < g_clip_x1 && y >= g_clip_y0 && y < g_clip_y1) {
         g_fb[y * SCREEN_W + x] = col;
     }
 }
 
 static void fill_rect(int x, int y, int w, int h, uint32_t col) {
-    int x0 = (x < 0) ? 0 : x;
-    int y0 = (y < 0) ? 0 : y;
-    int x1 = (x + w > SCREEN_W) ? SCREEN_W : (x + w);
-    int y1 = (y + h > SCREEN_H) ? SCREEN_H : (y + h);
+    int x0 = (x < g_clip_x0) ? g_clip_x0 : x;
+    int y0 = (y < g_clip_y0) ? g_clip_y0 : y;
+    int x1 = (x + w > g_clip_x1) ? g_clip_x1 : (x + w);
+    int y1 = (y + h > g_clip_y1) ? g_clip_y1 : (y + h);
     for (int py = y0; py < y1; ++py) {
         uint32_t *row = &g_fb[py * SCREEN_W];
         for (int px = x0; px < x1; ++px) {
             row[px] = col;
         }
+    }
+}
+
+static void set_clip_rect(int x, int y, int w, int h) {
+    g_clip_x0 = (x < 0) ? 0 : x;
+    g_clip_y0 = (y < 0) ? 0 : y;
+    g_clip_x1 = (x + w > SCREEN_W) ? SCREEN_W : (x + w);
+    g_clip_y1 = (y + h > SCREEN_H) ? SCREEN_H : (y + h);
+    if (g_mem_dc) {
+        HRGN rgn = CreateRectRgn(g_clip_x0, g_clip_y0, g_clip_x1, g_clip_y1);
+        SelectClipRgn(g_mem_dc, rgn);
+        DeleteObject(rgn);
+    }
+}
+
+static void reset_clip_rect(void) {
+    g_clip_x0 = 0;
+    g_clip_y0 = 0;
+    g_clip_x1 = SCREEN_W;
+    g_clip_y1 = SCREEN_H;
+    if (g_mem_dc) {
+        SelectClipRgn(g_mem_dc, NULL);
     }
 }
 
@@ -2271,7 +2301,9 @@ enum StarterFontIndex {
     FONT_15      = 3,
     FONT_15_SEMI = 4,
     FONT_23_BOLD = 5,
-    FONT_27_BOLD = 6
+    FONT_27_BOLD = 6,
+    FONT_12_BOLD = 7,
+    FONT_13_BOLD = 8
 };
 
 static void apply_font_variant(int variant);
@@ -2313,10 +2345,10 @@ static void apply_font_variant(int variant) {
     g_font_variant = variant;
     g_loaded_font_variant = variant;
 
-    static const int heights[7] = { -12, -13, -14, -15, -15, -23, -27 };
-    static const int weights[7] = { FW_NORMAL, FW_NORMAL, FW_NORMAL, FW_NORMAL, FW_SEMIBOLD, FW_BOLD, FW_BOLD };
+    static const int heights[9] = { -12, -13, -14, -15, -15, -23, -27, -12, -13 };
+    static const int weights[9] = { FW_NORMAL, FW_NORMAL, FW_NORMAL, FW_NORMAL, FW_SEMIBOLD, FW_BOLD, FW_BOLD, FW_BOLD, FW_BOLD };
 
-    for (int i = 0; i < 7; ++i) {
+    for (int i = 0; i < 9; ++i) {
         if (g_fonts[i]) {
             DeleteObject(g_fonts[i]);
             g_fonts[i] = NULL;
@@ -2357,11 +2389,47 @@ static int utf8_to_wstr(const char *text, wchar_t *wbuf, int cap) {
 static HFONT select_font_idx(int font_idx) {
     init_gdi_font_canvas();
     if (font_idx < 0) font_idx = 0;
-    if (font_idx > 6) font_idx = 6;
+    if (font_idx > 8) font_idx = 8;
     return g_fonts[font_idx];
 }
 
-static int text_width_px(const char *text, int font_idx = FONT_14) {
+/* Zeichnet das 14x14 Goldsack-Symbol (💰, U+1F4B0) fuer Exploits direkt in den Framebuffer */
+static void draw_moneybag_icon(int x0, int y0) {
+    /* 0=transparent, 1=dunkler Rand/Dollar (#5A3A10), 2=Braun/Schnur (#A86420), 3=Gold (#E5A938), 4=Glanz (#FBE078) */
+    static const uint8_t bag[14][14] = {
+        {0,0,0,0,1,3,4,3,3,1,0,0,0,0},
+        {0,0,0,0,0,1,3,4,1,0,0,0,0,0},
+        {0,0,0,0,1,2,2,2,2,1,0,0,0,0},
+        {0,0,0,1,3,4,3,3,3,3,1,0,0,0},
+        {0,0,1,3,4,4,3,1,3,3,3,1,0,0},
+        {0,1,3,4,4,3,1,1,1,3,3,3,1,0},
+        {0,1,3,4,3,1,3,1,0,3,3,3,1,0},
+        {1,3,3,3,3,3,1,1,1,3,3,3,3,1},
+        {1,3,3,3,3,3,0,1,3,1,3,3,3,1},
+        {1,3,3,3,3,1,1,1,1,3,3,3,3,1},
+        {1,3,3,3,3,3,3,1,3,3,3,3,3,1},
+        {0,1,3,3,3,3,3,3,3,3,3,3,1,0},
+        {0,0,1,3,3,3,3,3,3,3,3,1,0,0},
+        {0,0,0,1,1,1,1,1,1,1,1,0,0,0}
+    };
+    static const uint32_t pal[5] = {
+        0x00000000u,
+        0xFF4A2E08u,
+        0xFFA85E18u,
+        0xFFE6A832u,
+        0xFFFCE484u
+    };
+    for (int dy = 0; dy < 14; ++dy) {
+        for (int dx = 0; dx < 14; ++dx) {
+            uint8_t c = bag[dy][dx];
+            if (c > 0) {
+                put_px(x0 + dx, y0 + dy, pal[c]);
+            }
+        }
+    }
+}
+
+static int text_width_px_no_icon(const char *text, int font_idx) {
     if (!text || !text[0]) return 0;
     HFONT hf = select_font_idx(font_idx);
     if (g_mem_dc && hf) {
@@ -2376,6 +2444,29 @@ static int text_width_px(const char *text, int font_idx = FONT_14) {
     return (int)strlen(text) * 8;
 }
 
+static int text_width_px(const char *text, int font_idx = FONT_14) {
+    if (!text || !text[0]) return 0;
+    const char *bag_utf8 = "\xF0\x9F\x92\xB0";
+    const char *found = strstr(text, bag_utf8);
+    if (!found) {
+        return text_width_px_no_icon(text, font_idx);
+    }
+    int total = 0;
+    const char *cur = text;
+    while ((found = strstr(cur, bag_utf8)) != NULL) {
+        if (found > cur) {
+            std::string seg(cur, (size_t)(found - cur));
+            total += text_width_px_no_icon(seg.c_str(), font_idx);
+        }
+        total += 15;
+        cur = found + 4;
+    }
+    if (*cur) {
+        total += text_width_px_no_icon(cur, font_idx);
+    }
+    return total;
+}
+
 static int text_height_px(int font_idx = FONT_14) {
     HFONT hf = select_font_idx(font_idx);
     if (g_mem_dc && hf) {
@@ -2388,7 +2479,7 @@ static int text_height_px(int font_idx = FONT_14) {
     return 18;
 }
 
-static void draw_text(int x, int y, const char *text, uint32_t col, int font_idx = FONT_14, bool shadow = false) {
+static void draw_text_no_icon(int x, int y, const char *text, uint32_t col, int font_idx, bool shadow) {
     if (!text || !text[0]) return;
     HFONT hf = select_font_idx(font_idx);
     if (g_mem_dc && hf) {
@@ -2412,18 +2503,44 @@ static void draw_text(int x, int y, const char *text, uint32_t col, int font_idx
         TextOutW(g_mem_dc, x, y, wbuf, wlen);
 
         /* Alpha-Byte auf 0xFF setzen fuer SDL_PIXELFORMAT_ARGB8888 */
-        int x0 = (x < 0) ? 0 : x;
-        int y0 = (y < 0) ? 0 : y;
+        int x0 = (x < g_clip_x0) ? g_clip_x0 : x;
+        int y0 = (y < g_clip_y0) ? g_clip_y0 : y;
         int x1 = x + (int)sz.cx + 3;
         int y1 = y + (int)sz.cy + 3;
-        if (x1 > SCREEN_W) x1 = SCREEN_W;
-        if (y1 > SCREEN_H) y1 = SCREEN_H;
+        if (x1 > g_clip_x1) x1 = g_clip_x1;
+        if (y1 > g_clip_y1) y1 = g_clip_y1;
         for (int py = y0; py < y1; ++py) {
             uint32_t *row = &g_fb[py * SCREEN_W];
             for (int px = x0; px < x1; ++px) {
                 row[px] |= 0xFF000000u;
             }
         }
+    }
+}
+
+static void draw_text(int x, int y, const char *text, uint32_t col, int font_idx = FONT_14, bool shadow = false) {
+    if (!text || !text[0]) return;
+    const char *bag_utf8 = "\xF0\x9F\x92\xB0";
+    const char *found = strstr(text, bag_utf8);
+    if (!found) {
+        draw_text_no_icon(x, y, text, col, font_idx, shadow);
+        return;
+    }
+    int cur_x = x;
+    int th = text_height_px(font_idx);
+    const char *cur = text;
+    while ((found = strstr(cur, bag_utf8)) != NULL) {
+        if (found > cur) {
+            std::string seg(cur, (size_t)(found - cur));
+            draw_text_no_icon(cur_x, y, seg.c_str(), col, font_idx, shadow);
+            cur_x += text_width_px_no_icon(seg.c_str(), font_idx);
+        }
+        draw_moneybag_icon(cur_x, y + (th - 14) / 2);
+        cur_x += 15;
+        cur = found + 4;
+    }
+    if (*cur) {
+        draw_text_no_icon(cur_x, y, cur, col, font_idx, shadow);
     }
 }
 
@@ -2743,6 +2860,9 @@ static inline bool point_in_rect(int px, int py, int rx, int ry, int rw, int rh)
 }
 
 /* Kopfzeile (NACHTRAG 1 Etappe 6: Sprachumschalter entfernt, nur "Hilfe (F1)" rechts oben) */
+/* Versionsnummer des Starters (Aenderungen: AENDERUNGEN.md im Paket) */
+#define STARTER_VERSION "1.2"
+
 static const int HDR_HELP_X = 905;
 static const int HDR_HELP_Y = 29;
 static const int HDR_HELP_W = 104;
@@ -2751,7 +2871,7 @@ static const int HDR_HELP_H = 37;
 static void render_background_and_header(const char *subtitle, std::string *out_tooltip = NULL) {
     (void)out_tooltip;
     init_gdi_font_canvas();
-    bool bg_hover = (!g_help_active && !g_modal_active && g_open_dd_game < 0);
+    bool bg_hover = (!g_help_active && !g_modal_active && !g_fp_active && g_open_dd_game < 0);
 
     /* Hintergrund --bg: #141a26 */
     fill_rect(0, 0, SCREEN_W, SCREEN_H, 0xFF141A26u);
@@ -2761,6 +2881,10 @@ static void render_background_and_header(const char *subtitle, std::string *out_
     draw_border_1px(14, 10, 1012, 74, 0xFF3A4558u);
 
     draw_text(30, 16, "Das Schwarze Auge: Die Nordland-Trilogie", 0xFFE6E9EFu, FONT_27_BOLD, false);
+    {
+        int hw = text_width_px("Das Schwarze Auge: Die Nordland-Trilogie", FONT_27_BOLD);
+        draw_text(30 + hw + 12, 28, "Starter " STARTER_VERSION, 0xFF9AA3B2u, FONT_13, false);
+    }
     draw_text(30, 53, subtitle, 0xFF9AA3B2u, FONT_14, false);
 
     /* Hilfe-Knopf "Hilfe (F1)" */
@@ -2997,12 +3121,33 @@ static void get_open_dd_menu_rect(int game_idx, int &out_x, int &out_y, int &out
     }
 }
 
+static void get_card_fanpatch_rect(const GameCatalogEntry &g, int cx, int cy, int prog_bx, int &out_dot_x, int &out_ver_x, int &out_ver_y, int &out_ver_w, int &out_ver_h) {
+    out_dot_x = 0; out_ver_x = 0; out_ver_y = cy + 16; out_ver_w = 0; out_ver_h = 0;
+    if (g.version.empty()) return;
+    int tx0 = cx + 1 + 250 + 18;
+    char title_buf[160];
+    snprintf(title_buf, sizeof(title_buf), "%d. %s", g.teil, g.name.c_str());
+    int title_w = text_width_px(title_buf, FONT_23_BOLD);
+    const char *jahr = (g.teil == 1) ? "1992" : ((g.teil == 2) ? "1994" : "1996");
+    int dot_x = tx0 + title_w + 8 + text_width_px(jahr, FONT_13) + 8;
+    int dot_w = text_width_px("\xC2\xB7 ", FONT_13);
+    int ver_x = dot_x + dot_w;
+    int ver_w = text_width_px(g.version.c_str(), FONT_13);
+    if (ver_x + ver_w >= prog_bx - 8) return;
+    out_dot_x = dot_x;
+    out_ver_x = ver_x;
+    out_ver_y = cy + 16;
+    out_ver_w = ver_w;
+    out_ver_h = text_height_px(FONT_13);
+}
+
 static void render_screen_select_game(void) {
     std::string active_tooltip;
     std::string tip_override;
     uint32_t    tip_border_col = 0xFF3A4558u;
     uint32_t    tip_text_col   = 0xFFE6E9EFu;
-    bool bg_hover = (!g_help_active && !g_modal_active && g_open_dd_game < 0);
+    bool bg_hover = (!g_help_active && !g_modal_active && !g_fp_active && g_open_dd_game < 0);
+    bool any_hand_cursor = false;
 
     render_background_and_header(
         L("Gemeinsamer Starter – jedes Spiel auf seiner eigenen Karte einstellen und starten",
@@ -3047,6 +3192,9 @@ static void render_screen_select_game(void) {
             ? L("DSA Teil 1 – 1992", "DSA Part 1 – 1992")
             : ((g.teil == 2) ? L("DSA Teil 2 – 1994", "DSA Part 2 – 1994")
                              : L("DSA Teil 3 – 1996", "DSA Part 3 – 1996"));
+        /* Mit Versionsangabe nur das Jahr (die Teilnummer steht schon vor dem Titel), sonst wie bisher */
+        const char *jahr = (g.teil == 1) ? "1992" : ((g.teil == 2) ? "1994" : "1996");
+        if (!g.version.empty()) short_sub = jahr;
         draw_text(tx0 + title_w + 8, cy + 16, short_sub, 0xFF9AA3B2u, FONT_13, false);
 
         /* Rechtsbuendig die zwei Status-Haekchen (Programm gefunden / Spieldaten gefunden) */
@@ -3071,6 +3219,23 @@ static void render_screen_select_game(void) {
 
         draw_status_badge(dat_bx, cy + 16, g.gamedir_valid);
         draw_text(dat_tx, cy + 13, dat_lbl, g.gamedir_wrong_version ? 0xFFFF8870u : 0xFFE6E9EFu, FONT_14, false);
+
+        /* Versionsanzeige hinter "DSA Teil X - Jahr" (nur wenn bis zu den Haekchen Platz ist) */
+        bool hov_fanpatch = false;
+        if (!g.version.empty()) {
+            int dot_x = 0, ver_x = 0, ver_y = 0, ver_w = 0, ver_h = 0;
+            get_card_fanpatch_rect(g, cx, cy, prog_bx, dot_x, ver_x, ver_y, ver_w, ver_h);
+            if (ver_w > 0) {
+                hov_fanpatch = bg_hover && point_in_rect(g_mouse_x, g_mouse_y, ver_x - 3, cy + 12, ver_w + 6, 24);
+                draw_text(dot_x, ver_y, "\xC2\xB7", 0xFF9AA3B2u, FONT_13, false);
+                uint32_t vcol = hov_fanpatch ? 0xFFFFFFFFu : 0xFF9AA3B2u;
+                draw_text(ver_x, ver_y, g.version.c_str(), vcol, FONT_13, false);
+                if (hov_fanpatch) {
+                    fill_rect(ver_x, ver_y + ver_h - 2, ver_w, 1, 0xFFFFFFFFu);
+                    any_hand_cursor = true;
+                }
+            }
+        }
 
         /* Zeile 2: Spielordner (klein, grau) + auf Karte 1 rechtsbuendig "Fluessig drehen (Schicksalsklinge)" */
         const char *drehen_lbl = "Fl\xC3\xBCssig drehen (Schicksalsklinge)";
@@ -3277,6 +3442,10 @@ static void render_screen_select_game(void) {
             } else if (hov_gear) {
                 active_tooltip = std::string("Einstellungen öffnen (Skalierung: ") +
                                  skalierung_label_str(g.chosen_skalierung) + " – gilt für Windows)";
+            } else if (hov_fanpatch) {
+                active_tooltip = g.name + " – " + g.version + ": Klicken für Versionsverlauf, alle Fehlerkorrekturen und Zusatzfunktionen";
+                tip_override   = g.name + " (" + g.version + "): Klick öffnet den kompletten Fanpatch-Verlauf mit allen Versionen und Korrekturen.";
+                tip_border_col = 0xFFE3A63Au;
             } else if (hov_drehen) {
                 if (g.chosen_stufe == STUFE_ORIG) {
                     active_tooltip = "Flüssig drehen (Schicksalsklinge): Nur mit Fixes »Wichtige« oder »Alle« aktiv (Original ohne Schwenk)";
@@ -3326,6 +3495,10 @@ static void render_screen_select_game(void) {
             const char *ilbl = fenster_dd_short_label(g_dd_fenster_vals[k]);
             draw_text(mx + 24, iy + (26 - item_th) / 2, ilbl, ifg, FONT_14, false);
         }
+    }
+
+    if (!g_fp_active) {
+        SDL_SetHandCursor(any_hand_cursor ? 1 : 0);
     }
 
     if (!active_tooltip.empty()) {
@@ -3498,6 +3671,10 @@ static void render_screen_settings(void) {
         }
     }
 
+    if (!g_fp_active) {
+        SDL_SetHandCursor(0);
+    }
+
     if (!active_tooltip.empty()) {
         draw_tooltip_box(g_mouse_x, g_mouse_y, active_tooltip);
     }
@@ -3546,6 +3723,1313 @@ static void render_help_overlay(void) {
     }
 
     draw_button(mx + (mw - 320) / 2, my + mh - 50, 320, 36, L("Hilfe schließen (F1 / Enter)", "Close Help (F1 / Enter)"), true, true, true, true, FONT_15);
+}
+
+/* =========================================================================
+ * 8b. Fanpatch-Verlauf im Starter (Starter 1.2)
+ *     - Drei Reiter: "Versionen (N)", "Alle Korrekturen (N)", "Zusatzfunktionen"
+ *     - Auf-/Zuklappen mit "+" (zu) und "−" (offen), "Alle aufklappen" / "Alle zuklappen"
+ *     - Stufe als Wort: "Wichtig" (gold) bzw. "nur Alle" (blau)
+ *     - Suche (Text oder "Nr. 90") und Filter ("Alle" / "nur Wichtige" / "💰 Exploits")
+ *     - Scrollen mit Mausrad, Ziehen am Balken und Pfeil-/Bildtasten
+ * ========================================================================= */
+
+struct FanpatchVerKorrRef {
+    std::string nr;
+    std::string art; /* "neu" oder "nachgebessert" */
+};
+
+struct FanpatchVersionEntry {
+    std::string version;
+    std::string datum;
+    std::string titel;
+    std::string text;
+    std::vector<FanpatchVerKorrRef> korrekturen;
+    bool expanded;
+    std::vector<bool> korr_expanded;
+};
+
+struct FanpatchKorrekturEntry {
+    std::string nr;
+    std::string titel;
+    std::string was_war_falsch;
+    std::string so_pruefst_du_es;
+    std::string stufe;    /* "Wichtig" oder "nur Alle" */
+    bool        exploit;
+    std::string bereich;  /* z. B. "Dungeons (54)" */
+    std::string herkunft;
+    bool        expanded;
+};
+
+struct FanpatchZusatzEntry {
+    std::string titel;
+    std::string version;
+    std::string stufe;
+    std::string text;
+    bool        expanded;
+};
+
+struct FanpatchAreaGroup {
+    std::string raw_bereich;
+    std::string display_name;
+    std::vector<int> korr_indices;
+    bool expanded;
+};
+
+struct FanpatchData {
+    bool        loaded;
+    std::string spiel_id;
+    std::string spiel_name;
+    std::string aktuelle_version;
+    std::string github_url;
+    std::vector<FanpatchVersionEntry>   versionen;
+    std::vector<FanpatchKorrekturEntry> korrekturen;
+    std::vector<FanpatchZusatzEntry>    zusatzfunktionen;
+    std::vector<FanpatchAreaGroup>      bereiche;
+};
+
+enum FanpatchHitAction {
+    FP_ACT_TAB          = 1,
+    FP_ACT_EXPAND_ALL   = 2,
+    FP_ACT_COLLAPSE_ALL = 3,
+    FP_ACT_SEARCH_BOX   = 4,
+    FP_ACT_SEARCH_CLEAR = 5,
+    FP_ACT_FILTER       = 6,
+    FP_ACT_VER_TOGGLE   = 7,
+    FP_ACT_VKORR_TOGGLE = 8,
+    FP_ACT_AREA_TOGGLE  = 9,
+    FP_ACT_KORR_TOGGLE  = 10,
+    FP_ACT_ZUS_TOGGLE   = 11,
+    FP_ACT_GITHUB       = 12,
+    FP_ACT_CLOSE        = 13
+};
+
+struct FanpatchHitBox {
+    int x, y, w, h;
+    int action;
+    int idx1;
+    int idx2;
+};
+
+static FanpatchData                g_fp_data[3];
+static bool                        g_fp_attempted[3]    = {false, false, false};
+static int                         g_fp_tab             = 0; /* 0=Versionen, 1=Alle Korrekturen, 2=Zusatzfunktionen */
+static int                         g_fp_filter          = 0; /* 0=Alle, 1=nur Wichtige, 2=Exploits */
+static std::string                 g_fp_search_text;
+static bool                        g_fp_search_focused  = false;
+static int                         g_fp_scroll_y        = 0;
+static int                         g_fp_content_h       = 0;
+static int                         g_fp_view_h          = 420;
+static bool                        g_fp_dragging_sb     = false;
+static int                         g_fp_drag_start_my   = 0;
+static int                         g_fp_drag_start_sc   = 0;
+static int                         g_fp_sb_track_x      = 0;
+static int                         g_fp_sb_track_y      = 0;
+static int                         g_fp_sb_track_w      = 10;
+static int                         g_fp_sb_track_h      = 420;
+static int                         g_fp_sb_thumb_y      = 0;
+static int                         g_fp_sb_thumb_h      = 40;
+static std::vector<FanpatchHitBox> g_fp_hits;
+
+static std::string default_bugfixes_github_url(const GameCatalogEntry &g) {
+    if (g.teil == 2 || _stricmp(g.id.c_str(), "sternenschweif") == 0) {
+        return "https://github.com/MeowMuhMuhCow/sternenschweif/blob/main/BUGFIXES.md";
+    }
+    if (g.teil == 3 || _stricmp(g.id.c_str(), "riva") == 0) {
+        return "https://github.com/MeowMuhMuhCow/riva/blob/main/BUGFIXES.md";
+    }
+    return "https://github.com/MeowMuhMuhCow/schicksalsklinge/blob/main/BUGFIXES.md";
+}
+
+static std::string strip_area_count_suffix(const std::string &raw) {
+    size_t lp = raw.find_last_of('(');
+    if (lp != std::string::npos && lp > 0 && raw.back() == ')') {
+        bool all_digits = true;
+        for (size_t k = lp + 1; k + 1 < raw.size(); ++k) {
+            if (raw[k] < '0' || raw[k] > '9') { all_digits = false; break; }
+        }
+        if (all_digits && lp + 2 <= raw.size()) {
+            return trim_str(raw.substr(0, lp));
+        }
+    }
+    return raw;
+}
+
+static void parse_fanpatch_json_content(const std::string &content, FanpatchData &fp) {
+    const char *p = content.c_str();
+    skip_ws(p);
+    if (*p != '{') return;
+    ++p;
+    while (*p) {
+        skip_ws(p);
+        if (*p == '}') { ++p; break; }
+        std::string key = parse_json_string(p);
+        skip_ws(p);
+        if (*p == ':') ++p;
+        skip_ws(p);
+
+        if (key == "spiel_id") fp.spiel_id = parse_json_string(p);
+        else if (key == "spiel_name") fp.spiel_name = parse_json_string(p);
+        else if (key == "aktuelle_version") fp.aktuelle_version = parse_json_string(p);
+        else if (key == "github_url") fp.github_url = parse_json_string(p);
+        else if (key == "versionen" && *p == '[') {
+            ++p;
+            while (*p) {
+                skip_ws(p);
+                if (*p == ']') { ++p; break; }
+                if (*p == '{') {
+                    ++p;
+                    FanpatchVersionEntry ve;
+                    ve.expanded = false;
+                    while (*p) {
+                        skip_ws(p);
+                        if (*p == '}') { ++p; break; }
+                        std::string vk = parse_json_string(p);
+                        skip_ws(p);
+                        if (*p == ':') ++p;
+                        skip_ws(p);
+                        if (vk == "version") ve.version = parse_json_string(p);
+                        else if (vk == "datum") ve.datum = parse_json_string(p);
+                        else if (vk == "titel") ve.titel = parse_json_string(p);
+                        else if (vk == "text") ve.text = parse_json_string(p);
+                        else if (vk == "korrekturen" && *p == '[') {
+                            ++p;
+                            while (*p) {
+                                skip_ws(p);
+                                if (*p == ']') { ++p; break; }
+                                if (*p == '{') {
+                                    ++p;
+                                    FanpatchVerKorrRef kr;
+                                    kr.art = "neu";
+                                    while (*p) {
+                                        skip_ws(p);
+                                        if (*p == '}') { ++p; break; }
+                                        std::string kk = parse_json_string(p);
+                                        skip_ws(p);
+                                        if (*p == ':') ++p;
+                                        skip_ws(p);
+                                        if (kk == "nr") kr.nr = parse_json_string(p);
+                                        else if (kk == "art") kr.art = parse_json_string(p);
+                                        else skip_json_value(p);
+                                        skip_ws(p);
+                                        if (*p == ',') ++p;
+                                    }
+                                    if (!kr.nr.empty()) {
+                                        ve.korrekturen.push_back(kr);
+                                        ve.korr_expanded.push_back(false);
+                                    }
+                                } else {
+                                    skip_json_value(p);
+                                }
+                                skip_ws(p);
+                                if (*p == ',') ++p;
+                            }
+                        } else {
+                            skip_json_value(p);
+                        }
+                        skip_ws(p);
+                        if (*p == ',') ++p;
+                    }
+                    fp.versionen.push_back(ve);
+                } else {
+                    skip_json_value(p);
+                }
+                skip_ws(p);
+                if (*p == ',') ++p;
+            }
+        } else if (key == "korrekturen" && *p == '[') {
+            ++p;
+            while (*p) {
+                skip_ws(p);
+                if (*p == ']') { ++p; break; }
+                if (*p == '{') {
+                    ++p;
+                    FanpatchKorrekturEntry ke;
+                    ke.stufe = "Wichtig";
+                    ke.exploit = false;
+                    ke.expanded = false;
+                    while (*p) {
+                        skip_ws(p);
+                        if (*p == '}') { ++p; break; }
+                        std::string kk = parse_json_string(p);
+                        skip_ws(p);
+                        if (*p == ':') ++p;
+                        skip_ws(p);
+                        if (kk == "nr") ke.nr = parse_json_string(p);
+                        else if (kk == "titel") ke.titel = parse_json_string(p);
+                        else if (kk == "was_war_falsch") ke.was_war_falsch = parse_json_string(p);
+                        else if (kk == "so_pruefst_du_es") ke.so_pruefst_du_es = parse_json_string(p);
+                        else if (kk == "stufe") ke.stufe = parse_json_string(p);
+                        else if (kk == "exploit") ke.exploit = parse_json_bool(p);
+                        else if (kk == "bereich") ke.bereich = parse_json_string(p);
+                        else if (kk == "herkunft") ke.herkunft = parse_json_string(p);
+                        else skip_json_value(p);
+                        skip_ws(p);
+                        if (*p == ',') ++p;
+                    }
+                    fp.korrekturen.push_back(ke);
+                } else {
+                    skip_json_value(p);
+                }
+                skip_ws(p);
+                if (*p == ',') ++p;
+            }
+        } else if (key == "zusatzfunktionen" && *p == '[') {
+            ++p;
+            while (*p) {
+                skip_ws(p);
+                if (*p == ']') { ++p; break; }
+                if (*p == '{') {
+                    ++p;
+                    FanpatchZusatzEntry ze;
+                    ze.expanded = true;
+                    while (*p) {
+                        skip_ws(p);
+                        if (*p == '}') { ++p; break; }
+                        std::string zk = parse_json_string(p);
+                        skip_ws(p);
+                        if (*p == ':') ++p;
+                        skip_ws(p);
+                        if (zk == "titel") ze.titel = parse_json_string(p);
+                        else if (zk == "version") ze.version = parse_json_string(p);
+                        else if (zk == "stufe") ze.stufe = parse_json_string(p);
+                        else if (zk == "text" || zk == "beschreibung") ze.text = parse_json_string(p);
+                        else skip_json_value(p);
+                        skip_ws(p);
+                        if (*p == ',') ++p;
+                    }
+                    fp.zusatzfunktionen.push_back(ze);
+                } else {
+                    skip_json_value(p);
+                }
+                skip_ws(p);
+                if (*p == ',') ++p;
+            }
+        } else {
+            skip_json_value(p);
+        }
+        skip_ws(p);
+        if (*p == ',') ++p;
+    }
+
+    /* Bereiche aus korrekturen gruppieren */
+    fp.bereiche.clear();
+    for (size_t i = 0; i < fp.korrekturen.size(); ++i) {
+        const std::string &b = fp.korrekturen[i].bereich;
+        int found_b = -1;
+        for (size_t j = 0; j < fp.bereiche.size(); ++j) {
+            if (fp.bereiche[j].raw_bereich == b) {
+                found_b = (int)j;
+                break;
+            }
+        }
+        if (found_b < 0) {
+            FanpatchAreaGroup ag;
+            ag.raw_bereich  = b;
+            ag.display_name = strip_area_count_suffix(b);
+            ag.expanded     = fp.bereiche.empty(); /* Erster Bereich standardmaessig offen */
+            ag.korr_indices.push_back((int)i);
+            fp.bereiche.push_back(ag);
+        } else {
+            fp.bereiche[found_b].korr_indices.push_back((int)i);
+        }
+    }
+    fp.loaded = (!fp.versionen.empty() || !fp.korrekturen.empty());
+}
+
+static void load_fanpatch_data_for_game(int game_idx) {
+    if (game_idx < 0 || game_idx >= 3 || game_idx >= (int)g_games.size()) return;
+    const GameCatalogEntry &g = g_games[game_idx];
+    FanpatchData &fp = g_fp_data[game_idx];
+    fp = FanpatchData();
+    fp.loaded     = false;
+    fp.spiel_id   = g.id;
+    fp.spiel_name = g.name;
+    fp.github_url = default_bugfixes_github_url(g);
+    g_fp_attempted[game_idx] = true;
+
+    const char *force_missing = getenv("STARTER_FORCE_MISSING_FANPATCH_JSON");
+    if (force_missing && force_missing[0] == '1') {
+        return;
+    }
+
+    std::string fname = "fanpatch_" + g.id + ".json";
+    std::string cands[5] = {
+        join_path(g_data_dir, fname),
+        join_path(g_starter_dir, fname),
+        join_path(g_exe_dir, "_starter\\" + fname),
+        join_path(g_exe_dir, fname),
+        join_path(g_starter_dir, "trilogie\\Nordlandtrilogie\\_starter\\" + fname)
+    };
+    std::string chosen;
+    for (int i = 0; i < 5; ++i) {
+        if (file_exists_win(cands[i])) {
+            chosen = cands[i];
+            break;
+        }
+    }
+    if (chosen.empty()) return;
+
+    FILE *fp_file = fopen(utf8_to_win1252(chosen).c_str(), "rb");
+    if (!fp_file) fp_file = fopen(chosen.c_str(), "rb");
+    if (!fp_file) return;
+
+    fseek(fp_file, 0, SEEK_END);
+    long sz = ftell(fp_file);
+    fseek(fp_file, 0, SEEK_SET);
+    if (sz <= 0 || sz > 4 * 1024 * 1024) {
+        fclose(fp_file);
+        return;
+    }
+    std::string content((size_t)sz, '\0');
+    fread(&content[0], 1, (size_t)sz, fp_file);
+    fclose(fp_file);
+
+    parse_fanpatch_json_content(content, fp);
+    if (fp.github_url.empty()) {
+        fp.github_url = default_bugfixes_github_url(g);
+    }
+}
+
+static void open_fanpatch_window(int game_idx) {
+    if (game_idx < 0 || game_idx >= (int)g_games.size() || game_idx >= 3) return;
+    if (!g_fp_attempted[game_idx]) {
+        load_fanpatch_data_for_game(game_idx);
+    }
+    g_fp_game_idx       = game_idx;
+    g_fp_active         = true;
+    g_fp_tab            = 0;
+    g_fp_filter         = 0;
+    g_fp_search_text.clear();
+    g_fp_search_focused = false;
+    g_fp_scroll_y       = 0;
+    g_fp_dragging_sb    = false;
+    g_open_dd_game      = -1;
+    g_help_active       = false;
+    g_modal_active      = false;
+}
+
+static int find_korrektur_index_by_nr(const FanpatchData &fp, const std::string &nr) {
+    for (size_t i = 0; i < fp.korrekturen.size(); ++i) {
+        if (_stricmp(fp.korrekturen[i].nr.c_str(), nr.c_str()) == 0) {
+            return (int)i;
+        }
+    }
+    return -1;
+}
+
+static std::string utf8_tolower_de(const std::string &s) {
+    std::string out;
+    out.reserve(s.size());
+    for (size_t i = 0; i < s.size(); ++i) {
+        unsigned char c = (unsigned char)s[i];
+        if (c >= 'A' && c <= 'Z') {
+            out.push_back((char)(c + 32));
+        } else if (c == 0xC3 && i + 1 < s.size()) {
+            unsigned char c2 = (unsigned char)s[i + 1];
+            /* Ä (C3 84)->ä (C3 A4), Ö (C3 96)->ö (C3 B6), Ü (C3 9C)->ü (C3 BC) */
+            if (c2 == 0x84 || c2 == 0x96 || c2 == 0x9C) {
+                out.push_back((char)0xC3);
+                out.push_back((char)(c2 + 0x20));
+                ++i;
+                continue;
+            }
+            out.push_back((char)c);
+        } else {
+            out.push_back((char)c);
+        }
+    }
+    return out;
+}
+
+static bool korrektur_matches_filter_and_search(const FanpatchKorrekturEntry &k) {
+    if (g_fp_filter == 1 && k.stufe != "Wichtig") return false;
+    if (g_fp_filter == 2 && !k.exploit) return false;
+    if (g_fp_search_text.empty()) return true;
+
+    std::string q = utf8_tolower_de(trim_str(g_fp_search_text));
+    if (q.empty()) return true;
+
+    /* Spezielle Suche nach "nr. 90" oder "nr 90" oder "#90" */
+    std::string q_nr = q;
+    if (strncmp(q_nr.c_str(), "nr.", 3) == 0) q_nr = trim_str(q_nr.substr(3));
+    else if (strncmp(q_nr.c_str(), "nr ", 3) == 0) q_nr = trim_str(q_nr.substr(3));
+    else if (!q_nr.empty() && q_nr[0] == '#') q_nr = trim_str(q_nr.substr(1));
+
+    std::string k_nr_low = utf8_tolower_de(k.nr);
+    if (q != q_nr && !q_nr.empty()) {
+        if (k_nr_low == q_nr || ("r" + q_nr) == k_nr_low) return true;
+        return false;
+    }
+
+    if (k_nr_low.find(q) != std::string::npos) return true;
+    if (utf8_tolower_de(k.titel).find(q) != std::string::npos) return true;
+    if (utf8_tolower_de(k.was_war_falsch).find(q) != std::string::npos) return true;
+    if (utf8_tolower_de(k.so_pruefst_du_es).find(q) != std::string::npos) return true;
+    if (utf8_tolower_de(k.bereich).find(q) != std::string::npos) return true;
+    if (utf8_tolower_de(k.herkunft).find(q) != std::string::npos) return true;
+    return false;
+}
+
+/* Zeichnet "+" (geschlossen) bzw. "−" (offen) statt Pfeilen */
+static void draw_plus_minus_sign(int cx, int cy, bool is_open, uint32_t col) {
+    /* Horizontale Linie (9 px breit, 2 px hoch) */
+    fill_rect(cx - 4, cy, 9, 2, col);
+    if (!is_open) {
+        /* Vertikale Linie fuer "+" (2 px breit, 9 px hoch) */
+        fill_rect(cx, cy - 3, 2, 8, col);
+    }
+}
+
+/* Zeichnet das Stufen-Feld als Wort: "Wichtig" (gold) bzw. "nur Alle" (blau) */
+static void draw_stufe_word_badge(int x, int y, const std::string &stufe) {
+    const int bw = 54;
+    const int bh = 18;
+    bool is_wichtig = (_stricmp(stufe.c_str(), "Wichtig") == 0 || stufe == "W");
+    uint32_t bg = is_wichtig ? 0xFFE3A63Au : 0xFF5AA9E6u;
+    uint32_t fg = 0xFF141A26u;
+    const char *lbl = is_wichtig ? "Wichtig" : "nur Alle";
+    fill_rect(x, y, bw, bh, bg);
+    int th = text_height_px(FONT_12_BOLD);
+    draw_text_centered(x, y + (bh - th) / 2, bw, lbl, fg, FONT_12_BOLD, false);
+}
+
+/* Bricht einen langen UTF-8-Text wortweise auf max_width_px um (erste Zeile optional mit Einzug fuer Label) */
+static std::vector<std::string> wrap_text_to_lines(const std::string &text, int max_width_px, int font_idx, int first_indent_px = 0) {
+    std::vector<std::string> lines;
+    if (text.empty()) return lines;
+
+    size_t p_start = 0;
+    bool is_very_first_line = true;
+    while (p_start <= text.size()) {
+        size_t p_end = text.find('\n', p_start);
+        std::string para = (p_end == std::string::npos) ? text.substr(p_start) : text.substr(p_start, p_end - p_start);
+        p_start = (p_end == std::string::npos) ? (text.size() + 1) : (p_end + 1);
+
+        para = trim_str(para);
+        if (para.empty()) continue;
+
+        std::string cur_line;
+        int avail_w = is_very_first_line ? (max_width_px - first_indent_px) : max_width_px;
+        if (avail_w < 80) avail_w = 80;
+
+        size_t w_pos = 0;
+        while (w_pos < para.size()) {
+            while (w_pos < para.size() && para[w_pos] == ' ') ++w_pos;
+            if (w_pos >= para.size()) break;
+            size_t w_next = para.find(' ', w_pos);
+            std::string word = (w_next == std::string::npos) ? para.substr(w_pos) : para.substr(w_pos, w_next - w_pos);
+            w_pos = (w_next == std::string::npos) ? para.size() : w_next;
+
+            std::string cand = cur_line.empty() ? word : (cur_line + " " + word);
+            if (!cur_line.empty() && text_width_px(cand.c_str(), font_idx) > avail_w) {
+                lines.push_back(cur_line);
+                cur_line = word;
+                is_very_first_line = false;
+                avail_w = max_width_px;
+            } else {
+                cur_line = cand;
+            }
+        }
+        if (!cur_line.empty()) {
+            lines.push_back(cur_line);
+            is_very_first_line = false;
+        }
+    }
+    return lines;
+}
+
+/* Zeichnet den aufgeklappten Detailkasten ("Was war falsch:" + gestrichelte Linie + gruen "So prüfst du es:") */
+static int draw_korrektur_detail_box(int bx, int by, int bw, const FanpatchKorrekturEntry &k, bool draw_it) {
+    const int pad_x = 12;
+    const int pad_y = 9;
+    const int line_h = 18;
+    const int inner_w = bw - 2 * pad_x;
+
+    const char *lbl_was = "Was war falsch: ";
+    const char *lbl_prf = "So pr\xC3\xBC""fst du es: ";
+    int indent_was = text_width_px(lbl_was, FONT_13_BOLD);
+    int indent_prf = text_width_px(lbl_prf, FONT_13_BOLD);
+
+    std::string was_full = k.was_war_falsch;
+    if (!k.herkunft.empty() && was_full.find(k.herkunft) == std::string::npos) {
+        was_full += " (" + k.herkunft + ")";
+    }
+
+    std::vector<std::string> was_lines = wrap_text_to_lines(was_full, inner_w, FONT_13, indent_was);
+    if (was_lines.empty()) was_lines.push_back("-");
+
+    std::vector<std::string> prf_lines;
+    if (!k.so_pruefst_du_es.empty()) {
+        prf_lines = wrap_text_to_lines(k.so_pruefst_du_es, inner_w, FONT_13, indent_prf);
+    }
+
+    int bh = pad_y * 2 + (int)was_lines.size() * line_h;
+    if (!prf_lines.empty()) {
+        bh += 12 + (int)prf_lines.size() * line_h;
+    }
+
+    if (!draw_it) return bh;
+
+    fill_rect(bx, by, bw, bh, 0xFF131924u);
+    draw_border_1px(bx, by, bw, bh, 0xFF2B3548u);
+
+    int ty = by + pad_y;
+    draw_text(bx + pad_x, ty, lbl_was, 0xFFE3A63Au, FONT_13_BOLD, false);
+    for (size_t i = 0; i < was_lines.size(); ++i) {
+        int lx = bx + pad_x + ((i == 0) ? indent_was : 0);
+        draw_text(lx, ty, was_lines[i].c_str(), 0xFFD8DEE9u, FONT_13, false);
+        ty += line_h;
+    }
+
+    if (!prf_lines.empty()) {
+        int sep_y = ty + 5;
+        for (int dx = bx + pad_x; dx < bx + bw - pad_x; dx += 5) {
+            fill_rect(dx, sep_y, 3, 1, 0xFF2E3A4Eu);
+        }
+        ty += 12;
+        draw_text(bx + pad_x, ty, lbl_prf, 0xFF4CAF72u, FONT_13_BOLD, false);
+        for (size_t i = 0; i < prf_lines.size(); ++i) {
+            int lx = bx + pad_x + ((i == 0) ? indent_prf : 0);
+            draw_text(lx, ty, prf_lines[i].c_str(), 0xFFD8DEE9u, FONT_13, false);
+            ty += line_h;
+        }
+    }
+
+    return bh;
+}
+
+/* Zeichnet einen allgemeinen Textkasten (z. B. fuer Zusatzfunktionen oder reine Funktions-Versionen) */
+static int draw_plain_detail_box(int bx, int by, int bw, const std::string &text, bool draw_it) {
+    const int pad_x = 12;
+    const int pad_y = 9;
+    const int line_h = 18;
+    const int inner_w = bw - 2 * pad_x;
+
+    std::vector<std::string> lines = wrap_text_to_lines(text, inner_w, FONT_13, 0);
+    if (lines.empty()) lines.push_back("-");
+
+    int bh = pad_y * 2 + (int)lines.size() * line_h;
+    if (!draw_it) return bh;
+
+    fill_rect(bx, by, bw, bh, 0xFF131924u);
+    draw_border_1px(bx, by, bw, bh, 0xFF2B3548u);
+
+    int ty = by + pad_y;
+    for (size_t i = 0; i < lines.size(); ++i) {
+        draw_text(bx + pad_x, ty, lines[i].c_str(), 0xFFD8DEE9u, FONT_13, false);
+        ty += line_h;
+    }
+    return bh;
+}
+
+static void darken_framebuffer(int keep_factor_256) {
+    for (int i = 0; i < SCREEN_W * SCREEN_H; ++i) {
+        uint32_t c = g_fb[i];
+        int r = (((int)((c >> 16) & 0xFF)) * keep_factor_256) >> 8;
+        int g = (((int)((c >> 8)  & 0xFF)) * keep_factor_256) >> 8;
+        int b = (((int)(c         & 0xFF)) * keep_factor_256) >> 8;
+        g_fb[i] = 0xFF000000u | ((uint32_t)r << 16) | ((uint32_t)g << 8) | (uint32_t)b;
+    }
+}
+
+static std::string clip_text_px_right(const std::string &s, int max_px, int font_idx = FONT_14) {
+    if (text_width_px(s.c_str(), font_idx) <= max_px) return s;
+    std::string cur = s;
+    while (!cur.empty()) {
+        while (!cur.empty() && (((unsigned char)cur.back() & 0xC0) == 0x80)) {
+            cur.pop_back();
+        }
+        if (!cur.empty()) cur.pop_back();
+        std::string cand = cur + " \xE2\x80\xA6";
+        if (text_width_px(cand.c_str(), font_idx) <= max_px) {
+            return cand;
+        }
+    }
+    return "\xE2\x80\xA6";
+}
+
+static void clamp_fanpatch_scroll(void) {
+    int max_sc = g_fp_content_h - g_fp_view_h;
+    if (max_sc < 0) max_sc = 0;
+    if (g_fp_scroll_y > max_sc) g_fp_scroll_y = max_sc;
+    if (g_fp_scroll_y < 0) g_fp_scroll_y = 0;
+}
+
+static void render_fanpatch_overlay(void) {
+    if (!g_fp_active) return;
+    if (g_fp_game_idx < 0 || g_fp_game_idx >= (int)g_games.size() || g_fp_game_idx >= 3) return;
+
+    const GameCatalogEntry &g = g_games[g_fp_game_idx];
+    FanpatchData &fp = g_fp_data[g_fp_game_idx];
+    g_fp_hits.clear();
+
+    /* Hintergrund abdunkeln */
+    darken_framebuffer(105);
+
+    /* Modales Fenster mittig */
+    const int mw = 860;
+    const int mh = 610;
+    const int mx = (SCREEN_W - mw) / 2; /* 90 */
+    const int my = (SCREEN_H - mh) / 2; /* 18 */
+
+    fill_rect(mx, my, mw, mh, 0xFF181F2Du);
+    draw_border_1px(mx, my, mw, mh, 0xFF3E4E68u);
+
+    /* Titel: "<Spielname> – Fanpatch vX.Y" in Gold */
+    std::string ver_label = !g.version.empty() ? g.version : ("Fanpatch " + fp.aktuelle_version);
+    std::string win_title = g.name + " \xE2\x80\x93 " + ver_label;
+    draw_text(mx + 22, my + 14, win_title.c_str(), 0xFFE3A63Au, FONT_23_BOLD, false);
+
+    /* Untere Leiste: "Auf GitHub ansehen" (links), Legende (Mitte), "Schließen (Esc)" (rechts) */
+    const int bot_line_y = my + mh - 54;
+    fill_rect(mx + 1, bot_line_y, mw - 2, 1, 0xFF263042u);
+
+    const int btn_gh_x = mx + 22;
+    const int btn_gh_y = my + mh - 43;
+    const int btn_gh_w = 158;
+    const int btn_gh_h = 32;
+    draw_button(btn_gh_x, btn_gh_y, btn_gh_w, btn_gh_h, "Auf GitHub ansehen", false, true, false, true, FONT_14);
+    g_fp_hits.push_back({btn_gh_x, btn_gh_y, btn_gh_w, btn_gh_h, FP_ACT_GITHUB, 0, 0});
+
+    const int btn_cl_w = 136;
+    const int btn_cl_h = 32;
+    const int btn_cl_x = mx + mw - 22 - btn_cl_w;
+    const int btn_cl_y = my + mh - 43;
+    draw_button(btn_cl_x, btn_cl_y, btn_cl_w, btn_cl_h, "Schlie\xC3\x9F""en (Esc)", false, true, true, true, FONT_14);
+    g_fp_hits.push_back({btn_cl_x, btn_cl_y, btn_cl_w, btn_cl_h, FP_ACT_CLOSE, 0, 0});
+
+    /* Legende unten mittig */
+    const char *legende =
+        "Wichtig = in \xE2\x80\x9E""Wichtige\xE2\x80\x9C und \xE2\x80\x9E""Alle\xE2\x80\x9C enthalten \xC2\xB7 "
+        "nur Alle = nur in \xE2\x80\x9E""Alle\xE2\x80\x9C \xC2\xB7 \xF0\x9F\x92\xB0 = Exploit";
+    int leg_x = btn_gh_x + btn_gh_w + 6;
+    int leg_w = btn_cl_x - leg_x - 6;
+    draw_text_centered(leg_x, btn_gh_y + 8, leg_w, legende, 0xFF8A94A6u, FONT_12, false);
+
+    /* Fehlt die json-Datei: Fenster zeigt nur "Verlauf nicht gefunden" + GitHub-Knopf, kein Absturz */
+    if (!fp.loaded) {
+        fill_rect(mx + 1, my + 52, mw - 2, 1, 0xFF2E384Cu);
+        draw_text_centered(mx + 20, my + mh / 2 - 20, mw - 40, "Verlauf nicht gefunden", 0xFFE6E9EFu, FONT_15_SEMI, false);
+        SDL_SetHandCursor(0);
+        return;
+    }
+
+    /* Drei Reiter: "Versionen (N)", "Alle Korrekturen (N)", "Zusatzfunktionen" */
+    char tab0_lbl[64], tab1_lbl[64];
+    snprintf(tab0_lbl, sizeof(tab0_lbl), "Versionen (%d)", (int)fp.versionen.size());
+    snprintf(tab1_lbl, sizeof(tab1_lbl), "Alle Korrekturen (%d)", (int)fp.korrekturen.size());
+    const char *tab_labels[3] = { tab0_lbl, tab1_lbl, "Zusatzfunktionen" };
+
+    const int tab_y = my + 50;
+    const int tab_h = 31;
+    fill_rect(mx + 1, tab_y + tab_h, mw - 2, 1, 0xFF323E52u);
+
+    int cur_tx = mx + 22;
+    for (int ti = 0; ti < 3; ++ti) {
+        int tw = text_width_px(tab_labels[ti], FONT_14) + 28;
+        bool is_act = (g_fp_tab == ti);
+        bool is_hov = point_in_rect(g_mouse_x, g_mouse_y, cur_tx, tab_y, tw, tab_h);
+        uint32_t tbg  = is_act ? 0xFF232E42u : (is_hov ? 0xFF1E2738u : 0xFF1A2130u);
+        uint32_t tbrd = is_act ? 0xFF4A5D7Au : 0xFF2D374Au;
+        uint32_t tfg  = is_act ? 0xFFFFFFFFu : (is_hov ? 0xFFE6E9EFu : 0xFF9AA3B2u);
+        fill_rect(cur_tx, tab_y, tw, tab_h, tbg);
+        draw_border_1px(cur_tx, tab_y, tw, tab_h, tbrd);
+        if (is_act) {
+            fill_rect(cur_tx + 1, tab_y + tab_h - 2, tw - 2, 2, 0xFF5AA9E6u);
+        }
+        draw_text_centered(cur_tx, tab_y + 6, tw, tab_labels[ti], tfg, FONT_14, false);
+        g_fp_hits.push_back({cur_tx, tab_y, tw, tab_h, FP_ACT_TAB, ti, 0});
+        cur_tx += tw + 6;
+    }
+
+    /* Werkzeugzeile unter den Reitern */
+    const int tb_y = my + 91;
+    const int tb_h = 28;
+    if (g_fp_tab == 0 || g_fp_tab == 2) {
+        const char *hint = (g_fp_tab == 0)
+            ? "Klick auf eine Zeile klappt sie auf \xC2\xB7"
+            : "Zusatz- und Komfortfunktionen des Fanpatches \xC2\xB7";
+        draw_text(mx + 22, tb_y + 5, hint, 0xFF9AA3B2u, FONT_13, false);
+        int bx1 = mx + 22 + text_width_px(hint, FONT_13) + 10;
+        int bw1 = 114;
+        int bx2 = bx1 + bw1 + 8;
+        int bw2 = 110;
+        draw_button(bx1, tb_y, bw1, tb_h, "Alle aufklappen", false, true, false, true, FONT_13);
+        draw_button(bx2, tb_y, bw2, tb_h, "Alle zuklappen",  false, true, false, true, FONT_13);
+        g_fp_hits.push_back({bx1, tb_y, bw1, tb_h, FP_ACT_EXPAND_ALL, 0, 0});
+        g_fp_hits.push_back({bx2, tb_y, bw2, tb_h, FP_ACT_COLLAPSE_ALL, 0, 0});
+    } else {
+        /* Reiter "Alle Korrekturen": Suchfeld + Filter "Alle" / "nur Wichtige" / "💰 Exploits" + Auf-/Zuklappen */
+        int sx = mx + 22;
+        int sw = 294;
+        fill_rect(sx, tb_y, sw, tb_h, 0xFF121722u);
+        draw_border_1px(sx, tb_y, sw, tb_h, g_fp_search_focused ? 0xFF5AA9E6u : 0xFF3A4558u);
+        if (g_fp_search_text.empty()) {
+            const char *ph = "Suchen ... z. B. \xE2\x80\x9E""Truhe\xE2\x80\x9C oder \xE2\x80\x9E""Nr. 90\xE2\x80\x9C";
+            draw_text(sx + 10, tb_y + 5, ph, 0xFF6E7889u, FONT_13, false);
+            if (g_fp_search_focused) {
+                fill_rect(sx + 9, tb_y + 6, 1, 16, 0xFF5AA9E6u);
+            }
+        } else {
+            draw_text(sx + 10, tb_y + 5, g_fp_search_text.c_str(), 0xFFE6E9EFu, FONT_13, false);
+            if (g_fp_search_focused) {
+                int caret_x = sx + 11 + text_width_px(g_fp_search_text.c_str(), FONT_13);
+                if (caret_x < sx + sw - 24) {
+                    fill_rect(caret_x, tb_y + 6, 1, 16, 0xFF5AA9E6u);
+                }
+            }
+            /* Kleines 'x' zum Loeschen der Suche */
+            draw_text_centered(sx + sw - 22, tb_y + 4, 20, "\xC3\x97", 0xFF9AA3B2u, FONT_14, false);
+            g_fp_hits.push_back({sx + sw - 22, tb_y, 22, tb_h, FP_ACT_SEARCH_CLEAR, 0, 0});
+        }
+        g_fp_hits.push_back({sx, tb_y, sw - (g_fp_search_text.empty() ? 0 : 22), tb_h, FP_ACT_SEARCH_BOX, 0, 0});
+
+        const char *flt_lbls[3] = { "Alle", "nur Wichtige", "\xF0\x9F\x92\xB0 Exploits" };
+        const int   flt_ws[3]   = { 46, 98, 92 };
+        int fx = sx + sw + 8;
+        for (int fi = 0; fi < 3; ++fi) {
+            int fw = flt_ws[fi];
+            draw_button(fx, tb_y, fw, tb_h, flt_lbls[fi], g_fp_filter == fi, true, false, true, FONT_13);
+            g_fp_hits.push_back({fx, tb_y, fw, tb_h, FP_ACT_FILTER, fi, 0});
+            fx += fw + 6;
+        }
+
+        int bw2 = 104;
+        int bx2 = mx + mw - 22 - bw2;
+        int bw1 = 108;
+        int bx1 = bx2 - 6 - bw1;
+        draw_button(bx1, tb_y, bw1, tb_h, "Alle aufklappen", false, true, false, true, FONT_13);
+        draw_button(bx2, tb_y, bw2, tb_h, "Alle zuklappen",  false, true, false, true, FONT_13);
+        g_fp_hits.push_back({bx1, tb_y, bw1, tb_h, FP_ACT_EXPAND_ALL, 0, 0});
+        g_fp_hits.push_back({bx2, tb_y, bw2, tb_h, FP_ACT_COLLAPSE_ALL, 0, 0});
+    }
+
+    /* Scrollbarer Inhaltsbereich */
+    const int list_x = mx + 22;
+    const int list_y = my + 128;
+    const int list_w = mw - 44 - 14; /* 14 px rechts fuer Scrollbalken */
+    const int list_h = bot_line_y - 8 - list_y;
+    g_fp_view_h = list_h;
+
+    /* Zwei Durchlaeufe: Pass 0 misst Gesamt-Inhaltshoehe fuer Scroll-Begrenzung, Pass 1 zeichnet mit Clip-Rect */
+    for (int pass = 0; pass < 2; ++pass) {
+        bool draw_it = (pass == 1);
+        if (draw_it) {
+            clamp_fanpatch_scroll();
+            set_clip_rect(list_x, list_y, list_w, list_h);
+        }
+        int cur_y = list_y - (draw_it ? g_fp_scroll_y : 0);
+
+        if (g_fp_tab == 0) {
+            /* Reiter 0: Versionen (neueste oben) */
+            for (size_t vi = 0; vi < fp.versionen.size(); ++vi) {
+                const FanpatchVersionEntry &v = fp.versionen[vi];
+                bool is_installed = (vi == 0);
+                if (!g.version.empty()) {
+                    std::string expected_v = "Fanpatch " + v.version;
+                    is_installed = (_stricmp(g.version.c_str(), expected_v.c_str()) == 0 ||
+                                    _stricmp(g.version.c_str(), v.version.c_str()) == 0);
+                }
+
+                int row_h = 31;
+                if (draw_it) {
+                    bool row_vis = (cur_y + row_h > list_y && cur_y < list_y + list_h);
+                    if (row_vis) {
+                        bool hov_row = point_in_rect(g_mouse_x, g_mouse_y, list_x, cur_y, list_w, row_h) &&
+                                       point_in_rect(g_mouse_x, g_mouse_y, list_x, list_y, list_w, list_h);
+                        if (is_installed) {
+                            fill_rect(list_x, cur_y, list_w, row_h, hov_row ? 0xFF233246u : 0xFF1D2A3Bu);
+                        } else if (hov_row) {
+                            fill_rect(list_x, cur_y, list_w, row_h, 0xFF1E2636u);
+                        }
+                        draw_plus_minus_sign(list_x + 10, cur_y + 14, v.expanded, 0xFFB8C2D4u);
+                        draw_text(list_x + 26, cur_y + 5, v.version.c_str(), 0xFFE3A63Au, FONT_15_SEMI, false);
+                        if (!v.datum.empty()) {
+                            draw_text(list_x + 86, cur_y + 7, v.datum.c_str(), 0xFF9AA3B2u, FONT_13, false);
+                        }
+                        int tit_x = list_x + 168;
+                        int inst_w = is_installed ? (text_width_px("installiert", FONT_13_BOLD) + 16) : 0;
+                        int max_tit_w = (list_x + list_w - 8) - tit_x - inst_w;
+                        std::string disp_tit = clip_text_px_right(v.titel, max_tit_w, FONT_14);
+                        draw_text(tit_x, cur_y + 5, disp_tit.c_str(), 0xFFE6E9EFu, FONT_14, false);
+                        if (is_installed) {
+                            int ix = tit_x + text_width_px(disp_tit.c_str(), FONT_14) + 10;
+                            draw_text(ix, cur_y + 7, "installiert", 0xFF4CAF72u, FONT_13_BOLD, false);
+                        }
+                        g_fp_hits.push_back({list_x, cur_y, list_w, row_h, FP_ACT_VER_TOGGLE, (int)vi, 0});
+                    }
+                }
+                cur_y += row_h;
+
+                if (v.expanded) {
+                    int tree_y0 = cur_y;
+                    int indent_x = list_x + 26;
+                    if (!v.korrekturen.empty()) {
+                        for (size_t ki = 0; ki < v.korrekturen.size(); ++ki) {
+                            const FanpatchVerKorrRef &kr = v.korrekturen[ki];
+                            int k_idx = find_korrektur_index_by_nr(fp, kr.nr);
+                            if (k_idx < 0) continue;
+                            const FanpatchKorrekturEntry &k = fp.korrekturen[k_idx];
+                            bool k_open = (ki < v.korr_expanded.size()) ? v.korr_expanded[ki] : false;
+
+                            int kr_h = 28;
+                            if (draw_it) {
+                                bool kr_vis = (cur_y + kr_h > list_y && cur_y < list_y + list_h);
+                                if (kr_vis) {
+                                    bool hov_kr = point_in_rect(g_mouse_x, g_mouse_y, indent_x, cur_y, list_w - 26, kr_h) &&
+                                                  point_in_rect(g_mouse_x, g_mouse_y, list_x, list_y, list_w, list_h);
+                                    if (hov_kr) {
+                                        fill_rect(indent_x, cur_y, list_w - 26, kr_h, 0xFF1E2636u);
+                                    }
+                                    draw_plus_minus_sign(indent_x + 8, cur_y + 13, k_open, 0xFF9AA3B2u);
+                                    std::string nr_lbl = "Nr. " + k.nr;
+                                    draw_text(indent_x + 22, cur_y + 5, nr_lbl.c_str(), 0xFF9AA3B2u, FONT_13, false);
+                                    draw_stufe_word_badge(indent_x + 88, cur_y + 5, k.stufe);
+
+                                    std::string art_lbl = "(" + kr.art + ")";
+                                    int art_w = text_width_px(art_lbl.c_str(), FONT_13) + 12;
+                                    int exp_w = k.exploit ? 20 : 0;
+                                    int avail_kt = (list_x + list_w - 6) - (indent_x + 150) - art_w - exp_w;
+                                    std::string k_tit = clip_text_px_right(k.titel, avail_kt, FONT_14) + (k.exploit ? " \xF0\x9F\x92\xB0" : "");
+                                    draw_text(indent_x + 150, cur_y + 4, k_tit.c_str(), 0xFFE6E9EFu, FONT_14, false);
+                                    int art_x = indent_x + 150 + text_width_px(k_tit.c_str(), FONT_14) + 8;
+                                    draw_text(art_x, cur_y + 5, art_lbl.c_str(), 0xFF7C8698u, FONT_13, false);
+                                    g_fp_hits.push_back({indent_x, cur_y, list_w - 26, kr_h, FP_ACT_VKORR_TOGGLE, (int)vi, (int)ki});
+                                }
+                            }
+                            cur_y += kr_h;
+
+                            if (k_open) {
+                                int bx = indent_x + 88;
+                                int bw = (list_x + list_w) - bx - 4;
+                                int bh = draw_korrektur_detail_box(bx, cur_y + 2, bw, k, draw_it);
+                                cur_y += bh + 8;
+                            }
+                        }
+                    } else if (!v.text.empty()) {
+                        int bx = indent_x + 18;
+                        int bw = (list_x + list_w) - bx - 4;
+                        int bh = draw_plain_detail_box(bx, cur_y + 2, bw, v.text, draw_it);
+                        cur_y += bh + 8;
+                    }
+                    if (draw_it && cur_y > tree_y0 + 4) {
+                        fill_rect(list_x + 10, tree_y0, 1, cur_y - tree_y0 - 4, 0xFF323E52u);
+                    }
+                }
+                if (draw_it) {
+                    fill_rect(list_x, cur_y, list_w, 1, 0xFF222B3Cu);
+                }
+                cur_y += 2;
+            }
+        } else if (g_fp_tab == 1) {
+            /* Reiter 1: Alle Korrekturen (nach Bereich gruppiert, mit Suche und Filter) */
+            int total_matches = 0;
+            for (size_t bi = 0; bi < fp.bereiche.size(); ++bi) {
+                const FanpatchAreaGroup &ag = fp.bereiche[bi];
+                std::vector<int> matching;
+                for (size_t m = 0; m < ag.korr_indices.size(); ++m) {
+                    int k_idx = ag.korr_indices[m];
+                    if (korrektur_matches_filter_and_search(fp.korrekturen[k_idx])) {
+                        matching.push_back(k_idx);
+                    }
+                }
+                if (matching.empty()) continue;
+                total_matches += (int)matching.size();
+
+                bool area_open = ag.expanded || !g_fp_search_text.empty();
+                int ar_h = 31;
+                if (draw_it) {
+                    bool ar_vis = (cur_y + ar_h > list_y && cur_y < list_y + list_h);
+                    if (ar_vis) {
+                        bool hov_ar = point_in_rect(g_mouse_x, g_mouse_y, list_x, cur_y, list_w, ar_h) &&
+                                      point_in_rect(g_mouse_x, g_mouse_y, list_x, list_y, list_w, list_h);
+                        if (hov_ar) {
+                            fill_rect(list_x, cur_y, list_w, ar_h, 0xFF1E2636u);
+                        }
+                        draw_plus_minus_sign(list_x + 10, cur_y + 14, area_open, 0xFFB8C2D4u);
+                        draw_text(list_x + 26, cur_y + 5, ag.display_name.c_str(), 0xFFE6E9EFu, FONT_15_SEMI, false);
+                        char cnt_buf[32];
+                        snprintf(cnt_buf, sizeof(cnt_buf), "%d", (int)matching.size());
+                        int cx_cnt = list_x + 26 + text_width_px(ag.display_name.c_str(), FONT_15_SEMI) + 8;
+                        draw_text(cx_cnt, cur_y + 6, cnt_buf, 0xFF9AA3B2u, FONT_14, false);
+                        g_fp_hits.push_back({list_x, cur_y, list_w, ar_h, FP_ACT_AREA_TOGGLE, (int)bi, 0});
+                    }
+                }
+                cur_y += ar_h;
+
+                if (area_open) {
+                    int tree_y0 = cur_y;
+                    int indent_x = list_x + 26;
+                    for (size_t mi = 0; mi < matching.size(); ++mi) {
+                        int k_idx = matching[mi];
+                        const FanpatchKorrekturEntry &k = fp.korrekturen[k_idx];
+                        int kr_h = 28;
+                        if (draw_it) {
+                            bool kr_vis = (cur_y + kr_h > list_y && cur_y < list_y + list_h);
+                            if (kr_vis) {
+                                bool hov_kr = point_in_rect(g_mouse_x, g_mouse_y, indent_x, cur_y, list_w - 26, kr_h) &&
+                                              point_in_rect(g_mouse_x, g_mouse_y, list_x, list_y, list_w, list_h);
+                                if (hov_kr) {
+                                    fill_rect(indent_x, cur_y, list_w - 26, kr_h, 0xFF1E2636u);
+                                }
+                                draw_plus_minus_sign(indent_x + 8, cur_y + 13, k.expanded, 0xFF9AA3B2u);
+                                std::string nr_lbl = "Nr. " + k.nr;
+                                draw_text(indent_x + 22, cur_y + 5, nr_lbl.c_str(), 0xFF9AA3B2u, FONT_13, false);
+                                draw_stufe_word_badge(indent_x + 88, cur_y + 5, k.stufe);
+
+                                int exp_w = k.exploit ? 20 : 0;
+                                int avail_kt = (list_x + list_w - 6) - (indent_x + 150) - exp_w;
+                                std::string k_tit = clip_text_px_right(k.titel, avail_kt, FONT_14) + (k.exploit ? " \xF0\x9F\x92\xB0" : "");
+                                draw_text(indent_x + 150, cur_y + 4, k_tit.c_str(), 0xFFE6E9EFu, FONT_14, false);
+                                g_fp_hits.push_back({indent_x, cur_y, list_w - 26, kr_h, FP_ACT_KORR_TOGGLE, k_idx, 0});
+                            }
+                        }
+                        cur_y += kr_h;
+
+                        if (k.expanded) {
+                            int bx = indent_x + 88;
+                            int bw = (list_x + list_w) - bx - 4;
+                            int bh = draw_korrektur_detail_box(bx, cur_y + 2, bw, k, draw_it);
+                            cur_y += bh + 8;
+                        }
+                    }
+                    if (draw_it && cur_y > tree_y0 + 4) {
+                        fill_rect(list_x + 10, tree_y0, 1, cur_y - tree_y0 - 4, 0xFF323E52u);
+                    }
+                }
+                if (draw_it) {
+                    fill_rect(list_x, cur_y, list_w, 1, 0xFF222B3Cu);
+                }
+                cur_y += 2;
+            }
+            if (total_matches == 0 && draw_it) {
+                draw_text_centered(list_x, list_y + 60, list_w, "Keine passenden Korrekturen gefunden.", 0xFF9AA3B2u, FONT_14, false);
+            }
+        } else if (g_fp_tab == 2) {
+            /* Reiter 2: Zusatzfunktionen */
+            for (size_t zi = 0; zi < fp.zusatzfunktionen.size(); ++zi) {
+                const FanpatchZusatzEntry &z = fp.zusatzfunktionen[zi];
+                int row_h = 31;
+                if (draw_it) {
+                    bool row_vis = (cur_y + row_h > list_y && cur_y < list_y + list_h);
+                    if (row_vis) {
+                        bool hov_row = point_in_rect(g_mouse_x, g_mouse_y, list_x, cur_y, list_w, row_h) &&
+                                       point_in_rect(g_mouse_x, g_mouse_y, list_x, list_y, list_w, list_h);
+                        if (hov_row) {
+                            fill_rect(list_x, cur_y, list_w, row_h, 0xFF1E2636u);
+                        }
+                        draw_plus_minus_sign(list_x + 10, cur_y + 14, z.expanded, 0xFFB8C2D4u);
+                        draw_text(list_x + 26, cur_y + 5, z.titel.c_str(), 0xFFE3A63Au, FONT_15_SEMI, false);
+                        std::string meta = z.version;
+                        if (!z.stufe.empty()) {
+                            if (!meta.empty()) meta += " \xC2\xB7 ";
+                            meta += z.stufe;
+                        }
+                        if (!meta.empty()) {
+                            int tit_w = text_width_px(z.titel.c_str(), FONT_15_SEMI);
+                            int meta_x = list_x + 26 + tit_w + 12;
+                            int avail_m = (list_x + list_w - 8) - meta_x;
+                            if (avail_m > 40) {
+                                std::string disp_m = clip_text_px_right(meta, avail_m, FONT_12);
+                                draw_text(meta_x, cur_y + 8, disp_m.c_str(), 0xFF9AA3B2u, FONT_12, false);
+                            }
+                        }
+                        g_fp_hits.push_back({list_x, cur_y, list_w, row_h, FP_ACT_ZUS_TOGGLE, (int)zi, 0});
+                    }
+                }
+                cur_y += row_h;
+
+                if (z.expanded) {
+                    int bx = list_x + 26;
+                    int bw = list_w - 30;
+                    int bh = draw_plain_detail_box(bx, cur_y + 2, bw, z.text, draw_it);
+                    cur_y += bh + 8;
+                }
+                if (draw_it) {
+                    fill_rect(list_x, cur_y, list_w, 1, 0xFF222B3Cu);
+                }
+                cur_y += 3;
+            }
+        }
+
+        if (pass == 0) {
+            g_fp_content_h = cur_y - list_y;
+        } else {
+            reset_clip_rect();
+        }
+    }
+
+    /* Scrollbalken rechts neben der Liste */
+    g_fp_sb_track_x = mx + mw - 18;
+    g_fp_sb_track_y = list_y;
+    g_fp_sb_track_w = 8;
+    g_fp_sb_track_h = list_h;
+    fill_rect(g_fp_sb_track_x, g_fp_sb_track_y, g_fp_sb_track_w, g_fp_sb_track_h, 0xFF121722u);
+
+    if (g_fp_content_h > g_fp_view_h && g_fp_content_h > 0) {
+        int th_h = (g_fp_view_h * g_fp_view_h) / g_fp_content_h;
+        if (th_h < 28) th_h = 28;
+        if (th_h > g_fp_view_h) th_h = g_fp_view_h;
+        int max_sc = g_fp_content_h - g_fp_view_h;
+        int avail_track = g_fp_view_h - th_h;
+        int th_y = list_y + ((avail_track > 0 && max_sc > 0) ? (g_fp_scroll_y * avail_track) / max_sc : 0);
+        g_fp_sb_thumb_y = th_y;
+        g_fp_sb_thumb_h = th_h;
+        bool hov_sb = g_fp_dragging_sb || point_in_rect(g_mouse_x, g_mouse_y, g_fp_sb_track_x - 2, th_y, g_fp_sb_track_w + 4, th_h);
+        fill_rect(g_fp_sb_track_x, th_y, g_fp_sb_track_w, th_h, hov_sb ? 0xFF5AA9E6u : 0xFF3A475Cu);
+    } else {
+        g_fp_sb_thumb_y = list_y;
+        g_fp_sb_thumb_h = list_h;
+        fill_rect(g_fp_sb_track_x, list_y, g_fp_sb_track_w, list_h, 0xFF232B3Cu);
+    }
+
+    SDL_SetHandCursor(0);
+}
+
+static void fanpatch_set_expand_all(FanpatchData &fp, bool expand) {
+    if (g_fp_tab == 0) {
+        for (size_t vi = 0; vi < fp.versionen.size(); ++vi) {
+            fp.versionen[vi].expanded = expand;
+            /* Bei "Alle aufklappen" auf Versionen auch deren Korrekturen aufklappen (ausser v1.0 mit >40 Eintraegen, damit es uebersichtlich bleibt; bei erneutem Klick auch diese) */
+            bool exp_k = expand && (fp.versionen[vi].korrekturen.size() <= 40);
+            for (size_t ki = 0; ki < fp.versionen[vi].korr_expanded.size(); ++ki) {
+                fp.versionen[vi].korr_expanded[ki] = exp_k;
+            }
+        }
+    } else if (g_fp_tab == 1) {
+        for (size_t bi = 0; bi < fp.bereiche.size(); ++bi) {
+            fp.bereiche[bi].expanded = expand;
+        }
+        for (size_t ki = 0; ki < fp.korrekturen.size(); ++ki) {
+            fp.korrekturen[ki].expanded = expand;
+        }
+    } else if (g_fp_tab == 2) {
+        for (size_t zi = 0; zi < fp.zusatzfunktionen.size(); ++zi) {
+            fp.zusatzfunktionen[zi].expanded = expand;
+        }
+    }
+    if (!expand) {
+        g_fp_scroll_y = 0;
+    }
+}
+
+static void handle_fanpatch_click(int mx, int my) {
+    const int win_w = 860, win_h = 610;
+    const int win_x = (SCREEN_W - win_w) / 2;
+    const int win_y = (SCREEN_H - win_h) / 2;
+
+    /* Klick ausserhalb des Fensters schliesst es */
+    if (!point_in_rect(mx, my, win_x, win_y, win_w, win_h)) {
+        g_fp_active = false;
+        g_fp_search_focused = false;
+        g_fp_dragging_sb = false;
+        return;
+    }
+
+    FanpatchData &fp = g_fp_data[g_fp_game_idx];
+
+    /* Klick auf den Scrollbalken */
+    if (fp.loaded && point_in_rect(mx, my, g_fp_sb_track_x - 4, g_fp_sb_track_y, g_fp_sb_track_w + 8, g_fp_sb_track_h)) {
+        if (g_fp_content_h > g_fp_view_h) {
+            if (my >= g_fp_sb_thumb_y && my < g_fp_sb_thumb_y + g_fp_sb_thumb_h) {
+                g_fp_dragging_sb   = true;
+                g_fp_drag_start_my = my;
+                g_fp_drag_start_sc = g_fp_scroll_y;
+            } else {
+                int avail_track = g_fp_view_h - g_fp_sb_thumb_h;
+                int max_sc = g_fp_content_h - g_fp_view_h;
+                int rel_y = my - g_fp_sb_track_y - g_fp_sb_thumb_h / 2;
+                if (avail_track > 0) {
+                    g_fp_scroll_y = (rel_y * max_sc) / avail_track;
+                    clamp_fanpatch_scroll();
+                }
+                g_fp_dragging_sb   = true;
+                g_fp_drag_start_my = my;
+                g_fp_drag_start_sc = g_fp_scroll_y;
+            }
+        }
+        return;
+    }
+
+    const int list_y0 = win_y + 128;
+    const int list_y1 = win_y + win_h - 62;
+
+    for (size_t i = 0; i < g_fp_hits.size(); ++i) {
+        const FanpatchHitBox &hb = g_fp_hits[i];
+        /* Scrollbare Zeilen nur innerhalb des sichtbaren Listenbereichs klickbar */
+        if (hb.action >= FP_ACT_VER_TOGGLE && hb.action <= FP_ACT_ZUS_TOGGLE) {
+            if (my < list_y0 || my >= list_y1) continue;
+        }
+        if (point_in_rect(mx, my, hb.x, hb.y, hb.w, hb.h)) {
+            if (hb.action != FP_ACT_SEARCH_BOX) {
+                g_fp_search_focused = false;
+            }
+            switch (hb.action) {
+            case FP_ACT_TAB:
+                g_fp_tab = hb.idx1;
+                g_fp_scroll_y = 0;
+                break;
+            case FP_ACT_EXPAND_ALL:
+                fanpatch_set_expand_all(fp, true);
+                break;
+            case FP_ACT_COLLAPSE_ALL:
+                fanpatch_set_expand_all(fp, false);
+                break;
+            case FP_ACT_SEARCH_BOX:
+                g_fp_search_focused = true;
+                break;
+            case FP_ACT_SEARCH_CLEAR:
+                g_fp_search_text.clear();
+                g_fp_search_focused = true;
+                g_fp_scroll_y = 0;
+                break;
+            case FP_ACT_FILTER:
+                g_fp_filter = hb.idx1;
+                g_fp_scroll_y = 0;
+                break;
+            case FP_ACT_VER_TOGGLE:
+                if (hb.idx1 >= 0 && hb.idx1 < (int)fp.versionen.size()) {
+                    fp.versionen[hb.idx1].expanded = !fp.versionen[hb.idx1].expanded;
+                }
+                break;
+            case FP_ACT_VKORR_TOGGLE:
+                if (hb.idx1 >= 0 && hb.idx1 < (int)fp.versionen.size()) {
+                    FanpatchVersionEntry &ve = fp.versionen[hb.idx1];
+                    if (hb.idx2 >= 0 && hb.idx2 < (int)ve.korr_expanded.size()) {
+                        ve.korr_expanded[hb.idx2] = !ve.korr_expanded[hb.idx2];
+                    }
+                }
+                break;
+            case FP_ACT_AREA_TOGGLE:
+                if (hb.idx1 >= 0 && hb.idx1 < (int)fp.bereiche.size()) {
+                    fp.bereiche[hb.idx1].expanded = !fp.bereiche[hb.idx1].expanded;
+                }
+                break;
+            case FP_ACT_KORR_TOGGLE:
+                if (hb.idx1 >= 0 && hb.idx1 < (int)fp.korrekturen.size()) {
+                    fp.korrekturen[hb.idx1].expanded = !fp.korrekturen[hb.idx1].expanded;
+                }
+                break;
+            case FP_ACT_ZUS_TOGGLE:
+                if (hb.idx1 >= 0 && hb.idx1 < (int)fp.zusatzfunktionen.size()) {
+                    fp.zusatzfunktionen[hb.idx1].expanded = !fp.zusatzfunktionen[hb.idx1].expanded;
+                }
+                break;
+            case FP_ACT_GITHUB: {
+                const char *no_exec = getenv("STARTER_NO_BROWSER_EXEC");
+                if (!g_no_browser_exec && (!no_exec || no_exec[0] != '1') && !fp.github_url.empty()) {
+                    ShellExecuteA(NULL, "open", fp.github_url.c_str(), NULL, NULL, SW_SHOWNORMAL);
+                }
+                g_status_msg = "GitHub-Änderungsliste geöffnet: " + fp.github_url;
+                break;
+            }
+            case FP_ACT_CLOSE:
+                g_fp_active = false;
+                g_fp_search_focused = false;
+                g_fp_dragging_sb = false;
+                break;
+            }
+            return;
+        }
+    }
+    g_fp_search_focused = false;
+}
+
+static void handle_fanpatch_motion(int mx, int my) {
+    (void)mx;
+    if (g_fp_dragging_sb && g_fp_content_h > g_fp_view_h) {
+        int avail_track = g_fp_view_h - g_fp_sb_thumb_h;
+        int max_sc = g_fp_content_h - g_fp_view_h;
+        if (avail_track > 0) {
+            int dy = my - g_fp_drag_start_my;
+            g_fp_scroll_y = g_fp_drag_start_sc + (dy * max_sc) / avail_track;
+            clamp_fanpatch_scroll();
+        }
+    }
+}
+
+static void handle_fanpatch_mouseup(void) {
+    g_fp_dragging_sb = false;
+}
+
+static void handle_fanpatch_wheel(int wheel_y) {
+    if (!g_fp_active) return;
+    g_fp_scroll_y -= wheel_y * 44;
+    clamp_fanpatch_scroll();
+}
+
+static void handle_fanpatch_keydown(const SDL_KeyboardEvent &kev) {
+    int vk = (int)kev.keysym.sym;
+    int ascii = (int)(kev.keysym.unused & 0xFF);
+
+    if (vk == VK_ESCAPE) {
+        if (g_fp_search_focused && !g_fp_search_text.empty()) {
+            g_fp_search_text.clear();
+            g_fp_scroll_y = 0;
+            return;
+        }
+        g_fp_active = false;
+        g_fp_search_focused = false;
+        g_fp_dragging_sb = false;
+        return;
+    }
+
+    if (vk == VK_UP) {
+        g_fp_scroll_y -= 32;
+        clamp_fanpatch_scroll();
+        return;
+    }
+    if (vk == VK_DOWN) {
+        g_fp_scroll_y += 32;
+        clamp_fanpatch_scroll();
+        return;
+    }
+    if (vk == VK_PRIOR) {
+        g_fp_scroll_y -= g_fp_view_h - 40;
+        clamp_fanpatch_scroll();
+        return;
+    }
+    if (vk == VK_NEXT) {
+        g_fp_scroll_y += g_fp_view_h - 40;
+        clamp_fanpatch_scroll();
+        return;
+    }
+    if (vk == VK_HOME && !g_fp_search_focused) {
+        g_fp_scroll_y = 0;
+        return;
+    }
+    if (vk == VK_END && !g_fp_search_focused) {
+        g_fp_scroll_y = g_fp_content_h;
+        clamp_fanpatch_scroll();
+        return;
+    }
+
+    if (g_fp_tab == 1) {
+        if (vk == VK_BACK) {
+            g_fp_search_focused = true;
+            while (!g_fp_search_text.empty() && (((unsigned char)g_fp_search_text.back() & 0xC0) == 0x80)) {
+                g_fp_search_text.pop_back();
+            }
+            if (!g_fp_search_text.empty()) {
+                g_fp_search_text.pop_back();
+            }
+            g_fp_scroll_y = 0;
+            return;
+        }
+        if (ascii >= 32 && ascii != 127 && g_fp_search_text.size() < 42) {
+            g_fp_search_focused = true;
+            if (ascii < 0x80) {
+                g_fp_search_text.push_back((char)ascii);
+            } else {
+                /* Windows-1252 / Latin-1 Byte (z. B. ä, ö, ü, ß) nach UTF-8 */
+                g_fp_search_text.push_back((char)(0xC0 | ((ascii >> 6) & 0x1F)));
+                g_fp_search_text.push_back((char)(0x80 | (ascii & 0x3F)));
+            }
+            g_fp_scroll_y = 0;
+            return;
+        }
+    }
 }
 
 static void render_modal_dialog(void) {
@@ -3625,7 +5109,9 @@ static void render_frame(void) {
     } else {
         render_screen_settings();
     }
-    if (g_help_active) {
+    if (g_fp_active) {
+        render_fanpatch_overlay();
+    } else if (g_help_active) {
         render_help_overlay();
     } else if (g_modal_active) {
         render_modal_dialog();
@@ -3634,6 +5120,189 @@ static void render_frame(void) {
     SDL_RenderClear(g_renderer);
     SDL_RenderCopy(g_renderer, g_texture, NULL, NULL);
     SDL_RenderPresent(g_renderer);
+}
+
+static uint32_t png_crc32_buf(const uint8_t *buf, size_t len) {
+    uint32_t c = 0xFFFFFFFFu;
+    for (size_t i = 0; i < len; ++i) {
+        c ^= buf[i];
+        for (int k = 0; k < 8; ++k) {
+            c = (c & 1) ? (0xEDB88320u ^ (c >> 1)) : (c >> 1);
+        }
+    }
+    return c ^ 0xFFFFFFFFu;
+}
+
+static void png_write_u32_be(FILE *fp, uint32_t v) {
+    uint8_t b[4] = {
+        (uint8_t)((v >> 24) & 0xFF),
+        (uint8_t)((v >> 16) & 0xFF),
+        (uint8_t)((v >> 8)  & 0xFF),
+        (uint8_t)(v         & 0xFF)
+    };
+    fwrite(b, 1, 4, fp);
+}
+
+static void png_write_chunk(FILE *fp, const char tag[4], const uint8_t *data, size_t len) {
+    png_write_u32_be(fp, (uint32_t)len);
+    std::vector<uint8_t> tmp(4 + len);
+    memcpy(&tmp[0], tag, 4);
+    if (len > 0 && data) memcpy(&tmp[4], data, len);
+    fwrite(&tmp[0], 1, 4 + len, fp);
+    png_write_u32_be(fp, png_crc32_buf(&tmp[0], 4 + len));
+}
+
+static bool save_framebuffer_png(const std::string &png_path) {
+    if (png_path.empty()) return false;
+    ensure_parent_dirs_win(png_path);
+    FILE *fp = fopen(utf8_to_win1252(png_path).c_str(), "wb");
+    if (!fp) fp = fopen(png_path.c_str(), "wb");
+    if (!fp) return false;
+
+    static const uint8_t sig[8] = { 137, 80, 78, 71, 13, 10, 26, 10 };
+    fwrite(sig, 1, 8, fp);
+
+    uint8_t ihdr[13] = {
+        (uint8_t)((SCREEN_W >> 24) & 0xFF), (uint8_t)((SCREEN_W >> 16) & 0xFF),
+        (uint8_t)((SCREEN_W >> 8)  & 0xFF), (uint8_t)(SCREEN_W & 0xFF),
+        (uint8_t)((SCREEN_H >> 24) & 0xFF), (uint8_t)((SCREEN_H >> 16) & 0xFF),
+        (uint8_t)((SCREEN_H >> 8)  & 0xFF), (uint8_t)(SCREEN_H & 0xFF),
+        8, 2, 0, 0, 0
+    };
+    png_write_chunk(fp, "IHDR", ihdr, 13);
+
+    const size_t raw_row = 1 + SCREEN_W * 3;
+    const size_t raw_len = raw_row * SCREEN_H;
+    std::vector<uint8_t> raw(raw_len);
+    uint32_t s1 = 1, s2 = 0;
+    size_t p = 0;
+    for (int y = 0; y < SCREEN_H; ++y) {
+        raw[p++] = 0;
+        s2 = (s2 + s1) % 65521u;
+        for (int x = 0; x < SCREEN_W; ++x) {
+            uint32_t c = g_fb[y * SCREEN_W + x];
+            uint8_t r = (uint8_t)((c >> 16) & 0xFF);
+            uint8_t g = (uint8_t)((c >> 8)  & 0xFF);
+            uint8_t b = (uint8_t)(c         & 0xFF);
+            raw[p++] = r; s1 = (s1 + r) % 65521u; s2 = (s2 + s1) % 65521u;
+            raw[p++] = g; s1 = (s1 + g) % 65521u; s2 = (s2 + s1) % 65521u;
+            raw[p++] = b; s1 = (s1 + b) % 65521u; s2 = (s2 + s1) % 65521u;
+        }
+    }
+    uint32_t adler = (s2 << 16) | s1;
+
+    std::vector<uint8_t> zdat;
+    zdat.reserve(raw_len + (raw_len / 65535 + 2) * 5 + 6);
+    zdat.push_back(0x78);
+    zdat.push_back(0x01);
+    size_t off = 0;
+    while (off < raw_len) {
+        size_t blk = raw_len - off;
+        if (blk > 65535) blk = 65535;
+        uint8_t bfinal = (off + blk >= raw_len) ? 1 : 0;
+        uint16_t len16 = (uint16_t)blk;
+        uint16_t nlen16 = (uint16_t)(~len16);
+        zdat.push_back(bfinal);
+        zdat.push_back((uint8_t)(len16 & 0xFF));
+        zdat.push_back((uint8_t)((len16 >> 8) & 0xFF));
+        zdat.push_back((uint8_t)(nlen16 & 0xFF));
+        zdat.push_back((uint8_t)((nlen16 >> 8) & 0xFF));
+        zdat.insert(zdat.end(), raw.begin() + (ptrdiff_t)off, raw.begin() + (ptrdiff_t)(off + blk));
+        off += blk;
+    }
+    zdat.push_back((uint8_t)((adler >> 24) & 0xFF));
+    zdat.push_back((uint8_t)((adler >> 16) & 0xFF));
+    zdat.push_back((uint8_t)((adler >> 8)  & 0xFF));
+    zdat.push_back((uint8_t)(adler         & 0xFF));
+
+    png_write_chunk(fp, "IDAT", &zdat[0], zdat.size());
+    png_write_chunk(fp, "IEND", NULL, 0);
+    fclose(fp);
+    return true;
+}
+
+static bool save_framebuffer_image(const std::string &img_path) {
+    if (ends_with_ci(img_path, ".png")) {
+        return save_framebuffer_png(img_path);
+    }
+    return save_framebuffer_bmp(img_path);
+}
+
+static void run_starter_verlauf_test(const std::string &out_dir) {
+    mkdir_recursive_win(out_dir);
+    for (int gi = 0; gi < (int)g_games.size() && gi < 3; ++gi) {
+        g_selected_game = gi;
+        open_fanpatch_window(gi);
+        FanpatchData &fp = g_fp_data[gi];
+        const std::string &gid = g_games[gi].id;
+
+        /* 1. Versionen zu (alle Versionen zugeklappt) */
+        g_fp_tab = 0;
+        g_fp_scroll_y = 0;
+        fanpatch_set_expand_all(fp, false);
+        render_frame();
+        save_framebuffer_png(join_path(out_dir, "test_verlauf_" + gid + "_1_versionen_zu.png"));
+
+        /* 2. Version + Korrektur aufgeklappt (Schicksalsklinge: v1.5g + Nr. 18; Sternenschweif: v1.1 + Nr. 377; Riva: v1.0 + R001) */
+        fanpatch_set_expand_all(fp, false);
+        const char *target_ver = (gi == 0) ? "v1.5g" : ((gi == 1) ? "v1.1" : "v1.0");
+        const char *target_nr  = (gi == 0) ? "18"    : ((gi == 1) ? "377"   : "R001");
+        for (size_t vi = 0; vi < fp.versionen.size(); ++vi) {
+            if (_stricmp(fp.versionen[vi].version.c_str(), target_ver) == 0) {
+                fp.versionen[vi].expanded = true;
+                for (size_t ki = 0; ki < fp.versionen[vi].korrekturen.size(); ++ki) {
+                    if (_stricmp(fp.versionen[vi].korrekturen[ki].nr.c_str(), target_nr) == 0) {
+                        fp.versionen[vi].korr_expanded[ki] = true;
+                    }
+                }
+            }
+        }
+        render_frame();
+        save_framebuffer_png(join_path(out_dir, "test_verlauf_" + gid + "_2_version_aufgeklappt.png"));
+
+        /* 3. Alle Korrekturen mit Suche "Truhe" */
+        g_fp_tab = 1;
+        g_fp_filter = 0;
+        g_fp_search_text = "Truhe";
+        g_fp_scroll_y = 0;
+        for (size_t bi = 0; bi < fp.bereiche.size(); ++bi) fp.bereiche[bi].expanded = false;
+        bool first_truhe_opened = false;
+        for (size_t ki = 0; ki < fp.korrekturen.size(); ++ki) {
+            fp.korrekturen[ki].expanded = false;
+            if (!first_truhe_opened && korrektur_matches_filter_and_search(fp.korrekturen[ki])) {
+                fp.korrekturen[ki].expanded = true;
+                first_truhe_opened = true;
+            }
+        }
+        render_frame();
+        save_framebuffer_png(join_path(out_dir, "test_verlauf_" + gid + "_3_suche_truhe.png"));
+
+        /* 4. Alle Korrekturen mit Filter "nur Wichtige" (und bei Schicksalsklinge Nr. 90 aufgeklappt wie Vorlage 2) */
+        g_fp_tab = 1;
+        g_fp_filter = 1;
+        g_fp_search_text.clear();
+        g_fp_scroll_y = 0;
+        for (size_t bi = 0; bi < fp.bereiche.size(); ++bi) fp.bereiche[bi].expanded = (bi == 0);
+        for (size_t ki = 0; ki < fp.korrekturen.size(); ++ki) fp.korrekturen[ki].expanded = false;
+        if (gi == 0) {
+            int idx90 = find_korrektur_index_by_nr(fp, "90");
+            if (idx90 >= 0) fp.korrekturen[idx90].expanded = true;
+        } else if (!fp.bereiche.empty() && !fp.bereiche[0].korr_indices.empty()) {
+            fp.korrekturen[fp.bereiche[0].korr_indices[0]].expanded = true;
+        }
+        render_frame();
+        save_framebuffer_png(join_path(out_dir, "test_verlauf_" + gid + "_4_nur_wichtige.png"));
+
+        /* 5. Zusatzfunktionen */
+        g_fp_tab = 2;
+        g_fp_scroll_y = 0;
+        for (size_t zi = 0; zi < fp.zusatzfunktionen.size(); ++zi) {
+            fp.zusatzfunktionen[zi].expanded = true;
+        }
+        render_frame();
+        save_framebuffer_png(join_path(out_dir, "test_verlauf_" + gid + "_5_zusatzfunktionen.png"));
+    }
+    g_fp_active = false;
 }
 
 static bool save_framebuffer_bmp(const std::string &bmp_path) {
@@ -5527,6 +7196,11 @@ static void handle_mouse_click(int mx, int my, bool &running) {
     (void)running;
     g_show_focus_ring = false;
 
+    if (g_fp_active) {
+        handle_fanpatch_click(mx, my);
+        return;
+    }
+
     /* Header-Knopf "Hilfe (F1)" */
     if (point_in_rect(mx, my, HDR_HELP_X, HDR_HELP_Y, HDR_HELP_W, HDR_HELP_H)) {
         g_open_dd_game = -1;
@@ -5623,6 +7297,22 @@ static void handle_mouse_click(int mx, int my, bool &running) {
 
             if (point_in_rect(mx, my, cx, cy, cw, ch)) {
                 g_selected_game = (int)i;
+
+                /* Zeile 1: Klick auf "Fanpatch vX.Y" oeffnet das Fanpatch-Verlaufsfenster */
+                if (!g_games[i].version.empty()) {
+                    const char *dat_lbl = g_games[i].gamedir_valid ? "Spieldaten gefunden"
+                        : (g_games[i].gamedir_wrong_version ? "Falsche Fassung" : "Spieldaten fehlen");
+                    const char *prog_lbl = g_games[i].has_any_exe ? "Programm gefunden" : "Programm fehlt";
+                    int rx = cx + cw - 1 - 16;
+                    int dat_bx  = (rx - text_width_px(dat_lbl, FONT_14)) - 21;
+                    int prog_bx = (dat_bx - 16 - text_width_px(prog_lbl, FONT_14)) - 21;
+                    int dot_x = 0, ver_x = 0, ver_y = 0, ver_w = 0, ver_h = 0;
+                    get_card_fanpatch_rect(g_games[i], cx, cy, prog_bx, dot_x, ver_x, ver_y, ver_w, ver_h);
+                    if (ver_w > 0 && point_in_rect(mx, my, ver_x - 3, cy + 12, ver_w + 6, 24)) {
+                        open_fanpatch_window((int)i);
+                        return;
+                    }
+                }
 
                 /* Zeile 2 rechts (nur Karte 1): Haekchen "Fluessig drehen (Schicksalsklinge)" */
                 if (g_games[i].teil == 1) {
@@ -5900,6 +7590,11 @@ static void handle_keydown(const SDL_KeyboardEvent &kev, bool &running) {
     int vk = (int)kev.keysym.sym;
     int ascii = (int)(kev.keysym.unused & 0xFF);
     char ch = (char)toupper(ascii ? ascii : vk);
+
+    if (g_fp_active) {
+        handle_fanpatch_keydown(kev);
+        return;
+    }
 
     if (vk == VK_F1) {
         g_open_dd_game = -1;
@@ -6544,7 +8239,7 @@ int main(int argc, char **argv) {
     }
 
     g_window = SDL_CreateWindow(
-        "Das Schwarze Auge: Die Nordland-Trilogie",
+        "Das Schwarze Auge: Die Nordland-Trilogie - Starter " STARTER_VERSION,
         g_win_x, g_win_y,
         g_win_w, g_win_h,
         SDL_WINDOW_SHOWN | SDL_WINDOW_RESIZABLE
@@ -6609,10 +8304,20 @@ int main(int argc, char **argv) {
         inspect_absturz_log(test_absturz_path, g_games[g_selected_game].name);
     }
 
+    const char *verlauf_test_dir = getenv("STARTER_VERLAUF_TEST");
+    if (verlauf_test_dir && verlauf_test_dir[0]) {
+        run_starter_verlauf_test(verlauf_test_dir);
+        SDL_DestroyTexture(g_texture);
+        SDL_DestroyRenderer(g_renderer);
+        SDL_DestroyWindow(g_window);
+        SDL_Quit();
+        return 0;
+    }
+
     render_frame();
 
     if (!screenshot_path.empty()) {
-        save_framebuffer_bmp(screenshot_path);
+        save_framebuffer_image(screenshot_path);
     }
 
     if ((auto_patch_dos || auto_patch_dos_copy || auto_launch_dos || auto_open_browser) && auto_quit) {
@@ -6677,8 +8382,11 @@ int main(int argc, char **argv) {
             } else if (ev.type == SDL_MOUSEMOTION) {
                 g_mouse_x = ev.motion.x;
                 g_mouse_y = ev.motion.y;
+                if (g_fp_active) {
+                    handle_fanpatch_motion(ev.motion.x, ev.motion.y);
+                }
                 g_hover_game = -1;
-                if (g_screen == SCREEN_SELECT_GAME && !g_help_active && !g_modal_active) {
+                if (g_screen == SCREEN_SELECT_GAME && !g_help_active && !g_modal_active && !g_fp_active) {
                     for (size_t i = 0; i < g_games.size() && i < 3; ++i) {
                         int cy = 147 + (int)i * 162;
                         if (point_in_rect(g_mouse_x, g_mouse_y, 14, cy, 1012, 150)) {
@@ -6691,6 +8399,10 @@ int main(int argc, char **argv) {
                 g_mouse_x = ev.button.x;
                 g_mouse_y = ev.button.y;
                 handle_mouse_click(ev.button.x, ev.button.y, running);
+            } else if (ev.type == SDL_MOUSEBUTTONUP && ev.button.button == SDL_BUTTON_LEFT) {
+                handle_fanpatch_mouseup();
+            } else if (ev.type == SDL_MOUSEWHEEL) {
+                handle_fanpatch_wheel(ev.wheel.y);
             } else if (ev.type == SDL_KEYDOWN) {
                 handle_keydown(ev.key, running);
             }

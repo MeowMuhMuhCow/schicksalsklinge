@@ -27,6 +27,7 @@ Die Datei liegt im Spielstand-Ordner der Fassung (`Build\Testspielstaende_Fix_Wi
 | Talentprobe | Talent, Talentwert, Zuschlag, die drei Eigenschaften mit Werten, **jeder der drei W20**, Ergebnis mit Restpunkten |
 | Fernkampf (Schuss- und Wurfwaffen) | Zielwert, W20, Treffer oder daneben |
 | Zauberprobe | Zauber, Zauberfertigkeit, Zuschlag (mit Magieresistenz des Ziels), drei W20, Ergebnis |
+| Gegnerzauber (ab 1.5i) | Gegnername, Zauber, Ziel, die drei Eigenschaften mit Werten, Zuschlag (Magieresistenz), drei W20, Ergebnis und Wirkung (Schaden, wie viel Feuerbann und Gardianum abfangen, verbleibender Schild, Statuswirkung) |
 | Kampf | jede Attacke und Parade, von Helden und Gegnern, mit W20 und AT- bzw. PA-Wert |
 | Stufenanstieg (ab 1.5) | jeder Steigerungswurf für Talente und Zauber (alter Wert, Wurf, gelungen oder nicht), die gesteigerte positive Eigenschaft, die drei W20 beim Senken der negativen Eigenschaft, der LE-Wurf (bei Zauberkundigen die Punkte für LE und AE) und beim Magier der AE-Tausch. Im Anfängermodus, wo das Spiel selbst steigert, sieht man so erstmals, was passiert |
 | Ereignisse (ab 1.5d) | die gewürfelte Gegnerzahl bei Kämpfen mit zufälliger Gegnerzahl (z. B. WILD8), der Überfallwurf im Nachtlager und beim Lagern im Dungeon (mit Schwelle, Wache, Travias Segen und in welcher Wache der Überfall kommt) und auf Reisen für jeden Tag der Wurf auf Zufallsbegegnung und auf Kampf |

@@ -1,0 +1,1315 @@
+[
+ {
+  "name": "1. Beherrschung brechen (Heldenzauber)",
+  "im_code": "Zauber-ID 1 (`SP_BEHERRSCHUNG_BRECHEN`). Gruppe Antimagie, Herkunft Druide. Probe auf KL/IN/CH. AE-Kosten laut Tabelle: variabel (in der Tabelle −1, der Zauber legt die Kosten selbst fest); bei misslungener Probe 5–10 AE (zufällig). Einsatz: im Kampf und außerhalb. Ziel: ein Held, Reichweite Berührung (Nachbarfeld) im Kampf. Wirkung im Handler: Ziel: ein Held. Ist er nicht abtrünnig (nicht von einem Gegner beherrscht), misslingt der Zauber (halbe Kosten). Auf sich selbst: kostenlos abgebrochen. Sonst kostet er zufällig 8, 12, 16 oder 20 AE (2–5 × 4). Reicht die AE nicht, misslingt er; sonst ist der Held wieder frei.",
+  "codestellen": [
+   "Quelle/datseg.c:g_spell_descriptions",
+   "Quelle/seg098.c:use_spell",
+   "Quelle/seg098.c:test_spell",
+   "Quelle/seg099.c:spell_beherrschung"
+  ],
+  "deutung": "Vermutlich das Gegenmittel, wenn ein Gegner einen Helden mit Böser Blick übernommen hat. Die Kosten (8–20 AE) sind Glückssache.",
+  "status": "im Code geprüft, im Spiel unbestätigt"
+ },
+ {
+  "name": "2. Destructibo Arcanitas (Heldenzauber)",
+  "im_code": "Zauber-ID 2 (`SP_DESTRUCTIBO_ARCANITAS`). Gruppe Antimagie, Herkunft Magier. Probe auf KL/IN/FF. AE-Kosten laut Tabelle: variabel (in der Tabelle −1, der Zauber legt die Kosten selbst fest); bei misslungener Probe 5–10 AE (zufällig). Einsatz: im Kampf und außerhalb. Ziel: kein Ziel (wirkt auf den Zaubernden oder die Umgebung). Wirkung im Handler: Nicht umgesetzt: Der Handler lässt den Zauber immer misslingen (halbe Kosten).",
+  "codestellen": [
+   "Quelle/datseg.c:g_spell_descriptions",
+   "Quelle/seg098.c:use_spell",
+   "Quelle/seg098.c:test_spell",
+   "Quelle/seg099.c:spell_destructibo"
+  ],
+  "deutung": "Sieht so aus, als ob dieser Zauber im Original nicht programmiert ist und immer misslingt.",
+  "status": "im Code geprüft, im Spiel unbestätigt"
+ },
+ {
+  "name": "3. Gardianum Paradei (Heldenzauber)",
+  "im_code": "Zauber-ID 3 (`SP_GARDIANUM_PARADEI`). Gruppe Antimagie, Herkunft Magier. Probe auf IN/CH/KK. AE-Kosten laut Tabelle: variabel (in der Tabelle −1, der Zauber legt die Kosten selbst fest); bei misslungener Probe 5–10 AE (zufällig). Einsatz: nur im Kampf. Ziel: kein Ziel (wirkt auf den Zaubernden oder die Umgebung). Wirkung im Handler: Der Zaubernde gibt ein, wie viele AE in den Schutzschirm fließen sollen. Diese Menge ist zugleich der Preis. Im Original wird der Wert nur aufaddiert und nirgends gelesen, der Schirm wirkt also nicht. Mit Fix 192 (Fanpatch-Stufe „Wichtig“) ist der Schirm so stark wie eingesetzte AE plus Stufe des Zaubernden und fängt Schaden aus feindlichen Fulminictus und Ignifaxius ab, bis er verbraucht ist (siehe Gegnerzauber).",
+  "codestellen": [
+   "Quelle/datseg.c:g_spell_descriptions",
+   "Quelle/seg098.c:use_spell",
+   "Quelle/seg098.c:test_spell",
+   "Quelle/seg099.c:spell_gardianum",
+   "Quelle/seg102.c:fix_hero_spell_protect"
+  ],
+  "deutung": "Sieht so aus, als ob der Schutzschirm im Original nur AE frisst. Erst mit dem Fanpatch schützt er vor feindlichen Kampfzaubern.",
+  "status": "im Code geprüft, im Spiel unbestätigt"
+ },
+ {
+  "name": "4. Illusionen zerstören (Heldenzauber)",
+  "im_code": "Zauber-ID 4 (`SP_ILLUSIONEN_ZERSTOEREN`). Gruppe Antimagie, Herkunft Magier. Probe auf KL/IN/CH. AE-Kosten laut Tabelle: variabel (in der Tabelle −1, der Zauber legt die Kosten selbst fest); bei misslungener Probe 5–10 AE (zufällig). Einsatz: nur im Kampf. Ziel: ein Gegner, Reichweite Fernzauber im Kampf. Wirkung im Handler: Ziel: ein Gegner. Ist er eine Illusion, kostet der Zauber 2 × (Stufe des Gegners − Stufe des Zaubernden) AE, mindestens 5. Bei genug AE verschwindet die Illusion (gilt als tot), sonst misslingt der Zauber. Ist der Gegner keine Illusion: Meldung, Kosten 2 AE.",
+  "codestellen": [
+   "Quelle/datseg.c:g_spell_descriptions",
+   "Quelle/seg098.c:use_spell",
+   "Quelle/seg098.c:test_spell",
+   "Quelle/seg099.c:spell_illusionen"
+  ],
+  "deutung": "Vermutlich nur gegen Illusionen nützlich. Gegen echte Gegner kostet er 2 AE für nichts.",
+  "status": "im Code geprüft, im Spiel unbestätigt"
+ },
+ {
+  "name": "5. Verwandlung beenden (Heldenzauber)",
+  "im_code": "Zauber-ID 5 (`SP_VERWANDLUNG_BEENDEN`). Gruppe Antimagie, Herkunft Hexe. Probe auf MU/KL/CH. AE-Kosten laut Tabelle: variabel (in der Tabelle −1, der Zauber legt die Kosten selbst fest); bei misslungener Probe 5–10 AE (zufällig). Einsatz: im Kampf und außerhalb. Ziel: ein Held, Reichweite Berührung (Nachbarfeld) im Kampf. Wirkung im Handler: Ziel: ein Held. Ist er versteinert, kostet der Zauber 5–50 AE (1W10 × 5) und hebt die Versteinerung auf (bei zu wenig AE misslingt er). Ist er verwandelt (Fluch), wird der Fluch aufgehoben und alle sieben Eigenschaften steigen um 1. Sonst kostenlos abgebrochen. Im Original ist die Meldung für „kein Verwandlungszauber“ fehlerhaft formatiert, Fix 193 (Fanpatch-Stufe „nur Alle“) berichtigt sie.",
+  "codestellen": [
+   "Quelle/datseg.c:g_spell_descriptions",
+   "Quelle/seg098.c:use_spell",
+   "Quelle/seg098.c:test_spell",
+   "Quelle/seg099.c:spell_verwandlung"
+  ],
+  "deutung": "Vermutlich der Weg, eine Versteinerung oder einen Verwandlungsfluch loszuwerden.",
+  "status": "im Code geprüft, im Spiel unbestätigt"
+ },
+ {
+  "name": "6. Band und Fessel (Heldenzauber)",
+  "im_code": "Zauber-ID 6 (`SP_BAND_UND_FESSEL`). Gruppe Beherrschung, Herkunft Waldelf. Probe auf KL/CH/KK, erschwert um die Magieresistenz des Ziels. AE-Kosten laut Tabelle: 12 AE; bei misslungener Probe 6 AE. Einsatz: nur im Kampf. Ziel: ein Gegner oder ein Held, Reichweite Berührung (Nachbarfeld) im Kampf. Wirkung im Handler: Ziel Gegner: Gegner mit Skelett-Grafik (alle Skelettarten) sind immun (misslingt). Alle anderen werden gefesselt (ohne Rundenzähler). Ein gefesselter Gegner kann sich nicht bewegen, aber aus dem Stand weiter angreifen und zaubern. Zu Beginn jedes seiner Züge befreit er sich mit 4 % Wahrscheinlichkeit. Er zählt für das Kampfende nicht mehr als aktiver Gegner, stehen nur noch Gefesselte, ist der Kampf gewonnen. Fix 312 (Fanpatch-Stufe „nur Alle“) sorgt dafür, dass so besiegte Gegner nicht in FIGHT.LST zurückgeschrieben werden und nicht erneut kämpfen. Ziel Held (nicht sich selbst): Er ist gefesselt. Will er sich im Kampf bewegen, braucht er eine MU-Probe +2, um sich zu befreien; misslingt sie, sinkt MU für 7 Stunden um 2 (nur bei MU über 4). Angreifen kann er weiter. Nach dem Kampf ist er wieder frei.",
+  "codestellen": [
+   "Quelle/datseg.c:g_spell_descriptions",
+   "Quelle/seg098.c:use_spell",
+   "Quelle/seg098.c:test_spell",
+   "Quelle/seg099.c:spell_band",
+   "Quelle/seg037.c:FIG_enemy_turn",
+   "Quelle/seg032.c:FIG_count_active_enemies",
+   "Quelle/seg032.c:do_fight",
+   "Quelle/seg033.c:FIG_menu"
+  ],
+  "deutung": "Sieht so aus, als ob Band und Fessel einen Gegner vor allem aus der Kampfwertung nimmt: Stehen nur noch Gefesselte, ist der Kampf gewonnen. Ein Gefesselter kann aber weiter zuschlagen.",
+  "status": "im Code geprüft, im Spiel unbestätigt"
+ },
+ {
+  "name": "7. Bannbaladin (Heldenzauber)",
+  "im_code": "Zauber-ID 7 (`SP_BANNBALADIN`). Gruppe Beherrschung, Herkunft Auelf. Probe auf IN/CH/CH, erschwert um die Magieresistenz des Ziels. AE-Kosten laut Tabelle: 8 AE; bei misslungener Probe 4 AE. Einsatz: nur im Kampf. Ziel: ein Gegner, Reichweite Berührung (Nachbarfeld) im Kampf. Wirkung im Handler: Ziel: ein Gegner. Tiere: Meldung „kein denkendes Wesen“, keine Kosten. Gegner mit Skelett-Grafik: misslingt. Sonst ist der Gegner besänftigt: Er kommt nicht mehr an die Reihe. Für das Kampfende zählt er aber weiter als aktiver Gegner.",
+  "codestellen": [
+   "Quelle/datseg.c:g_spell_descriptions",
+   "Quelle/seg098.c:use_spell",
+   "Quelle/seg098.c:test_spell",
+   "Quelle/seg099.c:spell_bannbaladin",
+   "Quelle/seg032.c:FIG_is_enemy_active",
+   "Quelle/seg032.c:FIG_count_active_enemies"
+  ],
+  "deutung": "Vermutlich ein starker Kampfzauber gegen denkende Gegner. Allerdings bleibt der Besänftigte für das Kampfende ein Gegner.",
+  "status": "im Code geprüft, im Spiel unbestätigt"
+ },
+ {
+  "name": "8. Böser Blick (Heldenzauber)",
+  "im_code": "Zauber-ID 8 (`SP_BOESER_BLICK`). Gruppe Beherrschung, Herkunft Druide. Probe auf MU/CH/CH, erschwert um die Magieresistenz des Ziels. AE-Kosten laut Tabelle: 8 AE; bei misslungener Probe 4 AE. Einsatz: nur im Kampf. Ziel: ein Gegner, Reichweite Berührung (Nachbarfeld) im Kampf. Wirkung im Handler: Ziel: ein Gegner. Gegner mit Skelett-Grafik: misslingt. Sonst kämpft der Gegner auf der Seite der Helden (abtrünnig) und bekommt 2 Angriffe pro Runde. Erleidet er Schaden durch einen Helden (Waffe oder Zauber), endet das wieder.",
+  "codestellen": [
+   "Quelle/datseg.c:g_spell_descriptions",
+   "Quelle/seg098.c:use_spell",
+   "Quelle/seg098.c:test_spell",
+   "Quelle/seg099.c:spell_boeser_blick",
+   "Quelle/seg041.c:FIG_damage_enemy"
+  ],
+  "deutung": "Vermutlich der stärkste Beherrschungszauber: Der Gegner kämpft für die Helden, bis ihm ein Held Schaden zufügt.",
+  "status": "im Code geprüft, im Spiel unbestätigt"
+ },
+ {
+  "name": "9. Große Gier (Heldenzauber)",
+  "im_code": "Zauber-ID 9 (`SP_GROSSE_GIER`). Gruppe Beherrschung, Herkunft Hexe. Probe auf KL/IN/CH, erschwert um die Magieresistenz des Ziels. AE-Kosten laut Tabelle: 8 AE; bei misslungener Probe 4 AE. Einsatz: nur im Kampf. Ziel: ein Gegner, Reichweite Berührung (Nachbarfeld) im Kampf. Wirkung im Handler: Im Original nicht umgesetzt: Der Handler lässt den Zauber immer misslingen (halbe Kosten). Mit Fix 382 (Fanpatch-Stufe „Wichtig“) flieht der Gegner wie beim Horriphobus (Tiere sind ausgenommen, dann misslingt er); Kosten aus der Tabelle.",
+  "codestellen": [
+   "Quelle/datseg.c:g_spell_descriptions",
+   "Quelle/seg098.c:use_spell",
+   "Quelle/seg098.c:test_spell",
+   "Quelle/seg099.c:spell_grosse_gier"
+  ],
+  "deutung": "Sieht so aus, als ob der Zauber im Original immer misslingt. Mit dem Fanpatch schlägt er Gegner in die Flucht.",
+  "status": "im Code geprüft, im Spiel unbestätigt"
+ },
+ {
+  "name": "10. Große Verwirrung (Heldenzauber)",
+  "im_code": "Zauber-ID 10 (`SP_GROSSE_VERWIRRUNG`). Gruppe Beherrschung, Herkunft Druide. Probe auf KL/KL/CH, erschwert um die Magieresistenz des Ziels. AE-Kosten laut Tabelle: variabel (in der Tabelle −1, der Zauber legt die Kosten selbst fest); bei misslungener Probe 5–10 AE (zufällig). Einsatz: nur im Kampf. Ziel: ein Gegner, Reichweite Berührung (Nachbarfeld) im Kampf. Wirkung im Handler: Ziel: ein Gegner. Gegner mit Skelett-Grafik: misslingt. Sonst sinken AT und PA des Gegners dauerhaft (für diesen Kampf) um je 2, Kosten 8 AE.",
+  "codestellen": [
+   "Quelle/datseg.c:g_spell_descriptions",
+   "Quelle/seg098.c:use_spell",
+   "Quelle/seg098.c:test_spell",
+   "Quelle/seg099.c:spell_grosse_ver"
+  ],
+  "deutung": "Vermutlich ein billiger Schwächungszauber gegen einen Gegner.",
+  "status": "im Code geprüft, im Spiel unbestätigt"
+ },
+ {
+  "name": "11. Herr über das Tierreich (Heldenzauber)",
+  "im_code": "Zauber-ID 11 (`SP_HERR_UEBER_DAS_TIERREICH`). Gruppe Beherrschung, Herkunft Druide. Probe auf MU/MU/CH, erschwert um die Magieresistenz des Ziels. AE-Kosten laut Tabelle: variabel (in der Tabelle −1, der Zauber legt die Kosten selbst fest); bei misslungener Probe 5–10 AE (zufällig). Einsatz: nur im Kampf. Ziel: ein Gegner, Reichweite Berührung (Nachbarfeld) im Kampf. Wirkung im Handler: Ziel: ein Gegner. Wirkt nur auf Tiere (sonst Meldung, keine Kosten). Kostet so viele AE wie der Wert first_ap des Tiers (die AP, die es beim Sieg bringt). Bei genug AE ist das Tier besänftigt: Es kommt nicht mehr an die Reihe, zählt für das Kampfende aber weiter als aktiver Gegner.",
+  "codestellen": [
+   "Quelle/datseg.c:g_spell_descriptions",
+   "Quelle/seg098.c:use_spell",
+   "Quelle/seg098.c:test_spell",
+   "Quelle/seg099.c:spell_herrdertiere"
+  ],
+  "deutung": "Vermutlich nur gegen Tiere sinnvoll, und gegen starke Tiere teuer.",
+  "status": "im Code geprüft, im Spiel unbestätigt"
+ },
+ {
+  "name": "12. Horriphobus (Heldenzauber)",
+  "im_code": "Zauber-ID 12 (`SP_HORRIPHOBUS`). Gruppe Beherrschung, Herkunft Magier. Probe auf MU/IN/CH, erschwert um die Magieresistenz des Ziels. AE-Kosten laut Tabelle: 7 AE; bei misslungener Probe 3 AE. Einsatz: nur im Kampf. Ziel: ein Gegner, Reichweite Berührung (Nachbarfeld) im Kampf. Wirkung im Handler: Ziel: ein Gegner. Gegner mit Skelett-Grafik: misslingt. Sonst ist der Gegner verängstigt und flieht: Er sucht nur noch einen Fluchtweg und greift nicht mehr an. Ein abtrünniger Gegner (Böser Blick) verliert das wieder. Für das Kampfende zählt ein verängstigter Gegner weiter als aktiv (die Zählung prüft „verängstigt“ nicht).",
+  "codestellen": [
+   "Quelle/datseg.c:g_spell_descriptions",
+   "Quelle/seg098.c:use_spell",
+   "Quelle/seg098.c:test_spell",
+   "Quelle/seg099.c:spell_horriphobus",
+   "Quelle/seg037.c:FIG_enemy_turn"
+  ],
+  "deutung": "Vermutlich ein guter Zauber, um einen Gegner aus dem Kampf zu nehmen. Er bleibt aber Gegner, bis er geflohen ist.",
+  "status": "im Code geprüft, im Spiel unbestätigt"
+ },
+ {
+  "name": "13. Magischer Raub (Heldenzauber)",
+  "im_code": "Zauber-ID 13 (`SP_MAGISCHER_RAUB`). Gruppe Beherrschung, Herkunft Druide. Probe auf MU/KL/KK, erschwert um die Magieresistenz des Ziels. AE-Kosten laut Tabelle: 6 AE; bei misslungener Probe 3 AE. Einsatz: nur außerhalb des Kampfes. Ziel: kein Ziel (wirkt auf den Zaubernden oder die Umgebung). Wirkung im Handler: Der Handler ist leer: Der Zauber kostet bei gelungener Probe die vollen AE laut Tabelle und bewirkt nichts (es erscheint keine eigene Meldung).",
+  "codestellen": [
+   "Quelle/datseg.c:g_spell_descriptions",
+   "Quelle/seg098.c:use_spell",
+   "Quelle/seg098.c:test_spell",
+   "Quelle/seg099.c:spell_magischerraub"
+  ],
+  "deutung": "Sieht so aus, als ob dieser Zauber im Computerspiel nur AE kostet und nichts bewirkt. Vermutlich wurde er aus dem Regelwerk übernommen, aber nie programmiert.",
+  "status": "im Code geprüft, im Spiel unbestätigt"
+ },
+ {
+  "name": "14. Respondami Veritar (Heldenzauber)",
+  "im_code": "Zauber-ID 14 (`SP_RESPONDAMI_VERITAR`). Gruppe Beherrschung, Herkunft Magier. Probe auf KL/IN/CH, erschwert um die Magieresistenz des Ziels. AE-Kosten laut Tabelle: 5 AE; bei misslungener Probe 2 AE. Einsatz: nur außerhalb des Kampfes. Ziel: kein Ziel (wirkt auf den Zaubernden oder die Umgebung). Wirkung im Handler: Der Handler ist leer: Der Zauber kostet bei gelungener Probe die vollen AE laut Tabelle und bewirkt nichts (es erscheint keine eigene Meldung).",
+  "codestellen": [
+   "Quelle/datseg.c:g_spell_descriptions",
+   "Quelle/seg098.c:use_spell",
+   "Quelle/seg098.c:test_spell",
+   "Quelle/seg099.c:spell_respondami"
+  ],
+  "deutung": "Sieht so aus, als ob dieser Zauber im Computerspiel nur AE kostet und nichts bewirkt. Vermutlich wurde er aus dem Regelwerk übernommen, aber nie programmiert.",
+  "status": "im Code geprüft, im Spiel unbestätigt"
+ },
+ {
+  "name": "15. Sanftmut (Heldenzauber)",
+  "im_code": "Zauber-ID 15 (`SP_SANFTMUT`). Gruppe Beherrschung, Herkunft Hexe. Probe auf MU/CH/CH, erschwert um die Magieresistenz des Ziels. AE-Kosten laut Tabelle: variabel (in der Tabelle −1, der Zauber legt die Kosten selbst fest); bei misslungener Probe 5–10 AE (zufällig). Einsatz: nur im Kampf. Ziel: ein Gegner, Reichweite Berührung (Nachbarfeld) im Kampf. Wirkung im Handler: Ruft denselben Handler wie Herr über das Tierreich auf: wirkt nur auf Tiere, kostet so viele AE wie deren Wert first_ap, das Tier kommt danach nicht mehr an die Reihe.",
+  "codestellen": [
+   "Quelle/datseg.c:g_spell_descriptions",
+   "Quelle/seg098.c:use_spell",
+   "Quelle/seg098.c:test_spell",
+   "Quelle/seg099.c:spell_sanftmut",
+   "Quelle/seg099.c:spell_herrdertiere"
+  ],
+  "deutung": "Sieht so aus, als ob Sanftmut im Kampf genau wie Herr über das Tierreich wirkt.",
+  "status": "im Code geprüft, im Spiel unbestätigt"
+ },
+ {
+  "name": "16. Somnigravis Tausendschlaf (Heldenzauber)",
+  "im_code": "Zauber-ID 16 (`SP_SOMNIGRAVIS_TAUSENDSCHLAF`). Gruppe Beherrschung, Herkunft Waldelf. Probe auf KL/CH/CH, erschwert um die Magieresistenz des Ziels. AE-Kosten laut Tabelle: 8 AE; bei misslungener Probe 4 AE. Einsatz: nur im Kampf. Ziel: ein Gegner oder ein Held, Reichweite Fernzauber im Kampf. Wirkung im Handler: Ziel Gegner: Gegner mit Skelett-Grafik: misslingt. Sonst schläft der Gegner: Er kommt nicht an die Reihe, bis ihn ein Held angreift (der Angriff weckt ihn). Für das Kampfende zählt er weiter als aktiv. Ziel Held (nicht sich selbst): Er schläft. Zu Beginn jeder seiner Kampfphasen wacht er mit 74 % Wahrscheinlichkeit auf, ein Angriff auf ihn weckt ihn sofort.",
+  "codestellen": [
+   "Quelle/datseg.c:g_spell_descriptions",
+   "Quelle/seg098.c:use_spell",
+   "Quelle/seg098.c:test_spell",
+   "Quelle/seg099.c:spell_somnigravis",
+   "Quelle/seg032.c:FIG_do_round",
+   "Quelle/seg042.c:FIG_do_hero_action"
+  ],
+  "deutung": "Vermutlich ein guter Zauber gegen einzelne starke Gegner. Ein Angriff weckt sie aber.",
+  "status": "im Code geprüft, im Spiel unbestätigt"
+ },
+ {
+  "name": "17. Zwingtanz (Heldenzauber)",
+  "im_code": "Zauber-ID 17 (`SP_ZWINGTANZ`). Gruppe Beherrschung, Herkunft Druide. Probe auf MU/KL/CH, erschwert um die Magieresistenz des Ziels. AE-Kosten laut Tabelle: 6 AE; bei misslungener Probe 3 AE. Einsatz: nur im Kampf. Ziel: ein Gegner, Reichweite Fernzauber im Kampf. Wirkung im Handler: Ziel: ein Gegner. Gegner mit Skelett-Grafik: misslingt. Sonst tanzt der Gegner bis zum Kampfende: Er kommt nicht mehr an die Reihe, und seine Parade gegen Angriffe von Helden ist um 3 gesenkt. Für das Kampfende zählt er weiter als aktiv.",
+  "codestellen": [
+   "Quelle/datseg.c:g_spell_descriptions",
+   "Quelle/seg098.c:use_spell",
+   "Quelle/seg098.c:test_spell",
+   "Quelle/seg099.c:spell_zwingtanz",
+   "Quelle/seg032.c:FIG_is_enemy_active",
+   "Quelle/seg042.c:FIG_do_hero_action"
+  ],
+  "deutung": "Vermutlich nimmt der Zauber einen Gegner aus dem Geschehen und macht ihn leichter zu treffen.",
+  "status": "im Code geprüft, im Spiel unbestätigt"
+ },
+ {
+  "name": "18. Furor Blut und Sulphurdampf (Heldenzauber)",
+  "im_code": "Zauber-ID 18 (`SP_FUROR_BLUT_UND_SULPHURDAMPF`). Gruppe Dämonologie, Herkunft Magier. Probe auf MU/MU/CH. AE-Kosten laut Tabelle: 13 AE; bei misslungener Probe 6 AE. Einsatz: nur außerhalb des Kampfes. Ziel: kein Ziel (wirkt auf den Zaubernden oder die Umgebung). Wirkung im Handler: Nicht umgesetzt: Der Handler lässt den Zauber immer misslingen (halbe Kosten).",
+  "codestellen": [
+   "Quelle/datseg.c:g_spell_descriptions",
+   "Quelle/seg098.c:use_spell",
+   "Quelle/seg098.c:test_spell",
+   "Quelle/seg099.c:spell_furor_blut"
+  ],
+  "deutung": "Sieht so aus, als ob dieser Zauber im Original nicht programmiert ist und immer misslingt.",
+  "status": "im Code geprüft, im Spiel unbestätigt"
+ },
+ {
+  "name": "19. Geister austreiben (Heldenzauber)",
+  "im_code": "Zauber-ID 19 (`SP_GEISTER_AUSTREIBEN`). Gruppe Dämonologie, Herkunft Druide. Probe auf MU/MU/CH. AE-Kosten laut Tabelle: 13 AE; bei misslungener Probe 6 AE. Einsatz: nur außerhalb des Kampfes. Ziel: kein Ziel (wirkt auf den Zaubernden oder die Umgebung). Wirkung im Handler: Der Handler ist leer: Der Zauber kostet bei gelungener Probe die vollen AE laut Tabelle und bewirkt nichts (es erscheint keine eigene Meldung).",
+  "codestellen": [
+   "Quelle/datseg.c:g_spell_descriptions",
+   "Quelle/seg098.c:use_spell",
+   "Quelle/seg098.c:test_spell",
+   "Quelle/seg099.c:spell_geister_bannen"
+  ],
+  "deutung": "Sieht so aus, als ob dieser Zauber im Computerspiel nur AE kostet und nichts bewirkt. Vermutlich wurde er aus dem Regelwerk übernommen, aber nie programmiert.",
+  "status": "im Code geprüft, im Spiel unbestätigt"
+ },
+ {
+  "name": "20. Geister beschwören (Heldenzauber)",
+  "im_code": "Zauber-ID 20 (`SP_GEISTER_BESCHWOEREN`). Gruppe Dämonologie, Herkunft Druide. Probe auf MU/MU/CH. AE-Kosten laut Tabelle: 11 AE; bei misslungener Probe 5 AE. Einsatz: nur außerhalb des Kampfes. Ziel: kein Ziel (wirkt auf den Zaubernden oder die Umgebung). Wirkung im Handler: Nicht umgesetzt: Der Handler lässt den Zauber immer misslingen (halbe Kosten).",
+  "codestellen": [
+   "Quelle/datseg.c:g_spell_descriptions",
+   "Quelle/seg098.c:use_spell",
+   "Quelle/seg098.c:test_spell",
+   "Quelle/seg099.c:spell_geister_rufen"
+  ],
+  "deutung": "Sieht so aus, als ob dieser Zauber im Original nicht programmiert ist und immer misslingt.",
+  "status": "im Code geprüft, im Spiel unbestätigt"
+ },
+ {
+  "name": "21. Heptagon und Krötenei (Heldenzauber)",
+  "im_code": "Zauber-ID 21 (`SP_HEPTAGON_UND_KROETENEI`). Gruppe Dämonologie, Herkunft Magier. Probe auf MU/MU/CH. AE-Kosten laut Tabelle: 23 AE; bei misslungener Probe 11 AE. Einsatz: nur außerhalb des Kampfes. Ziel: kein Ziel (wirkt auf den Zaubernden oder die Umgebung). Wirkung im Handler: Nicht umgesetzt: Der Handler lässt den Zauber immer misslingen (halbe Kosten).",
+  "codestellen": [
+   "Quelle/datseg.c:g_spell_descriptions",
+   "Quelle/seg098.c:use_spell",
+   "Quelle/seg098.c:test_spell",
+   "Quelle/seg099.c:spell_heptagon"
+  ],
+  "deutung": "Sieht so aus, als ob dieser Zauber im Original nicht programmiert ist und immer misslingt.",
+  "status": "im Code geprüft, im Spiel unbestätigt"
+ },
+ {
+  "name": "22. Krähenruf (Heldenzauber)",
+  "im_code": "Zauber-ID 22 (`SP_KRAEHENRUF`). Gruppe Dämonologie, Herkunft Hexe. Probe auf MU/CH/CH. AE-Kosten laut Tabelle: 13 AE; bei misslungener Probe 6 AE. Einsatz: nur im Kampf. Ziel: ein Gegner oder ein Held, Reichweite Fernzauber im Kampf. Wirkung im Handler: Ziel: ein Gegner (oder ein Held). Für jede Stufe des Zaubernden plus 2 wird gewürfelt: Mit 40 % (W20 ≤ 8) greift ein Vogel an, und er trifft, wenn ein zweiter W20 über der Parade des Ziels liegt. Jeder Treffer macht 1 Schadenspunkt, Rüstungsschutz zählt nicht. Die Parade eines Helden ist dabei sein PA-Wert der Waffe minus Kampfmodifikator minus halbe Behinderung.",
+  "codestellen": [
+   "Quelle/datseg.c:g_spell_descriptions",
+   "Quelle/seg098.c:use_spell",
+   "Quelle/seg098.c:test_spell",
+   "Quelle/seg099.c:spell_kraehenruf",
+   "Quelle/seg098.c:get_attackee_parade",
+   "Quelle/seg098.c:FIG_do_spell_damage"
+  ],
+  "deutung": "Vermutlich ein schwacher Schadenszauber, dessen Schaden mit der Stufe des Zaubernden wächst.",
+  "status": "im Code geprüft, im Spiel unbestätigt"
+ },
+ {
+  "name": "23. Skelettarius Kryptaduft (Heldenzauber)",
+  "im_code": "Zauber-ID 23 (`SP_SKELETTARIUS_KRYPTADUFT`). Gruppe Dämonologie, Herkunft Magier. Probe auf MU/MU/CH. AE-Kosten laut Tabelle: 15 AE; bei misslungener Probe 7 AE. Einsatz: nur im Kampf. Ziel: ein Gegner, Reichweite Berührung (Nachbarfeld) im Kampf. Wirkung im Handler: Ziel: ein toter Gegner. Ist er nicht tot: Meldung, keine Kosten. Sonst wird an seiner Stelle ein Zombie (Gegnertyp 16) aufgestellt, der auf der Seite der Helden kämpft (abtrünnig). Im Original bleibt eine darunterliegende Leiche sichtbar, aber nicht mehr wählbar (Fix 195 (Fanpatch-Stufe „nur Alle“)), und jeder Skelettarius belegt zusätzlichen Grafikspeicher, bis er überläuft (Fix 196 (Fanpatch-Stufe „Wichtig“)).",
+  "codestellen": [
+   "Quelle/datseg.c:g_spell_descriptions",
+   "Quelle/seg098.c:use_spell",
+   "Quelle/seg098.c:test_spell",
+   "Quelle/seg099.c:spell_skelettarius"
+  ],
+  "deutung": "Vermutlich ein starker Zauber im Kampf: Ein toter Gegner steht als Zombie auf der Seite der Helden wieder auf.",
+  "status": "im Code geprüft, im Spiel unbestätigt"
+ },
+ {
+  "name": "24. Elementare beschwören (Heldenzauber)",
+  "im_code": "Zauber-ID 24 (`SP_ELEMENTARE_BESCHWOEREN`). Gruppe Elemente, Herkunft Druide. Probe auf MU/KL/CH. AE-Kosten laut Tabelle: variabel (in der Tabelle −1, der Zauber legt die Kosten selbst fest); bei misslungener Probe 5–10 AE (zufällig). Einsatz: nur außerhalb des Kampfes. Ziel: kein Ziel (wirkt auf den Zaubernden oder die Umgebung). Wirkung im Handler: Nicht umgesetzt: Der Handler lässt den Zauber immer misslingen (halbe Kosten).",
+  "codestellen": [
+   "Quelle/datseg.c:g_spell_descriptions",
+   "Quelle/seg098.c:use_spell",
+   "Quelle/seg098.c:test_spell",
+   "Quelle/seg099.c:spell_elementare"
+  ],
+  "deutung": "Sieht so aus, als ob dieser Zauber im Original nicht programmiert ist und immer misslingt.",
+  "status": "im Code geprüft, im Spiel unbestätigt"
+ },
+ {
+  "name": "25. Nihilatio Gravitas (Heldenzauber)",
+  "im_code": "Zauber-ID 25 (`SP_NIHILATIO_GRAVITAS`). Gruppe Elemente, Herkunft Magier. Probe auf KL/KK/KK. AE-Kosten laut Tabelle: 5 AE; bei misslungener Probe 2 AE. Einsatz: nur außerhalb des Kampfes. Ziel: kein Ziel (wirkt auf den Zaubernden oder die Umgebung). Wirkung im Handler: Der Handler ist leer: Der Zauber kostet bei gelungener Probe die vollen AE laut Tabelle und bewirkt nichts (es erscheint keine eigene Meldung).",
+  "codestellen": [
+   "Quelle/datseg.c:g_spell_descriptions",
+   "Quelle/seg098.c:use_spell",
+   "Quelle/seg098.c:test_spell",
+   "Quelle/seg099.c:spell_nihilatio"
+  ],
+  "deutung": "Sieht so aus, als ob dieser Zauber im Computerspiel nur AE kostet und nichts bewirkt. Vermutlich wurde er aus dem Regelwerk übernommen, aber nie programmiert.",
+  "status": "im Code geprüft, im Spiel unbestätigt"
+ },
+ {
+  "name": "26. Solidirid Farbenspiel (Heldenzauber)",
+  "im_code": "Zauber-ID 26 (`SP_SOLIDIRID_FARBENSPIEL`). Gruppe Elemente, Herkunft Firnelf. Probe auf IN/GE/KK. AE-Kosten laut Tabelle: variabel (in der Tabelle −1, der Zauber legt die Kosten selbst fest); bei misslungener Probe 5–10 AE (zufällig). Einsatz: nur außerhalb des Kampfes. Ziel: kein Ziel (wirkt auf den Zaubernden oder die Umgebung). Wirkung im Handler: Der Handler ist leer: Der Zauber kostet bei gelungener Probe die vollen AE laut Tabelle und bewirkt nichts (es erscheint keine eigene Meldung).",
+  "codestellen": [
+   "Quelle/datseg.c:g_spell_descriptions",
+   "Quelle/seg098.c:use_spell",
+   "Quelle/seg098.c:test_spell",
+   "Quelle/seg099.c:spell_solidirid"
+  ],
+  "deutung": "Sieht so aus, als ob dieser Zauber im Computerspiel nur AE kostet und nichts bewirkt. Vermutlich wurde er aus dem Regelwerk übernommen, aber nie programmiert.",
+  "status": "im Code geprüft, im Spiel unbestätigt"
+ },
+ {
+  "name": "27. Axxeleratus Blitzgeschwind (Heldenzauber)",
+  "im_code": "Zauber-ID 27 (`SP_AXXELERATUS_BLITZGESCHWIND`). Gruppe Bewegung, Herkunft Waldelf. Probe auf KL/GE/KK. AE-Kosten laut Tabelle: 7 AE; bei misslungener Probe 3 AE. Einsatz: nur im Kampf. Ziel: ein Held, Reichweite Berührung (Nachbarfeld) im Kampf. Wirkung im Handler: Ziel: ein Held. Wirkt der Zauber schon auf ihn, misslingt er. Sonst für 1 Spielminute: AT und PA seiner aktuellen Waffengattung +2, dazu in jeder Kampfrunde 4 Bewegungspunkte und eine Aktionsphase mehr.",
+  "codestellen": [
+   "Quelle/datseg.c:g_spell_descriptions",
+   "Quelle/seg098.c:use_spell",
+   "Quelle/seg098.c:test_spell",
+   "Quelle/seg099.c:spell_axxeleratus",
+   "Quelle/seg032.c:FIG_do_round"
+  ],
+  "deutung": "Sieht so aus, als ob Axxeleratus kurz, aber sehr stark ist: mehr Bewegung, eine zusätzliche Aktion und bessere AT/PA.",
+  "status": "im Code geprüft, im Spiel unbestätigt"
+ },
+ {
+  "name": "28. Foramen Foraminor (Heldenzauber)",
+  "im_code": "Zauber-ID 28 (`SP_FORAMEN_FORAMINOR`). Gruppe Bewegung, Herkunft Magier. Probe auf KL/KL/FF. AE-Kosten laut Tabelle: 6 AE; bei misslungener Probe 3 AE. Einsatz: nur außerhalb des Kampfes. Ziel: kein Ziel (wirkt auf den Zaubernden oder die Umgebung). Wirkung im Handler: Wirkt nur vor einer verschlossenen Tür im Dungeon (Menü „Tür öffnen“): Die Tür geht auf, der Zaubernde bekommt 1 AP. Anderswo kostet der Zauber die vollen AE und bewirkt nichts. Im Original zählt dabei nur der Modus „Schloss knacken“. Mit Fix 197 (Fanpatch-Stufe „Wichtig“) auch „Tür öffnen“, außerhalb von Dungeons nie. Zuschlag der Tür: Beim Zaubern über das Zaubermenü fehlt im Original der türeigene Zuschlag, Fix 191 (Fanpatch-Stufe „Wichtig“) rechnet ihn ein.",
+  "codestellen": [
+   "Quelle/datseg.c:g_spell_descriptions",
+   "Quelle/seg098.c:use_spell",
+   "Quelle/seg098.c:test_spell",
+   "Quelle/seg099.c:spell_foramen"
+  ],
+  "deutung": "Vermutlich ein Ersatz für Dietriche an verschlossenen Türen.",
+  "status": "im Code geprüft, im Spiel unbestätigt"
+ },
+ {
+  "name": "29. Motoricus Motilitich (Heldenzauber)",
+  "im_code": "Zauber-ID 29 (`SP_MOTORICUS_MOTILITICH`). Gruppe Bewegung, Herkunft Magier. Probe auf KL/FF/KK. AE-Kosten laut Tabelle: variabel (in der Tabelle −1, der Zauber legt die Kosten selbst fest); bei misslungener Probe 5–10 AE (zufällig). Einsatz: nur außerhalb des Kampfes. Ziel: kein Ziel (wirkt auf den Zaubernden oder die Umgebung). Wirkung im Handler: Der Handler ist leer: Der Zauber kostet bei gelungener Probe die vollen AE laut Tabelle und bewirkt nichts (es erscheint keine eigene Meldung).",
+  "codestellen": [
+   "Quelle/datseg.c:g_spell_descriptions",
+   "Quelle/seg098.c:use_spell",
+   "Quelle/seg098.c:test_spell",
+   "Quelle/seg099.c:spell_motoricus"
+  ],
+  "deutung": "Sieht so aus, als ob dieser Zauber im Computerspiel nur AE kostet und nichts bewirkt. Vermutlich wurde er aus dem Regelwerk übernommen, aber nie programmiert.",
+  "status": "im Code geprüft, im Spiel unbestätigt"
+ },
+ {
+  "name": "30. Spurlos trittlos fährtenlos (Heldenzauber)",
+  "im_code": "Zauber-ID 30 (`SP_SPURLOS_TRITTLOS_FAEHRTENLOS`). Gruppe Bewegung, Herkunft Waldelf. Probe auf IN/GE/GE. AE-Kosten laut Tabelle: 7 AE; bei misslungener Probe 3 AE. Einsatz: nur außerhalb des Kampfes. Ziel: kein Ziel (wirkt auf den Zaubernden oder die Umgebung). Wirkung im Handler: Der Handler ist leer: Der Zauber kostet bei gelungener Probe die vollen AE laut Tabelle und bewirkt nichts (es erscheint keine eigene Meldung).",
+  "codestellen": [
+   "Quelle/datseg.c:g_spell_descriptions",
+   "Quelle/seg098.c:use_spell",
+   "Quelle/seg098.c:test_spell",
+   "Quelle/seg099.c:spell_spurlos"
+  ],
+  "deutung": "Sieht so aus, als ob dieser Zauber im Computerspiel nur AE kostet und nichts bewirkt. Vermutlich wurde er aus dem Regelwerk übernommen, aber nie programmiert.",
+  "status": "im Code geprüft, im Spiel unbestätigt"
+ },
+ {
+  "name": "31. Transversalis Teleport (Heldenzauber)",
+  "im_code": "Zauber-ID 31 (`SP_TRANSVERSALIS_TELEPORT`). Gruppe Bewegung, Herkunft Magier. Probe auf KL/KL/KK. AE-Kosten laut Tabelle: variabel (in der Tabelle −1, der Zauber legt die Kosten selbst fest); bei misslungener Probe 5–10 AE (zufällig). Einsatz: nur außerhalb des Kampfes. Ziel: kein Ziel (wirkt auf den Zaubernden oder die Umgebung). Wirkung im Handler: Nur in einem Dungeon oder einer Stadt. Auf der Karte wird ein Zielfeld gewählt: Teleport auf ein freies Feld kostet 15 AE. Wände, Häuser und Wasser sind verboten (Zauber misslingt), das eigene Feld kostet nichts. Im Original prüft der Code nur, ob die Gruppe in einem Dungeon oder einer Stadt ist. Mit Fix 383 (Fanpatch-Stufe „Wichtig“) ist er außerdem während einer Reise nicht erlaubt.",
+  "codestellen": [
+   "Quelle/datseg.c:g_spell_descriptions",
+   "Quelle/seg098.c:use_spell",
+   "Quelle/seg098.c:test_spell",
+   "Quelle/seg099.c:spell_transversalis",
+   "Quelle/seg074.c:select_teleport_dest"
+  ],
+  "deutung": "Vermutlich ein bequemer Weg, sich in Stadt oder Dungeon zu versetzen, für 15 AE.",
+  "status": "im Code geprüft, im Spiel unbestätigt"
+ },
+ {
+  "name": "32. Über Eis und über Schnee (Heldenzauber)",
+  "im_code": "Zauber-ID 32 (`SP_UEBER_EIS_UND_UEBER_SCHNEE`). Gruppe Bewegung, Herkunft Firnelf. Probe auf KL/GE/KK. AE-Kosten laut Tabelle: 5 AE; bei misslungener Probe 2 AE. Einsatz: nur außerhalb des Kampfes. Ziel: kein Ziel (wirkt auf den Zaubernden oder die Umgebung). Wirkung im Handler: Nicht umgesetzt: Der Handler lässt den Zauber immer misslingen (halbe Kosten).",
+  "codestellen": [
+   "Quelle/datseg.c:g_spell_descriptions",
+   "Quelle/seg098.c:use_spell",
+   "Quelle/seg098.c:test_spell",
+   "Quelle/seg099.c:spell_ueber_eis"
+  ],
+  "deutung": "Sieht so aus, als ob dieser Zauber im Original nicht programmiert ist und immer misslingt.",
+  "status": "im Code geprüft, im Spiel unbestätigt"
+ },
+ {
+  "name": "33. Balsam Salabunde (Heldenzauber)",
+  "im_code": "Zauber-ID 33 (`SP_BALSAM_SALABUNDE`). Gruppe Heilung, Herkunft Auelf. Probe auf KL/IN/CH. AE-Kosten laut Tabelle: variabel (in der Tabelle −1, der Zauber legt die Kosten selbst fest); bei misslungener Probe 5–10 AE (zufällig). Einsatz: im Kampf und außerhalb. Ziel: ein Held, Reichweite Berührung (Nachbarfeld) im Kampf. Wirkung im Handler: Ziel: ein Held. Der Zaubernde gibt ein, wie viele LE er heilen will. Unter 7 kostet es trotzdem 7 AE (geheilt wird die eingegebene Zahl). Sonst kostet jeder LE 1 AE, höchstens so viel, wie dem Ziel fehlt. Reicht die AE nicht, wird mit allen AE entsprechend weniger geheilt. Im Computerkampf (Autokampf oder ein NSC zaubert) heilt er die Hälfte der fehlenden LE ohne Nachfrage.",
+  "codestellen": [
+   "Quelle/datseg.c:g_spell_descriptions",
+   "Quelle/seg098.c:use_spell",
+   "Quelle/seg098.c:test_spell",
+   "Quelle/seg099.c:spell_balsam"
+  ],
+  "deutung": "Vermutlich der wichtigste Heilzauber: 1 AE pro LE, aber mindestens 7 AE.",
+  "status": "im Code geprüft, im Spiel unbestätigt"
+ },
+ {
+  "name": "34. Hexenspeichel (Heldenzauber)",
+  "im_code": "Zauber-ID 34 (`SP_HEXENSPEICHEL`). Gruppe Heilung, Herkunft Hexe. Probe auf IN/CH/FF. AE-Kosten laut Tabelle: variabel (in der Tabelle −1, der Zauber legt die Kosten selbst fest); bei misslungener Probe 5–10 AE (zufällig). Einsatz: im Kampf und außerhalb. Ziel: ein Held, Reichweite Berührung (Nachbarfeld) im Kampf. Wirkung im Handler: Ziel: ein anderer Held (nicht sich selbst). Eingabe der gewünschten LE. Mit Fix 199 (Fanpatch-Stufe „Wichtig“): Jeder geheilte LE kostet 2 AE, höchstens so viele LE, wie dem Ziel fehlen, gedeckelt durch die AE des Zaubernden. Im Original ist die Rechnung fehlerhaft: Fehlt dem Ziel weniger als das Doppelte der Eingabe, kostet es 2 × fehlende LE und heilt alle fehlenden LE. Sonst kostet es 2 × Eingabe. Die AE des Zaubernden werden dabei praktisch nicht geprüft.",
+  "codestellen": [
+   "Quelle/datseg.c:g_spell_descriptions",
+   "Quelle/seg098.c:use_spell",
+   "Quelle/seg098.c:test_spell",
+   "Quelle/seg099.c:spell_hexenspeichel"
+  ],
+  "deutung": "Sieht so aus, als ob Hexenspeichel teurer ist als Balsam (2 AE pro LE) und im Original falsch rechnet.",
+  "status": "im Code geprüft, im Spiel unbestätigt"
+ },
+ {
+  "name": "35. Klarum Purum Kräutersud (Heldenzauber)",
+  "im_code": "Zauber-ID 35 (`SP_KLARUM_PURUM_KRAEUTERSUD`). Gruppe Heilung, Herkunft Magier. Probe auf KL/KL/CH. AE-Kosten laut Tabelle: variabel (in der Tabelle −1, der Zauber legt die Kosten selbst fest); bei misslungener Probe 5–10 AE (zufällig). Einsatz: im Kampf und außerhalb. Ziel: ein Held, Reichweite Berührung (Nachbarfeld) im Kampf. Wirkung im Handler: Ziel: ein Held. Ist er nicht vergiftet: Meldung, keine Kosten. Sonst kostet der Zauber so viele AE wie die Stärke des ersten Gifts (4 bis 15) und heilt dieses Gift (bei zu wenig AE misslingt er).",
+  "codestellen": [
+   "Quelle/datseg.c:g_spell_descriptions",
+   "Quelle/seg098.c:use_spell",
+   "Quelle/seg098.c:test_spell",
+   "Quelle/seg099.c:spell_klarum_purum",
+   "Quelle/datseg.c:g_poison_strength"
+  ],
+  "deutung": "Vermutlich der Zauber gegen Vergiftungen; je stärker das Gift, desto teurer.",
+  "status": "im Code geprüft, im Spiel unbestätigt"
+ },
+ {
+  "name": "36. Ruhe Körper, ruhe Geist (Heldenzauber)",
+  "im_code": "Zauber-ID 36 (`SP_RUHE_KOERPER_RUHE_GEIST`). Gruppe Heilung, Herkunft Firnelf. Probe auf KL/CH/KK. AE-Kosten laut Tabelle: 7 AE; bei misslungener Probe 3 AE. Einsatz: nur außerhalb des Kampfes. Ziel: ein Held, Reichweite Berührung (Nachbarfeld) im Kampf. Wirkung im Handler: Ziel: ein Held. Er regeneriert in der nächsten Nacht doppelt.",
+  "codestellen": [
+   "Quelle/datseg.c:g_spell_descriptions",
+   "Quelle/seg098.c:use_spell",
+   "Quelle/seg098.c:test_spell",
+   "Quelle/seg099.c:spell_ruhe_koerper"
+  ],
+  "deutung": "Vermutlich ein günstiger Weg zu doppelter Regeneration in der nächsten Nacht.",
+  "status": "im Code geprüft, im Spiel unbestätigt"
+ },
+ {
+  "name": "37. Tiere besprechen (Heldenzauber)",
+  "im_code": "Zauber-ID 37 (`SP_TIERE_BESPRECHEN`). Gruppe Heilung, Herkunft Hexe. Probe auf MU/IN/CH. AE-Kosten laut Tabelle: variabel (in der Tabelle −1, der Zauber legt die Kosten selbst fest); bei misslungener Probe 5–10 AE (zufällig). Einsatz: im Kampf und außerhalb. Ziel: kein Ziel (wirkt auf den Zaubernden oder die Umgebung). Wirkung im Handler: Der Zaubernde gibt eine AE-Zahl ein, die abgezogen wird. Eine Heilwirkung gibt es im Code nicht.",
+  "codestellen": [
+   "Quelle/datseg.c:g_spell_descriptions",
+   "Quelle/seg098.c:use_spell",
+   "Quelle/seg098.c:test_spell",
+   "Quelle/seg099.c:spell_tiere_heilen"
+  ],
+  "deutung": "Sieht so aus, als ob man hier AE ausgibt, ohne dass etwas geschieht.",
+  "status": "im Code geprüft, im Spiel unbestätigt"
+ },
+ {
+  "name": "38. Adleraug und Luchsenohr (Heldenzauber)",
+  "im_code": "Zauber-ID 38 (`SP_ADLERAUG_UND_LUCHSENOHR`). Gruppe Wahrnehmung, Herkunft Auelf. Probe auf KL/IN/FF. AE-Kosten laut Tabelle: 5 AE; bei misslungener Probe 2 AE. Einsatz: im Kampf und außerhalb. Ziel: kein Ziel (wirkt auf den Zaubernden oder die Umgebung). Wirkung im Handler: Wirkt nur auf den Zaubernden selbst: Sinnesschärfe +7 für 6 Spielminuten.",
+  "codestellen": [
+   "Quelle/datseg.c:g_spell_descriptions",
+   "Quelle/seg098.c:use_spell",
+   "Quelle/seg098.c:test_spell",
+   "Quelle/seg099.c:spell_adleraug"
+  ],
+  "deutung": "Vermutlich nur ein kurzer Schub für Sinnesschärfe des Zaubernden.",
+  "status": "im Code geprüft, im Spiel unbestätigt"
+ },
+ {
+  "name": "39. Analüs Arcanstruktur (Heldenzauber)",
+  "im_code": "Zauber-ID 39 (`SP_ANALUES_ARCANSTRUKTUR`). Gruppe Wahrnehmung, Herkunft Magier. Probe auf KL/KL/IN. AE-Kosten laut Tabelle: 10 AE; bei misslungener Probe 5 AE. Einsatz: nur außerhalb des Kampfes. Ziel: kein Ziel (wirkt auf den Zaubernden oder die Umgebung). Wirkung im Handler: Der Zaubernde wählt einen Gegenstand aus seinem Gepäck. Hat der Gegenstand einen Analüs-Eintrag (siehe Gegenstandsliste), erscheint dessen Text, wenn das Probenergebnis mindestens den Wert des Eintrags erreicht, und der Gegenstand gilt als magisch erkannt. Sonst kommt die Meldung, dass sich der Zauber nicht bestimmen lässt. Im Original kostet dieser Fall die vollen AE, mit Fix 201 (Fanpatch-Stufe „nur Alle“) die halben. Gegenstände ohne Eintrag ergeben „nichts Besonderes“. Mit Fix 386 (Fanpatch-Stufe „nur Alle“) erscheint bei magischen Gegenständen ohne Eintrag „Zauber nicht bestimmbar“. Bricht man die Auswahl ab, liest das Original einen ungültigen Inventarplatz, Fix 200 (Fanpatch-Stufe „nur Alle“) fängt das ab. In der Akademie gilt das Probenergebnis als 99.",
+  "codestellen": [
+   "Quelle/datseg.c:g_spell_descriptions",
+   "Quelle/seg098.c:use_spell",
+   "Quelle/seg098.c:test_spell",
+   "Quelle/seg099.c:spell_analues",
+   "Quelle/seg099.c:g_analues_items"
+  ],
+  "deutung": "Vermutlich der Weg, magische Gegenstände zu erkennen. Der Text verrät aber nicht immer, ob die Wirkung im Spiel auch existiert.",
+  "status": "im Code geprüft, im Spiel unbestätigt"
+ },
+ {
+  "name": "40. Eigenschaften seid gelesen (Heldenzauber)",
+  "im_code": "Zauber-ID 40 (`SP_EIGENSCHAFTEN_SEID_GELESEN`). Gruppe Wahrnehmung, Herkunft Auelf. Probe auf KL/IN/CH, erschwert um die Magieresistenz des Ziels. AE-Kosten laut Tabelle: 7 AE; bei misslungener Probe 3 AE. Einsatz: nur im Kampf. Ziel: ein Gegner, Reichweite Fernzauber im Kampf. Wirkung im Handler: Ziel: ein Gegner. Zeigt Name, Stufe, AT, PA, RS, Zahl der Angriffe, Trefferpunkte-Spanne, LE und AE des Gegners an. Im Original wird die Schadensspanne mit 0,8 malgenommen und ist damit zu niedrig angegeben. Fix 202 (Fanpatch-Stufe „nur Alle“) zeigt die echte Spanne.",
+  "codestellen": [
+   "Quelle/datseg.c:g_spell_descriptions",
+   "Quelle/seg098.c:use_spell",
+   "Quelle/seg098.c:test_spell",
+   "Quelle/seg100.c:spell_eigenschaften"
+  ],
+  "deutung": "Vermutlich nützlich, um einen Gegner einzuschätzen. Im Original ist die angezeigte Schadensspanne zu niedrig.",
+  "status": "im Code geprüft, im Spiel unbestätigt"
+ },
+ {
+  "name": "41. Exposami Creatur (Heldenzauber)",
+  "im_code": "Zauber-ID 41 (`SP_EXPOSAMI_CREATUR`). Gruppe Wahrnehmung, Herkunft Waldelf. Probe auf KL/KL/IN. AE-Kosten laut Tabelle: 5 AE; bei misslungener Probe 2 AE. Einsatz: nur im Kampf. Ziel: kein Ziel (wirkt auf den Zaubernden oder die Umgebung). Wirkung im Handler: Zählt die Gegner auf, die im laufenden Kampf erst noch erscheinen werden (nach Typ und Anzahl), sonst „keine weiteren Monster in Sicht“. Im Original wird beim Zählen ein nicht belegter Tabellenplatz mitgelesen, was falsche Zahlen ergeben kann. Fix 203 (Fanpatch-Stufe „nur Alle“) berichtigt das.",
+  "codestellen": [
+   "Quelle/datseg.c:g_spell_descriptions",
+   "Quelle/seg098.c:use_spell",
+   "Quelle/seg098.c:test_spell",
+   "Quelle/seg100.c:spell_exposami"
+  ],
+  "deutung": "Vermutlich eine Vorwarnung, welche Gegner im Kampf noch dazukommen.",
+  "status": "im Code geprüft, im Spiel unbestätigt"
+ },
+ {
+  "name": "42. Odem Arcanum (Heldenzauber)",
+  "im_code": "Zauber-ID 42 (`SP_ODEM_ARCANUM`). Gruppe Wahrnehmung, Herkunft Auelf. Probe auf KL/IN/CH. AE-Kosten laut Tabelle: 5 AE; bei misslungener Probe 2 AE. Einsatz: nur außerhalb des Kampfes. Ziel: kein Ziel (wirkt auf den Zaubernden oder die Umgebung). Wirkung im Handler: Der Zaubernde wählt einen Gegenstand aus seinem Gepäck und erfährt, ob er magisch ist; ein magischer gilt danach als erkannt. Bricht man die Auswahl ab, liest das Original einen ungültigen Inventarplatz, Fix 200 (Fanpatch-Stufe „nur Alle“) fängt das ab.",
+  "codestellen": [
+   "Quelle/datseg.c:g_spell_descriptions",
+   "Quelle/seg098.c:use_spell",
+   "Quelle/seg098.c:test_spell",
+   "Quelle/seg100.c:spell_odem_arcanum"
+  ],
+  "deutung": "Vermutlich die einfache Probe, ob ein Gegenstand magisch ist.",
+  "status": "im Code geprüft, im Spiel unbestätigt"
+ },
+ {
+  "name": "43. Penetrizzel Holz und Stein (Heldenzauber)",
+  "im_code": "Zauber-ID 43 (`SP_PENETRIZZEL_HOLZ_UND_STEIN`). Gruppe Wahrnehmung, Herkunft Magier. Probe auf KL/KL/KK. AE-Kosten laut Tabelle: 5 AE; bei misslungener Probe 2 AE. Einsatz: nur außerhalb des Kampfes. Ziel: kein Ziel (wirkt auf den Zaubernden oder die Umgebung). Wirkung im Handler: Deckt auf der Automap ein 5 × 5 Felder großes Gebiet um die Gruppe auf.",
+  "codestellen": [
+   "Quelle/datseg.c:g_spell_descriptions",
+   "Quelle/seg098.c:use_spell",
+   "Quelle/seg098.c:test_spell",
+   "Quelle/seg100.c:spell_penetrizzel"
+  ],
+  "deutung": "Vermutlich eine kleine Kartenhilfe in Dungeons.",
+  "status": "im Code geprüft, im Spiel unbestätigt"
+ },
+ {
+  "name": "44. Sensibar wahr und klar (Heldenzauber)",
+  "im_code": "Zauber-ID 44 (`SP_SENSIBAR_WAHR_UND_KLAR`). Gruppe Wahrnehmung, Herkunft Auelf. Probe auf KL/IN/CH, erschwert um die Magieresistenz des Ziels. AE-Kosten laut Tabelle: 5 AE; bei misslungener Probe 2 AE. Einsatz: nur außerhalb des Kampfes. Ziel: kein Ziel (wirkt auf den Zaubernden oder die Umgebung). Wirkung im Handler: Der Handler ist leer: Der Zauber kostet bei gelungener Probe die vollen AE laut Tabelle und bewirkt nichts (es erscheint keine eigene Meldung).",
+  "codestellen": [
+   "Quelle/datseg.c:g_spell_descriptions",
+   "Quelle/seg098.c:use_spell",
+   "Quelle/seg098.c:test_spell",
+   "Quelle/seg100.c:spell_sensibar"
+  ],
+  "deutung": "Sieht so aus, als ob dieser Zauber im Computerspiel nur AE kostet und nichts bewirkt. Vermutlich wurde er aus dem Regelwerk übernommen, aber nie programmiert.",
+  "status": "im Code geprüft, im Spiel unbestätigt"
+ },
+ {
+  "name": "45. Chamaelioni Mimikry (Heldenzauber)",
+  "im_code": "Zauber-ID 45 (`SP_CHAMAELIONI_MIMIKRY`). Gruppe Visionen, Herkunft Waldelf. Probe auf IN/CH/GE. AE-Kosten laut Tabelle: 5 AE; bei misslungener Probe 2 AE. Einsatz: nur im Kampf. Ziel: kein Ziel (wirkt auf den Zaubernden oder die Umgebung). Wirkung im Handler: Wirkt auf den Zaubernden selbst: Gegner greifen ihn mit AT −5 an, bis er sich im Kampf bewegt oder der Kampf endet.",
+  "codestellen": [
+   "Quelle/datseg.c:g_spell_descriptions",
+   "Quelle/seg098.c:use_spell",
+   "Quelle/seg098.c:test_spell",
+   "Quelle/seg100.c:spell_chamaelioni",
+   "Quelle/seg043.c:FIG_do_enemy_action",
+   "Quelle/seg033.c:FIG_menu"
+  ],
+  "deutung": "Vermutlich ein Schutzzauber für den Zaubernden, solange er stehen bleibt.",
+  "status": "im Code geprüft, im Spiel unbestätigt"
+ },
+ {
+  "name": "46. Duplicatus Doppelpein (Heldenzauber)",
+  "im_code": "Zauber-ID 46 (`SP_DUPLICATUS_DOPPELPEIN`). Gruppe Visionen, Herkunft Magier. Probe auf KL/CH/GE. AE-Kosten laut Tabelle: 8 AE; bei misslungener Probe 4 AE. Einsatz: nur im Kampf. Ziel: kein Ziel (wirkt auf den Zaubernden oder die Umgebung). Wirkung im Handler: Wirkt auf den Zaubernden selbst: Die AT von Gegnern gegen ihn wird bis zum Kampfende halbiert.",
+  "codestellen": [
+   "Quelle/datseg.c:g_spell_descriptions",
+   "Quelle/seg098.c:use_spell",
+   "Quelle/seg098.c:test_spell",
+   "Quelle/seg100.c:spell_duplicatus",
+   "Quelle/seg043.c:FIG_do_enemy_action"
+  ],
+  "deutung": "Vermutlich ein starker Schutzzauber für den Zaubernden für den ganzen Kampf.",
+  "status": "im Code geprüft, im Spiel unbestätigt"
+ },
+ {
+  "name": "47. Harmlose Gestalt (Heldenzauber)",
+  "im_code": "Zauber-ID 47 (`SP_HARMLOSE_GESTALT`). Gruppe Visionen, Herkunft Hexe. Probe auf KL/CH/GE. AE-Kosten laut Tabelle: 6 AE; bei misslungener Probe 3 AE. Einsatz: nur außerhalb des Kampfes. Ziel: kein Ziel (wirkt auf den Zaubernden oder die Umgebung). Wirkung im Handler: Der Handler ist leer: Der Zauber kostet bei gelungener Probe die vollen AE laut Tabelle und bewirkt nichts (es erscheint keine eigene Meldung).",
+  "codestellen": [
+   "Quelle/datseg.c:g_spell_descriptions",
+   "Quelle/seg098.c:use_spell",
+   "Quelle/seg098.c:test_spell",
+   "Quelle/seg100.c:spell_harmlos"
+  ],
+  "deutung": "Sieht so aus, als ob dieser Zauber im Computerspiel nur AE kostet und nichts bewirkt. Vermutlich wurde er aus dem Regelwerk übernommen, aber nie programmiert.",
+  "status": "im Code geprüft, im Spiel unbestätigt"
+ },
+ {
+  "name": "48. Hexenknoten (Heldenzauber)",
+  "im_code": "Zauber-ID 48 (`SP_HEXENKNOTEN`). Gruppe Visionen, Herkunft Hexe. Probe auf KL/IN/CH. AE-Kosten laut Tabelle: 4 AE; bei misslungener Probe 2 AE. Einsatz: nur im Kampf. Ziel: kein Ziel (wirkt auf den Zaubernden oder die Umgebung). Wirkung im Handler: Stellt auf das Feld vor dem Zaubernden (in Blickrichtung) einen Hexenknoten, der das Feld blockiert. Ist das Feld besetzt oder der Grafikspeicher zu voll, misslingt der Zauber.",
+  "codestellen": [
+   "Quelle/datseg.c:g_spell_descriptions",
+   "Quelle/seg098.c:use_spell",
+   "Quelle/seg098.c:test_spell",
+   "Quelle/seg100.c:spell_hexenknoten"
+  ],
+  "deutung": "Vermutlich ein Hindernis, das einen Durchgang versperrt.",
+  "status": "im Code geprüft, im Spiel unbestätigt"
+ },
+ {
+  "name": "49. Blitz dich find (Heldenzauber)",
+  "im_code": "Zauber-ID 49 (`SP_BLITZ_DICH_FIND`). Gruppe Kampf, Herkunft Waldelf. Probe auf KL/IN/GE. AE-Kosten laut Tabelle: 5 AE; bei misslungener Probe 2 AE. Einsatz: nur im Kampf. Ziel: ein Gegner oder ein Held, Reichweite Fernzauber im Kampf. Wirkung im Handler: Ziel Held (nicht sich selbst) oder Gegner: geblendet für 3 Kampfphasen, in denen er nichts tun kann. Ein geblendeter Gegner pariert Angriffe von Helden mit PA −5.",
+  "codestellen": [
+   "Quelle/datseg.c:g_spell_descriptions",
+   "Quelle/seg098.c:use_spell",
+   "Quelle/seg098.c:test_spell",
+   "Quelle/seg100.c:spell_blitz",
+   "Quelle/seg032.c:FIG_do_round",
+   "Quelle/seg042.c:FIG_do_hero_action"
+  ],
+  "deutung": "Vermutlich ein günstiger Zauber, um einen Gegner für ein paar Phasen auszuschalten.",
+  "status": "im Code geprüft, im Spiel unbestätigt"
+ },
+ {
+  "name": "50. Ecliptifactus (Heldenzauber)",
+  "im_code": "Zauber-ID 50 (`SP_ECLIPTIFACTUS`). Gruppe Kampf, Herkunft Magier. Probe auf MU/KL/KK. AE-Kosten laut Tabelle: variabel (in der Tabelle −1, der Zauber legt die Kosten selbst fest); bei misslungener Probe 5–10 AE (zufällig). Einsatz: nur im Kampf. Ziel: kein Ziel (wirkt auf den Zaubernden oder die Umgebung). Wirkung im Handler: Der Zaubernde gibt die Zahl der Kampfrunden ein. Kosten: 2 × Runden + 5 AE (reicht die AE nicht: Meldung, keine Kosten). Solange der Zähler läuft, wird der Schaden seiner Angriffe verdoppelt.",
+  "codestellen": [
+   "Quelle/datseg.c:g_spell_descriptions",
+   "Quelle/seg098.c:use_spell",
+   "Quelle/seg098.c:test_spell",
+   "Quelle/seg100.c:spell_ecliptifactus",
+   "Quelle/seg041.c:FIG_get_hero_weapon_attack_damage"
+  ],
+  "deutung": "Sieht so aus, als ob Ecliptifactus den Schaden des Zaubernden für mehrere Runden verdoppelt.",
+  "status": "im Code geprüft, im Spiel unbestätigt"
+ },
+ {
+  "name": "51. Eisenrost und grüner Span (Heldenzauber)",
+  "im_code": "Zauber-ID 51 (`SP_EISENROST_UND_GRUENER_SPAN`). Gruppe Kampf, Herkunft Magier. Probe auf KL/CH/GE. AE-Kosten laut Tabelle: 5 AE; bei misslungener Probe 2 AE. Einsatz: nur im Kampf. Ziel: ein Gegner oder ein Held, Reichweite Berührung (Nachbarfeld) im Kampf. Wirkung im Handler: Ziel Held (nicht sich selbst): Hat er keine Waffe in der rechten Hand, misslingt der Zauber. Ist sie schon zerbrochen: Meldung. Hat sie einen Bruchfaktor über 0, zerbricht sie, sonst misslingt der Zauber. Mit Fix 390 (Fanpatch-Stufe „nur Alle“) zerbrechen unzerbrechliche Waffen (Zauberstab, Hexenbesen, magische Orknase, magisches Kurzschwert, Grimring) nicht. Ziel Gegner: Gegner, die Tiere sind, haben keine Waffe (Meldung), im Original kostet das trotzdem die vollen AE, mit Fix 205 (Fanpatch-Stufe „nur Alle“) nichts. Sonst ist die Waffe des Gegners zerbrochen: Er richtet ab dann nur noch halben Schaden an.",
+  "codestellen": [
+   "Quelle/datseg.c:g_spell_descriptions",
+   "Quelle/seg098.c:use_spell",
+   "Quelle/seg098.c:test_spell",
+   "Quelle/seg100.c:spell_eisenrost",
+   "Quelle/seg100.c:fix_unbreakable_weapon",
+   "Quelle/seg041.c:FIG_get_enemy_attack_damage"
+  ],
+  "deutung": "Vermutlich ein guter Zauber gegen bewaffnete Gegner: Ihr Schaden halbiert sich.",
+  "status": "im Code geprüft, im Spiel unbestätigt"
+ },
+ {
+  "name": "52. Fulminictus Donnerkeil (Heldenzauber)",
+  "im_code": "Zauber-ID 52 (`SP_FULMINICTUS_DONNERKEIL`). Gruppe Kampf, Herkunft Auelf. Probe auf KL/GE/KK. AE-Kosten laut Tabelle: variabel (in der Tabelle −1, der Zauber legt die Kosten selbst fest); bei misslungener Probe 5–10 AE (zufällig). Einsatz: nur im Kampf. Ziel: ein Gegner oder ein Held, Reichweite Fernzauber im Kampf. Wirkung im Handler: Ziel: Gegner oder anderer Held (nicht sich selbst). Schaden 3W6 + Stufe des Zaubernden, höchstens so viel, wie er AE hat. Der Schaden geht ohne Rüstungsschutz direkt von der LE ab, die AE-Kosten sind gleich dem Schaden.",
+  "codestellen": [
+   "Quelle/datseg.c:g_spell_descriptions",
+   "Quelle/seg098.c:use_spell",
+   "Quelle/seg098.c:test_spell",
+   "Quelle/seg100.c:spell_fulminictus",
+   "Quelle/seg098.c:FIG_do_spell_damage"
+  ],
+  "deutung": "Vermutlich der verlässliche Schadenszauber, der Rüstung ignoriert. Er kostet genau so viele AE wie er Schaden macht.",
+  "status": "im Code geprüft, im Spiel unbestätigt"
+ },
+ {
+  "name": "53. Ignifaxius Flammenstrahl (Heldenzauber)",
+  "im_code": "Zauber-ID 53 (`SP_IGNIFAXIUS_FLAMMENSTRAHL`). Gruppe Kampf, Herkunft Magier. Probe auf KL/GE/FF. AE-Kosten laut Tabelle: variabel (in der Tabelle −1, der Zauber legt die Kosten selbst fest); bei misslungener Probe 5–10 AE (zufällig). Einsatz: nur im Kampf. Ziel: ein Gegner oder ein Held, Reichweite Fernzauber im Kampf. Wirkung im Handler: Ziel: Gegner oder anderer Held (nicht sich selbst). Der Spieler wählt die Stufe der Feuerlanze (höchstens Stufe des Zaubernden + 1; im Autokampf und bei NSC immer das Höchste). Schaden: Stufe × W6, höchstens so viel, wie der Zaubernde AE hat, direkt von der LE ohne Rüstungsschutz. Gegen Mumien doppelter Schaden (die AE-Kosten bleiben beim einfachen Wert). Danach: Schaden/10 Punkte Rüstungsschutz gehen verloren (beim Helden an der Körperrüstung, höchstens deren RS), und AT und PA sinken um Stufe/2 (beim Helden für 1 Stunde, beim Gegner für den Kampf). Kosten = Schaden.",
+  "codestellen": [
+   "Quelle/datseg.c:g_spell_descriptions",
+   "Quelle/seg098.c:use_spell",
+   "Quelle/seg098.c:test_spell",
+   "Quelle/seg100.c:spell_ignifaxius",
+   "Quelle/seg098.c:FIG_do_spell_damage"
+  ],
+  "deutung": "Vermutlich der stärkste Schadenszauber. Er schwächt das Ziel zusätzlich, besonders wirksam gegen Mumien.",
+  "status": "im Code geprüft, im Spiel unbestätigt"
+ },
+ {
+  "name": "54. Plumbumbarum und Narretei (Heldenzauber)",
+  "im_code": "Zauber-ID 54 (`SP_PLUMBUMBARUM_UND_NARRETEI`). Gruppe Kampf, Herkunft Magier. Probe auf CH/GE/KK, erschwert um die Magieresistenz des Ziels. AE-Kosten laut Tabelle: 5 AE; bei misslungener Probe 2 AE. Einsatz: nur im Kampf. Ziel: ein Gegner oder ein Held, Reichweite Fernzauber im Kampf. Wirkung im Handler: Ziel Held (nicht sich selbst): AT −3 für 5 Kampfrunden. Ziel Gegner: AT −3 für den Rest des Kampfes.",
+  "codestellen": [
+   "Quelle/datseg.c:g_spell_descriptions",
+   "Quelle/seg098.c:use_spell",
+   "Quelle/seg098.c:test_spell",
+   "Quelle/seg100.c:spell_plumbumbarum"
+  ],
+  "deutung": "Vermutlich ein günstiger Schwächungszauber.",
+  "status": "im Code geprüft, im Spiel unbestätigt"
+ },
+ {
+  "name": "55. Radau (Heldenzauber)",
+  "im_code": "Zauber-ID 55 (`SP_RADAU`). Gruppe Kampf, Herkunft Hexe. Probe auf MU/IN/CH. AE-Kosten laut Tabelle: 4 AE; bei misslungener Probe 2 AE. Einsatz: nur im Kampf. Ziel: ein Gegner oder ein Held, Reichweite Fernzauber im Kampf. Wirkung im Handler: Ruft denselben Handler wie Krähenruf auf (gleiche Wirkung, eigene Tabellenwerte).",
+  "codestellen": [
+   "Quelle/datseg.c:g_spell_descriptions",
+   "Quelle/seg098.c:use_spell",
+   "Quelle/seg098.c:test_spell",
+   "Quelle/seg100.c:spell_radau",
+   "Quelle/seg099.c:spell_kraehenruf"
+  ],
+  "deutung": "Sieht so aus, als ob Radau im Spiel dasselbe ist wie Krähenruf.",
+  "status": "im Code geprüft, im Spiel unbestätigt"
+ },
+ {
+  "name": "56. Saft, Kraft, Monstermacht (Heldenzauber)",
+  "im_code": "Zauber-ID 56 (`SP_SAFT_KRAFT_MONSTERMACHT`). Gruppe Kampf, Herkunft Magier. Probe auf MU/IN/CH. AE-Kosten laut Tabelle: variabel (in der Tabelle −1, der Zauber legt die Kosten selbst fest); bei misslungener Probe 5–10 AE (zufällig). Einsatz: nur im Kampf. Ziel: ein Held, Reichweite Berührung (Nachbarfeld) im Kampf. Wirkung im Handler: Ziel: ein Held. Für W20 Kampfrunden: AT +5, PA −5 und 5 Schadenspunkte mehr pro Treffer. Die AE-Kosten sind gleich der gewürfelten Rundenzahl. Fix 206 (Fanpatch-Stufe „nur Alle“) berichtigt einen Buchstabendreher in der Meldung.",
+  "codestellen": [
+   "Quelle/datseg.c:g_spell_descriptions",
+   "Quelle/seg098.c:use_spell",
+   "Quelle/seg098.c:test_spell",
+   "Quelle/seg100.c:spell_saft_kraft",
+   "Quelle/seg041.c:FIG_get_hero_weapon_attack_damage"
+  ],
+  "deutung": "Sieht so aus, als ob der Held mehr Schaden macht, sich aber schlechter verteidigt. Dauer und Kosten sind Glückssache.",
+  "status": "im Code geprüft, im Spiel unbestätigt"
+ },
+ {
+  "name": "57. Scharfes Auge und sichre Hand (Heldenzauber)",
+  "im_code": "Zauber-ID 57 (`SP_SCHARFES_AUGE_UND_SICHRE_HAND`). Gruppe Kampf, Herkunft Waldelf. Probe auf IN/GE/FF. AE-Kosten laut Tabelle: 5 AE; bei misslungener Probe 2 AE. Einsatz: nur im Kampf. Ziel: ein Held, Reichweite Berührung (Nachbarfeld) im Kampf. Wirkung im Handler: Ziel: ein Held. Talente Wurfwaffen und Schusswaffen je +3 für 3 Kampfrunden.",
+  "codestellen": [
+   "Quelle/datseg.c:g_spell_descriptions",
+   "Quelle/seg098.c:use_spell",
+   "Quelle/seg098.c:test_spell",
+   "Quelle/seg100.c:spell_scharfes_auge"
+  ],
+  "deutung": "Vermutlich ein kleiner Fernkampf-Bonus für drei Runden.",
+  "status": "im Code geprüft, im Spiel unbestätigt"
+ },
+ {
+  "name": "58. Hexenblick (Heldenzauber)",
+  "im_code": "Zauber-ID 58 (`SP_HEXENBLICK`). Gruppe Verständigung, Herkunft Hexe. Probe auf IN/IN/CH. AE-Kosten laut Tabelle: 2 AE; bei misslungener Probe 1 AE. Einsatz: nur außerhalb des Kampfes. Ziel: kein Ziel (wirkt auf den Zaubernden oder die Umgebung). Wirkung im Handler: Der Handler ist leer: Der Zauber kostet bei gelungener Probe die vollen AE laut Tabelle und bewirkt nichts (es erscheint keine eigene Meldung).",
+  "codestellen": [
+   "Quelle/datseg.c:g_spell_descriptions",
+   "Quelle/seg098.c:use_spell",
+   "Quelle/seg098.c:test_spell",
+   "Quelle/seg100.c:spell_hexenblick"
+  ],
+  "deutung": "Sieht so aus, als ob dieser Zauber im Computerspiel nur AE kostet und nichts bewirkt. Vermutlich wurde er aus dem Regelwerk übernommen, aber nie programmiert.",
+  "status": "im Code geprüft, im Spiel unbestätigt"
+ },
+ {
+  "name": "59. Nekropathia modernd Leich (Heldenzauber)",
+  "im_code": "Zauber-ID 59 (`SP_NEKROPATHIA_MODERND_LEICH`). Gruppe Verständigung, Herkunft Magier. Probe auf MU/KL/CH. AE-Kosten laut Tabelle: 11 AE; bei misslungener Probe 5 AE. Einsatz: nur außerhalb des Kampfes. Ziel: kein Ziel (wirkt auf den Zaubernden oder die Umgebung). Wirkung im Handler: Der Handler ist leer: Der Zauber kostet bei gelungener Probe die vollen AE laut Tabelle und bewirkt nichts (es erscheint keine eigene Meldung).",
+  "codestellen": [
+   "Quelle/datseg.c:g_spell_descriptions",
+   "Quelle/seg098.c:use_spell",
+   "Quelle/seg098.c:test_spell",
+   "Quelle/seg100.c:spell_necropathia"
+  ],
+  "deutung": "Sieht so aus, als ob dieser Zauber im Computerspiel nur AE kostet und nichts bewirkt. Vermutlich wurde er aus dem Regelwerk übernommen, aber nie programmiert.",
+  "status": "im Code geprüft, im Spiel unbestätigt"
+ },
+ {
+  "name": "60. Adler, Wolf und Hammerhai (Heldenzauber)",
+  "im_code": "Zauber-ID 60 (`SP_ADLER_WOLF_UND_HAMMERHAI`). Gruppe Verwandlung, Herkunft Waldelf. Probe auf MU/IN/GE. AE-Kosten laut Tabelle: 7 AE; bei misslungener Probe 3 AE. Einsatz: nur außerhalb des Kampfes. Ziel: kein Ziel (wirkt auf den Zaubernden oder die Umgebung). Wirkung im Handler: Nicht umgesetzt: Der Handler lässt den Zauber immer misslingen (halbe Kosten).",
+  "codestellen": [
+   "Quelle/datseg.c:g_spell_descriptions",
+   "Quelle/seg098.c:use_spell",
+   "Quelle/seg098.c:test_spell",
+   "Quelle/seg101.c:spell_adler"
+  ],
+  "deutung": "Sieht so aus, als ob dieser Zauber im Original nicht programmiert ist und immer misslingt.",
+  "status": "im Code geprüft, im Spiel unbestätigt"
+ },
+ {
+  "name": "61. Arcano Psychostabilis (Heldenzauber)",
+  "im_code": "Zauber-ID 61 (`SP_ARCANO_PSYCHOSTABILIS`). Gruppe Verwandlung, Herkunft Magier. Probe auf MU/KL/CH. AE-Kosten laut Tabelle: 7 AE; bei misslungener Probe 3 AE. Einsatz: nur im Kampf. Ziel: ein Held, Reichweite Fernzauber im Kampf. Wirkung im Handler: Ziel: ein Held. MR +2 für 1 Stunde.",
+  "codestellen": [
+   "Quelle/datseg.c:g_spell_descriptions",
+   "Quelle/seg098.c:use_spell",
+   "Quelle/seg098.c:test_spell",
+   "Quelle/seg101.c:spell_arcano"
+  ],
+  "deutung": "Vermutlich ein kleiner Schutz gegen feindliche Beherrschungszauber.",
+  "status": "im Code geprüft, im Spiel unbestätigt"
+ },
+ {
+  "name": "62. Armatrutz (Heldenzauber)",
+  "im_code": "Zauber-ID 62 (`SP_ARMATRUTZ`). Gruppe Verwandlung, Herkunft Auelf. Probe auf IN/GE/KK. AE-Kosten laut Tabelle: variabel (in der Tabelle −1, der Zauber legt die Kosten selbst fest); bei misslungener Probe 5–10 AE (zufällig). Einsatz: nur im Kampf. Ziel: kein Ziel (wirkt auf den Zaubernden oder die Umgebung). Wirkung im Handler: Nur auf den Zaubernden selbst. Er wählt den RS-Bonus, höchstens 9. Kosten: Bonus × Bonus AE. RS +Bonus für 5 Spielminuten. Im Original wird das erlaubte Höchstmaß falsch berechnet: Es ist die kleinste Zahl, deren Quadrat die vorhandenen AE erreicht oder übersteigt, man kann also mehr wählen, als man bezahlen kann. Fix 207 (Fanpatch-Stufe „Wichtig“) nimmt die größte Zahl, deren Quadrat höchstens den AE entspricht.",
+  "codestellen": [
+   "Quelle/datseg.c:g_spell_descriptions",
+   "Quelle/seg098.c:use_spell",
+   "Quelle/seg098.c:test_spell",
+   "Quelle/seg101.c:spell_armatrutz"
+  ],
+  "deutung": "Vermutlich ein teurer Rüstungszauber nur für den Zaubernden.",
+  "status": "im Code geprüft, im Spiel unbestätigt"
+ },
+ {
+  "name": "63. Charisma steigern (Heldenzauber)",
+  "im_code": "Zauber-ID 63 (`SP_CH_STEIGERN`). Gruppe Verwandlung, Herkunft Magier. Probe auf KL/CH/CH. AE-Kosten laut Tabelle: 7 AE; bei misslungener Probe 3 AE. Einsatz: im Kampf und außerhalb. Ziel: ein Held, Reichweite Berührung (Nachbarfeld) im Kampf. Wirkung im Handler: Ziel: ein anderer Held (nicht sich selbst). CH +2 für 2 Stunden. Ist CH beim Ziel schon über den Normalwert erhöht, kommt nur eine Meldung, die AE werden trotzdem voll abgezogen (der Handler setzt keine Sonderkosten).",
+  "codestellen": [
+   "Quelle/datseg.c:g_spell_descriptions",
+   "Quelle/seg098.c:use_spell",
+   "Quelle/seg098.c:test_spell",
+   "Quelle/seg101.c:spell_inc_ch"
+  ],
+  "deutung": "Vermutlich ein kurzer Eigenschaftsbonus für einen Mitstreiter.",
+  "status": "im Code geprüft, im Spiel unbestätigt"
+ },
+ {
+  "name": "64. Feuerbann (Heldenzauber)",
+  "im_code": "Zauber-ID 64 (`SP_FEUERBANN`). Gruppe Verwandlung, Herkunft Hexe. Probe auf MU/MU/KK. AE-Kosten laut Tabelle: 7 AE; bei misslungener Probe 3 AE. Einsatz: im Kampf und außerhalb. Ziel: kein Ziel (wirkt auf den Zaubernden oder die Umgebung). Wirkung im Handler: Nur auf den Zaubernden selbst (wirkt er schon, kostenlos abgebrochen). Setzt eine Feuerbann-Markierung, im Original für Stufe × 5 Spielminuten. Diese Markierung wird im Original nirgends ausgewertet, der Zauber schützt also vor nichts. Mit Fix 213 (Fanpatch-Stufe „Wichtig“) hält sie Stufe × 1 Stunde und halbiert den Schaden von feindlichem Ignifaxius (siehe Gegnerzauber).",
+  "codestellen": [
+   "Quelle/datseg.c:g_spell_descriptions",
+   "Quelle/seg098.c:use_spell",
+   "Quelle/seg098.c:test_spell",
+   "Quelle/seg101.c:spell_feuerbann",
+   "Quelle/seg102.c:fix_hero_spell_protect"
+  ],
+  "deutung": "Sieht so aus, als ob Feuerbann im Original wirkungslos ist. Mit dem Fanpatch halbiert er feindliches Feuer.",
+  "status": "im Code geprüft, im Spiel unbestätigt"
+ },
+ {
+  "name": "65. Fingerfertigkeit steigern (Heldenzauber)",
+  "im_code": "Zauber-ID 65 (`SP_FF_STEIGERN`). Gruppe Verwandlung, Herkunft Waldelf. Probe auf KL/CH/FF. AE-Kosten laut Tabelle: 7 AE; bei misslungener Probe 3 AE. Einsatz: im Kampf und außerhalb. Ziel: ein Held, Reichweite Berührung (Nachbarfeld) im Kampf. Wirkung im Handler: Ziel: ein anderer Held (nicht sich selbst). FF +2 für 2 Stunden. Ist FF beim Ziel schon über den Normalwert erhöht, kommt nur eine Meldung, die AE werden trotzdem voll abgezogen (der Handler setzt keine Sonderkosten).",
+  "codestellen": [
+   "Quelle/datseg.c:g_spell_descriptions",
+   "Quelle/seg098.c:use_spell",
+   "Quelle/seg098.c:test_spell",
+   "Quelle/seg101.c:spell_inc_ff"
+  ],
+  "deutung": "Vermutlich ein kurzer Eigenschaftsbonus für einen Mitstreiter.",
+  "status": "im Code geprüft, im Spiel unbestätigt"
+ },
+ {
+  "name": "66. Gewandtheit steigern (Heldenzauber)",
+  "im_code": "Zauber-ID 66 (`SP_GE_STEIGERN`). Gruppe Verwandlung, Herkunft Auelf. Probe auf KL/CH/GE. AE-Kosten laut Tabelle: 7 AE; bei misslungener Probe 3 AE. Einsatz: im Kampf und außerhalb. Ziel: ein Held, Reichweite Berührung (Nachbarfeld) im Kampf. Wirkung im Handler: Ziel: ein anderer Held (nicht sich selbst). GE +2 für 2 Stunden. Ist GE beim Ziel schon über den Normalwert erhöht, kommt nur eine Meldung, die AE werden trotzdem voll abgezogen (der Handler setzt keine Sonderkosten).",
+  "codestellen": [
+   "Quelle/datseg.c:g_spell_descriptions",
+   "Quelle/seg098.c:use_spell",
+   "Quelle/seg098.c:test_spell",
+   "Quelle/seg101.c:spell_inc_ge"
+  ],
+  "deutung": "Vermutlich ein kurzer Eigenschaftsbonus für einen Mitstreiter.",
+  "status": "im Code geprüft, im Spiel unbestätigt"
+ },
+ {
+  "name": "67. Intuition steigern (Heldenzauber)",
+  "im_code": "Zauber-ID 67 (`SP_IN_STEIGERN`). Gruppe Verwandlung, Herkunft Firnelf. Probe auf KL/IN/CH. AE-Kosten laut Tabelle: 7 AE; bei misslungener Probe 3 AE. Einsatz: im Kampf und außerhalb. Ziel: ein Held, Reichweite Berührung (Nachbarfeld) im Kampf. Wirkung im Handler: Ziel: ein anderer Held (nicht sich selbst). IN +2 für 2 Stunden. Ist IN beim Ziel schon über den Normalwert erhöht, kommt nur eine Meldung, die AE werden trotzdem voll abgezogen (der Handler setzt keine Sonderkosten).",
+  "codestellen": [
+   "Quelle/datseg.c:g_spell_descriptions",
+   "Quelle/seg098.c:use_spell",
+   "Quelle/seg098.c:test_spell",
+   "Quelle/seg101.c:spell_inc_in"
+  ],
+  "deutung": "Vermutlich ein kurzer Eigenschaftsbonus für einen Mitstreiter.",
+  "status": "im Code geprüft, im Spiel unbestätigt"
+ },
+ {
+  "name": "68. Körperkraft steigern (Heldenzauber)",
+  "im_code": "Zauber-ID 68 (`SP_KK_STEIGERN`). Gruppe Verwandlung, Herkunft Firnelf. Probe auf KL/CH/KK. AE-Kosten laut Tabelle: 7 AE; bei misslungener Probe 3 AE. Einsatz: im Kampf und außerhalb. Ziel: ein Held, Reichweite Berührung (Nachbarfeld) im Kampf. Wirkung im Handler: Ziel: ein anderer Held (nicht sich selbst). KK +2 für 2 Stunden. Ist KK beim Ziel schon über den Normalwert erhöht, kommt nur eine Meldung, die AE werden trotzdem voll abgezogen (der Handler setzt keine Sonderkosten).",
+  "codestellen": [
+   "Quelle/datseg.c:g_spell_descriptions",
+   "Quelle/seg098.c:use_spell",
+   "Quelle/seg098.c:test_spell",
+   "Quelle/seg101.c:spell_inc_kk"
+  ],
+  "deutung": "Vermutlich ein kurzer Eigenschaftsbonus für einen Mitstreiter.",
+  "status": "im Code geprüft, im Spiel unbestätigt"
+ },
+ {
+  "name": "69. Klugheit steigern (Heldenzauber)",
+  "im_code": "Zauber-ID 69 (`SP_KL_STEIGERN`). Gruppe Verwandlung, Herkunft Magier. Probe auf KL/KL/CH. AE-Kosten laut Tabelle: 7 AE; bei misslungener Probe 3 AE. Einsatz: im Kampf und außerhalb. Ziel: ein Held, Reichweite Berührung (Nachbarfeld) im Kampf. Wirkung im Handler: Ziel: ein anderer Held (nicht sich selbst). KL +2 für 2 Stunden. Ist KL beim Ziel schon über den Normalwert erhöht, kommt nur eine Meldung, die AE werden trotzdem voll abgezogen (der Handler setzt keine Sonderkosten).",
+  "codestellen": [
+   "Quelle/datseg.c:g_spell_descriptions",
+   "Quelle/seg098.c:use_spell",
+   "Quelle/seg098.c:test_spell",
+   "Quelle/seg101.c:spell_inc_kl"
+  ],
+  "deutung": "Vermutlich ein kurzer Eigenschaftsbonus für einen Mitstreiter.",
+  "status": "im Code geprüft, im Spiel unbestätigt"
+ },
+ {
+  "name": "70. Mut steigern (Heldenzauber)",
+  "im_code": "Zauber-ID 70 (`SP_MU_STEIGERN`). Gruppe Verwandlung, Herkunft Firnelf. Probe auf MU/KL/CH. AE-Kosten laut Tabelle: 7 AE; bei misslungener Probe 3 AE. Einsatz: im Kampf und außerhalb. Ziel: ein Held, Reichweite Berührung (Nachbarfeld) im Kampf. Wirkung im Handler: Ziel: ein anderer Held (nicht sich selbst). MU +2 für 2 Stunden. Ist MU beim Ziel schon über den Normalwert erhöht, kommt nur eine Meldung, die AE werden trotzdem voll abgezogen (der Handler setzt keine Sonderkosten).",
+  "codestellen": [
+   "Quelle/datseg.c:g_spell_descriptions",
+   "Quelle/seg098.c:use_spell",
+   "Quelle/seg098.c:test_spell",
+   "Quelle/seg101.c:spell_inc_mu"
+  ],
+  "deutung": "Vermutlich ein kurzer Eigenschaftsbonus für einen Mitstreiter.",
+  "status": "im Code geprüft, im Spiel unbestätigt"
+ },
+ {
+  "name": "71. Mutabili Hybridil (Heldenzauber)",
+  "im_code": "Zauber-ID 71 (`SP_MUTABILI_HYBRIDIL`). Gruppe Verwandlung, Herkunft Magier. Probe auf KL/GE/KK. AE-Kosten laut Tabelle: variabel (in der Tabelle −1, der Zauber legt die Kosten selbst fest); bei misslungener Probe 5–10 AE (zufällig). Einsatz: im Kampf und außerhalb. Ziel: kein Ziel (wirkt auf den Zaubernden oder die Umgebung). Wirkung im Handler: Nicht umgesetzt: Der Handler lässt den Zauber immer misslingen (halbe Kosten).",
+  "codestellen": [
+   "Quelle/datseg.c:g_spell_descriptions",
+   "Quelle/seg098.c:use_spell",
+   "Quelle/seg098.c:test_spell",
+   "Quelle/seg101.c:spell_mutabili"
+  ],
+  "deutung": "Sieht so aus, als ob dieser Zauber im Original nicht programmiert ist und immer misslingt.",
+  "status": "im Code geprüft, im Spiel unbestätigt"
+ },
+ {
+  "name": "72. Paralü Paralein (Heldenzauber)",
+  "im_code": "Zauber-ID 72 (`SP_PARALUE_PARALEIN`). Gruppe Verwandlung, Herkunft Magier. Probe auf IN/CH/KK, erschwert um die Magieresistenz des Ziels. AE-Kosten laut Tabelle: 13 AE; bei misslungener Probe 6 AE. Einsatz: nur im Kampf. Ziel: ein Gegner oder ein Held, Reichweite Fernzauber im Kampf. Wirkung im Handler: Ziel Gegner: versteinert (ohne Ausnahme für Skelette). Ein versteinerter Gegner kommt nicht mehr an die Reihe und zählt nicht mehr als aktiver Gegner. Ziel Held (nicht sich selbst): versteinert. Im Original prüft der Handler zuerst das Ziel des vorigen Zaubers. War das der Zaubernde selbst, endet der Zauber kostenlos ohne Wirkung. Fix 208 (Fanpatch-Stufe „nur Alle“) setzt das Ziel vorher richtig.",
+  "codestellen": [
+   "Quelle/datseg.c:g_spell_descriptions",
+   "Quelle/seg098.c:use_spell",
+   "Quelle/seg098.c:test_spell",
+   "Quelle/seg101.c:spell_paralue",
+   "Quelle/seg032.c:FIG_count_active_enemies"
+  ],
+  "deutung": "Vermutlich einer der stärksten Zauber: Der Gegner ist versteinert und zählt nicht mehr.",
+  "status": "im Code geprüft, im Spiel unbestätigt"
+ },
+ {
+  "name": "73. Salander Mutanderer (Heldenzauber)",
+  "im_code": "Zauber-ID 73 (`SP_SALANDER_MUTANDERER`). Gruppe Verwandlung, Herkunft Magier. Probe auf KL/IN/CH, erschwert um die Magieresistenz des Ziels. AE-Kosten laut Tabelle: variabel (in der Tabelle −1, der Zauber legt die Kosten selbst fest); bei misslungener Probe 5–10 AE (zufällig). Einsatz: nur im Kampf. Ziel: ein Gegner, Reichweite Berührung (Nachbarfeld) im Kampf. Wirkung im Handler: Ziel: ein Gegner. Kosten: 3 × MR des Gegners, mindestens 25 AE (reicht die AE nicht: Meldung, keine Kosten). Der Gegner wird in einen Pilz verwandelt: Er kommt nicht mehr an die Reihe und zählt nicht mehr als aktiver Gegner. Weitere Zauber mit MR-Zuschlag gegen ihn gelingen nicht mehr.",
+  "codestellen": [
+   "Quelle/datseg.c:g_spell_descriptions",
+   "Quelle/seg098.c:use_spell",
+   "Quelle/seg098.c:test_spell",
+   "Quelle/seg101.c:spell_salander"
+  ],
+  "deutung": "Vermutlich ein teurer, aber sicherer Weg, einen Gegner auszuschalten.",
+  "status": "im Code geprüft, im Spiel unbestätigt"
+ },
+ {
+  "name": "74. In See und Fluss (Heldenzauber)",
+  "im_code": "Zauber-ID 74 (`SP_IN_SEE_UND_FLUSS`). Gruppe Verwandlung, Herkunft Auelf. Probe auf MU/KL/KK. AE-Kosten laut Tabelle: variabel (in der Tabelle −1, der Zauber legt die Kosten selbst fest); bei misslungener Probe 5–10 AE (zufällig). Einsatz: nur außerhalb des Kampfes. Ziel: kein Ziel (wirkt auf den Zaubernden oder die Umgebung). Wirkung im Handler: Der Handler ist leer: Der Zauber kostet bei gelungener Probe die vollen AE laut Tabelle und bewirkt nichts (es erscheint keine eigene Meldung).",
+  "codestellen": [
+   "Quelle/datseg.c:g_spell_descriptions",
+   "Quelle/seg098.c:use_spell",
+   "Quelle/seg098.c:test_spell",
+   "Quelle/seg101.c:spell_see"
+  ],
+  "deutung": "Sieht so aus, als ob dieser Zauber im Computerspiel nur AE kostet und nichts bewirkt. Vermutlich wurde er aus dem Regelwerk übernommen, aber nie programmiert.",
+  "status": "im Code geprüft, im Spiel unbestätigt"
+ },
+ {
+  "name": "75. Visibili Vanitar (Heldenzauber)",
+  "im_code": "Zauber-ID 75 (`SP_VISIBILI_VANITAR`). Gruppe Verwandlung, Herkunft Auelf. Probe auf KL/KL/GE. AE-Kosten laut Tabelle: variabel (in der Tabelle −1, der Zauber legt die Kosten selbst fest); bei misslungener Probe 5–10 AE (zufällig). Einsatz: im Kampf und außerhalb. Ziel: kein Ziel (wirkt auf den Zaubernden oder die Umgebung). Wirkung im Handler: Der Zaubernde gibt die Dauer in Spielrunden ein. Kosten 5 AE je Runde; bei 0 Runden oder wenn er schon unsichtbar ist, kostenlos abgebrochen. Er ist für Runden × 5 Spielminuten unsichtbar. Wirkung: Ein Kampf fällt aus, wenn die Gruppe nur aus diesem einen Helden besteht (Original). Mit Fix 186 (Fanpatch-Stufe „Wichtig“) macht der Zauber die ganze Gruppe unsichtbar, und der Kampf fällt aus, wenn alle lebenden Helden unsichtbar sind.",
+  "codestellen": [
+   "Quelle/datseg.c:g_spell_descriptions",
+   "Quelle/seg098.c:use_spell",
+   "Quelle/seg098.c:test_spell",
+   "Quelle/seg101.c:spell_visibili",
+   "Quelle/seg032.c:do_fight"
+  ],
+  "deutung": "Sieht so aus, als ob Unsichtbarkeit vor allem Kämpfe verhindert, im Original nur für einen allein reisenden Helden.",
+  "status": "im Code geprüft, im Spiel unbestätigt"
+ },
+ {
+  "name": "76. Abvenenum Pest und Galle (Heldenzauber)",
+  "im_code": "Zauber-ID 76 (`SP_ABVENENUM_PEST_UND_GALLE`). Gruppe Veränderung, Herkunft Waldelf. Probe auf KL/KL/FF. AE-Kosten laut Tabelle: 5 AE; bei misslungener Probe 2 AE. Einsatz: nur außerhalb des Kampfes. Ziel: kein Ziel (wirkt auf den Zaubernden oder die Umgebung). Wirkung im Handler: Der Handler ist leer: Der Zauber kostet bei gelungener Probe die vollen AE laut Tabelle und bewirkt nichts (es erscheint keine eigene Meldung).",
+  "codestellen": [
+   "Quelle/datseg.c:g_spell_descriptions",
+   "Quelle/seg098.c:use_spell",
+   "Quelle/seg098.c:test_spell",
+   "Quelle/seg101.c:spell_abvenenum"
+  ],
+  "deutung": "Sieht so aus, als ob dieser Zauber im Computerspiel nur AE kostet und nichts bewirkt. Vermutlich wurde er aus dem Regelwerk übernommen, aber nie programmiert.",
+  "status": "im Code geprüft, im Spiel unbestätigt"
+ },
+ {
+  "name": "77. Aeolitus Windgebraus (Heldenzauber)",
+  "im_code": "Zauber-ID 77 (`SP_AEOLITUS_WINDGEBRAUS`). Gruppe Veränderung, Herkunft Firnelf. Probe auf KL/CH/KK. AE-Kosten laut Tabelle: 5 AE; bei misslungener Probe 2 AE. Einsatz: nur außerhalb des Kampfes. Ziel: kein Ziel (wirkt auf den Zaubernden oder die Umgebung). Wirkung im Handler: Der Handler ist leer: Der Zauber kostet bei gelungener Probe die vollen AE laut Tabelle und bewirkt nichts (es erscheint keine eigene Meldung).",
+  "codestellen": [
+   "Quelle/datseg.c:g_spell_descriptions",
+   "Quelle/seg098.c:use_spell",
+   "Quelle/seg098.c:test_spell",
+   "Quelle/seg101.c:spell_aeolitus"
+  ],
+  "deutung": "Sieht so aus, als ob dieser Zauber im Computerspiel nur AE kostet und nichts bewirkt. Vermutlich wurde er aus dem Regelwerk übernommen, aber nie programmiert.",
+  "status": "im Code geprüft, im Spiel unbestätigt"
+ },
+ {
+  "name": "78. Brenne toter Stoff! (Heldenzauber)",
+  "im_code": "Zauber-ID 78 (`SP_BRENNE_TOTER_STOFF`). Gruppe Veränderung, Herkunft Magier. Probe auf MU/KL/KK. AE-Kosten laut Tabelle: variabel (in der Tabelle −1, der Zauber legt die Kosten selbst fest); bei misslungener Probe 5–10 AE (zufällig). Einsatz: nur außerhalb des Kampfes. Ziel: kein Ziel (wirkt auf den Zaubernden oder die Umgebung). Wirkung im Handler: Zündet eine Fackel oder Laterne im Gepäck des Zaubernden an (hat er beides, fragt das Spiel). Fackel: brennt danach mit Brennzähler 10 (2,5 Stunden). Laterne: braucht eine Flasche Öl (wird verbraucht, eine Bronzeflasche kommt zurück) und brennt mit Brennzähler 100 (25 Stunden). Kosten in beiden Fällen W20 AE statt des Tabellenwerts. Ohne Fackel und Laterne oder ohne Öl: Meldung, keine Kosten. Im Original wird immer die erste Fackel bzw. Laterne angezündet, und nach dem Anzünden über „Benutzen“ findet der Zauber nur noch dieselbe Art (Fix 210 (Fanpatch-Stufe „nur Alle“) und Fix 211 (Fanpatch-Stufe „Wichtig“)).",
+  "codestellen": [
+   "Quelle/datseg.c:g_spell_descriptions",
+   "Quelle/seg098.c:use_spell",
+   "Quelle/seg098.c:test_spell",
+   "Quelle/seg101.c:spell_brenne",
+   "Quelle/seg107.c:item_ignite"
+  ],
+  "deutung": "Vermutlich der magische Ersatz für das Zunderkästchen.",
+  "status": "im Code geprüft, im Spiel unbestätigt"
+ },
+ {
+  "name": "79. Claudibus Clavistibor (Heldenzauber)",
+  "im_code": "Zauber-ID 79 (`SP_CLAUDIBUS_CLAVISTIBOR`). Gruppe Veränderung, Herkunft Magier. Probe auf KL/FF/KK. AE-Kosten laut Tabelle: variabel (in der Tabelle −1, der Zauber legt die Kosten selbst fest); bei misslungener Probe 5–10 AE (zufällig). Einsatz: nur außerhalb des Kampfes. Ziel: kein Ziel (wirkt auf den Zaubernden oder die Umgebung). Wirkung im Handler: Der Handler ist leer: Der Zauber kostet bei gelungener Probe die vollen AE laut Tabelle und bewirkt nichts (es erscheint keine eigene Meldung).",
+  "codestellen": [
+   "Quelle/datseg.c:g_spell_descriptions",
+   "Quelle/seg098.c:use_spell",
+   "Quelle/seg098.c:test_spell",
+   "Quelle/seg101.c:spell_claudibus"
+  ],
+  "deutung": "Sieht so aus, als ob dieser Zauber im Computerspiel nur AE kostet und nichts bewirkt. Vermutlich wurde er aus dem Regelwerk übernommen, aber nie programmiert.",
+  "status": "im Code geprüft, im Spiel unbestätigt"
+ },
+ {
+  "name": "80. Dunkelheit (Heldenzauber)",
+  "im_code": "Zauber-ID 80 (`SP_DUNKELHEIT`). Gruppe Veränderung, Herkunft Druide. Probe auf KL/KL/FF. AE-Kosten laut Tabelle: 3 AE; bei misslungener Probe 1 AE. Einsatz: nur im Kampf. Ziel: kein Ziel (wirkt auf den Zaubernden oder die Umgebung). Wirkung im Handler: Setzt für (Stufe + 3) Stunden den Dunkelheits-Zähler. In Dungeons ist es dann völlig dunkel, auch mit Fackeln, Flim Flam oder Zauberstab.",
+  "codestellen": [
+   "Quelle/datseg.c:g_spell_descriptions",
+   "Quelle/seg098.c:use_spell",
+   "Quelle/seg098.c:test_spell",
+   "Quelle/seg101.c:spell_dunkelheit",
+   "Quelle/seg075.c:DNG_lights"
+  ],
+  "deutung": "Sieht so aus, als ob Dunkelheit in Dungeons vor allem schadet, weil sie jede Lichtquelle auslöscht.",
+  "status": "im Code geprüft, im Spiel unbestätigt"
+ },
+ {
+  "name": "81. Weiches erstarre! (Heldenzauber)",
+  "im_code": "Zauber-ID 81 (`SP_WEICHES_ERSTARRE`). Gruppe Veränderung, Herkunft Magier. Probe auf MU/KL/KK. AE-Kosten laut Tabelle: variabel (in der Tabelle −1, der Zauber legt die Kosten selbst fest); bei misslungener Probe 5–10 AE (zufällig). Einsatz: nur außerhalb des Kampfes. Ziel: kein Ziel (wirkt auf den Zaubernden oder die Umgebung). Wirkung im Handler: Der Handler ist leer: Der Zauber kostet bei gelungener Probe die vollen AE laut Tabelle und bewirkt nichts (es erscheint keine eigene Meldung).",
+  "codestellen": [
+   "Quelle/datseg.c:g_spell_descriptions",
+   "Quelle/seg098.c:use_spell",
+   "Quelle/seg098.c:test_spell",
+   "Quelle/seg101.c:spell_erstarre"
+  ],
+  "deutung": "Sieht so aus, als ob dieser Zauber im Computerspiel nur AE kostet und nichts bewirkt. Vermutlich wurde er aus dem Regelwerk übernommen, aber nie programmiert.",
+  "status": "im Code geprüft, im Spiel unbestätigt"
+ },
+ {
+  "name": "82. Flim Flam Funkel (Heldenzauber)",
+  "im_code": "Zauber-ID 82 (`SP_FLIM_FLAM_FUNKEL`). Gruppe Veränderung, Herkunft Firnelf. Probe auf KL/KL/FF. AE-Kosten laut Tabelle: 1 AE; bei misslungener Probe 1 AE. Einsatz: nur außerhalb des Kampfes. Ziel: kein Ziel (wirkt auf den Zaubernden oder die Umgebung). Wirkung im Handler: Setzt für (Stufe + 3) Stunden den Flim-Flam-Zähler. In Dungeons ist es dann voll hell, ohne Fackel oder Laterne (außer wenn Dunkelheit wirkt).",
+  "codestellen": [
+   "Quelle/datseg.c:g_spell_descriptions",
+   "Quelle/seg098.c:use_spell",
+   "Quelle/seg098.c:test_spell",
+   "Quelle/seg101.c:spell_flim_flam",
+   "Quelle/seg075.c:DNG_lights"
+  ],
+  "deutung": "Vermutlich ein lang anhaltendes magisches Licht für Dungeons.",
+  "status": "im Code geprüft, im Spiel unbestätigt"
+ },
+ {
+  "name": "83. Hartes schmelze! (Heldenzauber)",
+  "im_code": "Zauber-ID 83 (`SP_HARTES_SCHMELZE`). Gruppe Veränderung, Herkunft Magier. Probe auf MU/KL/KK. AE-Kosten laut Tabelle: variabel (in der Tabelle −1, der Zauber legt die Kosten selbst fest); bei misslungener Probe 5–10 AE (zufällig). Einsatz: nur außerhalb des Kampfes. Ziel: kein Ziel (wirkt auf den Zaubernden oder die Umgebung). Wirkung im Handler: Der Handler ist leer: Der Zauber kostet bei gelungener Probe die vollen AE laut Tabelle und bewirkt nichts (es erscheint keine eigene Meldung).",
+  "codestellen": [
+   "Quelle/datseg.c:g_spell_descriptions",
+   "Quelle/seg098.c:use_spell",
+   "Quelle/seg098.c:test_spell",
+   "Quelle/seg101.c:spell_schmelze"
+  ],
+  "deutung": "Sieht so aus, als ob dieser Zauber im Computerspiel nur AE kostet und nichts bewirkt. Vermutlich wurde er aus dem Regelwerk übernommen, aber nie programmiert.",
+  "status": "im Code geprüft, im Spiel unbestätigt"
+ },
+ {
+  "name": "84. Silentium Silentille (Heldenzauber)",
+  "im_code": "Zauber-ID 84 (`SP_SILENTIUM_SILENTILLE`). Gruppe Veränderung, Herkunft Auelf. Probe auf KL/KL/CH. AE-Kosten laut Tabelle: variabel (in der Tabelle −1, der Zauber legt die Kosten selbst fest); bei misslungener Probe 5–10 AE (zufällig). Einsatz: nur außerhalb des Kampfes. Ziel: kein Ziel (wirkt auf den Zaubernden oder die Umgebung). Wirkung im Handler: Alle lebenden Helden der aktiven Gruppe bekommen Schleichen +10 für 5 Spielminuten. Kosten 5 AE.",
+  "codestellen": [
+   "Quelle/datseg.c:g_spell_descriptions",
+   "Quelle/seg098.c:use_spell",
+   "Quelle/seg098.c:test_spell",
+   "Quelle/seg101.c:spell_silentium"
+  ],
+  "deutung": "Vermutlich eine kurze Hilfe beim Schleichen für die ganze Gruppe.",
+  "status": "im Code geprüft, im Spiel unbestätigt"
+ },
+ {
+  "name": "85. Sturmgebrüll besänft'ge dich (Heldenzauber)",
+  "im_code": "Zauber-ID 85 (`SP_STURMGEBRUELL_BESAENFTGE_DICH`). Gruppe Veränderung, Herkunft Firnelf. Probe auf KL/CH/KK. AE-Kosten laut Tabelle: 5 AE; bei misslungener Probe 2 AE. Einsatz: nur außerhalb des Kampfes. Ziel: kein Ziel (wirkt auf den Zaubernden oder die Umgebung). Wirkung im Handler: Der Handler ist leer: Der Zauber kostet bei gelungener Probe die vollen AE laut Tabelle und bewirkt nichts (es erscheint keine eigene Meldung).",
+  "codestellen": [
+   "Quelle/datseg.c:g_spell_descriptions",
+   "Quelle/seg098.c:use_spell",
+   "Quelle/seg098.c:test_spell",
+   "Quelle/seg101.c:spell_sturmgebr"
+  ],
+  "deutung": "Sieht so aus, als ob dieser Zauber im Computerspiel nur AE kostet und nichts bewirkt. Vermutlich wurde er aus dem Regelwerk übernommen, aber nie programmiert.",
+  "status": "im Code geprüft, im Spiel unbestätigt"
+ },
+ {
+  "name": "1. Stabzauber",
+  "im_code": "Stabzauber 1 (`g_staffspell_descriptions[0]`). Probe beim Aufprägen auf KL/KL/CH mit Zuschlag 1, Kosten 21 AE, die maximale AE sinkt dauerhaft um 1. Aufprägen: Nur Magier, im Magie-Menü unter „Stabzauber“, immer der nächste der Reihe. Die AE müssen reichen. Bei gelungener Probe steigt die Stabzauber-Stufe um 1, die Kosten werden abgezogen, es vergehen 5 Stunden, und 12 Stunden lang regeneriert der Magier im Schlaf nicht. Bei misslungener Probe: halbe Kosten, 2 Stunden. Im Original prüft die Probe die zweite Eigenschaft doppelt und die dritte gar nicht, Fix 190 (Fanpatch-Stufe „Wichtig“) nimmt die dritte. Im Original endet die Reihe erst bei Stufe 7, man kann also weiter (vergeblich) Stabzauber 5–7 versuchen. Fix 189 (Fanpatch-Stufe „Wichtig“) beendet die Reihe nach dem 4. Wirkung: Der 1. Stabzauber selbst wird im Code nirgends abgefragt; er ist nur die Voraussetzung für die folgenden.",
+  "codestellen": [
+   "Quelle/datseg.c:g_staffspell_descriptions",
+   "Quelle/seg098.c:use_magic",
+   "Quelle/seg049.c:GRP_hero_sleep"
+  ],
+  "deutung": "Vermutlich nur der Einstieg in die Reihe der Stabzauber.",
+  "status": "im Code geprüft, im Spiel unbestätigt"
+ },
+ {
+  "name": "2. Stabzauber (Licht)",
+  "im_code": "Stabzauber 2 (`g_staffspell_descriptions[1]`). Probe beim Aufprägen auf KL/KL/CH mit Zuschlag 0, Kosten 23 AE. Aufprägen: Nur Magier, im Magie-Menü unter „Stabzauber“, immer der nächste der Reihe. Die AE müssen reichen. Bei gelungener Probe steigt die Stabzauber-Stufe um 1, die Kosten werden abgezogen, es vergehen 5 Stunden, und 12 Stunden lang regeneriert der Magier im Schlaf nicht. Bei misslungener Probe: halbe Kosten, 2 Stunden. Im Original prüft die Probe die zweite Eigenschaft doppelt und die dritte gar nicht, Fix 190 (Fanpatch-Stufe „Wichtig“) nimmt die dritte. Im Original endet die Reihe erst bei Stufe 7, man kann also weiter (vergeblich) Stabzauber 5–7 versuchen. Fix 189 (Fanpatch-Stufe „Wichtig“) beendet die Reihe nach dem 4. Wirkung: Ist in der aktiven Gruppe ein handlungsfähiger Magier mit Stabzauber ab Stufe 2, ist es in Dungeons hell wie mit Flim Flam (außer bei Dunkelheit).",
+  "codestellen": [
+   "Quelle/datseg.c:g_staffspell_descriptions",
+   "Quelle/seg098.c:use_magic",
+   "Quelle/seg049.c:GRP_hero_sleep",
+   "Quelle/seg075.c:is_staff_lvl2_in_group",
+   "Quelle/seg075.c:DNG_lights"
+  ],
+  "deutung": "Vermutlich der praktische Ersatz für Fackeln in Dungeons.",
+  "status": "im Code geprüft, im Spiel unbestätigt"
+ },
+ {
+  "name": "3. Stabzauber (Seil)",
+  "im_code": "Stabzauber 3 (`g_staffspell_descriptions[2]`). Probe beim Aufprägen auf KL/CH/CH mit Zuschlag 3, Kosten 19 AE. Aufprägen: Nur Magier, im Magie-Menü unter „Stabzauber“, immer der nächste der Reihe. Die AE müssen reichen. Bei gelungener Probe steigt die Stabzauber-Stufe um 1, die Kosten werden abgezogen, es vergehen 5 Stunden, und 12 Stunden lang regeneriert der Magier im Schlaf nicht. Bei misslungener Probe: halbe Kosten, 2 Stunden. Im Original prüft die Probe die zweite Eigenschaft doppelt und die dritte gar nicht, Fix 190 (Fanpatch-Stufe „Wichtig“) nimmt die dritte. Im Original endet die Reihe erst bei Stufe 7, man kann also weiter (vergeblich) Stabzauber 5–7 versuchen. Fix 189 (Fanpatch-Stufe „Wichtig“) beendet die Reihe nach dem 4. Wirkung: Ein Magier mit Stabzauber ab Stufe 3 ersetzt an Kletterstellen ein Seil (Fallgruben, Totenschiff mit Fix 92 (Fanpatch-Stufe „Wichtig“), Zwingfeste, Kultstätte des Namenlosen, Klamm auf der Strecke Ottarje–Orvil), siehe Seil in der Gegenstandsliste.",
+  "codestellen": [
+   "Quelle/datseg.c:g_staffspell_descriptions",
+   "Quelle/seg098.c:use_magic",
+   "Quelle/seg049.c:GRP_hero_sleep",
+   "Quelle/seg075.c:DNG_check_climb_tools",
+   "Quelle/seg087.c:DNG14_handler",
+   "Quelle/seg111.c:tevent_060"
+  ],
+  "deutung": "Vermutlich der Ersatz für ein Seil an Kletterstellen.",
+  "status": "im Code geprüft, im Spiel unbestätigt"
+ },
+ {
+  "name": "4. Stabzauber (AE-Ersparnis)",
+  "im_code": "Stabzauber 4 (`g_staffspell_descriptions[3]`). Probe beim Aufprägen auf KL/CH/CH mit Zuschlag 4, Kosten 27 AE. Aufprägen: Nur Magier, im Magie-Menü unter „Stabzauber“, immer der nächste der Reihe. Die AE müssen reichen. Bei gelungener Probe steigt die Stabzauber-Stufe um 1, die Kosten werden abgezogen, es vergehen 5 Stunden, und 12 Stunden lang regeneriert der Magier im Schlaf nicht. Bei misslungener Probe: halbe Kosten, 2 Stunden. Im Original prüft die Probe die zweite Eigenschaft doppelt und die dritte gar nicht, Fix 190 (Fanpatch-Stufe „Wichtig“) nimmt die dritte. Im Original endet die Reihe erst bei Stufe 7, man kann also weiter (vergeblich) Stabzauber 5–7 versuchen. Fix 189 (Fanpatch-Stufe „Wichtig“) beendet die Reihe nach dem 4. Wirkung: Ab Stufe 4 kostet jede AE-Ausgabe des Magiers 2 AE weniger (Zauber, auch weitere Stabzauber; nie unter 0). Beim Beruhigen eines Tiers mit Sanftmut im Reiseereignis reichen deshalb mit Fix 212 (Fanpatch-Stufe „Wichtig“) auch 13 statt 15 AE.",
+  "codestellen": [
+   "Quelle/datseg.c:g_staffspell_descriptions",
+   "Quelle/seg098.c:use_magic",
+   "Quelle/seg049.c:GRP_hero_sleep",
+   "Quelle/seg002.c:sub_ae_splash",
+   "Quelle/seg120.c"
+  ],
+  "deutung": "Sieht so aus, als ob der 4. Stabzauber auf Dauer viel AE spart.",
+  "status": "im Code geprüft, im Spiel unbestätigt"
+ },
+ {
+  "name": "5. Stabzauber (nicht erreichbar)",
+  "im_code": "Stabzauber 5 (`g_staffspell_descriptions[4]`). Probe beim Aufprägen auf MU/KL/KL mit Zuschlag 99 (99 = praktisch unmöglich), Kosten 30 AE. Aufprägen: Nur Magier, im Magie-Menü unter „Stabzauber“, immer der nächste der Reihe. Die AE müssen reichen. Bei gelungener Probe steigt die Stabzauber-Stufe um 1, die Kosten werden abgezogen, es vergehen 5 Stunden, und 12 Stunden lang regeneriert der Magier im Schlaf nicht. Bei misslungener Probe: halbe Kosten, 2 Stunden. Im Original prüft die Probe die zweite Eigenschaft doppelt und die dritte gar nicht, Fix 190 (Fanpatch-Stufe „Wichtig“) nimmt die dritte. Im Original endet die Reihe erst bei Stufe 7, man kann also weiter (vergeblich) Stabzauber 5–7 versuchen. Fix 189 (Fanpatch-Stufe „Wichtig“) beendet die Reihe nach dem 4. Wirkung: Mit Zuschlag 99 gelingt die Probe praktisch nie, und eine Wirkung ist im Code nicht vorhanden.",
+  "codestellen": [
+   "Quelle/datseg.c:g_staffspell_descriptions",
+   "Quelle/seg098.c:use_magic",
+   "Quelle/seg049.c:GRP_hero_sleep"
+  ],
+  "deutung": "Sieht so aus, als ob die Stabzauber ab dem 5. im Spiel nicht vorgesehen sind.",
+  "status": "im Code geprüft, im Spiel unbestätigt"
+ },
+ {
+  "name": "6. Stabzauber (nicht erreichbar)",
+  "im_code": "Stabzauber 6 (`g_staffspell_descriptions[5]`). Probe beim Aufprägen auf MU/CH/CH mit Zuschlag 99 (99 = praktisch unmöglich), Kosten 26 AE. Aufprägen: Nur Magier, im Magie-Menü unter „Stabzauber“, immer der nächste der Reihe. Die AE müssen reichen. Bei gelungener Probe steigt die Stabzauber-Stufe um 1, die Kosten werden abgezogen, es vergehen 5 Stunden, und 12 Stunden lang regeneriert der Magier im Schlaf nicht. Bei misslungener Probe: halbe Kosten, 2 Stunden. Im Original prüft die Probe die zweite Eigenschaft doppelt und die dritte gar nicht, Fix 190 (Fanpatch-Stufe „Wichtig“) nimmt die dritte. Im Original endet die Reihe erst bei Stufe 7, man kann also weiter (vergeblich) Stabzauber 5–7 versuchen. Fix 189 (Fanpatch-Stufe „Wichtig“) beendet die Reihe nach dem 4. Wirkung: Mit Zuschlag 99 gelingt die Probe praktisch nie, und eine Wirkung ist im Code nicht vorhanden.",
+  "codestellen": [
+   "Quelle/datseg.c:g_staffspell_descriptions",
+   "Quelle/seg098.c:use_magic",
+   "Quelle/seg049.c:GRP_hero_sleep"
+  ],
+  "deutung": "Sieht so aus, als ob die Stabzauber ab dem 5. im Spiel nicht vorgesehen sind.",
+  "status": "im Code geprüft, im Spiel unbestätigt"
+ },
+ {
+  "name": "7. Stabzauber (nicht erreichbar)",
+  "im_code": "Stabzauber 7 (`g_staffspell_descriptions[6]`). Probe beim Aufprägen auf MU/KL/CH mit Zuschlag 99 (99 = praktisch unmöglich), Kosten 21 AE, die maximale AE sinkt dauerhaft um 2. Aufprägen: Nur Magier, im Magie-Menü unter „Stabzauber“, immer der nächste der Reihe. Die AE müssen reichen. Bei gelungener Probe steigt die Stabzauber-Stufe um 1, die Kosten werden abgezogen, es vergehen 5 Stunden, und 12 Stunden lang regeneriert der Magier im Schlaf nicht. Bei misslungener Probe: halbe Kosten, 2 Stunden. Im Original prüft die Probe die zweite Eigenschaft doppelt und die dritte gar nicht, Fix 190 (Fanpatch-Stufe „Wichtig“) nimmt die dritte. Im Original endet die Reihe erst bei Stufe 7, man kann also weiter (vergeblich) Stabzauber 5–7 versuchen. Fix 189 (Fanpatch-Stufe „Wichtig“) beendet die Reihe nach dem 4. Wirkung: Mit Zuschlag 99 gelingt die Probe praktisch nie, und eine Wirkung ist im Code nicht vorhanden.",
+  "codestellen": [
+   "Quelle/datseg.c:g_staffspell_descriptions",
+   "Quelle/seg098.c:use_magic",
+   "Quelle/seg049.c:GRP_hero_sleep"
+  ],
+  "deutung": "Sieht so aus, als ob die Stabzauber ab dem 5. im Spiel nicht vorgesehen sind.",
+  "status": "im Code geprüft, im Spiel unbestätigt"
+ },
+ {
+  "name": "Verwandlung beenden (Gegnerzauber Nr. 1)",
+  "im_code": "Gegnerzauber-ID 1 (`MONSTER_SPELL_VERWANDLUNG_BEENDEN`). Probe des Gegners auf MU/KL/CH. AE-Kosten laut Tabelle: 20 AE. Berührungszauber (Ziel muss angrenzen). Zielart (Spalte mode) 1: auf einen verbündeten Gegner (oder sich selbst). Steht in den Spruchbüchern 0, 1, 2, 8, 9. Wirkung im Handler: Ziel: ein verbündeter Gegner. Ist er versteinert oder in einen Pilz verwandelt, kostet der Zauber 5–50 AE (1W10 × 5) und hebt das auf. Reichen die AE nicht, zahlt der Zaubernde alle seine AE, ohne Wirkung. Sonst kostet er 2 AE ohne Wirkung.",
+  "codestellen": [
+   "Quelle/datseg.c:g_mon_spell_descriptions",
+   "Quelle/datseg.c:g_mon_spellbooks",
+   "Quelle/seg102.c:MON_cast_spell",
+   "Quelle/seg102.c:mspell_verwandlung"
+  ],
+  "deutung": "Vermutlich der Weg, mit dem gegnerische Zauberer versteinerte Verbündete retten.",
+  "status": "im Code geprüft, im Spiel unbestätigt"
+ },
+ {
+  "name": "Bannbaladin (Gegnerzauber Nr. 2)",
+  "im_code": "Gegnerzauber-ID 2 (`MONSTER_SPELL_BANNBALADIN`). Probe des Gegners auf IN/CH/CH, erschwert um die MR des Ziels. AE-Kosten laut Tabelle: 8 AE. Berührungszauber (Ziel muss angrenzen). Zielart (Spalte mode) 2: auf einen Helden; ein übergelaufener Gegner setzt ihn nicht ein. Steht in den Spruchbüchern 2. Wirkung im Handler: Ziel: ein Held. Er gilt als besänftigt und greift nicht mehr an.",
+  "codestellen": [
+   "Quelle/datseg.c:g_mon_spell_descriptions",
+   "Quelle/datseg.c:g_mon_spellbooks",
+   "Quelle/seg102.c:MON_cast_spell",
+   "Quelle/seg102.c:mspell_bannbaladin"
+  ],
+  "deutung": "Vermutlich nimmt der Zauber einen Helden aus dem Kampf.",
+  "status": "im Code geprüft, im Spiel unbestätigt"
+ },
+ {
+  "name": "Böser Blick (Gegnerzauber Nr. 3)",
+  "im_code": "Gegnerzauber-ID 3 (`MONSTER_SPELL_BOESER_BLICK`). Probe des Gegners auf MU/CH/CH, erschwert um die MR des Ziels. AE-Kosten laut Tabelle: 8 AE. Berührungszauber (Ziel muss angrenzen). Zielart (Spalte mode) 2: auf einen Helden; ein übergelaufener Gegner setzt ihn nicht ein. Steht in den Spruchbüchern 1. Wirkung im Handler: Ziel: ein Held. Er wird abtrünnig und kämpft gegen die eigene Gruppe.",
+  "codestellen": [
+   "Quelle/datseg.c:g_mon_spell_descriptions",
+   "Quelle/datseg.c:g_mon_spellbooks",
+   "Quelle/seg102.c:MON_cast_spell",
+   "Quelle/seg102.c:mspell_boeser_blick"
+  ],
+  "deutung": "Vermutlich der gefährlichste Gegnerzauber: Ein Held kämpft gegen die eigene Gruppe.",
+  "status": "im Code geprüft, im Spiel unbestätigt"
+ },
+ {
+  "name": "Horriphobus (Gegnerzauber Nr. 4)",
+  "im_code": "Gegnerzauber-ID 4 (`MONSTER_SPELL_HORRIPHOBUS`). Probe des Gegners auf MU/IN/CH, erschwert um die MR des Ziels. AE-Kosten laut Tabelle: 7 AE. Berührungszauber (Ziel muss angrenzen). Zielart (Spalte mode) 2: auf einen Helden; ein übergelaufener Gegner setzt ihn nicht ein. Steht in den Spruchbüchern 1, 2, 7. Wirkung im Handler: Ziel: ein Held. Er ist verängstigt und flieht (eine Beherrschung durch Böser Blick endet dabei).",
+  "codestellen": [
+   "Quelle/datseg.c:g_mon_spell_descriptions",
+   "Quelle/datseg.c:g_mon_spellbooks",
+   "Quelle/seg102.c:MON_cast_spell",
+   "Quelle/seg102.c:mspell_horriphobus"
+  ],
+  "deutung": "Vermutlich nimmt der Zauber einen Helden aus dem Kampf.",
+  "status": "im Code geprüft, im Spiel unbestätigt"
+ },
+ {
+  "name": "Axxeleratus (Gegnerzauber Nr. 5)",
+  "im_code": "Gegnerzauber-ID 5 (`MONSTER_SPELL_AXXELERATUS`). Probe des Gegners auf KL/GE/KK. AE-Kosten laut Tabelle: 7 AE. Berührungszauber (Ziel muss angrenzen). Zielart (Spalte mode) 1: auf einen verbündeten Gegner (oder sich selbst). Steht in den Spruchbüchern 9, 10. Wirkung im Handler: Ziel: ein verbündeter Gegner. Er bekommt für den Rest des Kampfes einen Angriff mehr, AT +1, PA +1, und seine Bewegungspunkte werden verdoppelt.",
+  "codestellen": [
+   "Quelle/datseg.c:g_mon_spell_descriptions",
+   "Quelle/datseg.c:g_mon_spellbooks",
+   "Quelle/seg102.c:MON_cast_spell",
+   "Quelle/seg102.c:mspell_axxeleratus"
+  ],
+  "deutung": "Vermutlich macht der Zauber einen Verbündeten deutlich gefährlicher.",
+  "status": "im Code geprüft, im Spiel unbestätigt"
+ },
+ {
+  "name": "Balsam (Gegnerzauber Nr. 6)",
+  "im_code": "Gegnerzauber-ID 6 (`MONSTER_SPELL_BALSAM`). Probe des Gegners auf KL/IN/CH. AE-Kosten laut Tabelle: variabel (in der Tabelle −1). Berührungszauber (Ziel muss angrenzen). Zielart (Spalte mode) 1: auf einen verbündeten Gegner (oder sich selbst). Steht in den Spruchbüchern 8, 9, 10. Wirkung im Handler: Ziel: ein verbündeter Gegner. Im Original wird nur geheilt, wenn die Hälfte der fehlenden LE zwischen 1 und 6 liegt: Dann gibt es 7 LE für 7 AE (bei weniger AE entsprechend weniger). Fehlt mehr, heilt der Zauber nichts und kostet nichts. Mit Fix 36 (Fanpatch-Stufe „Wichtig“): Fehlen 16 oder mehr LE, wird die Hälfte geheilt, sonst bis zu 7 LE (höchstens so viel, wie fehlt). Gedeckelt durch die AE, Kosten gleich der Heilung.",
+  "codestellen": [
+   "Quelle/datseg.c:g_mon_spell_descriptions",
+   "Quelle/datseg.c:g_mon_spellbooks",
+   "Quelle/seg102.c:MON_cast_spell",
+   "Quelle/seg102.c:mspell_balsam"
+  ],
+  "deutung": "Sieht so aus, als ob gegnerische Heiler im Original kaum heilen.",
+  "status": "im Code geprüft, im Spiel unbestätigt"
+ },
+ {
+  "name": "Blitz (Gegnerzauber Nr. 7)",
+  "im_code": "Gegnerzauber-ID 7 (`MONSTER_SPELL_BLITZ`). Probe des Gegners auf KL/IN/GE, erschwert um die MR des Ziels. AE-Kosten laut Tabelle: 5 AE. Fernzauber. Zielart (Spalte mode) 3: auf einen Helden; ein übergelaufener Gegner zielt damit auf seine früheren Verbündeten. Steht in den Spruchbüchern 0, 1, 2, 5, 6, 7, 9. Wirkung im Handler: Ziel: ein Held oder Gegner. Geblendet für 3 Kampfphasen (wie der Heldenzauber Blitz dich find).",
+  "codestellen": [
+   "Quelle/datseg.c:g_mon_spell_descriptions",
+   "Quelle/datseg.c:g_mon_spellbooks",
+   "Quelle/seg102.c:MON_cast_spell",
+   "Quelle/seg102.c:mspell_blitz"
+  ],
+  "deutung": "Vermutlich setzt der Zauber einen Helden ein paar Phasen außer Gefecht.",
+  "status": "im Code geprüft, im Spiel unbestätigt"
+ },
+ {
+  "name": "Eisenrost (Gegnerzauber Nr. 8)",
+  "im_code": "Gegnerzauber-ID 8 (`MONSTER_SPELL_EISENROST`). Probe des Gegners auf KL/CH/GE. AE-Kosten laut Tabelle: 5 AE. Fernzauber. Zielart (Spalte mode) 2: auf einen Helden; ein übergelaufener Gegner setzt ihn nicht ein. Steht in den Spruchbüchern 0, 8. Wirkung im Handler: Ziel Held: Ohne Waffe in der rechten Hand kostet er 2 AE ohne Wirkung. Eine Waffe mit Bruchfaktor über 0 zerbricht, sonst misslingt der Zauber. Mit Fix 390 (Fanpatch-Stufe „nur Alle“) zerbrechen unzerbrechliche Waffen nicht. Ziel Gegner: dessen Waffe zerbricht (halber Schaden).",
+  "codestellen": [
+   "Quelle/datseg.c:g_mon_spell_descriptions",
+   "Quelle/datseg.c:g_mon_spellbooks",
+   "Quelle/seg102.c:MON_cast_spell",
+   "Quelle/seg102.c:mspell_eisenrost"
+  ],
+  "deutung": "Vermutlich zerstört der Zauber Waffen der Helden.",
+  "status": "im Code geprüft, im Spiel unbestätigt"
+ },
+ {
+  "name": "Fulminictus (Gegnerzauber Nr. 9)",
+  "im_code": "Gegnerzauber-ID 9 (`MONSTER_SPELL_FULMINICTUS`). Probe des Gegners auf KL/GE/KK, erschwert um die MR des Ziels. AE-Kosten laut Tabelle: variabel (in der Tabelle −1). Fernzauber. Zielart (Spalte mode) 3: auf einen Helden; ein übergelaufener Gegner zielt damit auf seine früheren Verbündeten. Steht in den Spruchbüchern 2, 3, 4, 5, 6, 7, 10. Wirkung im Handler: Ziel: ein Held. Schaden 3W6 + Stufe des Gegners, höchstens so viel, wie er AE hat, direkt von der LE ohne Rüstungsschutz. Kosten gleich dem Schaden. Mit Fix 192 (Fanpatch-Stufe „Wichtig“) fängt ein Gardianum-Schutzschirm der Helden den Schaden ab, bis der Schirm verbraucht ist. Der Gegner zahlt die AE trotzdem.",
+  "codestellen": [
+   "Quelle/datseg.c:g_mon_spell_descriptions",
+   "Quelle/datseg.c:g_mon_spellbooks",
+   "Quelle/seg102.c:MON_cast_spell",
+   "Quelle/seg102.c:mspell_fulminictus",
+   "Quelle/seg102.c:MON_do_spell_damage",
+   "Quelle/seg102.c:fix_hero_spell_protect"
+  ],
+  "deutung": "Vermutlich der häufigste Schadenszauber der Gegner.",
+  "status": "im Code geprüft, im Spiel unbestätigt"
+ },
+ {
+  "name": "Ignifaxius (Gegnerzauber Nr. 10)",
+  "im_code": "Gegnerzauber-ID 10 (`MONSTER_SPELL_IGNIFAXIUS`). Probe des Gegners auf KL/GE/FF, erschwert um die MR des Ziels. AE-Kosten laut Tabelle: variabel (in der Tabelle −1). Fernzauber. Zielart (Spalte mode) 3: auf einen Helden; ein übergelaufener Gegner zielt damit auf seine früheren Verbündeten. Steht in den Spruchbüchern 3, 4, 5. Wirkung im Handler: Ziel: ein Held. Schaden Stufe × W6 (Stufe des Gegners), höchstens so viel, wie er AE hat, direkt von der LE. Danach gehen Schaden/10 Punkte RS der Körperrüstung verloren, und AT und PA sinken für 1 Stunde um Stufe/2. Kosten gleich dem Schaden. Mit Fix 213 (Fanpatch-Stufe „Wichtig“) halbiert Feuerbann den Schaden. Mit Fix 192 (Fanpatch-Stufe „Wichtig“) fängt ein Gardianum-Schirm ab, was übrig bleibt. Wird so aller Schaden abgefangen, entfallen auch RS-Verlust und AT/PA-Malus.",
+  "codestellen": [
+   "Quelle/datseg.c:g_mon_spell_descriptions",
+   "Quelle/datseg.c:g_mon_spellbooks",
+   "Quelle/seg102.c:MON_cast_spell",
+   "Quelle/seg102.c:mspell_ignifaxius",
+   "Quelle/seg102.c:fix_hero_spell_protect"
+  ],
+  "deutung": "Vermutlich der stärkste Schadenszauber der Gegner.",
+  "status": "im Code geprüft, im Spiel unbestätigt"
+ },
+ {
+  "name": "Plumbumbarum (Gegnerzauber Nr. 11)",
+  "im_code": "Gegnerzauber-ID 11 (`MONSTER_SPELL_PLUMBUMBARUM`). Probe des Gegners auf CH/GE/KK, erschwert um die MR des Ziels. AE-Kosten laut Tabelle: 5 AE. Fernzauber. Zielart (Spalte mode) 3: auf einen Helden; ein übergelaufener Gegner zielt damit auf seine früheren Verbündeten. Steht in den Spruchbüchern 5. Wirkung im Handler: Ziel: ein Held. AT −3 für 1 Stunde. (Der Heldenzauber wirkt dagegen nur 5 Kampfrunden.)",
+  "codestellen": [
+   "Quelle/datseg.c:g_mon_spell_descriptions",
+   "Quelle/datseg.c:g_mon_spellbooks",
+   "Quelle/seg102.c:MON_cast_spell",
+   "Quelle/seg102.c:mspell_plumbumbarum"
+  ],
+  "deutung": "Vermutlich ein lang wirkender AT-Malus für einen Helden.",
+  "status": "im Code geprüft, im Spiel unbestätigt"
+ },
+ {
+  "name": "Saft, Kraft, Monstermacht (Gegnerzauber Nr. 12)",
+  "im_code": "Gegnerzauber-ID 12 (`MONSTER_SPELL_SAFT_KRAFT_MONSTERMACHT`). Probe des Gegners auf MU/IN/CH. AE-Kosten laut Tabelle: variabel (in der Tabelle −1). Berührungszauber (Ziel muss angrenzen). Zielart (Spalte mode) 1: auf einen verbündeten Gegner (oder sich selbst). Steht in den Spruchbüchern 4, 5, 7, 10. Wirkung im Handler: Ziel: ein verbündeter Gegner. Für den Rest des Kampfes AT +5, PA −5, 5 Schadenspunkte mehr pro Treffer. Kosten W20 AE.",
+  "codestellen": [
+   "Quelle/datseg.c:g_mon_spell_descriptions",
+   "Quelle/datseg.c:g_mon_spellbooks",
+   "Quelle/seg102.c:MON_cast_spell",
+   "Quelle/seg102.c:mspell_saft_kraft"
+  ],
+  "deutung": "Vermutlich macht der Zauber einen Verbündeten stärker im Angriff.",
+  "status": "im Code geprüft, im Spiel unbestätigt"
+ },
+ {
+  "name": "Armatrutz (Gegnerzauber Nr. 13)",
+  "im_code": "Gegnerzauber-ID 13 (`MONSTER_SPELL_ARMATRUTZ`). Probe des Gegners auf IN/GE/KK. AE-Kosten laut Tabelle: variabel (in der Tabelle −1). Berührungszauber (Ziel muss angrenzen). Zielart (Spalte mode) 0: auf sich selbst. Steht in den Spruchbüchern 4. Wirkung im Handler: Nur auf sich selbst: RS steigt um einen zufälligen Wert zwischen 1 und dem Höchstmaß, Kosten Wert × Wert AE. Das Höchstmaß ist im Original die kleinste Zahl, deren Quadrat die AE erreicht (kann mehr kosten, als er hat). Mit Fix 207 (Fanpatch-Stufe „Wichtig“) ist es die größte Zahl, deren Quadrat höchstens den AE entspricht.",
+  "codestellen": [
+   "Quelle/datseg.c:g_mon_spell_descriptions",
+   "Quelle/datseg.c:g_mon_spellbooks",
+   "Quelle/seg102.c:MON_cast_spell",
+   "Quelle/seg102.c:mspell_armatrutz"
+  ],
+  "deutung": "Vermutlich ein Selbstschutz gegnerischer Zauberer.",
+  "status": "im Code geprüft, im Spiel unbestätigt"
+ },
+ {
+  "name": "Paralü (Gegnerzauber Nr. 14)",
+  "im_code": "Gegnerzauber-ID 14 (`MONSTER_SPELL_PARALUE`). Probe des Gegners auf IN/CH/KK, erschwert um die MR des Ziels. AE-Kosten laut Tabelle: 13 AE. Berührungszauber (Ziel muss angrenzen). Zielart (Spalte mode) 3: auf einen Helden; ein übergelaufener Gegner zielt damit auf seine früheren Verbündeten. Steht in den Spruchbüchern 3, 6, 7, 10. Wirkung im Handler: Ziel: ein Held (bei übergelaufenen Gegnern ein Gegner). Er ist versteinert.",
+  "codestellen": [
+   "Quelle/datseg.c:g_mon_spell_descriptions",
+   "Quelle/datseg.c:g_mon_spellbooks",
+   "Quelle/seg102.c:MON_cast_spell",
+   "Quelle/seg102.c:mspell_paralue"
+  ],
+  "deutung": "Vermutlich nimmt der Zauber einen Helden vollständig aus dem Kampf.",
+  "status": "im Code geprüft, im Spiel unbestätigt"
+ }
+]

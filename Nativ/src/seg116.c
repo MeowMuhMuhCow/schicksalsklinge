@@ -45,7 +45,7 @@ static const struct climb_damage_range g_tevent135_climb_damage[5] = { { 1, 5 },
 /* Brendhil <-> Manrin: Huette mit muerrischem Jaeger */
 void tevent_130(void)
 {
-	dsa_trace_enter(1134, "seg116:tevent_130");
+	dsa_trace_enter(1135, "seg116:tevent_130");
 	signed int answer;
 
 	if (TRV_enter_hut_question()) {
@@ -90,7 +90,7 @@ void tevent_130(void)
 /* (Brendhil <-> Manrin) */
 void tevent_131(void)
 {
-	dsa_trace_enter(1135, "seg116:tevent_131");
+	dsa_trace_enter(1136, "seg116:tevent_131");
 	signed int answer;
 
 	if (test_talent(get_first_hero_available_in_group(), TA_SINNESSCHAERFE, 8) > 0 && !gs_tevent131_flag) {
@@ -127,7 +127,7 @@ void tevent_131(void)
 /* Brendhil <-> Manrin: Rastplatz, evtl. mit Wirselkraut */
 void tevent_132(void)
 {
-	dsa_trace_enter(1136, "seg116:tevent_132");
+	dsa_trace_enter(1137, "seg116:tevent_132");
 	if ((test_talent(get_first_hero_available_in_group(), TA_WILDNISLEBEN, 1) > 0 && !gs_tevent132_flag) || gs_tevent132_flag)
 	{
 
@@ -152,7 +152,7 @@ void tevent_132(void)
 /* Einsiedlersee (Rundweg): Sumpf */
 void tevent_133(void)
 {
-	dsa_trace_enter(1137, "seg116:tevent_133");
+	dsa_trace_enter(1138, "seg116:tevent_133");
 	signed int i;
 	signed int answer;
 	struct struct_hero *hero;
@@ -208,7 +208,7 @@ void tevent_133(void)
 /* Einsiedlersee (Rundweg): Kraeuterplatz mit Kairanhalm (Bonus wirkungslos, siehe seg112 tevent_070) */
 void tevent_134(void)
 {
-	dsa_trace_enter(1138, "seg116:tevent_134");
+	dsa_trace_enter(1139, "seg116:tevent_134");
 	if ((test_talent(get_first_hero_available_in_group(), TA_PFLANZENKUNDE, 6) > 0 && !gs_tevent134_flag) ||
 		gs_tevent134_flag)
 	{
@@ -362,7 +362,7 @@ void tevent_135(void)
 /* Einsiedlersee (Rundweg): Seeufer, Vorraete auffuellen */
 void tevent_137(void)
 {
-	dsa_trace_enter(1139, "seg116:tevent_137");
+	dsa_trace_enter(1140, "seg116:tevent_137");
 	signed int hero_pos;
 	signed int answer;
 	signed int inv_slot;
@@ -409,7 +409,7 @@ void tevent_137(void)
 /* Leuchtturm Runin <-> Runinshaven: Rastplatz mit guter Jagd */
 void tevent_138(void)
 {
-	dsa_trace_enter(1140, "seg116:tevent_138");
+	dsa_trace_enter(1141, "seg116:tevent_138");
 	if ((test_talent(get_first_hero_available_in_group(), TA_WILDNISLEBEN, 2) > 0 && !gs_tevent138_flag) || gs_tevent138_flag)
 	{
 		gs_tevent138_flag = 1;
@@ -420,7 +420,7 @@ void tevent_138(void)
 /* Querverbindung: Urwald (mit dem Saebel durch oder Umweg) */
 void tevent_139(void)
 {
-	dsa_trace_enter(1141, "seg116:tevent_139");
+	dsa_trace_enter(1142, "seg116:tevent_139");
 	signed int i;
 	signed int answer;
 	struct struct_hero *hero;
@@ -473,7 +473,7 @@ void tevent_139(void)
 /* Querverbindung: Rastplatz, evtl. mit Jorugawurzel (Bonus wirkungslos) */
 void tevent_140(void)
 {
-	dsa_trace_enter(1142, "seg116:tevent_140");
+	dsa_trace_enter(1143, "seg116:tevent_140");
 	if ((test_talent(get_first_hero_available_in_group(), TA_WILDNISLEBEN, 2) > 0 && !gs_tevent140_flag) || gs_tevent140_flag) {
 
 		/* set this camp place as known */
@@ -497,7 +497,7 @@ void tevent_140(void)
 /* Querverbindung: Hirschfaehrte, Jagd */
 void tevent_141(void)
 {
-	dsa_trace_enter(1143, "seg116:tevent_141");
+	dsa_trace_enter(1144, "seg116:tevent_141");
 	if ((test_talent(get_first_hero_available_in_group(), TA_FAEHRTENSUCHEN, 0) > 0 && !gs_tevent141_flag) || gs_tevent141_flag)
 	{
 		/* set this camp place as known */
@@ -513,7 +513,7 @@ void tevent_141(void)
 /* Querverbindung: Rastplatz mit guter Jagd */
 void tevent_142(void)
 {
-	dsa_trace_enter(1144, "seg116:tevent_142");
+	dsa_trace_enter(1145, "seg116:tevent_142");
 	if ((test_talent(get_first_hero_available_in_group(), TA_WILDNISLEBEN, 2) > 0 && !gs_tevent142_flag) ||
 		gs_tevent142_flag)
 	{
@@ -526,7 +526,7 @@ void tevent_142(void)
 /* Querverbindung: Dickicht (Texte FEATURE8.LTX) */
 void tevent_143(void)
 {
-	dsa_trace_enter(1145, "seg116:tevent_143");
+	dsa_trace_enter(1146, "seg116:tevent_143");
 	signed int i;
 	signed int answer;
 	struct struct_hero *hero;
@@ -581,7 +581,7 @@ void tevent_143(void)
 /* Phexcaer <-> Einsiedlersee: Heerlager der Orks und Zweikampf mit Grimring (ab 10. Peraine 17 Hal) */
 void tevent_144(void)
 {
-	dsa_trace_enter(1146, "seg116:tevent_144");
+	dsa_trace_enter(1147, "seg116:tevent_144");
 	signed int grimring_hero_pos;
 	signed int right_time_flag;
 	struct struct_hero *hero;
@@ -695,7 +695,7 @@ void tevent_144(void)
 /* TODO: this function is unused */
 void tevent_144_unused(void)
 {
-	dsa_trace_enter(1147, "seg116:tevent_144_unused");
+	dsa_trace_enter(1148, "seg116:tevent_144_unused");
 	GUI_output(get_tx2(16)); /* "<DER KAMPF MÖGE BEGINNEN!>" */
 }
 
@@ -708,7 +708,7 @@ void tevent_144_unused(void)
  */
 void TLK_old_woman(const signed int state)
 {
-	dsa_trace_enter(1148, "seg116:TLK_old_woman");
+	dsa_trace_enter(1149, "seg116:TLK_old_woman");
 	signed int hero_pos;
 	signed int counter;
 	struct struct_hero *hero;
@@ -791,7 +791,7 @@ void TLK_old_woman(const signed int state)
 /* Einsiedlersee (Rundweg): zweite Begegnung mit dem Einhorn (INFO7.TLK), wenn es die Karte bringen soll */
 void tevent_136(void)
 {
-	dsa_trace_enter(1149, "seg116:tevent_136");
+	dsa_trace_enter(1150, "seg116:tevent_136");
 	if (gs_met_unicorn_flag && gs_got_main_quest && gs_unicorn_get_map && !gs_unicorn_timer_hours) {
 
 #if FIX_0414

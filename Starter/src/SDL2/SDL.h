@@ -130,6 +130,16 @@ typedef struct SDL_MouseButtonEvent {
     Sint32 y;
 } SDL_MouseButtonEvent;
 
+typedef struct SDL_MouseWheelEvent {
+    Uint32 type;
+    Uint32 timestamp;
+    Uint32 windowID;
+    Uint32 which;
+    Sint32 x;
+    Sint32 y;
+    Uint32 direction;
+} SDL_MouseWheelEvent;
+
 typedef struct SDL_DropEvent {
     Uint32 type;
     Uint32 timestamp;
@@ -142,6 +152,7 @@ typedef union SDL_Event {
     SDL_KeyboardEvent    key;
     SDL_MouseMotionEvent motion;
     SDL_MouseButtonEvent button;
+    SDL_MouseWheelEvent  wheel;
     SDL_DropEvent        drop;
     Uint8                padding[56];
 } SDL_Event;
@@ -179,6 +190,7 @@ int           SDL_PushEvent(SDL_Event *event);
 Uint32        SDL_GetMouseState(int *x, int *y);
 void          SDL_WarpMouseInWindow(SDL_Window *window, int x, int y);
 int           SDL_ShowCursor(int toggle);
+void          SDL_SetHandCursor(int hand);
 
 Uint32        SDL_GetTicks(void);
 void          SDL_Delay(Uint32 ms);

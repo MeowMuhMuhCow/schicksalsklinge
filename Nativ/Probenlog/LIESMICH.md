@@ -1,6 +1,6 @@
 # Probenlog – sehen, was das Spiel würfelt
 
-Zusatzfunktion der Bugfix-Fassung (`WICHTIG` und `ALLES`). Jede Probe, die das Spiel würfelt, erscheint
+Zusatzfunktion der Bugfix-Fassung (WICHTIG und ALLES), ab Version 1.3. Jede Probe, die das Spiel würfelt, erscheint
 live in einem zweiten Fenster und wird in einer Datei mitgeschrieben. Das gilt auch für die versteckten Proben,
 die man sonst nie sieht, etwa Gefahrensinn oder Sinnesschärfe an Fallen.
 
@@ -10,13 +10,14 @@ die man sonst nie sieht, etwa Gefahrensinn oder Sinnesschärfe an Fallen.
 
 ## So geht's
 
-| | Windows (Nativ) | Linux |
+| | Windows | Linux |
 |---|---|---|
-| Spielen mit Probenlog | `Schicksalsklinge_starten_ALLE_FIXES_MIT_PROBENLOG.bat` (bzw. `…_WICHTIGE_FIXES_MIT_PROBENLOG.bat`) doppelklicken. Neben dem Spiel geht ein Fenster auf, in dem jede Probe erscheint | `bash start_schicksalsklinge.sh --probenlog`. Die Proben erscheinen im Terminal |
-| Ohne Probenlog | `Schicksalsklinge_starten_ALLE_FIXES.bat` (bzw. `…_WICHTIGE_FIXES.bat`) | `bash start_schicksalsklinge.sh` |
+| Spielen mit Probenlog | `BLADEM_FIX_WICHTIG_MIT_PROBENLOG_STARTEN.bat` (bzw. `…_ALLES_…`) doppelklicken. Neben dem Spiel geht ein Fenster auf, in dem jede Probe erscheint | `bash Linux/starten.sh wichtig log` (bzw. `alles log`). Die Proben erscheinen im Terminal |
+| Ohne Probenlog | wie bisher `BLADEM_FIX_WICHTIG_STARTEN.bat` | `bash Linux/starten.sh wichtig` |
 | Hinterher ansehen | `Probenlog_Schicksalsklinge.html` im Browser öffnen und die Datei `PROBEN.CSV` hineinziehen: alle Proben als Tabelle, dazu Erfolgsquote je Held, Talent und Zauber. In Chrome/Edge kann die Seite auch live mitlesen | ebenso |
 
-Die Datei `PROBEN.CSV` wird im Spielordner angelegt (ist der Spielordner nicht beschreibbar, z. B. unter `C:\Program Files (x86)\...`, werden Spielstände und `PROBEN.CSV` automatisch in den Ordner `Spielstaende\` neben der EXE umgeleitet). Beim nächsten Start wandert ein vorhandenes Log mit Datum im Namen nach `Probenlogs\`.
+Die Datei liegt im Spielstand-Ordner der Fassung (`Build\Testspielstaende_Fix_Wichtig\PROBEN.CSV`, unter Linux
+`Build/Linux_C_Fix_Wichtig/PROBEN.CSV`). Beim nächsten Start wandert sie nach `Build\Probenlogs`, mit Datum im Namen.
 
 ## Was drinsteht
 
@@ -26,6 +27,7 @@ Die Datei `PROBEN.CSV` wird im Spielordner angelegt (ist der Spielordner nicht b
 | Talentprobe | Talent, Talentwert, Zuschlag, die drei Eigenschaften mit Werten, **jeder der drei W20**, Ergebnis mit Restpunkten |
 | Fernkampf (Schuss- und Wurfwaffen) | Zielwert, W20, Treffer oder daneben |
 | Zauberprobe | Zauber, Zauberfertigkeit, Zuschlag (mit Magieresistenz des Ziels), drei W20, Ergebnis |
+| Gegnerzauber (ab 1.5i) | Gegnername, Zauber, Ziel, die drei Eigenschaften mit Werten, Zuschlag (Magieresistenz), drei W20, Ergebnis und Wirkung (Schaden, wie viel Feuerbann und Gardianum abfangen, verbleibender Schild, Statuswirkung) |
 | Kampf | jede Attacke und Parade, von Helden und Gegnern, mit W20 und AT- bzw. PA-Wert |
 | Stufenanstieg (ab 1.5) | jeder Steigerungswurf für Talente und Zauber (alter Wert, Wurf, gelungen oder nicht), die gesteigerte positive Eigenschaft, die drei W20 beim Senken der negativen Eigenschaft, der LE-Wurf (bei Zauberkundigen die Punkte für LE und AE) und beim Magier der AE-Tausch. Im Anfängermodus, wo das Spiel selbst steigert, sieht man so erstmals, was passiert |
 | Ereignisse (ab 1.5d) | die gewürfelte Gegnerzahl bei Kämpfen mit zufälliger Gegnerzahl (z. B. WILD8), der Überfallwurf im Nachtlager und beim Lagern im Dungeon (mit Schwelle, Wache, Travias Segen und in welcher Wache der Überfall kommt) und auf Reisen für jeden Tag der Wurf auf Zufallsbegegnung und auf Kampf |
@@ -42,7 +44,8 @@ Eigenschaften. Das Log zeigt genau das.
 Das Spiel schreibt nur, wenn `PROBEN.CSV` schon da ist. Die Startdatei legt sie an, ohne Datei läuft alles wie
 bisher. In der Datei stehen nur Zahlen und der Heldenname, eine Zeile pro Probe. Daraus machen das Fenster
 (`probenlog_fenster.ps1`, unter Linux `probenlog.py`) und die HTML-Seite den Klartext. Die Proben laufen dabei exakt
-gleich ab, mit gleich vielen Würfen in derselben Reihenfolge. Das Spielstandformat ist unverändert.
+gleich ab, mit gleich vielen Würfen in derselben Reihenfolge. Das Spielstandformat ist unverändert, und die
+Standard-EXE bleibt bytegleich mit dem Original.
 
 Zeilenformat: `Art;Tag;Monat;Jahr;Minute des Tages;Name;Werte…` mit Art 1 Eigenschaftsprobe
 (Eigenschaft, Wert, Zuschlag, W20, Ergebnis), 3 Dreifachprobe (3 Eigenschaften, 3 Werte, Zuschlag, 3 W20, Ergebnis),

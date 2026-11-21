@@ -160,6 +160,24 @@ signed int MON_get_spell_cost(const signed int mspell_id, const signed int half_
  * \param   attrib3     no of 3rd attribute
  * \param   handicap    may be positive or negative. The higher the value, the harder the test.
  */
+#if FIX_PROBENLOG
+/* Probenlog (Art 10, Gegnerzauber): Puffer im hinteren Teil von g_dtp2 (1500 Byte, Kampf-Meldungen < 100 Byte),
+ * belegt 0 Byte in DGROUP. Werte w[0..19]:
+ * w[0] Gegnertyp Zauberer, w[1] Gegnerzauber (1..14), w[2] Zielart (0 = selbst, 1 = Held in name, 2 = Gegner),
+ * w[3] Gegnertyp Ziel, w[4..6] Eigenschaften, w[7..9] Eigenschaftswerte, w[10] Zuschlag (MR),
+ * w[11..13] 3x W20, w[14] Probenergebnis, w[15..19] Wirkung (Schaden, Endschaden, Feuerbann, Gardianum, Schildrest) */
+#define PLOG_MSPELL ((signed int*)(g_dtp2 + 1200))
+
+static void fix_probenlog_mspell(const struct enemy_sheet *enemy)
+{
+	dsa_trace_enter(930, "seg102:fix_probenlog_mspell");
+	fix_probenlog(10,
+		((enemy->target_object_id > 0) && (enemy->target_object_id < 10)) ?
+			get_hero(enemy->target_object_id - 1)->alias : (char*)0,
+		20, PLOG_MSPELL);
+}
+#endif
+
 signed int MON_test_attrib3(const struct enemy_sheet *enemy, const signed int attrib1, const signed int attrib2, const signed int attrib3, signed char handicap)
 /* called only from a single position, in MON_test_spell((struct struct_hero*)..) */
 {
@@ -173,11 +191,29 @@ signed int MON_test_attrib3(const struct enemy_sheet *enemy, const signed int at
 	signed int randval;
 	signed int attr_sum;
 
+#if FIX_PROBENLOG
+	PLOG_MSPELL[4] = attrib1;
+	PLOG_MSPELL[5] = attrib2;
+	PLOG_MSPELL[6] = attrib3;
+	PLOG_MSPELL[7] = enemy->attrib[2 * attrib1 + 1];
+	PLOG_MSPELL[8] = enemy->attrib[2 * attrib2 + 1];
+	PLOG_MSPELL[9] = enemy->attrib[2 * attrib3 + 1];
+	PLOG_MSPELL[10] = handicap;
+	PLOG_MSPELL[11] = random_schick(20);
+	PLOG_MSPELL[12] = random_schick(20);
+	PLOG_MSPELL[13] = random_schick(20);
+	randval = PLOG_MSPELL[11] + PLOG_MSPELL[12] + PLOG_MSPELL[13] + handicap;
+	attr_sum = PLOG_MSPELL[7] + PLOG_MSPELL[8] + PLOG_MSPELL[9];
+	PLOG_MSPELL[14] = attr_sum - randval + 1;
+
+	return PLOG_MSPELL[14];
+#else
 	randval = dice_roll(3, 20, handicap);
 
 	attr_sum = enemy->attrib[2 * attrib1 + 1] + enemy->attrib[2 * attrib2 + 1] + enemy->attrib[2 * attrib3 + 1];
 
 	return attr_sum - randval + 1;
+#endif
 #else
 	/* Here, the original DSA2/3 talent test logic is implemented.
 	 * WARNING: This makes talent tests and spell casting (on both sides), and thus the game, significantly harder!
@@ -274,7 +310,7 @@ signed int MON_test_attrib3(const struct enemy_sheet *enemy, const signed int at
 /* Name irrefuehrend: prueft einen Gegnerzauber (Probe + MR des Ziels), kein Talent */
 signed int MON_test_spell(const struct enemy_sheet *enemy, const signed int mspell_id, signed char handicap)
 {
-	dsa_trace_enter(930, "seg102:MON_test_spell");
+	dsa_trace_enter(931, "seg102:MON_test_spell");
 	struct mon_spell_description *desc = &g_mon_spell_descriptions[mspell_id];
 
 	/* depends on MR */
@@ -300,7 +336,7 @@ signed int MON_test_spell(const struct enemy_sheet *enemy, const signed int mspe
 
 void MON_sub_ae(struct enemy_sheet *enemy, signed int ae)
 {
-	dsa_trace_enter(931, "seg102:MON_sub_ae");
+	dsa_trace_enter(932, "seg102:MON_sub_ae");
 	if (!enemy->flags.dead) {
 
 		enemy->ae -= ae;
@@ -313,7 +349,7 @@ void MON_sub_ae(struct enemy_sheet *enemy, signed int ae)
 
 signed int MON_cast_spell(struct enemy_sheet* enemy, signed char handicap)
 {
-	dsa_trace_enter(932, "seg102:MON_cast_spell");
+	dsa_trace_enter(933, "seg102:MON_cast_spell");
 	signed int mspell_id;
 	signed int retval;
 	signed int cost;
@@ -331,12 +367,41 @@ signed int MON_cast_spell(struct enemy_sheet* enemy, signed char handicap)
 			return -1;
 		}
 
+#if FIX_PROBENLOG
+		{
+			signed int i;
+
+			for (i = 0; i < 20; i++) {
+				PLOG_MSPELL[i] = 0;
+			}
+			PLOG_MSPELL[0] = enemy->monster_id;
+			PLOG_MSPELL[1] = mspell_id;
+			if ((enemy->target_object_id > 0) && (enemy->target_object_id < 10)) {
+				PLOG_MSPELL[2] = 1;
+			} else if (enemy->target_object_id >= 10) {
+				if (&g_enemy_sheets[enemy->target_object_id - 10] == enemy) {
+					PLOG_MSPELL[2] = 0;
+					PLOG_MSPELL[3] = enemy->monster_id;
+				} else {
+					PLOG_MSPELL[2] = 2;
+					PLOG_MSPELL[3] = g_enemy_sheets[enemy->target_object_id - 10].monster_id;
+				}
+			}
+		}
+#endif
+
 		g_spelltest_result = MON_test_spell(enemy, mspell_id, handicap);
 
 		if ((g_spelltest_result <= 0) || (gs_ingame_timers[INGAME_TIMER_RONDRA_NO_SPELLS] > 0)) {
 
 			/* spell failed */
 			MON_sub_ae(enemy, MON_get_spell_cost(mspell_id, 1));
+#if FIX_PROBENLOG
+			if (g_spelltest_result > 0) {
+				PLOG_MSPELL[15] = -9;
+			}
+			fix_probenlog_mspell(enemy);
+#endif
 
 			return 0;
 
@@ -380,6 +445,24 @@ signed int MON_cast_spell(struct enemy_sheet* enemy, signed char handicap)
 			} else {
 				MON_sub_ae(enemy, cost);
 			}
+#if FIX_PROBENLOG
+			if (mspell_id == MONSTER_SPELL_BALSAM) {
+				PLOG_MSPELL[15] = g_mspell_ae_cost;
+			} else if (mspell_id == MONSTER_SPELL_EISENROST) {
+				PLOG_MSPELL[15] = (*g_dtp2 != '\0');
+			} else if (mspell_id == MONSTER_SPELL_SAFT_KRAFT_MONSTERMACHT) {
+				PLOG_MSPELL[15] = 5;
+				PLOG_MSPELL[16] = g_mspell_ae_cost;
+			} else if ((mspell_id == MONSTER_SPELL_BLITZ) || (mspell_id == MONSTER_SPELL_PLUMBUMBARUM)) {
+				PLOG_MSPELL[15] = 3;
+			} else if ((mspell_id == MONSTER_SPELL_BANNBALADIN) || (mspell_id == MONSTER_SPELL_BOESER_BLICK) ||
+				(mspell_id == MONSTER_SPELL_HORRIPHOBUS) || (mspell_id == MONSTER_SPELL_AXXELERATUS) ||
+				(mspell_id == MONSTER_SPELL_PARALUE))
+			{
+				PLOG_MSPELL[15] = 1;
+			}
+			fix_probenlog_mspell(enemy);
+#endif
 
 			return retval;
 		}
@@ -393,7 +476,7 @@ signed int MON_cast_spell(struct enemy_sheet* enemy, signed char handicap)
  */
 void mspell_verwandlung(void)
 {
-	dsa_trace_enter(933, "seg102:mspell_verwandlung");
+	dsa_trace_enter(934, "seg102:mspell_verwandlung");
 	/* set pointer to an enemy target */
 	g_spelltarget_e = &g_enemy_sheets[g_spelluser_e->target_object_id - 10];
 
@@ -405,9 +488,15 @@ void mspell_verwandlung(void)
 		if (g_spelluser_e->ae < g_mspell_ae_cost) {
 			/* if not enough AE, all AE will be consumed, without further effect */
 			g_mspell_ae_cost = g_spelluser_e->ae;
+#if FIX_PROBENLOG
+			PLOG_MSPELL[15] = -1;
+#endif
 		} else {
 			/* unset 'petrified' flag */
 			g_spelltarget_e->flags.petrified = 0;
+#if FIX_PROBENLOG
+			PLOG_MSPELL[15] = 1;
+#endif
 
 			/* prepare message */
 			sprintf(g_dtp2,	get_tx(114), (uint8_t*)GUI_name_inflect_with_article( /* "%s IST NICHT LÄNGER VERSTEINERT." */
@@ -425,9 +514,15 @@ void mspell_verwandlung(void)
 		if (g_spelluser_e->ae < g_mspell_ae_cost) {
 			/* if not enough AE, all AE will be consumed, without further effect */
 			g_mspell_ae_cost = g_spelluser_e->ae;
+#if FIX_PROBENLOG
+			PLOG_MSPELL[15] = -1;
+#endif
 		} else {
 			/* unset 'mushroom' flag */
 			g_spelltarget_e->flags.mushroom = 0;
+#if FIX_PROBENLOG
+			PLOG_MSPELL[15] = 2;
+#endif
 
 			g_mspell_unmushroom_flag = 1;
 		}
@@ -438,7 +533,7 @@ void mspell_verwandlung(void)
 
 void mspell_bannbaladin(void)
 {
-	dsa_trace_enter(934, "seg102:mspell_bannbaladin");
+	dsa_trace_enter(935, "seg102:mspell_bannbaladin");
 	/* set pointer to hero target */
 	g_spelltarget = get_hero(g_spelluser_e->target_object_id - 1);
 
@@ -451,7 +546,7 @@ void mspell_bannbaladin(void)
 
 void mspell_boeser_blick(void)
 {
-	dsa_trace_enter(935, "seg102:mspell_boeser_blick");
+	dsa_trace_enter(936, "seg102:mspell_boeser_blick");
 	/* set pointer to hero target */
 	g_spelltarget = get_hero(g_spelluser_e->target_object_id - 1);
 
@@ -464,7 +559,7 @@ void mspell_boeser_blick(void)
 
 void mspell_horriphobus(void)
 {
-	dsa_trace_enter(936, "seg102:mspell_horriphobus");
+	dsa_trace_enter(937, "seg102:mspell_horriphobus");
 	/* set pointer to hero target */
 	g_spelltarget = get_hero(g_spelluser_e->target_object_id - 1);
 
@@ -478,7 +573,7 @@ void mspell_horriphobus(void)
 
 void mspell_axxeleratus(void)
 {
-	dsa_trace_enter(937, "seg102:mspell_axxeleratus");
+	dsa_trace_enter(938, "seg102:mspell_axxeleratus");
 	/* set pointer to an enemy target */
 	g_spelltarget_e = &g_enemy_sheets[g_spelluser_e->target_object_id - 10];
 
@@ -498,7 +593,7 @@ void mspell_axxeleratus(void)
 
 void mspell_balsam(void)
 {
-	dsa_trace_enter(938, "seg102:mspell_balsam");
+	dsa_trace_enter(939, "seg102:mspell_balsam");
 	signed int le;
 
 	/* set pointer to an enemy target */
@@ -552,7 +647,7 @@ void mspell_balsam(void)
 
 void mspell_blitz(void)
 {
-	dsa_trace_enter(939, "seg102:mspell_blitz");
+	dsa_trace_enter(940, "seg102:mspell_blitz");
 	if (g_spelluser_e->target_object_id < 10) {
 		/* target is a hero */
 
@@ -587,7 +682,7 @@ void mspell_blitz(void)
  * nicht durch Eisenrost, ein falscher Bruchfaktor (Curians Stab: bf 5) wird dabei auf -99 berichtigt */
 static signed int fix_unbreakable_weapon(struct inventory *p)
 {
-	dsa_trace_enter(940, "seg102:fix_unbreakable_weapon");
+	dsa_trace_enter(941, "seg102:fix_unbreakable_weapon");
 	signed int item_id = p->item_id;
 
 	if ((item_id == ITEM_ID_ZAUBERSTAB) || (item_id == ITEM_ID_HEXENBESEN) || (item_id == ITEM_ID_ORKNASE__MAGIC) ||
@@ -603,7 +698,7 @@ static signed int fix_unbreakable_weapon(struct inventory *p)
 
 void mspell_eisenrost(void)
 {
-	dsa_trace_enter(941, "seg102:mspell_eisenrost");
+	dsa_trace_enter(942, "seg102:mspell_eisenrost");
 	signed int item_id;
 
 	if (g_spelluser_e->target_object_id < 10) {
@@ -670,32 +765,47 @@ void mspell_eisenrost(void)
  * Feuerbann: halbiert den Feuerschaden (Loesungsbuch, so auch in Sternenschweif); Gardianum: der Schild der Gruppe faengt Schaden ab, bis er verbraucht ist. */
 static signed int fix_hero_spell_protect(signed int damage, const signed int fire)
 {
-	dsa_trace_enter(942, "seg102:fix_hero_spell_protect");
+	dsa_trace_enter(943, "seg102:fix_hero_spell_protect");
 	if (g_spelluser_e->target_object_id < 10) {
 #if FIX_0213
 		if (fire && get_hero(g_spelluser_e->target_object_id - 1)->fireban) {
+#if FIX_PROBENLOG
+			PLOG_MSPELL[17] = damage - (damage / 2);
+#endif
 			damage /= 2;
 		}
 #endif
 #if FIX_0192
 		if (gs_gardianum_used_ae > 0) {
 			if (gs_gardianum_used_ae >= damage) {
+#if FIX_PROBENLOG
+				PLOG_MSPELL[18] = damage;
+#endif
 				gs_gardianum_used_ae -= damage;
 				damage = 0;
 			} else {
+#if FIX_PROBENLOG
+				PLOG_MSPELL[18] = gs_gardianum_used_ae;
+#endif
 				damage -= gs_gardianum_used_ae;
 				gs_gardianum_used_ae = 0;
 			}
+#if FIX_PROBENLOG
+			PLOG_MSPELL[19] = gs_gardianum_used_ae;
+#endif
 		}
 #endif
 	}
+#if FIX_PROBENLOG
+	PLOG_MSPELL[16] = damage;
+#endif
 	return damage;
 }
 #endif
 
 void mspell_fulminictus(void)
 {
-	dsa_trace_enter(943, "seg102:mspell_fulminictus");
+	dsa_trace_enter(944, "seg102:mspell_fulminictus");
 	signed int damage;
 
 	/* roll 3W6 */
@@ -709,6 +819,9 @@ void mspell_fulminictus(void)
 		damage = g_spelluser_e->ae;
 	}
 
+#if FIX_PROBENLOG
+	PLOG_MSPELL[15] = PLOG_MSPELL[16] = damage;
+#endif
 	/* do the damage */
 #if !FIX_0192
 	MON_do_spell_damage(damage);
@@ -723,7 +836,7 @@ void mspell_fulminictus(void)
 
 void mspell_ignifaxius(void)
 {
-	dsa_trace_enter(944, "seg102:mspell_ignifaxius");
+	dsa_trace_enter(945, "seg102:mspell_ignifaxius");
 	signed int damage;
 	signed int level;
 	signed int rs_malus;
@@ -742,6 +855,9 @@ void mspell_ignifaxius(void)
 		damage = g_spelluser_e->ae;
 	}
 
+#if FIX_PROBENLOG
+	PLOG_MSPELL[15] = PLOG_MSPELL[16] = damage;
+#endif
 #if !(FIX_0192 || FIX_0213)
 	/* do the damage */
 	MON_do_spell_damage(damage);
@@ -816,7 +932,7 @@ void mspell_ignifaxius(void)
 
 void mspell_plumbumbarum(void)
 {
-	dsa_trace_enter(945, "seg102:mspell_plumbumbarum");
+	dsa_trace_enter(946, "seg102:mspell_plumbumbarum");
 	signed int mod_slot;
 	signed int hero_pos;
 
@@ -855,7 +971,7 @@ void mspell_plumbumbarum(void)
 
 void mspell_saft_kraft(void)
 {
-	dsa_trace_enter(946, "seg102:mspell_saft_kraft");
+	dsa_trace_enter(947, "seg102:mspell_saft_kraft");
 	/* set the pointer to the target */
 	g_spelltarget_e = &g_enemy_sheets[g_spelluser_e->target_object_id - 10];
 
@@ -874,7 +990,7 @@ void mspell_saft_kraft(void)
 
 void mspell_armatrutz(void)
 {
-	dsa_trace_enter(947, "seg102:mspell_armatrutz");
+	dsa_trace_enter(948, "seg102:mspell_armatrutz");
 	signed int i;
 	signed int rs_bonus;
 
@@ -901,11 +1017,15 @@ void mspell_armatrutz(void)
 
 	/* RS + rs_bonus */
 	g_spelluser_e->rs = g_spelluser_e->rs + rs_bonus;
+#if FIX_PROBENLOG
+	PLOG_MSPELL[15] = rs_bonus;
+	PLOG_MSPELL[16] = g_mspell_ae_cost;
+#endif
 }
 
 void mspell_paralue(void)
 {
-	dsa_trace_enter(948, "seg102:mspell_paralue");
+	dsa_trace_enter(949, "seg102:mspell_paralue");
 	if (g_spelluser_e->target_object_id >= 10) {
 		/* target is an enemy */
 

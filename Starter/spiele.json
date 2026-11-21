@@ -5,6 +5,7 @@
     {
       "id": "schicksalsklinge",
       "teil": 1,
+      "version": "Fanpatch v1.5i",
       "name": "Die Schicksalsklinge",
       "untertitel": "Das Schwarze Auge - Teil 1 (1992)",
       "status": "verfuegbar",
@@ -63,6 +64,7 @@
     {
       "id": "sternenschweif",
       "teil": 2,
+      "version": "Fanpatch v1.3",
       "name": "Sternenschweif",
       "untertitel": "Das Schwarze Auge - Teil 2 (1994)",
       "status": "verfuegbar",
@@ -118,6 +120,7 @@
     {
       "id": "riva",
       "teil": 3,
+      "version": "Fanpatch v1.0",
       "name": "Schatten über Riva",
       "untertitel": "Das Schwarze Auge - Teil 3 (1996)",
       "status": "verfuegbar",

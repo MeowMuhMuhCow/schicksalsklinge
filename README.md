@@ -4,6 +4,8 @@
 
 **Inoffizielle Bugfix-Fassung · spielbar ohne Compiler · das Original bleibt unangetastet · [gleich loslegen](#schnellstart-bugfix-fassung-spielen-ohne-compiler)**
 
+**Neu in Version 1.5i: Gegnerzauber, Gardianum und Feuerbann im Probenlog & Nachschlagewerk aller Zauber und Gegenstände.** Wenn ein Gegner im Kampf zaubert, zeigt das Probenlog jetzt Gegnername, Zauber, Ziel, die Dreifachprobe (Eigenschaften, Werte, Magieresistenz, alle drei W20, Ergebnis) und die genaue Wirkung – inklusive wie viele Schadenspunkte *Feuerbann* und *Gardianum* der Helden abfangen und wie viel Schildstärke übrig bleibt (gemeldet von Andrean). Dazu neu aus dem Quelltext zusammengestellt: **[Zauberliste](Analyse/Zauberliste.md)** ([zauber.json](Analyse/zauber.json), alle 85 Helden-, 7 Stab- und 14 Gegnerzauber mit den Formeln aus dem Code) und **[Gegenstandsliste](Analyse/Gegenstandsliste.md)** ([gegenstaende.json](Analyse/gegenstaende.json), alle 253 Gegenstände mit allen Stellen, an denen der Code sie abfragt). Jeder Eintrag trennt „Im Code“ (nachprüfbar, mit Codestelle) von der „Deutung der KI“; Korrekturen aus dem Spiel bitte im Crystals-DSA-Forum.
+
 **Neu in Version 1.5f: Flüssiges Drehen, keine Kopierschutzabfrage mehr & Mauszeiger flackert nicht mehr.** Beim Drehen in Städten und Dungeons schwenkt die Ansicht jetzt weich statt hart um 90 Grad (Rahmen, Verzierungen, Kompass und Mauszeiger bleiben fest stehen; standardmäßig an, abschaltbar mit `DREHEN_AUS.bat` bzw. `DREHEN=0`). Außerdem entfällt in den Fix-Fassungen beim Spielstart die Kopierschutzabfrage (wie in der Windows-Fassung), und der Mauszeiger flackert beim Laufen, Drehen und Betreten/Verlassen von Häusern nicht mehr.
 
 **Neu in Version 1.5d:** Das Probenlog zeigt jetzt auch die gewürfelte Gegnerzahl (z. B. WILD8), den Überfallwurf im Nachtlager und die Begegnungs- und Kampfwürfe auf Reisen (Wunsch von Andrean). Und in der [Änderungsliste](BUGFIXES.md) steht bei jeder Behebung „So prüfst du es“: wo man sie im Spiel sieht und was vorher anders war.
@@ -50,7 +52,7 @@ Documentation is in German.*
 
 Für alle, die nur spielen wollen. Nötig sind Windows und Schicksalsklinge von GOG, sonst nichts: kein Python, kein Compiler. (Linux: siehe unten.)
 
-1. Rechts unter **Releases** das Paket `schicksalsklinge_Bugfix_1.5h.zip` herunterladen (oder oben **Code → Download ZIP**) und irgendwohin entpacken.
+1. Rechts unter **Releases** das Paket `schicksalsklinge_Bugfix_1.5i.zip` herunterladen (oder oben **Code → Download ZIP**) und irgendwohin entpacken.
 2. **`PATCHEN.bat`** doppelklicken. Es findet den GOG-Spielordner (oder fragt danach), prüft per Prüfsumme, ob die
    eigene EXE genau die passende ist, und erzeugt daraus `Build\BLADEM_FIX_WICHTIG.EXE` und `Build\BLADEM_FIX_ALLES.EXE`.
    **Die Original-EXE wird nicht verändert**, das Spiel bleibt wie es ist.
@@ -140,7 +142,7 @@ Bauen kurz ein Fenster auf. Einzelheiten im Abschnitt „Linux“ von [Bauen/BAU
 | Ordner | Inhalt |
 |---|---|
 | `Quelle/` | 106 Module in C, Assembler, Miles-Klangbibliothek (`AIL/`), Header, Projekt der Entwicklungsumgebung |
-| `Analyse/` | Fehlerliste, Namensliste, Kopierschutz-Bericht, Quelltextkarte, Beschriftungsprüfung, Spieltexte |
+| `Analyse/` | [Zauberliste](Analyse/Zauberliste.md) ([zauber.json](Analyse/zauber.json)), [Gegenstandsliste](Analyse/Gegenstandsliste.md) ([gegenstaende.json](Analyse/gegenstaende.json)), Fehlerliste, Namensliste, Kopierschutz-Bericht, Quelltextkarte, Beschriftungsprüfung, Spieltexte |
 | `Bauen/` | Bau-Paket für Windows und Linux (`bauen.py`, unter Windows über `BAUEN.bat`) |
 | `Werkzeuge/` | Werkzeuge der Bearbeitung |
 | `Referenz/` | der unveränderte Bright-Eyes-Stand |

@@ -7,6 +7,7 @@ try { $Host.UI.RawUI.WindowTitle = "Probenlog $Spiel" } catch {}
 $EIG = @('MU', 'KL', 'CH', 'FF', 'GE', 'IN', 'KK', 'AG', 'HA', 'RA', 'GG', 'TA', 'NG', 'JZ')
 $TALENT = @('Waffenlos', 'Hiebwaffen', 'Stichwaffen', 'Schwerter', 'Äxte', 'Speere', 'Zweihänder', 'Schusswaffen', 'Wurfwaffen', 'Akrobatik', 'Klettern', 'Körperbeherrschung', 'Reiten', 'Schleichen', 'Schwimmen', 'Selbstbeherrschung', 'Tanzen', 'Verstecken', 'Zechen', 'Bekehren', 'Betören', 'Feilschen', 'Gassenwissen', 'Lügen', 'Menschenkenntnis', 'Schätzen', 'Fährtensuchen', 'Fesseln', 'Orientierung', 'Pflanzenkunde', 'Tierkunde', 'Wildnisleben', 'Alchimie', 'Alte Sprachen', 'Geographie', 'Geschichte', 'Götter/Kulte', 'Kriegskunst', 'Lesen', 'Magiekunde', 'Sprachen', 'Abrichten', 'Fahrzeuge', 'Falschspiel', 'Heilen Gift', 'Heilen Krankheiten', 'Heilen Wunden', 'Musizieren', 'Schlösser', 'Taschendiebstahl', 'Gefahrensinn', 'Sinnesschärfe')
 $ZAUBER = @('-', 'Beherrschung brechen', 'Destructibo', 'Gardianum', 'Illusionen zerstören', 'Verwandlung beenden', 'Band und Fessel', 'Bannbaladin', 'Böser Blick', 'Große Gier', 'Große Verwirrung', 'Herr der Tiere', 'Horriphobus', 'Magischer Raub', 'Respondami', 'Sanftmut', 'Somnigravis', 'Zwingtanz', 'Furor Blut', 'Geister bannen', 'Geister rufen', 'Heptagon', 'Krähenruf', 'Skelettarius', 'Elementare', 'Nihilatio', 'Solidirid', 'Axxeleratus', 'Foramen', 'Motoricus', 'Spurlos', 'Transversalis', 'Über Eis', 'Balsam', 'Hexenspeichel', 'Klarum Purum', 'Ruhe Körper', 'Tiere heilen', 'Adleraug', 'Analüs', 'Eigenschaften', 'Exposami', 'Odem Arcanum', 'Penetrizzel', 'Sensibar', 'Chamaelioni', 'Duplicatus', 'Harmlos', 'Hexenknoten', 'Blitz', 'Ecliptifactus', 'Eisenrost', 'Fulminictus', 'Ignifaxius', 'Plumbumbarum', 'Radau', 'Saft, Kraft, Monstermacht', 'Scharfes Auge', 'Hexenblick', 'Nekropathia', 'Adler, Wolf', 'Arcano', 'Armatrutz', 'CH steigern', 'Feuerbann', 'FF steigern', 'GE steigern', 'IN steigern', 'KK steigern', 'KL steigern', 'MU steigern', 'Mutabili', 'Paralü', 'Salander', 'See und Fluss', 'Visibili', 'Abvenenum', 'Aeolitus', 'Brenne', 'Claudibus', 'Dunkelheit', 'Erstarre', 'Flim Flam', 'Schmelze', 'Silentium', 'Sturmgebrüll')
+$GZAUBER = @('-', 'Verwandlung beenden', 'Bannbaladin', 'Böser Blick', 'Horriphobus', 'Axxeleratus', 'Balsam', 'Blitz', 'Eisenrost', 'Fulminictus', 'Ignifaxius', 'Plumbumbarum', 'Saft, Kraft, Monstermacht', 'Armatrutz', 'Paralü')
 $GEGNER = @('', 'Oger', 'Ork', 'Goblin', 'Heshthot', 'Säbelzahntiger', 'Skelett', 'Waldschrat', 'Mumie', 'Harpyie', 'Waldspinne', 'Großer Schröter', 'Pirat', 'Steuermann', 'Kapitän', 'Streuner', 'Zombie', 'Heshthot', 'Druide', 'Druide', 'Thorwaler', 'Thorwaler', 'Thorwaler', 'Thorwaler', 'Goblin', 'Goblin', 'Ork', 'Ork', 'Pirat', 'Pirat', 'Streuner', 'Streuner', 'Streuner', 'Skelett', 'Folterknecht', 'Grimwolf', 'Grimwolf', 'Höhlenspinne', 'Höhlenspinne', 'Höhlenspinne', 'Krieger', 'Stadtgardist', 'Stadtgardist', 'Stadtgardist', 'Kriegsveteran', 'Mumie', 'Magier', 'Magier', 'Zauberer', 'Zauberer', 'Zwerg', 'Lindwurm', 'Höhlendrache', 'Kultist', 'Kultist', 'Kultist', 'Kultist', 'Priester', 'Priester', 'Hohepriester', 'Estorik', 'Piratenboss', 'Pirat', 'Magier', 'Zwergenveteran', 'Räuber', 'Räuber', 'Räuber', 'Räuber', 'Räuber', 'Gorah', 'Steppenhund', 'Orkchampion', 'Pirat', 'Stadtgardist', 'Waldlöwe', 'Spinnendämon', 'Heshthot')
 $MONAT = @('', 'Praios', 'Rondra', 'Efferd', 'Travia', 'Boron', 'Hesinde', 'Firun', 'Tsa', 'Phex', 'Peraine', 'Ingerimm', 'Rahja', 'Namenlose Tage')
 $KRANKHEIT = @('keine', 'Wundfieber', 'Dumpfschädel', 'Blaue Keuche', 'Paralyse', 'Schlachtenfieber', 'Frostschäden', 'Tollwut')
@@ -114,7 +115,47 @@ function Zeile([string]$roh) {
             $wer = if ($name) { "${name}: " } else { "" }
             $t = "${wer}Krankheitsprobe auf ${kr}: W100 = $($w[2]), Ansteckung bei höchstens $($w[3]) → $(if ($w[4]) { 'ANGESTECKT' } else { 'nicht angesteckt' })"
             $farbe = if ($w[4]) { 'Red' } else { 'Green' }
+        } elseif ($typ -eq 10 -and $w.Count -ge 4) {
+            $wer = if ($name) { "${name}: " } else { "" }
+            $t = "${wer}Gardianum-Schutzschirm ($($w[1]) AE eingesetzt, +$($w[2])) → fängt bis zu $($w[3]) SP ab"
+            $farbe = 'Green'
         } else { $t = "Ereignis (Typ $typ)" }
+    } elseif ($art -eq 10 -and $w.Count -ge 20) {
+        $script:vor = $null
+        $mon = $w[0]; $sp = $w[1]; $ztyp = $w[2]; $zid = $w[3]; $r = $w[14]
+        $w1 = $w[15]; $w2 = $w[16]; $w3 = $w[17]; $w4 = $w[18]; $w5 = $w[19]
+        $ziel = if ($ztyp -eq 0) { 'auf sich selbst' } elseif ($ztyp -eq 1) { "auf $(if ($name) { $name } else { 'einen Helden' })" } else { "auf $(Gegner $zid)" }
+        $eig = ((Nm $EIG $w[4]), (Nm $EIG $w[5]), (Nm $EIG $w[6])) -join '/'
+        $eig += " ($($w[7])/$($w[8])/$($w[9]))"
+        $wue = (@($w[11], $w[12], $w[13]) | Where-Object { $_ -ne 0 }) -join ', '
+        $zs = Zuschlag $w[10]; if (-not $zs) { $zs = ' ohne Zuschlag' }
+        $t = "$(Gegner $mon) zaubert $(Nm $GZAUBER $sp) $ziel → Probe auf $eig,${zs}: $wue → $(Erg3 $r)"
+        if ($r -gt 0) {
+            if ($w1 -eq -9) { $t += ' → Magie durch Rondra gesperrt'; $farbe = 'Green' }
+            else {
+                $farbe = 'Red'
+                if ($sp -eq 9 -or $sp -eq 10) {
+                    $abg = @()
+                    if ($w3 -gt 0) { $abg += "$w3 durch Feuerbann" }
+                    if ($w4 -gt 0) { $abg += "$w4 durch Gardianum (Schild noch $w5)" }
+                    if ($abg.Count -gt 0) { $t += " → $w1 SP, $($abg -join ' und ') abgefangen → $w2 SP" }
+                    else { $t += " → $w2 SP" }
+                } elseif ($sp -eq 1) {
+                    $wk = if ($w1 -eq 1) { 'Versteinerung aufgehoben' } elseif ($w1 -eq 2) { 'Pilzverwandlung aufgehoben' } elseif ($w1 -eq -1) { 'nicht genug AE (wirkungslos)' } else { 'Ziel nicht verwandelt (wirkungslos)' }
+                    $t += " → $wk"
+                } elseif ($sp -eq 2) { $t += ' → Ziel greift nicht mehr an' }
+                elseif ($sp -eq 3) { $t += ' → Ziel kämpft gegen die eigene Gruppe' }
+                elseif ($sp -eq 4) { $t += ' → Ziel flieht verängstigt' }
+                elseif ($sp -eq 5) { $t += ' → Attacken +1, AT +1, PA +1, BP ×2' }
+                elseif ($sp -eq 6) { $t += if ($w1 -gt 0) { " → +$w1 LE geheilt" } else { ' → keine Heilung (0 LE)' } }
+                elseif ($sp -eq 7) { $t += " → $w1 Runden geblendet" }
+                elseif ($sp -eq 8) { $t += if ($w1 -gt 0) { ' → Waffe zerbrochen' } else { ' → keine zerbrechliche Waffe (wirkungslos)' } }
+                elseif ($sp -eq 11) { $t += " → AT -$w1" }
+                elseif ($sp -eq 12) { $t += " → AT +$w1, PA -$w1, TP +$w1 ($w2 AE)" }
+                elseif ($sp -eq 13) { $t += " → RS +$w1 ($w2 AE)" }
+                elseif ($sp -eq 14) { $t += ' → Ziel versteinert' }
+            }
+        } else { $farbe = 'Green' }
     } else { $t = "${name}: unbekannte Zeile (Art $art)" }
     if ($t) { return @("$zeit | $t", $farbe) }
     return $null

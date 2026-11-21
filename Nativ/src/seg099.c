@@ -108,6 +108,22 @@ void spell_gardianum(void)
 			/* Fix 192: Staerke des Schildes = Stufe des Zaubernden + eingesetzte AE (Loesungsbuch); ausgewertet in seg102 */
 			gs_gardianum_used_ae += answer + get_spelluser()->level;
 #endif
+#if FIX_PROBENLOG
+			/* Probenlog (Art 9, Typ 10): Gardianum-Schutzschirm aufgebaut (eingesetzte AE, Zuwachs, Schildstaerke gesamt) */
+			{
+				signed int w[4];
+
+				w[0] = 10;
+				w[1] = answer;
+#if FIX_0192
+				w[2] = answer + get_spelluser()->level;
+#else
+				w[2] = answer;
+#endif
+				w[3] = gs_gardianum_used_ae;
+				fix_probenlog(9, get_spelluser()->alias, 4, w);
+			}
+#endif
 			/* set AE costs */
 			g_spell_special_aecost = answer;
 			/* prepare the message */

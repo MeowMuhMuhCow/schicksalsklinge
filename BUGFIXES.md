@@ -1,6 +1,6 @@
 # Die Schicksalsklinge – Bugfix-Fassung: Änderungsliste
 
-**Version 1.5h vom 21.11.2026** · inoffiziell · zur deutschen GOG-Fassung 3.02 · **im Spiel noch ungetestet, Tester willkommen**
+**Version 1.5i vom 21.11.2026** · inoffiziell · zur deutschen GOG-Fassung 3.02 · **im Spiel noch ungetestet, Tester willkommen**
 
 ## So geht's
 
@@ -20,6 +20,13 @@ Die Spielstände der Bugfix-Fassung liegen in eigenen Ordnern unter `Build\`. Al
 |---|---|
 | **WICHTIG** (empfohlen) | kritische und mittlere Fehler: Abstürze, Hänger, verlorene Ausrüstung, falsche Preise, Fehler, die man im Spiel merkt |
 | **ALLES** | zusätzlich viele kleine Fehler ohne große Spielwirkung |
+
+## Neu in Version 1.5i: Gegnerzauber sowie abgefangener Schaden durch Gardianum und Feuerbann im Probenlog
+
+Danke an Andrean im Crystals-Forum.
+
+- **Gegnerzauber im Probenlog sichtbar** (gemeldet von Andrean): Wenn ein Gegner im Kampf zaubert (`MON_cast_spell` in `seg102.c`), schreibt das Probenlog jetzt wie bei den Helden eine vollständige Zeile mit Gegnername, Zauber, Ziel (Held, sich selbst oder anderer Gegner), der Dreifachprobe (Eigenschaften, Eigenschaftswerte, Zuschlag durch Magieresistenz, die drei W20-Würfe, Ergebnis gelungen/misslungen mit Restpunkten) und der Wirkung (Schaden, Statuswirkung, Heilung, Rüstungsschutz usw.). Die Zufallswürfe laufen dabei in exakt derselben Reihenfolge und Anzahl wie bisher.
+- **Sichtbar, wie viel Gardianum und Feuerbann der Helden abfangen** (gemeldet von Andrean): Bei feindlichem *Fulminictus* und *Ignifaxius* zeigt das Probenlog den ausgewürfelten Rohschaden, wie viele Schadenspunkte durch *Feuerbann* (Halbierung) und durch den *Gardianum*-Schutzschirm der Gruppe abgefangen werden, die verbleibende Schildstärke sowie den tatsächlichen Endschaden. Zusätzlich wird beim Wirken von *Gardianum* durch einen Helden (`spell_gardianum` in `seg099.c`) protokolliert, wie viele AE eingesetzt wurden und wie viele Schadenspunkte der Schutzschirm insgesamt abfängt.
 
 ## Neu in Version 1.5h: Geheimräume hinter allseitig gesperrten Wänden wieder erreichbar
 

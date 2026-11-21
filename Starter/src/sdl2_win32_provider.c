@@ -80,6 +80,7 @@ static int         g_mouse_x = 0;
 static int         g_mouse_y = 0;
 static Uint32      g_mouse_buttons = 0;
 static int         g_show_cursor = 1;
+static int         g_hand_cursor = 0;
 static DWORD       g_start_ticks = 0;
 
 static void evq_push(const SDL_Event *ev) {
@@ -126,11 +127,29 @@ static LRESULT CALLBACK starter_wndproc(HWND hwnd, UINT msg, WPARAM wParam, LPAR
 
     switch (msg) {
     case WM_SETCURSOR:
-        if (LOWORD(lParam) == HTCLIENT && !g_show_cursor) {
-            SetCursor(NULL);
+        if (LOWORD(lParam) == HTCLIENT) {
+            if (!g_show_cursor) {
+                SetCursor(NULL);
+                return TRUE;
+            }
+            SetCursor(LoadCursor(NULL, g_hand_cursor ? IDC_HAND : IDC_ARROW));
             return TRUE;
         }
         break;
+
+    case WM_MOUSEWHEEL: {
+        short delta = (short)HIWORD(wParam);
+        ev.type = SDL_MOUSEWHEEL;
+        ev.wheel.timestamp = GetTickCount() - g_start_ticks;
+        ev.wheel.x = 0;
+        if (delta >= 120 || delta <= -120) {
+            ev.wheel.y = delta / 120;
+        } else {
+            ev.wheel.y = (delta > 0) ? 1 : ((delta < 0) ? -1 : 0);
+        }
+        evq_push(&ev);
+        return 0;
+    }
 
     case WM_DROPFILES: {
         HDROP hDrop = (HDROP)wParam;
@@ -694,6 +713,16 @@ int SDL_ShowCursor(int toggle) {
         g_show_cursor = toggle ? 1 : 0;
     }
     return g_show_cursor;
+}
+
+void SDL_SetHandCursor(int hand) {
+    int h = hand ? 1 : 0;
+    if (g_hand_cursor != h) {
+        g_hand_cursor = h;
+        if (!g_using_dll && g_show_cursor) {
+            SetCursor(LoadCursor(NULL, g_hand_cursor ? IDC_HAND : IDC_ARROW));
+        }
+    }
 }
 
 Uint32 SDL_GetTicks(void) {

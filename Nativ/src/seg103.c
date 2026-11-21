@@ -53,7 +53,7 @@ static signed char g_select_talent_defaults[6] = { TA_HEILEN_GIFT, TA_HEILEN_KRA
  */
 signed int LVL_select_talent(const struct struct_hero *hero, const signed int show_values)
 {
-	dsa_trace_enter(949, "seg103:LVL_select_talent");
+	dsa_trace_enter(950, "seg103:LVL_select_talent");
 	signed int i;
 	signed int answer;
 	signed int first_talent;
@@ -192,7 +192,7 @@ struct struct_hero* get_best_hero_for_talent(const signed int talent_id)
  */
 signed int test_talent(const struct struct_hero* hero, const signed int talent_id, signed char handicap)
 {
-	dsa_trace_enter(950, "seg103:test_talent");
+	dsa_trace_enter(951, "seg103:test_talent");
 	signed int randval;
 	signed int e_talentval;
 
@@ -317,7 +317,7 @@ struct talent_ids6 {
  */
 signed int select_talent(void)
 {
-	dsa_trace_enter(951, "seg103:select_talent");
+	dsa_trace_enter(952, "seg103:select_talent");
 	signed int retval = -1;
 	signed int nr_talents = 3;
 
@@ -376,7 +376,7 @@ signed int select_talent(void)
  */
 signed int use_talent(const signed int hero_pos, signed char handicap, const signed int talent_id)
 {
-	dsa_trace_enter(952, "seg103:use_talent");
+	dsa_trace_enter(953, "seg103:use_talent");
 	signed int retval = 1;
 	signed int le_damage;
 
@@ -732,7 +732,7 @@ signed int use_talent(const signed int hero_pos, signed char handicap, const sig
  */
 signed int GUI_use_talent(const signed int hero_pos, const signed char handicap)
 {
-	dsa_trace_enter(953, "seg103:GUI_use_talent");
+	dsa_trace_enter(954, "seg103:GUI_use_talent");
 	signed int talent_id;
 	const struct struct_hero *hero = get_hero(hero_pos);
 
@@ -753,7 +753,7 @@ signed int GUI_use_talent(const signed int hero_pos, const signed char handicap)
  */
 signed int GUI_use_talent2(const signed int handicap, char *msg)
 {
-	dsa_trace_enter(954, "seg103:GUI_use_talent2");
+	dsa_trace_enter(955, "seg103:GUI_use_talent2");
 	signed int hero_pos;
 	const signed int talent_id = select_talent();
 
@@ -790,7 +790,7 @@ signed int GUI_use_talent2(const signed int handicap, char *msg)
 signed int bargain(const struct struct_hero *hero, const signed int items, const int32_t price,
 	const signed int percent, const signed char handicap_init)
 {
-	dsa_trace_enter(955, "seg103:bargain");
+	dsa_trace_enter(956, "seg103:bargain");
 
 	signed char handicap = handicap_init;
 

@@ -28,6 +28,8 @@ ZAUBER = ["-", "Beherrschung brechen", "Destructibo", "Gardianum", "Illusionen z
           "KL steigern", "MU steigern", "Mutabili", "Paralü", "Salander", "See und Fluss", "Visibili", "Abvenenum",
           "Aeolitus", "Brenne", "Claudibus", "Dunkelheit", "Erstarre", "Flim Flam", "Schmelze", "Silentium",
           "Sturmgebrüll"]
+GZAUBER = ["-", "Verwandlung beenden", "Bannbaladin", "Böser Blick", "Horriphobus", "Axxeleratus", "Balsam", "Blitz",
+           "Eisenrost", "Fulminictus", "Ignifaxius", "Plumbumbarum", "Saft, Kraft, Monstermacht", "Armatrutz", "Paralü"]
 GEGNER = ["", "Oger", "Ork", "Goblin", "Heshthot", "Säbelzahntiger", "Skelett", "Waldschrat", "Mumie", "Harpyie",
           "Waldspinne", "Großer Schröter", "Pirat", "Steuermann", "Kapitän", "Streuner", "Zombie", "Heshthot", "Druide",
           "Druide", "Thorwaler", "Thorwaler", "Thorwaler", "Thorwaler", "Goblin", "Goblin", "Ork", "Ork", "Pirat",
@@ -116,7 +118,48 @@ def ereignis(name, w):
         kr = nm(KRANKHEIT, w[1])
         wer = f'{name}: ' if name else ''
         return f'{wer}Krankheitsprobe auf {kr}: W100 = {w[2]}, Ansteckung bei höchstens {w[3]} → {"ANGESTECKT" if w[4] else "nicht angesteckt"}'
+    if typ == 10 and len(w) >= 4:
+        wer = f'{name}: ' if name else ''
+        return f'{wer}Gardianum-Schutzschirm ({w[1]} AE eingesetzt, +{w[2]}) → fängt bis zu {w[3]} SP ab'
     return f'Ereignis (Typ {typ})'
+
+
+def gegnerzauber(name, w):
+    """Art 10: Gegnerzauber im Kampf (Gegner, Zauber, Zielart, Zielgegner, 3 Eig, 3 Werte, Zuschlag, 3 W20, Ergebnis, Wirkung)"""
+    mon, sp, ztyp, zid = w[0], w[1], w[2], w[3]
+    a, wv, z, d, r = w[4:7], w[7:10], w[10], w[11:14], w[14]
+    w1, w2, w3, w4, w5 = w[15:20]
+    ziel = 'auf sich selbst' if ztyp == 0 else (f'auf {name or "einen Helden"}' if ztyp == 1 else f'auf {gegner(zid)}')
+    eig = '/'.join(nm(EIG, x) for x in a) + ' (' + '/'.join(str(x) for x in wv) + ')'
+    wuerfe = ', '.join(str(x) for x in d if x)
+    zs = zuschlag(z) or ' ohne Zuschlag'
+    t = f'{gegner(mon)} zaubert {nm(GZAUBER, sp)} {ziel} → Probe auf {eig},{zs}: {wuerfe} → {ergebnis3(r)}'
+    if r <= 0:
+        return t
+    if w1 == -9:
+        return t + ' → Magie durch Rondra gesperrt'
+    if sp in (9, 10):
+        abg = []
+        if w3 > 0: abg.append(f'{w3} durch Feuerbann')
+        if w4 > 0: abg.append(f'{w4} durch Gardianum (Schild noch {w5})')
+        if abg:
+            return t + f' → {w1} SP, {" und ".join(abg)} abgefangen → {w2} SP'
+        return t + f' → {w2} SP'
+    if sp == 1:
+        wk = {1: 'Versteinerung aufgehoben', 2: 'Pilzverwandlung aufgehoben', -1: 'nicht genug AE (wirkungslos)'}.get(w1, 'Ziel nicht verwandelt (wirkungslos)')
+    elif sp == 2: wk = 'Ziel greift nicht mehr an'
+    elif sp == 3: wk = 'Ziel kämpft gegen die eigene Gruppe'
+    elif sp == 4: wk = 'Ziel flieht verängstigt'
+    elif sp == 5: wk = 'Attacken +1, AT +1, PA +1, BP ×2'
+    elif sp == 6: wk = f'+{w1} LE geheilt' if w1 > 0 else 'keine Heilung (0 LE)'
+    elif sp == 7: wk = f'{w1} Runden geblendet'
+    elif sp == 8: wk = 'Waffe zerbrochen' if w1 > 0 else 'keine zerbrechliche Waffe (wirkungslos)'
+    elif sp == 11: wk = f'AT -{w1}'
+    elif sp == 12: wk = f'AT +{w1}, PA -{w1}, TP +{w1} ({w2} AE)'
+    elif sp == 13: wk = f'RS +{w1} ({w2} AE)'
+    elif sp == 14: wk = 'Ziel versteinert'
+    else: wk = ''
+    return t + (f' → {wk}' if wk else '')
 
 
 class Leser:
@@ -190,6 +233,9 @@ class Leser:
         if art == 9 and len(w) >= 4:
             self.vorspann = None
             return ereignis(name, w)
+        if art == 10 and len(w) >= 20:
+            self.vorspann = None
+            return gegnerzauber(name, w)
         return f'{name}: unbekannte Zeile (Art {art})'
 
 
