@@ -442,6 +442,7 @@
  * FIX_0439   alles    egal      -       ja         Tempel zeigen von der Seite eine Fachwerkwand statt ihrer Front
  * FIX_0440   wichtig  mittel    -       ja         Truhenschloss nach Spielstand-Laden auf +0
  * FIX_0441   wichtig  mittel    -       ja         Maennliche Gegner und Helden spielen beim Tod einen Frauenschrei ab
+ * FIX_0442   alles    egal      -       ja         Symbol "Gruppen vereinen" nach dem Laden falsch
  */
 #ifndef S_FIX_H
 #define S_FIX_H
@@ -1680,6 +1681,9 @@
 #endif
 #ifndef FIX_0441
 #define FIX_0441 FIX_STUFE_W
+#endif
+#ifndef FIX_0442
+#define FIX_0442 FIX_STUFE_A
 #endif
 
 /* SEG002 ist resident: ohne Platz fuer die Behebungen entfallen dort nie aufgerufene Funktionen */

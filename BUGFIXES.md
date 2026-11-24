@@ -1,6 +1,6 @@
 # Die Schicksalsklinge – Bugfix-Fassung: Änderungsliste
 
-**Version 1.5i vom 21.11.2026** · inoffiziell · zur deutschen GOG-Fassung 3.02 · **im Spiel noch ungetestet, Tester willkommen**
+**Version 1.5j vom 24.11.2026** · inoffiziell · zur deutschen GOG-Fassung 3.02 · **im Spiel noch ungetestet, Tester willkommen**
 
 ## So geht's
 
@@ -20,6 +20,16 @@ Die Spielstände der Bugfix-Fassung liegen in eigenen Ordnern unter `Build\`. Al
 |---|---|
 | **WICHTIG** (empfohlen) | kritische und mittlere Fehler: Abstürze, Hänger, verlorene Ausrüstung, falsche Preise, Fehler, die man im Spiel merkt |
 | **ALLES** | zusätzlich viele kleine Fehler ohne große Spielwirkung |
+
+## Neu in Version 1.5j: Stürze und Zufallsbegegnungen im Probenlog, Gruppensymbol nach dem Laden
+
+Danke an Andrean im Crystals-Forum.
+
+- **Probenlog zeigt Stürze in Fallgruben und Falltüren** (auf Wunsch von Andrean): je gestürztem Held eine Zeile mit dem Wurf, wie viele Helden fallen (W Gruppengröße), der Zahl der Gestürzten und dem Schaden. Stürzt im Dunkeln die ganze Gruppe, steht dort kein Wurf.
+- **Probenlog zeigt die Art der Zufallsbegegnung auf Landreisen** (auf Wunsch von Andrean): Landschaftstyp, W100 für die Begegnung, welche Begegnung es wurde (z. B. Kampf WILD4, Karenjagd) und bei Kämpfen den W100, der entscheidet, ob der Kampf stattfindet (nur bei höchstens 33).
+- **Symbol „Gruppen vereinen“ nach dem Laden richtig** (gemeldet von Andrean): Hat man nach dem Speichern die Gruppe geteilt und dann geladen, leuchtete das Symbol, obwohl keine Gruppe zum Vereinen da war (und umgekehrt) – Nr. 442 (ALLES)
+
+Die Würfe laufen genau wie bisher, Spielstände bleiben kompatibel, die Standard-EXE bleibt bytegleich.
 
 ## Neu in Version 1.5i: Gegnerzauber sowie abgefangener Schaden durch Gardianum und Feuerbann im Probenlog
 
@@ -200,8 +210,8 @@ Abgleich mit der Zauberliste im Lösungsbuch zur Schicksalsklinge. Zauber, die d
 | | ganz behoben | teilweise | Summe |
 |---|---:|---:|---:|
 | WICHTIG (steckt auch in ALLES) | 141 | 6 | 147 |
-| nur in ALLES | 130 | 9 | 139 |
-| **ALLES gesamt** | **271** | **15** | **286** |
+| nur in ALLES | 131 | 9 | 140 |
+| **ALLES gesamt** | **272** | **15** | **287** |
 
 **124** dieser Fehler standen schon im Projekt [Bright-Eyes](https://github.com/Henne/Bright-Eyes) (meist als „Original-Bug N“ im Quelltext), bei **32** stammt auch die Behebung von dort. Die Liste nennt das bei jedem Eintrag, mit der Bright-Eyes-Nummer, soweit es eine gibt.
 
@@ -489,7 +499,7 @@ Davon 38 **Exploits** (Fehler, die dem Spieler nützen, z. B. Geld oder Werte au
 | 210 | **Brenne entzündet immer die erste Fackel oder Laterne** – Wählt man die zweite unentzündete Fackel zum Anzünden, brennt die erste. *(Bright-Eyes, dort Original-Bug 55)*<br>*So prüfst du es:* Held mit Zunderkästchen und zwei unentzündeten Fackeln zündet die zweite über BENUTZEN an. Original brennt die erste Fackel, Fix die gewählte. Gleiches bei zwei Laternen (mit Öl im Gepäck). | A |
 | 386 | **Analüs erkennt nur 28 Gegenstände, Grimring nicht** *(teilweise)* – Analüs meldet bei Gegenständen außerhalb seiner Liste „nichts Besonderes“, auch beim Grimring.<br>*So prüfst du es:* Analüs auf einen magischen Gegenstand sprechen, den der Zauber nicht in seiner Liste hat. Vorher kommt „ICH KANN NICHTS BESONDERES ERKENNEN!“, jetzt „TUT MIR LEID, ICH KANN NICHT SAGEN, WAS FÜR EIN ZAUBER HIER ANGEWENDET…“. | A |
 
-### Technik & Oberfläche (20)
+### Technik & Oberfläche (21)
 
 | Nr | Was behoben ist | Stufe |
 |---:|---|:---:|
@@ -513,6 +523,7 @@ Davon 38 **Exploits** (Fehler, die dem Spieler nützen, z. B. Geld oder Werte au
 | 306 | **Abfrage „WIE VIELE DER … SOLLEN …“ im falschen Fall** – Grammatikfehler in der Mengenabfrage beim Übergeben. *(Bright-Eyes)*<br>*So prüfst du es:* Einen Stapel (mehr als 1 Stück) einem anderen Helden übergeben: in „WIE VIELE DER … SOLLEN AN … ÜBERGEBEN WERDEN?“ steht der Name jetzt im 2. statt 4. Fall. Meist sieht das gleich aus, anders nur bei Gegenständen ohne Mehrzahl (z. B. Lakritze, Gifte). | A |
 | 308 | **Speichermeldung nennt 5000 Byte zu wenig** – Bei zu wenig Speicher nennt die Startmeldung einen zu kleinen oder negativen Fehlbetrag.<br>*So prüfst du es:* Spiel mit weniger als 334.000 Byte freiem DOS-Speicher starten (z. B. DOSBox mit residenten Programmen). Vorher nennt die Meldung „needs … Byte more memory“ 5000 Byte zu wenig oder eine negative Zahl, jetzt den wirklichen Fehlbetrag. | A |
 | 410 | **Kampfmusik läuft nach direkt gestarteten Dungeonkämpfen weiter** – Nach manchen Dungeonkämpfen bleibt die Kampfmusik.<br>*So prüfst du es:* Dungeon: einen Kampf beenden, den ein Ereignisfeld direkt startet (z. B. Spinnenhöhle, Priesterkampf auf Feld (1,2,4)). Vorher läuft danach die Kampfmusik weiter, jetzt wieder die Dungeonmusik. | A |
+| 442 | **Symbol „Gruppen vereinen“ nach dem Laden falsch** – `g_can_merge_group` steht nicht im Spielstand und wird erst beim nächsten Schritt neu berechnet. Hat man nach dem Speichern die Gruppe geteilt und dann geladen, leuchtete das Symbol, obwohl keine Gruppe zum Vereinen da war (und umgekehrt). Gemeldet von Andrean (Crystals-Forum).<br>*So prüfst du es:* Gruppe ungeteilt speichern, teilen, laden: Symbol jetzt grau. | A |
 
 ### Gegenstände & Inventar (18)
 

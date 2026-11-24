@@ -17,7 +17,7 @@ Quelle der Tabelle: `Werkzeuge/fix_schalter.tsv`, erzeugt von `Werkzeuge/mkfix.p
 | Stufe | ja | teilweise | nein | kein Fehler |
 |---|---|---|---|---|
 | wichtig (kritisch + mittel) | 141 | 6 | 32 | - |
-| alles (zusaetzlich egal) | 130 | 9 | 76 | - |
+| alles (zusaetzlich egal) | 131 | 9 | 76 | - |
 | - (laut Raster kein Fehler) | - | - | - | 36 |
 
 Nr. 51 ist dieselbe Stelle wie Nr. 50 (`FIX_0051` folgt `FIX_0050`). In den residenten Modulen (seg001..seg007) darf kein Segment laenger werden; in seg002 entfallen dafuer mit den Behebungen nie aufgerufene Funktionen (Schalter `FIX_PLATZ_SEG002`, aus den Schaltern des Moduls abgeleitet).
@@ -456,3 +456,4 @@ Nr. 51 ist dieselbe Stelle wie Nr. 50 (`FIX_0051` folgt `FIX_0050`). In den resi
 | 439 | Tempel zeigen von der Seite eine Fachwerkwand statt ihrer Front | egal | nein | alles | ja | Eingangsseite eines Tempels von der Seite: aus der Tempelfront erzeugen; Seitenansicht der Tempelfront. Attic hat fuer Tempel nur die Frontansicht gezeichnet (TDIVERSE.NVF Bild 5,; 252 = Seitenwand an der Eingangsseite eines Tempels (Umriss aus Haustyp 3, siehe fix_tempelseite) (entdeckt von MiauKuh (05.11.2026); Seitenansicht aus der vorhandenen Tempelfront erzeugt) | SEG066.C |
 | 440 | Truhenschloss nach Spielstand-Laden auf +0 | mittel | nein | wichtig | ja | chest->lock liegt in der Truhentabelle im Datensegment und wird beim Laden eines Spielstands (gemeldet von Andrean im Crystals-Forum (11.2026)) | SEG092.C |
 | 441 | Männliche Gegner und Helden spielen beim Tod einen Frauenschrei ab | mittel | nein | wichtig | ja | maennliche Figuren (Sprite-Id 1..10) nutzen in ANI.DAT dieselben Sterbesequenzen (0x44..0x4c) (gemeldet von Andrean im Crystals-Forum (20.11.2026)) | SEG044.C |
+| 442 | Symbol „Gruppen vereinen“ nach dem Laden falsch | egal | nein | alles | ja | g_can_merge_group steht nicht im Spielstand und wird erst beim naechsten Schritt neu berechnet (gemeldet von Andrean im Crystals-Forum (23.11.2026)) | SEG026.C |

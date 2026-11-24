@@ -822,6 +822,11 @@ signed int load_game_state(void)
 
 		g_area_prepared = AREA_TYPE_NONE;
 		g_request_refresh = retval = 1;
+#if FIX_0442
+		/* Fix 442: das Symbol "Gruppen vereinen" nach dem Laden neu bestimmen. g_can_merge_group steht nicht im
+		 * Spielstand und wurde sonst erst beim naechsten Schritt neu berechnet (gemeldet von Andrean). */
+		g_can_merge_group = (signed char)can_merge_group();
+#endif
 		g_check_disease = 0;
 		g_check_poison = 0;
 		g_fading_state = 3;

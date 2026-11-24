@@ -1191,12 +1191,23 @@ signed int DNG_pitfall(const signed int max_damage)
 	signed int num_fallen_heroes;
 	signed int new_group_id;
 	signed int retval;
+#if FIX_PROBENLOG
+	/* Probenlog (Art 9, Typ 11): Sturz. Werte: Typ, Wurf W(Gruppe), Gruppengroesse, Anzahl gefallen,
+	 * Schaden, hoechster Schaden. Eine Zeile je gestuerztem Held, Wuerfe wie im Original. */
+	signed int plog_w[6];
+#endif
 
 	new_group_id = 0;
 	retval = 0;
 
 	g_dng_level_changed = 1;
 	num_fallen_heroes = random_schick(gs_group_member_counts[gs_active_group_id]);
+#if FIX_PROBENLOG
+	plog_w[0] = 11;
+	plog_w[1] = num_fallen_heroes;
+	plog_w[2] = gs_group_member_counts[gs_active_group_id];
+	plog_w[5] = max_damage;
+#endif
 
 	/* If the roll indicates that all but one hero of the active group should fall, then all heroes will fall instead.
 	 * Reason (probably): Prevent the NPC from ending up isolated as a single-hero group.
@@ -1205,6 +1216,9 @@ signed int DNG_pitfall(const signed int max_damage)
 	if (gs_group_member_counts[gs_active_group_id] - 1 == num_fallen_heroes) {
 		num_fallen_heroes = gs_group_member_counts[gs_active_group_id];
 	}
+#if FIX_PROBENLOG
+	plog_w[3] = num_fallen_heroes;
+#endif
 
 	if (gs_group_member_counts[gs_active_group_id] != num_fallen_heroes) {
 		/* Only part of the heroes in the active group falls. -> new group is needed */
@@ -1225,7 +1239,13 @@ signed int DNG_pitfall(const signed int max_damage)
 			get_hero(hero_pos)->group_id = (unsigned char)new_group_id;
 			gs_group_member_counts[new_group_id]++;
 			gs_group_member_counts[gs_active_group_id]--;
+#if FIX_PROBENLOG
+			plog_w[4] = random_schick(max_damage);
+			fix_probenlog(9, get_hero(hero_pos)->alias, 6, plog_w);
+			sub_hero_le(get_hero(hero_pos), plog_w[4]);
+#else
 			sub_hero_le(get_hero(hero_pos), random_schick(max_damage));
+#endif
 		}
 
 		GRP_save_pos(new_group_id);
@@ -1245,7 +1265,13 @@ signed int DNG_pitfall(const signed int max_damage)
 				hero_pos++;
 			}
 
+#if FIX_PROBENLOG
+			plog_w[4] = random_schick(max_damage);
+			fix_probenlog(9, get_hero(hero_pos)->alias, 6, plog_w);
+			sub_hero_le(get_hero(hero_pos++), plog_w[4]);
+#else
 			sub_hero_le(get_hero(hero_pos++), random_schick(max_damage));
+#endif
 		}
 
 		DNG_inc_level();

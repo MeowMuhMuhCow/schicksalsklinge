@@ -127,6 +127,16 @@ function lies(text) {
         wu = `W100 = ${w[2]}, bis ${w[3]}`; ok = !w[4]; erg = w[4] ? 'angesteckt' : 'nicht angesteckt'; }
       else if (typ === 10 && w.length >= 4) { heldErg = name; titel = 'Gardianum-Schutzschirm'; zusatz = `${w[1]} AE eingesetzt`;
         wu = `+${w[2]}`; ok = true; erg = `fängt bis zu ${w[3]} SP ab`; }
+      else if (typ === 11 && w.length >= 6) { heldErg = name; titel = w[1] > 0 ? 'Sturz in eine Grube' : 'Sturz im Dunkeln';
+        zusatz = w[1] > 0 ? `${w[3]} von ${w[2]} Helden stürzen` : `die ganze Gruppe (${w[3]}) stürzt`;
+        wu = w[1] > 0 ? `Wurf W${w[2]} = ${w[1]}` : 'kein Wurf'; ok = false; erg = `verliert ${w[4]} LE (1W${w[5]})`; }
+      else if (typ === 12 && w.length >= 6) {
+        const BEG = ['Kampf WILD1 (2 bis 7 Goblins)','Kampf WILD2 (1 bis 3 Oger)','Karenjagd','Kampf WILD3 (1 bis 2 Säbelzahntiger)','Kvillotter','Kampf WILD4 (2 bis 7 Grimwölfe)','Kampf WILD4 (4 bis 6 Grimwölfe)','Kampf WILD5 (2 bis 3 Steppenhunde)','Nashornjagd','Wildschweinjagd','Kampf WILD6 (1 bis 3 Waldspinnen)','Bisonjagd','Kampf WILD7 (1 bis 3 Harpyien)','Höhlenbär'];
+        const k = [0,1,3,5,6,7,10,12].includes(w[3]); const b = w[3] < 0 ? 'keine' : (BEG[w[3]] || 'Nr. ' + w[3]);
+        titel = 'Reise: Art der Begegnung'; zusatz = `Landschaftstyp ${w[1]}`;
+        wu = `W100 = ${w[2]}` + (k ? `, Kampfwurf W100 = ${w[4]} (bis 33)` : '');
+        ok = w[3] < 0 ? true : (k ? !!w[5] : null);
+        erg = b + (k ? ` → ${w[5] ? 'entfällt' : 'KAMPF'}` : ''); }
       else titel = 'Ereignis Typ ' + typ;
       r = {zeit, held: heldErg, typ: 'erg', titel, zusatz, wuerfe: wu, ok, pz: false, erg};
     } else if (art === 10 && w.length >= 20) {

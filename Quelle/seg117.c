@@ -768,11 +768,24 @@ void journey_random_encounter(signed int tmp)
 	signed int x_bak;
 	signed int y_bak;
 	signed int wallclock_update_bak;
+#if FIX_PROBENLOG
+	/* Probenlog (Art 9, Typ 12): Art der Zufallsbegegnung. Werte: Typ, Landschaftstyp, W100, Begegnung (0..13,
+	 * -1 = keine), W100 fuer den Kampf, Kampf entfaellt (1/0). Wuerfe wie im Original. */
+	signed int plog_w[6];
+
+	/* fights happen only with a chance of 33% */
+	plog_w[4] = random_schick(100);
+	if (plog_w[4] > 33) {
+		skip_fight = 1;
+	}
+	plog_w[5] = skip_fight;
+#else
 
 	/* fights happen only with a chance of 33% */
 	if (random_schick(100) > 33) {
 		skip_fight = 1;
 	}
+#endif
 
 	x_bak = g_basepos_x;
 	y_bak = g_basepos_y;
@@ -784,6 +797,11 @@ void journey_random_encounter(signed int tmp)
 	/* now tmp is the entry in g_trv_route_landscape_type_table belonging to the traveled land_route_id */
 
 	roll_d100 = random_schick(100);
+#if FIX_PROBENLOG
+	plog_w[0] = 12;
+	plog_w[1] = tmp;
+	plog_w[2] = roll_d100;
+#endif
 
 	/* Fehler im Original: Bedingung "Wert <= W100" statt "W100 <= Wert". Weil die Werte je Spalte steigen,
 	 * trifft immer nur die erste Zeile mit Wert != 0 zu (fuer Landschaft 0..6: Kampf WILD1 bei W100 >= 20..40,
@@ -798,6 +816,10 @@ void journey_random_encounter(signed int tmp)
 		if ((g_trv_journey_random_encounter_stats[random_encounter_id][tmp] <= roll_d100) && g_trv_journey_random_encounter_stats[random_encounter_id][tmp]) {
 #endif
 
+#if FIX_PROBENLOG
+			plog_w[3] = random_encounter_id;
+			fix_probenlog(9, NULL, 6, plog_w);
+#endif
 			gs_show_travel_map = g_wallclock_update = 0;
 			g_travel_event_active = 1;
 			g_fig_discard = 1;
@@ -891,6 +913,12 @@ void journey_random_encounter(signed int tmp)
 			break;
 		}
 	}
+#if FIX_PROBENLOG
+	if (random_encounter_id == 14) {
+		plog_w[3] = -1;
+		fix_probenlog(9, NULL, 6, plog_w);
+	}
+#endif
 
 	g_basepos_x = x_bak;
 	g_basepos_y = y_bak;

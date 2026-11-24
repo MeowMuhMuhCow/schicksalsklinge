@@ -42,6 +42,12 @@ GEGNER = ["", "Oger", "Ork", "Goblin", "Heshthot", "Säbelzahntiger", "Skelett",
 MONAT = ["", "Praios", "Rondra", "Efferd", "Travia", "Boron", "Hesinde", "Firun", "Tsa", "Phex", "Peraine",
          "Ingerimm", "Rahja", "Namenlose Tage"]
 KRANKHEIT = ["keine", "Wundfieber", "Dumpfschädel", "Blaue Keuche", "Paralyse", "Schlachtenfieber", "Frostschäden", "Tollwut"]
+BEGEGNUNG = ["Kampf WILD1 (2 bis 7 Goblins)", "Kampf WILD2 (1 bis 3 Oger)", "Karenjagd",
+             "Kampf WILD3 (1 bis 2 Säbelzahntiger)", "Kvillotter", "Kampf WILD4 (2 bis 7 Grimwölfe)",
+             "Kampf WILD4 (4 bis 6 Grimwölfe)", "Kampf WILD5 (2 bis 3 Steppenhunde)", "Nashornjagd",
+             "Wildschweinjagd", "Kampf WILD6 (1 bis 3 Waldspinnen)", "Bisonjagd",
+             "Kampf WILD7 (1 bis 3 Harpyien)", "Höhlenbär"]
+BEGEGNUNG_KAMPF = {0, 1, 3, 5, 6, 7, 10, 12}
 
 
 KAMPF = ["ZUFALL1_LAND", "LAND_FIGHT1_1", "ZUFALL2_LAND", "ZUFALL3_LAND", "ZUFALL4_LAND", "SHIP3", "SHIP4", "SHIP5", "SHIP6", "SHIP8", "SHIP9", "SHIP12", "SHIP14", "SHIP15", "SHIP17", "SHIP18", "SHIP19", "SHIP21", "SHIP22", "SHIP23A", "SHIP23B", "SHIP24", "SHIP10", "F061_2", "F061_3", "F061_4B", "F061_4A", "F061_5", "F061_6A", "F108_1", "F108_2", "F108_3A", "F108_3B", "F108_3C", "F108_4", "F108_6", "F108_9", "F108_7", "F051_05_4", "F051_05_3", "F051_05_2", "F051_05_1", "F051_07", "F051_09", "F051_13", "F108_15", "F051_15", "F051_16", "F051_16_1", "F051_03", "F051_04", "F051_17", "F051_18", "F051_19", "F051_20_2", "F051_18_3", "F046_01", "F046_04", "F046_06", "F046_07", "F046_10", "F046_12", "F046_13", "F046_15", "F046_16", "F046_18", "F046_22", "F046_24", "F046_25", "F046_26", "F046_26_5", "F046_27", "F046_28", "F046_31", "F076_04", "F076_06", "F076_07", "F076_10", "F076_11", "F076_13", "F094_02", "F094_05", "F094_10", "F094_13", "F094_17", "F094_19", "F094_22", "F100_01", "F100_03", "F100_05", "F100_12", "F100_13", "F126_03", "F126_07", "F126_08", "F126_09", "F126_11", "F126_12", "F126_13", "F126_17", "F126_18", "F126_20", "F126_22", "F126_23", "F126_25", "F126_27", "F126_28", "F129_05", "F129_08", "F129_09", "F129_18", "F129_21", "F129_23", "F129_24", "F129_25", "F129_27", "F129_28", "F129_29", "F129_30", "F131_01A", "F131_01B", "F131_04", "F131_05", "F131_06", "F131_07", "F131_08", "F131_10", "F131_11_1", "F131_14A", "F131_14B", "F131_16", "DFIN12", "DFIN16", "DFIN18A", "DFIN18B", "DFIN26", "DFIN27A", "DFIN27B", "DFIN28", "DFIN30", "DPRE10_1", "DOBE07", "DOBE09", "DOBE11", "DOBE20", "DOBE19", "DOBE22", "DTHO03", "DTHO05", "DTHO06", "DTHO09", "DTHO10", "DTHO13", "DTHO15", "DTHO16", "DTHO18", "DTHO19", "DTHO20", "DTHO20_1", "DTHO21A", "DTHO21B", "DTHO23", "DTHO25", "DTHO27", "DTHO43", "DTHO48_1", "DTHO49", "DTHO50", "DTHO53", "DTHO55", "DTHO56", "DTHO57", "DTHO57_1", "DTHO58", "DTHO59", "DTHO60", "DTHO61", "F031", "F035", "F046", "F064", "F066", "F074", "F075_A", "F075_B", "F075_C", "F077", "F080", "F084", "F099", "F101", "F122", "F144", "DASP1A", "DASP1B", "DASP2", "DASP3", "DASP4", "DASP5", "DASP6A", "DASP6B", "DASP7", "DASP8", "DASP9", "DASP10", "DASP11", "DASP12A", "DASP12B", "DASP13", "DASP14", "DASP16", "DASP17", "DASP18", "THOR8", "CITYFIGHT1", "CITYFIGHT2", "CITYFIGHT3", "CAMPFIGHT1", "CAMPFIGHT2", "CAMPFIGHT3", "SHIP10_1", "F061_6B", "F051_16A", "F051_16B", "F051_14A", "F051_14B", "F051_117", "F129_124", "F131_08A", "F131_08B", "F031_14A", "DTH021A", "CAMPFIGHT4", "SHIP10_2", "F051_02", "F051_5", "PHEX3", "PHEX22", "PHEX23", "PHEX24", "F131_01", "F129_08A", "DTHO14", "WILD1", "WILD2", "WILD3", "WILD4", "WILD5", "WILD6", "WILD7", "WILD8", "S001", "F051_14C", "F129_17", "DCAMPFIGHT1", "DCAMPFIGHT2", "DCAMPFIGHT3", "DCAMPFIGHT4"]
@@ -121,6 +127,18 @@ def ereignis(name, w):
     if typ == 10 and len(w) >= 4:
         wer = f'{name}: ' if name else ''
         return f'{wer}Gardianum-Schutzschirm ({w[1]} AE eingesetzt, +{w[2]}) → fängt bis zu {w[3]} SP ab'
+    if typ == 11 and len(w) >= 6:
+        wer = f'{name}: ' if name else ''
+        if w[1] > 0:
+            return f'{wer}Sturz in eine Grube – Wurf W{w[2]} = {w[1]} → {w[3]} von {w[2]} Helden stürzen, verliert {w[4]} LE (1W{w[5]})'
+        return f'{wer}Sturz im Dunkeln – die ganze Gruppe ({w[3]}) stürzt, verliert {w[4]} LE (1W{w[5]})'
+    if typ == 12 and len(w) >= 6:
+        if w[3] < 0:
+            return f'Reise: Art der Begegnung (Landschaftstyp {w[1]}): W100 = {w[2]} → keine'
+        t = f'Reise: Art der Begegnung (Landschaftstyp {w[1]}): W100 = {w[2]} → {nm(BEGEGNUNG, w[3])}'
+        if w[3] in BEGEGNUNG_KAMPF:
+            t += f', Kampfwurf W100 = {w[4]}, Kampf bei höchstens 33 → {"entfällt" if w[5] else "KAMPF"}'
+        return t
     return f'Ereignis (Typ {typ})'
 
 

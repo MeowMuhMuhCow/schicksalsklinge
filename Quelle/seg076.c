@@ -428,6 +428,10 @@ void DNG_pitfall_add_pit(const signed int max_damage)
 
 		signed int i;
 		struct struct_hero *hero;
+#if FIX_PROBENLOG
+		/* Probenlog (Art 9, Typ 11): im Dunkeln stuerzt die ganze Gruppe, Wurf 0 = kein Wurf */
+		signed int plog_w[6];
+#endif
 
 		GUI_output(get_ttx(517)); /* "HOLLA, WAS IST DAS?@DER BODEN HIER SCHEINT MORSCH ZU SEIN, ER GIBT@..." */
 		// Floor fails under your weight; you drop below.
@@ -446,7 +450,17 @@ void DNG_pitfall_add_pit(const signed int max_damage)
 			/* TODO: need to check if the hero is dead ? */
 			if ((hero->typus != HERO_TYPE_NONE) && (hero->group_id == gs_active_group_id))
 			{
+#if FIX_PROBENLOG
+				plog_w[0] = 11;
+				plog_w[1] = 0;
+				plog_w[2] = plog_w[3] = gs_group_member_counts[gs_active_group_id];
+				plog_w[4] = random_schick(max_damage);
+				plog_w[5] = max_damage;
+				fix_probenlog(9, hero->alias, 6, plog_w);
+				sub_hero_le(hero, plog_w[4]);
+#else
 				sub_hero_le(hero, random_schick(max_damage));
+#endif
 			}
 		}
 	} else {
