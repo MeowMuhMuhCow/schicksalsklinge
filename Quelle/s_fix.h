@@ -438,12 +438,12 @@
  * FIX_0435   alles    egal      -       ja         Runin: loser Stein vor dem Hebel (0,8,1) gilt erst nach Betaetigen des Hebels als entfernt
  * FIX_0436   alles    egal      -       nein       STRASSE.LTX ist groesser als der 10000-Byte-Textpuffer
  * FIX_0437   wichtig  mittel    -       ja         Gruppenwechsel in eine Gruppe, die schon in einem Ort steht: Statuszeile und Herberge der alten Gruppe
- * FIX_0438   alles    egal      -       ja         Hauswaende auf der linken Strassenseite zeigen die Fassade verkehrt herum
+ * FIX_0438   alles    egal      -       nein       Hauswaende auf der linken Strassenseite zeigen die Fassade verkehrt herum (1.5l zurueckgenommen: jede Bearbeitung von Attics Zeichnung sah schlechter aus als das Original)
  * FIX_0439   alles    egal      -       ja         Tempel zeigen von der Seite eine Fachwerkwand statt ihrer Front
  * FIX_0440   wichtig  mittel    -       ja         Truhenschloss nach Spielstand-Laden auf +0
  * FIX_0441   wichtig  mittel    -       ja         Maennliche Gegner und Helden spielen beim Tod einen Frauenschrei ab
  * FIX_0442   alles    egal      -       ja         Symbol "Gruppen vereinen" nach dem Laden falsch
- * FIX_0443   alles    egal      -       ja         Hauswand direkt neben der Gruppe steht links verkehrt herum (Ergaenzung zu Fix 438)
+ * FIX_0443   alles    egal      -       nein       Hauswand direkt neben der Gruppe zeigt links die Haelfte hinter statt vor der Gruppe (1.5l zurueckgenommen wie Fix 438)
  * FIX_0444   alles    mittel    -       ja         Heilungszauber (Balsam Salabunde u. a.) im Kampf nicht waehlbar
  * FIX_0445   alles    egal      -       ja         "Alte Optionen" mit Fernwaffe ohne Munition kostet die Runde
  */
@@ -1674,7 +1674,7 @@
 #define FIX_0437 FIX_STUFE_W
 #endif
 #ifndef FIX_0438
-#define FIX_0438 FIX_STUFE_A
+#define FIX_0438 0 /* 1.5l zurueckgenommen, siehe Liste */
 #endif
 #ifndef FIX_0439
 #define FIX_0439 FIX_STUFE_A
@@ -1689,7 +1689,7 @@
 #define FIX_0442 FIX_STUFE_A
 #endif
 #ifndef FIX_0443
-#define FIX_0443 FIX_STUFE_A
+#define FIX_0443 0 /* 1.5l zurueckgenommen, siehe Liste */
 #endif
 #ifndef FIX_0444
 #define FIX_0444 FIX_STUFE_A

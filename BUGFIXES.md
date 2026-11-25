@@ -1,6 +1,6 @@
 # Die Schicksalsklinge – Bugfix-Fassung: Änderungsliste
 
-**Version 1.5k vom 25.11.2026** · inoffiziell · zur deutschen GOG-Fassung 3.02 · **im Spiel noch ungetestet, Tester willkommen**
+**Version 1.5l vom 25.11.2026** · inoffiziell · zur deutschen GOG-Fassung 3.02 · **im Spiel noch ungetestet, Tester willkommen**
 
 ## So geht's
 
@@ -21,6 +21,14 @@ Die Spielstände der Bugfix-Fassung liegen in eigenen Ordnern unter `Build\`. Al
 | **WICHTIG** (empfohlen) | kritische und mittlere Fehler: Abstürze, Hänger, verlorene Ausrüstung, falsche Preise, Fehler, die man im Spiel merkt |
 | **ALLES** | zusätzlich viele kleine Fehler ohne große Spielwirkung |
 
+## Neu in Version 1.5l: Hauswände links wieder wie im Original
+
+Danke an MiauKuh im Crystals-Forum.
+
+- **Hauswände links wieder so, wie Attic sie gezeichnet hat:** Attic hat jede Seitenwand nur für die rechte Straßenseite gezeichnet, links steht dasselbe Bild. Dadurch läuft dort z. B. bei Haus 1 die Fassade verkehrt herum. Seit 1.5b hat der Patch das zu korrigieren versucht (Umdrehen, ab 1.5k auch die Wand direkt neben der Gruppe). Im Spiel sah das aber schlechter aus als das Original: Hausecken landeten am falschen Ende (hohe Kante in der Flucht, Häuser wirkten zu tief), Balken wurden wellig. Darum ist das zurückgenommen – Nr. 438 und 443 jetzt „nein“. Die Tempelseiten (Nr. 439) bleiben.
+
+Spielstände bleiben kompatibel, die Standard-EXE bleibt bytegleich.
+
 ## Neu in Version 1.5k: Heilungszauber im Kampf, Axxeleratus, Alte Optionen, Hauswand links
 
 Danke an Andrean und MiauKuh im Crystals-Forum.
@@ -28,7 +36,7 @@ Danke an Andrean und MiauKuh im Crystals-Forum.
 - **Heilungszauber im Kampf wählbar** (gemeldet von Andrean): Balsam Salabunde, Hexenspeichel, Klarum Purum und Tiere besprechen sind laut Zaubertabelle auch im Kampf erlaubt, die Gruppe Heilung ließ sich im Kampf aber nicht öffnen, weil sie keinen reinen Kampfzauber enthält – Nr. 444 (ALLES)
 - **„Alte Optionen“ ohne Munition** (gemeldet von Andrean): Statt die Kampfrunde zu verlieren, kommt die Meldung und man wählt neu, wie bei der normalen Zielwahl – Nr. 445 (ALLES)
 - **Axxeleratus: zweiter Angriff nur, wenn das Ziel erreichbar ist** (gemeldet von Andrean): Ein Angriff setzt die Bewegungspunkte auf 0, darum wiederholte die zweite Aktion denselben Angriff ohne Prüfung – im Nahkampf auch gegen weggelaufene Gegner, im Fernkampf durch blockierende Figuren hindurch. Jetzt wartet der Held, wenn das Ziel nicht mehr erreichbar ist (gleiche Prüfungen wie bei „Alte Optionen“, dazu Munition) – Nr. 379 (WICHTIG)
-- **Hauswand direkt neben der Gruppe auf der linken Straßenseite richtig herum** (entdeckt von MiauKuh): wie bei Nr. 438 für die weiter entfernten Wände; beim Vorbeigehen an Haustyp 1 kommt jetzt erst das Bootsgerüst, dann der Schornstein – Nr. 443 (ALLES)
+- **Hauswand direkt neben der Gruppe auf der linken Straßenseite richtig herum** (entdeckt von MiauKuh): wie bei Nr. 438 für die weiter entfernten Wände; beim Vorbeigehen an Haustyp 1 kommt jetzt erst das Bootsgerüst, dann der Schornstein – Nr. 443 (ALLES) (in 1.5l zurückgenommen, siehe oben)
 - **Zauberliste ergänzt:** Heilungszauber im Kampf (im Original gesperrt, Nr. 444), zweite Aktion bei Axxeleratus.
 - **Neu: Talentliste** (`Analyse/Talentliste.md`, dazu `talente.json`): alle 52 Talente mit jeder Stelle, an der das Spiel sie prüft – Ort, Zuschlag, wer würfelt und was passiert. Dazu die Probenmechanik (Summenprobe), die Steigerungschancen und die 22 Talente, die nie abgefragt werden.
 
@@ -100,7 +108,7 @@ Auf Wunsch von Andrean im Crystals-Forum. Keine neuen Fehlerbehebungen, die Wür
 
 ## Neu in Version 1.5b: Hauswände links richtig herum
 
-- **Hauswände auf der linken Straßenseite zeigten die Fassade verkehrt herum** (entdeckt von MiauKuh): Im Vorbeigehen sah man links etwa Fenster, Schornstein, Bootsrumpf, vor dem Haus aber Bootsrumpf, Schornstein, Fenster. Attic hat die entfernteren Seitenwände nur einmal gezeichnet, passend für die rechte Straßenseite. Jetzt werden sie für die linke Seite spaltenweise umgedreht und an die Perspektive angepasst, mit Attics eigenen Pixeln, ohne neue Grafik. Im Emulator in Thorwal geprüft – Nr. 438 (ALLES)
+- **Hauswände auf der linken Straßenseite zeigten die Fassade verkehrt herum** (entdeckt von MiauKuh): Im Vorbeigehen sah man links etwa Fenster, Schornstein, Bootsrumpf, vor dem Haus aber Bootsrumpf, Schornstein, Fenster. Attic hat die entfernteren Seitenwände nur einmal gezeichnet, passend für die rechte Straßenseite. Jetzt werden sie für die linke Seite spaltenweise umgedreht und an die Perspektive angepasst, mit Attics eigenen Pixeln, ohne neue Grafik. Im Emulator in Thorwal geprüft – Nr. 438 (ALLES) (in 1.5l zurückgenommen, siehe oben)
 
 ## Neu in Version 1.5a: Herberge nach dem Gruppenwechsel, Bright-Eyes-Herkunft in der Liste
 
@@ -223,8 +231,8 @@ Abgleich mit der Zauberliste im Lösungsbuch zur Schicksalsklinge. Zauber, die d
 | | ganz behoben | teilweise | Summe |
 |---|---:|---:|---:|
 | WICHTIG (steckt auch in ALLES) | 142 | 6 | 148 |
-| nur in ALLES | 134 | 9 | 143 |
-| **ALLES gesamt** | **276** | **15** | **291** |
+| nur in ALLES | 132 | 9 | 141 |
+| **ALLES gesamt** | **274** | **15** | **289** |
 
 **124** dieser Fehler standen schon im Projekt [Bright-Eyes](https://github.com/Henne/Bright-Eyes) (meist als „Original-Bug N“ im Quelltext), bei **32** stammt auch die Behebung von dort. Die Liste nennt das bei jedem Eintrag, mit der Bright-Eyes-Nummer, soweit es eine gibt.
 
@@ -232,7 +240,7 @@ Davon 38 **Exploits** (Fehler, die dem Spieler nützen, z. B. Geld oder Werte au
 
 ## Alle Änderungen nach Spielbereich
 
-*Stufe W = schon in WICHTIG, A = nur in ALLES. 💰 = Exploit. „So prüfst du es“ sagt, wo man die Behebung im Spiel sieht. „Bright-Eyes“ = der Fehler stand schon in Bright-Eyes, „Behebung aus Bright-Eyes“ = auch die Behebung stammt von dort.*
+*Stufe W = schon in WICHTIG, A = nur in ALLES, nein = zurückgenommen (nicht mehr enthalten). 💰 = Exploit. „So prüfst du es“ sagt, wo man die Behebung im Spiel sieht. „Bright-Eyes“ = der Fehler stand schon in Bright-Eyes, „Behebung aus Bright-Eyes“ = auch die Behebung stammt von dort.*
 
 ### Dungeons (55)
 
@@ -347,7 +355,7 @@ Davon 38 **Exploits** (Fehler, die dem Spieler nützen, z. B. Geld oder Werte au
 | 371 | **Grenz- und Straßentexte ohne Richtungsprüfung** – „Orkland betreten“ und „hier endet die Straße“ auch auf dem Rückweg.<br>*So prüfst du es:* Reise Vilnheim–Phexcaer, Grenzpfahl am Schilfmeer des Bodir: in Richtung Vilnheim reisen. Vorher kommt auch dort „HIER ENDET DIE EIGENTLICHE STRASSE. IHR BEFINDET EUCH NUN IM ORKLAND“, jetzt nur auf dem Weg nach Phexcaer. | A |
 | 375 | **Jagd: Einzelheld schafft immer den Blattschuss** 💰 – Ein einzelner Held erlegt nach gelungenem Schleichen immer die volle Beute.<br>*So prüfst du es:* Jagd unterwegs (Karene oder Wildschweine) mit einem einzelnen Helden: nach gelungenem Schleichen muss jetzt die Schusswaffen-Probe gelingen (im Probenlog), vorher war die Beute sicher. Allgemein reicht die aufgerundete Hälfte (3 Helden: 2 Treffer statt 1). | A |
 
-### Städte & Orte (47)
+### Städte & Orte (45, dazu 2 zurückgenommen)
 
 | Nr | Was behoben ist | Stufe |
 |---:|---|:---:|
@@ -395,9 +403,9 @@ Davon 38 **Exploits** (Fehler, die dem Spieler nützen, z. B. Geld oder Werte au
 | 338 | **Treborn Kolbergs Laden: Ortszeile leer oder fremd** – Leere Namensleiste, Zeichensalat.<br>*So prüfst du es:* Treborn Kolberg (Reisebegegnung): im Gespräch seinen Laden öffnen. Vorher leere oder fremde Ortszeile, „Reden“ öffnet einen Händlerdialog im Dialog, danach falscher Text oder Kopf. Jetzt steht STRASSENHÄNDLER da, Reden führt zurück in sein Gespräch. | A |
 | 343 | **Taverne: Gewinn wird als unsinnige Ausgabe angezeigt** – Nach Beorn erscheint eine Ausgabe von z. B. 20000.<br>*So prüfst du es:* Taverne: im Gespräch Geld bekommen statt ausgeben (laut Fehlerliste z. B. bei Beorn). Vorher meldet das Spiel „IHR HABT … IN DER TAVERNE AUSGEGEBEN!“ mit unsinnigem Betrag, jetzt kommt die Meldung nur bei echten Ausgaben. | A |
 | 425 | **Tavernenschlägerei schreibt über gs_town_outlawed_flags hinaus in die Rauswurf-Merker der Herbergen** – TLK_tavern Zustand 32/33 (Schlägerei bei crowdedness 3) setzt gs_town_outlawed_flags[gs_town_id] wie TLK_inn statt [gs_town_typeindex].<br>*So prüfst du es:* Kaum direkt sichtbar: eine Schlägerei in einer vollen Taverne schrieb ihren Merker bei Tavernen mit hoher Nummer in den Rauswurf-Merker einer fremden Herberge, deren Wirt die Gruppe dann grundlos wie nach einem Rauswurf ansprach. Jetzt bleibt jede Herberge unberührt. | A |
-| 438 | **Hauswände auf der linken Straßenseite zeigen die Fassade verkehrt herum** – Steht ein Haus links, zeigt die Seitenansicht z. B. Fenster, Schornstein, Bootsrumpf; stellt man sich davor, ist es Bootsrumpf, Schornstein, Fenster. Auf der rechten Straßenseite stimmt es. Entdeckt von MiauKuh.<br>*So prüfst du es:* Stadt: an Häusern auf der linken Straßenseite vorbeigehen und die weiter entfernten Seitenwände mit der Ansicht direkt davor vergleichen. Vorher läuft die Fassade links verkehrt herum (z. B. Bootsrumpf, Schornstein, Fenster), jetzt in derselben Reihenfolge wie vorn. | A |
+| 438 | **Hauswände auf der linken Straßenseite zeigen die Fassade verkehrt herum** – Steht ein Haus links, zeigt die Seitenansicht z. B. Fenster, Schornstein, Bootsrumpf; stellt man sich davor, ist es Bootsrumpf, Schornstein, Fenster. Auf der rechten Straßenseite stimmt es. Entdeckt von MiauKuh.<br>**In 1.5l zurückgenommen:** sah im Spiel schlechter aus als das Original (Hausecke am falschen Ende, Haus wirkt zu tief, Balken wellig); die Hauswände links bleiben, wie Attic sie gezeichnet hat.<br>*So prüfst du es:* Stadt: an Häusern auf der linken Straßenseite vorbeigehen und die weiter entfernten Seitenwände mit der Ansicht direkt davor vergleichen. Vorher läuft die Fassade links verkehrt herum (z. B. Bootsrumpf, Schornstein, Fenster), jetzt in derselben Reihenfolge wie vorn. | nein |
 | 439 | **Tempel zeigen von der Seite eine Fachwerkwand statt ihrer Front** – Im Vorbeigehen sieht die Eingangsseite eines Tempels aus wie ein Fachwerkhaus; erst wenn man sich davor stellt, erscheinen Torbogen und Schild. Entdeckt von MiauKuh.<br>*So prüfst du es:* Stadt: an einem Tempel vorbeigehen und die Eingangsseite schräg von der Seite ansehen. Vorher erscheint dort eine Fachwerkwand, erst direkt davor Torbogen und Schild, jetzt zeigt auch die Seitenansicht die Tempelfront. | A |
-| 443 | **Hauswand direkt neben der Gruppe steht links verkehrt herum** – Ergänzung zu Nr. 438: auch die Seitenwand direkt neben der Gruppe zeigt auf der linken Straßenseite die Fassade verkehrt herum, bei Haus 1 im Vorbeigehen erst den Schornstein und dahinter das Bootsgerüst. Jetzt wird auch diese Wand mit Attics eigenen Pixeln umgedreht, ohne neue Grafik. Entdeckt von MiauKuh.<br>*So prüfst du es:* Thorwal, an einem Haus mit Bootsgerüst links vorbeigehen; die Wand direkt daneben zeigt jetzt Gerüst vor Schornstein, wie vor dem Haus. | A |
+| 443 | **Hauswand direkt neben der Gruppe steht links verkehrt herum** – Ergänzung zu Nr. 438: auch die Seitenwand direkt neben der Gruppe zeigt auf der linken Straßenseite die Fassade verkehrt herum, bei Haus 1 im Vorbeigehen erst den Schornstein und dahinter das Bootsgerüst. Jetzt wird auch diese Wand mit Attics eigenen Pixeln umgedreht, ohne neue Grafik. Entdeckt von MiauKuh.<br>**In 1.5l zurückgenommen** wie Nr. 438: sah im Spiel schlechter aus als das Original.<br>*So prüfst du es:* Thorwal, an einem Haus mit Bootsgerüst links vorbeigehen; die Wand direkt daneben zeigt jetzt Gerüst vor Schornstein, wie vor dem Haus. | nein |
 
 ### Helden & Werte (40)
 
@@ -567,7 +575,7 @@ Davon 38 **Exploits** (Fehler, die dem Spieler nützen, z. B. Geld oder Werte au
 
 ## Bewusst nicht geändert
 
-107 gemeldete Fehler bleiben, wie sie sind. Die Gründe: Die Absicht von Attic ist unklar (Spielbalance), die Behebung würde Spielstände oder Spieldaten verändern, sie hätte keine Wirkung, oder sie wäre eine neue Spielmechanik statt einer Fehlerbehebung. Jeder einzelne Grund steht in [Bauen/FIXES.md](Bauen/FIXES.md).
+109 gemeldete Fehler bleiben, wie sie sind. Die Gründe: Die Absicht von Attic ist unklar (Spielbalance), die Behebung würde Spielstände oder Spieldaten verändern, sie hätte keine Wirkung, oder sie wäre eine neue Spielmechanik statt einer Fehlerbehebung. Jeder einzelne Grund steht in [Bauen/FIXES.md](Bauen/FIXES.md).
 
 ## Etwas gefunden?
 

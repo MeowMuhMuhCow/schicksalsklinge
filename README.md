@@ -1,10 +1,12 @@
 # Die Schicksalsklinge – Quelltext im Attic-Stil
 
-## 291 Fehler behoben – 34 Jahre nach Release
+## 289 Fehler behoben – 34 Jahre nach Release
 
 **Inoffizielle Bugfix-Fassung · spielbar ohne Compiler · das Original bleibt unangetastet · [gleich loslegen](#schnellstart-bugfix-fassung-spielen-ohne-compiler)**
 
-**Neu in Version 1.5k: Heilungszauber im Kampf, Axxeleratus, „Alte Optionen“, Hauswand links.** Balsam Salabunde, Hexenspeichel, Klarum Purum und Tiere besprechen lassen sich im Kampf jetzt wählen, wie es die Zaubertabelle vorsieht (Nr. 444). „Alte Optionen“ mit einer Fernwaffe ohne Munition kostet nicht mehr die Runde, es kommt die Meldung und man wählt neu (Nr. 445). Die zweite Aktion durch Axxeleratus greift nur noch an, wenn das Ziel erreichbar ist, sonst wartet der Held (Nr. 379, gemeldet von Andrean). Und auch die Hauswand direkt neben der Gruppe steht auf der linken Straßenseite richtig herum, bei Haus 1 erst das Bootsgerüst, dann der Schornstein (Nr. 443, entdeckt von MiauKuh). Neu ist außerdem die [Talentliste](Analyse/Talentliste.md): alle 52 Talente mit jeder Stelle, an der das Spiel sie prüft. Die [Zauberliste](Analyse/Zauberliste.md) ist ergänzt.
+**Neu in Version 1.5l: Hauswände links wieder wie im Original.** Das Umdrehen der linken Hauswände (Nr. 438, 443) sah im Spiel schlechter aus als Attics Zeichnung und ist zurückgenommen (auf Wunsch von MiauKuh); die Tempelseiten (Nr. 439) bleiben.
+
+**Neu in Version 1.5k: Heilungszauber im Kampf, Axxeleratus, „Alte Optionen“, Hauswand links.** Balsam Salabunde, Hexenspeichel, Klarum Purum und Tiere besprechen lassen sich im Kampf jetzt wählen, wie es die Zaubertabelle vorsieht (Nr. 444). „Alte Optionen“ mit einer Fernwaffe ohne Munition kostet nicht mehr die Runde, es kommt die Meldung und man wählt neu (Nr. 445). Die zweite Aktion durch Axxeleratus greift nur noch an, wenn das Ziel erreichbar ist, sonst wartet der Held (Nr. 379, gemeldet von Andrean). Und auch die Hauswand direkt neben der Gruppe steht auf der linken Straßenseite richtig herum, bei Haus 1 erst das Bootsgerüst, dann der Schornstein (Nr. 443, entdeckt von MiauKuh; in 1.5l zurückgenommen). Neu ist außerdem die [Talentliste](Analyse/Talentliste.md): alle 52 Talente mit jeder Stelle, an der das Spiel sie prüft. Die [Zauberliste](Analyse/Zauberliste.md) ist ergänzt.
 
 **Neu in Version 1.5j: Stürze und Zufallsbegegnungen im Probenlog, Symbol „Gruppen vereinen“ nach dem Laden.** Das Probenlog zeigt jetzt bei Stürzen in Fallgruben und durch Falltüren je gestürztem Held den Wurf auf die Zahl der Stürzenden (im Dunkeln ohne Wurf für die ganze Gruppe) und den Schaden, sowie auf Landreisen die Art der Zufallsbegegnung (Landschaftstyp, Begegnungs-W100, Begegnung und bei Kämpfen den Kampfwurf W100 ≤ 33, auf Wunsch von Andrean). Außerdem stimmt das Symbol „Gruppen vereinen“ sofort nach dem Laden eines Spielstands (Nr. 442, gemeldet von Andrean).
 
@@ -56,7 +58,7 @@ Documentation is in German.*
 
 Für alle, die nur spielen wollen. Nötig sind Windows und Schicksalsklinge von GOG, sonst nichts: kein Python, kein Compiler. (Linux: siehe unten.)
 
-1. Rechts unter **Releases** das Paket `schicksalsklinge_Bugfix_1.5k.zip` herunterladen (oder oben **Code → Download ZIP**) und irgendwohin entpacken.
+1. Rechts unter **Releases** das Paket `schicksalsklinge_Bugfix_1.5l.zip` herunterladen (oder oben **Code → Download ZIP**) und irgendwohin entpacken.
 2. **`PATCHEN.bat`** doppelklicken. Es findet den GOG-Spielordner (oder fragt danach), prüft per Prüfsumme, ob die
    eigene EXE genau die passende ist, und erzeugt daraus `Build\BLADEM_FIX_WICHTIG.EXE` und `Build\BLADEM_FIX_ALLES.EXE`.
    **Die Original-EXE wird nicht verändert**, das Spiel bleibt wie es ist.
