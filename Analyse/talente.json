@@ -1,0 +1,3278 @@
+[
+ {
+  "nr": 0,
+  "name": "Waffenlos",
+  "konstante": "TA_WAFFENLOS",
+  "gruppe": "Kampf",
+  "probe": "keine (Nahkampftalent)",
+  "steigerungen_je_stufe": 1,
+  "proben": 0,
+  "stellen": [],
+  "im_code": "Keine Talentprobe: test_talent() gibt für Nahkampftalente sofort 0 zurück. Beim Steigern gibt jeder gelungene Punkt zusätzlich +1 Attacke oder +1 Parade für diese Waffenart (Profi-Modus: Spieler wählt; Anfängermodus: automatisch auf den kleineren Wert, bei Gleichstand Attacke). Wird im Quelltext nirgends abgefragt und von nichts verändert.",
+  "codestellen": [],
+  "deutung": "Kampftalent: Der TaW selbst wird nie geprüft. Wichtig ist nur, dass jede Steigerung einen Punkt auf Attacke oder Parade für diese Waffenart gibt.",
+  "status": "im Code geprüft, im Spiel unbestätigt"
+ },
+ {
+  "nr": 1,
+  "name": "Hiebwaffen",
+  "konstante": "TA_HIEBWAFFEN",
+  "gruppe": "Kampf",
+  "probe": "keine (Nahkampftalent)",
+  "steigerungen_je_stufe": 1,
+  "proben": 0,
+  "stellen": [],
+  "im_code": "Keine Talentprobe: test_talent() gibt für Nahkampftalente sofort 0 zurück. Beim Steigern gibt jeder gelungene Punkt zusätzlich +1 Attacke oder +1 Parade für diese Waffenart (Profi-Modus: Spieler wählt; Anfängermodus: automatisch auf den kleineren Wert, bei Gleichstand Attacke). Wird im Quelltext nirgends abgefragt und von nichts verändert.",
+  "codestellen": [],
+  "deutung": "Wie alle Nahkampftalente: zählt nur über den AT/PA-Punkt beim Steigern.",
+  "status": "im Code geprüft, im Spiel unbestätigt"
+ },
+ {
+  "nr": 2,
+  "name": "Stichwaffen",
+  "konstante": "TA_STICHWAFFEN",
+  "gruppe": "Kampf",
+  "probe": "keine (Nahkampftalent)",
+  "steigerungen_je_stufe": 1,
+  "proben": 0,
+  "stellen": [],
+  "im_code": "Keine Talentprobe: test_talent() gibt für Nahkampftalente sofort 0 zurück. Beim Steigern gibt jeder gelungene Punkt zusätzlich +1 Attacke oder +1 Parade für diese Waffenart (Profi-Modus: Spieler wählt; Anfängermodus: automatisch auf den kleineren Wert, bei Gleichstand Attacke). Wird im Quelltext nirgends abgefragt und von nichts verändert.",
+  "codestellen": [],
+  "deutung": "Wie alle Nahkampftalente: zählt nur über den AT/PA-Punkt beim Steigern.",
+  "status": "im Code geprüft, im Spiel unbestätigt"
+ },
+ {
+  "nr": 3,
+  "name": "Schwerter",
+  "konstante": "TA_SCHWERTER",
+  "gruppe": "Kampf",
+  "probe": "keine (Nahkampftalent)",
+  "steigerungen_je_stufe": 1,
+  "proben": 0,
+  "stellen": [
+   {
+    "bereich": "Götterwunder",
+    "ort": "Rondra",
+    "zuschlag": "",
+    "wer": "",
+    "wirkung": "Schwerter +1 und Schwert-AT +1 für 3 Tage",
+    "codestelle": "Quelle/seg062.c:ask_miracle"
+   }
+  ],
+  "im_code": "Keine Talentprobe: test_talent() gibt für Nahkampftalente sofort 0 zurück. Beim Steigern gibt jeder gelungene Punkt zusätzlich +1 Attacke oder +1 Parade für diese Waffenart (Profi-Modus: Spieler wählt; Anfängermodus: automatisch auf den kleineren Wert, bei Gleichstand Attacke).",
+  "codestellen": [
+   "Quelle/seg062.c:ask_miracle"
+  ],
+  "deutung": "Wie alle Nahkampftalente: zählt nur über den AT/PA-Punkt beim Steigern. Das Rondra-Wunder erhöht neben dem TaW auch die AT, und nur die AT wirkt.",
+  "status": "im Code geprüft, im Spiel unbestätigt"
+ },
+ {
+  "nr": 4,
+  "name": "Äxte",
+  "konstante": "TA_AEXTE",
+  "gruppe": "Kampf",
+  "probe": "keine (Nahkampftalent)",
+  "steigerungen_je_stufe": 1,
+  "proben": 0,
+  "stellen": [],
+  "im_code": "Keine Talentprobe: test_talent() gibt für Nahkampftalente sofort 0 zurück. Beim Steigern gibt jeder gelungene Punkt zusätzlich +1 Attacke oder +1 Parade für diese Waffenart (Profi-Modus: Spieler wählt; Anfängermodus: automatisch auf den kleineren Wert, bei Gleichstand Attacke). Wird im Quelltext nirgends abgefragt und von nichts verändert.",
+  "codestellen": [],
+  "deutung": "Wie alle Nahkampftalente: zählt nur über den AT/PA-Punkt beim Steigern.",
+  "status": "im Code geprüft, im Spiel unbestätigt"
+ },
+ {
+  "nr": 5,
+  "name": "Speere",
+  "konstante": "TA_SPEERE",
+  "gruppe": "Kampf",
+  "probe": "keine (Nahkampftalent)",
+  "steigerungen_je_stufe": 1,
+  "proben": 0,
+  "stellen": [],
+  "im_code": "Keine Talentprobe: test_talent() gibt für Nahkampftalente sofort 0 zurück. Beim Steigern gibt jeder gelungene Punkt zusätzlich +1 Attacke oder +1 Parade für diese Waffenart (Profi-Modus: Spieler wählt; Anfängermodus: automatisch auf den kleineren Wert, bei Gleichstand Attacke). Wird im Quelltext nirgends abgefragt und von nichts verändert.",
+  "codestellen": [],
+  "deutung": "Wie alle Nahkampftalente: zählt nur über den AT/PA-Punkt beim Steigern.",
+  "status": "im Code geprüft, im Spiel unbestätigt"
+ },
+ {
+  "nr": 6,
+  "name": "Zweihänder",
+  "konstante": "TA_ZWEIHAENDER",
+  "gruppe": "Kampf",
+  "probe": "keine (Nahkampftalent)",
+  "steigerungen_je_stufe": 1,
+  "proben": 0,
+  "stellen": [],
+  "im_code": "Keine Talentprobe: test_talent() gibt für Nahkampftalente sofort 0 zurück. Beim Steigern gibt jeder gelungene Punkt zusätzlich +1 Attacke oder +1 Parade für diese Waffenart (Profi-Modus: Spieler wählt; Anfängermodus: automatisch auf den kleineren Wert, bei Gleichstand Attacke). Wird im Quelltext nirgends abgefragt und von nichts verändert.",
+  "codestellen": [],
+  "deutung": "Wie alle Nahkampftalente: zählt nur über den AT/PA-Punkt beim Steigern.",
+  "status": "im Code geprüft, im Spiel unbestätigt"
+ },
+ {
+  "nr": 7,
+  "name": "Schußwaffen",
+  "konstante": "TA_SCHUSSWAFFEN",
+  "gruppe": "Kampf",
+  "probe": "Fernkampfprobe: (KL + GE + KK) / 4 + TaW gegen W20",
+  "steigerungen_je_stufe": 1,
+  "proben": 8,
+  "stellen": [
+   {
+    "zuschlag": "je Ereignis",
+    "wer": "vom Spieler gewählter Schütze",
+    "codestelle": "Quelle/seg109.c:TRV_hunt_generic",
+    "bereich": "Wildnis und Reise",
+    "ort": "Jagd: erster Schuss",
+    "wirkung": "Treffer: Beute (Nahrung, AP)"
+   },
+   {
+    "zuschlag": "je Ereignis",
+    "wer": "vom Spieler gewählter Schütze",
+    "codestelle": "Quelle/seg109.c:TRV_hunt_generic",
+    "bereich": "Wildnis und Reise",
+    "ort": "Jagd: zweiter Schuss",
+    "wirkung": "Treffer: Beute (Nahrung, AP)"
+   },
+   {
+    "zuschlag": "+12",
+    "wer": "vom Spieler gewählter Held",
+    "codestelle": "Quelle/seg114.c:tevent_111",
+    "bereich": "Reiseereignis",
+    "ort": "Ereignis 111: Skelellen – Phexcaer (Meile 63)",
+    "wirkung": "Nashorn: drei Schüsse, jeder +12"
+   },
+   {
+    "zuschlag": "+12",
+    "wer": "vom Spieler gewählter Held",
+    "codestelle": "Quelle/seg114.c:tevent_111",
+    "bereich": "Reiseereignis",
+    "ort": "Ereignis 111: Skelellen – Phexcaer (Meile 63)",
+    "wirkung": "Nashorn: drei Schüsse, jeder +12"
+   },
+   {
+    "zuschlag": "+12",
+    "wer": "vom Spieler gewählter Held",
+    "codestelle": "Quelle/seg114.c:tevent_111",
+    "bereich": "Reiseereignis",
+    "ort": "Ereignis 111: Skelellen – Phexcaer (Meile 63)",
+    "wirkung": "Nashorn: drei Schüsse, jeder +12"
+   },
+   {
+    "zuschlag": "±0",
+    "wer": "jeder Held einzeln",
+    "codestelle": "Quelle/seg117.c:hunt_karen",
+    "bereich": "Wildnis und Reise",
+    "ort": "Jagd auf Karene",
+    "wirkung": "zählt die Treffer"
+   },
+   {
+    "zuschlag": "±0",
+    "wer": "jeder Held einzeln",
+    "codestelle": "Quelle/seg117.c:hunt_wildboar",
+    "bereich": "Wildnis und Reise",
+    "ort": "Jagd auf Wildschweine",
+    "wirkung": "zählt die Treffer"
+   },
+   {
+    "bereich": "Kampf",
+    "ort": "Fernkampftreffer",
+    "zuschlag": "",
+    "wer": "",
+    "wirkung": "jeder Schuss ist eine Fernkampfprobe; Zuschlag = Waffengrundwert + 2 × Entfernungsstufe − 2 × Zielgröße; Misslingen = kein Schaden",
+    "codestelle": "Quelle/seg041.c:FIG_get_hero_weapon_attack_damage"
+   },
+   {
+    "bereich": "Zauber",
+    "ort": "Scharfes Auge",
+    "zuschlag": "",
+    "wer": "",
+    "wirkung": "+3 für 3 Kampfrunden",
+    "codestelle": "Quelle/seg100.c:spell_scharfes_auge"
+   },
+   {
+    "bereich": "Anzeige",
+    "ort": "Statusseite",
+    "zuschlag": "",
+    "wer": "",
+    "wirkung": "zeigt TaW + Fernkampf-Basiswert als „Probe“",
+    "codestelle": "Quelle/seg046.c:status_show"
+   }
+  ],
+  "im_code": "",
+  "codestellen": [
+   "Quelle/seg109.c:TRV_hunt_generic",
+   "Quelle/seg114.c:tevent_111",
+   "Quelle/seg117.c:hunt_karen",
+   "Quelle/seg117.c:hunt_wildboar",
+   "Quelle/seg041.c:FIG_get_hero_weapon_attack_damage",
+   "Quelle/seg100.c:spell_scharfes_auge",
+   "Quelle/seg046.c:status_show"
+  ],
+  "deutung": "Sehr wichtig für Fernkämpfer: Jeder Schuss ist eine Probe. Dazu kommen die Jagden auf Reisen.",
+  "status": "im Code geprüft, im Spiel unbestätigt"
+ },
+ {
+  "nr": 8,
+  "name": "Wurfwaffen",
+  "konstante": "TA_WURFWAFFEN",
+  "gruppe": "Kampf",
+  "probe": "Fernkampfprobe: (KL + GE + KK) / 4 + TaW gegen W20",
+  "steigerungen_je_stufe": 1,
+  "proben": 1,
+  "stellen": [
+   {
+    "bereich": "Kampf",
+    "ort": "Fernkampftreffer mit Wurfwaffen",
+    "zuschlag": "",
+    "wer": "",
+    "wirkung": "wie Schußwaffen, nur mit dem Wurfwaffen-TaW",
+    "codestelle": "Quelle/seg041.c:FIG_get_hero_weapon_attack_damage"
+   },
+   {
+    "bereich": "Zauber",
+    "ort": "Scharfes Auge",
+    "zuschlag": "",
+    "wer": "",
+    "wirkung": "+3 für 3 Kampfrunden",
+    "codestelle": "Quelle/seg100.c:spell_scharfes_auge"
+   },
+   {
+    "bereich": "Anzeige",
+    "ort": "Statusseite",
+    "zuschlag": "",
+    "wer": "",
+    "wirkung": "zeigt TaW + Fernkampf-Basiswert als „Probe“",
+    "codestelle": "Quelle/seg046.c:status_show"
+   }
+  ],
+  "im_code": "",
+  "codestellen": [
+   "Quelle/seg041.c:FIG_get_hero_weapon_attack_damage",
+   "Quelle/seg100.c:spell_scharfes_auge",
+   "Quelle/seg046.c:status_show"
+  ],
+  "deutung": "Lohnt nur, wer wirklich mit Wurfwaffen kämpft. Außerhalb des Kampfes wird es nirgends abgefragt.",
+  "status": "im Code geprüft, im Spiel unbestätigt"
+ },
+ {
+  "nr": 9,
+  "name": "Akrobatik",
+  "konstante": "TA_AKROBATIK",
+  "gruppe": "Körper",
+  "probe": "MU / GE / KK",
+  "steigerungen_je_stufe": 2,
+  "proben": 3,
+  "stellen": [
+   {
+    "zuschlag": "±0 (Taverne: +50, wenn vor weniger als 2 Minuten gespeichert wurde)",
+    "wer": "vom Spieler gewählter Held",
+    "codestelle": "Quelle/seg103.c:use_talent",
+    "bereich": "Talent anwenden",
+    "ort": "Talent anwenden: Akrobatik vorführen",
+    "wirkung": "Gelingen: 10–200 Heller; danach 8 Stunden Pause"
+   },
+   {
+    "zuschlag": "±0",
+    "wer": "jeder Held einzeln",
+    "codestelle": "Quelle/seg113.c:tevent_098",
+    "bereich": "Reiseereignis",
+    "ort": "Ereignis 98: Rybon – Thoss (Meile 35)",
+    "wirkung": "Spalt überspringen: erst ein Freiwilliger, dann alle anderen; Misslingen → der Held verschwindet und taucht im Efferd-Tempel von Liskor wieder auf"
+   },
+   {
+    "zuschlag": "±0",
+    "wer": "vom Spieler gewählter Held",
+    "codestelle": "Quelle/seg113.c:tevent_098",
+    "bereich": "Reiseereignis",
+    "ort": "Ereignis 98: Rybon – Thoss (Meile 35)",
+    "wirkung": "Spalt überspringen: erst ein Freiwilliger, dann alle anderen; Misslingen → der Held verschwindet und taucht im Efferd-Tempel von Liskor wieder auf"
+   },
+   {
+    "bereich": "Kraut",
+    "ort": "Atmonblüte",
+    "zuschlag": "",
+    "wer": "",
+    "wirkung": "+2 für 5 Stunden (wirkt auf alle zehn Körpertalente)",
+    "codestelle": "Quelle/seg108.c:consume"
+   }
+  ],
+  "im_code": "Im Talentmenü in Tavernen und auf dem Markt: Gelingen bringt 10–200 Heller; danach ist Akrobatik 8 Stunden gesperrt, auch nach Misslingen.",
+  "codestellen": [
+   "Quelle/seg103.c:use_talent",
+   "Quelle/seg113.c:tevent_098",
+   "Quelle/seg108.c:consume"
+  ],
+  "deutung": "Ein kleines Zubrot in der Stadt plus ein einziges Reiseereignis. Weil dort ein Misslingen den Helden verschwinden lässt, ist ein Punkt mehr nicht verkehrt.",
+  "status": "im Code geprüft, im Spiel unbestätigt"
+ },
+ {
+  "nr": 10,
+  "name": "Klettern",
+  "konstante": "TA_KLETTERN",
+  "gruppe": "Körper",
+  "probe": "MU / GE / KK",
+  "steigerungen_je_stufe": 2,
+  "proben": 17,
+  "stellen": [
+   {
+    "zuschlag": "±0",
+    "wer": "erster einsatzfähiger Held",
+    "codestelle": "Quelle/seg077.c:DNG01_handler",
+    "bereich": "Dungeon: Totenschiff",
+    "ort": "Klettern (Fix 93: der erste handlungsfähige Held)",
+    "wirkung": "Gelingen: Weg frei"
+   },
+   {
+    "zuschlag": "±0",
+    "wer": "Held auf Platz 1",
+    "codestelle": "Quelle/seg077.c:DNG01_handler",
+    "bereich": "Dungeon: Totenschiff",
+    "ort": "Klettern (Originalzweig)",
+    "wirkung": "im Original klettert immer der Held auf Platz 1"
+   },
+   {
+    "zuschlag": "+2",
+    "wer": "jeder Held einzeln",
+    "codestelle": "Quelle/seg079.c:DNG03_handler",
+    "bereich": "Dungeon: Spinnenhöhle",
+    "ort": "Fallgrube mit Speeren umklettern",
+    "wirkung": "Misslingen: Sturz mit Schaden"
+   },
+   {
+    "zuschlag": "+2",
+    "wer": "jeder Held einzeln",
+    "codestelle": "Quelle/seg083.c:DNG08_handler",
+    "bereich": "Dungeon: Orkbehausung",
+    "ort": "Kletterstelle (Fix 111: bei Platz 1 beginnen)",
+    "wirkung": "Misslingen: Sturz mit Schaden"
+   },
+   {
+    "zuschlag": "±0",
+    "wer": "jeder Held einzeln",
+    "codestelle": "Quelle/seg087.c:DNG14_handler",
+    "bereich": "Dungeon: Zwingfeste",
+    "ort": "Abstieg in der Seilschaft (nur mit mindestens 5 Seilen/Strickleitern/Magierstäben)",
+    "wirkung": "Misslingen: Sturz"
+   },
+   {
+    "zuschlag": "+4",
+    "wer": "jeder Held einzeln",
+    "codestelle": "Quelle/seg087.c:DNG14_handler",
+    "bereich": "Dungeon: Zwingfeste",
+    "ort": "Abstieg zur Ebene 4",
+    "wirkung": "Misslingen: Sturz"
+   },
+   {
+    "zuschlag": "+3",
+    "wer": "jeder Held einzeln",
+    "codestelle": "Quelle/seg111.c:tevent_057",
+    "bereich": "Reiseereignis",
+    "ort": "Ereignis 57: Ottarje – Orvil (Meile 18)",
+    "wirkung": "Erdrutsch überklettern: Misslingen → Sturz; schwer nur ohne Seil und Strickleiter (Fix 158)"
+   },
+   {
+    "zuschlag": "±0",
+    "wer": "jeder Held einzeln",
+    "codestelle": "Quelle/seg111.c:tevent_060",
+    "bereich": "Reiseereignis",
+    "ort": "Ereignis 60: Ottarje – Orvil (Meile 33)",
+    "wirkung": "Abstieg in eine Klamm: Misslingen → Sturz, Zeitverlust"
+   },
+   {
+    "zuschlag": "+1",
+    "wer": "jeder Held einzeln",
+    "codestelle": "Quelle/seg113.c:tevent_107",
+    "bereich": "Reiseereignis",
+    "ort": "Ereignis 107: Skelellen – Phexcaer (Meile 36)",
+    "wirkung": "steiler Hang: Misslingen → Sturz mit LE-Verlust"
+   },
+   {
+    "zuschlag": "±0",
+    "wer": "jeder Held einzeln",
+    "codestelle": "Quelle/seg114.c:tevent_110",
+    "bereich": "Reiseereignis",
+    "ort": "Ereignis 110: Skelellen – Phexcaer (Meile 57)",
+    "wirkung": "Kletterstelle: Misslingen → Sturz mit LE-Verlust"
+   },
+   {
+    "zuschlag": "±0",
+    "wer": "jeder Held einzeln",
+    "codestelle": "Quelle/seg114.c:tevent_123",
+    "bereich": "Reiseereignis",
+    "ort": "Ereignis 123: Orvil – Rovik (Meile 14)",
+    "wirkung": "Hängebrücke (zusammen mit Höhenangst-Probe); der Zweig „Held verschwindet“ ist im Original unerreichbar"
+   },
+   {
+    "zuschlag": "−1",
+    "wer": "vom Spieler gewählter Held",
+    "codestelle": "Quelle/seg116.c:tevent_135",
+    "bereich": "Reiseereignis",
+    "ort": "Ereignis 135: Rundweg bei Einsiedlersee (Meile 20)",
+    "wirkung": "Monolith am Einsiedlersee: fünf Kletterproben nacheinander (−1, +1, ±0, +2, +1), jede weitere nur nach Gelingen der vorigen"
+   },
+   {
+    "zuschlag": "+1",
+    "wer": "vom Spieler gewählter Held",
+    "codestelle": "Quelle/seg116.c:tevent_135",
+    "bereich": "Reiseereignis",
+    "ort": "Ereignis 135: Rundweg bei Einsiedlersee (Meile 20)",
+    "wirkung": "Monolith am Einsiedlersee: fünf Kletterproben nacheinander (−1, +1, ±0, +2, +1), jede weitere nur nach Gelingen der vorigen"
+   },
+   {
+    "zuschlag": "±0",
+    "wer": "vom Spieler gewählter Held",
+    "codestelle": "Quelle/seg116.c:tevent_135",
+    "bereich": "Reiseereignis",
+    "ort": "Ereignis 135: Rundweg bei Einsiedlersee (Meile 20)",
+    "wirkung": "Monolith am Einsiedlersee: fünf Kletterproben nacheinander (−1, +1, ±0, +2, +1), jede weitere nur nach Gelingen der vorigen"
+   },
+   {
+    "zuschlag": "+2",
+    "wer": "vom Spieler gewählter Held",
+    "codestelle": "Quelle/seg116.c:tevent_135",
+    "bereich": "Reiseereignis",
+    "ort": "Ereignis 135: Rundweg bei Einsiedlersee (Meile 20)",
+    "wirkung": "Monolith am Einsiedlersee: fünf Kletterproben nacheinander (−1, +1, ±0, +2, +1), jede weitere nur nach Gelingen der vorigen"
+   },
+   {
+    "zuschlag": "+1",
+    "wer": "vom Spieler gewählter Held",
+    "codestelle": "Quelle/seg116.c:tevent_135",
+    "bereich": "Reiseereignis",
+    "ort": "Ereignis 135: Rundweg bei Einsiedlersee (Meile 20)",
+    "wirkung": "Monolith am Einsiedlersee: fünf Kletterproben nacheinander (−1, +1, ±0, +2, +1), jede weitere nur nach Gelingen der vorigen"
+   },
+   {
+    "zuschlag": "−2",
+    "wer": "jeder Held einzeln",
+    "codestelle": "Quelle/seg118.c:tevent_124",
+    "bereich": "Reiseereignis",
+    "ort": "Ereignis 124: Orvil – Rovik (Meile 17)",
+    "wirkung": "Weg an der Steilklippe: Misslingen → Sturz; ohne Kletterzeug ist ein Patzer tödlich (Fix 185: nur der echte Patzer)"
+   },
+   {
+    "bereich": "Kraut",
+    "ort": "Atmonblüte",
+    "zuschlag": "",
+    "wer": "",
+    "wirkung": "+2 für 5 Stunden (wirkt auf alle zehn Körpertalente)",
+    "codestelle": "Quelle/seg108.c:consume"
+   }
+  ],
+  "im_code": "",
+  "codestellen": [
+   "Quelle/seg077.c:DNG01_handler",
+   "Quelle/seg079.c:DNG03_handler",
+   "Quelle/seg083.c:DNG08_handler",
+   "Quelle/seg087.c:DNG14_handler",
+   "Quelle/seg111.c:tevent_057",
+   "Quelle/seg111.c:tevent_060",
+   "Quelle/seg113.c:tevent_107",
+   "Quelle/seg114.c:tevent_110",
+   "Quelle/seg114.c:tevent_123",
+   "Quelle/seg116.c:tevent_135",
+   "Quelle/seg118.c:tevent_124",
+   "Quelle/seg108.c:consume"
+  ],
+  "deutung": "Häufig und mit echtem Schaden: Stürze auf Reisen und in mehreren Dungeons, dazu ein möglicher tödlicher Patzer an der Steilklippe. Für alle Helden wichtig, weil meist jeder einzeln würfelt.",
+  "status": "im Code geprüft, im Spiel unbestätigt"
+ },
+ {
+  "nr": 11,
+  "name": "Körperbeherrschung",
+  "konstante": "TA_KOERPERBEHERRSCHUNG",
+  "gruppe": "Körper",
+  "probe": "MU / IN / GE",
+  "steigerungen_je_stufe": 2,
+  "proben": 2,
+  "stellen": [
+   {
+    "zuschlag": "RS-Behinderung",
+    "wer": "jeder Held einzeln",
+    "codestelle": "Quelle/seg081.c:DNG06_handler",
+    "bereich": "Dungeon: Daspota-Schatz",
+    "ort": "Sprung über eine Grube",
+    "wirkung": "Misslingen: Sturz; Zuschlag = Rüstungsbehinderung (Fix 86: nur handlungsfähige Helden springen)"
+   },
+   {
+    "zuschlag": "±0",
+    "wer": "erster einsatzfähiger Held",
+    "codestelle": "Quelle/seg081.c:DNG06_handler",
+    "bereich": "Dungeon: Daspota-Schatz",
+    "ort": "herabfallende Steinscheibe",
+    "wirkung": "nur wer Körperbeherrschung UND Gefahrensinn besteht, weicht aus"
+   },
+   {
+    "bereich": "Kraut",
+    "ort": "Atmonblüte",
+    "zuschlag": "",
+    "wer": "",
+    "wirkung": "+2 für 5 Stunden (wirkt auf alle zehn Körpertalente)",
+    "codestelle": "Quelle/seg108.c:consume"
+   }
+  ],
+  "im_code": "",
+  "codestellen": [
+   "Quelle/seg081.c:DNG06_handler",
+   "Quelle/seg108.c:consume"
+  ],
+  "deutung": "Nur zwei Stellen im Daspota-Schatz. Schwere Rüstung macht den Sprung dort schwerer.",
+  "status": "im Code geprüft, im Spiel unbestätigt"
+ },
+ {
+  "nr": 12,
+  "name": "Reiten",
+  "konstante": "TA_REITEN",
+  "gruppe": "Körper",
+  "probe": "CH / GE / KK",
+  "steigerungen_je_stufe": 2,
+  "proben": 0,
+  "stellen": [
+   {
+    "bereich": "Kraut",
+    "ort": "Atmonblüte",
+    "zuschlag": "",
+    "wer": "",
+    "wirkung": "+2 für 5 Stunden (wirkt auf alle zehn Körpertalente)",
+    "codestelle": "Quelle/seg108.c:consume"
+   }
+  ],
+  "im_code": "Keine einzige Probe im Spiel; nur die unten genannten Stellen verändern den Wert.",
+  "codestellen": [
+   "Quelle/seg108.c:consume"
+  ],
+  "deutung": "Wird nirgends abgefragt. Steigern bringt nichts.",
+  "status": "im Code geprüft, im Spiel unbestätigt"
+ },
+ {
+  "nr": 13,
+  "name": "Schleichen",
+  "konstante": "TA_SCHLEICHEN",
+  "gruppe": "Körper",
+  "probe": "MU / IN / GE",
+  "steigerungen_je_stufe": 2,
+  "proben": 14,
+  "stellen": [
+   {
+    "zuschlag": "+2",
+    "wer": "jeder Held einzeln",
+    "codestelle": "Quelle/seg080.c:DNG04_handler",
+    "bereich": "Dungeon: Wolfshöhle",
+    "ort": "einsturzgefährdete Decke",
+    "wirkung": "Misslingen: Steine treffen den Helden"
+   },
+   {
+    "zuschlag": "+4",
+    "wer": "jeder Held einzeln",
+    "codestelle": "Quelle/seg080.c:DNG04_handler",
+    "bereich": "Dungeon: Wolfshöhle",
+    "ort": "einsturzgefährdete Decke",
+    "wirkung": "Misslingen: Steine treffen den Helden"
+   },
+   {
+    "zuschlag": "RS-Behinderung + 3",
+    "wer": "jeder Held einzeln",
+    "codestelle": "Quelle/seg085.c:DNG10_handler",
+    "bereich": "Dungeon: Drachenhort",
+    "ort": "Drachenhort plündern",
+    "wirkung": "nur wenn KEIN Held misslingt, kann der Hort geplündert werden; Zuschlag = Rüstungsbehinderung + 3"
+   },
+   {
+    "zuschlag": "−4",
+    "wer": "jeder Held einzeln",
+    "codestelle": "Quelle/seg091.c:DNG13_collapsing_ceiling",
+    "bereich": "Dungeon: Verlassene Mine",
+    "ort": "einstürzende Decke",
+    "wirkung": "Misslingen: Steine treffen den Helden (leicht, −4)"
+   },
+   {
+    "zuschlag": "−1",
+    "wer": "jeder Held einzeln",
+    "codestelle": "Quelle/seg091.c:DNG13_collapsing_ceiling_hard",
+    "bereich": "Dungeon: Verlassene Mine",
+    "ort": "einstürzende Decke (schwere Variante)",
+    "wirkung": "Misslingen: Steine treffen den Helden"
+   },
+   {
+    "zuschlag": "je Ereignis",
+    "wer": "jeder Held einzeln",
+    "codestelle": "Quelle/seg109.c:TRV_hunt_generic",
+    "bereich": "Wildnis und Reise",
+    "ort": "Jagd (gemeinsamer Baustein der Reiseereignisse)",
+    "wirkung": "erst schleichen alle Helden an"
+   },
+   {
+    "zuschlag": "je Ereignis",
+    "wer": "vom Spieler gewählter Schütze",
+    "codestelle": "Quelle/seg109.c:TRV_hunt_generic",
+    "bereich": "Wildnis und Reise",
+    "ort": "Jagd",
+    "wirkung": "dann schleicht sich der Schütze näher heran"
+   },
+   {
+    "zuschlag": "±0",
+    "wer": "jeder Held einzeln",
+    "codestelle": "Quelle/seg111.c:tevent_064",
+    "bereich": "Reiseereignis",
+    "ort": "Ereignis 64: Ottarje – Orvil (Meile 58); Skjal – Orvil (Meile 61)",
+    "wirkung": "nur mit Umbriks Auftrag: ab zwei misslungenen Proben gibt es einen Hinterhalt"
+   },
+   {
+    "zuschlag": "−2",
+    "wer": "jeder Held einzeln",
+    "codestelle": "Quelle/seg111.c:tevent_066",
+    "bereich": "Reiseereignis",
+    "ort": "Ereignis 66: Orvil – Ala (Meile 19)",
+    "wirkung": "schon eine misslungene Probe verrät die Gruppe"
+   },
+   {
+    "zuschlag": "±0",
+    "wer": "jeder Held einzeln",
+    "codestelle": "Quelle/seg112.c:tevent_075",
+    "bereich": "Reiseereignis",
+    "ort": "Ereignis 75: Felsteyn – Orkanger (Meile 25)",
+    "wirkung": "Räuberlager: ab zwei misslungenen Proben wird die Gruppe entdeckt"
+   },
+   {
+    "zuschlag": "−5",
+    "wer": "jeder Held einzeln",
+    "codestelle": "Quelle/seg114.c:tevent_111",
+    "bereich": "Reiseereignis",
+    "ort": "Ereignis 111: Skelellen – Phexcaer (Meile 63)",
+    "wirkung": "Nashorn anschleichen: erst alle (−5), dann der gewählte Held (±0)"
+   },
+   {
+    "zuschlag": "±0",
+    "wer": "vom Spieler gewählter Held",
+    "codestelle": "Quelle/seg114.c:tevent_111",
+    "bereich": "Reiseereignis",
+    "ort": "Ereignis 111: Skelellen – Phexcaer (Meile 63)",
+    "wirkung": "Nashorn anschleichen: erst alle (−5), dann der gewählte Held (±0)"
+   },
+   {
+    "zuschlag": "+2",
+    "wer": "jeder Held einzeln",
+    "codestelle": "Quelle/seg117.c:hunt_karen",
+    "bereich": "Wildnis und Reise",
+    "ort": "Jagd auf Karene",
+    "wirkung": "zählt die Helden mit gelungener Probe"
+   },
+   {
+    "zuschlag": "±0",
+    "wer": "jeder Held einzeln",
+    "codestelle": "Quelle/seg117.c:hunt_wildboar",
+    "bereich": "Wildnis und Reise",
+    "ort": "Jagd auf Wildschweine",
+    "wirkung": "zählt die Helden mit gelungener Probe"
+   },
+   {
+    "bereich": "Zauber",
+    "ort": "Silentium",
+    "zuschlag": "",
+    "wer": "",
+    "wirkung": "+10 für alle Helden der Gruppe, 5 Minuten",
+    "codestelle": "Quelle/seg101.c:spell_silentium"
+   },
+   {
+    "bereich": "Gruppe",
+    "ort": "Abschied von Harika",
+    "zuschlag": "",
+    "wer": "",
+    "wirkung": "alle Helden der Gruppe bekommen bis zu drei freie Steigerungsversuche (im Original auf Kosten der nächsten Stufe, Fix 255)",
+    "codestelle": "Quelle/seg095.c:npc_farewell"
+   },
+   {
+    "bereich": "Kraut",
+    "ort": "Atmonblüte",
+    "zuschlag": "",
+    "wer": "",
+    "wirkung": "+2 für 5 Stunden (wirkt auf alle zehn Körpertalente)",
+    "codestelle": "Quelle/seg108.c:consume"
+   }
+  ],
+  "im_code": "",
+  "codestellen": [
+   "Quelle/seg080.c:DNG04_handler",
+   "Quelle/seg085.c:DNG10_handler",
+   "Quelle/seg091.c:DNG13_collapsing_ceiling",
+   "Quelle/seg091.c:DNG13_collapsing_ceiling_hard",
+   "Quelle/seg109.c:TRV_hunt_generic",
+   "Quelle/seg111.c:tevent_064",
+   "Quelle/seg111.c:tevent_066",
+   "Quelle/seg112.c:tevent_075",
+   "Quelle/seg114.c:tevent_111",
+   "Quelle/seg117.c:hunt_karen",
+   "Quelle/seg117.c:hunt_wildboar",
+   "Quelle/seg101.c:spell_silentium",
+   "Quelle/seg095.c:npc_farewell",
+   "Quelle/seg108.c:consume"
+  ],
+  "deutung": "Wird oft für alle Helden einzeln geprüft (Jagd, Räuberlager, Drachenhort). Ein schwacher Schleicher verdirbt es der ganzen Gruppe. Silentium hilft enorm.",
+  "status": "im Code geprüft, im Spiel unbestätigt"
+ },
+ {
+  "nr": 14,
+  "name": "Schwimmen",
+  "konstante": "TA_SCHWIMMEN",
+  "gruppe": "Körper",
+  "probe": "MU / GE / KK",
+  "steigerungen_je_stufe": 2,
+  "proben": 6,
+  "stellen": [
+   {
+    "zuschlag": "+8",
+    "wer": "vom Spieler gewählter Held",
+    "codestelle": "Quelle/seg087.c:DNG14_handler",
+    "bereich": "Dungeon: Zwingfeste",
+    "ort": "Tauchen (Ebenen 4 und 5): der Taucher",
+    "wirkung": "Misslingen: Schaden im Wasser"
+   },
+   {
+    "zuschlag": "+2 / +8",
+    "wer": "jeder Held einzeln",
+    "codestelle": "Quelle/seg088.c:DNG14_dive",
+    "bereich": "Dungeon: Zwingfeste",
+    "ort": "Tauchen: die übrigen Helden folgen",
+    "wirkung": "Misslingen: Schaden; Zuschlag +2, wenn der Taucher ein Seil hinübergebracht hat, ohne Tauchausrüstung +8"
+   },
+   {
+    "zuschlag": "±0",
+    "wer": "jeder Held einzeln",
+    "codestelle": "Quelle/seg110.c:TRV_swim2",
+    "bereich": "Wildnis und Reise",
+    "ort": "Fluss durchschwimmen (Furten)",
+    "wirkung": "Gelingen: sicher am anderen Ufer"
+   },
+   {
+    "zuschlag": "+2 (schwimmen) oder −1 (andere Wahl)",
+    "wer": "jeder Held einzeln",
+    "codestelle": "Quelle/seg112.c:TRV_swimm",
+    "bereich": "Wildnis und Reise",
+    "ort": "Fluss durchschwimmen (Furten)",
+    "wirkung": "Misslingen: Krankheitsprobe Dumpfschädel, W5 LE, evtl. Gegenstand verloren"
+   },
+   {
+    "zuschlag": "±0",
+    "wer": "betroffener Held",
+    "codestelle": "Quelle/seg117.c:octopus_attack",
+    "bereich": "Wildnis und Reise",
+    "ort": "Seereise: Krakenangriff",
+    "wirkung": "Misslingen: der über Bord gerissene Held hat Probleme im Wasser"
+   },
+   {
+    "zuschlag": "+5",
+    "wer": "zufällig bestimmter Held",
+    "codestelle": "Quelle/seg117.c:TLK_way_to_ruin",
+    "bereich": "Gespräch / Ort",
+    "ort": "Weg zu Hyggeliks Ruine (Gespräch)",
+    "wirkung": "Gelingen/Misslingen beim Schwimmen entscheidet den Verlauf"
+   },
+   {
+    "bereich": "Götterwunder",
+    "ort": "Efferd",
+    "zuschlag": "",
+    "wer": "",
+    "wirkung": "+2 für 4 Tage",
+    "codestelle": "Quelle/seg062.c:ask_miracle"
+   },
+   {
+    "bereich": "Kraut",
+    "ort": "Atmonblüte",
+    "zuschlag": "",
+    "wer": "",
+    "wirkung": "+2 für 5 Stunden (wirkt auf alle zehn Körpertalente)",
+    "codestelle": "Quelle/seg108.c:consume"
+   }
+  ],
+  "im_code": "",
+  "codestellen": [
+   "Quelle/seg087.c:DNG14_handler",
+   "Quelle/seg088.c:DNG14_dive",
+   "Quelle/seg110.c:TRV_swim2",
+   "Quelle/seg112.c:TRV_swimm",
+   "Quelle/seg117.c:octopus_attack",
+   "Quelle/seg117.c:TLK_way_to_ruin",
+   "Quelle/seg062.c:ask_miracle",
+   "Quelle/seg108.c:consume"
+  ],
+  "deutung": "Bei Furten muss jeder durch, Misslingen kostet LE und manchmal Ausrüstung. Wichtig für die Zwingfeste.",
+  "status": "im Code geprüft, im Spiel unbestätigt"
+ },
+ {
+  "nr": 15,
+  "name": "Selbstbeherrschung",
+  "konstante": "TA_SELBSTBEHERRSCHUNG",
+  "gruppe": "Körper",
+  "probe": "MU / KK / KK",
+  "steigerungen_je_stufe": 2,
+  "proben": 0,
+  "stellen": [
+   {
+    "bereich": "Kraut",
+    "ort": "Atmonblüte",
+    "zuschlag": "",
+    "wer": "",
+    "wirkung": "+2 für 5 Stunden (wirkt auf alle zehn Körpertalente)",
+    "codestelle": "Quelle/seg108.c:consume"
+   }
+  ],
+  "im_code": "Keine einzige Probe im Spiel; nur die unten genannten Stellen verändern den Wert.",
+  "codestellen": [
+   "Quelle/seg108.c:consume"
+  ],
+  "deutung": "Wird nirgends abgefragt. Steigern bringt nichts.",
+  "status": "im Code geprüft, im Spiel unbestätigt"
+ },
+ {
+  "nr": 16,
+  "name": "Tanzen",
+  "konstante": "TA_TANZEN",
+  "gruppe": "Körper",
+  "probe": "MU / IN / GE",
+  "steigerungen_je_stufe": 2,
+  "proben": 0,
+  "stellen": [
+   {
+    "bereich": "Götterwunder",
+    "ort": "Rahja",
+    "zuschlag": "",
+    "wer": "",
+    "wirkung": "+2 für 7 Tage (zusammen mit Betören); ein anderes Rahja-Wunder gibt +1 dauerhaft",
+    "codestelle": "Quelle/seg062.c:ask_miracle"
+   },
+   {
+    "bereich": "Kraut",
+    "ort": "Atmonblüte",
+    "zuschlag": "",
+    "wer": "",
+    "wirkung": "+2 für 5 Stunden (wirkt auf alle zehn Körpertalente)",
+    "codestelle": "Quelle/seg108.c:consume"
+   }
+  ],
+  "im_code": "Keine einzige Probe im Spiel; nur die unten genannten Stellen verändern den Wert.",
+  "codestellen": [
+   "Quelle/seg062.c:ask_miracle",
+   "Quelle/seg108.c:consume"
+  ],
+  "deutung": "Wird nie geprüft. Nur das Rahja-Wunder verändert den Wert.",
+  "status": "im Code geprüft, im Spiel unbestätigt"
+ },
+ {
+  "nr": 17,
+  "name": "Verstecken",
+  "konstante": "TA_VERSTECKEN",
+  "gruppe": "Körper",
+  "probe": "CH / GE / GE",
+  "steigerungen_je_stufe": 2,
+  "proben": 5,
+  "stellen": [
+   {
+    "zuschlag": "−2",
+    "wer": "jeder Held einzeln",
+    "codestelle": "Quelle/seg025.c:do_house",
+    "bereich": "Stadt",
+    "ort": "Einbruch in ein Haus",
+    "wirkung": "jeder Held muss bestehen; Misslingen in Thorwal, Prem, Phexcaer oder Oberorken: Wachen erwischen die Gruppe (Fix 86: nur handlungsfähige Helden)"
+   },
+   {
+    "zuschlag": "−5",
+    "wer": "jeder Held einzeln",
+    "codestelle": "Quelle/seg116.c:TLK_old_woman",
+    "bereich": "Reiseereignis",
+    "ort": "Ereignis 92: Felsteyn – Einsiedlersee, die alte Frau",
+    "wirkung": "Verstecken vor der Alten (Fix 153: nur lebende Helden der aktiven Gruppe)"
+   },
+   {
+    "zuschlag": "−5",
+    "wer": "jeder Held einzeln",
+    "codestelle": "Quelle/seg116.c:TLK_old_woman",
+    "bereich": "Reiseereignis",
+    "ort": "Ereignis 92: Felsteyn – Einsiedlersee, die alte Frau",
+    "wirkung": "wie oben (zweite Abfrage derselben Stelle)"
+   },
+   {
+    "zuschlag": "−5",
+    "wer": "jeder Held einzeln",
+    "codestelle": "Quelle/seg116.c:TLK_old_woman",
+    "bereich": "Reiseereignis",
+    "ort": "Ereignis 92: Felsteyn – Einsiedlersee, die alte Frau",
+    "wirkung": "Verstecken, zweite Situation"
+   },
+   {
+    "zuschlag": "−5",
+    "wer": "jeder Held einzeln",
+    "codestelle": "Quelle/seg116.c:TLK_old_woman",
+    "bereich": "Reiseereignis",
+    "ort": "Ereignis 92: Felsteyn – Einsiedlersee, die alte Frau",
+    "wirkung": "wie oben (zweite Abfrage derselben Stelle)"
+   },
+   {
+    "bereich": "Kraut",
+    "ort": "Atmonblüte",
+    "zuschlag": "",
+    "wer": "",
+    "wirkung": "+2 für 5 Stunden (wirkt auf alle zehn Körpertalente)",
+    "codestelle": "Quelle/seg108.c:consume"
+   }
+  ],
+  "im_code": "",
+  "codestellen": [
+   "Quelle/seg025.c:do_house",
+   "Quelle/seg116.c:TLK_old_woman",
+   "Quelle/seg108.c:consume"
+  ],
+  "deutung": "Nur beim Einbruch in Häuser und bei der alten Frau. Beim Einbruch zählt der schwächste Held.",
+  "status": "im Code geprüft, im Spiel unbestätigt"
+ },
+ {
+  "nr": 18,
+  "name": "Zechen",
+  "konstante": "TA_ZECHEN",
+  "gruppe": "Körper",
+  "probe": "KL / IN / KK",
+  "steigerungen_je_stufe": 2,
+  "proben": 2,
+  "stellen": [
+   {
+    "zuschlag": "Runden − 8",
+    "wer": "jeder Held der Reihe nach (Fix 60: nur aktive Gruppe)",
+    "codestelle": "Quelle/seg060.c:TLK_tavern",
+    "bereich": "Gespräch / Ort",
+    "ort": "Taverne: Wetttrinken",
+    "wirkung": "Gelingen: Held bleibt nüchtern; Zuschlag = Anzahl getrunkener Runden − 8"
+   },
+   {
+    "zuschlag": "±0",
+    "wer": "zufälliger Held",
+    "codestelle": "Quelle/seg072.c:INF_eliane_tiomar",
+    "bereich": "Gespräch / Ort",
+    "ort": "Gespräch mit Tiomar (Informant): Trinken",
+    "wirkung": "Ergebnis entscheidet den Gesprächsverlauf"
+   },
+   {
+    "bereich": "Kraut",
+    "ort": "Atmonblüte",
+    "zuschlag": "",
+    "wer": "",
+    "wirkung": "+2 für 5 Stunden (wirkt auf alle zehn Körpertalente)",
+    "codestelle": "Quelle/seg108.c:consume"
+   }
+  ],
+  "im_code": "",
+  "codestellen": [
+   "Quelle/seg060.c:TLK_tavern",
+   "Quelle/seg072.c:INF_eliane_tiomar",
+   "Quelle/seg108.c:consume"
+  ],
+  "deutung": "Nur fürs Wetttrinken in der Taverne und beim Informanten Tiomar.",
+  "status": "im Code geprüft, im Spiel unbestätigt"
+ },
+ {
+  "nr": 19,
+  "name": "Bekehren",
+  "konstante": "TA_BEKEHREN",
+  "gruppe": "Gesellschaft",
+  "probe": "KL / IN / CH",
+  "steigerungen_je_stufe": 2,
+  "proben": 0,
+  "stellen": [],
+  "im_code": "Wird im Quelltext nirgends abgefragt und von nichts verändert.",
+  "codestellen": [],
+  "deutung": "Wird nirgends abgefragt. Steigern bringt nichts.",
+  "status": "im Code geprüft, im Spiel unbestätigt"
+ },
+ {
+  "nr": 20,
+  "name": "Betören",
+  "konstante": "TA_BETOEREN",
+  "gruppe": "Gesellschaft",
+  "probe": "IN / CH / CH",
+  "steigerungen_je_stufe": 2,
+  "proben": 0,
+  "stellen": [
+   {
+    "bereich": "Götterwunder",
+    "ort": "Rahja",
+    "zuschlag": "",
+    "wer": "",
+    "wirkung": "+2 für 7 Tage (zusammen mit Tanzen); ein anderes Rahja-Wunder gibt +1 dauerhaft",
+    "codestelle": "Quelle/seg062.c:ask_miracle"
+   }
+  ],
+  "im_code": "Keine einzige Probe im Spiel; nur die unten genannten Stellen verändern den Wert.",
+  "codestellen": [
+   "Quelle/seg062.c:ask_miracle"
+  ],
+  "deutung": "Wird nie geprüft. Nur das Rahja-Wunder verändert den Wert.",
+  "status": "im Code geprüft, im Spiel unbestätigt"
+ },
+ {
+  "nr": 21,
+  "name": "Feilschen",
+  "konstante": "TA_FEILSCHEN",
+  "gruppe": "Gesellschaft",
+  "probe": "MU / KL / CH",
+  "steigerungen_je_stufe": 2,
+  "proben": 2,
+  "stellen": [
+   {
+    "zuschlag": "±0",
+    "wer": "erster einsatzfähiger Held",
+    "codestelle": "Quelle/seg055.c:TLK_whandel",
+    "bereich": "Gespräch / Ort",
+    "ort": "Händlergespräch",
+    "wirkung": "Gelingen: Preisnachlass im Gespräch; im Original verschlechterte dasselbe Gelingen zugleich die Verkaufspreise (Fix 53 nimmt das heraus)"
+   },
+   {
+    "zuschlag": "berechnet (siehe oben)",
+    "wer": "vom Spieler gewählter Held (Vorauswahl: bester Feilscher)",
+    "codestelle": "Quelle/seg103.c:bargain",
+    "bereich": "Handel",
+    "ort": "Feilschen bei Kauf, Verkauf und Schmied",
+    "wirkung": "Gelingen: der gewünschte Preisnachlass bzw. -aufschlag wird akzeptiert"
+   },
+   {
+    "bereich": "Götterwunder",
+    "ort": "Phex",
+    "zuschlag": "",
+    "wer": "",
+    "wirkung": "+1 für 3 Tage",
+    "codestelle": "Quelle/seg062.c:ask_miracle"
+   },
+   {
+    "bereich": "Handel",
+    "ort": "Kaufen und Verkaufen",
+    "zuschlag": "",
+    "wer": "",
+    "wirkung": "Vorauswahl im Heldenmenü: der Held mit der höchsten Summe aus den drei Eigenschaften und dem TaW",
+    "codestelle": "Quelle/seg056.c:buy_screen"
+   },
+   {
+    "bereich": "Handel",
+    "ort": "Verkaufen",
+    "zuschlag": "",
+    "wer": "",
+    "wirkung": "Vorauswahl wie beim Kaufen",
+    "codestelle": "Quelle/seg057.c:sell_screen"
+   }
+  ],
+  "im_code": "",
+  "codestellen": [
+   "Quelle/seg055.c:TLK_whandel",
+   "Quelle/seg103.c:bargain",
+   "Quelle/seg062.c:ask_miracle",
+   "Quelle/seg056.c:buy_screen",
+   "Quelle/seg057.c:sell_screen"
+  ],
+  "deutung": "Spart bei jedem Einkauf Geld. Die Formel belohnt große Einkäufe mit mehreren Waren. Harika in der Gruppe gibt noch einmal −2.",
+  "status": "im Code geprüft, im Spiel unbestätigt"
+ },
+ {
+  "nr": 22,
+  "name": "Gassenwissen",
+  "konstante": "TA_GASSENWISSEN",
+  "gruppe": "Gesellschaft",
+  "probe": "KL / IN / CH",
+  "steigerungen_je_stufe": 2,
+  "proben": 0,
+  "stellen": [],
+  "im_code": "Wird im Quelltext nirgends abgefragt und von nichts verändert.",
+  "codestellen": [],
+  "deutung": "Wird nirgends abgefragt. Steigern bringt nichts.",
+  "status": "im Code geprüft, im Spiel unbestätigt"
+ },
+ {
+  "nr": 23,
+  "name": "Lügen",
+  "konstante": "TA_LUEGEN",
+  "gruppe": "Gesellschaft",
+  "probe": "MU / IN / CH",
+  "steigerungen_je_stufe": 2,
+  "proben": 0,
+  "stellen": [],
+  "im_code": "Wird im Quelltext nirgends abgefragt und von nichts verändert.",
+  "codestellen": [],
+  "deutung": "Wird nirgends abgefragt. Steigern bringt nichts.",
+  "status": "im Code geprüft, im Spiel unbestätigt"
+ },
+ {
+  "nr": 24,
+  "name": "Menschenkenntnis",
+  "konstante": "TA_MENSCHENKENNTNIS",
+  "gruppe": "Gesellschaft",
+  "probe": "KL / IN / CH",
+  "steigerungen_je_stufe": 2,
+  "proben": 0,
+  "stellen": [],
+  "im_code": "Wird im Quelltext nirgends abgefragt und von nichts verändert.",
+  "codestellen": [],
+  "deutung": "Wird nirgends abgefragt. Steigern bringt nichts.",
+  "status": "im Code geprüft, im Spiel unbestätigt"
+ },
+ {
+  "nr": 25,
+  "name": "Schätzen",
+  "konstante": "TA_SCHAETZEN",
+  "gruppe": "Gesellschaft",
+  "probe": "KL / IN / IN",
+  "steigerungen_je_stufe": 2,
+  "proben": 0,
+  "stellen": [],
+  "im_code": "Wird im Quelltext nirgends abgefragt und von nichts verändert.",
+  "codestellen": [],
+  "deutung": "Wird nirgends abgefragt. Steigern bringt nichts.",
+  "status": "im Code geprüft, im Spiel unbestätigt"
+ },
+ {
+  "nr": 26,
+  "name": "Fährtensuchen",
+  "konstante": "TA_FAEHRTENSUCHEN",
+  "gruppe": "Natur",
+  "probe": "KL / IN / GE",
+  "steigerungen_je_stufe": 2,
+  "proben": 13,
+  "stellen": [
+   {
+    "zuschlag": "+5 + Platz",
+    "wer": "derselbe Held wie bei der Wassersuche",
+    "codestelle": "Quelle/seg051.c:replenish_stocks",
+    "bereich": "Wildnis und Reise",
+    "ort": "Wildlager: Vorräte auffüllen, Nahrung",
+    "wirkung": "Gelingen: Hunger der Gruppe weg (Firun-Wunder: gelingt automatisch)"
+   },
+   {
+    "zuschlag": "+2",
+    "wer": "erster einsatzfähiger Held",
+    "codestelle": "Quelle/seg109.c:tevent_004",
+    "bereich": "Reiseereignis",
+    "ort": "Ereignis 4: Serske – Breida (Meile 13)",
+    "wirkung": "Fährte von Waldrindern: Gelingen ermöglicht die Jagd auf einen Auerochsen (einmal gefunden, bleibt es bekannt)"
+   },
+   {
+    "zuschlag": "+5",
+    "wer": "erster einsatzfähiger Held",
+    "codestelle": "Quelle/seg110.c:tevent_022",
+    "bereich": "Reiseereignis",
+    "ort": "Ereignis 22: Rukian – Fähre Angbodirtal (Meile 15)",
+    "wirkung": "windgeschützter Rastplatz: Gelingen ermöglicht danach eine Wildschweinjagd (einmal gefunden, bleibt es bekannt)"
+   },
+   {
+    "zuschlag": "±0",
+    "wer": "erster einsatzfähiger Held",
+    "codestelle": "Quelle/seg110.c:tevent_041",
+    "bereich": "Reiseereignis",
+    "ort": "Ereignis 41: Varnheim – Auplog (Meile 25)",
+    "wirkung": "Bach mit zerstörter Hängebrücke: Gelingen ermöglicht eine Jagd"
+   },
+   {
+    "zuschlag": "+3",
+    "wer": "erster einsatzfähiger Held",
+    "codestelle": "Quelle/seg110.c:tevent_048",
+    "bereich": "Reiseereignis",
+    "ort": "Ereignis 48: Daspota – Ottarje (Meile 26)",
+    "wirkung": "Rastplatz: Gelingen ermöglicht eine Jagd (einmal gefunden, bleibt es bekannt)"
+   },
+   {
+    "zuschlag": "+3",
+    "wer": "erster einsatzfähiger Held",
+    "codestelle": "Quelle/seg111.c:tevent_061",
+    "bereich": "Reiseereignis",
+    "ort": "Ereignis 61: Ottarje – Orvil (Meile 41)",
+    "wirkung": "Spur nahe dem Eingang der Wolfshöhle (zusammen mit Sinnesschärfe +6)"
+   },
+   {
+    "zuschlag": "+4",
+    "wer": "erster einsatzfähiger Held",
+    "codestelle": "Quelle/seg111.c:tevent_066",
+    "bereich": "Reiseereignis",
+    "ort": "Ereignis 66: Orvil – Ala (Meile 19)",
+    "wirkung": "Spur wilder Hunde, danach evtl. Kampf"
+   },
+   {
+    "zuschlag": "±0",
+    "wer": "erster einsatzfähiger Held",
+    "codestelle": "Quelle/seg112.c:tevent_070",
+    "bereich": "Reiseereignis",
+    "ort": "Ereignis 70: Ala – Thoss (Meile 29); Tjanset – Thoss (Meile 34)",
+    "wirkung": "Fährte gefunden, danach Jagd möglich (einmal gefunden, bleibt es bekannt)"
+   },
+   {
+    "zuschlag": "+4",
+    "wer": "erster einsatzfähiger Held",
+    "codestelle": "Quelle/seg112.c:tevent_071",
+    "bereich": "Reiseereignis",
+    "ort": "Ereignis 71: Thoss – Liskor (Meile 11); Oberorken – Felsteyn (Meile 7)",
+    "wirkung": "Monolith am anderen Ufer des Thossel: Gelingen bringt eine Spur"
+   },
+   {
+    "zuschlag": "+5",
+    "wer": "der Jäger aus „Vorräte auffüllen“ (Fix 163: ohne Jäger der erste Held)",
+    "codestelle": "Quelle/seg113.c:tevent_080",
+    "bereich": "Reiseereignis",
+    "ort": "Ereignis 80: Orkanger – Clanegh (Meile 21)",
+    "wirkung": "Nahrungsplatz: der Jäger aus „Vorräte auffüllen“ findet evtl. eine Tatzelwurm-Spur (Fix 163) (einmal gefunden, bleibt es bekannt)"
+   },
+   {
+    "zuschlag": "+1",
+    "wer": "erster einsatzfähiger Held",
+    "codestelle": "Quelle/seg114.c:tevent_111",
+    "bereich": "Reiseereignis",
+    "ort": "Ereignis 111: Skelellen – Phexcaer (Meile 63)",
+    "wirkung": "Fährte eines Nashorns, danach Jagd (einmal gefunden, bleibt es bekannt)"
+   },
+   {
+    "zuschlag": "±0",
+    "wer": "erster einsatzfähiger Held",
+    "codestelle": "Quelle/seg116.c:tevent_141",
+    "bereich": "Reiseereignis",
+    "ort": "Ereignis 141: Querverbindung (Meile 28)",
+    "wirkung": "Hirschfährte, danach Jagd (einmal gefunden, bleibt es bekannt)"
+   },
+   {
+    "zuschlag": "+4",
+    "wer": "erster einsatzfähiger Held",
+    "codestelle": "Quelle/seg118.c:tevent_051",
+    "bereich": "Reiseereignis",
+    "ort": "Ereignis 51: Ottarje – Skjal (Meile 27)",
+    "wirkung": "Fährte gefunden, der Spur kann gefolgt werden"
+   }
+  ],
+  "im_code": "",
+  "codestellen": [
+   "Quelle/seg051.c:replenish_stocks",
+   "Quelle/seg109.c:tevent_004",
+   "Quelle/seg110.c:tevent_022",
+   "Quelle/seg110.c:tevent_041",
+   "Quelle/seg110.c:tevent_048",
+   "Quelle/seg111.c:tevent_061",
+   "Quelle/seg111.c:tevent_066",
+   "Quelle/seg112.c:tevent_070",
+   "Quelle/seg112.c:tevent_071",
+   "Quelle/seg113.c:tevent_080",
+   "Quelle/seg114.c:tevent_111",
+   "Quelle/seg116.c:tevent_141",
+   "Quelle/seg118.c:tevent_051"
+  ],
+  "deutung": "Wichtig für Nahrung: im Wildlager und für viele Jagden auf Reisen. Fast immer würfelt der erste Held der Gruppe, also den besten Fährtensucher nach vorn.",
+  "status": "im Code geprüft, im Spiel unbestätigt"
+ },
+ {
+  "nr": 27,
+  "name": "Fesseln",
+  "konstante": "TA_FESSELN",
+  "gruppe": "Natur",
+  "probe": "FF / GE / KK",
+  "steigerungen_je_stufe": 2,
+  "proben": 0,
+  "stellen": [],
+  "im_code": "Wird im Quelltext nirgends abgefragt und von nichts verändert.",
+  "codestellen": [],
+  "deutung": "Wird nirgends abgefragt. Steigern bringt nichts.",
+  "status": "im Code geprüft, im Spiel unbestätigt"
+ },
+ {
+  "nr": 28,
+  "name": "Orientierung",
+  "konstante": "TA_ORIENTIERUNG",
+  "gruppe": "Natur",
+  "probe": "KL / IN / FF",
+  "steigerungen_je_stufe": 2,
+  "proben": 23,
+  "stellen": [
+   {
+    "zuschlag": "+6",
+    "wer": "erster einsatzfähiger Held",
+    "codestelle": "Quelle/seg074.c:show_automap",
+    "bereich": "Dungeon: alle",
+    "ort": "Automap in Dungeons",
+    "wirkung": "bei schwachem Licht zeigt die Karte nur bei gelungener Probe; ohne Licht gar nicht, bei vollem Licht immer"
+   },
+   {
+    "zuschlag": "+3",
+    "wer": "erster einsatzfähiger Held",
+    "codestelle": "Quelle/seg110.c:tevent_029",
+    "bereich": "Reiseereignis",
+    "ort": "Ereignis 29: Vilnheim – Phexcaer (Meile 26)",
+    "wirkung": "Gelingen: richtiger Weg; Misslingen: verirrt, kostet Zeit (teils auch LE)"
+   },
+   {
+    "zuschlag": "+2",
+    "wer": "erster einsatzfähiger Held",
+    "codestelle": "Quelle/seg111.c:tevent_057",
+    "bereich": "Reiseereignis",
+    "ort": "Ereignis 57: Ottarje – Orvil (Meile 18)",
+    "wirkung": "Gelingen: richtiger Weg; Misslingen: verirrt, kostet Zeit (teils auch LE)"
+   },
+   {
+    "zuschlag": "+4",
+    "wer": "erster einsatzfähiger Held",
+    "codestelle": "Quelle/seg111.c:tevent_060",
+    "bereich": "Reiseereignis",
+    "ort": "Ereignis 60: Ottarje – Orvil (Meile 33)",
+    "wirkung": "Gelingen: richtiger Weg; Misslingen: verirrt, kostet Zeit (teils auch LE)"
+   },
+   {
+    "zuschlag": "+2",
+    "wer": "erster einsatzfähiger Held",
+    "codestelle": "Quelle/seg111.c:tevent_060",
+    "bereich": "Reiseereignis",
+    "ort": "Ereignis 60: Ottarje – Orvil (Meile 33)",
+    "wirkung": "Gelingen: richtiger Weg; Misslingen: verirrt, kostet Zeit (teils auch LE)"
+   },
+   {
+    "zuschlag": "+2",
+    "wer": "erster einsatzfähiger Held",
+    "codestelle": "Quelle/seg113.c:tevent_103",
+    "bereich": "Reiseereignis",
+    "ort": "Ereignis 103: Skjal – Orvil (Meile 29)",
+    "wirkung": "Gelingen: richtiger Weg; Misslingen: verirrt, kostet Zeit (teils auch LE)"
+   },
+   {
+    "zuschlag": "+3",
+    "wer": "erster einsatzfähiger Held",
+    "codestelle": "Quelle/seg113.c:tevent_103",
+    "bereich": "Reiseereignis",
+    "ort": "Ereignis 103: Skjal – Orvil (Meile 29)",
+    "wirkung": "Gelingen: richtiger Weg; Misslingen: verirrt, kostet Zeit (teils auch LE)"
+   },
+   {
+    "zuschlag": "+4",
+    "wer": "erster einsatzfähiger Held",
+    "codestelle": "Quelle/seg113.c:tevent_103",
+    "bereich": "Reiseereignis",
+    "ort": "Ereignis 103: Skjal – Orvil (Meile 29)",
+    "wirkung": "Gelingen: richtiger Weg; Misslingen: verirrt, kostet Zeit (teils auch LE)"
+   },
+   {
+    "zuschlag": "+1",
+    "wer": "erster einsatzfähiger Held",
+    "codestelle": "Quelle/seg113.c:tevent_107",
+    "bereich": "Reiseereignis",
+    "ort": "Ereignis 107: Skelellen – Phexcaer (Meile 36)",
+    "wirkung": "Gelingen: richtiger Weg; Misslingen: verirrt, kostet Zeit (teils auch LE)"
+   },
+   {
+    "zuschlag": "±0",
+    "wer": "erster einsatzfähiger Held",
+    "codestelle": "Quelle/seg114.c:tevent_110",
+    "bereich": "Reiseereignis",
+    "ort": "Ereignis 110: Skelellen – Phexcaer (Meile 57)",
+    "wirkung": "Gelingen: richtiger Weg; Misslingen: verirrt, kostet Zeit (teils auch LE)"
+   },
+   {
+    "zuschlag": "+2",
+    "wer": "erster einsatzfähiger Held",
+    "codestelle": "Quelle/seg115.c:tevent_096",
+    "bereich": "Reiseereignis",
+    "ort": "Ereignis 96: Rybon – Thoss (Meile 21)",
+    "wirkung": "Gelingen: richtiger Weg; Misslingen: verirrt, kostet Zeit (teils auch LE)"
+   },
+   {
+    "zuschlag": "+4",
+    "wer": "erster einsatzfähiger Held",
+    "codestelle": "Quelle/seg115.c:tevent_096",
+    "bereich": "Reiseereignis",
+    "ort": "Ereignis 96: Rybon – Thoss (Meile 21)",
+    "wirkung": "Gelingen: richtiger Weg; Misslingen: verirrt, kostet Zeit (teils auch LE)"
+   },
+   {
+    "zuschlag": "+3",
+    "wer": "erster einsatzfähiger Held",
+    "codestelle": "Quelle/seg115.c:tevent_096",
+    "bereich": "Reiseereignis",
+    "ort": "Ereignis 96: Rybon – Thoss (Meile 21)",
+    "wirkung": "Gelingen: richtiger Weg; Misslingen: verirrt, kostet Zeit (teils auch LE)"
+   },
+   {
+    "zuschlag": "+3",
+    "wer": "erster einsatzfähiger Held",
+    "codestelle": "Quelle/seg116.c:tevent_139",
+    "bereich": "Reiseereignis",
+    "ort": "Ereignis 139: Querverbindung (Meile 10)",
+    "wirkung": "Gelingen: richtiger Weg; Misslingen: verirrt, kostet Zeit (teils auch LE)"
+   },
+   {
+    "zuschlag": "+5",
+    "wer": "erster einsatzfähiger Held",
+    "codestelle": "Quelle/seg116.c:tevent_139",
+    "bereich": "Reiseereignis",
+    "ort": "Ereignis 139: Querverbindung (Meile 10)",
+    "wirkung": "Gelingen: richtiger Weg; Misslingen: verirrt, kostet Zeit (teils auch LE)"
+   },
+   {
+    "zuschlag": "+3",
+    "wer": "erster einsatzfähiger Held",
+    "codestelle": "Quelle/seg116.c:tevent_139",
+    "bereich": "Reiseereignis",
+    "ort": "Ereignis 139: Querverbindung (Meile 10)",
+    "wirkung": "Gelingen: richtiger Weg; Misslingen: verirrt, kostet Zeit (teils auch LE)"
+   },
+   {
+    "zuschlag": "+2",
+    "wer": "erster einsatzfähiger Held",
+    "codestelle": "Quelle/seg116.c:tevent_143",
+    "bereich": "Reiseereignis",
+    "ort": "Ereignis 143: Querverbindung (Meile 43)",
+    "wirkung": "Gelingen: richtiger Weg; Misslingen: verirrt, kostet Zeit (teils auch LE)"
+   },
+   {
+    "zuschlag": "+4",
+    "wer": "erster einsatzfähiger Held",
+    "codestelle": "Quelle/seg116.c:tevent_143",
+    "bereich": "Reiseereignis",
+    "ort": "Ereignis 143: Querverbindung (Meile 43)",
+    "wirkung": "Gelingen: richtiger Weg; Misslingen: verirrt, kostet Zeit (teils auch LE)"
+   },
+   {
+    "zuschlag": "+3",
+    "wer": "erster einsatzfähiger Held",
+    "codestelle": "Quelle/seg116.c:tevent_143",
+    "bereich": "Reiseereignis",
+    "ort": "Ereignis 143: Querverbindung (Meile 43)",
+    "wirkung": "Gelingen: richtiger Weg; Misslingen: verirrt, kostet Zeit (teils auch LE)"
+   },
+   {
+    "zuschlag": "+5",
+    "wer": "Held, den der Dialog bestimmt",
+    "codestelle": "Quelle/seg117.c:TLK_way_to_ruin",
+    "bereich": "Gespräch / Ort",
+    "ort": "Weg zu Hyggeliks Ruine (Gespräch)",
+    "wirkung": "Gelingen: Weg gefunden, sonst Umweg"
+   },
+   {
+    "zuschlag": "±0",
+    "wer": "jeder Held einzeln",
+    "codestelle": "Quelle/seg117.c:TLK_way_to_ruin",
+    "bereich": "Gespräch / Ort",
+    "ort": "Weg zu Hyggeliks Ruine (Gespräch)",
+    "wirkung": "zählt die Helden mit gelungener Probe"
+   },
+   {
+    "zuschlag": "±0",
+    "wer": "jeder Held einzeln",
+    "codestelle": "Quelle/seg117.c:TLK_way_to_ruin",
+    "bereich": "Gespräch / Ort",
+    "ort": "Weg zu Hyggeliks Ruine (Gespräch)",
+    "wirkung": "zählt die Helden mit gelungener Probe"
+   },
+   {
+    "zuschlag": "+8",
+    "wer": "erster einsatzfähiger Held",
+    "codestelle": "Quelle/seg118.c:tevent_078",
+    "bereich": "Reiseereignis",
+    "ort": "Ereignis 78: Orkanger – Clanegh (Meile 15)",
+    "wirkung": "Gelingen: richtiger Weg; Misslingen: verirrt, kostet Zeit (teils auch LE)"
+   }
+  ],
+  "im_code": "",
+  "codestellen": [
+   "Quelle/seg074.c:show_automap",
+   "Quelle/seg110.c:tevent_029",
+   "Quelle/seg111.c:tevent_057",
+   "Quelle/seg111.c:tevent_060",
+   "Quelle/seg113.c:tevent_103",
+   "Quelle/seg113.c:tevent_107",
+   "Quelle/seg114.c:tevent_110",
+   "Quelle/seg115.c:tevent_096",
+   "Quelle/seg116.c:tevent_139",
+   "Quelle/seg116.c:tevent_143",
+   "Quelle/seg117.c:TLK_way_to_ruin",
+   "Quelle/seg118.c:tevent_078"
+  ],
+  "deutung": "Auf Reisen spart sie Zeit und LE, im Halbdunkel der Dungeons öffnet sie die Karte. Es würfelt der erste Held.",
+  "status": "im Code geprüft, im Spiel unbestätigt"
+ },
+ {
+  "nr": 29,
+  "name": "Pflanzenkunde",
+  "konstante": "TA_PFLANZENKUNDE",
+  "gruppe": "Natur",
+  "probe": "KL / IN / IN",
+  "steigerungen_je_stufe": 2,
+  "proben": 17,
+  "stellen": [
+   {
+    "zuschlag": "je Kraut",
+    "wer": "vom Spieler gewählter Held",
+    "codestelle": "Quelle/seg051.c:gather_herbs",
+    "bereich": "Wildnis und Reise",
+    "ort": "Wildlager: Kräuter suchen",
+    "wirkung": "je Kraut: erst Fundchance in %, dann Probe mit Krautzuschlag − (Stunden − 1) + Platz"
+   },
+   {
+    "zuschlag": "+4",
+    "wer": "erster einsatzfähiger Held",
+    "codestelle": "Quelle/seg109.c:tevent_009",
+    "bereich": "Reiseereignis",
+    "ort": "Ereignis 9: Breida – Peilinen (Meile 17)",
+    "wirkung": "Gelingen: Kräuterplatz entdeckt (dort Kräutersuche mit Erleichterung) (einmal gefunden, bleibt es bekannt)"
+   },
+   {
+    "zuschlag": "+3",
+    "wer": "erster einsatzfähiger Held",
+    "codestelle": "Quelle/seg110.c:tevent_013",
+    "bereich": "Reiseereignis",
+    "ort": "Ereignis 13: Rovamund – Nordvest (Meile 8)",
+    "wirkung": "Gelingen: Kräuterplatz entdeckt (dort Kräutersuche mit Erleichterung) (einmal gefunden, bleibt es bekannt)"
+   },
+   {
+    "zuschlag": "+8",
+    "wer": "erster einsatzfähiger Held",
+    "codestelle": "Quelle/seg110.c:tevent_021",
+    "bereich": "Reiseereignis",
+    "ort": "Ereignis 21: Kravik – Skelellen (Meile 22)",
+    "wirkung": "Gelingen: Kräuterplatz entdeckt (dort Kräutersuche mit Erleichterung) (einmal gefunden, bleibt es bekannt)"
+   },
+   {
+    "zuschlag": "+5",
+    "wer": "erster einsatzfähiger Held",
+    "codestelle": "Quelle/seg110.c:tevent_032",
+    "bereich": "Reiseereignis",
+    "ort": "Ereignis 32: Vilnheim – Phexcaer (Meile 80)",
+    "wirkung": "Gelingen: Kräuterplatz entdeckt (dort Kräutersuche mit Erleichterung) (einmal gefunden, bleibt es bekannt)"
+   },
+   {
+    "zuschlag": "+6",
+    "wer": "erster einsatzfähiger Held",
+    "codestelle": "Quelle/seg110.c:tevent_036",
+    "bereich": "Reiseereignis",
+    "ort": "Ereignis 36: Phexcaer – Einsiedlersee (Meile 22)",
+    "wirkung": "Gelingen: Kräuterplatz entdeckt (dort Kräutersuche mit Erleichterung) (einmal gefunden, bleibt es bekannt)"
+   },
+   {
+    "zuschlag": "+4",
+    "wer": "erster einsatzfähiger Held",
+    "codestelle": "Quelle/seg110.c:tevent_050",
+    "bereich": "Reiseereignis",
+    "ort": "Ereignis 50: Ottarje – Skjal (Meile 23)",
+    "wirkung": "Gelingen: Kräuterplatz entdeckt (dort Kräutersuche mit Erleichterung) (einmal gefunden, bleibt es bekannt)"
+   },
+   {
+    "zuschlag": "+4",
+    "wer": "erster einsatzfähiger Held",
+    "codestelle": "Quelle/seg112.c:tevent_070",
+    "bereich": "Reiseereignis",
+    "ort": "Ereignis 70: Ala – Thoss (Meile 29); Tjanset – Thoss (Meile 34)",
+    "wirkung": "Kräuterplatz mit Jorugawurzel (Bonus wirkt im Original nicht, Fix 161) (einmal gefunden, bleibt es bekannt)"
+   },
+   {
+    "zuschlag": "+6",
+    "wer": "erster einsatzfähiger Held",
+    "codestelle": "Quelle/seg113.c:tevent_083",
+    "bereich": "Reiseereignis",
+    "ort": "Ereignis 83: Oberorken – Einsiedlersee (Meile 9)",
+    "wirkung": "Gelingen: Kräuterplatz entdeckt (dort Kräutersuche mit Erleichterung) (einmal gefunden, bleibt es bekannt)"
+   },
+   {
+    "zuschlag": "+6",
+    "wer": "erster einsatzfähiger Held",
+    "codestelle": "Quelle/seg113.c:tevent_085",
+    "bereich": "Reiseereignis",
+    "ort": "Ereignis 85: Oberorken – Einsiedlersee (Meile 35)",
+    "wirkung": "Gelingen: Kräuterplatz entdeckt (dort Kräutersuche mit Erleichterung) (einmal gefunden, bleibt es bekannt)"
+   },
+   {
+    "zuschlag": "+2",
+    "wer": "erster einsatzfähiger Held",
+    "codestelle": "Quelle/seg114.c:tevent_112",
+    "bereich": "Reiseereignis",
+    "ort": "Ereignis 112: Skelellen – Phexcaer (Meile 68)",
+    "wirkung": "Rastplatz mit Thonnysblüte (Bonus wirkt im Original nicht, Fix 161) (einmal gefunden, bleibt es bekannt)"
+   },
+   {
+    "zuschlag": "+3",
+    "wer": "erster einsatzfähiger Held",
+    "codestelle": "Quelle/seg114.c:tevent_118",
+    "bereich": "Reiseereignis",
+    "ort": "Ereignis 118: Merske – Rovamund (Meile 18)",
+    "wirkung": "Gelingen: Kräuterplatz entdeckt (dort Kräutersuche mit Erleichterung) (einmal gefunden, bleibt es bekannt)"
+   },
+   {
+    "zuschlag": "+5",
+    "wer": "erster einsatzfähiger Held",
+    "codestelle": "Quelle/seg115.c:tevent_091",
+    "bereich": "Reiseereignis",
+    "ort": "Ereignis 91: Felsteyn – Einsiedlersee (Meile 25)",
+    "wirkung": "Gelingen: Kräuterplatz entdeckt (dort Kräutersuche mit Erleichterung) (einmal gefunden, bleibt es bekannt)"
+   },
+   {
+    "zuschlag": "+4",
+    "wer": "erster einsatzfähiger Held",
+    "codestelle": "Quelle/seg115.c:tevent_128",
+    "bereich": "Reiseereignis",
+    "ort": "Ereignis 128: Runinshaven – Leuchtturm Runin (Meile 15)",
+    "wirkung": "Gelingen: Kräuterplatz entdeckt (dort Kräutersuche mit Erleichterung) (einmal gefunden, bleibt es bekannt)"
+   },
+   {
+    "zuschlag": "+1",
+    "wer": "erster einsatzfähiger Held",
+    "codestelle": "Quelle/seg116.c:tevent_132",
+    "bereich": "Reiseereignis",
+    "ort": "Ereignis 132: Brendhil – Manrin (Meile 19)",
+    "wirkung": "Gelingen: Kräuterplatz entdeckt (dort Kräutersuche mit Erleichterung) (einmal gefunden, bleibt es bekannt)"
+   },
+   {
+    "zuschlag": "+6",
+    "wer": "erster einsatzfähiger Held",
+    "codestelle": "Quelle/seg116.c:tevent_134",
+    "bereich": "Reiseereignis",
+    "ort": "Ereignis 134: Rundweg bei Einsiedlersee (Meile 17)",
+    "wirkung": "Kräuterplatz mit Kairanhalm (Bonus wirkt im Original nicht, Fix 161) (einmal gefunden, bleibt es bekannt)"
+   },
+   {
+    "zuschlag": "+4",
+    "wer": "erster einsatzfähiger Held",
+    "codestelle": "Quelle/seg116.c:tevent_140",
+    "bereich": "Reiseereignis",
+    "ort": "Ereignis 140: Querverbindung (Meile 23)",
+    "wirkung": "Rastplatz mit Jorugawurzel (Bonus wirkt im Original nicht, Fix 161) (einmal gefunden, bleibt es bekannt)"
+   },
+   {
+    "bereich": "Gegenstand",
+    "ort": "Sichel (magisch)",
+    "zuschlag": "",
+    "wer": "",
+    "wirkung": "+3, solange sie im Gepäck ist",
+    "codestelle": "Quelle/seg105.c:give_new_item_to_hero"
+   },
+   {
+    "bereich": "Wildlager",
+    "ort": "Kräuter suchen",
+    "zuschlag": "",
+    "wer": "",
+    "wirkung": "Vorauswahl im Heldenmenü: der beste Kräutersucher",
+    "codestelle": "Quelle/seg051.c:do_wildcamp"
+   }
+  ],
+  "im_code": "",
+  "codestellen": [
+   "Quelle/seg051.c:gather_herbs",
+   "Quelle/seg109.c:tevent_009",
+   "Quelle/seg110.c:tevent_013",
+   "Quelle/seg110.c:tevent_021",
+   "Quelle/seg110.c:tevent_032",
+   "Quelle/seg110.c:tevent_036",
+   "Quelle/seg110.c:tevent_050",
+   "Quelle/seg112.c:tevent_070",
+   "Quelle/seg113.c:tevent_083",
+   "Quelle/seg113.c:tevent_085",
+   "Quelle/seg114.c:tevent_112",
+   "Quelle/seg114.c:tevent_118",
+   "Quelle/seg115.c:tevent_091",
+   "Quelle/seg115.c:tevent_128",
+   "Quelle/seg116.c:tevent_132",
+   "Quelle/seg116.c:tevent_134",
+   "Quelle/seg116.c:tevent_140",
+   "Quelle/seg105.c:give_new_item_to_hero",
+   "Quelle/seg051.c:do_wildcamp"
+  ],
+  "deutung": "Kräuter sind Geld und Heilung. Die magische Sichel (+3) macht einen echten Unterschied.",
+  "status": "im Code geprüft, im Spiel unbestätigt"
+ },
+ {
+  "nr": 30,
+  "name": "Tierkunde",
+  "konstante": "TA_TIERKUNDE",
+  "gruppe": "Natur",
+  "probe": "MU / KL / IN",
+  "steigerungen_je_stufe": 2,
+  "proben": 0,
+  "stellen": [],
+  "im_code": "Wird im Quelltext nirgends abgefragt und von nichts verändert.",
+  "codestellen": [],
+  "deutung": "Wird nirgends abgefragt. Steigern bringt nichts.",
+  "status": "im Code geprüft, im Spiel unbestätigt"
+ },
+ {
+  "nr": 31,
+  "name": "Wildnisleben",
+  "konstante": "TA_WILDNISLEBEN",
+  "gruppe": "Natur",
+  "probe": "IN / FF / GE",
+  "steigerungen_je_stufe": 2,
+  "proben": 46,
+  "stellen": [
+   {
+    "zuschlag": "+5 + Platz",
+    "wer": "vom Spieler gewählter Held (Vorauswahl: bester in Wildnisleben)",
+    "codestelle": "Quelle/seg051.c:replenish_stocks",
+    "bereich": "Wildnis und Reise",
+    "ort": "Wildlager: Vorräte auffüllen, Wasser",
+    "wirkung": "Gelingen: alle Wasserschläuche voll, Durst weg (Efferd-Wunder: gelingt automatisch)"
+   },
+   {
+    "zuschlag": "±0",
+    "wer": "erster einsatzfähiger Held",
+    "codestelle": "Quelle/seg109.c:tevent_005",
+    "bereich": "Reiseereignis",
+    "ort": "Ereignis 5: Serske – Breida (Meile 19)",
+    "wirkung": "Gelingen: Rastplatz entdeckt (einmal gefunden, bleibt es bekannt)"
+   },
+   {
+    "zuschlag": "±0",
+    "wer": "jeder Held einzeln",
+    "codestelle": "Quelle/seg109.c:TRV_barrier",
+    "bereich": "Wildnis und Reise",
+    "ort": "Brückenbau an einem Bach (Reiseereignisse 7 und 41)",
+    "wirkung": "zählt die Helden mit gelungener Probe; braucht außerdem Hammer, Axt und zwei Seile/Strickleitern (Fix 153: nur lebende Helden der aktiven Gruppe)"
+   },
+   {
+    "zuschlag": "±0",
+    "wer": "jeder Held einzeln",
+    "codestelle": "Quelle/seg109.c:TRV_barrier",
+    "bereich": "Wildnis und Reise",
+    "ort": "Brückenbau",
+    "wirkung": "wie oben (Originalzweig ohne Fix 153)"
+   },
+   {
+    "zuschlag": "+2",
+    "wer": "erster einsatzfähiger Held",
+    "codestelle": "Quelle/seg109.c:tevent_008",
+    "bereich": "Reiseereignis",
+    "ort": "Ereignis 8: Tjoila – Breida (Meile 12)",
+    "wirkung": "Gelingen: Wasser-/Nahrungsplatz entdeckt (einmal gefunden, bleibt es bekannt)"
+   },
+   {
+    "zuschlag": "+2",
+    "wer": "erster einsatzfähiger Held",
+    "codestelle": "Quelle/seg110.c:tevent_017",
+    "bereich": "Reiseereignis",
+    "ort": "Ereignis 17: Nordvest – Kravik (Meile 19)",
+    "wirkung": "Gelingen: Wasser-/Nahrungsplatz entdeckt (einmal gefunden, bleibt es bekannt)"
+   },
+   {
+    "zuschlag": "±0",
+    "wer": "erster einsatzfähiger Held",
+    "codestelle": "Quelle/seg110.c:tevent_022",
+    "bereich": "Reiseereignis",
+    "ort": "Ereignis 22: Rukian – Fähre Angbodirtal (Meile 15)",
+    "wirkung": "Gelingen: Rastplatz entdeckt (einmal gefunden, bleibt es bekannt)"
+   },
+   {
+    "zuschlag": "+2",
+    "wer": "erster einsatzfähiger Held",
+    "codestelle": "Quelle/seg110.c:tevent_024",
+    "bereich": "Reiseereignis",
+    "ort": "Ereignis 24: Auplog – Vilnheim (Meile 10)",
+    "wirkung": "Gelingen: Rastplatz entdeckt (einmal gefunden, bleibt es bekannt)"
+   },
+   {
+    "zuschlag": "+1",
+    "wer": "erster einsatzfähiger Held",
+    "codestelle": "Quelle/seg110.c:tevent_025",
+    "bereich": "Reiseereignis",
+    "ort": "Ereignis 25: Auplog – Vilnheim (Meile 18)",
+    "wirkung": "Gelingen: Rastplatz entdeckt (einmal gefunden, bleibt es bekannt)"
+   },
+   {
+    "zuschlag": "+2",
+    "wer": "erster einsatzfähiger Held",
+    "codestelle": "Quelle/seg110.c:tevent_028",
+    "bereich": "Reiseereignis",
+    "ort": "Ereignis 28: Vilnheim – Phexcaer (Meile 20)",
+    "wirkung": "Gelingen: Rastplatz entdeckt (einmal gefunden, bleibt es bekannt)"
+   },
+   {
+    "zuschlag": "±0",
+    "wer": "erster einsatzfähiger Held",
+    "codestelle": "Quelle/seg110.c:tevent_030",
+    "bereich": "Reiseereignis",
+    "ort": "Ereignis 30: Vilnheim – Phexcaer (Meile 48)",
+    "wirkung": "Gelingen: Rastplatz entdeckt (einmal gefunden, bleibt es bekannt)"
+   },
+   {
+    "zuschlag": "+2",
+    "wer": "erster einsatzfähiger Held",
+    "codestelle": "Quelle/seg110.c:tevent_032",
+    "bereich": "Reiseereignis",
+    "ort": "Ereignis 32: Vilnheim – Phexcaer (Meile 80)",
+    "wirkung": "Gelingen: Rastplatz entdeckt (einmal gefunden, bleibt es bekannt)"
+   },
+   {
+    "zuschlag": "+2",
+    "wer": "erster einsatzfähiger Held",
+    "codestelle": "Quelle/seg110.c:tevent_034",
+    "bereich": "Reiseereignis",
+    "ort": "Ereignis 34: Vilnheim – Phexcaer (Meile 95)",
+    "wirkung": "Gelingen: Rastplatz entdeckt (einmal gefunden, bleibt es bekannt)"
+   },
+   {
+    "zuschlag": "+3",
+    "wer": "erster einsatzfähiger Held",
+    "codestelle": "Quelle/seg110.c:tevent_036",
+    "bereich": "Reiseereignis",
+    "ort": "Ereignis 36: Phexcaer – Einsiedlersee (Meile 22)",
+    "wirkung": "Gelingen: Rastplatz entdeckt (einmal gefunden, bleibt es bekannt)"
+   },
+   {
+    "zuschlag": "+4",
+    "wer": "erster einsatzfähiger Held",
+    "codestelle": "Quelle/seg110.c:tevent_039",
+    "bereich": "Reiseereignis",
+    "ort": "Ereignis 39: Phexcaer – Einsiedlersee (Meile 40)",
+    "wirkung": "Gelingen: Rastplatz entdeckt (einmal gefunden, bleibt es bekannt)"
+   },
+   {
+    "zuschlag": "+4",
+    "wer": "erster einsatzfähiger Held",
+    "codestelle": "Quelle/seg110.c:tevent_040",
+    "bereich": "Reiseereignis",
+    "ort": "Ereignis 40: Varnheim – Auplog (Meile 18)",
+    "wirkung": "Gelingen: Rastplatz entdeckt (einmal gefunden, bleibt es bekannt)"
+   },
+   {
+    "zuschlag": "+2",
+    "wer": "erster einsatzfähiger Held",
+    "codestelle": "Quelle/seg110.c:tevent_042",
+    "bereich": "Reiseereignis",
+    "ort": "Ereignis 42: Varnheim – Auplog (Meile 38)",
+    "wirkung": "Gelingen: Wasser-/Nahrungsplatz entdeckt (einmal gefunden, bleibt es bekannt)"
+   },
+   {
+    "zuschlag": "+3",
+    "wer": "erster einsatzfähiger Held",
+    "codestelle": "Quelle/seg110.c:tevent_043",
+    "bereich": "Reiseereignis",
+    "ort": "Ereignis 43: Varnheim – Auplog (Meile 42)",
+    "wirkung": "Gelingen: Rastplatz entdeckt (einmal gefunden, bleibt es bekannt)"
+   },
+   {
+    "zuschlag": "+3",
+    "wer": "erster einsatzfähiger Held",
+    "codestelle": "Quelle/seg110.c:tevent_048",
+    "bereich": "Reiseereignis",
+    "ort": "Ereignis 48: Daspota – Ottarje (Meile 26)",
+    "wirkung": "Gelingen: Rastplatz entdeckt (einmal gefunden, bleibt es bekannt)"
+   },
+   {
+    "zuschlag": "+2",
+    "wer": "erster einsatzfähiger Held",
+    "codestelle": "Quelle/seg110.c:tevent_049",
+    "bereich": "Reiseereignis",
+    "ort": "Ereignis 49: Ottarje – Skjal (Meile 19)",
+    "wirkung": "Gelingen: Rastplatz entdeckt (einmal gefunden, bleibt es bekannt)"
+   },
+   {
+    "zuschlag": "+3",
+    "wer": "erster einsatzfähiger Held",
+    "codestelle": "Quelle/seg110.c:tevent_050",
+    "bereich": "Reiseereignis",
+    "ort": "Ereignis 50: Ottarje – Skjal (Meile 23)",
+    "wirkung": "Gelingen: Wasser-/Nahrungsplatz entdeckt (einmal gefunden, bleibt es bekannt)"
+   },
+   {
+    "zuschlag": "+1",
+    "wer": "erster einsatzfähiger Held",
+    "codestelle": "Quelle/seg111.c:tevent_053",
+    "bereich": "Reiseereignis",
+    "ort": "Ereignis 53: Ottarje – Skjal (Meile 38)",
+    "wirkung": "Gelingen: Rastplatz entdeckt (einmal gefunden, bleibt es bekannt)"
+   },
+   {
+    "zuschlag": "+2",
+    "wer": "erster einsatzfähiger Held",
+    "codestelle": "Quelle/seg111.c:tevent_058",
+    "bereich": "Reiseereignis",
+    "ort": "Ereignis 58: Ottarje – Orvil (Meile 20)",
+    "wirkung": "Gelingen: Wasser-/Nahrungsplatz entdeckt (einmal gefunden, bleibt es bekannt)"
+   },
+   {
+    "zuschlag": "+2",
+    "wer": "erster einsatzfähiger Held",
+    "codestelle": "Quelle/seg111.c:tevent_066",
+    "bereich": "Reiseereignis",
+    "ort": "Ereignis 66: Orvil – Ala (Meile 19)",
+    "wirkung": "Gelingen: Wasser-/Nahrungsplatz entdeckt (einmal gefunden, bleibt es bekannt)"
+   },
+   {
+    "zuschlag": "+5",
+    "wer": "erster einsatzfähiger Held",
+    "codestelle": "Quelle/seg112.c:tevent_069",
+    "bereich": "Reiseereignis",
+    "ort": "Ereignis 69: Ala – Thoss (Meile 17); Tjanset – Thoss (Meile 22)",
+    "wirkung": "Gelingen: Rastplatz entdeckt (einmal gefunden, bleibt es bekannt)"
+   },
+   {
+    "zuschlag": "+3",
+    "wer": "erster einsatzfähiger Held",
+    "codestelle": "Quelle/seg112.c:tevent_070",
+    "bereich": "Reiseereignis",
+    "ort": "Ereignis 70: Ala – Thoss (Meile 29); Tjanset – Thoss (Meile 34)",
+    "wirkung": "Rastplatz, danach Kräutersuche (Pflanzenkunde +4) (einmal gefunden, bleibt es bekannt)"
+   },
+   {
+    "zuschlag": "+3",
+    "wer": "erster einsatzfähiger Held",
+    "codestelle": "Quelle/seg112.c:tevent_072",
+    "bereich": "Reiseereignis",
+    "ort": "Ereignis 72: Oberorken – Felsteyn (Meile 12)",
+    "wirkung": "Gelingen: Rastplatz entdeckt (einmal gefunden, bleibt es bekannt)"
+   },
+   {
+    "zuschlag": "+4",
+    "wer": "erster einsatzfähiger Held",
+    "codestelle": "Quelle/seg113.c:tevent_080",
+    "bereich": "Reiseereignis",
+    "ort": "Ereignis 80: Orkanger – Clanegh (Meile 21)",
+    "wirkung": "Gelingen: Wasser-/Nahrungsplatz entdeckt (einmal gefunden, bleibt es bekannt)"
+   },
+   {
+    "zuschlag": "+2",
+    "wer": "erster einsatzfähiger Held",
+    "codestelle": "Quelle/seg113.c:tevent_081",
+    "bereich": "Reiseereignis",
+    "ort": "Ereignis 81: Clanegh – Tyldon (Meile 18)",
+    "wirkung": "Gelingen: Rastplatz entdeckt (einmal gefunden, bleibt es bekannt)"
+   },
+   {
+    "zuschlag": "+4",
+    "wer": "erster einsatzfähiger Held",
+    "codestelle": "Quelle/seg113.c:tevent_085",
+    "bereich": "Reiseereignis",
+    "ort": "Ereignis 85: Oberorken – Einsiedlersee (Meile 35)",
+    "wirkung": "Gelingen: Rastplatz entdeckt (einmal gefunden, bleibt es bekannt)"
+   },
+   {
+    "zuschlag": "+3",
+    "wer": "erster einsatzfähiger Held",
+    "codestelle": "Quelle/seg113.c:tevent_088",
+    "bereich": "Reiseereignis",
+    "ort": "Ereignis 88: Oberorken – Einsiedlersee (Meile 64); Felsteyn – Einsiedlersee (Meile 50)",
+    "wirkung": "Gelingen: Rastplatz entdeckt (einmal gefunden, bleibt es bekannt)"
+   },
+   {
+    "zuschlag": "+4",
+    "wer": "erster einsatzfähiger Held",
+    "codestelle": "Quelle/seg113.c:tevent_106",
+    "bereich": "Reiseereignis",
+    "ort": "Ereignis 106: Skelellen – Phexcaer (Meile 20)",
+    "wirkung": "Gelingen: Rastplatz entdeckt (einmal gefunden, bleibt es bekannt)"
+   },
+   {
+    "zuschlag": "+6",
+    "wer": "erster einsatzfähiger Held",
+    "codestelle": "Quelle/seg113.c:tevent_109",
+    "bereich": "Reiseereignis",
+    "ort": "Ereignis 109: Skelellen – Phexcaer (Meile 48)",
+    "wirkung": "Gelingen: Rastplatz entdeckt (einmal gefunden, bleibt es bekannt)"
+   },
+   {
+    "zuschlag": "+2",
+    "wer": "erster einsatzfähiger Held",
+    "codestelle": "Quelle/seg114.c:tevent_112",
+    "bereich": "Reiseereignis",
+    "ort": "Ereignis 112: Skelellen – Phexcaer (Meile 68)",
+    "wirkung": "Gelingen: Rastplatz entdeckt (einmal gefunden, bleibt es bekannt)"
+   },
+   {
+    "zuschlag": "+6",
+    "wer": "erster einsatzfähiger Held",
+    "codestelle": "Quelle/seg114.c:tevent_116",
+    "bereich": "Reiseereignis",
+    "ort": "Ereignis 116: Skelellen – Phexcaer (Meile 122)",
+    "wirkung": "Gelingen: Rastplatz entdeckt (einmal gefunden, bleibt es bekannt)"
+   },
+   {
+    "zuschlag": "+2",
+    "wer": "erster einsatzfähiger Held",
+    "codestelle": "Quelle/seg114.c:tevent_119",
+    "bereich": "Reiseereignis",
+    "ort": "Ereignis 119: Merske – Rovamund (Meile 38)",
+    "wirkung": "Gelingen: Rastplatz entdeckt (einmal gefunden, bleibt es bekannt)"
+   },
+   {
+    "zuschlag": "+4",
+    "wer": "erster einsatzfähiger Held",
+    "codestelle": "Quelle/seg115.c:tevent_093",
+    "bereich": "Reiseereignis",
+    "ort": "Ereignis 93: Felsteyn – Einsiedlersee (Meile 34)",
+    "wirkung": "Gelingen: Rastplatz entdeckt (einmal gefunden, bleibt es bekannt)"
+   },
+   {
+    "zuschlag": "+2",
+    "wer": "erster einsatzfähiger Held",
+    "codestelle": "Quelle/seg115.c:tevent_128",
+    "bereich": "Reiseereignis",
+    "ort": "Ereignis 128: Runinshaven – Leuchtturm Runin (Meile 15)",
+    "wirkung": "Gelingen: Wasser-/Nahrungsplatz entdeckt (einmal gefunden, bleibt es bekannt)"
+   },
+   {
+    "zuschlag": "+1",
+    "wer": "erster einsatzfähiger Held",
+    "codestelle": "Quelle/seg116.c:tevent_132",
+    "bereich": "Reiseereignis",
+    "ort": "Ereignis 132: Brendhil – Manrin (Meile 19)",
+    "wirkung": "Gelingen: Rastplatz entdeckt (einmal gefunden, bleibt es bekannt)"
+   },
+   {
+    "zuschlag": "+5",
+    "wer": "erster einsatzfähiger Held",
+    "codestelle": "Quelle/seg116.c:tevent_137",
+    "bereich": "Reiseereignis",
+    "ort": "Ereignis 137: Rundweg bei Einsiedlersee (Meile 28)",
+    "wirkung": "Seeufer: Vorräte auffüllen möglich (einmal gefunden, bleibt es bekannt)"
+   },
+   {
+    "zuschlag": "+2",
+    "wer": "erster einsatzfähiger Held",
+    "codestelle": "Quelle/seg116.c:tevent_138",
+    "bereich": "Reiseereignis",
+    "ort": "Ereignis 138: Leuchtturm Runin – Runinshaven (Meile 18)",
+    "wirkung": "Gelingen: Rastplatz entdeckt (einmal gefunden, bleibt es bekannt)"
+   },
+   {
+    "zuschlag": "+2",
+    "wer": "erster einsatzfähiger Held",
+    "codestelle": "Quelle/seg116.c:tevent_140",
+    "bereich": "Reiseereignis",
+    "ort": "Ereignis 140: Querverbindung (Meile 23)",
+    "wirkung": "Gelingen: Rastplatz entdeckt (einmal gefunden, bleibt es bekannt)"
+   },
+   {
+    "zuschlag": "+2",
+    "wer": "erster einsatzfähiger Held",
+    "codestelle": "Quelle/seg116.c:tevent_142",
+    "bereich": "Reiseereignis",
+    "ort": "Ereignis 142: Querverbindung (Meile 39)",
+    "wirkung": "Gelingen: Rastplatz entdeckt (einmal gefunden, bleibt es bekannt)"
+   },
+   {
+    "zuschlag": "+6",
+    "wer": "Held, den der Dialog bestimmt",
+    "codestelle": "Quelle/seg117.c:TLK_way_to_ruin",
+    "bereich": "Gespräch / Ort",
+    "ort": "Weg zu Hyggeliks Ruine (Gespräch)",
+    "wirkung": "Ergebnis entscheidet den Weg"
+   },
+   {
+    "zuschlag": "+4",
+    "wer": "erster einsatzfähiger Held",
+    "codestelle": "Quelle/seg118.c:tevent_079",
+    "bereich": "Reiseereignis",
+    "ort": "Ereignis 79: Orkanger – Clanegh (Meile 18)",
+    "wirkung": "Gelingen: Rastplatz entdeckt (einmal gefunden, bleibt es bekannt)"
+   },
+   {
+    "zuschlag": "+3",
+    "wer": "erster einsatzfähiger Held",
+    "codestelle": "Quelle/seg118.c:tevent_120",
+    "bereich": "Reiseereignis",
+    "ort": "Ereignis 120: Merske – Rovamund (Meile 55)",
+    "wirkung": "Gelingen: Rastplatz entdeckt (einmal gefunden, bleibt es bekannt)"
+   },
+   {
+    "bereich": "Wildlager",
+    "ort": "Vorräte auffüllen",
+    "zuschlag": "",
+    "wer": "",
+    "wirkung": "Vorauswahl im Heldenmenü: der beste in Wildnisleben",
+    "codestelle": "Quelle/seg051.c:replenish_stocks"
+   }
+  ],
+  "im_code": "",
+  "codestellen": [
+   "Quelle/seg051.c:replenish_stocks",
+   "Quelle/seg109.c:tevent_005",
+   "Quelle/seg109.c:TRV_barrier",
+   "Quelle/seg109.c:tevent_008",
+   "Quelle/seg110.c:tevent_017",
+   "Quelle/seg110.c:tevent_022",
+   "Quelle/seg110.c:tevent_024",
+   "Quelle/seg110.c:tevent_025",
+   "Quelle/seg110.c:tevent_028",
+   "Quelle/seg110.c:tevent_030",
+   "Quelle/seg110.c:tevent_032",
+   "Quelle/seg110.c:tevent_034",
+   "Quelle/seg110.c:tevent_036",
+   "Quelle/seg110.c:tevent_039",
+   "Quelle/seg110.c:tevent_040",
+   "Quelle/seg110.c:tevent_042",
+   "Quelle/seg110.c:tevent_043",
+   "Quelle/seg110.c:tevent_048",
+   "Quelle/seg110.c:tevent_049",
+   "Quelle/seg110.c:tevent_050",
+   "Quelle/seg111.c:tevent_053",
+   "Quelle/seg111.c:tevent_058",
+   "Quelle/seg111.c:tevent_066",
+   "Quelle/seg112.c:tevent_069",
+   "Quelle/seg112.c:tevent_070",
+   "Quelle/seg112.c:tevent_072",
+   "Quelle/seg113.c:tevent_080",
+   "Quelle/seg113.c:tevent_081",
+   "Quelle/seg113.c:tevent_085",
+   "Quelle/seg113.c:tevent_088",
+   "Quelle/seg113.c:tevent_106",
+   "Quelle/seg113.c:tevent_109",
+   "Quelle/seg114.c:tevent_112",
+   "Quelle/seg114.c:tevent_116",
+   "Quelle/seg114.c:tevent_119",
+   "Quelle/seg115.c:tevent_093",
+   "Quelle/seg115.c:tevent_128",
+   "Quelle/seg116.c:tevent_132",
+   "Quelle/seg116.c:tevent_137",
+   "Quelle/seg116.c:tevent_138",
+   "Quelle/seg116.c:tevent_140",
+   "Quelle/seg116.c:tevent_142",
+   "Quelle/seg117.c:TLK_way_to_ruin",
+   "Quelle/seg118.c:tevent_079",
+   "Quelle/seg118.c:tevent_120"
+  ],
+  "deutung": "Das meistgeprüfte Talent auf Reisen: Rastplätze, Wasser, Brückenbau. Es würfelt fast immer der erste Held.",
+  "status": "im Code geprüft, im Spiel unbestätigt"
+ },
+ {
+  "nr": 32,
+  "name": "Alchimie",
+  "konstante": "TA_ALCHIMIE",
+  "gruppe": "Wissen",
+  "probe": "MU / KL / FF",
+  "steigerungen_je_stufe": 3,
+  "proben": 1,
+  "stellen": [
+   {
+    "zuschlag": "Rezept",
+    "wer": "Held, der braut",
+    "codestelle": "Quelle/seg104.c:do_alchemy",
+    "bereich": "Talent anwenden",
+    "ort": "Alchimie: ein Rezept brauen",
+    "wirkung": "Gelingen: der Trank entsteht; Zuschlag ist der Rezeptwert"
+   }
+  ],
+  "im_code": "Im Talentmenü im Wildlager und im Gasthaus: öffnet das Brauen; die eigentliche Probe kommt beim Brauen mit dem Zuschlag des Rezepts.",
+  "codestellen": [
+   "Quelle/seg104.c:do_alchemy"
+  ],
+  "deutung": "Nur fürs Brauen. Der Zuschlag hängt am Rezept.",
+  "status": "im Code geprüft, im Spiel unbestätigt"
+ },
+ {
+  "nr": 33,
+  "name": "Alte Sprachen",
+  "konstante": "TA_ALTE_SPRACHEN",
+  "gruppe": "Wissen",
+  "probe": "KL / KL / IN",
+  "steigerungen_je_stufe": 3,
+  "proben": 0,
+  "stellen": [],
+  "im_code": "Wird im Quelltext nirgends abgefragt und von nichts verändert.",
+  "codestellen": [],
+  "deutung": "Wird nirgends abgefragt. Steigern bringt nichts.",
+  "status": "im Code geprüft, im Spiel unbestätigt"
+ },
+ {
+  "nr": 34,
+  "name": "Geographie",
+  "konstante": "TA_GEOGRAPHIE",
+  "gruppe": "Wissen",
+  "probe": "KL / KL / IN",
+  "steigerungen_je_stufe": 3,
+  "proben": 0,
+  "stellen": [],
+  "im_code": "Wird im Quelltext nirgends abgefragt und von nichts verändert.",
+  "codestellen": [],
+  "deutung": "Wird nirgends abgefragt. Steigern bringt nichts.",
+  "status": "im Code geprüft, im Spiel unbestätigt"
+ },
+ {
+  "nr": 35,
+  "name": "Geschichte",
+  "konstante": "TA_GESCHICHTE",
+  "gruppe": "Wissen",
+  "probe": "KL / KL / IN",
+  "steigerungen_je_stufe": 3,
+  "proben": 0,
+  "stellen": [],
+  "im_code": "Wird im Quelltext nirgends abgefragt und von nichts verändert.",
+  "codestellen": [],
+  "deutung": "Wird nirgends abgefragt. Steigern bringt nichts.",
+  "status": "im Code geprüft, im Spiel unbestätigt"
+ },
+ {
+  "nr": 36,
+  "name": "Götter/Kulte",
+  "konstante": "TA_GOETTER_KULTE",
+  "gruppe": "Wissen",
+  "probe": "KL / IN / CH",
+  "steigerungen_je_stufe": 3,
+  "proben": 2,
+  "stellen": [
+   {
+    "zuschlag": "+4",
+    "wer": "erster einsatzfähiger Held",
+    "codestelle": "Quelle/seg083.c:DNG08_handler",
+    "bereich": "Dungeon: Orkbehausung",
+    "ort": "orkische Götterstatue",
+    "wirkung": "Gelingen: die Helden erkennen den dargestellten Gott (Brazoragh); nur Information"
+   },
+   {
+    "zuschlag": "+6",
+    "wer": "erster einsatzfähiger Held",
+    "codestelle": "Quelle/seg083.c:DNG08_handler",
+    "bereich": "Dungeon: Orkbehausung",
+    "ort": "zweite orkische Götterstatue",
+    "wirkung": "Gelingen: die Helden erkennen den dargestellten Gott (Tairach); nur Information"
+   }
+  ],
+  "im_code": "",
+  "codestellen": [
+   "Quelle/seg083.c:DNG08_handler"
+  ],
+  "deutung": "Nur zwei Stellen in der Orkbehausung, und dort geht es nur um eine Information.",
+  "status": "im Code geprüft, im Spiel unbestätigt"
+ },
+ {
+  "nr": 37,
+  "name": "Kriegskunst",
+  "konstante": "TA_KRIEGSKUNST",
+  "gruppe": "Wissen",
+  "probe": "MU / KL / CH",
+  "steigerungen_je_stufe": 3,
+  "proben": 7,
+  "stellen": [
+   {
+    "zuschlag": "+7",
+    "wer": "erster einsatzfähiger Held",
+    "codestelle": "Quelle/seg110.c:tevent_031",
+    "bereich": "Reiseereignis",
+    "ort": "Ereignis 31: Vilnheim – Phexcaer (Meile 65)",
+    "wirkung": "Überfall: wer die Flucht wählt und die Probe nicht schafft, kämpft, und die Gegner beginnen"
+   },
+   {
+    "zuschlag": "+8",
+    "wer": "erster einsatzfähiger Held",
+    "codestelle": "Quelle/seg110.c:tevent_035",
+    "bereich": "Reiseereignis",
+    "ort": "Ereignis 35: Phexcaer – Einsiedlersee (Meile 13)",
+    "wirkung": "Kampf: Fluchtversuch, Misslingen → Kampf, Gegner beginnen"
+   },
+   {
+    "zuschlag": "+2",
+    "wer": "erster einsatzfähiger Held",
+    "codestelle": "Quelle/seg112.c:tevent_074",
+    "bereich": "Reiseereignis",
+    "ort": "Ereignis 74: Felsteyn – Orkanger (Meile 12)",
+    "wirkung": "Wegelagerer im Hohlweg: Misslingen → Gegner beginnen"
+   },
+   {
+    "zuschlag": "+6",
+    "wer": "erster einsatzfähiger Held",
+    "codestelle": "Quelle/seg112.c:tevent_077",
+    "bereich": "Reiseereignis",
+    "ort": "Ereignis 77: Felsteyn – Orkanger (Meile 39)",
+    "wirkung": "Räuber im Wald: Misslingen → Gegner beginnen"
+   },
+   {
+    "zuschlag": "+5",
+    "wer": "erster einsatzfähiger Held",
+    "codestelle": "Quelle/seg113.c:tevent_084",
+    "bereich": "Reiseereignis",
+    "ort": "Ereignis 84: Oberorken – Einsiedlersee (Meile 32)",
+    "wirkung": "Kampf: Fluchtversuch, Misslingen → Kampf, Gegner beginnen"
+   },
+   {
+    "zuschlag": "+4",
+    "wer": "erster einsatzfähiger Held",
+    "codestelle": "Quelle/seg113.c:tevent_099",
+    "bereich": "Reiseereignis",
+    "ort": "Ereignis 99: Rybon – Thoss (Meile 44)",
+    "wirkung": "Fluchtversuch, Misslingen → Kampf, Gegner beginnen"
+   },
+   {
+    "zuschlag": "3–6 (Anzahl der Harpyien)",
+    "wer": "erster einsatzfähiger Held",
+    "codestelle": "Quelle/seg113.c:tevent_101",
+    "bereich": "Reiseereignis",
+    "ort": "Ereignis 101: Rybon – Thoss (Meile 52)",
+    "wirkung": "Harpyien: Fluchtversuch, Zuschlag = Anzahl der Harpyien (3–6); Misslingen → Kampf, Gegner beginnen"
+   }
+  ],
+  "im_code": "",
+  "codestellen": [
+   "Quelle/seg110.c:tevent_031",
+   "Quelle/seg110.c:tevent_035",
+   "Quelle/seg112.c:tevent_074",
+   "Quelle/seg112.c:tevent_077",
+   "Quelle/seg113.c:tevent_084",
+   "Quelle/seg113.c:tevent_099",
+   "Quelle/seg113.c:tevent_101"
+  ],
+  "deutung": "Entscheidet bei mehreren Überfällen auf Reisen, wer den Kampf beginnt oder ob die Flucht klappt. Es würfelt der erste Held.",
+  "status": "im Code geprüft, im Spiel unbestätigt"
+ },
+ {
+  "nr": 38,
+  "name": "Lesen",
+  "konstante": "TA_LESEN",
+  "gruppe": "Wissen",
+  "probe": "KL / KL / FF",
+  "steigerungen_je_stufe": 3,
+  "proben": 1,
+  "stellen": [
+   {
+    "zuschlag": "±0",
+    "wer": "jeder Held einzeln",
+    "codestelle": "Quelle/seg081.c:DNG06_chest01_loot",
+    "bereich": "Dungeon: Daspota-Schatz",
+    "ort": "Truhe mit Schriftstück",
+    "wirkung": "Gelingen: Inhalt verstanden"
+   }
+  ],
+  "im_code": "",
+  "codestellen": [
+   "Quelle/seg081.c:DNG06_chest01_loot"
+  ],
+  "deutung": "Eine einzige Stelle (Daspota-Schatz).",
+  "status": "im Code geprüft, im Spiel unbestätigt"
+ },
+ {
+  "nr": 39,
+  "name": "Magiekunde",
+  "konstante": "TA_MAGIEKUNDE",
+  "gruppe": "Wissen",
+  "probe": "KL / KL / FF",
+  "steigerungen_je_stufe": 3,
+  "proben": 0,
+  "stellen": [],
+  "im_code": "Wird im Quelltext nirgends abgefragt und von nichts verändert.",
+  "codestellen": [],
+  "deutung": "Wird nirgends abgefragt. Steigern bringt nichts.",
+  "status": "im Code geprüft, im Spiel unbestätigt"
+ },
+ {
+  "nr": 40,
+  "name": "Sprachen",
+  "konstante": "TA_SPRACHEN",
+  "gruppe": "Wissen",
+  "probe": "KL / IN / CH",
+  "steigerungen_je_stufe": 3,
+  "proben": 2,
+  "stellen": [
+   {
+    "zuschlag": "+2",
+    "wer": "erster einsatzfähiger Held",
+    "codestelle": "Quelle/seg083.c:DNG08_chest02_open",
+    "bereich": "Dungeon: Orkbehausung",
+    "ort": "Truhe 2: Schrift lesen",
+    "wirkung": "Gelingen: Schrift verstanden"
+   },
+   {
+    "zuschlag": "+4",
+    "wer": "Held, der das Dokument benutzt",
+    "codestelle": "Quelle/seg107.c:item_read_orkdokument",
+    "bereich": "Gegenstand",
+    "ort": "Orkdokument lesen",
+    "wirkung": "Gelingen (oder schon einmal gelesen): der Inhalt wird verstanden"
+   }
+  ],
+  "im_code": "",
+  "codestellen": [
+   "Quelle/seg083.c:DNG08_chest02_open",
+   "Quelle/seg107.c:item_read_orkdokument"
+  ],
+  "deutung": "Zwei Stellen: das Orkdokument und eine Truhe in der Orkbehausung.",
+  "status": "im Code geprüft, im Spiel unbestätigt"
+ },
+ {
+  "nr": 41,
+  "name": "Abrichten",
+  "konstante": "TA_ABRICHTEN",
+  "gruppe": "Handwerk",
+  "probe": "MU / IN / CH",
+  "steigerungen_je_stufe": 2,
+  "proben": 0,
+  "stellen": [],
+  "im_code": "Wird im Quelltext nirgends abgefragt und von nichts verändert.",
+  "codestellen": [],
+  "deutung": "Wird nirgends abgefragt. Steigern bringt nichts.",
+  "status": "im Code geprüft, im Spiel unbestätigt"
+ },
+ {
+  "nr": 42,
+  "name": "Fahrzeuge",
+  "konstante": "TA_FAHRZEUGE",
+  "gruppe": "Handwerk",
+  "probe": "IN / CH / FF",
+  "steigerungen_je_stufe": 2,
+  "proben": 0,
+  "stellen": [],
+  "im_code": "Wird im Quelltext nirgends abgefragt und von nichts verändert.",
+  "codestellen": [],
+  "deutung": "Wird nirgends abgefragt. Steigern bringt nichts.",
+  "status": "im Code geprüft, im Spiel unbestätigt"
+ },
+ {
+  "nr": 43,
+  "name": "Falschspiel",
+  "konstante": "TA_FALSCHSPIEL",
+  "gruppe": "Handwerk",
+  "probe": "MU / CH / FF",
+  "steigerungen_je_stufe": 2,
+  "proben": 2,
+  "stellen": [
+   {
+    "zuschlag": "+3",
+    "wer": "jeder Held einzeln",
+    "codestelle": "Quelle/seg070.c:PHX_spielhaus",
+    "bereich": "Gespräch / Ort",
+    "ort": "Spielhaus in Phexcaer",
+    "wirkung": "Proben aller Helden werden gezählt; im Original verliert die Gruppe, wenn MEHR als die Hälfte besteht (Fix 72 dreht das um)"
+   },
+   {
+    "zuschlag": "±0 (Taverne: +50, wenn vor weniger als 2 Minuten gespeichert wurde)",
+    "wer": "vom Spieler gewählter Held",
+    "codestelle": "Quelle/seg103.c:use_talent",
+    "bereich": "Talent anwenden",
+    "ort": "Talent anwenden: Falschspiel (nur Taverne)",
+    "wirkung": "Gelingen: 500–1000 Heller; Misslingen: dauerhaft Hausverbot in dieser Taverne"
+   }
+  ],
+  "im_code": "Nur über „Talent anwenden“ in der Taverne (im Statusmenü gesperrt): Gelingen bringt 500–1000 Heller (5–10 Dukaten); Misslingen bringt dauerhaft Hausverbot in dieser Taverne.",
+  "codestellen": [
+   "Quelle/seg070.c:PHX_spielhaus",
+   "Quelle/seg103.c:use_talent"
+  ],
+  "deutung": "Lukrativ, aber riskant: Misslingen bringt dauerhaft Hausverbot in der Taverne. Dazu das Spielhaus in Phexcaer.",
+  "status": "im Code geprüft, im Spiel unbestätigt"
+ },
+ {
+  "nr": 44,
+  "name": "Heilen Gift",
+  "konstante": "TA_HEILEN_GIFT",
+  "gruppe": "Handwerk",
+  "probe": "MU / KL / IN",
+  "steigerungen_je_stufe": 2,
+  "proben": 3,
+  "stellen": [
+   {
+    "zuschlag": "±0 (Taverne: +50, wenn vor weniger als 2 Minuten gespeichert wurde)",
+    "wer": "vom Spieler gewählter Held",
+    "codestelle": "Quelle/seg103.c:use_talent",
+    "bereich": "Talent anwenden",
+    "ort": "Heilen Gift, 1. Probe",
+    "wirkung": "Gift erkennen (kostet 20 Minuten)"
+   },
+   {
+    "zuschlag": "Giftstärke",
+    "wer": "vom Spieler gewählter Held",
+    "codestelle": "Quelle/seg103.c:use_talent",
+    "bereich": "Talent anwenden",
+    "ort": "Heilen Gift, 2. Probe",
+    "wirkung": "Gelingen: Gift gestoppt; Zuschlag = Giftstärke"
+   },
+   {
+    "zuschlag": "gewünschte LE",
+    "wer": "vom Spieler gewählter Held",
+    "codestelle": "Quelle/seg103.c:use_talent",
+    "bereich": "Talent anwenden",
+    "ort": "Heilen Gift, LE heilen (freiwillig)",
+    "wirkung": "Gelingen: so viele LE wie gewählt; Misslingen: 3 LE Schaden (mindestens 1 LE bleibt)"
+   }
+  ],
+  "im_code": "Im Talentmenü überall: erste Probe ±0 erkennt das Gift (20 Minuten), zweite Probe mit der Giftstärke stoppt es; danach kann man LE heilen lassen, die gewünschte Zahl LE ist der Zuschlag, Misslingen kostet den Patienten 3 LE (er behält mindestens 1). Pro Patient nur alle 4 Stunden.",
+  "codestellen": [
+   "Quelle/seg103.c:use_talent"
+  ],
+  "deutung": "Lebensrettend. Die LE-Heilung danach ist riskant, weil die gewünschte LE-Zahl der Zuschlag ist.",
+  "status": "im Code geprüft, im Spiel unbestätigt"
+ },
+ {
+  "nr": 45,
+  "name": "Heilen Krankheiten",
+  "konstante": "TA_HEILEN_KRANKHEITEN",
+  "gruppe": "Handwerk",
+  "probe": "MU / KL / CH",
+  "steigerungen_je_stufe": 2,
+  "proben": 2,
+  "stellen": [
+   {
+    "zuschlag": "wie übergeben (Talentmenü ±0)",
+    "wer": "behandelnder Held",
+    "codestelle": "Quelle/seg104.c:talent_cure_disease",
+    "bereich": "Talent anwenden",
+    "ort": "Krankheit heilen, 1. Probe",
+    "wirkung": "erkennen, welche Krankheit es ist (bei Ereignis-Heilungen entfällt diese Probe)"
+   },
+   {
+    "zuschlag": "Krankheitsstärke",
+    "wer": "behandelnder Held",
+    "codestelle": "Quelle/seg104.c:talent_cure_disease",
+    "bereich": "Talent anwenden",
+    "ort": "Krankheit heilen, 2. Probe",
+    "wirkung": "Gelingen: Krankheit wird geheilt; Zuschlag = Stärke der Krankheit"
+   }
+  ],
+  "im_code": "Im Talentmenü überall: erste Probe erkennt die Krankheit, zweite Probe mit der Krankheitsstärke heilt sie. Auch Ereignisse rufen diese Heilung auf (z. B. Tollwut, dort +10 und ohne Erkennungsprobe).",
+  "codestellen": [
+   "Quelle/seg104.c:talent_cure_disease"
+  ],
+  "deutung": "Lebensrettend. Die Krankheitsstärke steht als Zuschlag auf der zweiten Probe.",
+  "status": "im Code geprüft, im Spiel unbestätigt"
+ },
+ {
+  "nr": 46,
+  "name": "Heilen Wunden",
+  "konstante": "TA_HEILEN_WUNDEN",
+  "gruppe": "Handwerk",
+  "probe": "KL / CH / FF",
+  "steigerungen_je_stufe": 2,
+  "proben": 2,
+  "stellen": [
+   {
+    "zuschlag": "±0 (Taverne: +50, wenn vor weniger als 2 Minuten gespeichert wurde)",
+    "wer": "vom Spieler gewählter Held",
+    "codestelle": "Quelle/seg103.c:use_talent",
+    "bereich": "Talent anwenden",
+    "ort": "Heilen Wunden, 1. Probe",
+    "wirkung": "Misslingen: mit 35 % Wundfieber (Fix 258: nicht, wenn schon krank)"
+   },
+   {
+    "zuschlag": "±0 (Taverne: +50, wenn vor weniger als 2 Minuten gespeichert wurde)",
+    "wer": "vom Spieler gewählter Held",
+    "codestelle": "Quelle/seg103.c:use_talent",
+    "bereich": "Talent anwenden",
+    "ort": "Heilen Wunden, 2. Probe",
+    "wirkung": "Gelingen: LE in Höhe des TaW (mind. 1); Misslingen: 3 LE Schaden und einen Tag keine Regeneration"
+   }
+  ],
+  "im_code": "Im Talentmenü überall: zwei Proben ±0; beide gelungen heilen so viele LE wie der TaW (mindestens 1). Misslingt die erste, bekommt der Patient mit 35 % Wundfieber (Fix 258: nicht, wenn er es schon hat); misslingt die zweite, verliert er 3 LE (behält mindestens 1) und regeneriert einen Tag nicht. Pro Patient nur einmal am Tag.",
+  "codestellen": [
+   "Quelle/seg103.c:use_talent"
+  ],
+  "deutung": "Einmal am Tag so viele LE wie der TaW. Bei hohem TaW eine sehr gute Heilquelle, aber Wundfieber bei Misslingen.",
+  "status": "im Code geprüft, im Spiel unbestätigt"
+ },
+ {
+  "nr": 47,
+  "name": "Musizieren",
+  "konstante": "TA_MUSIZIEREN",
+  "gruppe": "Handwerk",
+  "probe": "KL / IN / FF",
+  "steigerungen_je_stufe": 2,
+  "proben": 1,
+  "stellen": [
+   {
+    "zuschlag": "±0 (Taverne: +50, wenn vor weniger als 2 Minuten gespeichert wurde)",
+    "wer": "vom Spieler gewählter Held",
+    "codestelle": "Quelle/seg103.c:use_talent",
+    "bereich": "Talent anwenden",
+    "ort": "Talent anwenden: Musizieren",
+    "wirkung": "Gelingen: 100–300 Heller; danach 8 Stunden Pause"
+   }
+  ],
+  "im_code": "Im Talentmenü in Tavernen: Gelingen bringt 100–300 Heller (1–3 Dukaten); danach 8 Stunden gesperrt.",
+  "codestellen": [
+   "Quelle/seg103.c:use_talent"
+  ],
+  "deutung": "Ein kleines Zubrot in der Taverne.",
+  "status": "im Code geprüft, im Spiel unbestätigt"
+ },
+ {
+  "nr": 48,
+  "name": "Schlösser",
+  "konstante": "TA_SCHLOESSER",
+  "gruppe": "Handwerk",
+  "probe": "IN / FF / FF",
+  "steigerungen_je_stufe": 2,
+  "proben": 23,
+  "stellen": [
+   {
+    "zuschlag": "je Tür",
+    "wer": "erster einsatzfähiger Held (braucht Dietriche)",
+    "codestelle": "Quelle/seg076.c:DNG_door",
+    "bereich": "Dungeon: alle",
+    "ort": "verschlossene Tür in jedem Dungeon (Dietriche)",
+    "wirkung": "Gelingen: Tür offen; ein Patzer oder der 4. Versuch ohne Weitergehen zerbricht die Dietriche; Zuschlag = Schloss der Tür"
+   },
+   {
+    "zuschlag": "+4",
+    "wer": "erster einsatzfähiger Held",
+    "codestelle": "Quelle/seg078.c:DNG02_handler",
+    "bereich": "Dungeon: Verfallene Herberge",
+    "ort": "Geheimtür 1 öffnen",
+    "wirkung": "Gelingen: Tür geht auf"
+   },
+   {
+    "zuschlag": "+2",
+    "wer": "erster einsatzfähiger Held",
+    "codestelle": "Quelle/seg078.c:DNG02_handler",
+    "bereich": "Dungeon: Verfallene Herberge",
+    "ort": "Geheimtür 2 öffnen",
+    "wirkung": "Gelingen: Tür geht auf"
+   },
+   {
+    "zuschlag": "+4",
+    "wer": "erster einsatzfähiger Held",
+    "codestelle": "Quelle/seg078.c:DNG02_handler",
+    "bereich": "Dungeon: Verfallene Herberge",
+    "ort": "Geheimtür 3 öffnen",
+    "wirkung": "Gelingen: Tür geht auf"
+   },
+   {
+    "zuschlag": "+7",
+    "wer": "erster einsatzfähiger Held",
+    "codestelle": "Quelle/seg082.c:DNG07_handler",
+    "bereich": "Dungeon: Ruine des Schwarzmagiers",
+    "ort": "verschlossene Tür",
+    "wirkung": "Gelingen: Tür mit Dietrich geöffnet"
+   },
+   {
+    "zuschlag": "+2",
+    "wer": "erster einsatzfähiger Held",
+    "codestelle": "Quelle/seg083.c:DNG08_handler",
+    "bereich": "Dungeon: Orkbehausung",
+    "ort": "Geheimtür öffnen",
+    "wirkung": "Gelingen: Tür geht auf"
+   },
+   {
+    "zuschlag": "+5",
+    "wer": "erster einsatzfähiger Held",
+    "codestelle": "Quelle/seg083.c:DNG08_chest03_open",
+    "bereich": "Dungeon: Orkbehausung",
+    "ort": "Truhe 3",
+    "wirkung": "öffnet mit Bronzeschlüssel oder gelungener Probe"
+   },
+   {
+    "zuschlag": "+5",
+    "wer": "erster einsatzfähiger Held",
+    "codestelle": "Quelle/seg083.c:DNG08_chest04_open",
+    "bereich": "Dungeon: Orkbehausung",
+    "ort": "Truhe 4",
+    "wirkung": "öffnet mit Bronzeschlüssel oder gelungener Probe"
+   },
+   {
+    "zuschlag": "+5",
+    "wer": "erster einsatzfähiger Held",
+    "codestelle": "Quelle/seg083.c:DNG08_chest05_open",
+    "bereich": "Dungeon: Orkbehausung",
+    "ort": "Truhe 5",
+    "wirkung": "öffnet mit Bronzeschlüssel oder gelungener Probe"
+   },
+   {
+    "zuschlag": "+4",
+    "wer": "erster einsatzfähiger Held",
+    "codestelle": "Quelle/seg084.c:DNG09_handler",
+    "bereich": "Dungeon: Kultstätte des Namenlosen",
+    "ort": "Geheimtür 1 öffnen",
+    "wirkung": "Gelingen: Tür geht auf"
+   },
+   {
+    "zuschlag": "+6",
+    "wer": "erster einsatzfähiger Held",
+    "codestelle": "Quelle/seg084.c:DNG09_handler",
+    "bereich": "Dungeon: Kultstätte des Namenlosen",
+    "ort": "Geheimtür 2 öffnen",
+    "wirkung": "Gelingen: Tür geht auf"
+   },
+   {
+    "zuschlag": "+7",
+    "wer": "erster einsatzfähiger Held",
+    "codestelle": "Quelle/seg085.c:DNG10_handler",
+    "bereich": "Dungeon: Drachenhort",
+    "ort": "Falle: Bodenplatte entschärfen",
+    "wirkung": "Misslingen: Schaden (nur wenn der Anführer es versucht)"
+   },
+   {
+    "zuschlag": "+7",
+    "wer": "erster einsatzfähiger Held",
+    "codestelle": "Quelle/seg085.c:DNG10_handler",
+    "bereich": "Dungeon: Drachenhort",
+    "ort": "Falle: Bodenplatte entschärfen",
+    "wirkung": "Gelingen: Falle entschärft"
+   },
+   {
+    "zuschlag": "+5",
+    "wer": "erster einsatzfähiger Held",
+    "codestelle": "Quelle/seg086.c:DNG11_handler",
+    "bereich": "Dungeon: Piratenhöhle",
+    "ort": "Geheimtür 1 öffnen (je nach Hebelstellung)",
+    "wirkung": "Gelingen: Tür geht auf; bei falscher Hebelstellung gibt es keine Probe (Fix 119 räumt dort einen Zufallswert ab)"
+   },
+   {
+    "zuschlag": "+3",
+    "wer": "erster einsatzfähiger Held",
+    "codestelle": "Quelle/seg086.c:DNG11_handler",
+    "bereich": "Dungeon: Piratenhöhle",
+    "ort": "Geheimtür 2 öffnen (je nach Hebelstellung)",
+    "wirkung": "Gelingen: Tür geht auf"
+   },
+   {
+    "zuschlag": "+5",
+    "wer": "erster einsatzfähiger Held",
+    "codestelle": "Quelle/seg086.c:DNG11_handler",
+    "bereich": "Dungeon: Piratenhöhle",
+    "ort": "Geheimtür 3 öffnen (je nach Hebelstellung)",
+    "wirkung": "Gelingen: Tür geht auf"
+   },
+   {
+    "zuschlag": "−6",
+    "wer": "erster einsatzfähiger Held",
+    "codestelle": "Quelle/seg087.c:DNG14_handler",
+    "bereich": "Dungeon: Zwingfeste",
+    "ort": "Geheimtür 1 öffnen",
+    "wirkung": "Gelingen: Tür geht auf (leicht, −6)"
+   },
+   {
+    "zuschlag": "+6",
+    "wer": "erster einsatzfähiger Held",
+    "codestelle": "Quelle/seg087.c:DNG14_handler",
+    "bereich": "Dungeon: Zwingfeste",
+    "ort": "Geheimtür 2 öffnen",
+    "wirkung": "Gelingen: Tür geht auf"
+   },
+   {
+    "zuschlag": "−6",
+    "wer": "erster einsatzfähiger Held",
+    "codestelle": "Quelle/seg087.c:DNG14_handler",
+    "bereich": "Dungeon: Zwingfeste",
+    "ort": "Geheimtür 3 öffnen",
+    "wirkung": "Gelingen: Tür geht auf (leicht, −6)"
+   },
+   {
+    "zuschlag": "+7",
+    "wer": "erster einsatzfähiger Held",
+    "codestelle": "Quelle/seg087.c:DNG14_handler",
+    "bereich": "Dungeon: Zwingfeste",
+    "ort": "Geheimtür 4 öffnen",
+    "wirkung": "Gelingen: Tür geht auf"
+   },
+   {
+    "zuschlag": "+4",
+    "wer": "erster einsatzfähiger Held",
+    "codestelle": "Quelle/seg087.c:DNG14_handler",
+    "bereich": "Dungeon: Zwingfeste",
+    "ort": "Geheimtür 5 öffnen",
+    "wirkung": "Gelingen: Tür geht auf"
+   },
+   {
+    "zuschlag": "±0",
+    "wer": "erster einsatzfähiger Held",
+    "codestelle": "Quelle/seg090.c:DNG12_handler",
+    "bereich": "Dungeon: Zwergenfeste",
+    "ort": "Speerfalle entschärfen",
+    "wirkung": "Misslingen: Schaden"
+   },
+   {
+    "zuschlag": "je Truhe",
+    "wer": "erster einsatzfähiger Held (braucht Dietriche)",
+    "codestelle": "Quelle/seg092.c:use_lockpicks_on_chest",
+    "bereich": "Dungeon: alle",
+    "ort": "verschlossene Truhe in jedem Dungeon (Dietriche)",
+    "wirkung": "Gelingen: Truhe offen; Zuschlag = Schloss der Truhe"
+   },
+   {
+    "bereich": "Götterwunder",
+    "ort": "Phex",
+    "zuschlag": "",
+    "wer": "",
+    "wirkung": "+1 für 3 Tage (zusammen mit Taschendiebstahl)",
+    "codestelle": "Quelle/seg062.c:ask_miracle"
+   }
+  ],
+  "im_code": "",
+  "codestellen": [
+   "Quelle/seg076.c:DNG_door",
+   "Quelle/seg078.c:DNG02_handler",
+   "Quelle/seg082.c:DNG07_handler",
+   "Quelle/seg083.c:DNG08_handler",
+   "Quelle/seg083.c:DNG08_chest03_open",
+   "Quelle/seg083.c:DNG08_chest04_open",
+   "Quelle/seg083.c:DNG08_chest05_open",
+   "Quelle/seg084.c:DNG09_handler",
+   "Quelle/seg085.c:DNG10_handler",
+   "Quelle/seg086.c:DNG11_handler",
+   "Quelle/seg087.c:DNG14_handler",
+   "Quelle/seg090.c:DNG12_handler",
+   "Quelle/seg092.c:use_lockpicks_on_chest",
+   "Quelle/seg062.c:ask_miracle"
+  ],
+  "deutung": "Sehr häufig in Dungeons (Türen, Geheimtüren, Truhen). Bei Dietrich-Türen würfelt der erste Held.",
+  "status": "im Code geprüft, im Spiel unbestätigt"
+ },
+ {
+  "nr": 49,
+  "name": "Taschendiebstahl",
+  "konstante": "TA_TASCHENDIEBSTAHL",
+  "gruppe": "Handwerk",
+  "probe": "MU / IN / FF",
+  "steigerungen_je_stufe": 2,
+  "proben": 1,
+  "stellen": [
+   {
+    "zuschlag": "±0 (Taverne: +50, wenn vor weniger als 2 Minuten gespeichert wurde)",
+    "wer": "vom Spieler gewählter Held",
+    "codestelle": "Quelle/seg103.c:use_talent",
+    "bereich": "Talent anwenden",
+    "ort": "Talent anwenden: Taschendiebstahl (Markt, Händler)",
+    "wirkung": "Gelingen: 500–1000 Heller; Misslingen: die Gruppe verliert ihr gesamtes Geld"
+   },
+   {
+    "bereich": "Götterwunder",
+    "ort": "Phex",
+    "zuschlag": "",
+    "wer": "",
+    "wirkung": "+1 für 3 Tage (zusammen mit Schlösser)",
+    "codestelle": "Quelle/seg062.c:ask_miracle"
+   }
+  ],
+  "im_code": "Im Talentmenü auf dem Markt und bei Händlern: Gelingen bringt 500–1000 Heller (5–10 Dukaten); Misslingen kostet die Gruppe ihr GESAMTES Geld.",
+  "codestellen": [
+   "Quelle/seg103.c:use_talent",
+   "Quelle/seg062.c:ask_miracle"
+  ],
+  "deutung": "Hohes Risiko: Misslingen kostet ALLES Geld der Gruppe.",
+  "status": "im Code geprüft, im Spiel unbestätigt"
+ },
+ {
+  "nr": 50,
+  "name": "Gefahrensinn",
+  "konstante": "TA_GEFAHRENSINN",
+  "gruppe": "Intuition",
+  "probe": "KL / IN / IN",
+  "steigerungen_je_stufe": 1,
+  "proben": 10,
+  "stellen": [
+   {
+    "zuschlag": "+4",
+    "wer": "erster einsatzfähiger Held",
+    "codestelle": "Quelle/seg079.c:DNG03_handler",
+    "bereich": "Dungeon: Spinnenhöhle",
+    "ort": "Säuregrube",
+    "wirkung": "Misslingen: Schaden; geprüft werden nur die ersten zwei Helden"
+   },
+   {
+    "zuschlag": "+4",
+    "wer": "zweiter einsatzfähiger Held",
+    "codestelle": "Quelle/seg079.c:DNG03_handler",
+    "bereich": "Dungeon: Spinnenhöhle",
+    "ort": "Säuregrube",
+    "wirkung": "wie oben"
+   },
+   {
+    "zuschlag": "+5",
+    "wer": "jeder Held einzeln",
+    "codestelle": "Quelle/seg081.c:DNG06_handler",
+    "bereich": "Dungeon: Daspota-Schatz",
+    "ort": "Falltür",
+    "wirkung": "Gelingen: Falltür bemerkt"
+   },
+   {
+    "zuschlag": "+5",
+    "wer": "jeder Held einzeln",
+    "codestelle": "Quelle/seg081.c:DNG06_handler",
+    "bereich": "Dungeon: Daspota-Schatz",
+    "ort": "Falltür",
+    "wirkung": "zweite gelungene Probe: Sicherung gefunden"
+   },
+   {
+    "zuschlag": "+5",
+    "wer": "jeder Held einzeln",
+    "codestelle": "Quelle/seg081.c:DNG06_handler",
+    "bereich": "Dungeon: Daspota-Schatz",
+    "ort": "Falltür (Fix 354: Zustand als Bits)",
+    "wirkung": "Gelingen: Falltür bemerkt"
+   },
+   {
+    "zuschlag": "+5",
+    "wer": "jeder Held einzeln",
+    "codestelle": "Quelle/seg081.c:DNG06_handler",
+    "bereich": "Dungeon: Daspota-Schatz",
+    "ort": "Falltür / umgelegter Stein",
+    "wirkung": "Gelingen: Falle bemerkt"
+   },
+   {
+    "zuschlag": "±0",
+    "wer": "erster einsatzfähiger Held",
+    "codestelle": "Quelle/seg081.c:DNG06_handler",
+    "bereich": "Dungeon: Daspota-Schatz",
+    "ort": "herabfallende Steinscheibe",
+    "wirkung": "nur wer Körperbeherrschung UND Gefahrensinn besteht, weicht aus"
+   },
+   {
+    "zuschlag": "+4",
+    "wer": "jeder Held einzeln",
+    "codestelle": "Quelle/seg081.c:DNG09_pitfall",
+    "bereich": "Dungeon: Kultstätte des Namenlosen",
+    "ort": "Fallgrube (gemeinsamer Baustein, genutzt in der Kultstätte des Namenlosen)",
+    "wirkung": "Gelingen: Held fällt nicht hinein (Fix 86: nur handlungsfähige Helden)"
+   },
+   {
+    "zuschlag": "+2",
+    "wer": "jeder Held einzeln",
+    "codestelle": "Quelle/seg084.c:DNG09_handler",
+    "bereich": "Dungeon: Kultstätte des Namenlosen",
+    "ort": "Bolzenfalle",
+    "wirkung": "Gelingen: Held entgeht der Falle"
+   },
+   {
+    "zuschlag": "±0",
+    "wer": "jeder Held einzeln",
+    "codestelle": "Quelle/seg115.c:tevent_090",
+    "bereich": "Reiseereignis",
+    "ort": "Ereignis 90: Felsteyn – Einsiedlersee (Meile 19)",
+    "wirkung": "Misslingen: W10 LE und zweimal 10 % Chance, einen Gegenstand zu verlieren"
+   },
+   {
+    "bereich": "Gegenstand",
+    "ort": "Kristallkugel",
+    "zuschlag": "",
+    "wer": "",
+    "wirkung": "+2, solange sie ausgerüstet ist",
+    "codestelle": "Quelle/seg105.c:add_equip_boni"
+   }
+  ],
+  "im_code": "",
+  "codestellen": [
+   "Quelle/seg079.c:DNG03_handler",
+   "Quelle/seg081.c:DNG06_handler",
+   "Quelle/seg081.c:DNG09_pitfall",
+   "Quelle/seg084.c:DNG09_handler",
+   "Quelle/seg115.c:tevent_090",
+   "Quelle/seg105.c:add_equip_boni"
+  ],
+  "deutung": "Fallen und Gruben in mehreren Dungeons, oft für jeden Helden einzeln. Die Kristallkugel gibt +2.",
+  "status": "im Code geprüft, im Spiel unbestätigt"
+ },
+ {
+  "nr": 51,
+  "name": "Sinnesschärfe",
+  "konstante": "TA_SINNESSCHAERFE",
+  "gruppe": "Intuition",
+  "probe": "KL / IN / IN",
+  "steigerungen_je_stufe": 1,
+  "proben": 36,
+  "stellen": [
+   {
+    "zuschlag": "+2",
+    "wer": "zufälliger Held",
+    "codestelle": "Quelle/seg067.c:city_event_1",
+    "bereich": "Stadt",
+    "ort": "Stadtereignis: Taschendieb",
+    "wirkung": "Misslingen: der Held verliert Geld (W20 × 10 Heller)"
+   },
+   {
+    "zuschlag": "+2",
+    "wer": "zufälliger Held",
+    "codestelle": "Quelle/seg067.c:city_event_2",
+    "bereich": "Stadt",
+    "ort": "Stadtereignis: Taschendieb",
+    "wirkung": "Misslingen: der Held verliert sein gesamtes Geld"
+   },
+   {
+    "zuschlag": "+6",
+    "wer": "erster einsatzfähiger Held",
+    "codestelle": "Quelle/seg078.c:DNG02_handler",
+    "bereich": "Dungeon: Verfallene Herberge",
+    "ort": "ehemalige Schatzkammer",
+    "wirkung": "Gelingen: etwas entdeckt"
+   },
+   {
+    "zuschlag": "+6",
+    "wer": "erster einsatzfähiger Held",
+    "codestelle": "Quelle/seg078.c:DNG02_handler",
+    "bereich": "Dungeon: Verfallene Herberge",
+    "ort": "Geheimtür 1",
+    "wirkung": "Gelingen: Geheimtür gefunden (bleibt danach bekannt)"
+   },
+   {
+    "zuschlag": "+2",
+    "wer": "erster einsatzfähiger Held",
+    "codestelle": "Quelle/seg078.c:DNG02_handler",
+    "bereich": "Dungeon: Verfallene Herberge",
+    "ort": "Geheimtür 2",
+    "wirkung": "Gelingen: Geheimtür gefunden (bleibt danach bekannt)"
+   },
+   {
+    "zuschlag": "+5",
+    "wer": "erster einsatzfähiger Held",
+    "codestelle": "Quelle/seg078.c:DNG02_handler",
+    "bereich": "Dungeon: Verfallene Herberge",
+    "ort": "Geheimtür 3",
+    "wirkung": "Gelingen: Geheimtür gefunden (bleibt danach bekannt)"
+   },
+   {
+    "zuschlag": "+10",
+    "wer": "jeder Held einzeln",
+    "codestelle": "Quelle/seg081.c:DNG06_handler",
+    "bereich": "Dungeon: Daspota-Schatz",
+    "ort": "versteckte Stelle",
+    "wirkung": "Gelingen: etwas entdeckt (sehr schwer, +10)"
+   },
+   {
+    "zuschlag": "+1",
+    "wer": "erster einsatzfähiger Held",
+    "codestelle": "Quelle/seg083.c:DNG08_handler",
+    "bereich": "Dungeon: Orkbehausung",
+    "ort": "Geheimtür (Fix 106: beim Betreten oder Drehen)",
+    "wirkung": "Gelingen: Geheimtür gefunden"
+   },
+   {
+    "zuschlag": "+6",
+    "wer": "erster einsatzfähiger Held",
+    "codestelle": "Quelle/seg084.c:DNG09_handler",
+    "bereich": "Dungeon: Kultstätte des Namenlosen",
+    "ort": "Geheimtür 1",
+    "wirkung": "Gelingen: Geheimtür gefunden (bleibt danach bekannt)"
+   },
+   {
+    "zuschlag": "+8",
+    "wer": "erster einsatzfähiger Held",
+    "codestelle": "Quelle/seg084.c:DNG09_handler",
+    "bereich": "Dungeon: Kultstätte des Namenlosen",
+    "ort": "Geheimtür 2",
+    "wirkung": "Gelingen: Geheimtür gefunden (bleibt danach bekannt)"
+   },
+   {
+    "zuschlag": "+7",
+    "wer": "erster einsatzfähiger Held",
+    "codestelle": "Quelle/seg085.c:DNG10_handler",
+    "bereich": "Dungeon: Drachenhort",
+    "ort": "Mauerloch mit Hebel einer Falle",
+    "wirkung": "Gelingen: Hebel entdeckt"
+   },
+   {
+    "zuschlag": "+5",
+    "wer": "erster einsatzfähiger Held",
+    "codestelle": "Quelle/seg085.c:DNG10_handler",
+    "bereich": "Dungeon: Drachenhort",
+    "ort": "Falle: loser Stein",
+    "wirkung": "Gelingen: Falle bemerkt"
+   },
+   {
+    "zuschlag": "+5",
+    "wer": "erster einsatzfähiger Held",
+    "codestelle": "Quelle/seg085.c:DNG10_handler",
+    "bereich": "Dungeon: Drachenhort",
+    "ort": "Falle: Bodenplatte",
+    "wirkung": "Gelingen: Platte bemerkt"
+   },
+   {
+    "zuschlag": "+5",
+    "wer": "erster einsatzfähiger Held",
+    "codestelle": "Quelle/seg085.c:DNG10_handler",
+    "bereich": "Dungeon: Drachenhort",
+    "ort": "Falle: Bodenplatte (Fix 116: Zustand als Bits)",
+    "wirkung": "Gelingen: Platte bemerkt"
+   },
+   {
+    "zuschlag": "+8",
+    "wer": "erster einsatzfähiger Held",
+    "codestelle": "Quelle/seg086.c:DNG11_handler",
+    "bereich": "Dungeon: Piratenhöhle",
+    "ort": "Geheimtür 1",
+    "wirkung": "Gelingen: Geheimtür gefunden (bleibt danach bekannt)"
+   },
+   {
+    "zuschlag": "+4",
+    "wer": "erster einsatzfähiger Held",
+    "codestelle": "Quelle/seg086.c:DNG11_handler",
+    "bereich": "Dungeon: Piratenhöhle",
+    "ort": "Geheimtür 2",
+    "wirkung": "Gelingen: Geheimtür gefunden (bleibt danach bekannt)"
+   },
+   {
+    "zuschlag": "+6",
+    "wer": "erster einsatzfähiger Held",
+    "codestelle": "Quelle/seg086.c:DNG11_handler",
+    "bereich": "Dungeon: Piratenhöhle",
+    "ort": "Geheimtür 3",
+    "wirkung": "Gelingen: Geheimtür gefunden (bleibt danach bekannt)"
+   },
+   {
+    "zuschlag": "+6",
+    "wer": "erster einsatzfähiger Held",
+    "codestelle": "Quelle/seg087.c:DNG14_handler",
+    "bereich": "Dungeon: Zwingfeste",
+    "ort": "Opferstock / Phex-Frevel",
+    "wirkung": "Misslingen: das Ansehen bei Phex sinkt stark"
+   },
+   {
+    "zuschlag": "+4",
+    "wer": "erster einsatzfähiger Held",
+    "codestelle": "Quelle/seg087.c:DNG14_handler",
+    "bereich": "Dungeon: Zwingfeste",
+    "ort": "Geheimtür 1",
+    "wirkung": "Gelingen: Geheimtür gefunden (bleibt danach bekannt)"
+   },
+   {
+    "zuschlag": "+4",
+    "wer": "erster einsatzfähiger Held",
+    "codestelle": "Quelle/seg087.c:DNG14_handler",
+    "bereich": "Dungeon: Zwingfeste",
+    "ort": "Geheimtür 2",
+    "wirkung": "Gelingen: Geheimtür gefunden (bleibt danach bekannt)"
+   },
+   {
+    "zuschlag": "+4",
+    "wer": "erster einsatzfähiger Held",
+    "codestelle": "Quelle/seg087.c:DNG14_handler",
+    "bereich": "Dungeon: Zwingfeste",
+    "ort": "Geheimtür 3",
+    "wirkung": "Gelingen: Geheimtür gefunden (bleibt danach bekannt)"
+   },
+   {
+    "zuschlag": "+8",
+    "wer": "erster einsatzfähiger Held",
+    "codestelle": "Quelle/seg087.c:DNG14_handler",
+    "bereich": "Dungeon: Zwingfeste",
+    "ort": "Geheimtür 4",
+    "wirkung": "Gelingen: Geheimtür gefunden (bleibt danach bekannt)"
+   },
+   {
+    "zuschlag": "+6",
+    "wer": "erster einsatzfähiger Held",
+    "codestelle": "Quelle/seg087.c:DNG14_handler",
+    "bereich": "Dungeon: Zwingfeste",
+    "ort": "Geheimtür 5",
+    "wirkung": "Gelingen: Geheimtür gefunden (bleibt danach bekannt)"
+   },
+   {
+    "zuschlag": "+6",
+    "wer": "erster einsatzfähiger Held",
+    "codestelle": "Quelle/seg090.c:DNG12_handler",
+    "bereich": "Dungeon: Zwergenfeste",
+    "ort": "Geheimtür bei der Wasserfalle",
+    "wirkung": "Gelingen: Geheimtür gefunden"
+   },
+   {
+    "zuschlag": "+2",
+    "wer": "erster einsatzfähiger Held",
+    "codestelle": "Quelle/seg090.c:DNG12_handler",
+    "bereich": "Dungeon: Zwergenfeste",
+    "ort": "Speerfalle",
+    "wirkung": "Gelingen: Falle bemerkt"
+   },
+   {
+    "zuschlag": "+8",
+    "wer": "erster einsatzfähiger Held",
+    "codestelle": "Quelle/seg110.c:tevent_011",
+    "bereich": "Reiseereignis",
+    "ort": "Ereignis 11: Peilinen – Rovamund (Meile 10)",
+    "wirkung": "Spuren am anderen Ufer des Roval: Pfad zur Querverbindung (einmal gefunden, bleibt es bekannt)"
+   },
+   {
+    "zuschlag": "+7",
+    "wer": "erster einsatzfähiger Held",
+    "codestelle": "Quelle/seg110.c:tevent_020",
+    "bereich": "Reiseereignis",
+    "ort": "Ereignis 20: Kravik – Skelellen (Meile 8)",
+    "wirkung": "alter Pfad nach Westen (einmal gefunden, bleibt es bekannt)"
+   },
+   {
+    "zuschlag": "±0",
+    "wer": "Held mit dem Lagervorfall, sonst erster einsatzfähiger Held",
+    "codestelle": "Quelle/seg110.c:tevent_046",
+    "bereich": "Reiseereignis",
+    "ort": "Ereignis 46: Daspota – Ottarje (Meile 15)",
+    "wirkung": "Verfallene Herberge: die Wache im Lager hört etwas"
+   },
+   {
+    "zuschlag": "+6",
+    "wer": "erster einsatzfähiger Held",
+    "codestelle": "Quelle/seg111.c:tevent_061",
+    "bereich": "Reiseereignis",
+    "ort": "Ereignis 61: Ottarje – Orvil (Meile 41)",
+    "wirkung": "Eingang der Wolfshöhle"
+   },
+   {
+    "zuschlag": "+6",
+    "wer": "erster einsatzfähiger Held",
+    "codestelle": "Quelle/seg112.c:tevent_067",
+    "bereich": "Reiseereignis",
+    "ort": "Ereignis 67: Ala – Tjanset (Meile 7); Ala – Thoss (Meile 7)",
+    "wirkung": "alter Pfad zu einer verfallenen Hütte (einmal gefunden, bleibt es bekannt)"
+   },
+   {
+    "zuschlag": "+8",
+    "wer": "erster einsatzfähiger Held",
+    "codestelle": "Quelle/seg112.c:tevent_071",
+    "bereich": "Reiseereignis",
+    "ort": "Ereignis 71: Thoss – Liskor (Meile 11); Oberorken – Felsteyn (Meile 7)",
+    "wirkung": "Monolith am anderen Ufer des Thossel"
+   },
+   {
+    "zuschlag": "+8",
+    "wer": "erster einsatzfähiger Held",
+    "codestelle": "Quelle/seg112.c:tevent_unused_herb_swim",
+    "bereich": "Reiseereignis",
+    "ort": "Ereignis unused_herb_swim (nie aufgerufen)",
+    "wirkung": "Kräuterplatz am anderen Ufer des Hjaldorval; wird im Spiel nie aufgerufen (einmal gefunden, bleibt es bekannt)"
+   },
+   {
+    "zuschlag": "+5",
+    "wer": "erster einsatzfähiger Held",
+    "codestelle": "Quelle/seg112.c:tevent_076",
+    "bereich": "Reiseereignis",
+    "ort": "Ereignis 76: Felsteyn – Orkanger (Meile 35)",
+    "wirkung": "Eingang der Goblinhöhle"
+   },
+   {
+    "zuschlag": "+3",
+    "wer": "erster einsatzfähiger Held",
+    "codestelle": "Quelle/seg113.c:tevent_108",
+    "bereich": "Reiseereignis",
+    "ort": "Ereignis 108: Skelellen – Phexcaer (Meile 40)",
+    "wirkung": "Eingang der Orkhöhle"
+   },
+   {
+    "zuschlag": "+4",
+    "wer": "erster einsatzfähiger Held",
+    "codestelle": "Quelle/seg115.c:tevent_129",
+    "bereich": "Reiseereignis",
+    "ort": "Ereignis 129: Runinshaven – Leuchtturm Runin (Meile 10)",
+    "wirkung": "Eingang der Drachenhöhle auf Runin"
+   },
+   {
+    "zuschlag": "+8",
+    "wer": "erster einsatzfähiger Held",
+    "codestelle": "Quelle/seg116.c:tevent_131",
+    "bereich": "Reiseereignis",
+    "ort": "Ereignis 131: Brendhil – Manrin (Meile 17)",
+    "wirkung": "etwas am Weg entdeckt"
+   },
+   {
+    "bereich": "Zauber",
+    "ort": "Adlerauge",
+    "zuschlag": "",
+    "wer": "",
+    "wirkung": "+7 für 6 Minuten Spielzeit",
+    "codestelle": "Quelle/seg099.c:spell_adleraug"
+   },
+   {
+    "bereich": "Regel",
+    "ort": "Anfängermodus",
+    "zuschlag": "",
+    "wer": "",
+    "wirkung": "jede Sinnesschärfe-Probe würfelt automatisch der beste Held der Gruppe",
+    "codestelle": "Quelle/seg103.c:test_talent"
+   }
+  ],
+  "im_code": "",
+  "codestellen": [
+   "Quelle/seg067.c:city_event_1",
+   "Quelle/seg067.c:city_event_2",
+   "Quelle/seg078.c:DNG02_handler",
+   "Quelle/seg081.c:DNG06_handler",
+   "Quelle/seg083.c:DNG08_handler",
+   "Quelle/seg084.c:DNG09_handler",
+   "Quelle/seg085.c:DNG10_handler",
+   "Quelle/seg086.c:DNG11_handler",
+   "Quelle/seg087.c:DNG14_handler",
+   "Quelle/seg090.c:DNG12_handler",
+   "Quelle/seg110.c:tevent_011",
+   "Quelle/seg110.c:tevent_020",
+   "Quelle/seg110.c:tevent_046",
+   "Quelle/seg111.c:tevent_061",
+   "Quelle/seg112.c:tevent_067",
+   "Quelle/seg112.c:tevent_071",
+   "Quelle/seg112.c:tevent_unused_herb_swim",
+   "Quelle/seg112.c:tevent_076",
+   "Quelle/seg113.c:tevent_108",
+   "Quelle/seg115.c:tevent_129",
+   "Quelle/seg116.c:tevent_131",
+   "Quelle/seg099.c:spell_adleraug",
+   "Quelle/seg103.c:test_talent"
+  ],
+  "deutung": "Das wichtigste Entdeckungstalent: Geheimtüren, Fallen, Dungeon-Eingänge, Taschendiebe. Im Anfängermodus würfelt automatisch der beste Held, sonst meist der erste.",
+  "status": "im Code geprüft, im Spiel unbestätigt"
+ }
+]

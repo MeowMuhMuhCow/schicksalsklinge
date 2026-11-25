@@ -62,7 +62,7 @@ struct struct_chest g_dng11_specialchests[15] = {
  */
 signed int DNG11_handler(void)
 {
-	dsa_trace_enter(704, "seg086:DNG11_handler");
+	dsa_trace_enter(705, "seg086:DNG11_handler");
 	signed int target_pos;
 	signed int test_result;
 	signed int answer;
@@ -350,7 +350,7 @@ signed int DNG11_handler(void)
 
 void DNG11_chest00_loot(struct struct_chest* chest)
 {
-	dsa_trace_enter(705, "seg086:DNG11_chest00_loot");
+	dsa_trace_enter(706, "seg086:DNG11_chest00_loot");
 	if (!gs_dng11_proviant1_flag)
 	{
 		/* a chest with 50 food rations (given by loot_special_chest() from the food field of the chest table) */
@@ -367,7 +367,7 @@ void DNG11_chest00_loot(struct struct_chest* chest)
 
 void DNG11_chest01_loot(struct struct_chest* chest)
 {
-	dsa_trace_enter(706, "seg086:DNG11_chest01_loot");
+	dsa_trace_enter(707, "seg086:DNG11_chest01_loot");
 	if (!gs_dng11_proviant2_flag) {
 
 		/* a chest with 21 food rations (given by loot_special_chest() from the food field of the chest table) */
@@ -384,7 +384,7 @@ void DNG11_chest01_loot(struct struct_chest* chest)
 
 void DNG11_chest02_loot(struct struct_chest* chest)
 {
-	dsa_trace_enter(707, "seg086:DNG11_chest02_loot");
+	dsa_trace_enter(708, "seg086:DNG11_chest02_loot");
         uint8_t* ptr_bak = chest->loot.content;
 
         chest->loot.content = gs_dng11_chest3;
@@ -396,7 +396,7 @@ void DNG11_chest02_loot(struct struct_chest* chest)
 
 void DNG11_chest03_loot(struct struct_chest* chest)
 {
-	dsa_trace_enter(708, "seg086:DNG11_chest03_loot");
+	dsa_trace_enter(709, "seg086:DNG11_chest03_loot");
         uint8_t* ptr_bak = chest->loot.content;
 
         chest->loot.content = gs_dng11_chest4;
@@ -408,7 +408,7 @@ void DNG11_chest03_loot(struct struct_chest* chest)
 
 void DNG11_chest04_loot(struct struct_chest* chest)
 {
-	dsa_trace_enter(709, "seg086:DNG11_chest04_loot");
+	dsa_trace_enter(710, "seg086:DNG11_chest04_loot");
         uint8_t* ptr_bak = chest->loot.content;
 
         chest->loot.content = gs_dng11_chest5;
@@ -420,7 +420,7 @@ void DNG11_chest04_loot(struct struct_chest* chest)
 
 void DNG11_chest05_loot(struct struct_chest* chest)
 {
-	dsa_trace_enter(710, "seg086:DNG11_chest05_loot");
+	dsa_trace_enter(711, "seg086:DNG11_chest05_loot");
         uint8_t* ptr_bak = chest->loot.content;
 
         chest->loot.content = gs_dng11_chest6;
@@ -432,7 +432,7 @@ void DNG11_chest05_loot(struct struct_chest* chest)
 
 void DNG11_chest06_loot(struct struct_chest* chest)
 {
-	dsa_trace_enter(711, "seg086:DNG11_chest06_loot");
+	dsa_trace_enter(712, "seg086:DNG11_chest06_loot");
         uint8_t* ptr_bak = chest->loot.content;
 
         chest->loot.content = &gs_dng11_chest7;
@@ -444,7 +444,7 @@ void DNG11_chest06_loot(struct struct_chest* chest)
 
 void DNG11_chest07_loot(struct struct_chest* chest)
 {
-	dsa_trace_enter(712, "seg086:DNG11_chest07_loot");
+	dsa_trace_enter(713, "seg086:DNG11_chest07_loot");
         uint8_t* ptr_bak = chest->loot.content;
 
         chest->loot.content = gs_dng11_chest8;
@@ -456,7 +456,7 @@ void DNG11_chest07_loot(struct struct_chest* chest)
 
 void DNG11_chest08_loot(struct struct_chest* chest)
 {
-	dsa_trace_enter(713, "seg086:DNG11_chest08_loot");
+	dsa_trace_enter(714, "seg086:DNG11_chest08_loot");
         uint8_t* ptr_bak = chest->loot.content;
 
         chest->loot.content = gs_dng11_chest9;
@@ -468,7 +468,7 @@ void DNG11_chest08_loot(struct struct_chest* chest)
 
 void DNG11_chest09_loot(struct struct_chest* chest)
 {
-	dsa_trace_enter(714, "seg086:DNG11_chest09_loot");
+	dsa_trace_enter(715, "seg086:DNG11_chest09_loot");
         uint8_t* ptr_bak = chest->loot.content;
 
         chest->loot.content = gs_dng11_chest10;
@@ -480,7 +480,7 @@ void DNG11_chest09_loot(struct struct_chest* chest)
 
 void DNG11_chest10_loot(struct struct_chest* chest)
 {
-	dsa_trace_enter(715, "seg086:DNG11_chest10_loot");
+	dsa_trace_enter(716, "seg086:DNG11_chest10_loot");
         uint8_t* ptr_bak = chest->loot.content;
 
         chest->loot.content = gs_dng11_chest11;
@@ -492,7 +492,7 @@ void DNG11_chest10_loot(struct struct_chest* chest)
 
 void DNG11_chest11_loot(struct struct_chest* chest)
 {
-	dsa_trace_enter(716, "seg086:DNG11_chest11_loot");
+	dsa_trace_enter(717, "seg086:DNG11_chest11_loot");
         uint8_t* ptr_bak = chest->loot.content;
 
         chest->loot.content = gs_dng11_chest12;
@@ -504,7 +504,7 @@ void DNG11_chest11_loot(struct struct_chest* chest)
 
 void DNG11_chest12_loot(struct struct_chest* chest)
 {
-	dsa_trace_enter(717, "seg086:DNG11_chest12_loot");
+	dsa_trace_enter(718, "seg086:DNG11_chest12_loot");
         uint8_t* ptr_bak = chest->loot.content;
 
         chest->loot.content = gs_dng11_chest13;
@@ -516,7 +516,7 @@ void DNG11_chest12_loot(struct struct_chest* chest)
 
 void DNG11_chest13_loot(struct struct_chest* chest)
 {
-	dsa_trace_enter(718, "seg086:DNG11_chest13_loot");
+	dsa_trace_enter(719, "seg086:DNG11_chest13_loot");
         uint8_t* ptr_bak = chest->loot.content;
 
         chest->loot.content = gs_dng11_chest14;
@@ -533,7 +533,7 @@ void DNG11_chest13_loot(struct struct_chest* chest)
  */
 void DNG11_fight_intro(const signed int fight_id)
 {
-	dsa_trace_enter(719, "seg086:DNG11_fight_intro");
+	dsa_trace_enter(720, "seg086:DNG11_fight_intro");
 	if (fight_id == FIGHT_ID_F131_11_1) {
 		GUI_output(get_tx(14)); /* "HIER FÜHRT EINE SCHMALE TREPPE NACH OBEN. VORSICHTIG STEIGT IHR DIE..." */
 	}

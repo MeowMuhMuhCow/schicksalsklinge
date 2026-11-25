@@ -55,7 +55,7 @@ static const char g_dng08_str_tairach[8] = "TAIRACH"; // ds:0x9725
  */
 signed int DNG08_handler(void)
 {
-	dsa_trace_enter(675, "seg083:DNG08_handler");
+	dsa_trace_enter(676, "seg083:DNG08_handler");
 	signed int target_pos;
 	signed int i;
 	signed int tmp; /* multiple use: mod_slot, group_id */
@@ -447,7 +447,7 @@ signed int DNG08_handler(void)
 /* static */
 void DNG08_search_bed(void)
 {
-	dsa_trace_enter(676, "seg083:DNG08_search_bed");
+	dsa_trace_enter(677, "seg083:DNG08_search_bed");
 	signed int counter;
 	signed int money;
 	signed int mod_slot;
@@ -519,7 +519,7 @@ void DNG08_search_bed(void)
  */
 void DNG08_chest01_trap(void)
 {
-	dsa_trace_enter(677, "seg083:DNG08_chest01_trap");
+	dsa_trace_enter(678, "seg083:DNG08_chest01_trap");
 	struct struct_hero *hero = get_first_hero_available_in_group();
 
 	sprintf(g_dtp2, get_tx(11), hero->alias, GUI_get_personal_pronoun(hero->sex, GRAMMAR_CASE_2ND)); /* "PLÖTZLICH SCHNAPPEN ZWEI EISERNE KIEFER ZU UND TRENNEN %s FAST DIE..." */
@@ -531,7 +531,7 @@ void DNG08_chest01_trap(void)
 
 void DNG08_chest00_loot(struct struct_chest* chest)
 {
-	dsa_trace_enter(678, "seg083:DNG08_chest00_loot");
+	dsa_trace_enter(679, "seg083:DNG08_chest00_loot");
 	if (!gs_dng08_chest0_looted)
 	{
 		gs_dng08_chest0_looted = 1;
@@ -545,13 +545,13 @@ void DNG08_chest00_loot(struct struct_chest* chest)
 
 void DNG08_chest01_loot(struct struct_chest* chest)
 {
-	dsa_trace_enter(679, "seg083:DNG08_chest01_loot");
+	dsa_trace_enter(680, "seg083:DNG08_chest01_loot");
 	loot_multi_chest(gs_dng08_chest1_content, get_tx(34)); /* "IN DIESER TRUHE FINDET IHR" */
 }
 
 void DNG08_chest02_loot(struct struct_chest* chest)
 {
-	dsa_trace_enter(680, "seg083:DNG08_chest02_loot");
+	dsa_trace_enter(681, "seg083:DNG08_chest02_loot");
 	uint8_t* ptr_bak = chest->loot.content;
 
 	chest->loot.content = gs_dng08_chest2_content;
@@ -566,7 +566,7 @@ void DNG08_chest02_loot(struct struct_chest* chest)
  */
 void DNG08_chest02_open(struct struct_chest* chest)
 {
-	dsa_trace_enter(681, "seg083:DNG08_chest02_open");
+	dsa_trace_enter(682, "seg083:DNG08_chest02_open");
 	/* REMARK: gs_dng08_chest2_looted is never set, so the else branch is never reached */
 	if (!gs_dng08_chest2_looted)
 	{
@@ -597,7 +597,7 @@ void DNG08_chest02_open(struct struct_chest* chest)
  */
 void DNG08_chest03_open(struct struct_chest* chest)
 {
-	dsa_trace_enter(682, "seg083:DNG08_chest03_open");
+	dsa_trace_enter(683, "seg083:DNG08_chest03_open");
 	struct struct_hero *hero = get_first_hero_available_in_group();
 
 	if (get_first_hero_with_item(ITEM_ID_BRONZESCHLUESSEL) != -1 || test_talent(hero, TA_SCHLOESSER, 5) > 0)
@@ -619,7 +619,7 @@ void DNG08_chest03_open(struct struct_chest* chest)
 
 void DNG08_chest04_open(struct struct_chest* chest)
 {
-	dsa_trace_enter(683, "seg083:DNG08_chest04_open");
+	dsa_trace_enter(684, "seg083:DNG08_chest04_open");
 	struct struct_hero *hero = get_first_hero_available_in_group();
 
 	if (get_first_hero_with_item(ITEM_ID_BRONZESCHLUESSEL) != -1 || test_talent(hero, TA_SCHLOESSER, 5) > 0) {
@@ -634,7 +634,7 @@ void DNG08_chest04_open(struct struct_chest* chest)
 
 void DNG08_chest05_open(struct struct_chest* chest)
 {
-	dsa_trace_enter(684, "seg083:DNG08_chest05_open");
+	dsa_trace_enter(685, "seg083:DNG08_chest05_open");
 	struct struct_hero *hero = get_first_hero_available_in_group();
 
 	if (get_first_hero_with_item(ITEM_ID_BRONZESCHLUESSEL) != -1 || test_talent(hero, TA_SCHLOESSER, 5) > 0) {
@@ -649,7 +649,7 @@ void DNG08_chest05_open(struct struct_chest* chest)
 
 void DNG08_chest04_loot(struct struct_chest* chest)
 {
-	dsa_trace_enter(685, "seg083:DNG08_chest04_loot");
+	dsa_trace_enter(686, "seg083:DNG08_chest04_loot");
 	uint8_t* ptr_bak = chest->loot.content;
 
 	chest->loot.content = gs_dng08_chest4_content;
@@ -661,7 +661,7 @@ void DNG08_chest04_loot(struct struct_chest* chest)
 
 void DNG08_chest05_loot(struct struct_chest* chest)
 {
-	dsa_trace_enter(686, "seg083:DNG08_chest05_loot");
+	dsa_trace_enter(687, "seg083:DNG08_chest05_loot");
 	uint8_t* ptr_bak = chest->loot.content;
 
 	chest->loot.content = gs_dng08_chest5_content;

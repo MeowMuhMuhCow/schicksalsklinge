@@ -82,7 +82,7 @@ static char g_empty_string7[1] = ""; // ds:0x64a1
 void status_show_spell(const struct struct_hero *hero, const signed int spell_id, const signed int first_spell_id,
 			const signed int x1, const signed int x2, const signed int gy)
 {
-	dsa_trace_enter(403, "seg046:status_show_spell");
+	dsa_trace_enter(404, "seg046:status_show_spell");
 	const signed int pos_in_spellclass = spell_id - first_spell_id;
 	char str[10];
 
@@ -111,7 +111,7 @@ void status_show_spell(const struct struct_hero *hero, const signed int spell_id
 void status_show_talent(const struct struct_hero *hero, const signed int talent_id, const signed int first_talent_id,
 			const signed int x1, const signed int x2, const signed int gy)
 {
-	dsa_trace_enter(404, "seg046:status_show_talent");
+	dsa_trace_enter(405, "seg046:status_show_talent");
 	const signed int pos_in_talentclass = talent_id - first_talent_id;
 	char str[10];
 
@@ -133,7 +133,7 @@ void status_show_talent(const struct struct_hero *hero, const signed int talent_
 /* Borlandified and identical */
 void status_show_talents(const struct struct_hero *hero)
 {
-	dsa_trace_enter(405, "seg046:status_show_talents");
+	dsa_trace_enter(406, "seg046:status_show_talents");
 	signed int talentclass_id;
 	signed int talent_id;
 
@@ -182,7 +182,7 @@ void status_show_talents(const struct struct_hero *hero)
  */
 static void set_status_string(char *fmt)
 {
-	dsa_trace_enter(406, "seg046:set_status_string");
+	dsa_trace_enter(407, "seg046:set_status_string");
 	char *fp = strstr(fmt, "%d");
 
 	fp[1] = 's';
@@ -197,7 +197,7 @@ static void set_status_string(char *fmt)
  */
 static void reset_status_string(char *fmt)
 {
-	dsa_trace_enter(407, "seg046:reset_status_string");
+	dsa_trace_enter(408, "seg046:reset_status_string");
 	char *fp = strstr(fmt, "%s");
 
 	fp[1] = 'd';
@@ -211,7 +211,7 @@ static void reset_status_string(char *fmt)
  */
 void status_show(const signed int index)
 {
-	dsa_trace_enter(408, "seg046:status_show");
+	dsa_trace_enter(409, "seg046:status_show");
 #ifdef M302de_ORIGINAL_BUGFIX
 	char le_fix[10];
 #endif

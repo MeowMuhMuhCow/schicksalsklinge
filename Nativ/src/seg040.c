@@ -77,7 +77,7 @@ signed char g_fig_cb_selector_id[21];	// ds:0xe38f
  */
 void FIG_chessboard_init(void)
 {
-	dsa_trace_enter(371, "seg040:FIG_chessboard_init");
+	dsa_trace_enter(372, "seg040:FIG_chessboard_init");
 	signed int i;
 	signed int cb_x;
 	signed int cb_y;
@@ -138,7 +138,7 @@ void FIG_chessboard_init(void)
  */
 void FIG_preload_gfx(void)
 {
-	dsa_trace_enter(372, "seg040:FIG_preload_gfx");
+	dsa_trace_enter(373, "seg040:FIG_preload_gfx");
 	struct struct_fighter *p_fighter;
 	signed int i;
 	struct nvf_extract_desc nvf;
@@ -266,7 +266,7 @@ void FIG_preload_gfx(void)
  */
 void FIG_draw_scenario(void)
 {
-	dsa_trace_enter(373, "seg040:FIG_draw_scenario");
+	dsa_trace_enter(374, "seg040:FIG_draw_scenario");
 	signed int cb_x;
 	signed int cb_y;
 

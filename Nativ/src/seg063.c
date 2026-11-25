@@ -120,7 +120,7 @@ signed char g_sea_travel_passage_type; // ds:0xe3fa, the PASSAGE_TYPE of the boo
  */
 void passages_init(void)
 {
-	dsa_trace_enter(486, "seg063:passages_init");
+	dsa_trace_enter(487, "seg063:passages_init");
 	signed int rnd;
 	signed int i;
 	struct sea_route *route = &g_sea_routes[0];
@@ -162,7 +162,7 @@ void passages_init(void)
  */
 void do_harbor(void)
 {
-	dsa_trace_enter(487, "seg063:do_harbor");
+	dsa_trace_enter(488, "seg063:do_harbor");
 	signed int i; /* diverse usage */
 	signed int done;
 	signed int answer;
@@ -533,7 +533,7 @@ void do_harbor(void)
  */
 void mod_clock_pos(const signed int town_id)
 {
-	dsa_trace_enter(488, "seg063:mod_clock_pos");
+	dsa_trace_enter(489, "seg063:mod_clock_pos");
 	signed int quarter;
 	signed int map_x;
 	signed int map_y;
@@ -558,7 +558,7 @@ void mod_clock_pos(const signed int town_id)
  */
 void sea_travel(const signed int route_id, const signed int reverse)
 {
-	dsa_trace_enter(489, "seg063:sea_travel");
+	dsa_trace_enter(490, "seg063:sea_travel");
 	signed int i;
 	struct struct_hero *hero;
 	uint8_t *ptr;
@@ -852,7 +852,7 @@ void sea_travel(const signed int route_id, const signed int reverse)
  */
 signed int get_srout_len(struct struct_point *ptr)
 {
-	dsa_trace_enter(490, "seg063:get_srout_len");
+	dsa_trace_enter(491, "seg063:get_srout_len");
 	signed int i = 0;
 
 	while (ptr->x != -1) {

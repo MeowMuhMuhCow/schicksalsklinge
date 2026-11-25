@@ -68,7 +68,7 @@ static const signed int g_FIG_weapon_gfx_id_melee_knife_list[5] = {
  */
 signed int range_attack_check_ammo(struct struct_hero *hero, const signed int mode)
 {
-	dsa_trace_enter(374, "seg041:range_attack_check_ammo");
+	dsa_trace_enter(375, "seg041:range_attack_check_ammo");
 	signed int right_hand_item_id;
 	signed int left_hand_item_id;
 	signed int retval = 0;
@@ -182,7 +182,7 @@ signed int range_attack_check_ammo(struct struct_hero *hero, const signed int mo
  */
 void FIG_output(char *str)
 {
-	dsa_trace_enter(375, "seg041:FIG_output");
+	dsa_trace_enter(376, "seg041:FIG_output");
 	if (*str != 0) {
 		GUI_output(str);
 	}
@@ -193,7 +193,7 @@ void FIG_output(char *str)
  */
 void FIG_clear_msgs(void)
 {
-	dsa_trace_enter(376, "seg041:FIG_clear_msgs");
+	dsa_trace_enter(377, "seg041:FIG_clear_msgs");
 	memset(g_fig_msg_data, 0 , 20);
 	g_fig_msg_counter = 0;
 }
@@ -206,7 +206,7 @@ void FIG_clear_msgs(void)
  */
 void FIG_add_msg(const signed int f_action, const signed int damage)
 {
-	dsa_trace_enter(377, "seg041:FIG_add_msg");
+	dsa_trace_enter(378, "seg041:FIG_add_msg");
 	g_fig_msg_data[g_fig_msg_counter].f_action = f_action;
 	g_fig_msg_data[g_fig_msg_counter].damage = damage;
 	if (g_fig_msg_counter < 4) {
@@ -226,7 +226,7 @@ void FIG_add_msg(const signed int f_action, const signed int damage)
  */
 void FIG_damage_enemy(struct enemy_sheet *enemy, const signed int damage, const signed int preserve_renegade)
 {
-	dsa_trace_enter(378, "seg041:FIG_damage_enemy");
+	dsa_trace_enter(379, "seg041:FIG_damage_enemy");
 	signed int i;
 
 	/* subtract the damage from the enemies LE */
@@ -275,7 +275,7 @@ void FIG_damage_enemy(struct enemy_sheet *enemy, const signed int damage, const 
  */
 signed int FIG_get_hero_weapon_attack_damage(struct struct_hero* hero, struct struct_hero* target, const signed int attack_hero)
 {
-	dsa_trace_enter(379, "seg041:FIG_get_hero_weapon_attack_damage");
+	dsa_trace_enter(380, "seg041:FIG_get_hero_weapon_attack_damage");
 	signed int damage;
 	signed int damage_mod = 0;
 	struct item_stats *item_p_rh;
@@ -550,7 +550,7 @@ signed int FIG_get_hero_weapon_attack_damage(struct struct_hero* hero, struct st
 
 signed int FIG_get_enemy_attack_damage(const struct enemy_sheet *attacker, struct enemy_sheet *target, const signed int is_enemy)
 {
-	dsa_trace_enter(380, "seg041:FIG_get_enemy_attack_damage");
+	dsa_trace_enter(381, "seg041:FIG_get_enemy_attack_damage");
 	signed int pos;
 	struct struct_hero *hero;
 
@@ -628,7 +628,7 @@ signed int FIG_get_enemy_attack_damage(const struct enemy_sheet *attacker, struc
  */
 void FANI_clear_ani_tracks(void)
 {
-	dsa_trace_enter(381, "seg041:FANI_clear_ani_tracks");
+	dsa_trace_enter(382, "seg041:FANI_clear_ani_tracks");
 	signed int i;
 
 	for (i = 0; i < FANI_TRACK_ID__MAX; i++)
@@ -651,7 +651,7 @@ void FANI_clear_ani_tracks(void)
  */
 signed int FIG_weapon_gfx_id_melee(const struct struct_hero *hero)
 {
-	dsa_trace_enter(382, "seg041:FIG_weapon_gfx_id_melee");
+	dsa_trace_enter(383, "seg041:FIG_weapon_gfx_id_melee");
 	struct item_stats *item_p;
 
 	signed int item_id;

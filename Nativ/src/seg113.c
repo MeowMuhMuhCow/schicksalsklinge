@@ -44,7 +44,7 @@
  * evtl. die Spur. gs_tevent080_tatzelwurm: 0 = unbekannt, 1 = Spur bekannt, 2 = Hoehle gefunden */
 void tevent_080(void)
 {
-	dsa_trace_enter(1089, "seg113:tevent_080");
+	dsa_trace_enter(1090, "seg113:tevent_080");
 	signed int answer;
 	struct struct_hero *hero;
 
@@ -114,7 +114,7 @@ void tevent_080(void)
 /* Clanegh <-> Tyldon: Rastplatz */
 void tevent_081(void)
 {
-	dsa_trace_enter(1090, "seg113:tevent_081");
+	dsa_trace_enter(1091, "seg113:tevent_081");
 	if ((test_talent(get_first_hero_available_in_group(), TA_WILDNISLEBEN, 2) > 0 && !gs_tevent081_flag) ||
 		 gs_tevent081_flag != 0)
 	{
@@ -126,13 +126,13 @@ void tevent_081(void)
 /* Oberorken <-> Einsiedlersee: Furt durch den Hjaldorval */
 void tevent_082(void)
 {
-	dsa_trace_enter(1091, "seg113:tevent_082");
+	dsa_trace_enter(1092, "seg113:tevent_082");
 	TRV_cross_a_ford(get_tx(51), 30, 1); /* "HJALDORVAL" */
 }
 
 void tevent_083(void)
 {
-	dsa_trace_enter(1092, "seg113:tevent_083");
+	dsa_trace_enter(1093, "seg113:tevent_083");
 	if ((test_talent(get_first_hero_available_in_group(), TA_PFLANZENKUNDE, 6) > 0 && !gs_tevent083_flag) || gs_tevent083_flag != 0)
 	{
 		g_gather_herbs_special = ITEM_ID_WIRSELKRAUT;
@@ -148,7 +148,7 @@ void tevent_083(void)
 /* Oberorken <-> Einsiedlersee: Kampf F084 (Fluchtversuch mit Kriegskunst-Probe) */
 void tevent_084(void)
 {
-	dsa_trace_enter(1093, "seg113:tevent_084");
+	dsa_trace_enter(1094, "seg113:tevent_084");
 	signed int answer;
 
 	if (!gs_tevent084_flag) {
@@ -181,7 +181,7 @@ void tevent_084(void)
 
 void tevent_085(void)
 {
-	dsa_trace_enter(1094, "seg113:tevent_085");
+	dsa_trace_enter(1095, "seg113:tevent_085");
 	struct struct_hero *hero = get_first_hero_available_in_group();
 
 	if ((test_talent(hero, TA_WILDNISLEBEN, 4) > 0 && !gs_tevent085_flag) || gs_tevent085_flag) {
@@ -207,7 +207,7 @@ void tevent_085(void)
 /* Oberorken <-> Einsiedlersee: Riesenlindwurm */
 void tevent_086(void)
 {
-	dsa_trace_enter(1095, "seg113:tevent_086");
+	dsa_trace_enter(1096, "seg113:tevent_086");
 	signed int i;
 	signed int answer;
 	struct struct_hero *hero;
@@ -252,7 +252,7 @@ void tevent_086(void)
 
 void tevent_088(void)
 {
-	dsa_trace_enter(1096, "seg113:tevent_088");
+	dsa_trace_enter(1097, "seg113:tevent_088");
 	if (((test_talent(get_first_hero_available_in_group(), TA_WILDNISLEBEN, 3) > 0) && (!gs_tevent088_flag)) ||
 		 gs_tevent088_flag != 0)
 	{
@@ -264,14 +264,14 @@ void tevent_088(void)
 /* Felsteyn <-> Einsiedlersee: Furt durch den Hjaldorval */
 void tevent_089(void)
 {
-	dsa_trace_enter(1097, "seg113:tevent_089");
+	dsa_trace_enter(1098, "seg113:tevent_089");
 	TRV_cross_a_ford(get_tx(51), 40, 2); /* "HJALDORVAL" */
 }
 
 /* Rybon <-> Thoss: Huette */
 void tevent_097(void)
 {
-	dsa_trace_enter(1098, "seg113:tevent_097");
+	dsa_trace_enter(1099, "seg113:tevent_097");
 	if (TRV_enter_hut_question()) {
 
 		gs_town_loc_type = LOCTYPE_WILDCAMP;
@@ -288,7 +288,7 @@ void tevent_097(void)
  */
 void tevent_098(void)
 {
-	dsa_trace_enter(1099, "seg113:tevent_098");
+	dsa_trace_enter(1100, "seg113:tevent_098");
 	signed int answer;
 	signed int repeat;
 	signed int i;
@@ -416,7 +416,7 @@ void tevent_098(void)
  */
 void hero_disappear(struct struct_hero *hero, const signed int pos, const signed int temple_id)
 {
-	dsa_trace_enter(1100, "seg113:hero_disappear");
+	dsa_trace_enter(1101, "seg113:hero_disappear");
 	/* decrement the number of heroes */
 	gs_total_hero_counter--;
 
@@ -480,7 +480,7 @@ void hero_disappear(struct struct_hero *hero, const signed int pos, const signed
 /* Rybon <-> Thoss */
 void tevent_099(void)
 {
-	dsa_trace_enter(1101, "seg113:tevent_099");
+	dsa_trace_enter(1102, "seg113:tevent_099");
 	signed int answer;
 
 	if (!gs_tevent099_flag) {
@@ -525,7 +525,7 @@ void tevent_099(void)
 /* Korrektur: 3-6 Harpyien (random_schick(4) + 2); Rybon <-> Thoss */
 void tevent_101(void)
 {
-	dsa_trace_enter(1102, "seg113:tevent_101");
+	dsa_trace_enter(1103, "seg113:tevent_101");
 	signed int answer;
 	signed int handicap; /* Zahl der Harpyien (g_max_enemies) und zugleich Erschwernis der Kriegskunst-Probe */
 
@@ -571,7 +571,7 @@ void tevent_101(void)
 /* Skjal <-> Orvil: Huette */
 void tevent_102(void)
 {
-	dsa_trace_enter(1103, "seg113:tevent_102");
+	dsa_trace_enter(1104, "seg113:tevent_102");
 	if (TRV_enter_hut_question())
 	{
 		gs_town_loc_type = LOCTYPE_WILDCAMP;
@@ -583,7 +583,7 @@ void tevent_102(void)
 /* Skjal <-> Orvil: Nebeltal */
 void tevent_103(void)
 {
-	dsa_trace_enter(1104, "seg113:tevent_103");
+	dsa_trace_enter(1105, "seg113:tevent_103");
 	signed int answer;
 	struct struct_hero *hero;
 
@@ -659,7 +659,7 @@ void tevent_103(void)
 /* Skjal <-> Orvil: schmaler Grat an einer Klamm (Hoehenangst) */
 void tevent_104(void)
 {
-	dsa_trace_enter(1105, "seg113:tevent_104");
+	dsa_trace_enter(1106, "seg113:tevent_104");
 	signed int answer; /* resused variable: answer and number of heroes with a failed HA test */
 	/* (genauer: Helden, bei denen die HA-Probe GELINGT, d. h. die Hoehenangst zuschlaegt) */
 	signed int done = 0;
@@ -816,7 +816,7 @@ void tevent_104(void)
 /* Skjal <-> Orvil: Huette */
 void tevent_105(void)
 {
-	dsa_trace_enter(1106, "seg113:tevent_105");
+	dsa_trace_enter(1107, "seg113:tevent_105");
 	if (TRV_enter_hut_question()) {
 
 		gs_town_loc_type = LOCTYPE_WILDCAMP;
@@ -828,7 +828,7 @@ void tevent_105(void)
 /* Skelellen <-> Phexcaer: Rastplatz mit guter Jagd */
 void tevent_106(void)
 {
-	dsa_trace_enter(1107, "seg113:tevent_106");
+	dsa_trace_enter(1108, "seg113:tevent_106");
 	if ((test_talent(get_first_hero_available_in_group(), TA_WILDNISLEBEN, 4) > 0 && !gs_tevent106_flag) ||
 		 gs_tevent106_flag)
 	{
@@ -841,7 +841,7 @@ void tevent_106(void)
 /* Skelellen <-> Phexcaer: steiler Hang (klettern oder Umweg) */
 void tevent_107(void)
 {
-	dsa_trace_enter(1108, "seg113:tevent_107");
+	dsa_trace_enter(1109, "seg113:tevent_107");
 	signed int i;
 	signed int answer;
 	struct struct_hero *hero;
@@ -906,7 +906,7 @@ void tevent_107(void)
 /* Phexcaer <-> Skelellen: entrance to the dungeon 'orc cave' */
 void tevent_108(void)
 {
-	dsa_trace_enter(1109, "seg113:tevent_108");
+	dsa_trace_enter(1110, "seg113:tevent_108");
 	signed int answer;
 
 	if ((test_talent(get_first_hero_available_in_group(), TA_SINNESSCHAERFE, 3) > 0) && !gs_tevent108_flag)
@@ -943,7 +943,7 @@ void tevent_108(void)
 /* Skelellen <-> Phexcaer: Rastplatz */
 void tevent_109(void)
 {
-	dsa_trace_enter(1110, "seg113:tevent_109");
+	dsa_trace_enter(1111, "seg113:tevent_109");
 	if ((test_talent(get_first_hero_available_in_group(), TA_WILDNISLEBEN, 6) > 0 && !gs_tevent109_flag) || gs_tevent109_flag)
 	{
 		gs_tevent109_flag = 1;

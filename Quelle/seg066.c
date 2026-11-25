@@ -1678,10 +1678,16 @@ void load_town_texture(signed int x, signed int y, signed int nvf_no, signed int
 	} else
 #endif
 #if FIX_0438
-	/* betroffen sind die weiter entfernten Seitenwaende 5, 6, 7 und 9 (bzw. 15, 16, 17, 19); 4 und 8 (die Wand
-	 * direkt neben der Gruppe) hat Attic richtig herum gezeichnet */
+	/* betroffen sind die weiter entfernten Seitenwaende 5, 6, 7 und 9 (bzw. 15, 16, 17, 19) */
 	if (!direction && (tex_set >= 2) && (tex_set <= 5) &&
-		((nvf_no % 10 == 5) || (nvf_no % 10 == 6) || (nvf_no % 10 == 7) || (nvf_no % 10 == 9))) {
+		((nvf_no % 10 == 5) || (nvf_no % 10 == 6) || (nvf_no % 10 == 7) || (nvf_no % 10 == 9)
+#if FIX_0443
+		/* Fix 443: auch die Wand direkt neben der Gruppe (4 und 8 bzw. 14 und 18) steht links verkehrt herum.
+		 * Haus 1: vorbeigehend kommt erst das Bootsgeruest, dann der Schornstein; das Spiel zeigte links den
+		 * Schornstein vorn und das Geruest dahinter (gemeldet von MiauKuh, Crystals-Forum). */
+		|| (nvf_no % 10 == 4) || (nvf_no % 10 == 8)
+#endif
+		)) {
 		fix_seite_umkehren(src, width, height);
 	}
 #endif

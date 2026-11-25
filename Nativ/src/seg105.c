@@ -43,7 +43,7 @@ unsigned char g_seg105_padding[1] = { 0x00 }; // ds:0xae47, never used; probably
  */
 void unequip(struct struct_hero *hero, const signed int item_id, const signed int inv_slot)
 {
-	dsa_trace_enter(967, "seg105:unequip");
+	dsa_trace_enter(968, "seg105:unequip");
 	/* unequip of item 0 is not allowed */
 	if (item_id != ITEM_ID_NONE) {
 
@@ -118,7 +118,7 @@ void unequip(struct struct_hero *hero, const signed int item_id, const signed in
  */
 void add_equip_boni(struct struct_hero *owner, struct struct_hero *equipper, const signed int item_id, const signed int inv_slot_owner, const signed int inv_slot_equipper)
 {
-	dsa_trace_enter(968, "seg105:add_equip_boni");
+	dsa_trace_enter(969, "seg105:add_equip_boni");
 	if (item_id != ITEM_ID_NONE) {
 
 		/* calculate pointer to item description */
@@ -204,7 +204,7 @@ void add_equip_boni(struct struct_hero *owner, struct struct_hero *equipper, con
  */
 signed int can_hero_use_item(const struct struct_hero *hero, const signed int item_id)
 {
-	dsa_trace_enter(969, "seg105:can_hero_use_item");
+	dsa_trace_enter(970, "seg105:can_hero_use_item");
 
 #if !defined(__BORLANDC__)
 	/* some new error check */
@@ -231,7 +231,7 @@ signed int can_hero_use_item(const struct struct_hero *hero, const signed int it
  */
 signed int can_hero_equip_item_at_slot(const signed int item_id, const signed int inv_slot)
 {
-	dsa_trace_enter(970, "seg105:can_hero_equip_item_at_slot");
+	dsa_trace_enter(971, "seg105:can_hero_equip_item_at_slot");
 	// assert(inv_slot) < HERO_INVENTORY_SLOT_KNAPSACK_1 // only for inv_slot at the body
 	struct item_stats *item_p = &g_itemsdat[item_id];
 
@@ -283,7 +283,7 @@ signed int can_hero_equip_item_at_slot(const signed int item_id, const signed in
  */
 signed int where_has_hero_equipped_item(struct struct_hero *hero, const signed int item_id)
 {
-	dsa_trace_enter(971, "seg105:where_has_hero_equipped_item");
+	dsa_trace_enter(972, "seg105:where_has_hero_equipped_item");
 	signed int i;
 
 	for (i = 0; i < HERO_INVENTORY_SLOT_KNAPSACK_1; i++) {
@@ -308,7 +308,7 @@ signed int where_has_hero_equipped_item(struct struct_hero *hero, const signed i
 //static
 signed int where_has_hero_incomplete_stack_of_item(struct struct_hero *hero, const signed int item_id)
 {
-	dsa_trace_enter(972, "seg105:where_has_hero_incomplete_stack_of_item");
+	dsa_trace_enter(973, "seg105:where_has_hero_incomplete_stack_of_item");
 	// assert(g_itemsdat[item_id]->flags.stackable)
 	signed int inv_slot;
 
@@ -343,7 +343,7 @@ signed int where_has_hero_incomplete_stack_of_item(struct struct_hero *hero, con
  */
 signed int give_new_item_to_hero(struct struct_hero *hero, const signed int item_id, const signed int mode, const signed int quantity)
 {
-	dsa_trace_enter(973, "seg105:give_new_item_to_hero");
+	dsa_trace_enter(974, "seg105:give_new_item_to_hero");
 	signed int inv_slot;
 	signed int retval;
 	signed int done;
@@ -499,7 +499,7 @@ signed int give_new_item_to_hero(struct struct_hero *hero, const signed int item
 //static
 signed int is_item_pleasing_ingerimm(const signed int item_id)
 {
-	dsa_trace_enter(974, "seg105:is_item_pleasing_ingerimm");
+	dsa_trace_enter(975, "seg105:is_item_pleasing_ingerimm");
 	struct item_stats *item_p = &g_itemsdat[item_id];
 
 	if (item_p->flags.weapon && (item_p->item_subtype_id == WEAPON_TYPE_AXT))
@@ -526,7 +526,7 @@ signed int is_item_pleasing_ingerimm(const signed int item_id)
  */
 signed int drop_item(struct struct_hero *hero, const signed int inv_slot, signed int quantity)
 {
-	dsa_trace_enter(975, "seg105:drop_item");
+	dsa_trace_enter(976, "seg105:drop_item");
 	struct item_stats *p_item;
 	signed int answer;
 	signed int retval = 0;
@@ -675,7 +675,7 @@ signed int drop_item(struct struct_hero *hero, const signed int inv_slot, signed
  */
 signed int give_new_item_to_group(signed int item_id, const signed int mode_unused, signed int quantity)
 {
-	dsa_trace_enter(976, "seg105:give_new_item_to_group");
+	dsa_trace_enter(977, "seg105:give_new_item_to_group");
 	signed int i;
 	signed int retval = 0;
 	signed int quant_hero;
@@ -750,7 +750,7 @@ signed int give_new_item_to_group(signed int item_id, const signed int mode_unus
  */
 signed int hero_count_item(struct struct_hero *hero, const signed int item_id)
 {
-	dsa_trace_enter(977, "seg105:hero_count_item");
+	dsa_trace_enter(978, "seg105:hero_count_item");
 	signed int inv_slot;
 	signed int ret = 0;
 
@@ -772,7 +772,7 @@ signed int hero_count_item(struct struct_hero *hero, const signed int item_id)
  */
 signed int group_count_item(const signed int item_id)
 {
-	dsa_trace_enter(978, "seg105:group_count_item");
+	dsa_trace_enter(979, "seg105:group_count_item");
 	struct struct_hero *hero_i;
 	signed int hero_pos;
 	signed int ret = 0;
@@ -855,7 +855,7 @@ void lose_random_item(struct struct_hero *hero, const signed int chance, char *t
  */
 signed int select_item_to_drop(struct struct_hero *hero)
 {
-	dsa_trace_enter(979, "seg105:select_item_to_drop");
+	dsa_trace_enter(980, "seg105:select_item_to_drop");
 	signed int i;
 	signed int answer = 0;
 	signed int item_cnt = 0;

@@ -445,7 +445,15 @@ signed int can_use_spellclass(const struct struct_hero *hero, const signed int s
 	for (i = 0; g_spellclasses[spellclass_id].length > i; i++) {
 
 		if ((hero->spells[first_spell + i] >= -5) &&
+#if FIX_0444
+			/* Fix 444: im Kampf zaehlen auch Sprueche "im Kampf und ausserhalb" (where_to_use 0). Sonst bleibt die
+			 * Gruppe Heilung im Kampf gesperrt (sie hat keinen reinen Kampfspruch), obwohl Balsam Salabunde,
+			 * Hexenspeichel, Klarum Purum und Tiere besprechen laut Tabelle im Kampf erlaubt sind und Balsam
+			 * sogar eigenen Code fuer den Kampf hat (gemeldet von Andrean, Crystals-Forum). */
+			((g_in_fight && (g_spell_descriptions[first_spell + i].where_to_use != -1)) ||
+#else
 			((g_in_fight && (g_spell_descriptions[first_spell + i].where_to_use == 1)) ||
+#endif
 			(!g_in_fight && (g_spell_descriptions[first_spell + i].where_to_use != 1))))
 		{
 			return 1;
@@ -552,7 +560,12 @@ signed int select_spell(struct struct_hero *hero, signed int show_vals)
 						get_ttx(first_spell + i + 106), /* TEXT.LTX 107..: Zaubername */
 						hero->spells[first_spell + i]);
 				} else if (
+#if FIX_0444
+					/* Fix 444: im Kampf auch Sprueche "im Kampf und ausserhalb" normal statt grau anzeigen */
+					((g_in_fight && (g_spell_descriptions[first_spell + i].where_to_use != -1)) ||
+#else
 					((g_in_fight && (g_spell_descriptions[first_spell + i].where_to_use == 1)) ||
+#endif
 					(!g_in_fight && (g_spell_descriptions[first_spell + i].where_to_use != 1))) &&
 					(hero->spells[first_spell + i] >= -5))
 				{

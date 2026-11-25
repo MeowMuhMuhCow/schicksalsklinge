@@ -64,7 +64,7 @@ signed int g_fig_critical_fail_backfire_2;	// ds:0xe3ac
  * auch wenn die Daten (Curians Stab bf 5) oder der alte Fehler (bf++ bei -99) anderes sagen (Osterpatch NRS 2016) */
 static void fix_set_unbreakable(struct inventory *item)
 {
-	dsa_trace_enter(383, "seg042:fix_set_unbreakable");
+	dsa_trace_enter(384, "seg042:fix_set_unbreakable");
 	if ((item->item_id == ITEM_ID_ZAUBERSTAB) || (item->item_id == ITEM_ID_HEXENBESEN) ||
 		(item->item_id == ITEM_ID_ORKNASE__MAGIC) || (item->item_id == ITEM_ID_KURZSCHWERT__MAGIC) ||
 		(item->item_id == ITEM_ID_DAS_SCHWERT_GRIMRING))
@@ -82,7 +82,7 @@ static void fix_set_unbreakable(struct inventory *item)
  */
 void FIG_do_hero_action(struct struct_hero* hero, const signed int hero_pos)
 {
-	dsa_trace_enter(384, "seg042:FIG_do_hero_action");
+	dsa_trace_enter(385, "seg042:FIG_do_hero_action");
 	signed int damage;
 	struct enemy_sheet *p_target_enemy;
 	struct struct_hero *p_target_hero;

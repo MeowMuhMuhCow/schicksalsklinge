@@ -57,7 +57,7 @@ static const char g_str_s_und_s_waren[17] = "%s UND %s WAREN "; // ds:0x9657
  */
 signed int DNG06_handler(void)
 {
-	dsa_trace_enter(668, "seg081:DNG06_handler");
+	dsa_trace_enter(669, "seg081:DNG06_handler");
 	signed int i;
 	signed int target_pos;
 	signed int l3; /* multi use: counter, flag, dice */
@@ -596,7 +596,7 @@ signed int DNG06_handler(void)
  */
 void DNG06_fight_intro(const signed int fight_id)
 {
-	dsa_trace_enter(669, "seg081:DNG06_fight_intro");
+	dsa_trace_enter(670, "seg081:DNG06_fight_intro");
 	if (fight_id == FIGHT_ID_F094_22)
 	{
 		/* this is true all the time: (!gs_estorik_known), since gs_estorik_known is never set */
@@ -608,7 +608,7 @@ void DNG06_fight_intro(const signed int fight_id)
 
 void DNG06_chest00_loot(struct struct_chest* chest)
 {
-	dsa_trace_enter(670, "seg081:DNG06_chest00_loot");
+	dsa_trace_enter(671, "seg081:DNG06_chest00_loot");
 	uint8_t* ptr_bak = chest->loot.content;
 
 	chest->loot.content = gs_dng06_chest1_content;
@@ -625,7 +625,7 @@ void DNG06_chest00_loot(struct struct_chest* chest)
  */
 void DNG06_chest01_loot(struct struct_chest* chest)
 {
-	dsa_trace_enter(671, "seg081:DNG06_chest01_loot");
+	dsa_trace_enter(672, "seg081:DNG06_chest01_loot");
 	signed int i;
 	struct struct_hero *hero;
 
@@ -662,7 +662,7 @@ void DNG06_chest01_loot(struct struct_chest* chest)
 
 void DNG09_pitfall(void)
 {
-	dsa_trace_enter(672, "seg081:DNG09_pitfall");
+	dsa_trace_enter(673, "seg081:DNG09_pitfall");
 	signed int i;
 	signed int l3;
 	struct struct_hero *hero;

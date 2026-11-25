@@ -30,7 +30,7 @@
 
 void poison_effect(void)
 {
-	dsa_trace_enter(1189, "seg121:poison_effect");
+	dsa_trace_enter(1190, "seg121:poison_effect");
 	signed int hero_pos;
 	volatile signed int j; /* multi use: weapon_type, AE-Verlust (Bannstaub), poison_id (berichtigt: kein hero_pos) */
 	struct struct_hero *hero;

@@ -37,7 +37,7 @@ signed char g_town_city_event_active = 0; // ds:0x7c42, 0 = default, 1 = city ev
  */
 void city_event_switch(void)
 {
-	dsa_trace_enter(531, "seg067:city_event_switch");
+	dsa_trace_enter(532, "seg067:city_event_switch");
 	/* load STRASSE.LTX */
 	load_tx(ARCHIVE_FILE_STRASSE_LTX);
 
@@ -72,7 +72,7 @@ void city_event_switch(void)
  */
 void city_event_1(void)
 {
-	dsa_trace_enter(532, "seg067:city_event_1");
+	dsa_trace_enter(533, "seg067:city_event_1");
 	signed int randval;
 	signed int answer;
 	struct struct_hero *hero;
@@ -140,7 +140,7 @@ void city_event_1(void)
  */
 void city_event_2(void)
 {
-	dsa_trace_enter(533, "seg067:city_event_2");
+	dsa_trace_enter(534, "seg067:city_event_2");
 	signed int answer;
 	struct struct_hero *hero;
 
@@ -181,7 +181,7 @@ void city_event_2(void)
  */
 void city_event_3(void)
 {
-	dsa_trace_enter(534, "seg067:city_event_3");
+	dsa_trace_enter(535, "seg067:city_event_3");
 	signed int answer;
 	int32_t money;
 
@@ -208,7 +208,7 @@ void city_event_3(void)
  */
 void city_event_4(void)
 {
-	dsa_trace_enter(535, "seg067:city_event_4");
+	dsa_trace_enter(536, "seg067:city_event_4");
 	signed int answer;
 	int32_t money;
 
@@ -242,7 +242,7 @@ void city_event_4(void)
  */
 void city_event_5(void)
 {
-	dsa_trace_enter(536, "seg067:city_event_5");
+	dsa_trace_enter(537, "seg067:city_event_5");
 	signed int randval;
 	signed int tw_bak;
 	struct struct_hero* hero;
@@ -273,7 +273,7 @@ void city_event_5(void)
  */
 void city_event_6(void)
 {
-	dsa_trace_enter(537, "seg067:city_event_6");
+	dsa_trace_enter(538, "seg067:city_event_6");
 	signed int answer;
 	signed int loc_bak;
 #if FIX_0065
@@ -327,7 +327,7 @@ void city_event_6(void)
  */
 void city_event_7(void)
 {
-	dsa_trace_enter(538, "seg067:city_event_7");
+	dsa_trace_enter(539, "seg067:city_event_7");
 	signed int randval;
 	struct struct_hero *hero;
 
@@ -375,7 +375,7 @@ void city_event_7(void)
  */
 void city_event_8(void)
 {
-	dsa_trace_enter(539, "seg067:city_event_8");
+	dsa_trace_enter(540, "seg067:city_event_8");
 	signed int randval;
 	struct struct_hero *hero;
 
@@ -410,7 +410,7 @@ void city_event_8(void)
  */
 void city_event_9(void)
 {
-	dsa_trace_enter(540, "seg067:city_event_9");
+	dsa_trace_enter(541, "seg067:city_event_9");
 	signed int randval = random_schick(4) - 1;
 
 	if (!randval) {

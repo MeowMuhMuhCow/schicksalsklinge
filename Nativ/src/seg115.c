@@ -38,7 +38,7 @@
 /* Nordvest <-> Kravik: Floesser, deren Baumstaemme sich verkeilt haben (Texte FEATURE8.LTX) */
 void tevent_016(void)
 {
-	dsa_trace_enter(1122, "seg115:tevent_016");
+	dsa_trace_enter(1123, "seg115:tevent_016");
 	signed int answer;
 	struct struct_hero *hero;
 
@@ -153,7 +153,7 @@ void tevent_016(void)
 /* Felsteyn <-> Einsiedlersee */
 void tevent_090(void)
 {
-	dsa_trace_enter(1123, "seg115:tevent_090");
+	dsa_trace_enter(1124, "seg115:tevent_090");
 	signed int i;
 	struct struct_hero *hero;
 
@@ -180,7 +180,7 @@ void tevent_090(void)
 /* Felsteyn <-> Einsiedlersee: Kraeuterplatz (Shurinknolle) */
 void tevent_091(void)
 {
-	dsa_trace_enter(1124, "seg115:tevent_091");
+	dsa_trace_enter(1125, "seg115:tevent_091");
 	if ((test_talent(get_first_hero_available_in_group(), TA_PFLANZENKUNDE, 5) > 0 && !gs_tevent091_flag) ||	gs_tevent091_flag)
 	{
 		g_gather_herbs_special = ITEM_ID_SHURINKNOLLE;
@@ -196,7 +196,7 @@ void tevent_091(void)
 /* Felsteyn <-> Einsiedlersee: Rastplatz */
 void tevent_093(void)
 {
-	dsa_trace_enter(1125, "seg115:tevent_093");
+	dsa_trace_enter(1126, "seg115:tevent_093");
 	if ((test_talent(get_first_hero_available_in_group(), TA_WILDNISLEBEN, 4) > 0 && !gs_tevent093_flag) || gs_tevent093_flag)
 	{
 		TRV_found_camp_place(0);
@@ -209,7 +209,7 @@ void tevent_093(void)
 /* nur nach dem Hinweis der sterbenden Abenteurerin (tevent_044 setzt gs_daspota_treasure_hint) */
 void tevent_094(void)
 {
-	dsa_trace_enter(1126, "seg115:tevent_094");
+	dsa_trace_enter(1127, "seg115:tevent_094");
 	if (gs_daspota_treasure_hint != 0)
 	{
 		signed int answer;
@@ -237,7 +237,7 @@ void tevent_094(void)
  * meint also eine gelungene HA-Probe) */
 void tevent_095(void)
 {
-	dsa_trace_enter(1127, "seg115:tevent_095");
+	dsa_trace_enter(1128, "seg115:tevent_095");
 	signed int counter_failed;
 	signed int done = 0;
 	signed int i;
@@ -391,7 +391,7 @@ void tevent_095(void)
 /* Rybon <-> Thoss: Felslabyrinth */
 void tevent_096(void)
 {
-	dsa_trace_enter(1128, "seg115:tevent_096");
+	dsa_trace_enter(1129, "seg115:tevent_096");
 	signed int answer;
 
 	do {
@@ -463,7 +463,7 @@ void tevent_096(void)
 /* (Weg Ljasdahl, Rundweg) */
 void tevent_126(void)
 {
-	dsa_trace_enter(1129, "seg115:tevent_126");
+	dsa_trace_enter(1130, "seg115:tevent_126");
 	signed int answer;
 
 	do {
@@ -488,7 +488,7 @@ void tevent_126(void)
 /* Ljasdahl (Rundweg): Kraemer am Wegrand */
 void tevent_127(void)
 {
-	dsa_trace_enter(1130, "seg115:tevent_127");
+	dsa_trace_enter(1131, "seg115:tevent_127");
 	signed int answer;
 
 	load_in_head(14);
@@ -509,7 +509,7 @@ void tevent_127(void)
 /* Runinshaven <-> Leuchtturm Runin: Nahrungsplatz, ggf. mit Kraeuterhinweis (erscheint wegen Text 16 nie) */
 void tevent_128(void)
 {
-	dsa_trace_enter(1131, "seg115:tevent_128");
+	dsa_trace_enter(1132, "seg115:tevent_128");
 	if ((test_talent(get_first_hero_available_in_group(), TA_WILDNISLEBEN, 2) > 0 && !gs_tevent128_flag) ||
 		gs_tevent128_flag)
 	{
@@ -529,7 +529,7 @@ void tevent_128(void)
 /* Runin: entrance to the dungeon "dragon cave" */
 void tevent_129(void)
 {
-	dsa_trace_enter(1132, "seg115:tevent_129");
+	dsa_trace_enter(1133, "seg115:tevent_129");
 	signed int answer;
 
 	if (test_talent(get_first_hero_available_in_group(), TA_SINNESSCHAERFE, 4) > 0 && !gs_tevent129_flag)
@@ -568,7 +568,7 @@ void tevent_129(void)
 /* Daspota <-> Ottarje: a cutter */
 void tevent_047(void)
 {
-	dsa_trace_enter(1133, "seg115:tevent_047");
+	dsa_trace_enter(1134, "seg115:tevent_047");
 	signed int answer;
 	signed int ran_off_or_dest; /* erst: 1 = weggelaufen und stehengeblieben (Text 11 statt 15);
 				     * dann: Zufallsziel 0 = Ljasdahl/Ottarje, 1 = Varnheim */
@@ -691,7 +691,7 @@ void tevent_047(void)
 /* (nur, wenn seg072 gs_tevent100_flag gesetzt hat) */
 void tevent_100(void)
 {
-	dsa_trace_enter(1134, "seg115:tevent_100");
+	dsa_trace_enter(1135, "seg115:tevent_100");
 	signed int tmp; /* multiple use: answer, mod_slot */
 
 	if (gs_tevent100_flag) {

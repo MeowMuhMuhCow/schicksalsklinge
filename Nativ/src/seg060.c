@@ -47,7 +47,7 @@ struct inn_descr g_tavern_descr_table[89]; // ds:0x6c84
  */
 void talk_tavern(void)
 {
-	dsa_trace_enter(475, "seg060:talk_tavern");
+	dsa_trace_enter(476, "seg060:talk_tavern");
 	signed int txt_id;
 	signed int food_quality;
 	signed int answer;
@@ -273,7 +273,7 @@ void talk_tavern(void)
  */
 void TLK_tavern(const signed int answer)
 {
-	dsa_trace_enter(476, "seg060:TLK_tavern");
+	dsa_trace_enter(477, "seg060:TLK_tavern");
 	signed int old_state;
 	signed int tmp;
 	int32_t p_money;

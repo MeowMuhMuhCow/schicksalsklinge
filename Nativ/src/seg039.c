@@ -52,7 +52,7 @@ const signed char g_gfxtab_double_size_extra_x2[FIG_VIEWDIR__END] = { 15, 31, 31
  */
 signed int manhattan_distance(const signed int x1, const signed int y1, const signed int x2, const signed int y2)
 {
-	dsa_trace_enter(364, "seg039:manhattan_distance");
+	dsa_trace_enter(365, "seg039:manhattan_distance");
 	return __abs__(x1 - x2) + __abs__(y1 - y2);
 }
 
@@ -65,7 +65,7 @@ signed int manhattan_distance(const signed int x1, const signed int y1, const si
  */
 signed int FIG_weapon_gfx_id_ranged(const struct struct_hero *hero)
 {
-	dsa_trace_enter(365, "seg039:FIG_weapon_gfx_id_ranged");
+	dsa_trace_enter(366, "seg039:FIG_weapon_gfx_id_ranged");
 	struct item_stats *item_p;
 	signed int retval = -1;
 	signed int weapon_id;
@@ -106,7 +106,7 @@ signed int FIG_weapon_gfx_id_ranged(const struct struct_hero *hero)
  */
 void fill_enemy_sheet(const signed int enemy_id, const signed char monster_id, const signed char round)
 {
-	dsa_trace_enter(366, "seg039:fill_enemy_sheet");
+	dsa_trace_enter(367, "seg039:fill_enemy_sheet");
 	struct monster *monster;
 	struct enemy_sheet *sheet;
 	signed int i;
@@ -216,7 +216,7 @@ void fill_enemy_sheet(const signed int enemy_id, const signed char monster_id, c
  */
 signed int place_obj_on_cb(const signed int x, const signed int y, const signed int object_id, const signed int type, const signed char viewdir)
 {
-	dsa_trace_enter(367, "seg039:place_obj_on_cb");
+	dsa_trace_enter(368, "seg039:place_obj_on_cb");
 	/* check if an object is already on that square
 		check if the object id is valid */
 	if ((get_cb_val(x, y) > 0) || (object_id < 0)) {
@@ -291,7 +291,7 @@ signed int place_obj_on_cb(const signed int x, const signed int y, const signed 
  */
 void FIG_load_enemy_sprites(struct enemy_sheet *enemy, const signed int x, const signed int y)
 {
-	dsa_trace_enter(368, "seg039:FIG_load_enemy_sprites");
+	dsa_trace_enter(369, "seg039:FIG_load_enemy_sprites");
 	struct nvf_extract_desc nvf;
 	signed int width_height;
 
@@ -378,7 +378,7 @@ void FIG_load_enemy_sprites(struct enemy_sheet *enemy, const signed int x, const
  */
 void FIG_init_enemies(void)
 {
-	dsa_trace_enter(369, "seg039:FIG_init_enemies");
+	dsa_trace_enter(370, "seg039:FIG_init_enemies");
 	signed int i;
 
 	/* Cleanup the old enemy tables */
@@ -432,7 +432,7 @@ void FIG_init_enemies(void)
  */
 void FIG_init_heroes(void)
 {
-	dsa_trace_enter(370, "seg039:FIG_init_heroes");
+	dsa_trace_enter(371, "seg039:FIG_init_heroes");
 	struct struct_hero *hero;
 	signed int cb_x;
 	signed int cb_y;

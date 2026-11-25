@@ -124,7 +124,7 @@ signed char g_large_buf; 		// ds:0xe5e4
 /* Borlandified and identical */
 void rabies_frenzy(struct struct_hero* hero_rabies, signed int hero_pos_rabies)
 {
-	dsa_trace_enter(1178, "seg120:rabies_frenzy");
+	dsa_trace_enter(1179, "seg120:rabies_frenzy");
 	signed int answer;
 	signed int hero_pos;
 	signed int done = 0;
@@ -372,7 +372,7 @@ void rabies_frenzy(struct struct_hero* hero_rabies, signed int hero_pos_rabies)
 /* Borlandified and identical */
 void init_global_buffer(void)
 {
-	dsa_trace_enter(1179, "seg120:init_global_buffer");
+	dsa_trace_enter(1180, "seg120:init_global_buffer");
 #if defined(__BORLANDC__)
 	g_global_buffer_ptr = (HugePt)schick_alloc(g_buffersize);
 #else
@@ -408,7 +408,7 @@ void init_global_buffer(void)
 /* Borlandified and identical */
 signed int init_memory(void)
 {
-	dsa_trace_enter(1180, "seg120:init_memory");
+	dsa_trace_enter(1181, "seg120:init_memory");
 	signed int error = 0;
 	uint32_t freemem;
 
@@ -515,7 +515,7 @@ signed int init_memory(void)
 /* Borlandified and identical */
 void refresh_colors(void)
 {
-	dsa_trace_enter(1181, "seg120:refresh_colors");
+	dsa_trace_enter(1182, "seg120:refresh_colors");
 	set_color((uint8_t*)g_color_black, 0);
 	set_color((uint8_t*)g_color_white, 0xff);
 	set_palette((uint8_t*)g_palette_textbox, 0xd8, 8);
@@ -530,7 +530,7 @@ void refresh_colors(void)
 /* freier Platz auf dem aktuellen Laufwerk minus 200 KB Reserve */
 int32_t get_diskspace(void)
 {
-	dsa_trace_enter(1182, "seg120:get_diskspace");
+	dsa_trace_enter(1183, "seg120:get_diskspace");
 #if defined(__BORLANDC__)
 	struct dfree df;
 	int32_t space;
@@ -548,7 +548,7 @@ int32_t get_diskspace(void)
 /* Borlandified and identical */
 void init_game_state(void)
 {
-	dsa_trace_enter(1183, "seg120:init_game_state");
+	dsa_trace_enter(1184, "seg120:init_game_state");
 	signed int i;
 
 	refresh_colors();
@@ -603,7 +603,7 @@ void init_game_state(void)
 /* Borlandified and identical */
 int err_handler(void)
 {
-	dsa_trace_enter(1184, "seg120:err_handler");
+	dsa_trace_enter(1185, "seg120:err_handler");
 #if defined(__BORLANDC__)
 	hardresume(3);
 #endif
@@ -613,7 +613,7 @@ int err_handler(void)
 /* Borlandified and nearly identical */
 void prepare_dirs(void)
 {
-	dsa_trace_enter(1185, "seg120:prepare_dirs");
+	dsa_trace_enter(1186, "seg120:prepare_dirs");
 #if defined(__BORLANDC__)
 	signed int done;
 	signed int handle;
@@ -789,7 +789,7 @@ void prepare_dirs(void)
 /* Borlandified and identical */
 void cleanup_game(void)
 {
-	dsa_trace_enter(1186, "seg120:cleanup_game");
+	dsa_trace_enter(1187, "seg120:cleanup_game");
 #if defined(__BORLANDC__)
 	struct ffblk blk;
 #endif
@@ -896,7 +896,7 @@ void cleanup_game(void)
 /* Borlandified and identical */
 void game_over_screen(void)
 {
-	dsa_trace_enter(1187, "seg120:game_over_screen");
+	dsa_trace_enter(1188, "seg120:game_over_screen");
 	signed int handle;
 
 	disable_ani();
@@ -941,7 +941,7 @@ void game_over_screen(void)
 /* Borlandified and identical */
 void call_gen(void)
 {
-	dsa_trace_enter(1188, "seg120:call_gen");
+	dsa_trace_enter(1189, "seg120:call_gen");
 #if defined(__BORLANDC__)
 	uint32_t freemem;
 	signed int retval;

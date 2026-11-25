@@ -96,7 +96,7 @@ signed int g_temple_god; // ds:0xe3f8, id of current temple's god
  */
 void do_temple(void)
 {
-	dsa_trace_enter(477, "seg061:do_temple");
+	dsa_trace_enter(478, "seg061:do_temple");
 	signed int god_id;
 	signed int answer;
 	signed int input;
@@ -311,7 +311,7 @@ void do_temple(void)
  */
 void char_add(const signed int temple_id)
 {
-	dsa_trace_enter(478, "seg061:char_add");
+	dsa_trace_enter(479, "seg061:char_add");
 	signed int position;
 	signed int entries;
 	signed int i;
@@ -378,7 +378,7 @@ void char_add(const signed int temple_id)
  */
 void char_letgo(const signed int temple_id)
 {
-	dsa_trace_enter(479, "seg061:char_letgo");
+	dsa_trace_enter(480, "seg061:char_letgo");
 	if (!gs_total_hero_counter || !gs_group_member_counts[gs_active_group_id]) {
 
 		GUI_output(get_ttx(232)); /* "ES BEFINDET SICH LEIDER KEIN HELD IN DIESER GRUPPE!" */
@@ -436,7 +436,7 @@ void char_letgo(const signed int temple_id)
  */
 signed int char_erase(void)
 {
-	dsa_trace_enter(480, "seg061:char_erase");
+	dsa_trace_enter(481, "seg061:char_erase");
 	signed int position;
 	signed int entries;
 	signed int unlink_ret;
@@ -502,7 +502,7 @@ signed int char_erase(void)
  */
 void miracle_heal_hero(signed int le_in, const char *str)
 {
-	dsa_trace_enter(481, "seg061:miracle_heal_hero");
+	dsa_trace_enter(482, "seg061:miracle_heal_hero");
 	signed int i;
 	signed int le = 0;
 	signed int hero_pos = -1;
@@ -550,7 +550,7 @@ void miracle_heal_hero(signed int le_in, const char *str)
  */
 void miracle_resurrect(const char *str)
 {
-	dsa_trace_enter(482, "seg061:miracle_resurrect");
+	dsa_trace_enter(483, "seg061:miracle_resurrect");
 	signed int i;
 
 	for (i = 0; i <= 6; i++) {
@@ -585,7 +585,7 @@ void miracle_resurrect(const char *str)
  */
 void miracle_modify(const unsigned int offset, const int32_t timer_value, const signed int mod)
 {
-	dsa_trace_enter(483, "seg061:miracle_modify");
+	dsa_trace_enter(484, "seg061:miracle_modify");
 	signed int i;
 	signed int mod_slot;
 	HugePt ptr;
@@ -613,7 +613,7 @@ void miracle_modify(const unsigned int offset, const int32_t timer_value, const 
  */
 void miracle_weapon(const char *str, const signed int mode)
 {
-	dsa_trace_enter(484, "seg061:miracle_weapon");
+	dsa_trace_enter(485, "seg061:miracle_weapon");
 	signed int i;
 	signed int j;
 	signed int done;

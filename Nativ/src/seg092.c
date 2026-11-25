@@ -74,7 +74,7 @@ static const char g_str_single_space[2] = " "; // ds:0x9dc4
 
 void chest_protected_normal(void)
 {
-	dsa_trace_enter(758, "seg092:chest_protected_normal");
+	dsa_trace_enter(759, "seg092:chest_protected_normal");
 	/* a protected chest */
 	print_msg_with_first_hero(get_ttx(518)); /* "DIE TRUHE MUSS IRGENDWIE GESCHÜTZT SEIN. %s WURDE LEICHT VERLETZT!" */
 
@@ -84,14 +84,14 @@ void chest_protected_normal(void)
 
 void chest_closed(void)
 {
-	dsa_trace_enter(759, "seg092:chest_closed");
+	dsa_trace_enter(760, "seg092:chest_closed");
 	/* a chest that just stays closed (no damage) */
 	print_msg_with_first_hero(get_ttx(519)); /* "%s SCHAFFT ES NICHT, DIE TRUHE ZU ÖFFNEN!" */
 }
 
 void chest_protected_heavy(void)
 {
-	dsa_trace_enter(760, "seg092:chest_protected_heavy");
+	dsa_trace_enter(761, "seg092:chest_protected_heavy");
 	/* a protected chest */
 	print_msg_with_first_hero(get_ttx(520)); /* "VERSUCH MISSLUNGEN!@%s WURDE VON EINEM GIFTDORN GETROFFEN!" */
 
@@ -101,7 +101,7 @@ void chest_protected_heavy(void)
 
 void chest_poisoned1(void)
 {
-	dsa_trace_enter(761, "seg092:chest_poisoned1");
+	dsa_trace_enter(762, "seg092:chest_poisoned1");
 	/* a protected chest */
 	print_msg_with_first_hero(get_ttx(520)); /* "VERSUCH MISSLUNGEN!@%s WURDE VON EINEM GIFTDORN GETROFFEN!" */
 
@@ -118,7 +118,7 @@ void chest_poisoned1(void)
 
 void chest_poisoned2(void)
 {
-	dsa_trace_enter(762, "seg092:chest_poisoned2");
+	dsa_trace_enter(763, "seg092:chest_poisoned2");
 	/* a protected chest */
 	print_msg_with_first_hero(get_ttx(520)); /* "VERSUCH MISSLUNGEN!@%s WURDE VON EINEM GIFTDORN GETROFFEN!" */
 
@@ -135,7 +135,7 @@ void chest_poisoned2(void)
 
 void chest_poisoned3(void)
 {
-	dsa_trace_enter(763, "seg092:chest_poisoned3");
+	dsa_trace_enter(764, "seg092:chest_poisoned3");
 	/* a protected chest */
 	print_msg_with_first_hero(get_ttx(520)); /* "VERSUCH MISSLUNGEN!@%s WURDE VON EINEM GIFTDORN GETROFFEN!" */
 
@@ -152,7 +152,7 @@ void chest_poisoned3(void)
 
 void chest_protected_brutal(void)
 {
-	dsa_trace_enter(764, "seg092:chest_protected_brutal");
+	dsa_trace_enter(765, "seg092:chest_protected_brutal");
 	/* a protected chest */
 	print_msg_with_first_hero(get_ttx(520)); /* "VERSUCH MISSLUNGEN!@%s WURDE VON EINEM GIFTDORN GETROFFEN!" */
 
@@ -162,7 +162,7 @@ void chest_protected_brutal(void)
 
 void chest_petrified(void)
 {
-	dsa_trace_enter(765, "seg092:chest_petrified");
+	dsa_trace_enter(766, "seg092:chest_petrified");
 	/* a protected chest */
 	print_msg_with_first_hero(get_ttx(776)); /* "VERSUCH MISSLUNGEN!@%s WIRD VON EINER GIFTNADEL GESTOCHEN UND VERST..." */
 
@@ -179,7 +179,7 @@ void chest_petrified(void)
 
 void chest_ignifax_normal(void)
 {
-	dsa_trace_enter(766, "seg092:chest_ignifax_normal");
+	dsa_trace_enter(767, "seg092:chest_ignifax_normal");
 	/* a protected chest */
 	print_msg_with_first_hero(get_ttx(777)); /* "AUTSCH!@DIESE TRUHE WAR MIT EINEM IGNIFAX GESICHERT, DER SICH NUN V..." */
 
@@ -189,7 +189,7 @@ void chest_ignifax_normal(void)
 
 void chest_ignifax_brutal(void)
 {
-	dsa_trace_enter(767, "seg092:chest_ignifax_brutal");
+	dsa_trace_enter(768, "seg092:chest_ignifax_brutal");
 	/* a protected chest */
 	print_msg_with_first_hero(get_ttx(777)); /* "AUTSCH!@DIESE TRUHE WAR MIT EINEM IGNIFAX GESICHERT, DER SICH NUN V..." */
 
@@ -199,7 +199,7 @@ void chest_ignifax_brutal(void)
 
 void chest_ignifax_heavy(void)
 {
-	dsa_trace_enter(768, "seg092:chest_ignifax_heavy");
+	dsa_trace_enter(769, "seg092:chest_ignifax_heavy");
 	/* a protected chest */
 	print_msg_with_first_hero(get_ttx(777)); /* "AUTSCH!@DIESE TRUHE WAR MIT EINEM IGNIFAX GESICHERT, DER SICH NUN V..." */
 
@@ -209,7 +209,7 @@ void chest_ignifax_heavy(void)
 
 void chest_crossbow_bolts(void)
 {
-	dsa_trace_enter(769, "seg092:chest_crossbow_bolts");
+	dsa_trace_enter(770, "seg092:chest_crossbow_bolts");
 	/* a protected chest */
 	print_msg_with_first_hero(get_ttx(788)); /* "%s WIRD VON ZWEI ARMBRUSTBOLZEN GETROFFEN!" */
 
@@ -219,7 +219,7 @@ void chest_crossbow_bolts(void)
 
 void chest_cursed(void)
 {
-	dsa_trace_enter(770, "seg092:chest_cursed");
+	dsa_trace_enter(771, "seg092:chest_cursed");
 	/* cursed chest on the Totenschiff. 50D, but each good attribute of the group leader is decreased by 1.
 	 * can be cured by 'Verwandlung beenden' spell or a Praios/Hesinde miracle */
 	/* REMARK: this is the trap of that chest (failed lock picking); the 50 D are in its money field. */
@@ -242,7 +242,7 @@ void chest_cursed(void)
 
 void chest_fulminictus(void)
 {
-	dsa_trace_enter(771, "seg092:chest_fulminictus");
+	dsa_trace_enter(772, "seg092:chest_fulminictus");
 	/* a protected chest */
 	print_msg_with_first_hero(get_ttx(564)); /* "AUTSCH!@DIESE TRUHE WAR MIT EINEM FULMINICTUS GESICHERT, DER SICH N..." */
 
@@ -258,7 +258,7 @@ void chest_fulminictus(void)
  */
 void loot_simple_chest(struct struct_chest *chest)
 {
-	dsa_trace_enter(772, "seg092:loot_simple_chest");
+	dsa_trace_enter(773, "seg092:loot_simple_chest");
 	signed int item_num;
 	signed int item_id;
 	signed int tw_bak;
@@ -328,7 +328,7 @@ void loot_simple_chest(struct struct_chest *chest)
  */
 void delete_chest_item(struct struct_chest *chest, signed int item_num)
 {
-	dsa_trace_enter(773, "seg092:delete_chest_item");
+	dsa_trace_enter(774, "seg092:delete_chest_item");
 	signed char tmp;
 
 	do {
@@ -348,7 +348,7 @@ void delete_chest_item(struct struct_chest *chest, signed int item_num)
  */
 void loot_chest(struct struct_chest *chest, char *text_non_empty, char *text_empty)
 {
-	dsa_trace_enter(774, "seg092:loot_chest");
+	dsa_trace_enter(775, "seg092:loot_chest");
 	signed int tmp; /* multi use: index of chest content; answer */
 	signed int item_id;
 	signed int tw_bak;
@@ -419,7 +419,7 @@ void loot_chest(struct struct_chest *chest, char *text_non_empty, char *text_emp
  */
 signed int hero_has_lockpicks(const struct struct_hero *hero)
 {
-	dsa_trace_enter(775, "seg092:hero_has_lockpicks");
+	dsa_trace_enter(776, "seg092:hero_has_lockpicks");
 	signed int retval = -1;
 	signed int inv_slot;
 
@@ -453,7 +453,7 @@ signed int hero_has_lockpicks(const struct struct_hero *hero)
  **/
 void loot_special_chest(const signed int check_dir)
 {
-	dsa_trace_enter(776, "seg092:loot_special_chest");
+	dsa_trace_enter(777, "seg092:loot_special_chest");
 	signed int x;
 	signed int y;
 	signed int pos;
@@ -544,7 +544,7 @@ void loot_special_chest(const signed int check_dir)
  */
 void use_lockpicks_on_chest(struct struct_chest* chest_ptr)
 {
-	dsa_trace_enter(777, "seg092:use_lockpicks_on_chest");
+	dsa_trace_enter(778, "seg092:use_lockpicks_on_chest");
 	signed int inv_slot;
 	signed int test_val;
 	struct struct_hero *hero = get_first_hero_available_in_group();
@@ -607,7 +607,7 @@ void use_lockpicks_on_chest(struct struct_chest* chest_ptr)
  */
 void use_key_on_chest(struct struct_chest* chest)
 {
-	dsa_trace_enter(778, "seg092:use_key_on_chest");
+	dsa_trace_enter(779, "seg092:use_key_on_chest");
 	signed int key_pos;
 	struct struct_hero *hero = get_first_hero_available_in_group();
 
@@ -639,7 +639,7 @@ void use_key_on_chest(struct struct_chest* chest)
  */
 void loot_multi_chest(uint8_t *content, char *msg)
 {
-	dsa_trace_enter(779, "seg092:loot_multi_chest");
+	dsa_trace_enter(780, "seg092:loot_multi_chest");
 	unsigned int quantity;
 	signed int pos;
 	signed int i;

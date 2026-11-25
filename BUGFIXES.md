@@ -1,6 +1,6 @@
 # Die Schicksalsklinge – Bugfix-Fassung: Änderungsliste
 
-**Version 1.5j vom 24.11.2026** · inoffiziell · zur deutschen GOG-Fassung 3.02 · **im Spiel noch ungetestet, Tester willkommen**
+**Version 1.5k vom 25.11.2026** · inoffiziell · zur deutschen GOG-Fassung 3.02 · **im Spiel noch ungetestet, Tester willkommen**
 
 ## So geht's
 
@@ -20,6 +20,19 @@ Die Spielstände der Bugfix-Fassung liegen in eigenen Ordnern unter `Build\`. Al
 |---|---|
 | **WICHTIG** (empfohlen) | kritische und mittlere Fehler: Abstürze, Hänger, verlorene Ausrüstung, falsche Preise, Fehler, die man im Spiel merkt |
 | **ALLES** | zusätzlich viele kleine Fehler ohne große Spielwirkung |
+
+## Neu in Version 1.5k: Heilungszauber im Kampf, Axxeleratus, Alte Optionen, Hauswand links
+
+Danke an Andrean und MiauKuh im Crystals-Forum.
+
+- **Heilungszauber im Kampf wählbar** (gemeldet von Andrean): Balsam Salabunde, Hexenspeichel, Klarum Purum und Tiere besprechen sind laut Zaubertabelle auch im Kampf erlaubt, die Gruppe Heilung ließ sich im Kampf aber nicht öffnen, weil sie keinen reinen Kampfzauber enthält – Nr. 444 (ALLES)
+- **„Alte Optionen“ ohne Munition** (gemeldet von Andrean): Statt die Kampfrunde zu verlieren, kommt die Meldung und man wählt neu, wie bei der normalen Zielwahl – Nr. 445 (ALLES)
+- **Axxeleratus: zweiter Angriff nur, wenn das Ziel erreichbar ist** (gemeldet von Andrean): Ein Angriff setzt die Bewegungspunkte auf 0, darum wiederholte die zweite Aktion denselben Angriff ohne Prüfung – im Nahkampf auch gegen weggelaufene Gegner, im Fernkampf durch blockierende Figuren hindurch. Jetzt wartet der Held, wenn das Ziel nicht mehr erreichbar ist (gleiche Prüfungen wie bei „Alte Optionen“, dazu Munition) – Nr. 379 (WICHTIG)
+- **Hauswand direkt neben der Gruppe auf der linken Straßenseite richtig herum** (entdeckt von MiauKuh): wie bei Nr. 438 für die weiter entfernten Wände; beim Vorbeigehen an Haustyp 1 kommt jetzt erst das Bootsgerüst, dann der Schornstein – Nr. 443 (ALLES)
+- **Zauberliste ergänzt:** Heilungszauber im Kampf (im Original gesperrt, Nr. 444), zweite Aktion bei Axxeleratus.
+- **Neu: Talentliste** (`Analyse/Talentliste.md`, dazu `talente.json`): alle 52 Talente mit jeder Stelle, an der das Spiel sie prüft – Ort, Zuschlag, wer würfelt und was passiert. Dazu die Probenmechanik (Summenprobe), die Steigerungschancen und die 22 Talente, die nie abgefragt werden.
+
+Spielstände bleiben kompatibel, die Standard-EXE bleibt bytegleich.
 
 ## Neu in Version 1.5j: Stürze und Zufallsbegegnungen im Probenlog, Gruppensymbol nach dem Laden
 
@@ -209,9 +222,9 @@ Abgleich mit der Zauberliste im Lösungsbuch zur Schicksalsklinge. Zauber, die d
 
 | | ganz behoben | teilweise | Summe |
 |---|---:|---:|---:|
-| WICHTIG (steckt auch in ALLES) | 141 | 6 | 147 |
-| nur in ALLES | 131 | 9 | 140 |
-| **ALLES gesamt** | **272** | **15** | **287** |
+| WICHTIG (steckt auch in ALLES) | 142 | 6 | 148 |
+| nur in ALLES | 134 | 9 | 143 |
+| **ALLES gesamt** | **276** | **15** | **291** |
 
 **124** dieser Fehler standen schon im Projekt [Bright-Eyes](https://github.com/Henne/Bright-Eyes) (meist als „Original-Bug N“ im Quelltext), bei **32** stammt auch die Behebung von dort. Die Liste nennt das bei jedem Eintrag, mit der Bright-Eyes-Nummer, soweit es eine gibt.
 
@@ -221,7 +234,7 @@ Davon 38 **Exploits** (Fehler, die dem Spieler nützen, z. B. Geld oder Werte au
 
 *Stufe W = schon in WICHTIG, A = nur in ALLES. 💰 = Exploit. „So prüfst du es“ sagt, wo man die Behebung im Spiel sieht. „Bright-Eyes“ = der Fehler stand schon in Bright-Eyes, „Behebung aus Bright-Eyes“ = auch die Behebung stammt von dort.*
 
-### Dungeons (54)
+### Dungeons (55)
 
 | Nr | Was behoben ist | Stufe |
 |---:|---|:---:|
@@ -334,7 +347,7 @@ Davon 38 **Exploits** (Fehler, die dem Spieler nützen, z. B. Geld oder Werte au
 | 371 | **Grenz- und Straßentexte ohne Richtungsprüfung** – „Orkland betreten“ und „hier endet die Straße“ auch auf dem Rückweg.<br>*So prüfst du es:* Reise Vilnheim–Phexcaer, Grenzpfahl am Schilfmeer des Bodir: in Richtung Vilnheim reisen. Vorher kommt auch dort „HIER ENDET DIE EIGENTLICHE STRASSE. IHR BEFINDET EUCH NUN IM ORKLAND“, jetzt nur auf dem Weg nach Phexcaer. | A |
 | 375 | **Jagd: Einzelheld schafft immer den Blattschuss** 💰 – Ein einzelner Held erlegt nach gelungenem Schleichen immer die volle Beute.<br>*So prüfst du es:* Jagd unterwegs (Karene oder Wildschweine) mit einem einzelnen Helden: nach gelungenem Schleichen muss jetzt die Schusswaffen-Probe gelingen (im Probenlog), vorher war die Beute sicher. Allgemein reicht die aufgerundete Hälfte (3 Helden: 2 Treffer statt 1). | A |
 
-### Städte & Orte (46)
+### Städte & Orte (47)
 
 | Nr | Was behoben ist | Stufe |
 |---:|---|:---:|
@@ -384,6 +397,7 @@ Davon 38 **Exploits** (Fehler, die dem Spieler nützen, z. B. Geld oder Werte au
 | 425 | **Tavernenschlägerei schreibt über gs_town_outlawed_flags hinaus in die Rauswurf-Merker der Herbergen** – TLK_tavern Zustand 32/33 (Schlägerei bei crowdedness 3) setzt gs_town_outlawed_flags[gs_town_id] wie TLK_inn statt [gs_town_typeindex].<br>*So prüfst du es:* Kaum direkt sichtbar: eine Schlägerei in einer vollen Taverne schrieb ihren Merker bei Tavernen mit hoher Nummer in den Rauswurf-Merker einer fremden Herberge, deren Wirt die Gruppe dann grundlos wie nach einem Rauswurf ansprach. Jetzt bleibt jede Herberge unberührt. | A |
 | 438 | **Hauswände auf der linken Straßenseite zeigen die Fassade verkehrt herum** – Steht ein Haus links, zeigt die Seitenansicht z. B. Fenster, Schornstein, Bootsrumpf; stellt man sich davor, ist es Bootsrumpf, Schornstein, Fenster. Auf der rechten Straßenseite stimmt es. Entdeckt von MiauKuh.<br>*So prüfst du es:* Stadt: an Häusern auf der linken Straßenseite vorbeigehen und die weiter entfernten Seitenwände mit der Ansicht direkt davor vergleichen. Vorher läuft die Fassade links verkehrt herum (z. B. Bootsrumpf, Schornstein, Fenster), jetzt in derselben Reihenfolge wie vorn. | A |
 | 439 | **Tempel zeigen von der Seite eine Fachwerkwand statt ihrer Front** – Im Vorbeigehen sieht die Eingangsseite eines Tempels aus wie ein Fachwerkhaus; erst wenn man sich davor stellt, erscheinen Torbogen und Schild. Entdeckt von MiauKuh.<br>*So prüfst du es:* Stadt: an einem Tempel vorbeigehen und die Eingangsseite schräg von der Seite ansehen. Vorher erscheint dort eine Fachwerkwand, erst direkt davor Torbogen und Schild, jetzt zeigt auch die Seitenansicht die Tempelfront. | A |
+| 443 | **Hauswand direkt neben der Gruppe steht links verkehrt herum** – Ergänzung zu Nr. 438: auch die Seitenwand direkt neben der Gruppe zeigt auf der linken Straßenseite die Fassade verkehrt herum, bei Haus 1 im Vorbeigehen erst den Schornstein und dahinter das Bootsgerüst. Jetzt wird auch diese Wand mit Attics eigenen Pixeln umgedreht, ohne neue Grafik. Entdeckt von MiauKuh.<br>*So prüfst du es:* Thorwal, an einem Haus mit Bootsgerüst links vorbeigehen; die Wand direkt daneben zeigt jetzt Gerüst vor Schornstein, wie vor dem Haus. | A |
 
 ### Helden & Werte (40)
 
@@ -430,7 +444,7 @@ Davon 38 **Exploits** (Fehler, die dem Spieler nützen, z. B. Geld oder Werte au
 | 405 | **Angriffsart bleibt nach dem Kampf im Helden stehen** – Beim Export nach Sternenschweif bleibt die AT/PA-Verschiebung (aggressiv/vorsichtig) erhalten.<br>*So prüfst du es:* In der Schicksalsklinge selbst nicht sichtbar: im Kampf aggressiv oder vorsichtig kämpfen, danach Helden nach Sternenschweif exportieren. Vorher bleibt die AT/PA-Verschiebung im Helden stehen, jetzt wird sie nach jedem Kampf auf 0 gesetzt. | A |
 | 407 | **Gruppengeld: Rest der Teilung verfällt** – Ein paar Heller gehen beim Verteilen verloren.<br>*So prüfst du es:* Gruppe mit 3 Helden: etwas kaufen, sodass das Gruppengeld nicht glatt durch 3 teilbar ist, dann das Geld der Helden im Charakterbogen prüfen. Vorher gehen die Rest-Heller verloren, jetzt bekommt sie der erste Held. Ein NSC allein bekommt den Betrag statt zusätzlich. | A |
 
-### Kampf (31)
+### Kampf (32)
 
 | Nr | Was behoben ist | Stufe |
 |---:|---|:---:|
@@ -465,8 +479,9 @@ Davon 38 **Exploits** (Fehler, die dem Spieler nützen, z. B. Geld oder Werte au
 | 32 | **Paradepatzer setzt backfire_1 statt backfire_2** – Bei einem Paradepatzer wird die falsche Figur animiert. *(Bright-Eyes)*<br>*So prüfst du es:* Kampf: Held greift an, der Gegner patzt bei der Parade (W20 = 20, Probenlog) und es gibt einen Freischlag (2W6 = 3 bis 8). Original wird dabei der Verteidiger animiert, mit Fix der angreifende Held, der den Freischlag ausführt. | A |
 | 312 | **Gefesselte Gegner bleiben in der Kampfliste und kämpfen beim nächsten Betreten erneut** 💰 – Ein mit Band und Fessel gefesselter Gegner greift beim nächsten Betreten wieder an. AP gibt es jedes Mal, Beute nur einmal.<br>*So prüfst du es:* Kampf, der beim erneuten Betreten wiederkommt (z. B. im Dungeon): einen Gegner mit Band und Fessel fesseln, Kampf gewinnen, Feld erneut betreten. Vorher kämpft der Gefesselte wieder (AP gibt es erneut), jetzt gilt er als besiegt. | A |
 | 327 | **Piratenangriff: Ergebnis von do_fight() wird nicht ausgewertet** *(teilweise)* 💰 – Flucht aus dem Seekampf bleibt folgenlos. Nach „Verlassen/Laden“ erscheint trotzdem der Ausrüstungsbildschirm.<br>*So prüfst du es:* Seereise mit Piratenangriff: den Seekampf verlieren oder per VERLASSEN/LADEN beenden. Vorher erscheint danach trotzdem der Ausrüstungsbildschirm, jetzt nicht mehr. Nach Sieg oder Flucht kommt er weiterhin. | A |
+| 445 | **„Alte Optionen“ mit Fernwaffe ohne Munition kostet die Runde** – Wählt ein Fernkämpfer ohne Munition „Alte Optionen“, ist die Kampfrunde verloren. Jetzt kommt die Meldung und man wählt neu, wie bei der normalen Zielwahl. Gemeldet von Andrean (Crystals-Forum).<br>*So prüfst du es:* Fernkampfwaffe, Munition verschießen, nächste Runde „Alte Optionen“: Meldung und neue Wahl. | A |
 
-### Magie (28)
+### Magie (30)
 
 | Nr | Was behoben ist | Stufe |
 |---:|---|:---:|
@@ -482,6 +497,7 @@ Davon 38 **Exploits** (Fehler, die dem Spieler nützen, z. B. Geld oder Werte au
 | 211 | **g_ignite_mode wird nach dem Anzünden nicht zurückgesetzt** – Nach dem Anzünden einer Fackel kann „Brenne toter Stoff“ keine Laterne mehr entzünden (und umgekehrt). *(Bright-Eyes, dort Original-Bug 54)*<br>*So prüfst du es:* Eine Fackel über BENUTZEN anzünden, danach mit „Brenne, toter Stoff“ eine Laterne entzünden. Original findet nur noch Fackeln (z. B. „… HAT WEDER EINE FACKEL NOCH EINE LATERNE“), Fix: die Laterne brennt. Gilt auch umgekehrt (Laterne, dann Fackel). | W |
 | 212 | **Tollwut: Sanftmut ohne Prüfung des Zauberwerts** *(teilweise)* – Jeder Zauberkundige kann den Tollwütigen mit Sanftmut beruhigen, auch wenn er den Zauber nicht kann. Magier mit 4. Stabzauber brauchen trotzdem 15 statt 13 AE, eine Meldung „beherrscht den Zauber nicht“ fehlt. *(Bright-Eyes, dort Original-Bug 49)*<br>*So prüfst du es:* Tollwut-Anfall, Auswahl „DEN ZAUBER SANFTMUT ANGEWANDT HABT“: Original lässt jeden Zauberkundigen zaubern, auch mit Sanftmut unter −5. Fix: nur ab −5, Magier mit 4. Stabzauber reichen 13 statt 15 AE. Eine Meldung „beherrscht den Zauber nicht“ fehlt weiterhin. | W |
 | 213 | **Feuerbann wird gesetzt, aber nirgends ausgewertet** – Der Zauber Feuerbann kostet AE und hat keine Wirkung. *(Bright-Eyes)*<br>*So prüfst du es:* Feuerbann sprechen, dann Kampf gegen einen Gegner, der Ignifaxius wirkt. Original: voller Schaden, Feuerbann hält nur Stufe × 5 Min. Fix: der Feuerschaden wird halbiert, die Wirkung hält Stufe in Stunden. | W |
+| 379 | **Axxeleratus: zweite Aktion wiederholt den Angriff ohne Zielwahl** – Ein Angriff setzt die Bewegungspunkte auf 0, darum öffnet die zweite Aktion durch Axxeleratus kein Menü, sondern wiederholt denselben Angriff ohne jede Prüfung: im Nahkampf auch gegen inzwischen weggelaufene Gegner, im Fernkampf durch blockierende Figuren hindurch. Jetzt wartet der Held, wenn das Ziel nicht mehr erreichbar ist (gleiche Prüfungen wie bei „Alte Optionen“, dazu Munition). Ein neues Menü mit neuen Bewegungspunkten gibt es nicht, das wäre eine Regeländerung. Gemeldet von Andrean (Crystals-Forum).<br>*So prüfst du es:* Axxeleratus auf einen Fernkämpfer, nach dem ersten Schuss einen Gegner in die Schusslinie laufen lassen. Vorher schießt der Held ein zweites Mal durch ihn hindurch, jetzt wartet er. | W |
 | 382 | **Große Gier ist nicht umgesetzt** – Große Gier misslingt immer und kostet die halben AE.<br>*So prüfst du es:* Kampf: Große Gier auf einen Gegner wirken, der kein Tier ist. Vorher misslingt der Zauber immer und kostet die halben AE, jetzt verlässt der Gegner den Kampfplatz wie beim Horriphobus (8 AE). Auf Tiere misslingt er weiterhin. | W |
 | 383 | **Transversalis auf der Landreise kostet AE ohne Wirkung** – Auf der Reise lässt sich Transversalis wirken, AE gehen weg, es passiert nichts.<br>*So prüfst du es:* Unterwegs im Lager Transversalis sprechen. Vorher gehen AE weg und nichts passiert, jetzt kommt „DIESER SPRUCH IST NUR IN EINEM DUNGEON ODER EINER STADT MÖGLICH!“ ohne AE-Kosten. | W |
 | 385 | **Curian zaubert im Kampf nur im Computerkampf mit Magie** – Der NSC zaubert im normalen Kampf nie.<br>*So prüfst du es:* Mit Curian (oder einem anderen zauberkundigen NSC) einen normalen Kampf ohne Computerkampf bestreiten. Vorher zaubert der NSC nie, jetzt wirkt er bei mehr als 10 AE auch Kampfzauber (nicht im Endkampf). | W |
@@ -498,6 +514,7 @@ Davon 38 **Exploits** (Fehler, die dem Spieler nützen, z. B. Geld oder Werte au
 | 208 | **Paralue auf einen Helden prüft das alte Zauberziel** – War das letzte Zauberziel der Zauberer selbst, scheitert Paralue auf einen Helden still und kostet nichts. *(Bright-Eyes)*<br>*So prüfst du es:* Zauberer spricht erst einen Zauber auf sich selbst (z. B. Balsam), dann Paralü auf einen anderen Helden. Original: nichts passiert und es kostet nichts, weil das alte Ziel geprüft wird. Fix: „… IST VERSTEINERT!“ | A |
 | 210 | **Brenne entzündet immer die erste Fackel oder Laterne** – Wählt man die zweite unentzündete Fackel zum Anzünden, brennt die erste. *(Bright-Eyes, dort Original-Bug 55)*<br>*So prüfst du es:* Held mit Zunderkästchen und zwei unentzündeten Fackeln zündet die zweite über BENUTZEN an. Original brennt die erste Fackel, Fix die gewählte. Gleiches bei zwei Laternen (mit Öl im Gepäck). | A |
 | 386 | **Analüs erkennt nur 28 Gegenstände, Grimring nicht** *(teilweise)* – Analüs meldet bei Gegenständen außerhalb seiner Liste „nichts Besonderes“, auch beim Grimring.<br>*So prüfst du es:* Analüs auf einen magischen Gegenstand sprechen, den der Zauber nicht in seiner Liste hat. Vorher kommt „ICH KANN NICHTS BESONDERES ERKENNEN!“, jetzt „TUT MIR LEID, ICH KANN NICHT SAGEN, WAS FÜR EIN ZAUBER HIER ANGEWENDET…“. | A |
+| 444 | **Heilungszauber (Balsam Salabunde u. a.) im Kampf nicht wählbar** – Balsam Salabunde, Hexenspeichel, Klarum Purum und Tiere besprechen sind laut Zaubertabelle auch im Kampf erlaubt (Balsam hat sogar eigenen Code für den Kampf), die Gruppe Heilung ließ sich im Kampf aber nicht öffnen, weil sie keinen reinen Kampfzauber enthält. Jetzt zählen im Kampf auch die Zauber, die im und außerhalb des Kampfes gehen. Gemeldet von Andrean (Crystals-Forum).<br>*So prüfst du es:* Im Kampf mit einer Elfe oder Hexe „Zaubern“: die Gruppe Heilung ist jetzt anwählbar, Balsam auf einen Helden sprechen. | A |
 
 ### Technik & Oberfläche (21)
 
@@ -550,7 +567,7 @@ Davon 38 **Exploits** (Fehler, die dem Spieler nützen, z. B. Geld oder Werte au
 
 ## Bewusst nicht geändert
 
-108 gemeldete Fehler bleiben, wie sie sind. Die Gründe: Die Absicht von Attic ist unklar (Spielbalance), die Behebung würde Spielstände oder Spieldaten verändern, sie hätte keine Wirkung, oder sie wäre eine neue Spielmechanik statt einer Fehlerbehebung. Jeder einzelne Grund steht in [Bauen/FIXES.md](Bauen/FIXES.md).
+107 gemeldete Fehler bleiben, wie sie sind. Die Gründe: Die Absicht von Attic ist unklar (Spielbalance), die Behebung würde Spielstände oder Spieldaten verändern, sie hätte keine Wirkung, oder sie wäre eine neue Spielmechanik statt einer Fehlerbehebung. Jeder einzelne Grund steht in [Bauen/FIXES.md](Bauen/FIXES.md).
 
 ## Etwas gefunden?
 

@@ -390,7 +390,7 @@
  * (376)      -        egal      -       kein Fehler Gorah-Versteck ohne Weiterreise
  * (377)      -        egal      -       kein Fehler Gorahs Truhe: immer der erste Held oeffnet
  * (378)      -        egal      -       kein Fehler Nachtrast immer bis 8 Uhr
- * FIX_0379   wichtig  mittel    -       nein       Axxeleratus: zweite Aktion wiederholt den Angriff ohne Zielwahl
+ * FIX_0379   wichtig  mittel    -       ja         Axxeleratus: zweite Aktion wiederholt den Angriff ohne Zielwahl
  * FIX_0380   wichtig  mittel    -       nein       Boeser Blick setzt dauerhaft zwei Attacken
  * FIX_0381   alles    egal      -       nein       Boeser Blick auf Leichen moeglich
  * FIX_0382   wichtig  mittel    -       ja         Grosse Gier ist nicht umgesetzt
@@ -443,6 +443,9 @@
  * FIX_0440   wichtig  mittel    -       ja         Truhenschloss nach Spielstand-Laden auf +0
  * FIX_0441   wichtig  mittel    -       ja         Maennliche Gegner und Helden spielen beim Tod einen Frauenschrei ab
  * FIX_0442   alles    egal      -       ja         Symbol "Gruppen vereinen" nach dem Laden falsch
+ * FIX_0443   alles    egal      -       ja         Hauswand direkt neben der Gruppe steht links verkehrt herum (Ergaenzung zu Fix 438)
+ * FIX_0444   alles    mittel    -       ja         Heilungszauber (Balsam Salabunde u. a.) im Kampf nicht waehlbar
+ * FIX_0445   alles    egal      -       ja         "Alte Optionen" mit Fernwaffe ohne Munition kostet die Runde
  */
 #ifndef S_FIX_H
 #define S_FIX_H
@@ -1684,6 +1687,15 @@
 #endif
 #ifndef FIX_0442
 #define FIX_0442 FIX_STUFE_A
+#endif
+#ifndef FIX_0443
+#define FIX_0443 FIX_STUFE_A
+#endif
+#ifndef FIX_0444
+#define FIX_0444 FIX_STUFE_A
+#endif
+#ifndef FIX_0445
+#define FIX_0445 FIX_STUFE_A
 #endif
 
 /* SEG002 ist resident: ohne Platz fuer die Behebungen entfallen dort nie aufgerufene Funktionen */

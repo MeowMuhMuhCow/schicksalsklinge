@@ -56,6 +56,9 @@
 #include "seg105.h"
 #include "seg113.h"
 #include "seg120.h"
+#if FIX_0379
+#include "seg041.h"
+#endif
 
 signed int g_fig_dropped_counter = 0;	// ds:0x5f12
 static signed int g_fig_all_heroes_withdrawn = 0; // ds:0x5f14
@@ -406,9 +409,64 @@ signed int FIG_fight_continues(void)
 	return 1;
 }
 
+#if FIX_0379
+/* Fix 379: Ein Angriff setzt die BP auf 0. Die zweite Aktion durch Axxeleratus oeffnet deshalb kein Menue, sondern
+ * wiederholt denselben Angriff auf dasselbe Ziel ohne jede Pruefung (Nahkampf auch gegen inzwischen weggelaufene
+ * Gegner, Fernkampf durch blockierende Figuren hindurch). Jetzt nur, wenn das Ziel noch erreichbar ist - mit
+ * denselben Pruefungen wie bei "Alte Optionen" (Fix 322) und dazu Munition und "zu nah". Sonst wartet der Held.
+ * Ein neues Menue mit neuen BP waere eine Regelaenderung und gibt es nicht (gemeldet von Andrean, Crystals-Forum). */
+static signed int fix_zweitaktion_ok(struct struct_hero *hero, const signed int hero_pos, const signed int x, const signed int y)
+{
+	dsa_trace_enter(327, "seg032:fix_zweitaktion_ok");
+	signed int tx;
+	signed int ty;
+	signed int id = hero->target_object_id;
+
+	if ((hero->action_id != FIG_ACTION_MELEE_ATTACK) && (hero->action_id != FIG_ACTION_RANGE_ATTACK) &&
+		(hero->action_id != FIG_ACTION_SPELL))
+	{
+		return 1;
+	}
+	if (id <= 0) {
+		return 1;
+	}
+	if (id >= 30) {
+		id -= 20;	/* Schwanz eines grossen Gegners: Kopf */
+	}
+	if (((id >= 10) && (id < 30) && g_enemy_sheets[id - 10].flags.dead) ||
+		((id < 10) && get_hero(id - 1)->flags.dead))
+	{
+		return 0;
+	}
+	if (hero->action_id == FIG_ACTION_MELEE_ATTACK) {
+		if (FIG_search_obj_on_cb(id, &tx, &ty) && (manhattan_distance(x, y, tx, ty) < 2)) {
+			return 1;
+		}
+		if ((id >= 10) && (id < 30) && FIG_search_obj_on_cb(id + 20, &tx, &ty) &&
+			(manhattan_distance(x, y, tx, ty) < 2))
+		{
+			return 1;
+		}
+		return 0;
+	}
+	if (!check_hero_range_attack(hero, hero_pos)) {
+		return 0;
+	}
+	if (hero->action_id == FIG_ACTION_RANGE_ATTACK) {
+		if (FIG_search_obj_on_cb(id, &tx, &ty) && (manhattan_distance(x, y, tx, ty) < 2)) {
+			return 0;	/* zu nah fuer einen Fernkampf */
+		}
+		if (!range_attack_check_ammo(hero, 1)) {
+			return 0;
+		}
+	}
+	return 1;
+}
+#endif
+
 void FIG_do_round(void)
 {
-	dsa_trace_enter(327, "seg032:FIG_do_round");
+	dsa_trace_enter(328, "seg032:FIG_do_round");
 	signed int i;
 	signed int nr_hero_act_phases_left_in_round; /* total number over all heroes */
 	signed int nr_enemy_action_phases_left_in_round; /* total number over all enemies */
@@ -422,6 +480,9 @@ void FIG_do_round(void)
 	signed int x;
 	signed int y;
 	struct struct_fighter *p_fighter;
+#if FIX_0379
+	signed int fix_ohne_menue;
+#endif
 
 	/* A round is the phase of a fight where all heroes and enemies get their number of BP (Bewegungspunkte; depending on load, enemy type etc.) and use them to perform a series of actions.
 	 * Actions are performed in action phases, An action phase consists of one or more actions by the active actor, where the actions 'melee attack', 'ranged attack',
@@ -637,7 +698,17 @@ void FIG_do_round(void)
 					g_fig_char_pic = actor_id + 1;
 
 					/* select a fight action */
+#if FIX_0379
+					/* ohne BP oeffnet FIG_menu() kein Menue, die Aktion der ersten Phase bleibt stehen */
+					fix_ohne_menue = (hero->fight_bp_left <= 0);
+#endif
 					FIG_menu(hero, actor_id, x_coord, y_coord);
+#if FIX_0379
+					if (fix_ohne_menue && !fix_zweitaktion_ok(hero, actor_id, x_coord, y_coord)) {
+						hero->action_id = FIG_ACTION_WAIT;
+						hero->target_object_id = 0;
+					}
+#endif
 
 					if ((hero->action_id == FIG_ACTION_MELEE_ATTACK) || (hero->action_id == FIG_ACTION_SPELL) ||
 						(hero->action_id == FIG_ACTION_USE_ITEM) || (hero->action_id == FIG_ACTION_RANGE_ATTACK))
@@ -874,7 +945,7 @@ void FIG_do_round(void)
  */
 void FIG_load_ship_sprites(void)
 {
-	dsa_trace_enter(328, "seg032:FIG_load_ship_sprites");
+	dsa_trace_enter(329, "seg032:FIG_load_ship_sprites");
 	signed int object_id;
 	signed int cb_x;
 	signed int cb_y;
@@ -973,7 +1044,7 @@ void FIG_load_ship_sprites(void)
  */
 signed int do_fight(const signed int fight_id)
 {
-	dsa_trace_enter(329, "seg032:do_fight");
+	dsa_trace_enter(330, "seg032:do_fight");
 	signed int i;
 
 	signed int handle;

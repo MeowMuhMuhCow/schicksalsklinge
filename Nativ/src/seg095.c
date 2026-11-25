@@ -39,7 +39,7 @@
  */
 signed int npc_meetings(const signed int type_index)
 {
-	dsa_trace_enter(790, "seg095:npc_meetings");
+	dsa_trace_enter(791, "seg095:npc_meetings");
 	/* check if an NPC is in the party and if we already had an NPC conversation here */
 	if (!get_hero(6)->typus && (type_index != gs_npc_meet_tavern)) {
 
@@ -81,7 +81,7 @@ signed int npc_meetings(const signed int type_index)
 
 void npc_farewell(void)
 {
-	dsa_trace_enter(791, "seg095:npc_farewell");
+	dsa_trace_enter(792, "seg095:npc_farewell");
 	struct struct_hero *hero_i;
 	signed int i;
 	signed int tmp;
@@ -174,7 +174,7 @@ void npc_farewell(void)
 //static
 void npc_nariell(void)
 {
-	dsa_trace_enter(792, "seg095:npc_nariell");
+	dsa_trace_enter(793, "seg095:npc_nariell");
 	signed int answer;
 
 	/* load NSC.LTX */
@@ -214,7 +214,7 @@ void npc_nariell(void)
 //static
 void npc_harika(void)
 {
-	dsa_trace_enter(793, "seg095:npc_harika");
+	dsa_trace_enter(794, "seg095:npc_harika");
 	signed long money;
 	signed int answer;
 
@@ -283,7 +283,7 @@ void npc_harika(void)
 
 void npc_curian(void)
 {
-	dsa_trace_enter(794, "seg095:npc_curian");
+	dsa_trace_enter(795, "seg095:npc_curian");
 	signed int answer;
 
 	/* load NSC.LTX */
@@ -322,7 +322,7 @@ void npc_curian(void)
 //static
 void npc_ardora(void)
 {
-	dsa_trace_enter(795, "seg095:npc_ardora");
+	dsa_trace_enter(796, "seg095:npc_ardora");
 	signed int answer;
 
 	/* load NSC.LTX */
@@ -392,7 +392,7 @@ void npc_ardora(void)
 //static
 void npc_garsvik(void)
 {
-	dsa_trace_enter(796, "seg095:npc_garsvik");
+	dsa_trace_enter(797, "seg095:npc_garsvik");
 	signed int answer;
 
 	/* load NSC.LTX */
@@ -431,7 +431,7 @@ void npc_garsvik(void)
 //static
 void npc_erwo(void)
 {
-	dsa_trace_enter(797, "seg095:npc_erwo");
+	dsa_trace_enter(798, "seg095:npc_erwo");
 	signed int answer;
 
 	/* load NSC.LTX */
@@ -480,7 +480,7 @@ void npc_erwo(void)
 void remove_npc(const signed int head_index, const signed char days,
 		const signed int index, char *name, char *text)
 {
-	dsa_trace_enter(798, "seg095:remove_npc");
+	dsa_trace_enter(799, "seg095:remove_npc");
 #if FIX_0256
 	/* Fix 256: Zustand des NSC vor dem Loeschen merken, sonst wird der Timer immer -1 */
 	signed int npc_ok;
@@ -539,7 +539,7 @@ void remove_npc(const signed int head_index, const signed char days,
  */
 void add_npc(const signed int index)
 {
-	dsa_trace_enter(799, "seg095:add_npc");
+	dsa_trace_enter(800, "seg095:add_npc");
 	load_npc(index);
 
 	/* overwrite the picture of the NPC with one from IN_HEAD.NVF */

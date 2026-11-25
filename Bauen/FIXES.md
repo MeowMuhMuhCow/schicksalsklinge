@@ -16,8 +16,8 @@ Quelle der Tabelle: `Werkzeuge/fix_schalter.tsv`, erzeugt von `Werkzeuge/mkfix.p
 
 | Stufe | ja | teilweise | nein | kein Fehler |
 |---|---|---|---|---|
-| wichtig (kritisch + mittel) | 141 | 6 | 32 | - |
-| alles (zusaetzlich egal) | 131 | 9 | 76 | - |
+| wichtig (kritisch + mittel) | 142 | 6 | 31 | - |
+| alles (zusaetzlich egal) | 134 | 9 | 76 | - |
 | - (laut Raster kein Fehler) | - | - | - | 36 |
 
 Nr. 51 ist dieselbe Stelle wie Nr. 50 (`FIX_0051` folgt `FIX_0050`). In den residenten Modulen (seg001..seg007) darf kein Segment laenger werden; in seg002 entfallen dafuer mit den Behebungen nie aufgerufene Funktionen (Schalter `FIX_PLATZ_SEG002`, aus den Schaltern des Moduls abgeleitet).
@@ -404,7 +404,7 @@ Nr. 51 ist dieselbe Stelle wie Nr. 50 (`FIX_0051` folgt `FIX_0050`). In den resi
 | 376 | Gorah-Versteck ohne Weiterreise | egal | nein | - | kein Fehler | laut Raster kein Fehler |  |
 | 377 | Gorahs Truhe: immer der erste Held öffnet | egal | nein | - | kein Fehler | laut Raster kein Fehler |  |
 | 378 | Nachtrast immer bis 8 Uhr | egal | nein | - | kein Fehler | laut Raster kein Fehler |  |
-| 379 | Axxeleratus: zweite Aktion wiederholt den Angriff ohne Zielwahl | mittel | nein | wichtig | nein | Absicht unklar (Spielbalance): Axxeleratus gibt eine zweite Aktion; ob sie neue BP und eine neue Wahl bekommen sollte, ist nicht belegbar - ein neues Menue mit neuen BP waere eine Regelaenderung |  |
+| 379 | Axxeleratus: zweite Aktion wiederholt den Angriff ohne Zielwahl | mittel | nein | wichtig | ja | zweite Aktion nur, wenn das Ziel noch erreichbar ist (gleiche Pruefungen wie bei "Alte Optionen", dazu Munition und "zu nah"), sonst wartet der Held; kein neues Menue, keine Regelaenderung (gemeldet von Andrean im Crystals-Forum (24.11.2026)) | SEG032.C |
 | 380 | Böser Blick setzt dauerhaft zwei Attacken | mittel | nein | wichtig | nein | unklar, ob die zwei Attacken gewollt sind; zuruecksetzen ginge nur an allen Stellen, die renegade loeschen, und der Ausgangswert ist im Gegnerblatt nicht gespeichert |  |
 | 381 | Böser Blick auf Leichen möglich | egal | nein | alles | nein | folgenlos (tote Gegner kaempfen nicht); welche Meldung/Kosten richtig waeren, ist offen |  |
 | 382 | Große Gier ist nicht umgesetzt | mittel | nein | wichtig | ja | der Gegner verlaesst den Kampfplatz (Loesungsbuch), wie beim Horriphobus ueber die Flucht; Kosten 8 AE aus der Zaubertabelle. (belegt durch das Loesungsbuch ("Gegner verlaesst den Kampfplatz", 8 AE): Gegner flieht wie beim Horriphobus, ohne eigene Meldung (Version 1.1)) | SEG099.C |
@@ -457,3 +457,6 @@ Nr. 51 ist dieselbe Stelle wie Nr. 50 (`FIX_0051` folgt `FIX_0050`). In den resi
 | 440 | Truhenschloss nach Spielstand-Laden auf +0 | mittel | nein | wichtig | ja | chest->lock liegt in der Truhentabelle im Datensegment und wird beim Laden eines Spielstands (gemeldet von Andrean im Crystals-Forum (11.2026)) | SEG092.C |
 | 441 | Männliche Gegner und Helden spielen beim Tod einen Frauenschrei ab | mittel | nein | wichtig | ja | maennliche Figuren (Sprite-Id 1..10) nutzen in ANI.DAT dieselben Sterbesequenzen (0x44..0x4c) (gemeldet von Andrean im Crystals-Forum (20.11.2026)) | SEG044.C |
 | 442 | Symbol „Gruppen vereinen“ nach dem Laden falsch | egal | nein | alles | ja | g_can_merge_group steht nicht im Spielstand und wird erst beim naechsten Schritt neu berechnet (gemeldet von Andrean im Crystals-Forum (23.11.2026)) | SEG026.C |
+| 443 | Hauswand direkt neben der Gruppe steht links verkehrt herum | egal | nein | alles | ja | auch die Wand direkt neben der Gruppe (Bild 4 und 8 bzw. 14 und 18) wird auf der linken Strassenseite wie bei Nr. 438 umgedreht; Haus 1: vorbeigehend erst das Bootsgeruest, dann der Schornstein (entdeckt von MiauKuh im Crystals-Forum (24.11.2026); Grafik nicht neu, Spalten der vorhandenen Bilder umgeordnet) | SEG066.C |
+| 444 | Heilungszauber (Balsam Salabunde u. a.) im Kampf nicht wählbar | mittel | nein | alles | ja | im Kampf zaehlen auch Sprueche "im Kampf und ausserhalb" (where_to_use 0); sonst bleibt die Gruppe Heilung gesperrt, obwohl Balsam Salabunde, Hexenspeichel, Klarum Purum und Tiere besprechen laut Tabelle im Kampf erlaubt sind (gemeldet von Andrean im Crystals-Forum (24.11.2026)) | SEG098.C |
+| 445 | „Alte Optionen“ mit Fernwaffe ohne Munition kostet die Runde | egal | nein | alles | ja | "Alte Optionen" mit Fernwaffe ohne Munition: Meldung und neu waehlen, statt die Runde zu verlieren, wie bei der normalen Zielwahl (gemeldet von Andrean im Crystals-Forum (24.11.2026)) | SEG033.C |

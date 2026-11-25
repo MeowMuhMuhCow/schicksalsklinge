@@ -329,7 +329,7 @@
  },
  {
   "name": "27. Axxeleratus Blitzgeschwind (Heldenzauber)",
-  "im_code": "Zauber-ID 27 (`SP_AXXELERATUS_BLITZGESCHWIND`). Gruppe Bewegung, Herkunft Waldelf. Probe auf KL/GE/KK. AE-Kosten laut Tabelle: 7 AE; bei misslungener Probe 3 AE. Einsatz: nur im Kampf. Ziel: ein Held, Reichweite Berührung (Nachbarfeld) im Kampf. Wirkung im Handler: Ziel: ein Held. Wirkt der Zauber schon auf ihn, misslingt er. Sonst für 1 Spielminute: AT und PA seiner aktuellen Waffengattung +2, dazu in jeder Kampfrunde 4 Bewegungspunkte und eine Aktionsphase mehr.",
+  "im_code": "Zauber-ID 27 (`SP_AXXELERATUS_BLITZGESCHWIND`). Gruppe Bewegung, Herkunft Waldelf. Probe auf KL/GE/KK. AE-Kosten laut Tabelle: 7 AE; bei misslungener Probe 3 AE. Einsatz: nur im Kampf. Ziel: ein Held, Reichweite Berührung (Nachbarfeld) im Kampf. Wirkung im Handler: Ziel: ein Held. Wirkt der Zauber schon auf ihn, misslingt er. Sonst für 1 Spielminute: AT und PA seiner aktuellen Waffengattung +2, dazu in jeder Kampfrunde 4 Bewegungspunkte und eine Aktionsphase mehr. Weil ein Angriff die Bewegungspunkte auf 0 setzt, öffnet die zweite Aktionsphase kein Menü: Sie wiederholt denselben Angriff auf dasselbe Ziel, ohne Reichweite, Schusslinie oder Munition zu prüfen (Originalfehler). Mit Fix 379 (Fanpatch-Stufe „Wichtig“) nur noch, wenn das Ziel erreichbar ist, sonst wartet der Held.",
   "codestellen": [
    "Quelle/datseg.c:g_spell_descriptions",
    "Quelle/seg098.c:use_spell",
@@ -403,7 +403,7 @@
  },
  {
   "name": "33. Balsam Salabunde (Heldenzauber)",
-  "im_code": "Zauber-ID 33 (`SP_BALSAM_SALABUNDE`). Gruppe Heilung, Herkunft Auelf. Probe auf KL/IN/CH. AE-Kosten laut Tabelle: variabel (in der Tabelle −1, der Zauber legt die Kosten selbst fest); bei misslungener Probe 5–10 AE (zufällig). Einsatz: im Kampf und außerhalb. Ziel: ein Held, Reichweite Berührung (Nachbarfeld) im Kampf. Wirkung im Handler: Ziel: ein Held. Der Zaubernde gibt ein, wie viele LE er heilen will. Unter 7 kostet es trotzdem 7 AE (geheilt wird die eingegebene Zahl). Sonst kostet jeder LE 1 AE, höchstens so viel, wie dem Ziel fehlt. Reicht die AE nicht, wird mit allen AE entsprechend weniger geheilt. Im Computerkampf (Autokampf oder ein NSC zaubert) heilt er die Hälfte der fehlenden LE ohne Nachfrage.",
+  "im_code": "Zauber-ID 33 (`SP_BALSAM_SALABUNDE`). Gruppe Heilung, Herkunft Auelf. Probe auf KL/IN/CH. AE-Kosten laut Tabelle: variabel (in der Tabelle −1, der Zauber legt die Kosten selbst fest); bei misslungener Probe 5–10 AE (zufällig). Einsatz: im Kampf und außerhalb. Ziel: ein Held, Reichweite Berührung (Nachbarfeld) im Kampf. Im Original im Kampf trotzdem nicht wählbar: Eine Zaubergruppe lässt sich im Kampf nur öffnen, wenn sie einen reinen Kampfspruch enthält, und die Gruppe Heilung hat keinen (Quelle/seg098.c:can_use_spellclass). Mit Fix 444 (Fanpatch-Stufe „nur Alle“) im Kampf wählbar. Wirkung im Handler: Ziel: ein Held. Der Zaubernde gibt ein, wie viele LE er heilen will. Unter 7 kostet es trotzdem 7 AE (geheilt wird die eingegebene Zahl). Sonst kostet jeder LE 1 AE, höchstens so viel, wie dem Ziel fehlt. Reicht die AE nicht, wird mit allen AE entsprechend weniger geheilt. Im Computerkampf (Autokampf oder ein NSC zaubert) heilt er die Hälfte der fehlenden LE ohne Nachfrage.",
   "codestellen": [
    "Quelle/datseg.c:g_spell_descriptions",
    "Quelle/seg098.c:use_spell",
@@ -415,7 +415,7 @@
  },
  {
   "name": "34. Hexenspeichel (Heldenzauber)",
-  "im_code": "Zauber-ID 34 (`SP_HEXENSPEICHEL`). Gruppe Heilung, Herkunft Hexe. Probe auf IN/CH/FF. AE-Kosten laut Tabelle: variabel (in der Tabelle −1, der Zauber legt die Kosten selbst fest); bei misslungener Probe 5–10 AE (zufällig). Einsatz: im Kampf und außerhalb. Ziel: ein Held, Reichweite Berührung (Nachbarfeld) im Kampf. Wirkung im Handler: Ziel: ein anderer Held (nicht sich selbst). Eingabe der gewünschten LE. Mit Fix 199 (Fanpatch-Stufe „Wichtig“): Jeder geheilte LE kostet 2 AE, höchstens so viele LE, wie dem Ziel fehlen, gedeckelt durch die AE des Zaubernden. Im Original ist die Rechnung fehlerhaft: Fehlt dem Ziel weniger als das Doppelte der Eingabe, kostet es 2 × fehlende LE und heilt alle fehlenden LE. Sonst kostet es 2 × Eingabe. Die AE des Zaubernden werden dabei praktisch nicht geprüft.",
+  "im_code": "Zauber-ID 34 (`SP_HEXENSPEICHEL`). Gruppe Heilung, Herkunft Hexe. Probe auf IN/CH/FF. AE-Kosten laut Tabelle: variabel (in der Tabelle −1, der Zauber legt die Kosten selbst fest); bei misslungener Probe 5–10 AE (zufällig). Einsatz: im Kampf und außerhalb. Ziel: ein Held, Reichweite Berührung (Nachbarfeld) im Kampf. Im Original im Kampf trotzdem nicht wählbar: Eine Zaubergruppe lässt sich im Kampf nur öffnen, wenn sie einen reinen Kampfspruch enthält, und die Gruppe Heilung hat keinen (Quelle/seg098.c:can_use_spellclass). Mit Fix 444 (Fanpatch-Stufe „nur Alle“) im Kampf wählbar. Wirkung im Handler: Ziel: ein anderer Held (nicht sich selbst). Eingabe der gewünschten LE. Mit Fix 199 (Fanpatch-Stufe „Wichtig“): Jeder geheilte LE kostet 2 AE, höchstens so viele LE, wie dem Ziel fehlen, gedeckelt durch die AE des Zaubernden. Im Original ist die Rechnung fehlerhaft: Fehlt dem Ziel weniger als das Doppelte der Eingabe, kostet es 2 × fehlende LE und heilt alle fehlenden LE. Sonst kostet es 2 × Eingabe. Die AE des Zaubernden werden dabei praktisch nicht geprüft.",
   "codestellen": [
    "Quelle/datseg.c:g_spell_descriptions",
    "Quelle/seg098.c:use_spell",
@@ -427,7 +427,7 @@
  },
  {
   "name": "35. Klarum Purum Kräutersud (Heldenzauber)",
-  "im_code": "Zauber-ID 35 (`SP_KLARUM_PURUM_KRAEUTERSUD`). Gruppe Heilung, Herkunft Magier. Probe auf KL/KL/CH. AE-Kosten laut Tabelle: variabel (in der Tabelle −1, der Zauber legt die Kosten selbst fest); bei misslungener Probe 5–10 AE (zufällig). Einsatz: im Kampf und außerhalb. Ziel: ein Held, Reichweite Berührung (Nachbarfeld) im Kampf. Wirkung im Handler: Ziel: ein Held. Ist er nicht vergiftet: Meldung, keine Kosten. Sonst kostet der Zauber so viele AE wie die Stärke des ersten Gifts (4 bis 15) und heilt dieses Gift (bei zu wenig AE misslingt er).",
+  "im_code": "Zauber-ID 35 (`SP_KLARUM_PURUM_KRAEUTERSUD`). Gruppe Heilung, Herkunft Magier. Probe auf KL/KL/CH. AE-Kosten laut Tabelle: variabel (in der Tabelle −1, der Zauber legt die Kosten selbst fest); bei misslungener Probe 5–10 AE (zufällig). Einsatz: im Kampf und außerhalb. Ziel: ein Held, Reichweite Berührung (Nachbarfeld) im Kampf. Im Original im Kampf trotzdem nicht wählbar: Eine Zaubergruppe lässt sich im Kampf nur öffnen, wenn sie einen reinen Kampfspruch enthält, und die Gruppe Heilung hat keinen (Quelle/seg098.c:can_use_spellclass). Mit Fix 444 (Fanpatch-Stufe „nur Alle“) im Kampf wählbar. Wirkung im Handler: Ziel: ein Held. Ist er nicht vergiftet: Meldung, keine Kosten. Sonst kostet der Zauber so viele AE wie die Stärke des ersten Gifts (4 bis 15) und heilt dieses Gift (bei zu wenig AE misslingt er).",
   "codestellen": [
    "Quelle/datseg.c:g_spell_descriptions",
    "Quelle/seg098.c:use_spell",
@@ -452,7 +452,7 @@
  },
  {
   "name": "37. Tiere besprechen (Heldenzauber)",
-  "im_code": "Zauber-ID 37 (`SP_TIERE_BESPRECHEN`). Gruppe Heilung, Herkunft Hexe. Probe auf MU/IN/CH. AE-Kosten laut Tabelle: variabel (in der Tabelle −1, der Zauber legt die Kosten selbst fest); bei misslungener Probe 5–10 AE (zufällig). Einsatz: im Kampf und außerhalb. Ziel: kein Ziel (wirkt auf den Zaubernden oder die Umgebung). Wirkung im Handler: Der Zaubernde gibt eine AE-Zahl ein, die abgezogen wird. Eine Heilwirkung gibt es im Code nicht.",
+  "im_code": "Zauber-ID 37 (`SP_TIERE_BESPRECHEN`). Gruppe Heilung, Herkunft Hexe. Probe auf MU/IN/CH. AE-Kosten laut Tabelle: variabel (in der Tabelle −1, der Zauber legt die Kosten selbst fest); bei misslungener Probe 5–10 AE (zufällig). Einsatz: im Kampf und außerhalb. Ziel: kein Ziel (wirkt auf den Zaubernden oder die Umgebung). Im Original im Kampf trotzdem nicht wählbar: Eine Zaubergruppe lässt sich im Kampf nur öffnen, wenn sie einen reinen Kampfspruch enthält, und die Gruppe Heilung hat keinen (Quelle/seg098.c:can_use_spellclass). Mit Fix 444 (Fanpatch-Stufe „nur Alle“) im Kampf wählbar. Wirkung im Handler: Der Zaubernde gibt eine AE-Zahl ein, die abgezogen wird. Eine Heilwirkung gibt es im Code nicht.",
   "codestellen": [
    "Quelle/datseg.c:g_spell_descriptions",
    "Quelle/seg098.c:use_spell",

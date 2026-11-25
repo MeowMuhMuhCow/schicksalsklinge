@@ -44,7 +44,7 @@ static const char g_str_obviously_closed[28] = "OFFENSICHTLICH GESCHLOSSEN!"; //
  */
 void THO_eisenhof(void)
 {
-	dsa_trace_enter(541, "seg068:THO_eisenhof");
+	dsa_trace_enter(542, "seg068:THO_eisenhof");
 	signed int answer;
 	int32_t money;
 
@@ -90,7 +90,7 @@ void THO_eisenhof(void)
  */
 void THO_imman(void)
 {
-	dsa_trace_enter(542, "seg068:THO_imman");
+	dsa_trace_enter(543, "seg068:THO_imman");
 	signed int tmp = get_current_season();
 
 	if ((tmp == SEASON_SPRING || tmp == SEASON_AUTUMN) && (gs_day_of_week == 5)) {
@@ -120,7 +120,7 @@ void THO_imman(void)
  */
 void THO_botschaft(void)
 {
-	dsa_trace_enter(543, "seg068:THO_botschaft");
+	dsa_trace_enter(544, "seg068:THO_botschaft");
 	int closed = 0;
 
 	/* At the 6th month in year 17 Hal the embassy is closed and another message is shown */
@@ -143,7 +143,7 @@ void THO_botschaft(void)
  */
 void THO_bank(void)
 {
-	dsa_trace_enter(544, "seg068:THO_bank");
+	dsa_trace_enter(545, "seg068:THO_bank");
 	signed int answer;
 	signed int done;
 	signed int excess;
@@ -285,7 +285,7 @@ void THO_bank(void)
  */
 void THO_arsenal(void)
 {
-	dsa_trace_enter(545, "seg068:THO_arsenal");
+	dsa_trace_enter(546, "seg068:THO_arsenal");
 	/* ARSENAL / ZEUGHAUS */
 	signed int answer;
 	signed int options;
@@ -361,7 +361,7 @@ void THO_arsenal(void)
  */
 void THO_magistracy(void)
 {
-	dsa_trace_enter(546, "seg068:THO_magistracy");
+	dsa_trace_enter(547, "seg068:THO_magistracy");
 	signed int answer;
 
 	if (!gs_got_main_quest) {
@@ -407,7 +407,7 @@ void THO_magistracy(void)
  */
 void THO_mueller(void)
 {
-	dsa_trace_enter(547, "seg068:THO_mueller");
+	dsa_trace_enter(548, "seg068:THO_mueller");
 	if (GUI_bool(get_tx2(16))) { /* "IHR STEHT VOR EINER WINDMÜHLE, EINEM WUNDERWERK DER TECHNIK.@WOLLT..." */
 
 		/* first visit ? */
@@ -423,7 +423,7 @@ void THO_mueller(void)
  */
 void THO_black_finger(void)
 {
-	dsa_trace_enter(548, "seg068:THO_black_finger");
+	dsa_trace_enter(549, "seg068:THO_black_finger");
 	if (GUI_radio(get_tx2(19), 2, get_tx2(20), get_tx2(21)) == 1) { /* "DER SCHWARZE FINGER IST EIN D..." / "ANKLOPFEN?" / "WEITERZIEHEN?" */
 
 		GUI_output(get_tx2(22)); /* "EIN VERHUTZELTES MÄNNCHEN ÖFFNET DIE TÜR - <DER MEISTER WÜNSCHT KEI..." */
@@ -436,7 +436,7 @@ void THO_black_finger(void)
 /* static */
 void dramosch_says(char *msg)
 {
-	dsa_trace_enter(549, "seg068:dramosch_says");
+	dsa_trace_enter(550, "seg068:dramosch_says");
 	GUI_dialogbox((unsigned char*)g_dtp2, get_tx2(48), msg, 0); /* "MEISTER DRAMOSCH" */
 }
 
@@ -447,7 +447,7 @@ void dramosch_says(char *msg)
  */
 void THO_ugdalf(void)
 {
-	dsa_trace_enter(550, "seg068:THO_ugdalf");
+	dsa_trace_enter(551, "seg068:THO_ugdalf");
 	signed int answer;
 	signed int randval;
 
@@ -553,7 +553,7 @@ void THO_ugdalf(void)
 /* should be static */
 void academy_analues(void)
 {
-	dsa_trace_enter(551, "seg068:academy_analues");
+	dsa_trace_enter(552, "seg068:academy_analues");
 	signed int tx_file_index_bak;
 	signed int hero_pos;
 
@@ -594,7 +594,7 @@ void academy_analues(void)
  * gesucht in derselben Reihenfolge (Platz 0..5 der aktiven Gruppe, lebend) */
 static signed int fix_academy_pay_slot(const signed int item_id, struct struct_hero **p_hero)
 {
-	dsa_trace_enter(552, "seg068:fix_academy_pay_slot");
+	dsa_trace_enter(553, "seg068:fix_academy_pay_slot");
 	signed int i;
 	signed int inv_slot;
 	struct struct_hero *hero = get_hero(0);
@@ -624,7 +624,7 @@ static signed int fix_academy_pay_slot(const signed int item_id, struct struct_h
  */
 void THO_academy(void)
 {
-	dsa_trace_enter(553, "seg068:THO_academy");
+	dsa_trace_enter(554, "seg068:THO_academy");
 	signed int answer;
 	signed int item_id;
 	signed int i; /* dual use as inv_slot and hero_pos */
@@ -847,7 +847,7 @@ void THO_academy(void)
 /* should be static */
 signed int academy_get_equal_item(const signed int price)
 {
-	dsa_trace_enter(554, "seg068:academy_get_equal_item");
+	dsa_trace_enter(555, "seg068:academy_get_equal_item");
 	signed int inv_slot;
 	signed int retval;
 	signed int i;

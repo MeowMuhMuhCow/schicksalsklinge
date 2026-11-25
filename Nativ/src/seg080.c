@@ -54,7 +54,7 @@ int16_t g_dng05_trash_flag = 0; // ds:0x960e, 1 = heap of rubbish in DNG05 searc
  */
 signed int DNG04_handler(void)
 {
-	dsa_trace_enter(659, "seg080:DNG04_handler");
+	dsa_trace_enter(660, "seg080:DNG04_handler");
 	signed int target_pos;
 	signed int i; /* dual use: mod_slot, hero_pos */
 	signed int tw_bak;
@@ -320,25 +320,25 @@ signed int DNG04_handler(void)
 
 void DNG04_chest00_open(struct struct_chest* chest)
 {
-	dsa_trace_enter(660, "seg080:DNG04_chest00_open");
+	dsa_trace_enter(661, "seg080:DNG04_chest00_open");
 	loot_corpse(chest, get_tx(1), (int8_t*)&gs_dng04_corpse0_flag); /* "AN DER WAND LEHNT EIN IN LUMPEN GEKLEIDETES SKELETT. DIE GRÖSSE LÄS..." */
 }
 
 void DNG04_chest01_open(struct struct_chest* chest)
 {
-	dsa_trace_enter(661, "seg080:DNG04_chest01_open");
+	dsa_trace_enter(662, "seg080:DNG04_chest01_open");
 	loot_corpse(chest, get_tx(8), (int8_t*)&gs_dng04_corpse1_flag); /* "IN DER ECKE LIEGEN MEHRERE RECHT FRISCHE LEICHEN, OFFENSICHTLICH DI..." */
 }
 
 void DNG04_chest02_open(struct struct_chest* chest)
 {
-	dsa_trace_enter(662, "seg080:DNG04_chest02_open");
+	dsa_trace_enter(663, "seg080:DNG04_chest02_open");
 	loot_corpse(chest, get_tx(20), (int8_t*)&gs_dng04_corpse2_flag); /* "AM ENDE DES GANGES LIEGT DIE ZUSAMMENGEKRÜMMT GESTALT EINES ELFEN,..." */
 }
 
 void DNG04_chest00_loot(struct struct_chest* chest)
 {
-	dsa_trace_enter(663, "seg080:DNG04_chest00_loot");
+	dsa_trace_enter(664, "seg080:DNG04_chest00_loot");
 	uint8_t* bak = chest->loot.content;
 
 	chest->loot.content = gs_dng04_chest_corpse0;
@@ -350,7 +350,7 @@ void DNG04_chest00_loot(struct struct_chest* chest)
 
 void DNG04_chest01_loot(struct struct_chest* chest)
 {
-	dsa_trace_enter(664, "seg080:DNG04_chest01_loot");
+	dsa_trace_enter(665, "seg080:DNG04_chest01_loot");
 	uint8_t* bak = chest->loot.content;
 
 	chest->loot.content = gs_dng04_chest_corpse1;
@@ -362,7 +362,7 @@ void DNG04_chest01_loot(struct struct_chest* chest)
 
 void DNG04_chest02_loot(struct struct_chest* chest)
 {
-	dsa_trace_enter(665, "seg080:DNG04_chest02_loot");
+	dsa_trace_enter(666, "seg080:DNG04_chest02_loot");
 	uint8_t* bak = chest->loot.content;
 
 	chest->loot.content = gs_dng04_chest_corpse2;
@@ -377,7 +377,7 @@ void DNG04_chest02_loot(struct struct_chest* chest)
  */
 signed int DNG05_handler(void)
 {
-	dsa_trace_enter(666, "seg080:DNG05_handler");
+	dsa_trace_enter(667, "seg080:DNG05_handler");
 	signed int target_pos;
 	signed int tmp; /* multiple use: mod_slot, answer */
 	signed int tw_bak;
@@ -518,7 +518,7 @@ signed int DNG05_handler(void)
  */
 void DNG05_fight_intro(const signed int fight_id)
 {
-	dsa_trace_enter(667, "seg080:DNG05_fight_intro");
+	dsa_trace_enter(668, "seg080:DNG05_fight_intro");
 	if (fight_id == 76) { /* FIGHT_ID_F076_07 */
 		GUI_output(get_tx(10)); /* "DIES IST OFFENSICHTLICH DIE SCHATZKAMMER DER GOBLINS. IN EINER ECKE..." */
 	}

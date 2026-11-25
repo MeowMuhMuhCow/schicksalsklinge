@@ -52,7 +52,7 @@ static struct int16_t_5 g_sell_screen_items_posy = { 35, 55, 75, 95, 115 }; // d
  */
 void sell_screen(struct merchant_descr *merchant_descr)
 {
-	dsa_trace_enter(465, "seg057:sell_screen");
+	dsa_trace_enter(466, "seg057:sell_screen");
 	signed int tmp; /* multi use: inv_slot, y-coordinate for table, and others. */
 	signed int j;
 	signed int items_x;

@@ -41,7 +41,7 @@ static unsigned char *g_hexenknoten_gfx_buf = NULL; // ds:0xacc8; /* wird nur in
 
 void spell_eigenschaften(void)
 {
-	dsa_trace_enter(879, "seg100:spell_eigenschaften");
+	dsa_trace_enter(880, "seg100:spell_eigenschaften");
 	signed int min;
 	signed int max;
 
@@ -86,7 +86,7 @@ void spell_eigenschaften(void)
 
 void spell_exposami(void)
 {
-	dsa_trace_enter(880, "seg100:spell_exposami");
+	dsa_trace_enter(881, "seg100:spell_exposami");
 	signed int j;
 	signed int id;
 	signed int found;
@@ -179,7 +179,7 @@ void spell_exposami(void)
 
 void spell_odem_arcanum(void)
 {
-	dsa_trace_enter(881, "seg100:spell_odem_arcanum");
+	dsa_trace_enter(882, "seg100:spell_odem_arcanum");
 	signed int inv_pos;
 	signed int item_id;
 
@@ -221,7 +221,7 @@ void spell_odem_arcanum(void)
 
 void spell_penetrizzel(void)
 {
-	dsa_trace_enter(882, "seg100:spell_penetrizzel");
+	dsa_trace_enter(883, "seg100:spell_penetrizzel");
 	signed int y;
 	signed int x;
 
@@ -238,7 +238,7 @@ void spell_penetrizzel(void)
 
 void spell_sensibar(void)
 {
-	dsa_trace_enter(883, "seg100:spell_sensibar");
+	dsa_trace_enter(884, "seg100:spell_sensibar");
 #if !defined(__BORLANDC__)
         D1_INFO("Zauberspruch \"Sensibar\" ist nicht implementiert\n");
 #endif
@@ -247,7 +247,7 @@ void spell_sensibar(void)
 /* Illusion */
 void spell_chamaelioni(void)
 {
-	dsa_trace_enter(884, "seg100:spell_chamaelioni");
+	dsa_trace_enter(885, "seg100:spell_chamaelioni");
 	get_spelluser()->flags.chamaelioni = 1;
 
 	/* prepare the message */
@@ -257,7 +257,7 @@ void spell_chamaelioni(void)
 
 void spell_duplicatus(void)
 {
-	dsa_trace_enter(885, "seg100:spell_duplicatus");
+	dsa_trace_enter(886, "seg100:spell_duplicatus");
 	get_spelluser()->flags.duplicatus = 1;
 
 	/* prepare the message */
@@ -267,7 +267,7 @@ void spell_duplicatus(void)
 
 void spell_harmlos(void)
 {
-	dsa_trace_enter(886, "seg100:spell_harmlos");
+	dsa_trace_enter(887, "seg100:spell_harmlos");
 #if !defined(__BORLANDC__)
         D1_INFO("Zauberspruch \"Harmlos\" ist nicht implementiert\n");
 #endif
@@ -275,7 +275,7 @@ void spell_harmlos(void)
 
 void spell_hexenknoten(void)
 {
-	dsa_trace_enter(887, "seg100:spell_hexenknoten");
+	dsa_trace_enter(888, "seg100:spell_hexenknoten");
 	struct struct_fighter *p_fighter;
 	uint8_t *rp;
 	signed int x;
@@ -367,7 +367,7 @@ void spell_hexenknoten(void)
 
 void spell_blitz(void)
 {
-	dsa_trace_enter(888, "seg100:spell_blitz");
+	dsa_trace_enter(889, "seg100:spell_blitz");
 
 	if (get_spelluser()->target_object_id < 10) {
 		/* cast a hero */
@@ -407,7 +407,7 @@ void spell_blitz(void)
 
 void spell_ecliptifactus(void)
 {
-	dsa_trace_enter(889, "seg100:spell_ecliptifactus");
+	dsa_trace_enter(890, "seg100:spell_ecliptifactus");
 	signed int rounds;
 	signed int ae;
 
@@ -443,7 +443,7 @@ void spell_ecliptifactus(void)
  * nicht durch Eisenrost, ein falscher Bruchfaktor (Curians Stab: bf 5) wird dabei auf -99 berichtigt */
 static signed int fix_unbreakable_weapon(struct inventory *p)
 {
-	dsa_trace_enter(890, "seg100:fix_unbreakable_weapon");
+	dsa_trace_enter(891, "seg100:fix_unbreakable_weapon");
 	signed int item_id = p->item_id;
 
 	if ((item_id == ITEM_ID_ZAUBERSTAB) || (item_id == ITEM_ID_HEXENBESEN) || (item_id == ITEM_ID_ORKNASE__MAGIC) ||
@@ -459,7 +459,7 @@ static signed int fix_unbreakable_weapon(struct inventory *p)
 
 void spell_eisenrost(void)
 {
-	dsa_trace_enter(891, "seg100:spell_eisenrost");
+	dsa_trace_enter(892, "seg100:spell_eisenrost");
 	signed int item_id;
 
 	if (get_spelluser()->target_object_id < 10) {
@@ -547,7 +547,7 @@ void spell_eisenrost(void)
 
 void spell_fulminictus(void)
 {
-	dsa_trace_enter(892, "seg100:spell_fulminictus");
+	dsa_trace_enter(893, "seg100:spell_fulminictus");
 	signed int damage;
 
 	if ((get_spelluser()->target_object_id < 10) &&
@@ -583,7 +583,7 @@ void spell_fulminictus(void)
 
 void spell_ignifaxius(void)
 {
-	dsa_trace_enter(893, "seg100:spell_ignifaxius");
+	dsa_trace_enter(894, "seg100:spell_ignifaxius");
 	signed int rs_malus;
 	signed int hero_pos;
 	signed int mod_slot;
@@ -715,7 +715,7 @@ void spell_ignifaxius(void)
 
 void spell_plumbumbarum(void)
 {
-	dsa_trace_enter(894, "seg100:spell_plumbumbarum");
+	dsa_trace_enter(895, "seg100:spell_plumbumbarum");
 	signed int mod_slot;
 	signed int hero_pos;
 
@@ -771,13 +771,13 @@ void spell_plumbumbarum(void)
 /* Radau: gleiche Wirkung wie Kraehenruf */
 void spell_radau(void)
 {
-	dsa_trace_enter(895, "seg100:spell_radau");
+	dsa_trace_enter(896, "seg100:spell_radau");
 	spell_kraehenruf();
 }
 
 void spell_saft_kraft(void)
 {
-	dsa_trace_enter(896, "seg100:spell_saft_kraft");
+	dsa_trace_enter(897, "seg100:spell_saft_kraft");
 	signed int target;
 	signed int mod_slot;
 	signed int rounds;
@@ -833,7 +833,7 @@ void spell_saft_kraft(void)
 
 void spell_scharfes_auge(void)
 {
-	dsa_trace_enter(897, "seg100:spell_scharfes_auge");
+	dsa_trace_enter(898, "seg100:spell_scharfes_auge");
 	signed int target;
 	signed int mod_slot;
 
@@ -860,7 +860,7 @@ void spell_scharfes_auge(void)
 /* Communication / Verstaendigung */
 void spell_hexenblick(void)
 {
-	dsa_trace_enter(898, "seg100:spell_hexenblick");
+	dsa_trace_enter(899, "seg100:spell_hexenblick");
 #if !defined(__BORLANDC__)
         D1_INFO("Zauberspruch \"Hexenblick\" ist nicht implementiert\n");
 #endif
@@ -868,7 +868,7 @@ void spell_hexenblick(void)
 
 void spell_necropathia(void)
 {
-	dsa_trace_enter(899, "seg100:spell_necropathia");
+	dsa_trace_enter(900, "seg100:spell_necropathia");
 #if !defined(__BORLANDC__)
         D1_INFO("Zauberspruch \"Necropathia\" ist nicht implementiert\n");
 #endif
