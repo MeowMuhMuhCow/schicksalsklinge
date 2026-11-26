@@ -60,7 +60,7 @@ struct merchant_descr g_merchant_descr_table[95]; // ds:0x6870
  */
 void add_item_to_buy_selector(const struct merchant_descr *merchant, const signed int item_id, const signed int pos)
 {
-	dsa_trace_enter(457, "seg055:add_item_to_buy_selector");
+	dsa_trace_enter(459, "seg055:add_item_to_buy_selector");
 	g_item_selector_buy[pos].item_id = item_id;
 
 	g_item_selector_buy[pos].price = g_itemsdat[item_id].price + g_itemsdat[item_id].price * merchant->price_mod / 100;
@@ -78,7 +78,7 @@ void add_item_to_buy_selector(const struct merchant_descr *merchant, const signe
  */
 void do_merchant(void)
 {
-	dsa_trace_enter(458, "seg055:do_merchant");
+	dsa_trace_enter(460, "seg055:do_merchant");
 	signed int item_selector_pos; /* dual use */
 	signed int item_selector_pos_tail;
 	signed int done = 0;
@@ -354,7 +354,7 @@ void do_merchant(void)
  */
 void talk_merchant(void)
 {
-	dsa_trace_enter(459, "seg055:talk_merchant");
+	dsa_trace_enter(461, "seg055:talk_merchant");
 	signed int tlk_id;
 
 	switch (g_merchant_descr_table[gs_town_typeindex].type) {
@@ -368,7 +368,7 @@ void talk_merchant(void)
 
 void TLK_ghandel(const signed int state)
 {
-	dsa_trace_enter(460, "seg055:TLK_ghandel");
+	dsa_trace_enter(462, "seg055:TLK_ghandel");
 	if (!state) {
 		g_dialog_next_state = (gs_merchant_kicked_flags[gs_town_typeindex] ? 1 : 4);
 	} else if (state == 1) {
@@ -384,7 +384,7 @@ void TLK_ghandel(const signed int state)
 
 void TLK_khandel(const signed int state)
 {
-	dsa_trace_enter(461, "seg055:TLK_khandel");
+	dsa_trace_enter(463, "seg055:TLK_khandel");
 	if (!state) {
 		g_dialog_next_state = (gs_merchant_kicked_flags[gs_town_typeindex] ? 1 : 2);
 	} else if (state == 5) {
@@ -411,7 +411,7 @@ void TLK_khandel(const signed int state)
 
 void TLK_whandel(const signed int state)
 {
-	dsa_trace_enter(462, "seg055:TLK_whandel");
+	dsa_trace_enter(464, "seg055:TLK_whandel");
 	if (!state) {
 
 		g_dialog_next_state = (gs_merchant_kicked_flags[gs_town_typeindex] ? 26 : 1);

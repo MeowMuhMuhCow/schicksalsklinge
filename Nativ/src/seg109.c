@@ -133,7 +133,7 @@ static const char g_empty_string12[1] = ""; // ds:0xb13d
  */
 void TRV_load_textfile(signed int travel_event_id)
 {
-	dsa_trace_enter(1006, "seg109:TRV_load_textfile");
+	dsa_trace_enter(1009, "seg109:TRV_load_textfile");
 	load_tx(ARCHIVE_FILE_FEATURE_LTX);
 
 	if (travel_event_id == -1) {
@@ -155,7 +155,7 @@ void TRV_load_textfile(signed int travel_event_id)
 
 void TRV_event(const signed int travel_event_id)
 {
-	dsa_trace_enter(1007, "seg109:TRV_event");
+	dsa_trace_enter(1010, "seg109:TRV_event");
 	signed int tw_bak;
 	signed int x_bak;
 	signed int y_bak;
@@ -203,7 +203,7 @@ void TRV_event(const signed int travel_event_id)
  */
 signed int TRV_fight_event(const signed int fight_id, const signed int travel_event_id)
 {
-	dsa_trace_enter(1008, "seg109:TRV_fight_event");
+	dsa_trace_enter(1011, "seg109:TRV_fight_event");
 	const signed int retval = do_fight(fight_id);
 
 	TRV_load_textfile(travel_event_id);
@@ -219,7 +219,7 @@ signed int TRV_fight_event(const signed int fight_id, const signed int travel_ev
  */
 void TRV_found_herb_place(const signed int hunt_hint)
 {
-	dsa_trace_enter(1009, "seg109:TRV_found_herb_place");
+	dsa_trace_enter(1012, "seg109:TRV_found_herb_place");
 	signed int answer;
 	signed int randval;
 	const struct struct_hero *hero = get_first_hero_available_in_group();
@@ -241,7 +241,7 @@ void TRV_found_herb_place(const signed int hunt_hint)
 /* Kraeutersuche am Reiseweg: Held waehlen, Stunden eingeben, gather_herbs() mit Erleichterung 3 */
 void TRV_inside_herb_place(void)
 {
-	dsa_trace_enter(1010, "seg109:TRV_inside_herb_place");
+	dsa_trace_enter(1013, "seg109:TRV_inside_herb_place");
 	signed int hero_pos;
 
 	load_ani(1);
@@ -280,7 +280,7 @@ void TRV_inside_herb_place(void)
  */
 signed int TRV_found_camp_place(const signed int bonus_type)
 {
-	dsa_trace_enter(1011, "seg109:TRV_found_camp_place");
+	dsa_trace_enter(1014, "seg109:TRV_found_camp_place");
 	signed int answer;
 	const signed int randval = random_schick(5) + 10;
 
@@ -330,7 +330,7 @@ signed int TRV_found_camp_place(const signed int bonus_type)
  */
 void TRV_found_replenish_place(const signed int herb_hint)
 {
-	dsa_trace_enter(1012, "seg109:TRV_found_replenish_place");
+	dsa_trace_enter(1015, "seg109:TRV_found_replenish_place");
 	signed int hero_pos;
 	signed int answer;
 
@@ -433,7 +433,7 @@ void TRV_found_inn(const signed int inn_name_tx, const signed int inn_typeindex)
  */
 signed int TRV_enter_hut_question(void)
 {
-	dsa_trace_enter(1013, "seg109:TRV_enter_hut_question");
+	dsa_trace_enter(1016, "seg109:TRV_enter_hut_question");
 	signed int answer;
 
 	load_ani(8);
@@ -455,7 +455,7 @@ signed int TRV_enter_hut_question(void)
  */
 signed int TRV_follow_trail_question(void)
 {
-	dsa_trace_enter(1014, "seg109:TRV_follow_trail_question");
+	dsa_trace_enter(1017, "seg109:TRV_follow_trail_question");
 	signed int answer;
 	const struct struct_hero *hero = get_first_hero_available_in_group();
 
@@ -479,7 +479,7 @@ signed int TRV_follow_trail_question(void)
  */
 signed int TRV_cross_a_ford(char *msg, const signed int time, const signed int handicap)
 {
-	dsa_trace_enter(1015, "seg109:TRV_cross_a_ford");
+	dsa_trace_enter(1018, "seg109:TRV_cross_a_ford");
 	signed int answer;
 	signed int done = 0;
 
@@ -529,7 +529,7 @@ signed int TRV_cross_a_ford(char *msg, const signed int time, const signed int h
 
 void TRV_ford_test(const signed int handicap, const signed int time)
 {
-	dsa_trace_enter(1016, "seg109:TRV_ford_test");
+	dsa_trace_enter(1019, "seg109:TRV_ford_test");
 	signed int i;
 	struct struct_hero *hero = get_hero(0);
 
@@ -580,7 +580,7 @@ void TRV_ford_test(const signed int handicap, const signed int time)
  */
 signed int TRV_ferry(char *msg, signed int price)
 {
-	dsa_trace_enter(1017, "seg109:TRV_ferry");
+	dsa_trace_enter(1020, "seg109:TRV_ferry");
 	signed int done = 0;
 	signed int answer;
 	const signed int heroes_num = count_heroes_in_group();
@@ -662,14 +662,14 @@ signed int TRV_ferry(char *msg, signed int price)
 /* Vaermhag <-> Varnheim: inn "Golfblick" */
 void tevent_001(void)
 {
-	dsa_trace_enter(1018, "seg109:tevent_001");
+	dsa_trace_enter(1021, "seg109:tevent_001");
 	TRV_found_inn(TOWN_ID_DASPOTA, 65); /* 40 = FEATURE.LTX "GOLFBLICK" */
 }
 
 /* Varnheim <-> Daspota: hunter */
 void tevent_002(void)
 {
-	dsa_trace_enter(1019, "seg109:tevent_002");
+	dsa_trace_enter(1022, "seg109:tevent_002");
 	signed int answer;
 
 	/* load dialog head */
@@ -694,14 +694,14 @@ void tevent_002(void)
 /* Thorwal <-> Serske: Faehre ueber den Bodir */
 void tevent_003(void)
 {
-	dsa_trace_enter(1020, "seg109:tevent_003");
+	dsa_trace_enter(1023, "seg109:tevent_003");
 	TRV_ferry(get_tx(69), 5); /* "BODIR" */
 }
 
 /* Serske <-> Breida: Faehrte von Waldrindern, Jagd auf einen Auerochsen */
 void tevent_004(void)
 {
-	dsa_trace_enter(1021, "seg109:tevent_004");
+	dsa_trace_enter(1024, "seg109:tevent_004");
 	if ((test_talent(get_first_hero_available_in_group(), TA_FAEHRTENSUCHEN, 2) > 0 && !gs_tevent004_flag) ||
 		gs_tevent004_flag)
 	{
@@ -735,7 +735,7 @@ void TRV_hunt_generic(const signed int ani_id, const signed int text_start,
 		const signed int ap_all1, const signed int ap_hero, const signed int ap_all2,
 		const signed int ap_all3, const signed int foods1, const signed int foods2)
 {
-	dsa_trace_enter(1022, "seg109:TRV_hunt_generic");
+	dsa_trace_enter(1025, "seg109:TRV_hunt_generic");
 	signed int failed_sneaks_num; /* Mehrfachnutzung: gescheiterte Schleicher, danach Treffer */
 	signed int i;
 	signed int shot2; /* Ergebnis des zweiten Schusses (99 = gluecklich) */
@@ -843,7 +843,7 @@ void TRV_hunt_generic(const signed int ani_id, const signed int text_start,
 /* Serske <-> Breida: Rastplatz mit guter Jagd */
 void tevent_005(void)
 {
-	dsa_trace_enter(1023, "seg109:tevent_005");
+	dsa_trace_enter(1026, "seg109:tevent_005");
 	if ((test_talent(get_first_hero_available_in_group(), TA_WILDNISLEBEN, 0) > 0 && !gs_tevent005_flag) ||
 		gs_tevent005_flag)
 	{
@@ -879,7 +879,7 @@ void tevent_007(void)
  */
 void TRV_barrier(const signed int text_start)
 {
-	dsa_trace_enter(1024, "seg109:TRV_barrier");
+	dsa_trace_enter(1027, "seg109:TRV_barrier");
 	signed int i;
 	signed int tools_num;
 	signed int answer;
@@ -1000,7 +1000,7 @@ void TRV_barrier(const signed int text_start)
 /* Tjeula <-> Breida: Nahrungsplatz (Text: kleiner Bachlauf) */
 void tevent_008(void)
 {
-	dsa_trace_enter(1025, "seg109:tevent_008");
+	dsa_trace_enter(1028, "seg109:tevent_008");
 	if ((test_talent(get_first_hero_available_in_group(), TA_WILDNISLEBEN, 2) > 0 && !gs_tevent008_flag) ||
 		gs_tevent008_flag)
 	{
@@ -1012,7 +1012,7 @@ void tevent_008(void)
 /* Breida <-> Peilinen: Kraeuterplatz (Einbeere) */
 void tevent_009(void)
 {
-	dsa_trace_enter(1026, "seg109:tevent_009");
+	dsa_trace_enter(1029, "seg109:tevent_009");
 	if ((test_talent(get_first_hero_available_in_group(), TA_PFLANZENKUNDE, 4) > 0 && !gs_tevent009_flag) ||	gs_tevent009_flag)
 	{
 		g_gather_herbs_special = ITEM_ID_EINBEERE;
@@ -1028,41 +1028,41 @@ void tevent_009(void)
 /* Breida <-> Peilinen: Herberge "Alt-Nostria" */
 void tevent_010(void)
 {
-	dsa_trace_enter(1027, "seg109:tevent_010");
+	dsa_trace_enter(1030, "seg109:tevent_010");
 	TRV_found_inn(TOWN_ID_VARNHEIM, 66); /* 43 = FEATURE.LTX "ALT-NOSTRIA" */
 }
 
 /* Rovamund <-> Nordvest: Furt durch den Ingval */
 void tevent_012(void)
 {
-	dsa_trace_enter(1028, "seg109:tevent_012");
+	dsa_trace_enter(1031, "seg109:tevent_012");
 	TRV_cross_a_ford(get_tx(53), 30, 0); /* "INGVAL" */
 }
 
 /* Nordvest <-> Kravik: Furt durch den Ingval */
 void tevent_018(void)
 {
-	dsa_trace_enter(1029, "seg109:tevent_018");
+	dsa_trace_enter(1032, "seg109:tevent_018");
 	TRV_cross_a_ford(get_tx(53), 20, 0); /* "INGVAL" */
 }
 
 /* Kravik <-> Skelellen: Furt durch den Kraval */
 void tevent_019(void)
 {
-	dsa_trace_enter(1030, "seg109:tevent_019");
+	dsa_trace_enter(1033, "seg109:tevent_019");
 	TRV_cross_a_ford(get_tx(70), 20, 0); /* "KRAVAL" */
 }
 
 /* Faehre Angbodirtal <-> Angbodirtal: Faehre ueber den Bodir */
 void tevent_023(void)
 {
-	dsa_trace_enter(1031, "seg109:tevent_023");
+	dsa_trace_enter(1034, "seg109:tevent_023");
 	TRV_ferry(get_tx(69), 3); /* "BODIR" */
 }
 
 /* Felsteyn <-> Einsiedlersee: die alte Frau (F092.TLK, TLK_old_woman() in seg116) */
 void tevent_092(void)
 {
-	dsa_trace_enter(1032, "seg109:tevent_092");
+	dsa_trace_enter(1035, "seg109:tevent_092");
 	do_talk(0, 0);
 }

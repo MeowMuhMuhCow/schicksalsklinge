@@ -19,6 +19,7 @@ bash Linux/patchen.sh            # erzeugt Build/BLADEM_FIX_WICHTIG.EXE und Buil
 bash Linux/starten.sh wichtig    # kritische + mittlere Fehler behoben
 bash Linux/starten.sh alles      # alle behebbaren Fehler
 bash Linux/starten.sh wichtig log  # dazu das Probenlog: jede Probe erscheint live im Terminal (siehe Probenlog/LIESMICH.md)
+bash Linux/starten.sh original     # das Original ohne jede Fehlerbehebung, nur mit Probenlog (würfelgleich mit dem Original)
 ```
 
 Beim ersten Mal sucht `patchen.sh` den Spielordner (unter `~/GOG Games`, `~/Games`, `~/Spiele`, Wine und Steam) oder

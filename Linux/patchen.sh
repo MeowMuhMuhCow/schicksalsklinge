@@ -9,6 +9,11 @@ command -v python3 >/dev/null 2>&1 || { echo "Python 3 fehlt (z. B. sudo apt ins
 spielpfad_suchen || exit 1
 echo
 python3 "$REPO/Patch/patchen.py" "$SPIEL" "$ORIG_EXE" "$BUILD" "${EXE}_FIX_*.ndp" || { echo "Patch nicht moeglich (siehe oben)."; exit 1; }
+if ls "$REPO/Patch/${EXE}_ORIGINAL_PROBENLOG.ndp" >/dev/null 2>&1; then
+	echo
+	echo "Original mit Probenlog (keine Fehlerbehebung, nur das Probenlog):"
+	python3 "$REPO/Patch/patchen.py" "$SPIEL" "$ORIG_EXE" "$BUILD" "${EXE}_ORIGINAL_PROBENLOG.ndp" || { echo "Patch nicht moeglich (siehe oben)."; exit 1; }
+fi
 if [ -n "$DATEN" ]; then
 	echo
 	echo "Spieldaten ($DATEN) mit den Korrekturen aus dem Patch von NRS:"
@@ -17,3 +22,4 @@ fi
 echo
 echo "Jetzt spielen:  bash Linux/starten.sh wichtig   (kritische + mittlere Fehler behoben)"
 echo "          oder: bash Linux/starten.sh alles     (alle behebbaren Fehler)"
+echo "          oder: bash Linux/starten.sh original  (Original ohne Behebungen, nur mit Probenlog)"

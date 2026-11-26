@@ -42,7 +42,7 @@ td.w{font-variant-numeric:tabular-nums;white-space:nowrap}.ok{color:var(--ok)}.b
 <div id="inhalt" hidden>
 <div class="reihe">
 <select id="f_held"><option value="">alle Helden</option></select>
-<select id="f_art"><option value="">alle Proben</option><option value="eig">Eigenschaftsproben</option><option value="tal">Talentproben</option><option value="zau">Zauber</option><option value="kampf">Kampf (AT/PA)</option><option value="stg">Stufenanstieg</option><option value="erg">Ereignisse (Gegnerzahl, Lager, Reise)</option></select>
+<select id="f_art"><option value="">alle Proben</option><option value="eig">Eigenschaftsproben</option><option value="tal">Talentproben</option><option value="zau">Zauber</option><option value="kampf">Kampf (AT/PA, Zauberschaden)</option><option value="stg">Stufenanstieg</option><option value="erg">Ereignisse (Gegnerzahl, Lager, Reise)</option></select>
 <input type="search" id="f_text" placeholder="Suchen, z. B. Schlösser">
 </div>
 <div class="karten" id="karten"></div>
@@ -108,6 +108,13 @@ function lies(text) {
       else if (typ === 6) { titel = '10 Zaubersteigerungen gegen AE'; wu = `${w[3]} (3–8)`; erg = `AE ${alt} → ${alt + w[4]}`; }
       else titel = 'Typ ' + typ;
       r = {zeit, held: name, typ: 'stg', titel, zusatz: typ === 1 || typ === 2 ? 'Steigerung beim Stufenanstieg' : 'Stufenanstieg', wuerfe: wu, ok, pz: false, erg};
+    } else if (art === 9 && w.length >= 10 && w[0] === 16) {
+      vor = null; const zp = w[2] ? nm(D.GZAUBER, w[1]) : nm(D.ZAUBER, w[1]);
+      const wer = w[2] ? `${zp} (${gegner(w[3])})` : `${name}: ${zp}`;
+      const ziel = w[4] === 1 ? (w[2] ? (name || 'einen Helden') : `Held Nr. ${w[5]}`) : gegner(w[5]);
+      const abg = []; if (w[7] > 0) abg.push(`Feuerbann halbiert (−${w[7]})`); if (w[8] > 0) abg.push(`Gardianum fängt ${w[8]} ab`);
+      r = {zeit, held: name || '', eigen: false, typ: 'kampf', titel: `${wer} auf ${ziel}`, zusatz: 'Zauberschaden',
+           wuerfe: `${w[6]} SP` + (abg.length ? ', ' + abg.join(', ') : ''), ok: null, pz: false, erg: `${w[9]} SP am Ziel`};
     } else if (art === 9 && w.length >= 4) {
       vor = null; const typ = w[0]; let titel, zusatz = '', wu = '', ok = null, erg = '';
       const wa = w.length >= 5 && w[4] >= 0 ? `Überfall in der ${w[4] + 1}. Wache` : '';

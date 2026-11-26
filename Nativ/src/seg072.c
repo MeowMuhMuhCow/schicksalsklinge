@@ -52,7 +52,7 @@ char g_str_beorn_npc_name[20]; // ds:0xe42e, name of the NPC (Erwo) as dialog ti
  */
 void INF_jurge_hjore(const signed int informer, const signed int state)
 {
-	dsa_trace_enter(571, "seg072:INF_jurge_hjore");
+	dsa_trace_enter(573, "seg072:INF_jurge_hjore");
 
 	if (!informer) {
 		/* JURGE TORFINSSON */
@@ -138,7 +138,7 @@ void INF_jurge_hjore(const signed int informer, const signed int state)
  */
 void INF_yasma_umbrik_isleif(const signed int informer, const signed int state)
 {
-	dsa_trace_enter(572, "seg072:INF_yasma_umbrik_isleif");
+	dsa_trace_enter(574, "seg072:INF_yasma_umbrik_isleif");
 	struct struct_hero *hero;
 
 	if (!informer) {
@@ -242,7 +242,7 @@ void INF_yasma_umbrik_isleif(const signed int informer, const signed int state)
  */
 void INF_ragna_beorn_algrid(const signed int informer, const signed int state)
 {
-	dsa_trace_enter(573, "seg072:INF_ragna_beorn_algrid");
+	dsa_trace_enter(575, "seg072:INF_ragna_beorn_algrid");
 	unsigned char tmp;
 	signed int beorn_ch_malus;
 
@@ -424,7 +424,7 @@ void INF_ragna_beorn_algrid(const signed int informer, const signed int state)
  */
 void INF_eliane_tiomar(const signed int informer, const signed int state)
 {
-	dsa_trace_enter(574, "seg072:INF_eliane_tiomar");
+	dsa_trace_enter(576, "seg072:INF_eliane_tiomar");
 	if (!informer) {
 		/* ELIANE WINDENBECK */
 
@@ -518,7 +518,7 @@ void INF_eliane_tiomar(const signed int informer, const signed int state)
  */
 void INF_olvir_asgrimm(const signed int informer, const signed int state)
 {
-	dsa_trace_enter(575, "seg072:INF_olvir_asgrimm");
+	dsa_trace_enter(577, "seg072:INF_olvir_asgrimm");
 	struct struct_hero *hero;
 
 	if (!informer) {
@@ -613,7 +613,7 @@ void INF_olvir_asgrimm(const signed int informer, const signed int state)
  */
 void INF_treborn_unicorn(const signed int informer, const signed int state)
 {
-	dsa_trace_enter(576, "seg072:INF_treborn_unicorn");
+	dsa_trace_enter(578, "seg072:INF_treborn_unicorn");
 	int32_t money;
 	signed int enough_money;
 
@@ -782,7 +782,7 @@ void INF_treborn_unicorn(const signed int informer, const signed int state)
  */
 void INF_swafnild_unicorn(const signed int informer, const signed int state)
 {
-	dsa_trace_enter(577, "seg072:INF_swafnild_unicorn");
+	dsa_trace_enter(579, "seg072:INF_swafnild_unicorn");
 	if (!informer) {
 		/* SWAFNILD EGILSDOTTER */
 
@@ -899,7 +899,7 @@ void INF_swafnild_unicorn(const signed int informer, const signed int state)
  */
 signed int count_map_parts(void)
 {
-	dsa_trace_enter(578, "seg072:count_map_parts");
+	dsa_trace_enter(580, "seg072:count_map_parts");
 	int i;
 	int parts;
 
@@ -918,7 +918,7 @@ signed int count_map_parts(void)
  */
 signed int has_hetman_letter(void)
 {
-	dsa_trace_enter(579, "seg072:has_hetman_letter");
+	dsa_trace_enter(581, "seg072:has_hetman_letter");
 	/* check for the introduction letter / Empfehlungsschreiben */
 	return (get_first_hero_with_item(ITEM_ID_EMPFEHLUNGSSCHREIBEN__HETMAN) != -1 ? 1 : 0);
 }

@@ -128,6 +128,35 @@ void FIG_do_spell_damage(const signed int le)
 	if (le <= 0)
 		return;
 
+#if FIX_PROBENLOG
+	/* Probenlog (Art 9, Typ 16): Schaden durch einen Heldenzauber (Fulminictus, Ignifaxius, Kraehenruf).
+	 * Werte: Typ, Zauber, Zaubernder (0 = Held, 1 = Gegner), Gegnertyp des Zaubernden (Held: 0), Zielart
+	 * (1 = Held, 2 = Gegner), Ziel (Heldenplatz 1..7 bzw. Gegnertyp), Schaden, abgefangen durch Feuerbann,
+	 * abgefangen durch Gardianum (bei Heldenzaubern immer 0), Schaden am Ziel. Name: der zaubernde Held.
+	 * Nur Lesen, die Wuerfe sind wie im Original. */
+	if ((get_spelluser()->target_object_id >= 10) ||
+		(get_hero(get_spelluser()->target_object_id - 1) != get_spelluser()))
+	{
+		signed int plog_zs[10];
+		plog_zs[0] = 16;
+		plog_zs[1] = get_spelluser()->spell_id;
+		plog_zs[2] = 0;
+		plog_zs[3] = 0;
+		if (get_spelluser()->target_object_id < 10) {
+			plog_zs[4] = 1;
+			plog_zs[5] = get_spelluser()->target_object_id;
+		} else {
+			plog_zs[4] = 2;
+			plog_zs[5] = g_enemy_sheets[get_spelluser()->target_object_id - 10].monster_id;
+		}
+		plog_zs[6] = le;
+		plog_zs[7] = 0;
+		plog_zs[8] = 0;
+		plog_zs[9] = le;
+		fix_probenlog(9, get_spelluser()->alias, 10, plog_zs);
+	}
+#endif
+
 	if (get_spelluser()->target_object_id < 10) {
 		/* attack hero */
 

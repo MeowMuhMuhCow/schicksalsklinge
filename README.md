@@ -1,8 +1,10 @@
 # Die Schicksalsklinge – Quelltext im Attic-Stil
 
-## 291 Fehler behoben – 34 Jahre nach Release
+## 293 Fehler behoben – 34 Jahre nach Release
 
 **Inoffizielle Bugfix-Fassung · spielbar ohne Compiler · das Original bleibt unangetastet · [gleich loslegen](#schnellstart-bugfix-fassung-spielen-ohne-compiler)**
+
+**Neu in Version 1.5n: Axxeleratus und „Alte Optionen“, Zauber auf sich selbst, Zauberschaden im Probenlog, Original mit Probenlog.** Nach einem fliehenden Gegner bekam ein Held mit Axxeleratus über „Alte Optionen“ ein volles zweites Menü; das lag an unserer Änderung aus 1.5k und ist behoben (Nr. 379), dazu verbraucht „Alte Optionen“ die Bewegungspunkte jetzt wie die gewählte Aktion (Nr. 448). Zauber, die nicht auf den Zaubernden wirken, werden schon bei der Zielwahl abgewiesen, statt die Runde zu kosten (Nr. 449). Das Probenlog zeigt jeden Schaden durch Zauber, auch was Feuerbann und Gardianum abfangen. Neu ist außerdem die Fassung „Original mit Probenlog“: das Spiel ganz ohne Behebungen, nur mit Probenlog, würfelgleich mit dem Original (`BLADEM_ORIGINAL_MIT_PROBENLOG_STARTEN.bat`). Alles gemeldet bzw. gewünscht von Andrean.
 
 **Neu in Version 1.5m: Tempelseiten, Wasserfass, Zauber auf Tote, Probenlog.** In Sichtweite eines Tempels erscheint wieder eine Tempelseite statt mehrerer schmaler Tempelbilder nebeneinander (Fehler aus 1.5l, Nr. 439). Ein leerer Wasserschlauch kostet am Fass 2 Einheiten statt 1 (Nr. 447). Ein Zauber auf einen gefallenen Gegner oder Helden wird wie ein Angriff abgewiesen, außer Skelettarius (Nr. 446). Das Probenlog zeigt jetzt auch die Regeneration im Schlaf, Wundfieber nach misslungener Wundheilung und das Treffen mit Olvir oder Treborn Kolberg auf Reisen. Alles gemeldet bzw. gewünscht von Andrean.
 
@@ -60,16 +62,16 @@ Documentation is in German.*
 
 Für alle, die nur spielen wollen. Nötig sind Windows und Schicksalsklinge von GOG, sonst nichts: kein Python, kein Compiler. (Linux: siehe unten.)
 
-1. Rechts unter **Releases** das Paket `schicksalsklinge_Bugfix_1.5m.zip` herunterladen (oder oben **Code → Download ZIP**) und irgendwohin entpacken.
+1. Rechts unter **Releases** das Paket `schicksalsklinge_Bugfix_1.5n.zip` herunterladen (oder oben **Code → Download ZIP**) und irgendwohin entpacken.
 2. **`PATCHEN.bat`** doppelklicken. Es findet den GOG-Spielordner (oder fragt danach), prüft per Prüfsumme, ob die
    eigene EXE genau die passende ist, und erzeugt daraus `Build\BLADEM_FIX_WICHTIG.EXE` und `Build\BLADEM_FIX_ALLES.EXE`.
    **Die Original-EXE wird nicht verändert**, das Spiel bleibt wie es ist.
 3. **`BLADEM_FIX_WICHTIG_STARTEN.bat`** (wichtige Fehler) oder **`BLADEM_FIX_ALLES_STARTEN.bat`** (alle) doppelklicken.
    Das Spiel startet mit den GOG-Daten. Die Spielstände landen in eigenen Ordnern unter `Build\`, die echten bleiben unberührt.
 
-**Mit Probenlog:** statt Schritt 3 `BLADEM_FIX_WICHTIG_MIT_PROBENLOG_STARTEN.bat` doppelklicken, dann erscheint jede Probe live in einem zweiten Fenster.
+**Mit Probenlog:** statt Schritt 3 `BLADEM_FIX_WICHTIG_MIT_PROBENLOG_STARTEN.bat` doppelklicken, dann erscheint jede Probe live in einem zweiten Fenster. Zum Vergleich mit dem unveränderten Spiel: `BLADEM_ORIGINAL_MIT_PROBENLOG_STARTEN.bat` startet das Original ohne jede Behebung, nur mit Probenlog (würfelt genau wie das Original).
 
-**Linux:** genauso mit `bash Linux/patchen.sh` und `bash Linux/starten.sh wichtig` (bzw. `alles`, mit Probenlog: `wichtig log`). Nötig sind Python 3 und DOSBox, Anleitung: [Linux/LIESMICH.md](Linux/LIESMICH.md).
+**Linux:** genauso mit `bash Linux/patchen.sh` und `bash Linux/starten.sh wichtig` (bzw. `alles`, mit Probenlog: `wichtig log`, Original mit Probenlog: `original`). Nötig sind Python 3 und DOSBox, Anleitung: [Linux/LIESMICH.md](Linux/LIESMICH.md).
 
 **Funktionieren meine Spielstände weiter?** Ja. Die Bugfix-Fassung ändert das Speicherformat nicht, kein Feld, keine
 Größe. Eure alten Spielstände aus dem GOG-Ordner erscheinen beim Laden automatisch und lassen sich weiterspielen.

@@ -8,7 +8,7 @@
  *            FIG_latecomers() setzt Gegner, die erst in spaeteren Runden erscheinen, auf
  *            ein freies Feld nahe ihrer Startposition.
  * Aufrufer:  FIG_menu() (seg033), do_fight() (seg032), check_hero_range_attack() (seg035).
- * Daten:     g_cb_obj_nonobstacle (begehbare Objekte, Nummer - 50), Richtungstabellen.
+ * Daten:     g_cb_obj_nonobstacle (Objekte, die die Sichtlinie nicht sperren, Nummer - 50), Richtungen.
  * Besonders: FIG_move_hero(): Flucht ueber den Rand y<0 oder y>23 braucht ein BP mehr als
  *            ueber x<0; im Fluchtfall wird object_id_bak einer frueheren Cursorposition
  *            geprueft. Bekannt (Bright-Eyes): "ZIEL: 99 BP" bei toten Figuren als Ziel.

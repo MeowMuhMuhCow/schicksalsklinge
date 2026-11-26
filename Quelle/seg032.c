@@ -405,7 +405,8 @@ signed int FIG_fight_continues(void)
  * wiederholt denselben Angriff auf dasselbe Ziel ohne jede Pruefung (Nahkampf auch gegen inzwischen weggelaufene
  * Gegner, Fernkampf durch blockierende Figuren hindurch). Jetzt nur, wenn das Ziel noch erreichbar ist - mit
  * denselben Pruefungen wie bei "Alte Optionen" (Fix 322) und dazu Munition und "zu nah". Sonst wartet der Held.
- * Ein neues Menue mit neuen BP waere eine Regelaenderung und gibt es nicht (gemeldet von Andrean, Crystals-Forum). */
+ * Ein neues Menue mit neuen BP waere eine Regelaenderung und gibt es nicht (gemeldet von Andrean, Crystals-Forum).
+ * Seit 1.5n bleiben Aktion und Ziel dabei stehen, damit "Alte Optionen" danach wie im Original prueft. */
 static signed int fix_zweitaktion_ok(struct struct_hero *hero, const signed int hero_pos, const signed int x, const signed int y)
 {
 	signed int tx;
@@ -693,12 +694,14 @@ void FIG_do_round(void)
 #endif
 					FIG_menu(hero, actor_id, x_coord, y_coord);
 #if FIX_0379
+					/* 1.5n: der Held wartet, aber Aktion und Ziel bleiben stehen. Frueher wurden sie hier auf
+					 * "Abwarten" gesetzt; dann wiederholte "Alte Optionen" in der naechsten Runde dieses Abwarten
+					 * und liess die BP stehen (zweite Aktion mit vollem Menue), statt wie im Original "HIER
+					 * BRAUCHST DU KEINE KRAFT MEHR ZU VERSCHWENDEN" zu melden und neu waehlen zu lassen. */
 					if (fix_ohne_menue && !fix_zweitaktion_ok(hero, actor_id, x_coord, y_coord)) {
-						hero->action_id = FIG_ACTION_WAIT;
-						hero->target_object_id = 0;
-					}
+						/* warten: keine Aktion ausfuehren */
+					} else
 #endif
-
 					if ((hero->action_id == FIG_ACTION_MELEE_ATTACK) || (hero->action_id == FIG_ACTION_SPELL) ||
 						(hero->action_id == FIG_ACTION_USE_ITEM) || (hero->action_id == FIG_ACTION_RANGE_ATTACK))
 					{

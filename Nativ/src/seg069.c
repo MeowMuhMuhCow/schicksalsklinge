@@ -35,7 +35,7 @@ signed int g_combo_mode; // ds:0xe42c, 0 = normal, 1 = tavern/inn of a combined 
  */
 void THO_hetmann(void)
 {
-	dsa_trace_enter(556, "seg069:THO_hetmann");
+	dsa_trace_enter(558, "seg069:THO_hetmann");
 	signed int answer;
 	signed int i;
 	signed int map_parts;
@@ -180,7 +180,7 @@ void THO_hetmann(void)
  */
 void THO_windriders(void)
 {
-	dsa_trace_enter(557, "seg069:THO_windriders");
+	dsa_trace_enter(559, "seg069:THO_windriders");
 	const signed int answer = GUI_radio(get_tx2(20), 3, get_tx2(21), get_tx2(22), get_tx2(23)); /* "IHR STEHT VOR EINEM ETWA DREI..." / "HÖFLICH UM EINLASS BITTEN?" / "IN EINEM UNBEOBACHTETEN MOMEN..." / "VERSUCHEN, DIE TORWACHEN ZU B..." */
 
 	if (answer != -1) {
@@ -220,7 +220,7 @@ void THO_windriders(void)
  */
 void THO_tav_inn_combi(void)
 {
-	dsa_trace_enter(558, "seg069:THO_tav_inn_combi");
+	dsa_trace_enter(560, "seg069:THO_tav_inn_combi");
 	signed int answer;
 	signed int typeindex_bak;
 
@@ -299,7 +299,7 @@ void THO_tav_inn_combi(void)
  */
 void THO_stormchildren(void)
 {
-	dsa_trace_enter(559, "seg069:THO_stormchildren");
+	dsa_trace_enter(561, "seg069:THO_stormchildren");
 	const signed int answer = GUI_radio(get_tx2(29), 3, get_tx2(30), get_tx2(31), get_tx2(32)); /* "IHR STEHT VOR EINEM ETWA DREI..." / "HÖFLICH UM EINLASS BITTEN?" / "IN EINEM UNBEOBACHTETEN MOMEN..." / "VERSUCHEN, DIE TORWACHEN ZU B..." */
 
 	if (answer != -1) {
@@ -336,7 +336,7 @@ void THO_stormchildren(void)
  */
 void THO_garaldsson(void)
 {
-	dsa_trace_enter(560, "seg069:THO_garaldsson");
+	dsa_trace_enter(562, "seg069:THO_garaldsson");
 	const signed int answer = GUI_radio(get_tx2(38), 3, get_tx2(39), get_tx2(40), get_tx2(41)); /* "IHR STEHT VOR EINEM ETWA DREI..." / "HÖFLICH UM EINLASS BITTEN?" / "IN EINEM UNBEOBACHTETEN MOMEN..." / "VERSUCHEN, DIE TORWACHEN ZU B..." */
 
 	if (answer != -1) {

@@ -150,7 +150,23 @@ def ereignis(name, w):
         vorher = {-1: 'krank', 0: 'gesund', 1: 'Genesung'}.get(w[2], str(w[2]))
         return (f'{wer}Wundfieber nach Wundheilung: W20 {w[1]} (bis 7), vorher {vorher}'
                 f' → neu begonnen {"ja" if w[3] else "nein"}')
+    if typ == 16 and len(w) >= 10:
+        return zauberschaden(name, w)
     return f'Ereignis (Typ {typ})'
+
+
+def zauberschaden(name, w):
+    """Art 9, Typ 16: Schaden durch einen Zauber (Held oder Gegner zaubert; Feuerbann/Gardianum fangen ab)"""
+    zp = nm(GZAUBER, w[1]) if w[2] else nm(ZAUBER, w[1])
+    wer = f'{zp} ({gegner(w[3])})' if w[2] else f'{name}: {zp}'
+    if w[4] == 1:
+        ziel = (name or 'einen Helden') if w[2] else f'Held Nr. {w[5]}'
+    else:
+        ziel = gegner(w[5])
+    t = f'{wer} auf {ziel}: {w[6]} SP'
+    if w[7] > 0: t += f', Feuerbann halbiert (−{w[7]})'
+    if w[8] > 0: t += f', Gardianum fängt {w[8]} ab'
+    return t + f' → {w[9]} SP am Ziel'
 
 
 def gegnerzauber(name, w):

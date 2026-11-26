@@ -22,7 +22,7 @@
  * FIX_0008   alles    egal      -       ja         Schwanzteil eines durch eigenen Patzer getoeteten Doppelgegners bleibt stehen
  * FIX_0009   alles    egal      -       ja         Abfrage g_max_enemies != 0 nach dem Sieg ist nie wahr
  * FIX_0010   alles    egal      -       nein       Fluchtverteilung uebergeht den NSC auf Platz 6
- * FIX_0011   wichtig  mittel    -       ja         Zauberziel: begehbare Objekte (Id >= 50) werden nicht abgewiesen
+ * FIX_0011   wichtig  mittel    -       ja         Zauberziel: Deko-Objekte (Id >= 50) werden nicht abgewiesen
  * FIX_0012   alles    egal      -       ja         Flucht ueber den oberen und unteren Rand kostet ein BP mehr
  * FIX_0013   alles    egal      -       ja         Fluchtfeld wird mit dem Inhalt einer frueheren Cursorposition geprueft
  * FIX_0014   alles    egal      -       ja         Verschachtelte ifs: tote Figur auf dem Zielfeld ueberspringt die Weg- und BP-Pruefung
@@ -448,6 +448,8 @@
  * FIX_0445   alles    egal      -       ja         "Alte Optionen" mit Fernwaffe ohne Munition kostet die Runde
  * FIX_0446   alles    egal      -       ja         Zauber auf einen toten Gegner oder Helden kostet die Runde (Angriff wird abgewiesen)
  * FIX_0447   alles    egal      -       ja         Leerer Wasserschlauch braucht am Fass nur 1 Einheit statt 2
+ * FIX_0448   alles    egal      -       ja         "Alte Optionen" verbraucht keine BP: mit Axxeleratus oeffnet die zweite Aktion ein volles Menue
+ * FIX_0449   alles    egal      -       ja         Zauber, die nicht auf sich selbst wirken, kosten auf den Zaubernden die Runde (Angriff wird abgewiesen)
  */
 #ifndef S_FIX_H
 #define S_FIX_H
@@ -1704,6 +1706,12 @@
 #endif
 #ifndef FIX_0447
 #define FIX_0447 FIX_STUFE_A
+#endif
+#ifndef FIX_0448
+#define FIX_0448 FIX_STUFE_A
+#endif
+#ifndef FIX_0449
+#define FIX_0449 FIX_STUFE_A
 #endif
 
 /* SEG002 ist resident: ohne Platz fuer die Behebungen entfallen dort nie aufgerufene Funktionen */

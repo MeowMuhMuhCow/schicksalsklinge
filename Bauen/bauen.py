@@ -12,13 +12,15 @@ Wichtig: Die Module werden immer in derselben Reihenfolge und im selben DOSBox-L
 bei der Registerwahl fuer switch nicht vorbelegten Speicher; das Ergebnis kann von der vorher uebersetzten Datei
 abhaengen (so bei Sternenschweif O030 beobachtet).
 
-Aufruf:  python3 bauen.py [wichtig|alles] [--exploits-lassen] [--fixflags "..."]
+Aufruf:  python3 bauen.py [wichtig|alles|probenlog] [--exploits-lassen] [--fixflags "..."]
                          [--projekt ORDNER] [--compiler ORDNER] [--dosbox DOSBox.exe] [--baudir ORDNER] [--sichtbar]
 
 Fix-Modus (python bauen.py wichtig | alles): nach dem Standardbau (FIX_BUGS=0, muss bytegleich sein) zusaetzlich die
 Fehlerbehebungen einschalten (Quelle\\s_fix.h: FIX_BUGS=1 "wichtig" = kritisch + mittel, 2 "alles"), alle Module mit
 den Schaltern neu uebersetzen, residente Module auf ihre Originallaenge auffuellen (Werkzeuge\\segpad.py), linken und
 gegen den Standardbau pruefen (Werkzeuge\\fixcheck.py) -> Build\\BLADEM_FIX_WICHTIG.EXE bzw. BLADEM_FIX_ALLES.EXE.
+probenlog: das Original ohne jede Behebung (FIX_BUGS=0), nur mit Probenlog (FIX_PROBENLOG=1), wuerfelgleich mit
+BLADEM.EXE -> Build\\BLADEM_ORIGINAL_PROBENLOG.EXE (Start: BLADEM_ORIGINAL_MIT_PROBENLOG_STARTEN.bat).
 ALLE BEHEBUNGEN SIND IM SPIEL UNGETESTET (siehe Bauen\\FIXES.md)."""
 import os, sys, re, shutil, stat, hashlib, subprocess, time, argparse, tempfile
 
@@ -225,7 +227,7 @@ class Dos:
         return t
 
 
-def fix_bau(projekt, root, dosbox, sichtbar, flags, name):
+def fix_bau(projekt, root, dosbox, sichtbar, flags, name, exename=None):
     """Fix-Modus (Portierung von Werkzeuge/build_fix.sh): alle Module mit den Schaltern neu uebersetzen, residente
     Module (SEG001..SEG013) auf die Laenge des Standardbaus auffuellen, linken, mit fixcheck pruefen."""
     werkz = os.path.join(projekt, 'Werkzeuge')
@@ -277,10 +279,11 @@ def fix_bau(projekt, root, dosbox, sichtbar, flags, name):
                         finde_ci(src, 'BLADEM.EXE'), finde_ci(src, 'BLADEM.MAP')], capture_output=True, text=True)
     for l in (r.stdout + r.stderr).strip().split('\n'): say('      ' + l)
     if r.returncode: abbruch('Fix-Modus: fixcheck meldet Fehler - die Fix-EXE wird nicht ausgegeben')
-    ziel = os.path.join(projekt, 'Build', f'BLADEM_FIX_{name}.EXE')
+    exename = exename or f'BLADEM_FIX_{name}'
+    ziel = os.path.join(projekt, 'Build', f'{exename}.EXE')
     shutil.copyfile(exe, ziel)
-    shutil.copyfile(finde_ci(fix, 'BLADEM.MAP'), os.path.join(projekt, 'Build', f'BLADEM_FIX_{name}.MAP'))
-    say(f'      {pfad("Build", f"BLADEM_FIX_{name}.EXE")}  {os.path.getsize(ziel)} Byte  MD5 {md5(ziel)}')
+    shutil.copyfile(finde_ci(fix, 'BLADEM.MAP'), os.path.join(projekt, 'Build', f'{exename}.MAP'))
+    say(f'      {pfad("Build", f"{exename}.EXE")}  {os.path.getsize(ziel)} Byte  MD5 {md5(ziel)}')
     say(f'      ALLE BEHEBUNGEN SIND IM SPIEL UNGETESTET - Rueckmeldungen willkommen ({pfad("Bauen", "FIXES.md")})')
     return ziel
 
@@ -288,8 +291,8 @@ def fix_bau(projekt, root, dosbox, sichtbar, flags, name):
 def main():
     global LOG, DOSLOG
     ap = argparse.ArgumentParser(description='baut BLADEM.EXE aus dem Quelltext')
-    ap.add_argument('fix', nargs='?', choices=['wichtig', 'alles'], type=str.lower,
-                    help='zusaetzlich die Fix-EXE bauen: wichtig (FIX_BUGS=1) oder alles (FIX_BUGS=2)')
+    ap.add_argument('fix', nargs='?', choices=['wichtig', 'alles', 'probenlog'], type=str.lower,
+                    help='zusaetzlich die Fix-EXE bauen: wichtig (FIX_BUGS=1), alles (FIX_BUGS=2) oder probenlog (Original + Probenlog)')
     ap.add_argument('--exploits-lassen', action='store_true',
                     help='Fix-Modus: Fehler, die dem Spieler nuetzen, nicht beheben (FIX_EXPLOITS=0)')
     ap.add_argument('--fixflags', default='', help='Fix-Modus: weitere Schalter fuer BCC, z. B. "-DFIX_0040=0"')
@@ -369,6 +372,14 @@ def main():
         return 0 if gleich else 1
     if not gleich:
         abbruch('Fix-Modus nur nach bytegleichem Standardbau (er ist die Vergleichsfassung fuer fixcheck)')
+    if a.fix == 'probenlog':
+        # Original ohne Behebungen, nur das Probenlog (aendert keine Wuerfe); alle Zusatzfunktionen bleiben aus
+        flags = ('-DFIX_BUGS=0 -DFIX_PROBENLOG=1 ' + a.fixflags).strip()
+        say('')
+        fix_bau(projekt, root, dosbox, a.sichtbar, flags, 'PROBENLOG', 'BLADEM_ORIGINAL_PROBENLOG')
+        start = 'BLADEM_ORIGINAL_MIT_PROBENLOG_STARTEN.bat' if WINDOWS else 'bash Linux/starten.sh original log'
+        say(''); say(f'EXE fertig: {pfad("Build", "BLADEM_ORIGINAL_PROBENLOG.EXE")} - starten mit {start}')
+        return 0
     flags = ('-DFIX_BUGS=1' if a.fix == 'wichtig' else '-DFIX_BUGS=2') + (' -DFIX_EXPLOITS=0' if a.exploits_lassen else '')
     flags = (flags + ' ' + a.fixflags).strip()
     say('')

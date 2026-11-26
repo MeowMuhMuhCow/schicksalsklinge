@@ -41,8 +41,46 @@ struct struct_hero *g_spelltarget;		// ds:0xe5b8
 struct struct_hero *g_spelluser;		// ds:0xe5bc
 struct enemy_sheet *g_spelluser_e;	// ds:0xe5c0
 
+#if FIX_PROBENLOG
+/* Puffer wie PLOG_MSPELL (Art 10, unten): hinterer Teil von g_dtp2 */
+#define FIX_PLOG_MS16 ((signed int*)(g_dtp2 + 1200))
+
+/* Probenlog (Art 9, Typ 16): Schaden durch einen Gegnerzauber (Fulminictus, Ignifaxius). Werte wie bei den
+ * Heldenzaubern (seg098 FIG_do_spell_damage), Zauber ist hier die Nummer des Gegnerzaubers (1..14), Zaubernder 1.
+ * Schaden, Feuerbann und Gardianum kommen aus den schon fuer Art 10 gefuellten Werten w[15], w[17], w[18].
+ * Name: der getroffene Held (bei einem Gegner als Ziel leer). */
+static void fix_probenlog_mschaden(const signed int damage)
+{
+	signed int plog_zs[10];
+
+	if (FIX_PLOG_MS16[15] <= 0) {
+		return;
+	}
+	plog_zs[0] = 16;
+	plog_zs[1] = FIX_PLOG_MS16[1];
+	plog_zs[2] = 1;
+	plog_zs[3] = g_spelluser_e->monster_id;
+	if (g_spelluser_e->target_object_id < 10) {
+		plog_zs[4] = 1;
+		plog_zs[5] = g_spelluser_e->target_object_id;
+	} else {
+		plog_zs[4] = 2;
+		plog_zs[5] = g_enemy_sheets[g_spelluser_e->target_object_id - 10].monster_id;
+	}
+	plog_zs[6] = FIX_PLOG_MS16[15];
+	plog_zs[7] = FIX_PLOG_MS16[17];
+	plog_zs[8] = FIX_PLOG_MS16[18];
+	plog_zs[9] = damage;
+	fix_probenlog(9, (g_spelluser_e->target_object_id < 10) ? get_hero(g_spelluser_e->target_object_id - 1)->alias : (char*)0,
+		10, plog_zs);
+}
+#endif
+
 void MON_do_spell_damage(const signed int damage)
 {
+#if FIX_PROBENLOG
+	fix_probenlog_mschaden(damage);
+#endif
 	if (damage > 0) {
 
 		if (g_spelluser_e->target_object_id < 10) {
@@ -171,6 +209,7 @@ static void fix_probenlog_mspell(const struct enemy_sheet *enemy)
 			get_hero(enemy->target_object_id - 1)->alias : (char*)0,
 		20, PLOG_MSPELL);
 }
+
 #endif
 
 signed int MON_test_attrib3(const struct enemy_sheet *enemy, const signed int attrib1, const signed int attrib2, const signed int attrib3, signed char handicap)
@@ -849,6 +888,10 @@ void mspell_ignifaxius(void)
 	g_mspell_ae_cost = damage;
 	rs_malus = fix_hero_spell_protect(damage, 1);
 	if ((rs_malus == 0) && (damage > 0)) {
+#if FIX_PROBENLOG
+		/* ganz abgefangen: MON_do_spell_damage() wird nicht aufgerufen, darum die Zeile Typ 16 hier */
+		fix_probenlog_mschaden(0);
+#endif
 		*g_dtp2 = '\0';
 		return;
 	}

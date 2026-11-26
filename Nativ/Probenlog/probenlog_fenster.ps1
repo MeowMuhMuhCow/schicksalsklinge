@@ -151,6 +151,15 @@ function Zeile([string]$roh) {
             $vorher = if ($w[2] -eq -1) { 'krank' } elseif ($w[2] -eq 0) { 'gesund' } elseif ($w[2] -eq 1) { 'Genesung' } else { "$($w[2])" }
             $t = "${wer}Wundfieber nach Wundheilung: W20 $($w[1]) (bis 7), vorher $vorher → neu begonnen $(if ($w[3]) { 'ja' } else { 'nein' })"
             $farbe = if ($w[3]) { 'Red' } else { 'Green' }
+        } elseif ($typ -eq 16 -and $w.Count -ge 10) {
+            $zp = if ($w[2]) { Nm $GZAUBER $w[1] } else { Nm $ZAUBER $w[1] }
+            $wer = if ($w[2]) { "$zp ($(Gegner $w[3]))" } else { "${name}: $zp" }
+            $ziel = if ($w[4] -eq 1) { if ($w[2]) { if ($name) { $name } else { 'einen Helden' } } else { "Held Nr. $($w[5])" } } else { Gegner $w[5] }
+            $t = "$wer auf ${ziel}: $($w[6]) SP"
+            if ($w[7] -gt 0) { $t += ", Feuerbann halbiert (−$($w[7]))" }
+            if ($w[8] -gt 0) { $t += ", Gardianum fängt $($w[8]) ab" }
+            $t += " → $($w[9]) SP am Ziel"
+            $farbe = if ($w[2]) { 'Red' } else { 'Green' }
         } else { $t = "Ereignis (Typ $typ)" }
     } elseif ($art -eq 10 -and $w.Count -ge 20) {
         $script:vor = $null

@@ -53,7 +53,7 @@ signed int g_dng12_watertrap_bak = 0;  // ds:0x9d45 SHOULD BE IN GAME STATE
  */
 signed int DNG12_handler(void)
 {
-	dsa_trace_enter(746, "seg090:DNG12_handler");
+	dsa_trace_enter(748, "seg090:DNG12_handler");
 	signed int target_pos;
 	signed int i;
 	signed int tw_bak;
@@ -582,7 +582,7 @@ signed int DNG12_handler(void)
  */
 void DNG12_clear_corridor(int8_t *flag)
 {
-	dsa_trace_enter(747, "seg090:DNG12_clear_corridor");
+	dsa_trace_enter(749, "seg090:DNG12_clear_corridor");
 	/* ask if the corridor should be cleared */
 	if (GUI_bool(get_tx(1))) { /* "VOR EUCH IST DER GANG EINGESTÜRZT.@WOLLT IHR EUCH DEN WEG FREIBUDDE..." */
 
@@ -600,7 +600,7 @@ void DNG12_clear_corridor(int8_t *flag)
 
 void DNG12_chest00_loot(struct struct_chest* chest)
 {
-	dsa_trace_enter(748, "seg090:DNG12_chest00_loot");
+	dsa_trace_enter(750, "seg090:DNG12_chest00_loot");
 	uint8_t* ptr_bak = chest->loot.content;
 
 	chest->loot.content = gs_dng12_chest1_content;
@@ -617,7 +617,7 @@ void DNG12_chest00_loot(struct struct_chest* chest)
  */
 void DNG12_fight_intro(const signed int fight_id)
 {
-	dsa_trace_enter(749, "seg090:DNG12_fight_intro");
+	dsa_trace_enter(751, "seg090:DNG12_fight_intro");
 	if (fight_id == 141) { /* FIGHT_ID_DOBE07 */
 		GUI_output(get_tx(12)); /* "VOR EUCH STEHT EIN FELDBETT MIT EINEM ZWERG, DER JETZT AUFSPRINGT U..." */
 	}

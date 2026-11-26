@@ -81,7 +81,7 @@ unsigned char g_automap_buf[64]; // ds:0xe442
  */
 void show_automap(void)
 {
-	dsa_trace_enter(583, "seg074:show_automap");
+	dsa_trace_enter(585, "seg074:show_automap");
 	signed int scroll_x;
 	signed int answer;
 	signed int loc_bak;
@@ -205,7 +205,7 @@ void show_automap(void)
  */
 signed int is_discovered(const signed int x, const signed int y)
 {
-	dsa_trace_enter(584, "seg074:is_discovered");
+	dsa_trace_enter(586, "seg074:is_discovered");
 	return g_automap_buf[(4 * y) + (x >> 3)] & g_automap_bitmask[(x & 7)];
 }
 
@@ -218,7 +218,7 @@ signed int is_discovered(const signed int x, const signed int y)
  */
 uint16_t get_mapval_small(const signed int x, const signed int y)
 {
-	dsa_trace_enter(585, "seg074:get_mapval_small");
+	dsa_trace_enter(587, "seg074:get_mapval_small");
 	uint8_t *map = g_dng_map;
 
 	return *(map + 16 * y + x);
@@ -233,7 +233,7 @@ uint16_t get_mapval_small(const signed int x, const signed int y)
  */
 uint16_t get_mapval_large(const signed int x, const signed int y)
 {
-	dsa_trace_enter(586, "seg074:get_mapval_large");
+	dsa_trace_enter(588, "seg074:get_mapval_large");
 	uint8_t *map = g_dng_map;
 
 	return *(map + 32 * y + x);
@@ -247,7 +247,7 @@ uint16_t get_mapval_large(const signed int x, const signed int y)
  */
 signed int is_group_in_prison(const signed int group_id)
 {
-	dsa_trace_enter(587, "seg074:is_group_in_prison");
+	dsa_trace_enter(589, "seg074:is_group_in_prison");
 	struct struct_hero *hero = get_hero(0);
 	signed int i;
 
@@ -272,7 +272,7 @@ signed int is_group_in_prison(const signed int group_id)
  */
 void render_automap(const signed int x_off)
 {
-	dsa_trace_enter(588, "seg074:render_automap");
+	dsa_trace_enter(590, "seg074:render_automap");
 	signed int tile_type;
 	signed int group_i;
 	signed int x;
@@ -419,7 +419,7 @@ void render_automap(const signed int x_off)
  */
 void draw_automap_square(const signed int x, const signed int y, const signed int map_tile_id, const signed int viewdir_arrow)
 {
-	dsa_trace_enter(589, "seg074:draw_automap_square");
+	dsa_trace_enter(591, "seg074:draw_automap_square");
 	signed int i;
 	signed int offset_y;
 	uint8_t* p_img_tile;
@@ -492,7 +492,7 @@ void draw_automap_square(const signed int x, const signed int y, const signed in
  */
 void draw_automap_entrance(const signed int x, const signed int y, const signed int viewdir)
 {
-	dsa_trace_enter(590, "seg074:draw_automap_entrance");
+	dsa_trace_enter(592, "seg074:draw_automap_entrance");
 	signed int offset_y = y;
 	signed int d = viewdir;
 	signed int skipsize;
@@ -528,7 +528,7 @@ void draw_automap_entrance(const signed int x, const signed int y, const signed 
  */
 void draw_automap_to_screen(void)
 {
-	dsa_trace_enter(591, "seg074:draw_automap_to_screen");
+	dsa_trace_enter(593, "seg074:draw_automap_to_screen");
 	/* save screen coordinates */
 	struct struct_rect rect_bak = g_pic_copy_rect;
 
@@ -571,7 +571,7 @@ void draw_automap_to_screen(void)
  */
 signed int select_teleport_dest(void)
 {
-	dsa_trace_enter(592, "seg074:select_teleport_dest");
+	dsa_trace_enter(594, "seg074:select_teleport_dest");
 	signed int scroll_x;
 #if !defined(__BORLANDC__)
 	signed int tile_type;
@@ -753,7 +753,7 @@ signed int select_teleport_dest(void)
  */
 signed int get_maploc(const signed int x, const signed int y)
 {
-	dsa_trace_enter(593, "seg074:get_maploc");
+	dsa_trace_enter(595, "seg074:get_maploc");
 	struct location *locations_tab_ptr;
 	const signed int pos_xy = TOWN_POS(x,y);
 

@@ -49,7 +49,7 @@ static struct viewdir_offsets8s g_fig_viewdir_inverse_offsets3 = { { { -1, 0 }, 
 /* Fix 390: unzerbrechliche Gegenstaende (wie in seg042) auch bei der Parade gegen Gegner auf bf -99 setzen (Curians Stab) */
 static void fix_set_unbreakable_pa(struct inventory *item)
 {
-	dsa_trace_enter(386, "seg043:fix_set_unbreakable_pa");
+	dsa_trace_enter(388, "seg043:fix_set_unbreakable_pa");
 	if ((item->item_id == ITEM_ID_ZAUBERSTAB) || (item->item_id == ITEM_ID_HEXENBESEN) ||
 		(item->item_id == ITEM_ID_ORKNASE__MAGIC) || (item->item_id == ITEM_ID_KURZSCHWERT__MAGIC) ||
 		(item->item_id == ITEM_ID_DAS_SCHWERT_GRIMRING))
@@ -61,7 +61,7 @@ static void fix_set_unbreakable_pa(struct inventory *item)
 
 void FIG_do_enemy_action(struct enemy_sheet* p_enemy, const signed int enemy_id)
 {
-	dsa_trace_enter(387, "seg043:FIG_do_enemy_action");
+	dsa_trace_enter(389, "seg043:FIG_do_enemy_action");
 	signed int damage;
 	struct struct_hero *hero;
 	struct enemy_sheet *target_enemy;
@@ -947,7 +947,7 @@ void FIG_do_enemy_action(struct enemy_sheet* p_enemy, const signed int enemy_id)
  */
 void FIG_use_item(struct struct_hero *hero, struct enemy_sheet *target_enemy, struct struct_hero *target_hero, const signed int target_is_hero, const signed int hero_pos)
 {
-	dsa_trace_enter(388, "seg043:FIG_use_item");
+	dsa_trace_enter(390, "seg043:FIG_use_item");
 	enum {
 		USE_CASE_NOT_USABLE = 0,
 		USE_CASE_HERB_OR_POTION = 1,

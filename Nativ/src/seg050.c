@@ -130,7 +130,7 @@ unsigned char *g_talents_buffer;		// ds:0xe3ba
 static void fix_stufenlog(const struct struct_hero *hero, const signed int typ, const signed int nr,
 			const signed int alt, const signed int wurf, const signed int erg)
 {
-	dsa_trace_enter(440, "seg050:fix_stufenlog");
+	dsa_trace_enter(442, "seg050:fix_stufenlog");
 	signed int w[5];
 
 	w[0] = typ; w[1] = nr; w[2] = alt; w[3] = wurf; w[4] = erg;
@@ -147,7 +147,7 @@ static void fix_stufenlog(const struct struct_hero *hero, const signed int typ, 
  */
 void inc_spell_advanced(struct struct_hero *hero, const signed int spell_id)
 {
-	dsa_trace_enter(441, "seg050:inc_spell_advanced");
+	dsa_trace_enter(443, "seg050:inc_spell_advanced");
 	signed int max_incs = 1;
 	signed int randval;
 	struct mssr a = g_magic_school_spellranges;
@@ -261,7 +261,7 @@ void inc_spell_advanced(struct struct_hero *hero, const signed int spell_id)
  */
 void inc_talent_advanced(struct struct_hero *hero, const signed int talent_id)
 {
-	dsa_trace_enter(442, "seg050:inc_talent_advanced");
+	dsa_trace_enter(444, "seg050:inc_talent_advanced");
 	signed int randval;
 	signed int max_incs;
 
@@ -361,7 +361,7 @@ void inc_talent_advanced(struct struct_hero *hero, const signed int talent_id)
  */
 void inc_talent_novice(struct struct_hero *hero, const signed int talent_id)
 {
-	dsa_trace_enter(443, "seg050:inc_talent_novice");
+	dsa_trace_enter(445, "seg050:inc_talent_novice");
 	signed int done = 0;
 	signed int randval;
 
@@ -444,7 +444,7 @@ void inc_talent_novice(struct struct_hero *hero, const signed int talent_id)
  */
 void inc_spell_novice(struct struct_hero *hero, const signed int spell_id)
 {
-	dsa_trace_enter(444, "seg050:inc_spell_novice");
+	dsa_trace_enter(446, "seg050:inc_spell_novice");
 	signed int done = 0;
 	signed int randval;
 
@@ -516,7 +516,7 @@ void inc_spell_novice(struct struct_hero *hero, const signed int spell_id)
  */
 void level_up(const signed int hero_pos)
 {
-	dsa_trace_enter(445, "seg050:level_up");
+	dsa_trace_enter(447, "seg050:level_up");
 	signed int l_si; /* multi use */
 	signed char mr;
 	signed char rounds;

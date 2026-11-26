@@ -11,7 +11,7 @@
  * Aufrufer:  FIG_do_round() (seg032).
  * Daten:     g_finalfight_tumult (Endkampf: Getuemmel ausgeloest), g_autofight_magic (Magie
  *            im Computerkampf).
- * Besonders: Zauberziel ohne Obergrenze: ein begehbares Objekt (Id >= 50) wird als Ziel
+ * Besonders: Zauberziel ohne Obergrenze: ein Deko-Objekt (Id >= 50, Baum, Fass) wird als Ziel
  *            angenommen und spaeter als Gegner behandelt (Zugriff ausserhalb
  *            g_enemy_sheets). Kommentar zu WEAPON_GFX_ID_NONE berichtigt (-1).
  *
@@ -39,6 +39,9 @@
 #include "seg098.h"
 #include "seg105.h"
 #include "seg106.h"
+#if FIX_0449
+#include "seg026.h"
+#endif
 
 signed char g_finalfight_tumult = 0; // ds:0x5f30
 signed char g_autofight_magic = 0; // ds:0x5f31
@@ -48,6 +51,58 @@ static const char g_space_separated_strings[6] = "%s %s"; // ds:0x5f3c
 static const char g_empty_string3[1] = ""; // ds:0x5f42
 static const char g_empty_string4[1] = ""; // ds:0x5f43
 static const char g_empty_string5[1] = ""; // ds:0x5f44
+
+#if FIX_0449
+/* Fix 449: diese Zauber lehnen den Zaubernden als Ziel ab ("DIESER SPRUCH IST NICHT AUF SICH SELBST ANWENDBAR!"
+ * u. a.). Im Original kam die Meldung erst nach der Zauberprobe, die Kampfrunde war verloren; beim Angriff auf
+ * sich selbst darf man dagegen neu waehlen. Jetzt dieselbe Meldung schon bei der Zielwahl und neue Wahl. */
+static signed int fix_kein_selbstziel(const signed int spell_id)
+{
+	switch (spell_id) {
+	case SP_BEHERRSCHUNG_BRECHEN:
+	case SP_BAND_UND_FESSEL:
+	case SP_SOMNIGRAVIS_TAUSENDSCHLAF:
+	case SP_HEXENSPEICHEL:
+	case SP_BLITZ_DICH_FIND:
+	case SP_EISENROST_UND_GRUENER_SPAN:
+	case SP_FULMINICTUS_DONNERKEIL:
+	case SP_IGNIFAXIUS_FLAMMENSTRAHL:
+	case SP_PLUMBUMBARUM_UND_NARRETEI:
+	case SP_CH_STEIGERN:
+	case SP_FF_STEIGERN:
+	case SP_GE_STEIGERN:
+	case SP_IN_STEIGERN:
+	case SP_KK_STEIGERN:
+	case SP_KL_STEIGERN:
+	case SP_MU_STEIGERN:
+	case SP_PARALUE_PARALEIN:
+		return 1;
+	}
+	return 0;
+}
+
+/* dieselbe Meldung wie im Zauber selbst (Texte aus SPELLTXT.LTX, danach wieder den Kampftext laden wie use_spell()) */
+static void fix_selbstziel_meldung(const struct struct_hero *hero)
+{
+	signed int tx_file_bak = g_tx_file_index;
+
+	load_tx(ARCHIVE_FILE_SPELLTXT_LTX);
+
+	if (hero->spell_id == SP_HEXENSPEICHEL) {
+		sprintf(g_dtp2, get_tx(20), hero->alias); /* "%s KANN MIT HEXENSPEICHEL KEINE SELBSTHEILUNG ERREICHEN." */
+	} else if (hero->spell_id == SP_BEHERRSCHUNG_BRECHEN) {
+		strcpy(g_dtp2, get_tx(0)); /* "SELBSTAUFLEHNUNG IST UNMOEGLICH." */
+	} else {
+		strcpy(g_dtp2, get_tx(112)); /* "DIESER SPRUCH IST NICHT AUF SICH SELBST ANWENDBAR!" */
+	}
+
+	if ((tx_file_bak != -1) && (tx_file_bak != ARCHIVE_FILE_SPELLTXT_LTX)) {
+		load_tx(tx_file_bak);
+	}
+
+	GUI_output(g_dtp2);
+}
+#endif
 
 /**
  * \brief   combat menu
@@ -383,13 +438,13 @@ void FIG_menu(struct struct_hero *hero, const signed int hero_pos, signed int x,
 									call_mouse_bg();
 
 									/* REMARK: unlike the attack and item branches, object ids >= 50 are not rejected here.
-									 * FIG_cb_select_target() can return a walkable object (g_cb_obj_nonobstacle), which is
+									 * FIG_cb_select_target() can return a decoration object (tree, barrel, stone), which is
 									 * then accepted as spell target and later treated as an enemy by FIG_do_hero_action()
 									 * (index outside g_enemy_sheets). Original-Bug? */
 									if (target_object_id != -99) {
 
 #if FIX_0011
-										/* Fix 11: begehbare Objekte (Id >= 50) wie im Angriffszweig abweisen */
+										/* Fix 11: Deko-Objekte (Id >= 50, nicht begehbar) wie im Angriffszweig abweisen */
 										if ((target_object_id < 0) || (target_object_id >= 50)) {
 #else
 										if (target_object_id < 0) {
@@ -412,6 +467,11 @@ void FIG_menu(struct struct_hero *hero, const signed int hero_pos, signed int x,
 										{
 											GUI_output(get_tx(6)); /* "AUF MONSTER IST DIESER SPRUCH NICHT ANWENDBAR." */
 
+#if FIX_0449
+										} else if ((target_object_id == hero_pos + 1) && fix_kein_selbstziel(hero->spell_id)) {
+											/* Fix 449: Zauber, die nicht auf sich selbst wirken: Meldung und neue Wahl */
+											fix_selbstziel_meldung(hero);
+#endif
 #if FIX_0446
 										} else if ((hero->spell_id != SP_SKELETTARIUS_KRYPTADUFT) &&
 											(((target_object_id < 10) && get_hero(target_object_id - 1)->flags.dead) ||
@@ -904,6 +964,18 @@ void FIG_menu(struct struct_hero *hero, const signed int hero_pos, signed int x,
 					}
 #endif
 				}
+#if FIX_0448
+				/* Fix 448: "Alte Optionen" liess die BP stehen. Angriff, Sichern, Gegenstand benutzen und Abwarten
+				 * setzen sie im Menue auf 0; wiederholt ueber "Alte Optionen" blieben sie voll, darum oeffnete die
+				 * zweite Aktion durch Axxeleratus ein Menue mit allen BP statt den Angriff zu wiederholen.
+				 * Jetzt wie die gewaehlte Aktion (Zaubern laesst die BP auch im Menue stehen). Gemeldet von Andrean. */
+				if (done && ((hero->action_id == FIG_ACTION_MELEE_ATTACK) || (hero->action_id == FIG_ACTION_RANGE_ATTACK) ||
+					(hero->action_id == FIG_ACTION_GUARD) || (hero->action_id == FIG_ACTION_USE_ITEM) ||
+					(hero->action_id == FIG_ACTION_WAIT)))
+				{
+					hero->fight_bp_left = 0;
+				}
+#endif
 			}
 		}
 	}

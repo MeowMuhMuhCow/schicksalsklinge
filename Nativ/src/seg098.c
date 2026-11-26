@@ -64,7 +64,7 @@ static struct int8_t_12 g_spell_select_class_usable = { 1, 1, 1, 1, 1, 1, 1, 1, 
  */
 void magic_target_stars_ani(const struct struct_hero *hero)
 {
-	dsa_trace_enter(830, "seg098:magic_target_stars_ani");
+	dsa_trace_enter(832, "seg098:magic_target_stars_ani");
 	signed int target_object_id;
 	struct int16_t_5 a = g_ani_heal_picstars;
 	//signed int a[5] = { 0, 1, 2, 1, 0 };
@@ -125,10 +125,39 @@ void magic_target_stars_ani(const struct struct_hero *hero)
  */
 void FIG_do_spell_damage(const signed int le)
 {
-	dsa_trace_enter(831, "seg098:FIG_do_spell_damage");
+	dsa_trace_enter(833, "seg098:FIG_do_spell_damage");
 
 	if (le <= 0)
 		return;
+
+#if FIX_PROBENLOG
+	/* Probenlog (Art 9, Typ 16): Schaden durch einen Heldenzauber (Fulminictus, Ignifaxius, Kraehenruf).
+	 * Werte: Typ, Zauber, Zaubernder (0 = Held, 1 = Gegner), Gegnertyp des Zaubernden (Held: 0), Zielart
+	 * (1 = Held, 2 = Gegner), Ziel (Heldenplatz 1..7 bzw. Gegnertyp), Schaden, abgefangen durch Feuerbann,
+	 * abgefangen durch Gardianum (bei Heldenzaubern immer 0), Schaden am Ziel. Name: der zaubernde Held.
+	 * Nur Lesen, die Wuerfe sind wie im Original. */
+	if ((get_spelluser()->target_object_id >= 10) ||
+		(get_hero(get_spelluser()->target_object_id - 1) != get_spelluser()))
+	{
+		signed int plog_zs[10];
+		plog_zs[0] = 16;
+		plog_zs[1] = get_spelluser()->spell_id;
+		plog_zs[2] = 0;
+		plog_zs[3] = 0;
+		if (get_spelluser()->target_object_id < 10) {
+			plog_zs[4] = 1;
+			plog_zs[5] = get_spelluser()->target_object_id;
+		} else {
+			plog_zs[4] = 2;
+			plog_zs[5] = g_enemy_sheets[get_spelluser()->target_object_id - 10].monster_id;
+		}
+		plog_zs[6] = le;
+		plog_zs[7] = 0;
+		plog_zs[8] = 0;
+		plog_zs[9] = le;
+		fix_probenlog(9, get_spelluser()->alias, 10, plog_zs);
+	}
+#endif
 
 	if (get_spelluser()->target_object_id < 10) {
 		/* attack hero */
@@ -178,7 +207,7 @@ void FIG_do_spell_damage(const signed int le)
  */
 signed int get_attackee_parade(void)
 {
-	dsa_trace_enter(832, "seg098:get_attackee_parade");
+	dsa_trace_enter(834, "seg098:get_attackee_parade");
 	/* check if enemy or hero is attacked */
 	if (get_spelluser()->target_object_id < 10) {
 
@@ -210,7 +239,7 @@ signed int get_attackee_parade(void)
  */
 signed int get_attackee_rs(void)
 {
-	dsa_trace_enter(833, "seg098:get_attackee_rs");
+	dsa_trace_enter(835, "seg098:get_attackee_rs");
 	/* check if enemy or hero is attacked */
 	if (get_spelluser()->target_object_id < 10) {
 
@@ -241,7 +270,7 @@ signed int get_attackee_rs(void)
  */
 signed int get_spell_cost(const signed int spell_id, const signed int half_cost)
 {
-	dsa_trace_enter(834, "seg098:get_spell_cost");
+	dsa_trace_enter(836, "seg098:get_spell_cost");
 	signed char ret = g_spell_descriptions[spell_id].ae_cost;
 
 	if (half_cost != 0) {
@@ -269,7 +298,7 @@ signed int get_spell_cost(const signed int spell_id, const signed int half_cost)
  */
 signed int use_magic(struct struct_hero *hero)
 {
-	dsa_trace_enter(835, "seg098:use_magic");
+	dsa_trace_enter(837, "seg098:use_magic");
 	signed int ae;
 	signed int retval = 0;
 	const signed int answer = GUI_radio(get_ttx(329), 3, get_ttx(311), get_ttx(312), get_ttx(213)); /* "WAS GENAU SOLL VERSUCHT WERDEN?" / "MEDITIEREN" / "STABZAUBER" / "ZAUBER SPRECHEN" */
@@ -445,7 +474,7 @@ signed int use_magic(struct struct_hero *hero)
  */
 signed int can_use_spellclass(const struct struct_hero *hero, const signed int spellclass_id)
 {
-	dsa_trace_enter(836, "seg098:can_use_spellclass");
+	dsa_trace_enter(838, "seg098:can_use_spellclass");
 	signed int i;
 	const signed int first_spell = g_spellclasses[spellclass_id].first;
 
@@ -482,7 +511,7 @@ signed int can_use_spellclass(const struct struct_hero *hero, const signed int s
  */
 signed int select_spell(struct struct_hero *hero, signed int show_vals)
 {
-	dsa_trace_enter(837, "seg098:select_spell");
+	dsa_trace_enter(839, "seg098:select_spell");
 	signed int i;
 	signed int answer1;
 	signed int first_spell;
@@ -645,7 +674,7 @@ signed int select_spell(struct struct_hero *hero, signed int show_vals)
  */
 signed int test_spell(struct struct_hero *hero, const signed int spell_id, signed char handicap)
 {
-	dsa_trace_enter(838, "seg098:test_spell");
+	dsa_trace_enter(840, "seg098:test_spell");
 	signed int retval;
 	struct spell_descr *spell_desc;
 
@@ -716,7 +745,7 @@ signed int test_spell(struct struct_hero *hero, const signed int spell_id, signe
  */
 signed int test_spell_group(const signed int spell_id, const signed char handicap)
 {
-	dsa_trace_enter(839, "seg098:test_spell_group");
+	dsa_trace_enter(841, "seg098:test_spell_group");
 	struct struct_hero *hero_i = get_hero(0);
 	signed int i;
 
@@ -749,7 +778,7 @@ signed int test_spell_group(const signed int spell_id, const signed char handica
 
 signed int select_magic_user(void)
 {
-	dsa_trace_enter(840, "seg098:select_magic_user");
+	dsa_trace_enter(842, "seg098:select_magic_user");
 	/* select the hero who should cast a spell */
 	const signed int answer = select_hero_ok(get_ttx(317)); /* "WELCHER HELD SOLL MAGIE ANWENDEN?" */
 
@@ -771,7 +800,7 @@ signed int select_magic_user(void)
  */
 signed int use_spell(struct struct_hero* hero, const signed int selection_menu, signed char handicap)
 {
-	dsa_trace_enter(841, "seg098:use_spell");
+	dsa_trace_enter(843, "seg098:use_spell");
 	signed int retval = 1;
 	signed int spell_id;
 	signed int ae_cost;

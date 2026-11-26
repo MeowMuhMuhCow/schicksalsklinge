@@ -52,7 +52,7 @@ static struct viewdir_offsets g_fig_viewdir_offsets6 = { { { 1, 0 }, { 0, -1 }, 
  */
 static signed int copy_ani_sequence(int8_t *dst, const signed int ani_num, const signed int mode)
 {
-	dsa_trace_enter(353, "seg037:copy_ani_sequence");
+	dsa_trace_enter(355, "seg037:copy_ani_sequence");
 	uint8_t *p_datbuffer;
 	int8_t *p_datitem;
 	signed char len;
@@ -114,7 +114,7 @@ static signed int copy_ani_sequence(int8_t *dst, const signed int ani_num, const
  */
 void prepare_enemy_ani(struct enemy_sheet *enemy, const signed int enemy_id)
 {
-	dsa_trace_enter(354, "seg037:prepare_enemy_ani");
+	dsa_trace_enter(356, "seg037:prepare_enemy_ani");
 	signed char ani_index_ptr_index_1;
 	signed char ani_index_ptr_index_2;
 	signed char viewdir_iter;
@@ -232,7 +232,7 @@ void prepare_enemy_ani(struct enemy_sheet *enemy, const signed int enemy_id)
  */
 signed int FIG_enemy_can_attack_neighbour(const signed int x, const signed int y, const signed int dx, const signed int dy, const signed int mode)
 {
-	dsa_trace_enter(355, "seg037:FIG_enemy_can_attack_neighbour");
+	dsa_trace_enter(357, "seg037:FIG_enemy_can_attack_neighbour");
 	const signed char target_object_id = get_cb_val(x + dx, y + dy);
 
 	if (mode == 0) {
@@ -302,7 +302,7 @@ signed int FIG_enemy_can_attack_neighbour(const signed int x, const signed int y
  */
 signed int FIG_search_range_target(const signed int x, const signed int y, const signed int viewdir, const signed int mode)
 {
-	dsa_trace_enter(356, "seg037:FIG_search_range_target");
+	dsa_trace_enter(358, "seg037:FIG_search_range_target");
 	signed int done;
 	signed int x_diff;	/* run variables in viewdir */
 	signed char target_object_id;
@@ -472,7 +472,7 @@ signed int FIG_search_range_target(const signed int x, const signed int y, const
  */
 signed int FIG_get_mspell_target_mode(const signed int mspell_id, const signed int attack_foe)
 {
-	dsa_trace_enter(357, "seg037:FIG_get_mspell_target_mode");
+	dsa_trace_enter(359, "seg037:FIG_get_mspell_target_mode");
 	signed int retval = 0;
 	struct mon_spell_description *desc = &g_mon_spell_descriptions[mspell_id];
 
@@ -512,7 +512,7 @@ signed int FIG_get_mspell_target_mode(const signed int mspell_id, const signed i
  */
 signed int FIG_select_mspell(struct enemy_sheet* enemy, const signed int enemy_id, const signed int attack_foe, signed int x, signed int y)
 {
-	dsa_trace_enter(358, "seg037:FIG_select_mspell");
+	dsa_trace_enter(360, "seg037:FIG_select_mspell");
 	signed int available_spells;
 	signed int mspell_id;
 	signed int done;
@@ -726,7 +726,7 @@ signed int FIG_select_mspell(struct enemy_sheet* enemy, const signed int enemy_i
  */
 signed int FIG_enemy_range_attack(struct enemy_sheet *enemy, const signed int enemy_id, const signed int attack_foe, signed int x, signed int y)
 {
-	dsa_trace_enter(359, "seg037:FIG_enemy_range_attack");
+	dsa_trace_enter(361, "seg037:FIG_enemy_range_attack");
 
 	signed int cnt;
 	signed int done;
@@ -814,7 +814,7 @@ signed int FIG_enemy_range_attack(struct enemy_sheet *enemy, const signed int en
  */
 void FIG_enemy_turn(struct enemy_sheet *enemy, const signed int enemy_id, signed int x, signed int y)
 {
-	dsa_trace_enter(360, "seg037:FIG_enemy_turn");
+	dsa_trace_enter(362, "seg037:FIG_enemy_turn");
 	signed int target_reachable;
 	signed int attack_foe;
 	signed int viewdir;

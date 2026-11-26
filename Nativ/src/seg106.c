@@ -75,7 +75,7 @@ static const signed int g_hero_startup_items_all[4] = {
 /* Borlandified and identical */
 signed int two_hand_collision(struct struct_hero* hero, const signed int item_id, const signed int inv_slot)
 {
-	dsa_trace_enter(981, "seg106:two_hand_collision");
+	dsa_trace_enter(984, "seg106:two_hand_collision");
 	signed int retval = 0;
 	signed int other_inv_slot;
 	signed int other_item_id;
@@ -107,7 +107,7 @@ signed int two_hand_collision(struct struct_hero* hero, const signed int item_id
 /* Fix 222: Meldung "... KANN AN DIESER POSITION NICHT GETRAGEN WERDEN" (wie in move_item()) */
 static void fix_msg_not_here(const signed int item_id)
 {
-	dsa_trace_enter(982, "seg106:fix_msg_not_here");
+	dsa_trace_enter(985, "seg106:fix_msg_not_here");
 	if (is_in_int_array(item_id, g_items_pluralwords))
 		sprintf(g_dtp2, get_ttx(222), GUI_name_inflect_with_article(
 			INFLECT_OMIT_ARTICLE | INFLECT_SINGULAR | INFLECT_1ST_CASE,
@@ -145,7 +145,7 @@ static void fix_msg_not_here(const signed int item_id)
  */
 void move_item(signed int inv_slot_1, signed int inv_slot_2, struct struct_hero *hero)
 {
-	dsa_trace_enter(983, "seg106:move_item");
+	dsa_trace_enter(986, "seg106:move_item");
 	signed int item_id_1;
 	signed int item_id_2;
 	signed int do_exchange = 0;
@@ -357,7 +357,7 @@ void move_item(signed int inv_slot_1, signed int inv_slot_2, struct struct_hero 
 /* Borlandified and identical */
 void print_item_description(struct struct_hero *hero, const signed int pos)
 {
-	dsa_trace_enter(984, "seg106:print_item_description");
+	dsa_trace_enter(987, "seg106:print_item_description");
 	/* create pointer to the item in the inventory */
 	struct inventory *inventory_p = &hero->inventory[pos];
 
@@ -435,7 +435,7 @@ void print_item_description(struct struct_hero *hero, const signed int pos)
 /* Borlandified and identical */
 void pass_item(struct struct_hero *hero1, const signed int old_pos1, struct struct_hero *hero2, const signed int pos2)
 {
-	dsa_trace_enter(985, "seg106:pass_item");
+	dsa_trace_enter(988, "seg106:pass_item");
 	signed int stackable_quant;
 	register signed int pos1 = old_pos1;
 
@@ -809,7 +809,7 @@ struct items_all {
 /* Borlandified and identical */
 void startup_equipment(struct struct_hero *hero)
 {
-	dsa_trace_enter(986, "seg106:startup_equipment");
+	dsa_trace_enter(989, "seg106:startup_equipment");
 	signed int i;
 	struct items_all all;
 
@@ -867,7 +867,7 @@ void startup_equipment(struct struct_hero *hero)
 /* Borlandified and identical */
 signed int get_max_light_time(void)
 {
-	dsa_trace_enter(987, "seg106:get_max_light_time");
+	dsa_trace_enter(990, "seg106:get_max_light_time");
 	struct struct_hero *hero;
 	signed int i;
 	signed int j;
@@ -913,7 +913,7 @@ signed int get_max_light_time(void)
 /* Borlandified and identical */
 void equip_belt_ani(void)
 {
-	dsa_trace_enter(988, "seg106:equip_belt_ani");
+	dsa_trace_enter(991, "seg106:equip_belt_ani");
 	signed int i;
 	signed int handle;
 
@@ -1016,7 +1016,7 @@ void equip_belt_ani(void)
 /* Borlandified and identical */
 signed int get_full_waterskin_inv_slot(const struct struct_hero *hero)
 {
-	dsa_trace_enter(989, "seg106:get_full_waterskin_inv_slot");
+	dsa_trace_enter(992, "seg106:get_full_waterskin_inv_slot");
 	signed int inv_pos = -1;
 	signed int i;
 

@@ -8,7 +8,7 @@
  *            FIG_latecomers() setzt Gegner, die erst in spaeteren Runden erscheinen, auf
  *            ein freies Feld nahe ihrer Startposition.
  * Aufrufer:  FIG_menu() (seg033), do_fight() (seg032), check_hero_range_attack() (seg035).
- * Daten:     g_cb_obj_nonobstacle (begehbare Objekte, Nummer - 50), Richtungstabellen.
+ * Daten:     g_cb_obj_nonobstacle (Objekte, die die Sichtlinie nicht sperren, Nummer - 50), Richtungen.
  * Besonders: FIG_move_hero(): Flucht ueber den Rand y<0 oder y>23 braucht ein BP mehr als
  *            ueber x<0; im Fluchtfall wird object_id_bak einer frueheren Cursorposition
  *            geprueft. Bekannt (Bright-Eyes): "ZIEL: 99 BP" bei toten Figuren als Ziel.
@@ -66,7 +66,7 @@ signed int FIG_check_target_cursor_step(const signed int x_hero, const signed in
 			const signed int x_diff, const signed int y_diff,
 			const signed int max_range)
 {
-	dsa_trace_enter(332, "seg034:FIG_check_target_cursor_step");
+	dsa_trace_enter(334, "seg034:FIG_check_target_cursor_step");
 	signed int target_object_id;
 	signed int cursor_object_id;
 	signed int distance;
@@ -184,7 +184,7 @@ signed int FIG_check_target_cursor_step(const signed int x_hero, const signed in
  */
 signed char FIG_cb_select_target(signed int *px, signed int *py, const signed int max_range)
 {
-	dsa_trace_enter(333, "seg034:FIG_cb_select_target");
+	dsa_trace_enter(335, "seg034:FIG_cb_select_target");
 	signed int x_diff;
 	signed int y_diff;
 	signed int x;
@@ -383,7 +383,7 @@ signed char FIG_cb_select_target(signed int *px, signed int *py, const signed in
  */
 void FIG_find_latecomer_position(const signed int x, const signed int y, signed int *px, signed int *py, const signed int viewdir, const signed int double_size)
 {
-	dsa_trace_enter(334, "seg034:FIG_find_latecomer_position");
+	dsa_trace_enter(336, "seg034:FIG_find_latecomer_position");
 	signed int new_viewdir;
 	signed int dist;
 	signed int new_x;
@@ -439,7 +439,7 @@ void FIG_find_latecomer_position(const signed int x, const signed int y, signed 
  */
 void FIG_latecomers(void)
 {
-	dsa_trace_enter(335, "seg034:FIG_latecomers");
+	dsa_trace_enter(337, "seg034:FIG_latecomers");
 	signed int i;
 	signed int x;
 	signed int y;
@@ -529,7 +529,7 @@ void FIG_latecomers(void)
  */
 signed int FIG_move_pathlen(void)
 {
-	dsa_trace_enter(336, "seg034:FIG_move_pathlen");
+	dsa_trace_enter(338, "seg034:FIG_move_pathlen");
 	signed int i = 0;
 
 	/* count everything till the end marker -1 of the path */
@@ -555,7 +555,7 @@ signed int FIG_move_pathlen(void)
  */
 void FIG_move_hero(struct struct_hero *hero, const signed int hero_pos, signed int *px, signed int *py)
 {
-	dsa_trace_enter(337, "seg034:FIG_move_hero");
+	dsa_trace_enter(339, "seg034:FIG_move_hero");
 	signed int problem;
 	signed int path_end;
 	signed int sel_x;

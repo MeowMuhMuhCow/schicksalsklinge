@@ -52,7 +52,7 @@ signed int g_alchemy_missing_item; // ds:0xe5c4
  */
 signed int hero_has_ingredients(struct struct_hero *hero, const signed int recipe_id)
 {
-	dsa_trace_enter(958, "seg104:hero_has_ingredients");
+	dsa_trace_enter(961, "seg104:hero_has_ingredients");
 	signed int i = 0;
 	signed int retval = 1;
 	struct struct_recipe *r_ptr = &g_alchemy_recipes[recipe_id];
@@ -98,7 +98,7 @@ signed int hero_has_ingredients(struct struct_hero *hero, const signed int recip
  */
 void hero_use_ingredients(struct struct_hero *hero, const signed int recipe_id)
 {
-	dsa_trace_enter(959, "seg104:hero_use_ingredients");
+	dsa_trace_enter(962, "seg104:hero_use_ingredients");
 	signed int i = 0;
 	struct struct_recipe *r_ptr = &g_alchemy_recipes[recipe_id];
 	signed int inv_slot;
@@ -182,7 +182,7 @@ signed int do_alchemy(struct struct_hero* hero, const signed int recipe_id, cons
  * bei Bright-Eyes, die es im Original nicht gibt) */
 static signed int fix_count_group_no_npc(void)
 {
-	dsa_trace_enter(960, "seg104:fix_count_group_no_npc");
+	dsa_trace_enter(963, "seg104:fix_count_group_no_npc");
 	signed int i;
 	signed int cnt = 0;
 	struct struct_hero *hero_i = get_hero(0);
@@ -203,7 +203,7 @@ static signed int fix_count_group_no_npc(void)
 /* Fix 260: erste freie der 6 Gruppen, -1 wenn alle belegt sind */
 static signed int fix_free_group(void)
 {
-	dsa_trace_enter(961, "seg104:fix_free_group");
+	dsa_trace_enter(964, "seg104:fix_free_group");
 	signed int i;
 
 	for (i = 0; i < 6; i++) {
@@ -226,7 +226,7 @@ static signed int fix_free_group(void)
  */
 signed int plan_alchemy(struct struct_hero *hero)
 {
-	dsa_trace_enter(962, "seg104:plan_alchemy");
+	dsa_trace_enter(965, "seg104:plan_alchemy");
 	signed int retval;
 	signed int inv_slot;
 	signed int recipes;
@@ -425,7 +425,7 @@ signed int plan_alchemy(struct struct_hero *hero)
  */
 signed int has_herb_for_disease(const struct struct_hero *hero, const signed int disease_id)
 {
-	dsa_trace_enter(963, "seg104:has_herb_for_disease");
+	dsa_trace_enter(966, "seg104:has_herb_for_disease");
 	signed int retval = 0;
 
 	switch (disease_id) {
@@ -481,7 +481,7 @@ signed int has_herb_for_disease(const struct struct_hero *hero, const signed int
  */
 signed int talent_cure_disease(struct struct_hero *healer, struct struct_hero *patient, const signed int handicap, const signed int from_event)
 {
-	dsa_trace_enter(964, "seg104:talent_cure_disease");
+	dsa_trace_enter(967, "seg104:talent_cure_disease");
 	signed int disease_id;
 	signed int retval;
 
@@ -595,7 +595,7 @@ signed int talent_cure_disease(struct struct_hero *healer, struct struct_hero *p
  */
 struct struct_hero* get_heaviest_hero(void)
 {
-	dsa_trace_enter(965, "seg104:get_heaviest_hero");
+	dsa_trace_enter(968, "seg104:get_heaviest_hero");
 	struct struct_hero *hero;
 	struct struct_hero *retval;
 
@@ -626,7 +626,7 @@ struct struct_hero* get_heaviest_hero(void)
  */
 signed int get_hero_weight(const struct struct_hero *hero)
 {
-	dsa_trace_enter(966, "seg104:get_hero_weight");
+	dsa_trace_enter(969, "seg104:get_hero_weight");
 	return hero->weight + hero->load;
 }
 
@@ -638,7 +638,7 @@ signed int get_hero_weight(const struct struct_hero *hero)
  */
 signed int get_talented_hero_pos(const signed int talent_id)
 {
-	dsa_trace_enter(967, "seg104:get_talented_hero_pos");
+	dsa_trace_enter(970, "seg104:get_talented_hero_pos");
 	signed int pos;
 	signed int cur;
 

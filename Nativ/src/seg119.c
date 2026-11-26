@@ -48,7 +48,7 @@
  */
 void disease_effect(void)
 {
-	dsa_trace_enter(1178, "seg119:disease_effect");
+	dsa_trace_enter(1181, "seg119:disease_effect");
 	signed int hero_pos;
 	signed int j; /* multi use: hero_pos (Ansteckung), Waffentalent-Index, Zufallswert, disease_id */
 	struct struct_hero *hero;

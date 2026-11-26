@@ -3,7 +3,8 @@ rem ============================================================
 rem  PATCHEN.bat - erzeugt die Bugfix-Fassungen OHNE Compiler aus
 rem  der eigenen SCHICKM.EXE der GOG-Fassung (Schicksalsklinge).
 rem  Die Original-EXE wird nur gelesen und NICHT veraendert.
-rem  Ergebnis: Build\BLADEM_FIX_WICHTIG.EXE und Build\BLADEM_FIX_ALLES.EXE
+rem  Ergebnis: Build\BLADEM_FIX_WICHTIG.EXE und Build\BLADEM_FIX_ALLES.EXE,
+rem  dazu Build\BLADEM_ORIGINAL_PROBENLOG.EXE (Original ohne Behebungen, nur Probenlog)
 rem  Danach spielen mit BLADEM_FIX_WICHTIG_STARTEN.bat bzw. _ALLES_STARTEN.bat
 rem  Den Spielordner findet SPIELPFAD_SUCHEN.cmd (oder fragt nach).
 rem ============================================================
@@ -15,6 +16,12 @@ echo Spielordner: %SPIEL%
 echo.
 powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0Patch\patchen.ps1" -Spiel "%SPIEL%" -Name SCHICKM.EXE -Ziel "%~dp0Build" -Muster "BLADEM_FIX_*.ndp"
 if errorlevel 1 goto fehler
+if not exist "%~dp0Patch\BLADEM_ORIGINAL_PROBENLOG.ndp" goto ohne_original
+echo.
+echo Original mit Probenlog (keine Fehlerbehebung, nur das Probenlog):
+powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0Patch\patchen.ps1" -Spiel "%SPIEL%" -Name SCHICKM.EXE -Ziel "%~dp0Build" -Muster "BLADEM_ORIGINAL_PROBENLOG.ndp"
+if errorlevel 1 goto fehler
+:ohne_original
 echo.
 echo Spieldaten (SCHICK.DAT) mit den Korrekturen aus dem Osterpatch von NRS:
 powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0Patch\patchen.ps1" -Spiel "%SPIEL%" -Name SCHICK.DAT -Ziel "%~dp0Build" -Muster "SCHICK.DAT.ndp"
@@ -22,6 +29,7 @@ if errorlevel 1 goto fehler
 echo.
 echo Jetzt spielen: BLADEM_FIX_WICHTIG_STARTEN.bat (kritische + mittlere Fehler behoben)
 echo          oder: BLADEM_FIX_ALLES_STARTEN.bat   (alle behebbaren Fehler)
+echo          oder: BLADEM_ORIGINAL_MIT_PROBENLOG_STARTEN.bat (Original, nur mit Probenlog)
 echo Alle Behebungen sind im Spiel noch ungetestet - Rueckmeldungen willkommen.
 echo.
 pause

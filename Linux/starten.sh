@@ -4,6 +4,8 @@
 #   bash Linux/starten.sh alles       Bugfix-Fassung: alle behebbaren Fehler (nach patchen.sh)
 #   bash Linux/starten.sh quelltext   die selbst gebaute, bytegleiche EXE (nach dem Bauen)
 #   bash Linux/starten.sh wichtig log dazu das Probenlog: jede Probe erscheint live in diesem Terminal
+#   bash Linux/starten.sh original    das Original ohne jede Fehlerbehebung, nur mit Probenlog (immer an;
+#                                     wuerfelgleich mit dem Original, ungepatchte Spieldaten; nach patchen.sh)
 #
 # Der Spielordner wird nicht angefasst. Spielstaende und Probenlog liegen im Ablageordner der Fassung:
 # Build/Linux_C_<Fassung>, oder mit ABLAGE=... in <ABLAGE>/<Fassung> (z. B. ausserhalb des Clones).
@@ -27,10 +29,12 @@ case "${1:-}" in
 	wichtig)   QUELLE="$BUILD/${EXE}_FIX_WICHTIG.EXE"; FASSUNG="Fix_Wichtig"; MITDATEN=1 ;;
 	alles)     QUELLE="$BUILD/${EXE}_FIX_ALLES.EXE";   FASSUNG="Fix_Alles";   MITDATEN=1 ;;
 	quelltext) QUELLE="$BUILD/${EXE}.EXE";             FASSUNG="Quelltext";   MITDATEN=0 ;;
-	*) echo "Aufruf: bash Linux/starten.sh wichtig | alles | quelltext  [log]"; exit 1 ;;
+	original)  QUELLE="$BUILD/${EXE}_ORIGINAL_PROBENLOG.EXE"; FASSUNG="Original_Probenlog"; MITDATEN=0 ;;
+	*) echo "Aufruf: bash Linux/starten.sh wichtig | alles | quelltext  [log]   oder   original"; exit 1 ;;
 esac
 LOG=0
 [ "${2:-}" = "log" ] && LOG=1
+[ "${1:-}" = "original" ] && LOG=1
 if [ "$LOG" = 1 ] && [ -z "$PROBENLOG" ]; then echo "Das Probenlog gibt es fuer $SPIELNAME noch nicht."; LOG=0; fi
 if [ ! -f "$QUELLE" ]; then
 	echo "$QUELLE fehlt."
