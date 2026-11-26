@@ -140,6 +140,17 @@ function Zeile([string]$roh) {
                     $farbe = if ($w[5]) { 'Green' } else { 'Red' }
                 }
             }
+        } elseif ($typ -eq 13) {
+            $t = "Olvir/Treborn: W100 $($w[1]) (bis $($w[2])) → Treffen $(if ($w[3]) { 'ja' } else { 'nein' }) (ab dem 4. Monat der Queste)"
+        } elseif ($typ -eq 14 -and $w.Count -ge 6) {
+            $wer = if ($name) { "${name}: " } else { "" }
+            $t = "${wer}Regeneration: Lager $($w[1]), W6 LE $($w[2]), W6 AE $($w[3]) → LE $($w[4]), AE $($w[5]) (vor Tausch/Verdopplung)"
+            $farbe = 'Green'
+        } elseif ($typ -eq 15) {
+            $wer = if ($name) { "${name}: " } else { "" }
+            $vorher = if ($w[2] -eq -1) { 'krank' } elseif ($w[2] -eq 0) { 'gesund' } elseif ($w[2] -eq 1) { 'Genesung' } else { "$($w[2])" }
+            $t = "${wer}Wundfieber nach Wundheilung: W20 $($w[1]) (bis 7), vorher $vorher → neu begonnen $(if ($w[3]) { 'ja' } else { 'nein' })"
+            $farbe = if ($w[3]) { 'Red' } else { 'Green' }
         } else { $t = "Ereignis (Typ $typ)" }
     } elseif ($art -eq 10 -and $w.Count -ge 20) {
         $script:vor = $null

@@ -1,8 +1,10 @@
 # Die Schicksalsklinge – Quelltext im Attic-Stil
 
-## 289 Fehler behoben – 34 Jahre nach Release
+## 291 Fehler behoben – 34 Jahre nach Release
 
 **Inoffizielle Bugfix-Fassung · spielbar ohne Compiler · das Original bleibt unangetastet · [gleich loslegen](#schnellstart-bugfix-fassung-spielen-ohne-compiler)**
+
+**Neu in Version 1.5m: Tempelseiten, Wasserfass, Zauber auf Tote, Probenlog.** In Sichtweite eines Tempels erscheint wieder eine Tempelseite statt mehrerer schmaler Tempelbilder nebeneinander (Fehler aus 1.5l, Nr. 439). Ein leerer Wasserschlauch kostet am Fass 2 Einheiten statt 1 (Nr. 447). Ein Zauber auf einen gefallenen Gegner oder Helden wird wie ein Angriff abgewiesen, außer Skelettarius (Nr. 446). Das Probenlog zeigt jetzt auch die Regeneration im Schlaf, Wundfieber nach misslungener Wundheilung und das Treffen mit Olvir oder Treborn Kolberg auf Reisen. Alles gemeldet bzw. gewünscht von Andrean.
 
 **Neu in Version 1.5l: Hauswände links wieder wie im Original.** Das Umdrehen der linken Hauswände (Nr. 438, 443) sah im Spiel schlechter aus als Attics Zeichnung und ist zurückgenommen (auf Wunsch von MiauKuh); die Tempelseiten (Nr. 439) bleiben.
 
@@ -58,7 +60,7 @@ Documentation is in German.*
 
 Für alle, die nur spielen wollen. Nötig sind Windows und Schicksalsklinge von GOG, sonst nichts: kein Python, kein Compiler. (Linux: siehe unten.)
 
-1. Rechts unter **Releases** das Paket `schicksalsklinge_Bugfix_1.5l.zip` herunterladen (oder oben **Code → Download ZIP**) und irgendwohin entpacken.
+1. Rechts unter **Releases** das Paket `schicksalsklinge_Bugfix_1.5m.zip` herunterladen (oder oben **Code → Download ZIP**) und irgendwohin entpacken.
 2. **`PATCHEN.bat`** doppelklicken. Es findet den GOG-Spielordner (oder fragt danach), prüft per Prüfsumme, ob die
    eigene EXE genau die passende ist, und erzeugt daraus `Build\BLADEM_FIX_WICHTIG.EXE` und `Build\BLADEM_FIX_ALLES.EXE`.
    **Die Original-EXE wird nicht verändert**, das Spiel bleibt wie es ist.

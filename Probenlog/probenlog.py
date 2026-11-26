@@ -139,6 +139,17 @@ def ereignis(name, w):
         if w[3] in BEGEGNUNG_KAMPF:
             t += f', Kampfwurf W100 = {w[4]}, Kampf bei höchstens 33 → {"entfällt" if w[5] else "KAMPF"}'
         return t
+    if typ == 13 and len(w) >= 4:
+        return f'Olvir/Treborn: W100 {w[1]} (bis {w[2]}) → Treffen {"ja" if w[3] else "nein"} (ab dem 4. Monat der Queste)'
+    if typ == 14 and len(w) >= 6:
+        wer = f'{name}: ' if name else ''
+        return (f'{wer}Regeneration: Lager {w[1]}, W6 LE {w[2]}, W6 AE {w[3]} → LE {w[4]}, AE {w[5]}'
+                ' (vor Tausch/Verdopplung)')
+    if typ == 15 and len(w) >= 4:
+        wer = f'{name}: ' if name else ''
+        vorher = {-1: 'krank', 0: 'gesund', 1: 'Genesung'}.get(w[2], str(w[2]))
+        return (f'{wer}Wundfieber nach Wundheilung: W20 {w[1]} (bis 7), vorher {vorher}'
+                f' → neu begonnen {"ja" if w[3] else "nein"}')
     return f'Ereignis (Typ {typ})'
 
 

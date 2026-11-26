@@ -17,7 +17,7 @@ Quelle der Tabelle: `Werkzeuge/fix_schalter.tsv`, erzeugt von `Werkzeuge/mkfix.p
 | Stufe | ja | teilweise | nein | kein Fehler |
 |---|---|---|---|---|
 | wichtig (kritisch + mittel) | 142 | 6 | 31 | - |
-| alles (zusaetzlich egal) | 132 | 9 | 78 | - |
+| alles (zusaetzlich egal) | 134 | 9 | 78 | - |
 | - (laut Raster kein Fehler) | - | - | - | 36 |
 
 Nr. 51 ist dieselbe Stelle wie Nr. 50 (`FIX_0051` folgt `FIX_0050`). In den residenten Modulen (seg001..seg007) darf kein Segment laenger werden; in seg002 entfallen dafuer mit den Behebungen nie aufgerufene Funktionen (Schalter `FIX_PLATZ_SEG002`, aus den Schaltern des Moduls abgeleitet).
@@ -460,3 +460,5 @@ Nr. 51 ist dieselbe Stelle wie Nr. 50 (`FIX_0051` folgt `FIX_0050`). In den resi
 | 443 | Hauswand direkt neben der Gruppe zeigt links die Haelfte hinter statt vor der Gruppe | egal | nein | alles | nein | 1.5l zurueckgenommen wie Nr. 438: sah im Spiel schlechter aus als das Original. Funktionen bleiben im Code (SEG066.C), Schalter 0 (entdeckt von MiauKuh im Crystals-Forum (24.11.2026)) |  |
 | 444 | Heilungszauber (Balsam Salabunde u. a.) im Kampf nicht wählbar | mittel | nein | alles | ja | im Kampf zaehlen auch Sprueche "im Kampf und ausserhalb" (where_to_use 0); sonst bleibt die Gruppe Heilung gesperrt, obwohl Balsam Salabunde, Hexenspeichel, Klarum Purum und Tiere besprechen laut Tabelle im Kampf erlaubt sind (gemeldet von Andrean im Crystals-Forum (24.11.2026)) | SEG098.C |
 | 445 | „Alte Optionen“ mit Fernwaffe ohne Munition kostet die Runde | egal | nein | alles | ja | "Alte Optionen" mit Fernwaffe ohne Munition: Meldung und neu waehlen, statt die Runde zu verlieren, wie bei der normalen Zielwahl (gemeldet von Andrean im Crystals-Forum (24.11.2026)) | SEG033.C |
+| 446 | Zauber auf einen toten Gegner oder Helden kostet die Runde (Angriff wird abgewiesen) | egal | nein | alles | ja | Zauber auf einen Toten (Held oder Gegner, auch das Hinterteil eines Doppelgegners, Ziel 30..49) wie beim Angriff abweisen: Meldung tx 29 "HIER BRAUCHST DU KEINE KRAFT MEHR ZU VERSCHWENDEN" und neu waehlen, statt die Runde zu verbrauchen; ausser SP_SKELETTARIUS_KRYPTADUFT, der genau dafuer da ist (gemeldet von Andrean im Crystals-Forum (25.11.2026)) | SEG033.C |
+| 447 | Leerer Wasserschlauch braucht am Fass nur 1 Einheit statt 2 | egal | nein | alles | ja | ein leerer Schlauch hat beide Bits gesetzt (beim Trinken wird erst half_empty, dann zusaetzlich empty gesetzt); DNG_waterbarrel prueft darum zuerst auf "leer": 2 Einheiten statt 1 (gemeldet von Andrean im Crystals-Forum (25.11.2026)) | SEG076.C |

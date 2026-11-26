@@ -563,7 +563,24 @@ signed int use_talent(const signed int hero_pos, signed char handicap, const sig
 							}
 						} else {
 
+#if FIX_PROBENLOG
+							/* Probenlog (Art 9, Typ 15): Wundfieber nach misslungener Wundheilung (W20 <= 7). Werte: Typ,
+							 * W20, Zustand vorher (-1 krank, 0 gesund, 1 Genesung), Wundfieber neu begonnen (1/0).
+							 * Wuerfe wie im Original. */
+							signed int plog_wf[4];
+							plog_wf[0] = 15;
+							plog_wf[1] = random_schick(20);
+							plog_wf[2] = patient->disease[DISEASE_ID_WUNDFIEBER].status;
+#if FIX_0258
+							plog_wf[3] = ((plog_wf[1] <= 7) && (plog_wf[2] == DISEASE_STATUS_HEALTHY)) ? 1 : 0;
+#else
+							plog_wf[3] = (plog_wf[1] <= 7) ? 1 : 0;
+#endif
+							fix_probenlog(9, patient->alias, 4, plog_wf);
+							if (plog_wf[1] <= 7) {
+#else
 							if (random_schick(20) <= 7) {
+#endif
 								/* TODO Original-Bug? What if already diseased or recovering? */
 
 								/* 35% chance: infected with Wundfieber disease */

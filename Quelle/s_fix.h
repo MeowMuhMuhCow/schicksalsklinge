@@ -446,6 +446,8 @@
  * FIX_0443   alles    egal      -       nein       Hauswand direkt neben der Gruppe zeigt links die Haelfte hinter statt vor der Gruppe (1.5l zurueckgenommen wie Fix 438)
  * FIX_0444   alles    mittel    -       ja         Heilungszauber (Balsam Salabunde u. a.) im Kampf nicht waehlbar
  * FIX_0445   alles    egal      -       ja         "Alte Optionen" mit Fernwaffe ohne Munition kostet die Runde
+ * FIX_0446   alles    egal      -       ja         Zauber auf einen toten Gegner oder Helden kostet die Runde (Angriff wird abgewiesen)
+ * FIX_0447   alles    egal      -       ja         Leerer Wasserschlauch braucht am Fass nur 1 Einheit statt 2
  */
 #ifndef S_FIX_H
 #define S_FIX_H
@@ -1696,6 +1698,12 @@
 #endif
 #ifndef FIX_0445
 #define FIX_0445 FIX_STUFE_A
+#endif
+#ifndef FIX_0446
+#define FIX_0446 FIX_STUFE_A
+#endif
+#ifndef FIX_0447
+#define FIX_0447 FIX_STUFE_A
 #endif
 
 /* SEG002 ist resident: ohne Platz fuer die Behebungen entfallen dort nie aufgerufene Funktionen */

@@ -412,6 +412,16 @@ void FIG_menu(struct struct_hero *hero, const signed int hero_pos, signed int x,
 										{
 											GUI_output(get_tx(6)); /* "AUF MONSTER IST DIESER SPRUCH NICHT ANWENDBAR." */
 
+#if FIX_0446
+										} else if ((hero->spell_id != SP_SKELETTARIUS_KRYPTADUFT) &&
+											(((target_object_id < 10) && get_hero(target_object_id - 1)->flags.dead) ||
+											((target_object_id >= 10) && (target_object_id < 30) && g_enemy_sheets[target_object_id - 10].flags.dead) ||
+											((target_object_id >= 30) && (target_object_id < 50) && g_enemy_sheets[target_object_id - 30].flags.dead)))
+										{
+											/* Fix 446: Zauber auf einen Toten wie beim Angriff abweisen, statt die Runde zu
+											 * verbrauchen (ausser Skelettarius, der genau dafuer da ist). Gemeldet von Andrean. */
+											GUI_output(get_tx(29)); /* "HIER BRAUCHST DU KEINE KRAFT MEHR ZU VERSCHWENDEN" */
+#endif
 										} else {
 											hero->action_id = FIG_ACTION_SPELL;
 											hero->target_object_id = target_object_id;

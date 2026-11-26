@@ -1080,6 +1080,19 @@ void DNG_waterbarrel(uint8_t *unit_ptr)
 						{
 							units_needed = 0;
 
+#if FIX_0447
+							/* Fix 447: ein leerer Schlauch hat beide Bits gesetzt (beim Trinken wird erst half_empty,
+							 * dann zusaetzlich empty gesetzt). Darum zuerst auf "leer" pruefen: 2 Einheiten statt 1.
+							 * Gemeldet von Andrean (Crystals-Forum). */
+							if (hero->inventory[inv_slot].flags.empty) {
+
+								units_needed = 2;
+
+							} else if (hero->inventory[inv_slot].flags.half_empty) {
+
+								units_needed = 1;
+							}
+#else
 							if (hero->inventory[inv_slot].flags.half_empty) {
 
 								units_needed = 1;
@@ -1088,6 +1101,7 @@ void DNG_waterbarrel(uint8_t *unit_ptr)
 
 								units_needed = 2;
 							}
+#endif
 
 #if FIX_0091
 							/* Fix 91: erst nachsehen, was im Fass ist: aus einem leeren Fass nichts fuellen,

@@ -814,6 +814,26 @@ void GRP_hero_sleep(struct struct_hero *hero, const signed int quality)
 
 					le_regen = random_schick(6) + quality;
 					ae_regen = random_schick(6) + quality;
+#if FIX_PROBENLOG
+					/* Probenlog (Art 9, Typ 14): Regeneration im Schlaf. Werte: Typ, Lagerqualitaet, W6 LE, W6 AE,
+					 * Ergebnis LE, Ergebnis AE (nach der Untergrenze, vor Tausch und Verdopplung durch Ruhe Koerper).
+					 * Wuerfe wie im Original. */
+					{
+						signed int plog_rg[6];
+						plog_rg[0] = 14;
+						plog_rg[1] = quality;
+						plog_rg[2] = le_regen - quality;
+						plog_rg[3] = ae_regen - quality;
+#if FIX_0246
+						plog_rg[4] = (le_regen <= 0) ? 1 : le_regen;
+						plog_rg[5] = (ae_regen <= 0) ? 1 : ae_regen;
+#else
+						plog_rg[4] = (le_regen < 0) ? 1 : le_regen;
+						plog_rg[5] = (ae_regen < 0) ? 1 : ae_regen;
+#endif
+						fix_probenlog(9, hero->alias, 6, plog_rg);
+					}
+#endif
 
 					/* Original-Bug: next operator should be <= */
 #if FIX_0246

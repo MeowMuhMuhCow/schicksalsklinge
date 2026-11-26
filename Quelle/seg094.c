@@ -351,10 +351,25 @@ void trv_do_journey(const signed int land_route_id, const signed int reverse)
 	/* random section starts */
 	if (gs_quested_months > 3)
 	{
+#if FIX_PROBENLOG
+		/* Probenlog (Art 9, Typ 13): Treffen mit Olvir oder Treborn Kolberg (W100 <= 2, erst ab dem 4. Monat
+		 * der Queste). Werte: Typ, W100, Schwelle, Treffen (1/0). Wuerfe wie im Original. */
+		signed int plog_ot[4];
+		plog_ot[0] = 13;
+		plog_ot[1] = random_schick(100);
+		plog_ot[2] = 2;
+		if ((gs_journey_olvir_treborn_flag = (plog_ot[1] <= 2) ? 1 : 0))
+		{
+			gs_journey_olvir_treborn_position = random_schick(gs_travel_distance_per_18_hours); /* unit: [10m] */
+		}
+		plog_ot[3] = gs_journey_olvir_treborn_flag;
+		fix_probenlog(9, NULL, 4, plog_ot);
+#else
 		if ((gs_journey_olvir_treborn_flag = (random_schick(100) <= 2) ? 1 : 0))
 		{
 			gs_journey_olvir_treborn_position = random_schick(gs_travel_distance_per_18_hours); /* unit: [10m] */
 		}
+#endif
 	} else {
 		gs_journey_olvir_treborn_flag = 0;
 	}
@@ -675,10 +690,24 @@ void trv_do_journey(const signed int land_route_id, const signed int reverse)
 
 				if (gs_quested_months > 3)
 				{
+#if FIX_PROBENLOG
+					/* Probenlog (Art 9, Typ 13): Treffen mit Olvir oder Treborn Kolberg fuer den naechsten Tag */
+					signed int plog_ot[4];
+					plog_ot[0] = 13;
+					plog_ot[1] = random_schick(100);
+					plog_ot[2] = 2;
+					if ((gs_journey_olvir_treborn_flag = plog_ot[1] <= 2 ? 1 : 0) != 0)
+					{
+						gs_journey_olvir_treborn_position = random_schick(gs_travel_distance_per_18_hours);
+					}
+					plog_ot[3] = gs_journey_olvir_treborn_flag;
+					fix_probenlog(9, NULL, 4, plog_ot);
+#else
 					if ((gs_journey_olvir_treborn_flag = random_schick(100) <= 2 ? 1 : 0) != 0)
 					{
 						gs_journey_olvir_treborn_position = random_schick(gs_travel_distance_per_18_hours);
 					}
+#endif
 				} else {
 					gs_journey_olvir_treborn_flag = 0;
 				}

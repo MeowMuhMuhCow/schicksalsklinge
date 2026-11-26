@@ -1454,13 +1454,20 @@ void load_town_texture(signed int x, signed int y, signed int nvf_no, signed int
 	/* Original-Bug 438: die Seitenwaende der Haeuser (Bilder 4..9 und 14..19) stehen auf der linken Strassenseite
 	 * verkehrt herum (siehe fix_seite_umkehren). Gemeldet von MiauKuh (Crystals-Forum). */
 #if FIX_0439
+	/* Kein "else" vor dem Block von Fix 438: ist Fix 438 abgeschaltet (1.5l), haengte sich das else sonst an
+	 * "copy_width = width;", bei Tempelseiten blieb die Breite ungesetzt (mehrere Tempelbilder nebeneinander,
+	 * gemeldet von Andrean, Crystals-Forum; behoben in 1.5m). */
 	if (tempel) {
 		fix_tempelseite(src, width, height, nvf_no, direction);
-	} else
+	}
 #endif
 #if FIX_0438
 	/* betroffen sind die weiter entfernten Seitenwaende 5, 6, 7 und 9 (bzw. 15, 16, 17, 19) */
-	if (!direction && (tex_set >= 2) && (tex_set <= 5) &&
+	if (
+#if FIX_0439
+		!tempel &&
+#endif
+		!direction && (tex_set >= 2) && (tex_set <= 5) &&
 		((nvf_no % 10 == 5) || (nvf_no % 10 == 6) || (nvf_no % 10 == 7) || (nvf_no % 10 == 9)
 #if FIX_0443
 		/* Fix 443: auch die Wand direkt neben der Gruppe (4 und 8 bzw. 14 und 18) steht links verkehrt herum.

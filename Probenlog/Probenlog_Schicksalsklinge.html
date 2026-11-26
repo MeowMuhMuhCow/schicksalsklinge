@@ -137,6 +137,13 @@ function lies(text) {
         wu = `W100 = ${w[2]}` + (k ? `, Kampfwurf W100 = ${w[4]} (bis 33)` : '');
         ok = w[3] < 0 ? true : (k ? !!w[5] : null);
         erg = b + (k ? ` → ${w[5] ? 'entfällt' : 'KAMPF'}` : ''); }
+      else if (typ === 13) { titel = 'Olvir/Treborn'; zusatz = 'ab dem 4. Monat der Queste';
+        wu = `W100 ${w[1]} (bis ${w[2]})`; ok = null; erg = `Treffen ${w[3] ? 'ja' : 'nein'}`; }
+      else if (typ === 14 && w.length >= 6) { heldErg = name; titel = 'Regeneration'; zusatz = `Lager ${w[1]} (vor Tausch/Verdopplung)`;
+        wu = `W6 LE ${w[2]}, W6 AE ${w[3]}`; ok = null; erg = `LE ${w[4]}, AE ${w[5]}`; }
+      else if (typ === 15) { heldErg = name; titel = 'Wundfieber nach Wundheilung';
+        zusatz = `vorher ${({'-1': 'krank', '0': 'gesund', '1': 'Genesung'})[w[2]] || w[2]}`;
+        wu = `W20 ${w[1]} (bis 7)`; ok = !w[3]; erg = `neu begonnen ${w[3] ? 'ja' : 'nein'}`; }
       else titel = 'Ereignis Typ ' + typ;
       r = {zeit, held: heldErg, typ: 'erg', titel, zusatz, wuerfe: wu, ok, pz: false, erg};
     } else if (art === 10 && w.length >= 20) {
