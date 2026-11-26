@@ -1,0 +1,1553 @@
+<!DOCTYPE html>
+<!--
+  index.html - Web-Oberflaeche fuer DSA 1: Die Schicksalsklinge (V3.02de) im Browser
+  Lizenz: GNU General Public License Version 3 (GPL v3, siehe COPYING)
+
+  Funktionen:
+    - Exaktes 4:3-Seitenverhaeltnis (320x200 auf 4:3, image-rendering: pixelated, keine Grafikfilter)
+    - Spieldaten-Ablage per Drag & Drop (Ordner oder ZIP) sowie Knoepfe "Ordner/Zip waehlen" / "Spielordner waehlen"
+    - Knopf "Spieldaten vergessen" (loescht gespeicherte Spieldaten aus IndexedDB)
+    - Sichtbarer Hinweis: "Deine Spieldateien werden nur in diesem Browser gelesen und nie hochgeladen."
+    - Spielstaende in IDBFS (/spielstand_schick) mit "Spielstaende sichern (Zip)" und "Spielstaende einspielen"
+    - Fix-Stufen-Umschalter (Original / Wichtig / Alle) per Auswahlfeld und URL-Parameter (?stufe=original|wichtig|alles)
+    - Einblendbares Seitenfenster "Probenlog" (liest /spiel/PROBEN.CSV live mit) + Knopf "PROBEN.CSV herunterladen"
+    - Ton-Steuerung (CD-Audio OGG / DOSBox OPL2 + Lautstaerke), Start nach erstem Klick
+    - Vollbild-Knopf
+
+  Quellen & Danksagung:
+    - Bright-Eyes (https://github.com/shihan42/Bright-Eyes, GPL v3): C-Rekonstruktion von SCHICKM.EXE V3.02de & NGEN
+    - MobileEyes (https://github.com/Kerygma83/mobile-eyes, Autor: Gero Ohrner, GPL v3):
+      CD-Audio-Steuerung (seg001.c / seg002.c / ngen_embed.c), 8086-Intro-Interpreter (dsa_intro.cpp)
+      und Vorbild fuer die Browser-Architektur (IndexedDB / IDBFS / 4:3-Buehne)
+    - fflate v0.8.3 (https://github.com/101arrowz/fflate, Autor: Arjun Barrett, MIT-Lizenz): ZIP-Verarbeitung
+-->
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>DSA 1: Die Schicksalsklinge – Browser-Edition</title>
+<style>
+    :root {
+        --bg: #0c0a08;
+        --panel: #1b1612;
+        --panel-border: #3d3126;
+        --gold: #d8b168;
+        --gold-bright: #f2cf88;
+        --text: #e8dfd1;
+        --muted: #a69986;
+        --btn-bg: #29211b;
+        --btn-hover: #3a2e24;
+        --btn-active: #4c3c2e;
+        --danger: #d96b6b;
+        --ok: #7cc47c;
+        --pz: #c59be0;
+        --bar-h: 2.65rem;
+        --foot-h: 1.45rem;
+    }
+
+    *, *::before, *::after {
+        box-sizing: border-box;
+    }
+
+    html, body {
+        margin: 0;
+        padding: 0;
+        width: 100%;
+        height: 100%;
+        background: var(--bg);
+        color: var(--text);
+        font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+        overflow: hidden;
+        user-select: none;
+    }
+
+    body {
+        display: flex;
+        flex-direction: column;
+    }
+
+    /* ---------- Obere Steuerleiste ---------- */
+    #kopfzeile {
+        height: var(--bar-h);
+        min-height: var(--bar-h);
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 0.22rem;
+        padding: 0 0.38rem;
+        background: var(--panel);
+        border-bottom: 1px solid var(--panel-border);
+        z-index: 10;
+        flex-wrap: nowrap;
+        overflow-x: auto;
+    }
+    .gruppe {
+        display: flex;
+        align-items: center;
+        gap: 0.2rem;
+        flex-shrink: 0;
+    }
+    .titel {
+        font: bold 0.82rem Georgia, "Times New Roman", serif;
+        color: var(--gold);
+        letter-spacing: 0.01em;
+        margin-right: 0.12rem;
+        white-space: nowrap;
+    }
+    button, select, input[type="search"] {
+        font: inherit;
+        font-size: 0.72rem;
+        color: var(--text);
+        background: var(--btn-bg);
+        border: 1px solid var(--panel-border);
+        border-radius: 0.3rem;
+        padding: 0.18rem 0.38rem;
+        cursor: pointer;
+        white-space: nowrap;
+        transition: background 0.15s, border-color 0.15s;
+    }
+    input[type="search"] {
+        cursor: text;
+    }
+    button:hover, select:hover {
+        background: var(--btn-hover);
+        border-color: var(--gold);
+    }
+    button:active, button.aktiv-knopf {
+        background: var(--btn-active);
+        border-color: var(--gold-bright);
+        color: var(--gold-bright);
+    }
+    button:disabled {
+        opacity: 0.45;
+        cursor: default;
+    }
+    button.gefahr:hover {
+        border-color: var(--danger);
+        color: #ffd6d6;
+    }
+    label.inline {
+        display: flex;
+        align-items: center;
+        gap: 0.18rem;
+        font-size: 0.72rem;
+        color: var(--muted);
+        white-space: nowrap;
+    }
+    input[type="range"] {
+        width: 2.6rem;
+        accent-color: var(--gold);
+        cursor: pointer;
+    }
+    #ton-badge {
+        font-size: 0.7rem;
+        padding: 0.15rem 0.32rem;
+        border-radius: 0.3rem;
+        border: 1px solid var(--panel-border);
+        background: #17130f;
+        color: var(--muted);
+        white-space: nowrap;
+        cursor: pointer;
+    }
+    #ton-badge.aktiv {
+        color: var(--ok);
+        border-color: #3c6e3c;
+    }
+    #meldung-kurz {
+        font-size: 0.72rem;
+        color: var(--gold);
+        white-space: nowrap;
+    }
+
+    /* ---------- Hauptbereich: 4:3-Buehne + einblendbares Probenlog-Seitenfenster ---------- */
+    #arbeitsbereich {
+        flex: 1;
+        min-height: 0;
+        width: 100%;
+        display: flex;
+        flex-direction: row;
+        overflow: hidden;
+        background: #000;
+    }
+
+    #buehne {
+        flex: 1;
+        min-width: 0;
+        min-height: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: #000;
+        position: relative;
+        overflow: hidden;
+    }
+
+    #bild-rahmen {
+        aspect-ratio: 4 / 3;
+        width: 800px;
+        height: 600px;
+        background: #000;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        position: relative;
+        box-shadow: 0 0 32px rgba(0, 0, 0, 0.9);
+    }
+
+    #canvas {
+        width: 100%;
+        height: 100%;
+        display: block;
+        /* Scharfe Pixel-Skalierung ohne Grafikfilter */
+        image-rendering: pixelated;
+        image-rendering: crisp-edges;
+        outline: none;
+    }
+
+    #lade-status {
+        position: absolute;
+        inset: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: rgba(12, 10, 8, 0.78);
+        color: var(--gold);
+        font-size: 1rem;
+        pointer-events: none;
+        text-align: center;
+        padding: 1rem;
+    }
+
+    /* ---------- Einblendbares Seitenfenster: Probenlog (B2) ---------- */
+    #probenlog-fenster {
+        width: 430px;
+        max-width: 46vw;
+        height: 100%;
+        background: var(--panel);
+        border-left: 1px solid var(--panel-border);
+        display: flex;
+        flex-direction: column;
+        z-index: 9;
+        user-select: text;
+    }
+    #probenlog-fenster[hidden] {
+        display: none !important;
+    }
+    .probenlog-kopf {
+        padding: 0.45rem 0.65rem;
+        border-bottom: 1px solid var(--panel-border);
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 0.4rem;
+        background: #15110d;
+    }
+    .probenlog-kopf h3 {
+        margin: 0;
+        font: bold 0.88rem Georgia, serif;
+        color: var(--gold-bright);
+    }
+    .probenlog-filter {
+        padding: 0.4rem 0.65rem;
+        border-bottom: 1px solid var(--panel-border);
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.3rem;
+        align-items: center;
+    }
+    .probenlog-filter select, .probenlog-filter input[type="search"] {
+        font-size: 0.72rem;
+        padding: 0.2rem 0.38rem;
+    }
+    .probenlog-filter input[type="search"] {
+        flex: 1;
+        min-width: 90px;
+    }
+    #probenlog-karten {
+        padding: 0.4rem 0.65rem;
+        border-bottom: 1px solid var(--panel-border);
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(118px, 1fr));
+        gap: 0.35rem;
+        max-height: 145px;
+        overflow-y: auto;
+    }
+    .proben-karte {
+        background: #14100d;
+        border: 1px solid var(--panel-border);
+        border-radius: 0.35rem;
+        padding: 0.3rem 0.45rem;
+        font-size: 0.7rem;
+    }
+    .proben-karte strong {
+        color: var(--gold-bright);
+        display: block;
+        font-size: 0.74rem;
+    }
+    #probenlog-tabelle-wrap {
+        flex: 1;
+        min-height: 0;
+        overflow-y: auto;
+        padding: 0;
+    }
+    #probenlog-tabelle {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 0.72rem;
+    }
+    #probenlog-tabelle th, #probenlog-tabelle td {
+        text-align: left;
+        padding: 0.28rem 0.45rem;
+        border-bottom: 1px solid #2b231c;
+        vertical-align: top;
+    }
+    #probenlog-tabelle th {
+        position: sticky;
+        top: 0;
+        background: #17130f;
+        color: var(--muted);
+        font-weight: 600;
+        z-index: 1;
+    }
+    .wuerfe-spalte {
+        font-variant-numeric: tabular-nums;
+        white-space: nowrap;
+        color: var(--gold);
+    }
+    .erg-ok { color: var(--ok); font-weight: 600; }
+    .erg-bad { color: var(--danger); }
+    .erg-pz { color: var(--pz); font-weight: 700; }
+    .proben-leer {
+        padding: 1.2rem 0.75rem;
+        text-align: center;
+        color: var(--muted);
+        font-size: 0.76rem;
+    }
+
+    /* ---------- Untere Datenschutz-Hinweiszeile (B2) ---------- */
+    #datenschutz-leiste {
+        height: var(--foot-h);
+        min-height: var(--foot-h);
+        background: #14100d;
+        border-top: 1px solid var(--panel-border);
+        color: var(--muted);
+        font-size: 0.72rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 0 0.75rem;
+        gap: 0.75rem;
+        z-index: 10;
+    }
+    #datenschutz-leiste strong {
+        color: var(--gold);
+        font-weight: 600;
+    }
+
+    /* Im Vollbildmodus Kopf- und Fusszeile ausblenden */
+    body.vollbild-aktiv #kopfzeile,
+    body.vollbild-aktiv #datenschutz-leiste {
+        display: none;
+    }
+
+    /* ---------- Spieldaten-Ablage (Drag & Drop Dialog, W3 + B2) ---------- */
+    #spieldaten-modal {
+        position: fixed;
+        inset: 0;
+        background: rgba(8, 6, 5, 0.88);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 50;
+        padding: 1rem;
+    }
+    #spieldaten-modal[hidden] {
+        display: none !important;
+    }
+    .modal-karte {
+        width: min(40rem, 100%);
+        background: var(--panel);
+        border: 1px solid var(--gold);
+        border-radius: 0.75rem;
+        padding: 1.35rem 1.5rem;
+        box-shadow: 0 18px 50px rgba(0, 0, 0, 0.85);
+        display: flex;
+        flex-direction: column;
+        gap: 0.85rem;
+    }
+    .modal-karte h2 {
+        margin: 0;
+        font: bold 1.2rem Georgia, "Times New Roman", serif;
+        color: var(--gold-bright);
+    }
+    .modal-karte p {
+        margin: 0;
+        font-size: 0.88rem;
+        line-height: 1.45;
+        color: var(--text);
+    }
+    .datenschutz-banner {
+        background: #141a14;
+        border: 1px solid #355835;
+        color: #bce6bc;
+        border-radius: 0.45rem;
+        padding: 0.48rem 0.75rem;
+        font-size: 0.84rem;
+        font-weight: 600;
+        text-align: center;
+    }
+    #drop-zone {
+        border: 2px dashed var(--gold);
+        border-radius: 0.65rem;
+        padding: 1.35rem 1rem;
+        text-align: center;
+        background: rgba(216, 177, 104, 0.05);
+        transition: background 0.15s, border-color 0.15s, transform 0.1s;
+        cursor: pointer;
+    }
+    #drop-zone.dragover {
+        background: rgba(216, 177, 104, 0.16);
+        border-color: var(--gold-bright);
+        transform: scale(1.01);
+    }
+    #drop-zone .drop-titel {
+        font-size: 1rem;
+        font-weight: 600;
+        color: var(--gold-bright);
+        margin-bottom: 0.3rem;
+    }
+    #drop-zone .hinweis {
+        font-size: 0.8rem;
+        color: var(--muted);
+    }
+    .auswahl-knoepfe {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.55rem;
+        justify-content: center;
+        margin-top: 0.75rem;
+    }
+    .auswahl-knoepfe button {
+        font-size: 0.85rem;
+        padding: 0.42rem 0.9rem;
+        border-color: var(--gold);
+    }
+    .hinweis {
+        font-size: 0.78rem;
+        color: var(--muted);
+    }
+    #spieldaten-status {
+        font-size: 0.86rem;
+        color: var(--gold);
+        min-height: 1.1rem;
+    }
+    #spieldaten-fehler {
+        color: var(--danger);
+        font-weight: 600;
+        font-size: 0.86rem;
+    }
+    #spieldaten-fehler:empty, #spieldaten-status:empty {
+        display: none;
+    }
+    .modal-fuss {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 0.6rem;
+        flex-wrap: wrap;
+    }
+</style>
+</head>
+<body>
+
+<header id="kopfzeile">
+    <div class="gruppe">
+        <span class="titel">DSA 1: Die Schicksalsklinge</span>
+        <label class="inline" for="select-fix-stufe">Fix-Stufe:
+            <select id="select-fix-stufe" title="Fix-Stufe wählen (lädt das jeweilige WebAssembly-Build)">
+                <option value="alles">Alle Fixes (Stufe 2)</option>
+                <option value="wichtig">Wichtige Fixes (Stufe 1)</option>
+                <option value="original">Original (V3.02de)</option>
+            </select>
+        </label>
+    </div>
+
+    <div class="gruppe">
+        <button type="button" id="btn-saves-zip" title="Alle Spielstände (GAMES.NAM, *.GAM, *.CHR) als ZIP-Archiv herunterladen">Spielstände sichern (Zip)</button>
+        <button type="button" id="btn-saves-import" title="Spielstände aus einer ZIP-Datei oder einzelnen .GAM/.CHR-Dateien einspielen">Spielstände einspielen</button>
+        <input id="input-saves-import" type="file" accept=".zip,.gam,.GAM,.chr,.CHR" multiple hidden>
+        <button type="button" id="btn-probenlog-fenster" title="Einblendbares Seitenfenster mit dem Live-Probenlog öffnen/schließen">Probenlog</button>
+        <button type="button" id="btn-proben-csv" title="Aktuelles Würfel- und Probenprotokoll als PROBEN.CSV herunterladen">PROBEN.CSV herunterladen</button>
+    </div>
+
+    <div class="gruppe">
+        <span id="ton-badge" title="Browser starten WebAudio nach dem ersten Mausklick oder Tastendruck">Ton: Klick aktiviert</span>
+        <button type="button" id="btn-musik-modus" title="Zwischen CD-Musik (OGG) und AdLib-Synthesizer (OPL2) umschalten (Taste F10)">Musik: CD (OGG)</button>
+        <label class="inline" title="Lautstärke (F11 leiser / F12 lauter)">
+            <span>Lautst.</span>
+            <input type="range" id="input-lautstaerke" min="0" max="100" value="80">
+        </label>
+        <button type="button" id="btn-spieldaten-neu" title="Spieldaten-Dialog öffnen (Ordner oder ZIP neu einlesen)">Spieldaten</button>
+        <button type="button" id="btn-spieldaten-vergessen" class="gefahr" title="Gespeicherte Spieldaten aus dem Browser (IndexedDB) löschen">Spieldaten vergessen</button>
+        <button type="button" id="btn-vollbild" title="Vollbildmodus im exakten 4:3-Seitenverhältnis umschalten (Alt+Enter)">Vollbild</button>
+        <span id="meldung-kurz" role="status"></span>
+    </div>
+</header>
+
+<div id="arbeitsbereich">
+    <main id="buehne">
+        <div id="bild-rahmen">
+            <canvas id="canvas" width="320" height="200" tabindex="-1" oncontextmenu="event.preventDefault()"></canvas>
+            <div id="lade-status">Initialisiere …</div>
+        </div>
+    </main>
+
+    <!-- Einblendbares Seitenfenster fuer das Live-Probenlog aus /spiel/PROBEN.CSV (B2) -->
+    <aside id="probenlog-fenster" hidden aria-label="Probenlog">
+        <div class="probenlog-kopf">
+            <h3>Probenlog <span id="probenlog-anzahl" style="font-weight:normal;font-size:0.75rem;color:var(--muted)">(0)</span></h3>
+            <div class="gruppe">
+                <button type="button" id="btn-probenlog-leeren" title="Bisherige Einträge in PROBEN.CSV zurücksetzen">Leeren</button>
+                <button type="button" id="btn-probenlog-schliessen" title="Probenlog-Seitenfenster schließen">Schließen</button>
+            </div>
+        </div>
+        <div class="probenlog-filter">
+            <select id="proben-filter-held" title="Nach Held filtern">
+                <option value="">Alle Helden</option>
+            </select>
+            <select id="proben-filter-art" title="Nach Probenart filtern">
+                <option value="">Alle Proben</option>
+                <option value="eig">Eigenschaftsproben</option>
+                <option value="tal">Talentproben</option>
+                <option value="zau">Zauber</option>
+                <option value="kampf">Kampf (AT/PA, Zauberschaden)</option>
+                <option value="stg">Stufenanstieg</option>
+                <option value="erg">Ereignisse</option>
+            </select>
+            <input type="search" id="proben-filter-suche" placeholder="Suchen (z. B. Angriff, Sinnesschärfe) …">
+        </div>
+        <div id="probenlog-karten"></div>
+        <div id="probenlog-tabelle-wrap">
+            <table id="probenlog-tabelle">
+                <thead>
+                    <tr>
+                        <th>Zeit</th>
+                        <th>Wer</th>
+                        <th>Probe</th>
+                        <th>Würfe</th>
+                        <th>Ergebnis</th>
+                    </tr>
+                </thead>
+                <tbody id="probenlog-tbody"></tbody>
+            </table>
+        </div>
+    </aside>
+</div>
+
+<footer id="datenschutz-leiste">
+    <strong>Datenschutz-Hinweis:</strong>
+    <span>Deine Spieldateien werden nur in diesem Browser gelesen und nie hochgeladen.</span>
+</footer>
+
+<!-- Dialog zum Einlesen der GOG-Spieldaten (Ordner oder ZIP per Drag & Drop oder Dateidialog) -->
+<div id="spieldaten-modal" hidden role="dialog" aria-modal="true" aria-label="Spieldaten wählen">
+    <div class="modal-karte">
+        <h2>Spieldaten laden (Deutsche GOG-/CD-Fassung)</h2>
+        <p>Diese Browser-Fassung enthält keine urheberrechtlich geschützten Originaldaten. Bitte wähle deinen installierten Spielordner von <b>Das Schwarze Auge: Die Schicksalsklinge</b> (deutsche GOG-Fassung V3.02de mit <code>SCHICK.DAT</code>) oder eine ZIP-Datei davon.</p>
+
+        <div class="datenschutz-banner" id="datenschutz-hinweis-modal">
+            Deine Spieldateien werden nur in diesem Browser gelesen und nie hochgeladen.
+        </div>
+
+        <div id="drop-zone">
+            <div class="drop-titel">Spielordner oder ZIP-Datei einfach hierher ziehen &amp; ablegen</div>
+            <p class="hinweis">Erkennt automatisch <code>SCHICK.DAT</code>, <code>DSAGEN.DAT</code>, <code>SCHICKM.EXE</code> sowie <code>MUSIC/Track02..15.ogg</code> (auch in Unterordnern).</p>
+            <div class="auswahl-knoepfe">
+                <button type="button" id="btn-zip-waehlen">Ordner/Zip wählen …</button>
+                <button type="button" id="btn-ordner-waehlen">Spielordner wählen …</button>
+            </div>
+            <input id="spieldaten-datei" type="file" multiple hidden accept=".zip,application/zip,.DAT,.EXE,.NVF,.CHR,.ADV,.CFG,.LTX,.DIR,.SND,.VOL,.OVL,.OGG,.ogg">
+            <input id="spieldaten-ordner" type="file" webkitdirectory directory multiple hidden>
+        </div>
+
+        <label class="inline" style="color: var(--text);">
+            <input type="checkbox" id="chk-musik-import" checked>
+            <span>CD-Musik (<code>MUSIC/Track02.ogg</code> … <code>Track15.ogg</code>) mit übernehmen</span>
+        </label>
+
+        <div id="spieldaten-status" aria-live="polite"></div>
+        <div id="spieldaten-fehler" role="alert"></div>
+
+        <div class="modal-fuss">
+            <button type="button" id="btn-modal-vergessen" class="gefahr" title="Gespeicherte Spieldaten aus IndexedDB löschen">Spieldaten vergessen</button>
+            <button type="button" id="btn-modal-schliessen" hidden>Schließen</button>
+        </div>
+    </div>
+</div>
+
+<script src="fflate.min.js"></script>
+<script src="daten.js"></script>
+<script src="spielstand_umzug.js"></script>
+<script>
+(function () {
+    'use strict';
+
+    /* ---------- 1. Fix-Stufe bestimmen (URL-Parameter ?stufe=... oder localStorage) ---------- */
+    const urlParams = new URLSearchParams(window.location.search);
+    const liesSpeicher = (k) => { try { return localStorage.getItem(k); } catch (_) { return null; } };
+    const schreibeSpeicher = (k, v) => { try { localStorage.setItem(k, v); } catch (_) {} };
+
+    function normiereStufe(wert) {
+        const s = String(wert || '').toLowerCase().trim();
+        if (s === '0' || s === 'orig' || s === 'original') return 'original';
+        if (s === '1' || s === 'wichtig') return 'wichtig';
+        return 'alles';
+    }
+
+    const aktiveStufe = urlParams.has('stufe')
+        ? normiereStufe(urlParams.get('stufe'))
+        : normiereStufe(liesSpeicher('schick_fix_stufe') || 'alles');
+    schreibeSpeicher('schick_fix_stufe', aktiveStufe);
+
+    const BUILD_DATEIEN = {
+        alles:    { js: 'index.js',          wasm: 'index.wasm',          label: 'Alle Fixes (Stufe 2)' },
+        wichtig:  { js: 'schick_wichtig.js', wasm: 'schick_wichtig.wasm', label: 'Wichtige Fixes (Stufe 1)' },
+        original: { js: 'schick_orig.js',    wasm: 'schick_orig.wasm',    label: 'Original (V3.02de)' }
+    };
+    const aktivesBuild = BUILD_DATEIEN[aktiveStufe] || BUILD_DATEIEN.alles;
+
+    const selectStufe = document.getElementById('select-fix-stufe');
+    selectStufe.value = aktiveStufe;
+    selectStufe.addEventListener('change', () => {
+        const neueStufe = normiereStufe(selectStufe.value);
+        schreibeSpeicher('schick_fix_stufe', neueStufe);
+        const zielUrl = new URL(window.location.href);
+        zielUrl.searchParams.set('stufe', neueStufe);
+        window.location.href = zielUrl.toString();
+    });
+
+    /* ---------- 2. Exakte 4:3-Skalierung der Buehne (auch bei offenem Probenlog-Fenster) ---------- */
+    const buehneEl = document.getElementById('buehne');
+    const bildRahmenEl = document.getElementById('bild-rahmen');
+
+    function aktualisiereRahmen4zu3() {
+        const maxW = buehneEl.clientWidth;
+        const maxH = buehneEl.clientHeight;
+        if (maxW <= 0 || maxH <= 0) return;
+        let h = maxH;
+        let w = Math.round((h * 4) / 3);
+        if (w > maxW) {
+            w = maxW;
+            h = Math.round((w * 3) / 4);
+            w = Math.round((h * 4) / 3);
+        }
+        bildRahmenEl.style.width = `${w}px`;
+        bildRahmenEl.style.height = `${h}px`;
+    }
+    window.addEventListener('resize', aktualisiereRahmen4zu3);
+    aktualisiereRahmen4zu3();
+
+    /* ---------- 3. Kurzmeldungen & Status ---------- */
+    const ladeStatusEl = document.getElementById('lade-status');
+    const meldungKurzEl = document.getElementById('meldung-kurz');
+    let meldungTimer = null;
+    function zeigeKurzmeldung(text, dauerMs = 4000) {
+        meldungKurzEl.textContent = text;
+        if (meldungTimer) clearTimeout(meldungTimer);
+        if (text && dauerMs > 0) {
+            meldungTimer = setTimeout(() => { meldungKurzEl.textContent = ''; }, dauerMs);
+        }
+    }
+
+    /* ---------- 4. Spieldaten-Dialog & "Spieldaten vergessen" (W3 + B2) ---------- */
+    const spieldaten = spieldatenEinrichten();
+    const modalEl = document.getElementById('spieldaten-modal');
+    const dropZoneEl = document.getElementById('drop-zone');
+    const inputDateiEl = document.getElementById('spieldaten-datei');
+    const inputOrdnerEl = document.getElementById('spieldaten-ordner');
+    const btnZipWaehlen = document.getElementById('btn-zip-waehlen');
+    const btnOrdnerWaehlen = document.getElementById('btn-ordner-waehlen');
+    const btnModalSchliessen = document.getElementById('btn-modal-schliessen');
+    const chkMusikImport = document.getElementById('chk-musik-import');
+    const statusTextEl = document.getElementById('spieldaten-status');
+    const fehlerTextEl = document.getElementById('spieldaten-fehler');
+
+    let dialogResolve = null;
+
+    async function verarbeiteSpieldatenEingabe(eingabeListe) {
+        if (!eingabeListe || !eingabeListe.length) return;
+        btnZipWaehlen.disabled = true;
+        btnOrdnerWaehlen.disabled = true;
+        fehlerTextEl.textContent = '';
+        statusTextEl.textContent = 'Prüfe ausgewählte Dateien …';
+        try {
+            const anzahl = await spieldaten.einlesen(
+                eingabeListe,
+                chkMusikImport.checked,
+                (fortschritt) => { statusTextEl.textContent = fortschritt; }
+            );
+            statusTextEl.textContent = `${anzahl} Dateien erfolgreich im Browser gespeichert.`;
+            modalEl.hidden = true;
+            aktualisiereRahmen4zu3();
+            if (dialogResolve) {
+                const fn = dialogResolve;
+                dialogResolve = null;
+                fn();
+            } else {
+                window.location.reload();
+            }
+        } catch (err) {
+            console.warn('Spieldaten-Import:', err);
+            fehlerTextEl.textContent = err?.message || String(err);
+            statusTextEl.textContent = '';
+        } finally {
+            btnZipWaehlen.disabled = false;
+            btnOrdnerWaehlen.disabled = false;
+        }
+    }
+
+    async function spieldatenVergessenAktion() {
+        try {
+            await spieldaten.loeschen();
+            fehlerTextEl.textContent = '';
+            statusTextEl.textContent = 'Gespeicherte Spieldaten wurden aus dem Browser (IndexedDB) gelöscht.';
+            btnModalSchliessen.hidden = true;
+            modalEl.hidden = false;
+            zeigeKurzmeldung('Spieldaten aus Browser gelöscht.');
+        } catch (err) {
+            console.warn('Spieldaten löschen fehlgeschlagen:', err);
+            zeigeKurzmeldung('Fehler beim Löschen der Spieldaten.');
+        }
+    }
+
+    document.getElementById('btn-spieldaten-vergessen').addEventListener('click', spieldatenVergessenAktion);
+    document.getElementById('btn-modal-vergessen').addEventListener('click', spieldatenVergessenAktion);
+
+    btnZipWaehlen.addEventListener('click', () => inputDateiEl.click());
+    btnOrdnerWaehlen.addEventListener('click', () => inputOrdnerEl.click());
+
+    inputDateiEl.addEventListener('change', async () => {
+        const files = [...(inputDateiEl.files || [])];
+        inputDateiEl.value = '';
+        await verarbeiteSpieldatenEingabe(files);
+    });
+
+    inputOrdnerEl.addEventListener('change', async () => {
+        const files = [...(inputOrdnerEl.files || [])];
+        inputOrdnerEl.value = '';
+        await verarbeiteSpieldatenEingabe(files);
+    });
+
+    for (const ziel of [dropZoneEl, window]) {
+        ziel.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            dropZoneEl.classList.add('dragover');
+        });
+        ziel.addEventListener('dragleave', (e) => {
+            if (e.target === dropZoneEl || e.target === modalEl) {
+                dropZoneEl.classList.remove('dragover');
+            }
+        });
+        ziel.addEventListener('drop', async (e) => {
+            e.preventDefault();
+            dropZoneEl.classList.remove('dragover');
+            if (modalEl.hidden) {
+                modalEl.hidden = false;
+                btnModalSchliessen.hidden = false;
+            }
+            statusTextEl.textContent = 'Lese gezogenen Ordner / Archiv …';
+            fehlerTextEl.textContent = '';
+            const liste = await extrahiereDropDateien(e.dataTransfer);
+            await verarbeiteSpieldatenEingabe(liste);
+        });
+    }
+
+    function zeigeSpieldatenDialog(manuell = false) {
+        statusTextEl.textContent = '';
+        fehlerTextEl.textContent = '';
+        btnModalSchliessen.hidden = !manuell;
+        modalEl.hidden = false;
+        return new Promise((resolve) => {
+            dialogResolve = resolve;
+        });
+    }
+
+    btnModalSchliessen.addEventListener('click', () => {
+        modalEl.hidden = true;
+        if (dialogResolve) {
+            const fn = dialogResolve;
+            dialogResolve = null;
+            fn();
+        }
+    });
+
+    document.getElementById('btn-spieldaten-neu').addEventListener('click', () => {
+        zeigeSpieldatenDialog(true);
+    });
+
+    /* ---------- 5. Emscripten Module & Canvas-Eingabe (W2, W5, W6) ---------- */
+    const canvasEl = document.getElementById('canvas');
+    try { canvasEl.getContext('2d', { willReadFrequently: true }); } catch (_) {}
+
+    canvasEl.addEventListener('pointerdown', (e) => {
+        canvasEl.focus();
+        const rect = canvasEl.getBoundingClientRect();
+        if (rect.width > 0 && rect.height > 0 && typeof window.Module?._dsa_web_inject_mouse === 'function') {
+            const x = Math.max(0, Math.min(319, Math.floor(((e.clientX - rect.left) * 320) / rect.width)));
+            const y = Math.max(0, Math.min(199, Math.floor(((e.clientY - rect.top) * 200) / rect.height)));
+            window.Module._dsa_web_inject_mouse(x, y, 1, 0, 0);
+        }
+    }, { capture: true });
+
+    window.addEventListener('keydown', (e) => {
+        const tag = document.activeElement?.tagName;
+        if (tag === 'INPUT' || tag === 'SELECT' || tag === 'TEXTAREA') return;
+        if (
+            ['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'Space', 'PageUp', 'PageDown', 'Tab'].includes(e.code) ||
+            (e.ctrlKey && ['KeyE', 'KeyO', 'KeyP', 'KeyQ', 'KeyS'].includes(e.code)) ||
+            /^F([1-9]|10)$/.test(e.code)
+        ) {
+            e.preventDefault();
+        }
+    }, { capture: true });
+
+    window.Module = {
+        canvas: canvasEl,
+        locateFile: (pfad) => {
+            if (pfad.endsWith('.wasm')) return aktivesBuild.wasm;
+            return pfad;
+        },
+        spieldatenHolen: () => spieldaten.holen(() => zeigeSpieldatenDialog(false)),
+        print: (t) => console.log(t),
+        printErr: (t) => console.log(t),
+        setStatus: (text) => {
+            if (!text) {
+                ladeStatusEl.style.display = 'none';
+                ladeStatusEl.textContent = '';
+            } else {
+                ladeStatusEl.style.display = 'flex';
+                ladeStatusEl.textContent = text;
+            }
+        },
+        onRuntimeInitialized: () => {
+            ladeStatusEl.style.display = 'none';
+            aktualisiereRahmen4zu3();
+            const gespeicherteVol = Number(liesSpeicher('schick_volume') ?? 80);
+            document.getElementById('input-lautstaerke').value = String(gespeicherteVol);
+            if (typeof window.Module._dsa_web_set_volume === 'function') {
+                window.Module._dsa_web_set_volume(gespeicherteVol);
+            }
+            aktualisiereMusikKnopf();
+        },
+        toggleVollbild: () => schalteVollbildUm()
+    };
+
+    /* ---------- 6. Ton nach erstem Klick aktivieren (W5 Browserregel) ---------- */
+    const tonBadgeEl = document.getElementById('ton-badge');
+    const btnMusikModus = document.getElementById('btn-musik-modus');
+    const inputLautstaerke = document.getElementById('input-lautstaerke');
+
+    function entsperreWebAudio() {
+        const ctx = window.Module?.SDL2?.audioContext;
+        if (ctx) {
+            if (ctx.state !== 'running') {
+                ctx.resume().then(() => {
+                    tonBadgeEl.textContent = 'Ton: Aktiv';
+                    tonBadgeEl.classList.add('aktiv');
+                }).catch(() => {});
+            } else {
+                tonBadgeEl.textContent = 'Ton: Aktiv';
+                tonBadgeEl.classList.add('aktiv');
+            }
+        }
+    }
+    for (const evName of ['pointerdown', 'mousedown', 'keydown', 'touchend']) {
+        window.addEventListener(evName, entsperreWebAudio, { capture: true, passive: true });
+    }
+
+    function aktualisiereMusikKnopf() {
+        if (typeof window.Module?._dsa_platform_get_music_mode !== 'function') return;
+        const m = window.Module._dsa_platform_get_music_mode();
+        btnMusikModus.textContent = (m === 0) ? 'Musik: CD (OGG)' : 'Musik: AdLib (OPL2)';
+    }
+
+    btnMusikModus.addEventListener('click', () => {
+        entsperreWebAudio();
+        if (typeof window.Module?._dsa_platform_get_music_mode !== 'function') return;
+        const aktuell = window.Module._dsa_platform_get_music_mode();
+        const neu = (aktuell === 0) ? 2 : 0;
+        window.Module._dsa_platform_set_music_mode(neu);
+        aktualisiereMusikKnopf();
+        zeigeKurzmeldung(neu === 0 ? 'Musikmodus: CD-Audio (OGG)' : 'Musikmodus: AdLib OPL2');
+    });
+
+    inputLautstaerke.addEventListener('input', () => {
+        entsperreWebAudio();
+        const v = Number(inputLautstaerke.value);
+        schreibeSpeicher('schick_volume', String(v));
+        if (typeof window.Module?._dsa_web_set_volume === 'function') {
+            window.Module._dsa_web_set_volume(v);
+        }
+    });
+
+    /* ---------- 7. Spielstaende sichern (Zip) & einspielen (W4) ---------- */
+    function dateiNameFuerSlotName(slotName) {
+        let s = '';
+        for (let i = 0; i < 8; i++) {
+            const c = slotName[i] || '';
+            s += /[A-Za-z0-9]/.test(c) ? c.toUpperCase() : '_';
+        }
+        return s + '.GAM';
+    }
+
+    document.getElementById('btn-saves-zip').addEventListener('click', async () => {
+        try {
+            if (typeof window.Module?.spielstaendeSichern === 'function') {
+                await window.Module.spielstaendeSichern();
+            }
+            const FS = window.Module?.FS;
+            if (!FS) {
+                zeigeKurzmeldung('Dateisystem noch nicht bereit.');
+                return;
+            }
+            const eintraege = [];
+            const gesehen = new Set();
+            for (const ordner of ['/spiel', '/spielstand_schick']) {
+                let namen = [];
+                try { namen = FS.readdir(ordner); } catch (_) { continue; }
+                for (const n of namen) {
+                    if (n === '.' || n === '..') continue;
+                    if (n === 'GAMES.NAM' || /\.(GAM|CHR)$/i.test(n)) {
+                        const gross = n.toUpperCase();
+                        if (gesehen.has(gross)) continue;
+                        gesehen.add(gross);
+                        eintraege.push({ name: gross, daten: FS.readFile(`${ordner}/${n}`) });
+                    }
+                }
+            }
+            if (!eintraege.length) {
+                zeigeKurzmeldung('Keine Spielstände zum Sichern gefunden.');
+                return;
+            }
+            const zipBlob = zipErzeugen(eintraege);
+            const url = URL.createObjectURL(zipBlob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'Schicksalsklinge_Spielstaende.zip';
+            document.body.appendChild(a);
+            a.click();
+            a.remove();
+            setTimeout(() => URL.revokeObjectURL(url), 10000);
+            zeigeKurzmeldung(`${eintraege.length} Spielstand-Dateien als ZIP gesichert.`);
+        } catch (err) {
+            console.warn('Fehler beim ZIP-Export der Spielstände:', err);
+            zeigeKurzmeldung('Fehler beim Sichern der Spielstände.');
+        }
+    });
+
+    const inputSavesImport = document.getElementById('input-saves-import');
+    document.getElementById('btn-saves-import').addEventListener('click', () => {
+        inputSavesImport.value = '';
+        inputSavesImport.click();
+    });
+
+    inputSavesImport.addEventListener('change', async () => {
+        const files = [...(inputSavesImport.files || [])];
+        inputSavesImport.value = '';
+        if (!files.length) return;
+        const FS = window.Module?.FS;
+        if (!FS) {
+            zeigeKurzmeldung('Dateisystem noch nicht bereit.');
+            return;
+        }
+        try {
+            const importiert = [];
+            for (const f of files) {
+                if (/\.zip$/i.test(f.name)) {
+                    const entpackt = await zipLesen(
+                        f,
+                        (pfad) => {
+                            const b = dateiBasisname(pfad).toUpperCase();
+                            return b === 'GAMES.NAM' || /\.(GAM|CHR)$/i.test(b);
+                        }
+                    );
+                    for (const e of entpackt) {
+                        importiert.push({
+                            name: dateiBasisname(e.pfad).toUpperCase(),
+                            daten: new Uint8Array(await e.daten.arrayBuffer())
+                        });
+                    }
+                } else {
+                    const b = dateiBasisname(f.name).toUpperCase();
+                    if (b === 'GAMES.NAM' || /\.(GAM|CHR)$/i.test(b)) {
+                        importiert.push({
+                            name: b,
+                            daten: new Uint8Array(await f.arrayBuffer())
+                        });
+                    }
+                }
+            }
+
+            if (!importiert.length) {
+                zeigeKurzmeldung('Keine gültigen Spielstände (.GAM, .CHR, GAMES.NAM) gefunden.');
+                return;
+            }
+
+            const hatGamesNam = importiert.some((e) => e.name === 'GAMES.NAM');
+            const gamDateien = importiert.filter((e) => /\.GAM$/i.test(e.name));
+
+            for (const e of importiert) {
+                FS.writeFile(`/spiel/${e.name}`, e.daten);
+                if (/\.CHR$/i.test(e.name)) {
+                    try { FS.writeFile(`/spiel/TEMP/${e.name}`, e.daten); } catch (_) {}
+                }
+            }
+
+            if (!hatGamesNam && gamDateien.length > 0) {
+                const nam = new Uint8Array(45);
+                try { nam.set(FS.readFile('/spiel/GAMES.NAM').subarray(0, 45)); } catch (_) {}
+                const dec = new TextDecoder('ascii');
+                const slots = [0, 1, 2, 3, 4].map((i) => {
+                    const sub = nam.subarray(i * 9, i * 9 + 9);
+                    const nul = sub.indexOf(0);
+                    return dec.decode(sub.subarray(0, nul < 0 ? 9 : nul));
+                });
+                for (const g of gamDateien) {
+                    const basis = g.name.replace(/\.GAM$/i, '').replace(/_+$/, '').replace(/[^A-Z0-9]/g, '').slice(0, 8) || 'SPIEL';
+                    let platz = slots.findIndex((s) => s && dateiNameFuerSlotName(s) === g.name);
+                    if (platz < 0) platz = slots.findIndex((s) => !s);
+                    if (platz < 0) platz = 0;
+                    slots[platz] = basis;
+                    nam.fill(0, platz * 9, platz * 9 + 9);
+                    for (let c = 0; c < basis.length && c < 8; c++) {
+                        nam[platz * 9 + c] = basis.charCodeAt(c);
+                    }
+                    const kanonisch = dateiNameFuerSlotName(basis);
+                    if (kanonisch !== g.name) {
+                        FS.writeFile(`/spiel/${kanonisch}`, g.daten);
+                    }
+                }
+                FS.writeFile('/spiel/GAMES.NAM', nam);
+            }
+
+            if (typeof window.Module._dsa_web_reload_savegame_names === 'function') {
+                window.Module._dsa_web_reload_savegame_names();
+            }
+            if (typeof window.Module.spielstaendeSichern === 'function') {
+                await window.Module.spielstaendeSichern();
+            }
+            zeigeKurzmeldung(`${importiert.length} Spielstand-Datei(en) eingespielt und gespeichert.`);
+        } catch (err) {
+            console.warn('Fehler beim Einspielen der Spielstände:', err);
+            zeigeKurzmeldung('Einspielen fehlgeschlagen: ' + (err?.message || err));
+        }
+    });
+
+    /* ---------- 8. Einblendbares Probenlog-Seitenfenster + PROBEN.CSV-Download (W6 + B2) ---------- */
+    const PROBEN_STAMMDATEN = {
+        EIG: ['MU', 'KL', 'CH', 'FF', 'GE', 'IN', 'KK', 'AG', 'HA', 'RA', 'GG', 'TA', 'NG', 'JZ'],
+        TALENT: [
+            'Waffenlos', 'Hiebwaffen', 'Stichwaffen', 'Schwerter', 'Äxte', 'Speere', 'Zweihänder', 'Schusswaffen',
+            'Wurfwaffen', 'Akrobatik', 'Klettern', 'Körperbeherrschung', 'Reiten', 'Schleichen', 'Schwimmen',
+            'Selbstbeherrschung', 'Tanzen', 'Verstecken', 'Zechen', 'Bekehren', 'Betören', 'Feilschen', 'Gassenwissen',
+            'Lügen', 'Menschenkenntnis', 'Schätzen', 'Fährtensuchen', 'Fesseln', 'Orientierung', 'Pflanzenkunde',
+            'Tierkunde', 'Wildnisleben', 'Alchimie', 'Alte Sprachen', 'Geographie', 'Geschichte', 'Götter/Kulte',
+            'Kriegskunst', 'Lesen', 'Magiekunde', 'Sprachen', 'Abrichten', 'Fahrzeuge', 'Falschspiel', 'Heilen Gift',
+            'Heilen Krankheiten', 'Heilen Wunden', 'Musizieren', 'Schlösser', 'Taschendiebstahl', 'Gefahrensinn',
+            'Sinnesschärfe'
+        ],
+        ZAUBER: [
+            '-', 'Beherrschung brechen', 'Destructibo', 'Gardianum', 'Illusionen zerstören', 'Verwandlung beenden',
+            'Band und Fessel', 'Bannbaladin', 'Böser Blick', 'Große Gier', 'Große Verwirrung', 'Herr der Tiere',
+            'Horriphobus', 'Magischer Raub', 'Respondami', 'Sanftmut', 'Somnigravis', 'Zwingtanz', 'Furor Blut',
+            'Geister bannen', 'Geister rufen', 'Heptagon', 'Krähenruf', 'Skelettarius', 'Elementare', 'Nihilatio',
+            'Solidirid', 'Axxeleratus', 'Foramen', 'Motoricus', 'Spurlos', 'Transversalis', 'Über Eis', 'Balsam',
+            'Hexenspeichel', 'Klarum Purum', 'Ruhe Körper', 'Tiere heilen', 'Adleraug', 'Analüs', 'Eigenschaften',
+            'Exposami', 'Odem Arcanum', 'Penetrizzel', 'Sensibar', 'Chamaelioni', 'Duplicatus', 'Harmlos', 'Hexenknoten',
+            'Blitz', 'Ecliptifactus', 'Eisenrost', 'Fulminictus', 'Ignifaxius', 'Plumbumbarum', 'Radau',
+            'Saft, Kraft, Monstermacht', 'Scharfes Auge', 'Hexenblick', 'Nekropathia', 'Adler, Wolf', 'Arcano',
+            'Armatrutz', 'CH steigern', 'Feuerbann', 'FF steigern', 'GE steigern', 'IN steigern', 'KK steigern',
+            'KL steigern', 'MU steigern', 'Mutabili', 'Paralü', 'Salander', 'See und Fluss', 'Visibili', 'Abvenenum',
+            'Aeolitus', 'Brenne', 'Claudibus', 'Dunkelheit', 'Erstarre', 'Flim Flam', 'Schmelze', 'Silentium',
+            'Sturmgebrüll'
+        ],
+        GZAUBER: [
+            '-', 'Verwandlung beenden', 'Bannbaladin', 'Böser Blick', 'Horriphobus', 'Axxeleratus',
+            'Balsam', 'Blitz', 'Eisenrost', 'Fulminictus', 'Ignifaxius', 'Plumbumbarum',
+            'Saft, Kraft, Monstermacht', 'Armatrutz', 'Paralü'
+        ],
+        GEGNER: [
+            '', 'Oger', 'Ork', 'Goblin', 'Heshthot', 'Säbelzahntiger', 'Skelett', 'Waldschrat', 'Mumie', 'Harpyie',
+            'Waldspinne', 'Großer Schröter', 'Pirat', 'Steuermann', 'Kapitän', 'Streuner', 'Zombie', 'Heshthot', 'Druide',
+            'Druide', 'Thorwaler', 'Thorwaler', 'Thorwaler', 'Thorwaler', 'Goblin', 'Goblin', 'Ork', 'Ork', 'Pirat',
+            'Pirat', 'Streuner', 'Streuner', 'Streuner', 'Skelett', 'Folterknecht', 'Grimwolf', 'Grimwolf',
+            'Höhlenspinne', 'Höhlenspinne', 'Höhlenspinne', 'Krieger', 'Stadtgardist', 'Stadtgardist', 'Stadtgardist',
+            'Kriegsveteran', 'Mumie', 'Magier', 'Magier', 'Zauberer', 'Zauberer', 'Zwerg', 'Lindwurm', 'Höhlendrache',
+            'Kultist', 'Kultist', 'Kultist', 'Kultist', 'Priester', 'Priester', 'Hohepriester', 'Estorik', 'Piratenboss',
+            'Pirat', 'Magier', 'Zwergenveteran', 'Räuber', 'Räuber', 'Räuber', 'Räuber', 'Räuber', 'Gorah',
+            'Steppenhund', 'Orkchampion', 'Pirat', 'Stadtgardist', 'Waldlöwe', 'Spinnendämon', 'Heshthot'
+        ],
+        KAMPF: [
+            'ZUFALL1_LAND', 'LAND_FIGHT1_1', 'ZUFALL2_LAND', 'ZUFALL3_LAND', 'ZUFALL4_LAND', 'SHIP3', 'SHIP4', 'SHIP5',
+            'SHIP6', 'SHIP8', 'SHIP9', 'SHIP12', 'SHIP14', 'SHIP15', 'SHIP17', 'SHIP18', 'SHIP19', 'SHIP21', 'SHIP22',
+            'SHIP23A', 'SHIP23B', 'SHIP24', 'SHIP10', 'F061_2', 'F061_3', 'F061_4B', 'F061_4A', 'F061_5', 'F061_6A',
+            'F108_1', 'F108_2', 'F108_3A', 'F108_3B', 'F108_3C', 'F108_4', 'F108_6', 'F108_9', 'F108_7', 'F051_05_4',
+            'F051_05_3', 'F051_05_2', 'F051_05_1', 'F051_07', 'F051_09', 'F051_13', 'F108_15', 'F051_15', 'F051_16',
+            'F051_16_1', 'F051_03', 'F051_04', 'F051_17', 'F051_18', 'F051_19', 'F051_20_2', 'F051_18_3', 'F046_01',
+            'F046_04', 'F046_06', 'F046_07', 'F046_10', 'F046_12', 'F046_13', 'F046_15', 'F046_16', 'F046_18',
+            'F046_22', 'F046_24', 'F046_25', 'F046_26', 'F046_26_5', 'F046_27', 'F046_28', 'F046_31', 'F076_04',
+            'F076_06', 'F076_07', 'F076_10', 'F076_11', 'F076_13', 'F094_02', 'F094_05', 'F094_10', 'F094_13',
+            'F094_17', 'F094_19', 'F094_22', 'F100_01', 'F100_03', 'F100_05', 'F100_12', 'F100_13', 'F126_03',
+            'F126_07', 'F126_08', 'F126_09', 'F126_11', 'F126_12', 'F126_13', 'F126_17', 'F126_18', 'F126_20',
+            'F126_22', 'F126_23', 'F126_25', 'F126_27', 'F126_28', 'F129_05', 'F129_08', 'F129_09', 'F129_18',
+            'F129_21', 'F129_23', 'F129_24', 'F129_25', 'F129_27', 'F129_28', 'F129_29', 'F129_30', 'F131_01A',
+            'F131_01B', 'F131_04', 'F131_05', 'F131_06', 'F131_07', 'F131_08', 'F131_10', 'F131_11_1', 'F131_14A',
+            'F131_14B', 'F131_16', 'DFIN12', 'DFIN16', 'DFIN18A', 'DFIN18B', 'DFIN26', 'DFIN27A', 'DFIN27B',
+            'DFIN28', 'DFIN30', 'DPRE10_1', 'DOBE07', 'DOBE09', 'DOBE11', 'DOBE20', 'DOBE19', 'DOBE22', 'DTHO03',
+            'DTHO05', 'DTHO06', 'DTHO09', 'DTHO10', 'DTHO13', 'DTHO15', 'DTHO16', 'DTHO18', 'DTHO19', 'DTHO20',
+            'DTHO20_1', 'DTHO21A', 'DTHO21B', 'DTHO23', 'DTHO25', 'DTHO27', 'DTHO43', 'DTHO48_1', 'DTHO49', 'DTHO50',
+            'DTHO53', 'DTHO55', 'DTHO56', 'DTHO57', 'DTHO57_1', 'DTHO58', 'DTHO59', 'DTHO60', 'DTHO61', 'F031',
+            'F035', 'F046', 'F064', 'F066', 'F074', 'F075_A', 'F075_B', 'F075_C', 'F077', 'F080', 'F084', 'F099',
+            'F101', 'F122', 'F144', 'DASP1A', 'DASP1B', 'DASP2', 'DASP3', 'DASP4', 'DASP5', 'DASP6A', 'DASP6B',
+            'DASP7', 'DASP8', 'DASP9', 'DASP10', 'DASP11', 'DASP12A', 'DASP12B', 'DASP13', 'DASP14', 'DASP16',
+            'DASP17', 'DASP18', 'THOR8', 'CITYFIGHT1', 'CITYFIGHT2', 'CITYFIGHT3', 'CAMPFIGHT1', 'CAMPFIGHT2',
+            'CAMPFIGHT3', 'SHIP10_1', 'F061_6B', 'F051_16A', 'F051_16B', 'F051_14A', 'F051_14B', 'F051_117',
+            'F129_124', 'F131_08A', 'F131_08B', 'F031_14A', 'DTH021A', 'CAMPFIGHT4', 'SHIP10_2', 'F051_02',
+            'F051_5', 'PHEX3', 'PHEX22', 'PHEX23', 'PHEX24', 'F131_01', 'F129_08A', 'DTHO14', 'WILD1', 'WILD2',
+            'WILD3', 'WILD4', 'WILD5', 'WILD6', 'WILD7', 'WILD8', 'S001', 'F051_14C', 'F129_17', 'DCAMPFIGHT1',
+            'DCAMPFIGHT2', 'DCAMPFIGHT3', 'DCAMPFIGHT4'
+        ],
+        MONAT: ['', 'Praios', 'Rondra', 'Efferd', 'Travia', 'Boron', 'Hesinde', 'Firun', 'Tsa', 'Phex', 'Peraine', 'Ingerimm', 'Rahja', 'Namenlose Tage']
+    };
+
+    const tabName = (liste, idx) => (idx >= 0 && idx < liste.length) ? liste[idx] : `Nr. ${idx}`;
+    const gegnerName = (idx) => (idx > 0 && idx < PROBEN_STAMMDATEN.GEGNER.length) ? PROBEN_STAMMDATEN.GEGNER[idx] : `Gegner Nr. ${idx}`;
+    const modText = (z) => z > 0 ? `erschwert um ${z}` : (z < 0 ? `erleichtert um ${-z}` : '');
+    const htmlEsc = (s) => String(s || '').replace(/[&<>]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' }[c]));
+
+    function parsiereProbenCsv(csvText) {
+        const eintraege = [];
+        let vorspann = null;
+        for (const rohZeile of csvText.split(/\r?\n/)) {
+            const felder = rohZeile.trim().split(';');
+            if (felder.length < 6 || !/^-?\d+$/.test(felder[0])) continue;
+            const [art, tag, mon, jahr, minute] = felder.slice(0, 5).map(Number);
+            const name = felder[5];
+            const w = felder.slice(6).filter((x) => x !== '').map(Number);
+            const zeit = `${tag}. ${tabName(PROBEN_STAMMDATEN.MONAT, mon)} ${jahr} Hal, ${String(Math.floor(minute / 60)).padStart(2, '0')}:${String(minute % 60).padStart(2, '0')}`;
+            let r = null;
+
+            if (art === 1 && w.length >= 5) {
+                const e = tabName(PROBEN_STAMMDATEN.EIG, w[0]);
+                r = {
+                    zeit, held: name, typ: 'eig', titel: `${e}-Probe`, zusatz: modText(w[2]),
+                    wuerfe: `${w[3]} gg. ${e} ${w[1]}`,
+                    ok: w[4] > 0, pz: w[4] === -99,
+                    erg: w[4] === -99 ? 'Patzer (20)' : (w[4] > 0 ? `gelungen (${w[4] - 1} übr.)` : 'misslungen')
+                };
+            } else if (art === 3 && w.length >= 11) {
+                const eig = [0, 1, 2].map((i) => tabName(PROBEN_STAMMDATEN.EIG, w[i])).join('/') + ' (' + w.slice(3, 6).join('/') + ')';
+                const wu = w.slice(7, 10).filter((x) => x).join(', ');
+                const res = w[10];
+                r = {
+                    zeit, held: name, typ: 'eig', titel: `Probe auf ${eig}`, zusatz: modText(w[6]),
+                    wuerfe: wu,
+                    ok: res > 0, pz: res === -99,
+                    erg: res === -99 ? 'Patzer (2×20)' : (res > 0 ? `gelungen (${res - 1} übr.)` : `misslungen (${1 - res} fehlt)`)
+                };
+                if (vorspann && vorspann.held === name) {
+                    r.typ = vorspann.typ;
+                    r.titel = vorspann.titel;
+                    r.zusatz = vorspann.zusatz + (vorspann.zusatz ? ', ' : '') + `auf ${eig}` + (w[6] ? ` gesamt ${modText(w[6])}` : '');
+                }
+                vorspann = null;
+            } else if (art === 4 && w.length >= 6) {
+                const ta = tabName(PROBEN_STAMMDATEN.TALENT, w[0]);
+                if (w[3]) {
+                    vorspann = null;
+                    const x = w[5];
+                    r = {
+                        zeit, held: name, typ: 'tal', titel: ta, zusatz: modText(w[2]),
+                        wuerfe: `${w[4]} gg. ZW ${w[1]}`,
+                        ok: x > 0, pz: x === -1,
+                        erg: x === -1 ? 'Patzer (20)' : (x === 99 ? 'Glückswurf (1)' : (x > 0 ? `getroffen (${x - 1} übr.)` : 'daneben'))
+                    };
+                } else {
+                    vorspann = { held: name, typ: 'tal', titel: `${ta} (TaW ${w[1]})`, zusatz: modText(w[2]) };
+                    continue;
+                }
+            } else if (art === 5 && w.length >= 3) {
+                const sp = tabName(PROBEN_STAMMDATEN.ZAUBER, w[0]);
+                vorspann = { held: name, typ: 'zau', titel: `${sp} (ZfW ${w[1]})`, zusatz: modText(w[2]) };
+                continue;
+            } else if ((art === 6 || art === 7) && w.length >= 4) {
+                vorspann = null;
+                const [wert, wurf, monIdx, rtg] = w;
+                const ok = wurf <= wert && wurf !== 20;
+                const kurz = art === 6 ? 'AT' : 'PA';
+                let wer = '', held = '', heldOk = null;
+                if (art === 6) {
+                    if (rtg === 0) { wer = `${name} attackiert ${monIdx < 0 ? 'Helden' : gegnerName(monIdx)}`; held = name; heldOk = ok; }
+                    else if (rtg === 1) { wer = `${gegnerName(monIdx)} attackiert ${name}`; heldOk = !ok; }
+                    else { wer = `${gegnerName(monIdx)} attackiert Gegner`; }
+                } else {
+                    if (rtg === 0) { wer = monIdx < 0 ? `${name} pariert` : `${gegnerName(monIdx)} pariert gg. ${name}`; heldOk = !ok; }
+                    else if (rtg === 1) { wer = `${name} pariert gg. ${gegnerName(monIdx)}`; held = name; heldOk = ok; }
+                    else { wer = `Gegner pariert gg. ${gegnerName(monIdx)}`; }
+                }
+                r = {
+                    zeit, held: held || name, typ: 'kampf', kampf: kurz, eigen: Boolean(held),
+                    titel: wer, zusatz: '', wuerfe: `${wurf} gg. ${kurz} ${wert}`,
+                    ok: heldOk, pz: wurf === 20,
+                    erg: (art === 6 ? (ok ? 'trifft' : 'verfehlt') : (ok ? 'pariert' : 'pariert nicht')) + (wurf === 20 ? ' (20)' : '')
+                };
+            } else if (art === 8 && w.length >= 5) {
+                vorspann = null;
+                const [typ, nr, alt] = w;
+                let titel = `Stufenanstieg (${typ})`, wu = '', ok = null, erg = '';
+                if (typ === 1 || typ === 2) {
+                    titel = typ === 1 ? `${tabName(PROBEN_STAMMDATEN.TALENT, nr)} (TaW ${alt})` : `${tabName(PROBEN_STAMMDATEN.ZAUBER, nr)} (ZfW ${alt})`;
+                    wu = `${w[3]} gg. ${alt}`;
+                    ok = Boolean(w[4]);
+                    erg = w[4] ? `gelungen (${alt + 1})` : 'misslungen';
+                } else if (typ === 3) {
+                    titel = `${tabName(PROBEN_STAMMDATEN.EIG, nr)} +1`;
+                    erg = `${alt} → ${alt + 1}`;
+                } else if (typ === 5) {
+                    titel = 'LE-Wurf';
+                    wu = `W6 = ${w[3]}`;
+                    erg = `LE +${w[4]}`;
+                }
+                r = { zeit, held: name, typ: 'stg', titel, zusatz: 'Stufenanstieg', wuerfe: wu, ok, pz: false, erg };
+            } else if (art === 9 && w.length >= 10 && w[0] === 16) {
+                vorspann = null;
+                const zp = w[2] ? tabName(PROBEN_STAMMDATEN.GZAUBER, w[1]) : tabName(PROBEN_STAMMDATEN.ZAUBER, w[1]);
+                const wer = w[2] ? `${zp} (${gegnerName(w[3])})` : `${name}: ${zp}`;
+                const ziel = w[4] === 1 ? (w[2] ? (name || 'einen Helden') : `Held Nr. ${w[5]}`) : gegnerName(w[5]);
+                const abg = [];
+                if (w[7] > 0) abg.push(`Feuerbann halbiert (−${w[7]})`);
+                if (w[8] > 0) abg.push(`Gardianum fängt ${w[8]} ab`);
+                r = { zeit, held: name || '', eigen: false, typ: 'kampf', titel: `${wer} auf ${ziel}`, zusatz: 'Zauberschaden',
+                      wuerfe: `${w[6]} SP` + (abg.length ? ', ' + abg.join(', ') : ''), ok: null, pz: false, erg: `${w[9]} SP am Ziel` };
+            } else if (art === 9 && w.length >= 4) {
+                vorspann = null;
+                const typ = w[0];
+                let titel = `Ereignis ${typ}`, zusatz = '', wu = '', ok = null, erg = '';
+                if (typ === 1 && w.length >= 5) {
+                    titel = `Kampf ${tabName(PROBEN_STAMMDATEN.KAMPF, w[1])}`;
+                    zusatz = w[2] > 0 ? 'Gegnerzahl' : 'Kampfliste';
+                    wu = w[2] > 0 ? `max. ${w[2]}` : `${w[3]} Gegner`;
+                    erg = w[2] > 0 ? `${w[4]} von ${w[3]} Gegnern` : `${w[3]} Gegner`;
+                } else if (typ === 2 && w.length >= 5) {
+                    titel = 'Nachtlager';
+                    wu = `W100 = ${w[1]} (< ${w[2]})`;
+                    ok = w[4] < 0;
+                    erg = w[4] >= 0 ? `Überfall (${w[4] + 1}. Wache)` : 'kein Überfall';
+                } else if (typ === 3 && w.length >= 5) {
+                    titel = `Dungeon-Lager (${w[3]}h)`;
+                    wu = `W100 = ${w[1]} (< ${w[2]})`;
+                    ok = w[4] < 0;
+                    erg = w[4] >= 0 ? `Überfall (${w[4] + 1}. Wache)` : 'kein Überfall';
+                } else if (typ === 4 || typ === 5) {
+                    titel = 'Reise';
+                    zusatz = typ === 4 ? 'Begegnung' : 'Kampf';
+                    wu = `W100 = ${w[1]} (≤ ${w[2]})`;
+                    erg = w[3] ? zusatz : 'nichts';
+                } else if (typ >= 6 && typ <= 8) {
+                    titel = 'Seereise';
+                    zusatz = typ === 6 ? 'Totenschiff' : (typ === 7 ? 'Krakenmolch' : 'Piratenangriff');
+                    wu = `W100 = ${w[1]} (≤ ${w[2]})`;
+                    ok = !w[3];
+                    erg = w[3] ? zusatz : 'nichts';
+                } else if (typ === 9 && w.length >= 5) {
+                    const KR = ['keine', 'Wundfieber', 'Dumpfschädel', 'Blaue Keuche', 'Paralyse', 'Schlachtenfieber', 'Frostschäden', 'Tollwut'];
+                    titel = `Krankheitsprobe (${KR[w[1]] || w[1]})`;
+                    wu = `W100 = ${w[2]} (≤ ${w[3]})`;
+                    ok = !w[4];
+                    erg = w[4] ? 'angesteckt' : 'nicht angesteckt';
+                } else if (typ === 10 && w.length >= 4) {
+                    titel = 'Gardianum-Schutzschirm';
+                    zusatz = `${w[1]} AE eingesetzt`;
+                    wu = `+${w[2]}`;
+                    ok = true;
+                    erg = `fängt bis zu ${w[3]} SP ab`;
+                } else if (typ === 11 && w.length >= 6) {
+                    titel = w[1] > 0 ? 'Sturz in eine Grube' : 'Sturz im Dunkeln';
+                    zusatz = w[1] > 0 ? `${w[3]} von ${w[2]} Helden stürzen` : `die ganze Gruppe (${w[3]}) stürzt`;
+                    wu = w[1] > 0 ? `Wurf W${w[2]} = ${w[1]}` : 'kein Wurf';
+                    ok = false;
+                    erg = `verliert ${w[4]} LE (1W${w[5]})`;
+                } else if (typ === 12 && w.length >= 6) {
+                    const BEG = [
+                        'Kampf WILD1 (2 bis 7 Goblins)', 'Kampf WILD2 (1 bis 3 Oger)', 'Karenjagd',
+                        'Kampf WILD3 (1 bis 2 Säbelzahntiger)', 'Kvillotter', 'Kampf WILD4 (2 bis 7 Grimwölfe)',
+                        'Kampf WILD4 (4 bis 6 Grimwölfe)', 'Kampf WILD5 (2 bis 3 Steppenhunde)', 'Nashornjagd',
+                        'Wildschweinjagd', 'Kampf WILD6 (1 bis 3 Waldspinnen)', 'Bisonjagd',
+                        'Kampf WILD7 (1 bis 3 Harpyien)', 'Höhlenbär'
+                    ];
+                    const k = [0, 1, 3, 5, 6, 7, 10, 12].includes(w[3]);
+                    const b = w[3] < 0 ? 'keine' : (BEG[w[3]] || `Nr. ${w[3]}`);
+                    titel = 'Reise: Art der Begegnung';
+                    zusatz = `Landschaftstyp ${w[1]}`;
+                    wu = `W100 = ${w[2]}` + (k ? `, Kampfwurf W100 = ${w[4]} (≤ 33)` : '');
+                    ok = w[3] < 0 ? true : (k ? Boolean(w[5]) : null);
+                    erg = b + (k ? ` → ${w[5] ? 'entfällt' : 'KAMPF'}` : '');
+                } else if (typ === 13) {
+                    titel = 'Olvir/Treborn';
+                    zusatz = 'ab dem 4. Monat der Queste';
+                    wu = `W100 ${w[1]} (bis ${w[2]})`;
+                    erg = `Treffen ${w[3] ? 'ja' : 'nein'}`;
+                } else if (typ === 14 && w.length >= 6) {
+                    titel = 'Regeneration';
+                    zusatz = `Lager ${w[1]} (vor Tausch/Verdopplung)`;
+                    wu = `W6 LE ${w[2]}, W6 AE ${w[3]}`;
+                    erg = `LE ${w[4]}, AE ${w[5]}`;
+                } else if (typ === 15) {
+                    const VOR = { '-1': 'krank', '0': 'gesund', '1': 'Genesung' };
+                    titel = 'Wundfieber nach Wundheilung';
+                    zusatz = `vorher ${VOR[w[2]] || w[2]}`;
+                    wu = `W20 ${w[1]} (bis 7)`;
+                    ok = !w[3];
+                    erg = `neu begonnen ${w[3] ? 'ja' : 'nein'}`;
+                }
+                r = { zeit, held: name || '', typ: 'erg', titel, zusatz, wuerfe: wu, ok, pz: false, erg };
+            } else if (art === 10 && w.length >= 20) {
+                vorspann = null;
+                const [mon, sp, ztyp, zid] = w;
+                const eig = [4, 5, 6].map((i) => tabName(PROBEN_STAMMDATEN.EIG, w[i])).join('/') + ' (' + w.slice(7, 10).join('/') + ')';
+                const wu = w.slice(11, 14).filter((x) => x).join(', ');
+                const res = w[14];
+                const [w1, w2, w3, w4, w5] = w.slice(15, 20);
+                const ziel = ztyp === 0 ? 'auf sich selbst' : (ztyp === 1 ? `auf ${name || 'Helden'}` : `auf ${gegnerName(zid)}`);
+                let wk = '';
+                if (res > 0) {
+                    if (w1 === -9) wk = 'Magie durch Rondra gesperrt';
+                    else if (sp === 9 || sp === 10) {
+                        const abg = [];
+                        if (w3 > 0) abg.push(`${w3} durch Feuerbann`);
+                        if (w4 > 0) abg.push(`${w4} durch Gardianum (Schild noch ${w5})`);
+                        wk = abg.length ? `${w1} SP, ${abg.join(' und ')} abgefangen → ${w2} SP` : `${w2} SP`;
+                    } else if (sp === 1) wk = w1 === 1 ? 'Versteinerung aufgehoben' : (w1 === 2 ? 'Pilzverwandlung aufgehoben' : (w1 === -1 ? 'nicht genug AE' : 'wirkungslos'));
+                    else if (sp === 2) wk = 'greift nicht mehr an';
+                    else if (sp === 3) wk = 'kämpft gg. eigene Gruppe';
+                    else if (sp === 4) wk = 'flieht verängstigt';
+                    else if (sp === 5) wk = 'Attacken +1, AT/PA +1, BP ×2';
+                    else if (sp === 6) wk = w1 > 0 ? `+${w1} LE geheilt` : '0 LE';
+                    else if (sp === 7) wk = `${w1} Runden geblendet`;
+                    else if (sp === 8) wk = w1 > 0 ? 'Waffe zerbrochen' : 'wirkungslos';
+                    else if (sp === 11) wk = `AT -${w1}`;
+                    else if (sp === 12) wk = `AT/TP +${w1}, PA -${w1} (${w2} AE)`;
+                    else if (sp === 13) wk = `RS +${w1} (${w2} AE)`;
+                    else if (sp === 14) wk = 'versteinert';
+                }
+                r = {
+                    zeit, held: name || '', eigen: false, typ: 'zau',
+                    titel: `${gegnerName(mon)} zaubert ${tabName(PROBEN_STAMMDATEN.GZAUBER, sp)} ${ziel}`,
+                    zusatz: `auf ${eig}` + (w[10] ? `, ${modText(w[10])}` : ''),
+                    wuerfe: wu,
+                    ok: res <= 0 || w1 === -9, pz: false,
+                    erg: (res > 0 ? `gelungen (${res - 1} übr.)` : `misslungen (${1 - res} fehlt)`) + (wk ? ` → ${wk}` : '')
+                };
+            } else {
+                continue;
+            }
+            eintraege.push(r);
+        }
+        return eintraege;
+    }
+
+    const probenFensterEl = document.getElementById('probenlog-fenster');
+    const btnProbenFenster = document.getElementById('btn-probenlog-fenster');
+    const selectProbenHeld = document.getElementById('proben-filter-held');
+    const selectProbenArt = document.getElementById('proben-filter-art');
+    const inputProbenSuche = document.getElementById('proben-filter-suche');
+    const probenKartenEl = document.getElementById('probenlog-karten');
+    const probenTbodyEl = document.getElementById('probenlog-tbody');
+    const probenAnzahlEl = document.getElementById('probenlog-anzahl');
+
+    let letzteProbenCsvGroesse = -1;
+    let gecachteProben = [];
+
+    function leseAktuelleProbenCsvText() {
+        const FS = window.Module?.FS;
+        if (!FS) return '';
+        try {
+            const bytes = FS.readFile('/spiel/PROBEN.CSV');
+            return new TextDecoder('latin1').decode(bytes);
+        } catch (_) {
+            return '';
+        }
+    }
+
+    function zeichneProbenlogFenster(erzwingen = false) {
+        if (probenFensterEl.hidden) return;
+        const FS = window.Module?.FS;
+        let groesse = 0;
+        if (FS) {
+            try {
+                groesse = FS.stat('/spiel/PROBEN.CSV').size;
+            } catch (_) {
+                groesse = 0;
+            }
+        }
+        if (erzwingen || groesse !== letzteProbenCsvGroesse) {
+            letzteProbenCsvGroesse = groesse;
+            const csvText = leseAktuelleProbenCsvText();
+            gecachteProben = parsiereProbenCsv(csvText);
+
+            const bisherHeld = selectProbenHeld.value;
+            const heldenListe = [...new Set(
+                gecachteProben
+                    .filter((r) => r.held && r.typ !== 'erg' && r.eigen !== false)
+                    .map((r) => r.held)
+            )].sort();
+            selectProbenHeld.innerHTML =
+                '<option value="">Alle Helden</option>' +
+                heldenListe.map((h) => `<option value="${htmlEsc(h)}"${h === bisherHeld ? ' selected' : ''}>${htmlEsc(h)}</option>`).join('');
+        }
+
+        const fHeld = selectProbenHeld.value;
+        const fArt = selectProbenArt.value;
+        const fSuche = inputProbenSuche.value.trim().toLowerCase();
+
+        const gefiltert = gecachteProben.filter((r) =>
+            (!fHeld || r.held === fHeld) &&
+            (!fArt || r.typ === fArt) &&
+            (!fSuche || `${r.titel} ${r.zusatz} ${r.held} ${r.erg}`.toLowerCase().includes(fSuche))
+        );
+
+        probenAnzahlEl.textContent = `(${gefiltert.length})`;
+
+        /* Helden-Kurzstatistik */
+        const heldStat = {};
+        for (const r of gefiltert) {
+            if (!r.held || r.typ === 'stg' || r.typ === 'erg' || r.eigen === false) continue;
+            const st = (heldStat[r.held] ??= { proben: 0, probenOk: 0, at: 0, atOk: 0, pa: 0, paOk: 0 });
+            if (r.typ === 'kampf') {
+                if (r.kampf === 'AT') { st.at++; if (r.ok) st.atOk++; }
+                else { st.pa++; if (r.ok) st.paOk++; }
+            } else {
+                st.proben++;
+                if (r.ok) st.probenOk++;
+            }
+        }
+        const heldKeys = Object.keys(heldStat).sort();
+        probenKartenEl.innerHTML = heldKeys.map((h) => {
+            const st = heldStat[h];
+            const teile = [];
+            if (st.proben) teile.push(`Proben: ${st.probenOk}/${st.proben}`);
+            if (st.at) teile.push(`AT: ${st.atOk}/${st.at}`);
+            if (st.pa) teile.push(`PA: ${st.paOk}/${st.pa}`);
+            return `<div class="proben-karte"><strong>${htmlEsc(h)}</strong><span>${teile.join(' · ') || '–'}</span></div>`;
+        }).join('');
+
+        /* Tabelle (neueste Eintraege oben) */
+        if (!gefiltert.length) {
+            probenTbodyEl.innerHTML = '<tr><td colspan="5" class="proben-leer">Noch keine Proben für diese Auswahl protokolliert.</td></tr>';
+            return;
+        }
+        const zeilenHtml = [];
+        const ansicht = gefiltert.slice(-250).reverse();
+        for (const r of ansicht) {
+            const ergKlasse = r.pz ? 'erg-pz' : (r.ok === true ? 'erg-ok' : (r.ok === false ? 'erg-bad' : ''));
+            zeilenHtml.push(
+                `<tr>` +
+                `<td style="color:var(--muted);white-space:nowrap">${htmlEsc(r.zeit)}</td>` +
+                `<td>${r.typ === 'kampf' ? '' : htmlEsc(r.held)}</td>` +
+                `<td>${htmlEsc(r.titel)}${r.zusatz ? ` <span style="color:var(--muted)">(${htmlEsc(r.zusatz)})</span>` : ''}</td>` +
+                `<td class="wuerfe-spalte">${htmlEsc(r.wuerfe)}</td>` +
+                `<td class="${ergKlasse}">${htmlEsc(r.erg)}</td>` +
+                `</tr>`
+            );
+        }
+        probenTbodyEl.innerHTML = zeilenHtml.join('');
+    }
+
+    function schalteProbenlogFenster(offen) {
+        const zielOffen = typeof offen === 'boolean' ? offen : probenFensterEl.hidden;
+        probenFensterEl.hidden = !zielOffen;
+        btnProbenFenster.classList.toggle('aktiv-knopf', zielOffen);
+        aktualisiereRahmen4zu3();
+        if (zielOffen) {
+            zeichneProbenlogFenster(true);
+        }
+    }
+
+    btnProbenFenster.addEventListener('click', () => schalteProbenlogFenster());
+    document.getElementById('btn-probenlog-schliessen').addEventListener('click', () => schalteProbenlogFenster(false));
+    document.getElementById('btn-probenlog-leeren').addEventListener('click', () => {
+        const FS = window.Module?.FS;
+        if (FS) {
+            try {
+                FS.writeFile('/spiel/PROBEN.CSV', new Uint8Array(0));
+            } catch (_) {}
+        }
+        letzteProbenCsvGroesse = -1;
+        zeichneProbenlogFenster(true);
+        zeigeKurzmeldung('Probenlog geleert.');
+    });
+
+    selectProbenHeld.addEventListener('change', () => zeichneProbenlogFenster(true));
+    selectProbenArt.addEventListener('change', () => zeichneProbenlogFenster(true));
+    inputProbenSuche.addEventListener('input', () => zeichneProbenlogFenster(true));
+
+    setInterval(() => {
+        if (!probenFensterEl.hidden) {
+            zeichneProbenlogFenster(false);
+        }
+    }, 700);
+
+    document.getElementById('btn-proben-csv').addEventListener('click', () => {
+        const FS = window.Module?.FS;
+        if (!FS) {
+            zeigeKurzmeldung('Dateisystem noch nicht bereit.');
+            return;
+        }
+        let daten;
+        try {
+            daten = FS.readFile('/spiel/PROBEN.CSV');
+        } catch (_) {
+            daten = new Uint8Array(0);
+        }
+        const blob = new Blob([daten], { type: 'text/csv;charset=utf-8' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'PROBEN.CSV';
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+        setTimeout(() => URL.revokeObjectURL(url), 10000);
+        const zeilen = new TextDecoder().decode(daten).trim().split(/\r?\n/).filter(Boolean).length;
+        zeigeKurzmeldung(`PROBEN.CSV heruntergeladen (${zeilen} Einträge).`);
+    });
+
+    /* ---------- 9. Vollbild mit exaktem 4:3-Seitenverhaeltnis (W6) ---------- */
+    const btnVollbild = document.getElementById('btn-vollbild');
+    function schalteVollbildUm() {
+        if (document.fullscreenElement) {
+            document.exitFullscreen().catch(() => {});
+        } else {
+            document.documentElement.requestFullscreen?.().catch(() => {});
+        }
+    }
+    btnVollbild.addEventListener('click', schalteVollbildUm);
+    document.addEventListener('fullscreenchange', () => {
+        const aktiv = !!document.fullscreenElement;
+        document.body.classList.toggle('vollbild-aktiv', aktiv);
+        btnVollbild.textContent = aktiv ? 'Vollbild beenden' : 'Vollbild';
+        setTimeout(aktualisiereRahmen4zu3, 50);
+    });
+
+    /* ---------- 10. Emscripten-Hauptskript der gewaehlten Fix-Stufe laden ---------- */
+    /* eigener Spielstand-Speicher je Spiel (seit 20.11.2026), alte gemeinsame Spielstaende einmalig uebernehmen */
+    window.dsaSpielstandUmzug('schick').then(() => {
+        const scriptEl = document.createElement('script');
+        scriptEl.src = aktivesBuild.js;
+        scriptEl.async = true;
+        document.body.appendChild(scriptEl);
+    });
+})();
+</script>
+</body>
+</html>
